@@ -34,7 +34,7 @@ minSdk 34, compile/targetSdk 37. Java 21.
 
 - Build debug APK: `./gradlew :app:assembleDebug` (output: `app/build/outputs/apk/debug/app-debug.apk`)
 - All unit tests: `./gradlew test`
-- One module: `./gradlew :core:domain:test`; one class: `--tests "com.callbackdev.passo.domain.SomeTest"`
+- One module: `./gradlew :core:domain:test`; one class: `--tests "com.callbackdev.passo.core.domain.tracking.StepAccountantTest"`
 - Lint (every module, via `checkDependencies`): `./gradlew :app:lintDebug`
 - Format: `./gradlew spotlessApply` (CI runs `spotlessCheck`; rules in `.editorconfig`)
 - Forbidden-permission check on the merged manifests: `./gradlew :app:checkForbiddenPermissions`

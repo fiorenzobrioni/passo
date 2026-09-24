@@ -1,0 +1,198 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "d3f9e06e81da83f6e44ae77a9b26f7cc",
+    "entities": [
+      {
+        "tableName": "tracker_state",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `bootCount` INTEGER NOT NULL, `lastCounterValue` INTEGER NOT NULL, `lastSampleElapsedNanos` INTEGER NOT NULL, `lastSampleWallMillis` INTEGER NOT NULL, `updatedAtMillis` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bootCount",
+            "columnName": "bootCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastCounterValue",
+            "columnName": "lastCounterValue",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastSampleElapsedNanos",
+            "columnName": "lastSampleElapsedNanos",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastSampleWallMillis",
+            "columnName": "lastSampleWallMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAtMillis",
+            "columnName": "updatedAtMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "minute_steps",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`epochMinute` INTEGER NOT NULL, `localEpochDay` INTEGER NOT NULL, `steps` INTEGER NOT NULL, PRIMARY KEY(`epochMinute`))",
+        "fields": [
+          {
+            "fieldPath": "epochMinute",
+            "columnName": "epochMinute",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "localEpochDay",
+            "columnName": "localEpochDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "steps",
+            "columnName": "steps",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "epochMinute"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_minute_steps_localEpochDay",
+            "unique": false,
+            "columnNames": [
+              "localEpochDay"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_minute_steps_localEpochDay` ON `${TABLE_NAME}` (`localEpochDay`)"
+          }
+        ]
+      },
+      {
+        "tableName": "daily_summary",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`localEpochDay` INTEGER NOT NULL, `steps` INTEGER NOT NULL, `distanceMeters` REAL NOT NULL, `activeKcal` REAL NOT NULL, `activeMinutes` INTEGER NOT NULL, `briskMinutes` INTEGER NOT NULL, `goalSteps` INTEGER NOT NULL, `finalized` INTEGER NOT NULL, PRIMARY KEY(`localEpochDay`))",
+        "fields": [
+          {
+            "fieldPath": "localEpochDay",
+            "columnName": "localEpochDay",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "steps",
+            "columnName": "steps",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "distanceMeters",
+            "columnName": "distanceMeters",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "activeKcal",
+            "columnName": "activeKcal",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "activeMinutes",
+            "columnName": "activeMinutes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "briskMinutes",
+            "columnName": "briskMinutes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "goalSteps",
+            "columnName": "goalSteps",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "finalized",
+            "columnName": "finalized",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "localEpochDay"
+          ]
+        }
+      },
+      {
+        "tableName": "diagnostics_event",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `wallMillis` INTEGER NOT NULL, `type` TEXT NOT NULL, `detail` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wallMillis",
+            "columnName": "wallMillis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "detail",
+            "columnName": "detail",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd3f9e06e81da83f6e44ae77a9b26f7cc')"
+    ]
+  }
+}

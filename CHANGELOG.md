@@ -17,3 +17,9 @@ All notable changes to Passo are documented here. The format follows
   language picker, and a launchable app with nothing in it yet.
 - A build that refuses any network, location, exact-alarm or body-sensor permission, checked
   on every push.
+- Step counting in the background (Phase 1): the phone's hardware step counter, read by a
+  foreground service that starts again by itself after a reboot or an app update, and saves
+  the count before a shutdown. Steps are kept per minute, on the phone only, and survive
+  reboots, sensor resets, midnight, time-zone and clock changes.
+- A notification with today's steps, and a first screen that asks for the "Physical activity"
+  permission (or explains a phone without a step counter).

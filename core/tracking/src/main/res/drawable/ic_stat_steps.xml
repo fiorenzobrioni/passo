@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Two footprints, a sole and a heel each: the status-bar mark of the tracking notification.
+     White on transparent, as status-bar icons must be; the system tints it. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M4.8,11.5a3,4.8 0,1 0,6 0a3,4.8 0,1 0,-6 0z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M5.8,19a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M13.2,6.5a3,4.8 0,1 0,6 0a3,4.8 0,1 0,-6 0z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M14.2,14a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z" />
+</vector>

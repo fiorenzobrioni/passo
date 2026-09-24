@@ -18,8 +18,9 @@ Free, no account, no ads, no tracking, and no network permission at all.
 </div>
 
 > [!NOTE]
-> Passo is in early development (Phase 0 of [the plan](./PLANNING.md): the project skeleton).
-> There is no usable release yet.
+> Passo is in early development (Phase 1 of [the plan](./PLANNING.md): the step tracking
+> engine, which counts in the background but has no real screens yet and has not been field
+> tested on a phone). There is no usable release yet.
 
 ## What Passo is
 

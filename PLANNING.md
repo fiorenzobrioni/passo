@@ -96,7 +96,7 @@ This is the riskiest part of the app. Build it first, test it in the field, and 
 - Since Android 9, apps in the background don't receive sensor events. A worker waking up periodically can't reliably read the sensor.
 - A foreground service of type `health` is the documented mechanism for continuous fitness tracking.
   - Prerequisites: the `FOREGROUND_SERVICE_HEALTH` permission in the manifest, and the runtime permission `ACTIVITY_RECOGNITION`.
-  - The service can be started from `BOOT_COMPLETED`; verify this on Android 15+ in Phase 1.
+  - The service can be started from `BOOT_COMPLETED`. `BOOT_COMPLETED` and `MY_PACKAGE_REPLACED` are exemptions from the background-start restriction, and `health` is not among the types Android 15 forbids from a `BOOT_COMPLETED` receiver (`dataSync`, `camera`, `mediaPlayback`, `phoneCall`, `mediaProjection`, `microphone`). `ACTIVITY_RECOGNITION` is not a while-in-use permission, so it does not block a start from the background either. Established from the documentation in Phase 1 (§15).
 
 ### 4.2 Service lifecycle
 
@@ -123,8 +123,8 @@ If the user or the OEM stops the service, no data is lost as long as the device 
 
 - A non-wake-up sensor never wakes the application processor. Events wait in the hardware FIFO and are delivered the next time the processor is awake.
 - If the FIFO overflows, intermediate events are dropped, but the **total stays correct** because the counter is cumulative. Only minute-level attribution gets coarser.
-- **Experiment in Phase 1:** compare the wake-up variant (`getDefaultSensor(TYPE_STEP_COUNTER, true)`) with a 15 to 30 minute latency. It gives a guaranteed maximum age of persisted data, in case of an abrupt power loss, in exchange for a small number of wakeups. Pick based on measurements.
-- Log `sensor.fifoMaxEventCount`, `fifoReservedEventCount`, vendor and name to the diagnostics screen.
+- **Non-wake-up, decided from the platform documentation** (`docs/adr/0002-sensor-reporting.md`): the wake-up variant would only bound the loss on an *abrupt* power loss, and would pay for it with a wakeup per report window, every day. A device that has only a wake-up step counter still gets it.
+- `sensor.fifoMaxEventCount`, `fifoReservedEventCount`, vendor, name and wake-up mode are written to the diagnostics log at every service start.
 
 ### 4.4 Accounting algorithm (`StepAccountant`, pure Kotlin)
 
@@ -132,7 +132,7 @@ Input for each sensor event: `counterValue` (total since boot), `eventElapsedNan
 `bootCount` comes from `Settings.Global.BOOT_COUNT`.
 
 ```
-state = TrackerState(bootCount, lastCounterValue, lastSampleWallMillis)   // persisted in Room
+state = TrackerState(bootCount, lastCounterValue, lastSampleElapsedNanos, lastSampleWallMillis)   // persisted in Room
 
 delta = when {
     state == null                       -> 0                   // first run ever: baseline, don't count steps from before install
@@ -197,6 +197,7 @@ data class TrackerStateEntity(
     @PrimaryKey val id: Int = 0,
     val bootCount: Int,
     val lastCounterValue: Long,
+    val lastSampleElapsedNanos: Long,           // monotonic: gaps are measured on this clock (§15)
     val lastSampleWallMillis: Long,
     val updatedAtMillis: Long,
 )
@@ -408,26 +409,26 @@ Phases 1 and 4 need **field testing on a physical device**; an emulator is not e
 
 ### Phase 1 — Tracking engine (highest risk)
 
-- [ ] `core:domain`: `StepAccountant` with test-driven unit tests covering every case in §4.6
-- [ ] `core:data`: Room schema v1 (§5), DAOs, `TrackingRepository` with the transactional flush
-- [ ] `core:tracking`: `StepSensorSource` (wraps `SensorManager` and exposes a `Flow` of events plus `flush()`)
-- [ ] `StepTrackingService` (`health` type): registration strategy (§4.3), screen, shutdown and time receivers (§4.2), in-memory buffer
-- [ ] `BootReceiver` and `PackageReplacedReceiver`; verify the foreground service starts from boot on Android 14, 15, 16 and 17
-- [ ] Minimal notification (static text plus today's steps)
-- [ ] Minimal permission request for `ACTIVITY_RECOGNITION` and `POST_NOTIFICATIONS`
-- [ ] **Diagnostics screen** (debug builds, or hidden in About):
-  - sensor info and FIFO size
-  - boot count and last sample
-  - service uptime
-  - diagnostics log
-  - raw counter value
-- [ ] Wake-up vs non-wake-up sensor experiment (§4.3); record the results in `docs/adr/0002-sensor-reporting.md`
+- [x] `core:domain`: `StepAccountant` with test-driven unit tests covering every case in §4.6
+  - Plus `StepLedger`, the service's buffer as pure Kotlin: the write triggers of §4.5 and the restore of a batch whose write failed, with its own tests.
+- [x] `core:data`: Room schema v1 (§5), DAOs, `TrackingRepository` with the transactional flush
+  - One `@Transaction` writes the minute increments, the tracker state, the summaries of the touched days and the log lines; Robolectric tests on an in-memory database.
+- [x] `core:tracking`: `StepSensorSource` (wraps `SensorManager` and exposes a `Flow` of events plus `flush()`)
+  - Samples and flush completions share one ordered channel, so a flush is complete only once every sample it delivered has been accounted.
+- [x] `StepTrackingService` (`health` type): registration strategy (§4.3), screen, shutdown and time receivers (§4.2), in-memory buffer
+- [x] `BootReceiver` and `PackageReplacedReceiver`
+  - *Deviation:* the start from boot on Android 14 to 17 is established from the documentation, not on devices (§4.1, §15).
+- [x] Minimal notification (static text plus today's steps)
+- [x] Minimal permission request for `ACTIVITY_RECOGNITION` and `POST_NOTIFICATIONS`
+  - With the blocking explanation for a phone without a step counter (§4.6). A placeholder screen in `feature:onboarding`, replaced by the real onboarding in Phase 3.
+- *Removed from the plan (owner's decision, §15):* the diagnostics screen and the wake-up vs non-wake-up experiment. The sensor choice is made from the platform documentation (`docs/adr/0002-sensor-reporting.md`); the diagnostics **log** (§5) stays, with no screen.
 
 **Acceptance:**
-- All accounting unit tests pass.
-- A 3 to 5 day field test on at least one physical device, with nightly full shutdowns and without opening the app, shows no lost steps: the daily totals match the raw counter deltas in the diagnostics log.
-- `batterystats` shows no app wakelocks or alarms while the screen is off.
-- Tracking resumes after a reboot without opening the app.
+- [x] All accounting unit tests pass.
+- [ ] A 3 to 5 day field test on at least one physical device, with nightly full shutdowns and without opening the app, shows no lost steps.
+- [ ] `batterystats` shows no app wakelocks or alarms while the screen is off.
+- [ ] Tracking resumes after a reboot without opening the app.
+- *Pending (owner, on a device).* The three device checks are not run yet. By construction the service holds no wakelock and sets no alarm, and nothing in it runs on a timer with the screen off; the boot start follows the documented exemptions (§4.1). A measurement is still what closes them, whenever a phone is available.
 
 ### Phase 2 — Profile, settings, metrics
 
@@ -612,7 +613,7 @@ Include:
 | Lost or leaked release signing key | Users can't update without uninstalling (and losing data); a future Play listing can't reuse the key | Keystore created in Phase 0, kept outside the repo with an offline backup, stored only in GitHub Actions secrets |
 | Play policy review of the `health` foreground service (only if Phase 9 happens) | Delay of a Play release | Continuous step tracking is the documented use case; prepare the declaration and video early |
 | Users dislike the persistent notification | Uninstalls | Low-importance, useful content (live steps); explain why in onboarding; the user can minimize the channel |
-| Abrupt power loss | Steps since the last batch are lost | Bounded by the latency window; optionally use the wake-up sensor variant (Phase 1 experiment) |
+| Abrupt power loss | Steps since the last batch are lost | Bounded by the latency window (10 min with the screen off), and only for steps the processor has not been awake for since; the wake-up variant was weighed and rejected (`docs/adr/0002-sensor-reporting.md`) |
 | Android 17 RemoteViews bitmap cap | Widget crash | Tiny or no bitmaps; test on API 37 |
 
 ---
@@ -636,6 +637,13 @@ Include:
 - Charts: custom Compose `Canvas` components; no third-party chart library.
 - Distribution: signed APKs on **GitHub Releases**; Google Play possibly later (Phase 9); no F-Droid.
 - First day after install: pre-install steps from the current boot session are **not** counted.
+- **Phase 1: no diagnostics screen and no wake-up vs non-wake-up experiment** (owner's decision: no device available for measurements now). The sensor is the non-wake-up step counter, chosen from the platform documentation; reasons in `docs/adr/0002-sensor-reporting.md`. The diagnostics log (§5) is kept: it costs a handful of rows a day, written with the steps, and it is what makes a field problem readable later (an export in Phase 7, or a hidden screen if one is ever wanted).
+- **Start from boot, from the documentation** (Phase 1): `BOOT_COMPLETED` and `MY_PACKAGE_REPLACED` are background-start exemptions; Android 15's `BOOT_COMPLETED` restriction does not cover the `health` type; `ACTIVITY_RECOGNITION` is not a while-in-use permission. To be confirmed on a device with the Phase 1 acceptance checks.
+- `TrackerState` also stores **`lastSampleElapsedNanos`** (§5): the gap between two samples of one boot session is measured on the monotonic clock. Measured on the wall clock, setting the clock back an hour would make the gap negative, and the jump cap would cut real steps to 50 (a unit test covers it). A reboot is recognized by the boot count, and also by the elapsed clock going backwards, for devices whose boot count is missing.
+- Screen-on report latency: **1 s**; screen-off: **10 min** (§4.3). The shutdown flush waits at most **1.5 s**.
+- The buffer is written when a sample establishes a baseline, a new boot session or a counter reset, or is capped as an anomaly, as well as on the triggers of §4.5: those states are what every later delta depends on.
+- Until Phase 2, `daily_summary` rows carry only `steps` and a provisional goal (`DEFAULT_GOAL_STEPS`, 8 000); no day is finalized, so Phase 2 computes the metrics of every day recorded before it.
+- Italian plurals carry the CLDR `many` form too (exact millions), identical to `other`: lint asks for it.
 
 ### Open
 
@@ -644,4 +652,3 @@ Include:
 - Walk detection thresholds (60 spm per minute, 2-minute gaps, 10-minute default minimum): tune after the Phase 5 field test.
 - Should a 7-day mini chart be offered in the 4x2 widget as an alternative to today's hourly bars (widget configuration)?
 - Widget progress ring: bitmap or vector levels (Phase 4 spike)?
-- Wake-up vs non-wake-up sensor (Phase 1 experiment)?
