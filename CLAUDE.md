@@ -42,7 +42,8 @@ minSdk 34, compile/targetSdk 37. Java 21.
 - On a machine with no system JDK, prepend `JAVA_HOME="/c/Program Files/Android/Android Studio/jbr"`.
 - **Maven Central answers HTTP 429** (Too Many Requests; it happens in the Claude Code cloud
   sandbox): add `--init-script gradle/google-maven-mirror.init.gradle.kts` to any command. It
-  puts Google's mirror of Maven Central first, for that run only; nothing in the build changes.
+  puts Google's mirror of Maven Central first, and points Robolectric's own `android-all`
+  download at it, for that run only; nothing in the build changes.
 
 **Convention plugins** (`build-logic/convention`): `passo.android.application`,
 `passo.android.library`, `passo.android.compose`, `passo.android.feature`, `passo.android.hilt`,

@@ -23,3 +23,10 @@ All notable changes to Passo are documented here. The format follows
   reboots, sensor resets, midnight, time-zone and clock changes.
 - A notification with today's steps, and a first screen that asks for the "Physical activity"
   permission (or explains a phone without a step counter).
+- Distance, active calories, active minutes, brisk minutes and cadence for every day (Phase 2),
+  estimated from the steps and an optional profile (height, weight, step length), with the
+  sources of every formula in the code. Metric and imperial units, and numbers written the way
+  your language writes them.
+- A daily goal that is kept with each day. Changing your weight, step length or goal updates
+  today only: days already over keep the numbers they had, unless you ask to apply the new
+  profile to the past.

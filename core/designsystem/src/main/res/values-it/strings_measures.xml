@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Un numero già formattato (nella lingua di chi legge) seguito dal simbolo della sua unità. -->
+<resources>
+    <string name="measure_kilometers">%1$s km</string>
+    <string name="measure_miles">%1$s mi</string>
+    <string name="measure_kilocalories">%1$s kcal</string>
+    <string name="measure_kilograms">%1$s kg</string>
+    <string name="measure_pounds">%1$s lb</string>
+    <string name="measure_centimeters">%1$s cm</string>
+    <string name="measure_feet">%1$s ft</string>
+    <string name="measure_inches">%1$s in</string>
+    <string name="measure_steps_per_minute">%1$s passi/min</string>
+    <string name="measure_minutes">%1$s min</string>
+</resources>

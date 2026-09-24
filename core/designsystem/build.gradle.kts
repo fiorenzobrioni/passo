@@ -10,6 +10,9 @@ android {
 }
 
 dependencies {
+    // The formatter (numbers for the locale) and the units it formats into.
+    api(project(":core:domain"))
+
     // The BOM is exported with the libraries, so a module that reaches Compose through this one
     // (the widget, for GlanceTheme's colors) resolves the same versions.
     api(platform(libs.androidx.compose.bom))

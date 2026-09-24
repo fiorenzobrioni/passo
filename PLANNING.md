@@ -248,11 +248,11 @@ data class DiagnosticsEventEntity(
 
 All constants live in one file (`MetricsConstants.kt`) with comments that cite their sources. All defaults are to be validated.
 
-- **Default walking step length:** `height × 0.415`. If height is unknown, 0.70 m.
+- **Default walking step length:** `height × 0.415` (`× 0.413` when the profile says female). If height is unknown, 0.70 m.
 - **Running step length:** default `walking × 1.3`, user-editable. It applies to minutes with a cadence of at least `RUNNING_CADENCE` (140 spm).
 - **Distance:** the sum over minutes of `steps × stepLength(cadence)`.
 - **Active calories (net):** the sum over minutes of `distanceKm × weightKg × k(cadence)`.
-  - `k_walk ≈ 0.5 kcal/kg/km`, rising slightly for brisk cadences.
+  - `k_walk ≈ 0.5 kcal/kg/km`, rising slightly for brisk cadences: flat up to 100 spm, then linearly to 0.6 just below 140 spm (Phase 2, §15).
   - `k_run ≈ 1.0 kcal/kg/km`.
   - Default weight if not set: 70 kg.
   - Net means basal metabolism is not included. The UI calls this "active calories".
@@ -432,14 +432,19 @@ Phases 1 and 4 need **field testing on a physical device**; an emulator is not e
 
 ### Phase 2 — Profile, settings, metrics
 
-- [ ] DataStore settings and profile repository
-- [ ] Calculators in `core:domain`: distance, calories, active and brisk minutes, cadence, with unit tests
-- [ ] `DailySummary` recomputation for today; freezing past days; "Apply profile to past data"
-- [ ] Units (metric and imperial) with formatting helpers, and locale-aware number formatting
+- [x] DataStore settings and profile repository
+  - `UserPreferencesDataSource` stores only the fields that differ from their default and reads back anything out of range as the default; `SettingsRepository` is what the screens use. A profile or goal change goes through `TrackingRepository`, which freezes the past first (§15, `docs/adr/0003-daily-summaries.md`).
+- [x] Calculators in `core:domain`: distance, calories, active and brisk minutes, cadence, with unit tests
+  - `MetricsCalculator`, `StepLengths`, `ProfileLimits`, `DaySummaries`; every constant in `MetricsConstants.kt` with its source.
+- [x] `DailySummary` recomputation for today; freezing past days; "Apply profile to past data"
+  - Open days are recomputed at every write; the first write after midnight finalizes the day; late steps on a finalized day add only their own share. "Apply profile to past data" is `SettingsRepository.applyProfileToPastDays()`; its button comes with the Settings screen (Phase 3).
+- [x] Units (metric and imperial) with formatting helpers, and locale-aware number formatting
+  - `MeasureFormatter` and `UnitConversions` in `core:domain` (numbers only); the unit symbols are string resources in `core:designsystem` (`Measure.text()`, `Resources.format`).
 
 **Acceptance:**
-- Calculator tests cover defaults, edge cases (0 steps, missing profile) and unit conversion.
-- Changing the weight updates today only, unless "Apply to past data" is used.
+- [x] Calculator tests cover defaults, edge cases (0 steps, missing profile) and unit conversion.
+- [x] Changing the weight updates today only, unless "Apply to past data" is used.
+  - Both on a real Room database (`TrackingRepositoryTest`), including a day still open at the change and late steps after it.
 
 ### Phase 3 — Today screen and onboarding
 
@@ -645,6 +650,16 @@ Include:
 - Until Phase 2, `daily_summary` rows carry only `steps` and a provisional goal (`DEFAULT_GOAL_STEPS`, 8 000); no day is finalized, so Phase 2 computes the metrics of every day recorded before it.
 - `gradle/google-maven-mirror.init.gradle.kts`: an **opt-in** init script (never applied by the build) that puts Google's mirror of Maven Central first, for sandboxes where Maven Central answers HTTP 429, as the Claude Code cloud environment does. Used for the Phase 1 builds there; CLAUDE.md says when to add it.
 - Italian plurals carry the CLDR `many` form too (exact millions), identical to `other`: lint asks for it.
+- **Phase 2: summaries, the profile and the frozen past** (`docs/adr/0003-daily-summaries.md`). An open day is recomputed from its minutes at every write; the first write after a day is over finalizes it with the profile and goal in effect until then. A profile or goal change first finalizes the open past days with the old values, then stores the new ones, then recomputes today, under one lock with the service's writes. Steps that reach a finalized day late add only their own share (the difference they make to their minute, priced with the current profile), so the rest of the day never changes. Only "Apply profile to past data" rewrites finalized days.
+- Schema v1 is kept in Phase 2: the average cadence is not stored, because it does not depend on the profile and a screen can compute it from the day's minutes.
+- The daily goal is a setting (`UserSettings.dailyGoalSteps`, default 8 000, accepted 500 to 100 000); the Phase 1 constant `DEFAULT_GOAL_STEPS` is gone.
+- **Energy cost by cadence:** 0.5 kcal/kg/km below 100 spm, rising linearly to 0.6 just below 140, 1.0 from 140 (ACSM walking and running equations; the brisk rise from the classic energy-speed curves). Flat below 100 on purpose: in one-minute buckets a low count is mostly a minute walked in part, not a slow gait.
+- **Profile limits:** height 0.5 to 2.5 m, weight 20 to 350 kg, walking step 0.2 to 1.5 m, running step 0.2 to 2.5 m. A value outside is treated as not given (the default applies) and is not stored.
+- **Sex** changes only the height ratio of the default step length (0.413 instead of 0.415); with no height it changes nothing.
+- **Units:** "System" (the default) follows the phone's region, not the app's language: the United States, Liberia, Myanmar and the United Kingdom walk in miles, everyone else in kilometres. Numbers are formatted in the app's language. Values are always stored metric.
+- **Formatting:** `core:domain` formats the number (locale digits, fixed decimals per magnitude so a live value does not change width, distances rounded down so a distance is never shown as covered before it is); the unit symbol is a string resource in `core:designsystem`, in English and Italian.
+- DataStore stores only the fields that differ from their default, so an improved default reaches everyone who never moved away from it; a stored value that cannot be read back (out of range, an unknown enum name from a newer build) reads as the default.
+- The Maven Central mirror init script also points **Robolectric** at the mirror (`robolectric.dependency.repo.url`): Robolectric downloads its `android-all` jar itself, at test time, and got HTTP 429 in the cloud sandbox too.
 
 ### Open
 

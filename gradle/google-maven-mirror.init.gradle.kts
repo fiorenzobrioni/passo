@@ -15,3 +15,11 @@ beforeSettings {
     dependencyResolutionManagement.repositories.google()
     dependencyResolutionManagement.repositories.maven { url = uri(mavenCentralMirror) }
 }
+
+// Robolectric fetches its android-all jar from Maven Central itself, at test time and outside
+// Gradle's resolution, so it needs pointing at the mirror too.
+allprojects {
+    tasks.withType<Test>().configureEach {
+        systemProperty("robolectric.dependency.repo.url", mavenCentralMirror)
+    }
+}

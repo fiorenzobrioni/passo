@@ -30,9 +30,9 @@ data class TrackerStateEntity(
 data class MinuteStepsEntity(@PrimaryKey val epochMinute: Long, val localEpochDay: Long, val steps: Int)
 
 /**
- * One day's totals. Until the calculators exist (Phase 2) only `steps` and `goalSteps` are
- * filled; no day is finalized before then, so Phase 2 computes the metrics of every day
- * recorded until it lands.
+ * One day's totals and estimates, recomputed from its minutes while the day is open and frozen
+ * once it is over (`finalized`). Phase 1 wrote only `steps` and a provisional goal and
+ * finalized nothing, so its days get their estimates at the first write after Phase 2 lands.
  */
 @Entity(tableName = "daily_summary")
 data class DailySummaryEntity(

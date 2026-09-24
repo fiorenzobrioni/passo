@@ -1,0 +1,63 @@
+package com.callbackdev.passo.core.model
+
+import java.time.DayOfWeek
+import java.time.LocalTime
+
+/**
+ * The reader's settings (PLANNING.md §5), apart from the [Profile]. Defaults are the values a
+ * fresh install starts with; `null` where a field follows the system instead.
+ *
+ * @property firstDayOfWeek null follows the locale.
+ */
+data class UserSettings(
+    val dailyGoalSteps: Int = DEFAULT_DAILY_GOAL_STEPS,
+    val units: UnitPreference = UnitPreference.SYSTEM,
+    val firstDayOfWeek: DayOfWeek? = null,
+    val theme: ThemeMode = ThemeMode.SYSTEM,
+    val dynamicColor: Boolean = true,
+    val goalReachedNotification: Boolean = false,
+    val eveningReminder: Boolean = false,
+    val eveningReminderTime: LocalTime = DEFAULT_EVENING_REMINDER_TIME,
+    val weeklySummary: Boolean = false,
+    val trackingEnabled: Boolean = true,
+    val walkDetection: Boolean = true,
+    val minWalkMinutes: Int = DEFAULT_MIN_WALK_MINUTES,
+    val typicalDayLine: Boolean = true,
+) {
+    companion object {
+        /**
+         * 8 000: where the mortality benefit of daily steps starts to level off in adults under
+         * 60 (8 000 to 10 000), and where it already has over 60 (6 000 to 8 000). Paluch et
+         * al., Lancet Public Health 2022, a meta-analysis of 15 cohorts.
+         */
+        const val DEFAULT_DAILY_GOAL_STEPS: Int = 8_000
+
+        /** The goals the settings accept; a stored value outside falls back to the default. */
+        val DAILY_GOAL_RANGE: IntRange = 500..100_000
+
+        val DEFAULT_EVENING_REMINDER_TIME: LocalTime = LocalTime.of(20, 0)
+
+        /** The minimum walk durations the settings offer (VISION.md, walk detection). */
+        val MIN_WALK_MINUTES_CHOICES: List<Int> = listOf(5, 10, 15)
+        const val DEFAULT_MIN_WALK_MINUTES: Int = 10
+    }
+}
+
+/** The units the reader picked; [SYSTEM] follows the region of the phone's locale. */
+enum class UnitPreference {
+    SYSTEM,
+    METRIC,
+    IMPERIAL,
+}
+
+/** The units numbers are shown in, once [UnitPreference.SYSTEM] has been resolved. */
+enum class UnitSystem {
+    METRIC,
+    IMPERIAL,
+}
+
+enum class ThemeMode {
+    SYSTEM,
+    LIGHT,
+    DARK,
+}
