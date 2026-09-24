@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Placeholder mark (Phase 0): a progress ring three quarters full, the motif of the Today
+     screen and the widget. The real icon is a Phase 8 task. Everything sits inside the 66dp
+     safe zone of the 108dp adaptive canvas. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M54,32 A22,22 0 1,1 53.99,32"
+        android:strokeWidth="7"
+        android:strokeColor="@color/ic_launcher_track" />
+    <path
+        android:pathData="M54,32 A22,22 0 1,1 32,54"
+        android:strokeLineCap="round"
+        android:strokeWidth="7"
+        android:strokeColor="@color/ic_launcher_ink" />
+</vector>
