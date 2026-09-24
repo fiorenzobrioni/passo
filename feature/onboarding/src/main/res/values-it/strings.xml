@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="setup_permission_title">Fai vedere i tuoi passi a Passo</string>
+    <string name="setup_permission_body">Android chiama questo permesso «Attività fisica». Passo lo usa solo per leggere il contapassi del telefono, e i tuoi passi non lasciano mai il telefono. Se consenti anche le notifiche, il conteggio di oggi compare nella notifica che tiene attivo il conteggio.</string>
+    <string name="setup_permission_allow">Consenti</string>
+    <string name="setup_permission_denied_body">Il permesso è stato negato. Puoi consentire «Attività fisica» nelle impostazioni dell’app.</string>
+    <string name="setup_permission_open_settings">Apri impostazioni</string>
+    <string name="setup_no_sensor_title">Questo telefono non ha un contapassi</string>
+    <string name="setup_no_sensor_body">Passo conta i passi solo con il sensore contapassi del telefono, e questo dispositivo non ce l’ha. Qui Passo non ha niente da contare.</string>
+    <string name="setup_tracking_title">Passo sta contando i tuoi passi</string>
+    <string name="setup_tracking_body">Puoi chiudere l’app. Il conteggio continua in background e riparte da solo dopo un riavvio.</string>
+    <plurals name="setup_tracking_steps_today">
+        <item quantity="one">%1$s passo oggi</item>
+        <item quantity="other">%1$s passi oggi</item>
+        <!-- CLDR "many": exact millions (1.000.000 passi). Digits read the same as "other". -->
+        <item quantity="many">%1$s passi oggi</item>
+    </plurals>
+</resources>

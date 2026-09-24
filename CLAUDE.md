@@ -34,12 +34,15 @@ minSdk 34, compile/targetSdk 37. Java 21.
 
 - Build debug APK: `./gradlew :app:assembleDebug` (output: `app/build/outputs/apk/debug/app-debug.apk`)
 - All unit tests: `./gradlew test`
-- One module: `./gradlew :core:domain:test`; one class: `--tests "com.callbackdev.passo.domain.SomeTest"`
+- One module: `./gradlew :core:domain:test`; one class: `--tests "com.callbackdev.passo.core.domain.tracking.StepAccountantTest"`
 - Lint (every module, via `checkDependencies`): `./gradlew :app:lintDebug`
 - Format: `./gradlew spotlessApply` (CI runs `spotlessCheck`; rules in `.editorconfig`)
 - Forbidden-permission check on the merged manifests: `./gradlew :app:checkForbiddenPermissions`
 - Installable minified build: `./gradlew :app:assembleRelease -PsignReleaseWithDebugKey`
 - On a machine with no system JDK, prepend `JAVA_HOME="/c/Program Files/Android/Android Studio/jbr"`.
+- **Maven Central answers HTTP 429** (Too Many Requests; it happens in the Claude Code cloud
+  sandbox): add `--init-script gradle/google-maven-mirror.init.gradle.kts` to any command. It
+  puts Google's mirror of Maven Central first, for that run only; nothing in the build changes.
 
 **Convention plugins** (`build-logic/convention`): `passo.android.application`,
 `passo.android.library`, `passo.android.compose`, `passo.android.feature`, `passo.android.hilt`,

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="setup_permission_title">Let Passo see your steps</string>
+    <string name="setup_permission_body">Android calls this permission “Physical activity”. Passo uses it only to read your phone’s step counter, and your steps never leave the phone. Allow notifications too, and today’s count shows in the notification that keeps counting running.</string>
+    <string name="setup_permission_allow">Allow</string>
+    <string name="setup_permission_denied_body">The permission was turned down. You can allow “Physical activity” in the app’s settings.</string>
+    <string name="setup_permission_open_settings">Open settings</string>
+    <string name="setup_no_sensor_title">This phone has no step counter</string>
+    <string name="setup_no_sensor_body">Passo counts steps only with the phone’s own step counter sensor, and this device doesn’t have one. There is nothing Passo can count here.</string>
+    <string name="setup_tracking_title">Passo is counting your steps</string>
+    <string name="setup_tracking_body">You can close the app. Counting goes on in the background, and starts again by itself after a restart.</string>
+    <plurals name="setup_tracking_steps_today">
+        <item quantity="one">%1$s step today</item>
+        <item quantity="other">%1$s steps today</item>
+    </plurals>
+</resources>

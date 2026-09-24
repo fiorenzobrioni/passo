@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Passo's permissions are the short list in PLANNING.md §10, and they arrive with the phase
-  that needs them (tracking in Phase 1). Never here, from this file or from any library:
+  Passo's permissions are the short list in PLANNING.md §10. The tracking ones (activity
+  recognition, the health foreground service, boot, notifications) are declared by
+  :core:tracking, next to the components that need them. Never here, from this file or from
+  any library:
   INTERNET, location, exact alarms, battery-optimization exemptions, high-rate or body
   sensors. `checkForbiddenPermissions` fails the build on the merged manifest if one appears.
 -->

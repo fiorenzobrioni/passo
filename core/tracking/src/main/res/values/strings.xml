@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="tracking_channel_name">Step counting</string>
+    <string name="tracking_channel_description">The notification that keeps step counting running. You can minimize it from here.</string>
+    <string name="tracking_notification_title">Counting your steps</string>
+    <plurals name="tracking_notification_steps">
+        <item quantity="one">%1$s step today</item>
+        <item quantity="other">%1$s steps today</item>
+    </plurals>
+</resources>

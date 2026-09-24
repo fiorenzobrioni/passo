@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The tracking engine's permissions and components (PLANNING.md §4.1, §10). This is the whole
+  list Passo holds: activity recognition to read the step counter, a foreground service of type
+  health to keep reading it, the boot broadcast to start again without being opened, and
+  notifications (optional). `checkForbiddenPermissions` guards the rest.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Documents the requirement and filters devices on a future Play listing. It does not
+         stop a sideloaded APK from installing, so the app also checks for the sensor. -->
+    <uses-feature
+        android:name="android.hardware.sensor.stepcounter"
+        android:required="true" />
+
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <application>
+        <service
+            android:name=".StepTrackingService"
+            android:exported="false"
+            android:foregroundServiceType="health" />
+
+        <!-- Not exported: the system delivers its own broadcasts to non-exported receivers,
+             and nothing else has any business starting the tracker. -->
+        <receiver
+            android:name=".BootReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name=".PackageReplacedReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
+    </application>
+
+</manifest>
