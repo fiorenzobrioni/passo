@@ -61,10 +61,11 @@ class TrackingNotificationsTest {
         assertThat(notification.extras.getCharSequence(Notification.EXTRA_TITLE_BIG).toString())
             .isEqualTo("6,000 steps today")
         val lines = notification.extras.getCharSequence(Notification.EXTRA_BIG_TEXT).toString().lines()
-        assertThat(lines).hasSize(3)
-        assertThat(lines[0]).isEqualTo("2,000 steps to go: about 20 minutes of brisk walking")
-        assertThat(lines[1]).isEqualTo("75% of 8,000 · 60 active minutes")
-        assertThat(lines[2]).matches("Estimated: [0-9.]+ km · [0-9,]+ kcal")
+        assertThat(lines).hasSize(4)
+        assertThat(lines[0]).isEqualTo("2,000 steps to go:")
+        assertThat(lines[1]).isEqualTo("about 20 minutes of brisk walking")
+        assertThat(lines[2]).isEqualTo("75% of 8,000 · 60 active minutes")
+        assertThat(lines[3]).matches("Estimated: [0-9.]+ km · [0-9,]+ kcal")
         assertThat(notification.extras.getInt(Notification.EXTRA_PROGRESS_MAX)).isEqualTo(8_000)
         assertThat(notification.extras.getInt(Notification.EXTRA_PROGRESS)).isEqualTo(6_000)
     }
@@ -74,7 +75,17 @@ class TrackingNotificationsTest {
         val lines = notifications.expandedText(day(0, goal = 9_000), context.measureFormatter(UnitPreference.METRIC))
             .lines()
 
-        assertThat(lines[0]).isEqualTo("9,000 steps to go: about 1 h 30 min of brisk walking")
+        assertThat(lines[0]).isEqualTo("9,000 steps to go:")
+        assertThat(lines[1]).isEqualTo("about 1 h 30 min of brisk walking")
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT")
+    fun `in Italian the way to the goal breaks after the colon too`() {
+        val lines = notifications.expandedText(day(60), context.measureFormatter(UnitPreference.METRIC)).lines()
+
+        assertThat(lines[0]).isEqualTo("Ne mancano 2.000:")
+        assertThat(lines[1]).isEqualTo("circa 20 minuti a passo svelto")
     }
 
     @Test

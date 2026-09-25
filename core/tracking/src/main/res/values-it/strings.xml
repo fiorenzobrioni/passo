@@ -13,9 +13,9 @@
     <!-- La notifica espansa: la frase del giorno, l’obiettivo, le stime. -->
     <string name="tracking_notification_goal_reached">Obiettivo raggiunto alle %1$s</string>
     <plurals name="tracking_notification_to_go">
-        <item quantity="one">Ne manca %1$s: circa %2$s a passo svelto</item>
-        <item quantity="many">Ne mancano %1$s: circa %2$s a passo svelto</item>
-        <item quantity="other">Ne mancano %1$s: circa %2$s a passo svelto</item>
+        <item quantity="one">Ne manca %1$s:\ncirca %2$s a passo svelto</item>
+        <item quantity="many">Ne mancano %1$s:\ncirca %2$s a passo svelto</item>
+        <item quantity="other">Ne mancano %1$s:\ncirca %2$s a passo svelto</item>
     </plurals>
     <string name="tracking_notification_goal">%1$s di %2$s</string>
     <plurals name="tracking_notification_active">

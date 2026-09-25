@@ -111,6 +111,11 @@ class StepTrackingService : Service() {
     private var tickerJob: Job? = null
     private var notifyJob: Job? = null
     private var renderJob: Job? = null
+
+    // What the notification last said. The app starts the service again every time it is opened
+    // (to be sure it counts), and startForeground posts the notification again: with this it
+    // keeps its expanded form instead of falling back to the count until the next step.
+    private var shownContent: NotificationContent? = null
     private var lastNotifyElapsed = 0L
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -133,11 +138,14 @@ class StepTrackingService : Service() {
             stopSelf()
             return START_NOT_STICKY
         }
+        // Only today's: after midnight the last one would show yesterday's numbers.
+        val content = displayedToday()?.let { steps -> shownContent ?: NotificationContent(steps) }
+            ?: NotificationContent(null)
         try {
             ServiceCompat.startForeground(
                 this,
                 TrackingNotifications.NOTIFICATION_ID,
-                notifications.build(NotificationContent(displayedToday())),
+                notifications.build(content),
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH,
             )
         } catch (e: SecurityException) {
@@ -152,6 +160,9 @@ class StepTrackingService : Service() {
         if (!started) {
             started = true
             startTracking()
+        } else if (interactive) {
+            // Opened from the app, so someone is looking: the numbers catch up at once.
+            notifyNow()
         }
         return START_STICKY
     }
@@ -420,7 +431,11 @@ class StepTrackingService : Service() {
         lastNotifyElapsed = SystemClock.elapsedRealtime()
         // A newer update replaces one still reading: it would post older numbers.
         renderJob?.cancel()
-        renderJob = scope.launch { notifications.update(notificationContent()) }
+        renderJob = scope.launch {
+            val content = notificationContent()
+            shownContent = content
+            notifications.update(content)
+        }
     }
 
     /** A new goal, profile or units: the numbers change, and are shown if someone can see them. */

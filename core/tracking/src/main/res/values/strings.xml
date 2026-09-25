@@ -11,8 +11,8 @@
     <!-- The expanded notification: the day's sentence, the goal, the estimates. -->
     <string name="tracking_notification_goal_reached">Goal reached at %1$s</string>
     <plurals name="tracking_notification_to_go">
-        <item quantity="one">%1$s step to go: about %2$s of brisk walking</item>
-        <item quantity="other">%1$s steps to go: about %2$s of brisk walking</item>
+        <item quantity="one">%1$s step to go:\nabout %2$s of brisk walking</item>
+        <item quantity="other">%1$s steps to go:\nabout %2$s of brisk walking</item>
     </plurals>
     <string name="tracking_notification_goal">%1$s of %2$s</string>
     <plurals name="tracking_notification_active">
