@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The home-screen widgets (PLANNING.md §7): two receivers and the settings screen the launcher
+  opens on a long press. No permission of their own: the cards read what the tracking service
+  already stored, in this process. Glance brings WorkManager, with its WAKE_LOCK (held by the
+  job while a card is being drawn) and ACCESS_NETWORK_STATE (which lets nothing leave the phone:
+  there is no INTERNET permission). Both are left as WorkManager declares them, as in Chiaro:
+  removing the second was the one change here that nothing on a phone had ever run with.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application android:supportsRtl="true">
+        <!-- Reached from the launcher's reconfigure flow. Exported, because the launcher starts
+             it; taskAffinity empty, so it never lands on top of the app's own task. -->
+        <activity
+            android:name=".config.WidgetConfigActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.Passo.WidgetConfig">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <!-- exported=false: the system delivers APPWIDGET_* to them regardless. -->
+        <receiver
+            android:name=".glance.GlanceWidgetReceiver"
+            android:exported="false"
+            android:label="@string/widget_glance_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_glance_info" />
+        </receiver>
+        <receiver
+            android:name=".words.WordsWidgetReceiver"
+            android:exported="false"
+            android:label="@string/widget_words_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_words_info" />
+        </receiver>
+    </application>
+
+</manifest>

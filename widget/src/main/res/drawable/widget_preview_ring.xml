@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The ring at 78%, for the picker's static preview only (the card paints its own, RingPainter):
+  a track and an arc on a 56-unit box, stroke 6.2 (RingPainter.STROKE_SHARE), from twelve
+  o'clock clockwise, round caps.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="56dp"
+    android:height="56dp"
+    android:viewportWidth="56"
+    android:viewportHeight="56">
+    <path
+        android:pathData="M28,3.1A24.9,24.9 0,1 1,27.99,3.1"
+        android:strokeWidth="6.2"
+        android:strokeColor="@color/widget_preview_track" />
+    <path
+        android:pathData="M28,3.1A24.9,24.9 0,1 1,3.54,23.33"
+        android:strokeWidth="6.2"
+        android:strokeColor="@color/widget_preview_ink"
+        android:strokeLineCap="round" />
+</vector>

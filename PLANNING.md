@@ -292,46 +292,48 @@ Input: the minute buckets of one local day, plus the settings. Output: a list of
 
 ---
 
-## 7. Widget (Glance)
+## 7. Widgets (Glance)
+
+Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card and a Chiaro card on one home screen read as one family: «At a glance» (Chiaro's «Colpo d'occhio», with today's ring where the weather glyph was) and «In words» (Chiaro's «In parole»: the day in type, with two small marks). Decisions and reasons: `docs/adr/0005-widgets.md`.
 
 ### Configuration
 
-- `SizeMode.Responsive(setOf(...))` with one breakpoint per supported size.
-- `resizeMode="horizontal|vertical"`; `targetCellWidth` and `targetCellHeight`; `minResizeWidth`, `minResizeHeight`, `maxResizeWidth`, `maxResizeHeight` spanning 1x1 to 4x2.
-- Starting breakpoints, from Android's cell formula (width ≈ 73n − 16 dp, height ≈ 118n − 16 dp in portrait). Tune them on real launchers.
-  - 1x1 ≈ 57×102
-  - 2x1 ≈ 130×102
-  - 2x2 ≈ 130×220
-  - 3x1 ≈ 203×102
-  - 4x1 ≈ 276×102
-  - 4x2 ≈ 276×220
+- `SizeMode.Exact`: every form is read off the size the launcher really granted.
+- **One size spec for both cards** (`WidgetProviderTest`): default placement 4×1 (`targetCellWidth` 4, `targetCellHeight` 1, where Chiaro's pair opens), minimum one cell (`minResizeWidth`/`minResizeHeight` 40 dp), `resizeMode="horizontal|vertical"`, and **no maximum**: Launcher3 turns a dp maximum into cells on every grid profile and keeps the smallest, so no value means "four cells" everywhere (ADR 0005). Each layout has a form for any grant instead.
+- `updatePeriodMillis = 0`; `configure` is the per-widget settings screen, `reconfigurable|configuration_optional`.
+- Reference grants the layout tests measure against (Chiaro's): one row ≈ 85 dp tall, two cells ≈ 159 dp, three ≈ 250, four ≈ 340; two rows ≈ 189 dp.
 
-| Size | Content |
-|---|---|
-| 1x1 | Compact step count (e.g. "8.4k") and a small progress ring |
-| 2x1 | Ring, steps, goal % |
-| 2x2 | Large ring with steps in the center; distance and calories below |
-| 3x1 / 4x1 | Horizontal: steps, distance, calories, active minutes, and a linear progress bar |
-| 4x2 | Header with steps and progress, 4 metric chips, and a mini chart of today's steps by hour: 24 bars built from Glance `Box`es (no bitmaps), current hour highlighted |
+| «At a glance» form | When | Content |
+|---|---|---|
+| DOT | narrower than 120 dp | The ring with the count inside (compact where the language shortens thousands) |
+| NARROW | one row | Ring, count, «of 10,000 steps» |
+| WIDE | one row with a sentence column (4 cells) | The same, and the day's sentence at the far edge; or mirrored, the ring on the right |
+| TALL | two rows and up | Ring in the top corner; count, sentence and goal from the bottom |
+| PANEL | two rows and up, three cells or wider | The row on top, today's steps by hour under it: 24 bars built from boxes, current hour highlighted |
+
+| «In words» form | When | Content |
+|---|---|---|
+| LINE | one row, one or two cells | «Steps today», the count, the share of the goal where it costs the number nothing |
+| ROW | one row, three cells and up | The count on the leading side; the sentence, the goal and the distance and calories at the far edge |
+| STACK | two rows and up | The eyebrow on top; the count large, the sentence and the facts at the bottom; «the day in figures» with height to spare |
+| PANEL | two rows and up, four cells | The count beside the words, on one baseline; the day in figures under both |
 
 ### Rendering
 
-- Colors come from `GlanceTheme`, using Material 3 dynamic color.
-- **Android 17:** apps targeting API 37 get a hard memory cap on the bitmaps and icons in a RemoteViews parcel. Exceeding it throws `IllegalArgumentException` and crashes the process. Keep bitmaps tiny or avoid them.
-  - Progress ring options, decided with a spike in Phase 4:
-    - (a) a small bitmap sized to the widget, well under the cap
-    - (b) pre-built vector drawables at 5% steps (21 levels)
-- Previews: generated previews on API 35+ (if supported by the Glance version), plus a static `previewLayout` or `previewImage` fallback.
-- Tapping the widget opens the Today screen. In the paused state, tapping opens the app, which restarts the service.
+- Colours are resolved at render time against the ground the card really has (Chiaro's ink rule, `widgetInk`), never left to the launcher's day/night resolution: white inks on one of Chiaro's six card colours, the dress's own inks on light or dark, and below 50% solidity the wallpaper's hint decides. Material 3 dynamic color when the reader turned wallpaper colours on in the app.
+- **The ring is a bitmap** painted at the size shown, capped at 416 px a side (at most 0.7 MB, about 50 KB in a row), one per card: far under the Android 17 RemoteViews bitmap cap. Vector levels were rejected (5% steps for the arc and the notch). The bars are boxes.
+- Previews: a static `previewLayout` of the default card, and generated previews on Android 15+ (`providePreview`), published once per app version.
+- Tapping a card opens the Today screen. A paused card opens the app asking it to resume (the service is started from the activity). A card without the permission or stopped by the system opens the app, which fixes or restarts it.
 
 ### Update strategy (battery-aware)
 
-- Push-based from `StepTrackingService` through a `WidgetUpdateCoordinator`. There is **no periodic polling**, and `updatePeriodMillis = 0`.
+- Push-based from `StepTrackingService` through `WidgetUpdates` (interface in `:core:data`, `WidgetUpdateCoordinator` in `:widget`), decided by `WidgetUpdatePolicy` (pure, `:core:domain`). There is **no periodic polling**.
   - Screen on or user present: flush the sensor, then update immediately.
-  - While the screen is on: update at most every 60 s, and only if the steps changed.
-  - Day rollover (detected by the screen-on ticker), goal reached, settings changed, tracking state changed: update immediately.
+  - While the screen is on: update at most every 60 s, and only if the steps changed (a trailing timer, cancelled at screen-off).
+  - Day rollover (detected by the screen-on ticker), goal reached: update immediately.
+  - Settings or profile changed, tracking started or stopped: update immediately, with the screen off too (one repaint, and a stopped service cannot repaint at the next screen-on).
   - Screen off: no updates.
-- The widget reads from the repository, so it always shows persisted truth.
+- The widget reads the repository plus the service's in-process buffer (`LiveSteps`), exactly as Today does, so it shows persisted truth and the steps not written yet.
 
 ---
 
@@ -372,6 +374,7 @@ Input: the minute buckets of one local day, plus the settings. Output: a list of
 | `FOREGROUND_SERVICE` | Normal | Foreground service |
 | `FOREGROUND_SERVICE_HEALTH` | Normal | Foreground service of type `health` |
 | `RECEIVE_BOOT_COMPLETED` | Normal | Restart tracking after boot |
+| `WAKE_LOCK`, `ACCESS_NETWORK_STATE` | Normal | Brought by WorkManager, which Glance runs its widget sessions on (Phase 4): the wake lock is held by the job while a card is drawn; the network state lets nothing leave the phone without `INTERNET`. Passo's own code uses neither |
 | `<uses-feature android:name="android.hardware.sensor.stepcounter" android:required="true"/>` | Feature | Documents the requirement; filters devices on a future Play listing. It does not block APK installs, so the app also checks the sensor at runtime |
 
 **Forbidden:** `INTERNET`, `ACCESS_*_LOCATION`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`, `HIGH_SAMPLING_RATE_SENSORS`, `BODY_SENSORS`.
@@ -478,18 +481,30 @@ Built in Chiaro's design language (owner's request): its colors, typefaces, shap
 
 ### Phase 4 — Widget
 
-- [ ] Glance widget, receiver and `appwidget-provider` XML (sizes from §7)
-- [ ] Five responsive layouts (1x1, 2x1, 2x2, 3x1/4x1, 4x2) with `GlanceTheme`
-- [ ] 4x2 hourly mini-bars (24 `Box`es, heights normalized to the day's busiest hour, current hour highlighted)
-- [ ] Spike on the progress ring rendering (bitmap vs vector levels), within the Android 17 RemoteViews bitmap limit
-- [ ] `WidgetUpdateCoordinator` wired to the service (§7 update strategy)
-- [ ] Paused and "permission needed" states; tap actions
-- [ ] Generated preview (API 35+) and a static fallback preview
+Two widgets, in Chiaro's dress (owner's request): «At a glance» and «In words», `docs/adr/0005-widgets.md`.
+
+- [x] Glance widget, receiver and `appwidget-provider` XML (sizes from §7)
+  - *Deviation:* two widgets, one size spec (default 4×1, minimum 1×1, no maximum: ADR 0005 has why a dp maximum cannot mean four cells).
+- [x] Five responsive layouts (1x1, 2x1, 2x2, 3x1/4x1, 4x2) with `GlanceTheme`
+  - Five forms for «At a glance» (DOT, NARROW, WIDE, TALL, PANEL), four for «In words» (LINE, ROW, STACK, PANEL), picked from the exact grant, with the budgets pinned by `GlanceLayoutTest` and `WordsLayoutTest`. *Deviation:* colours resolved per card with Chiaro's ink rule rather than `GlanceTheme`, whose day/night the launcher resolves (Chiaro's device reports).
+- [x] 4x2 hourly mini-bars (24 `Box`es, heights normalized to the day's busiest hour, current hour highlighted)
+  - Four groups of six, because Glance drops the eleventh child of a container; hours to come are a baseline.
+- [x] Spike on the progress ring rendering (bitmap vs vector levels), within the Android 17 RemoteViews bitmap limit
+  - Bitmap, painted at the size shown and capped at 416 px a side (§7, ADR 0005).
+- [x] `WidgetUpdateCoordinator` wired to the service (§7 update strategy)
+  - The rules are `WidgetUpdatePolicy` in `:core:domain`, unit-tested; the service reports through `WidgetUpdates`.
+- [x] Paused and "permission needed" states; tap actions
+  - Plus "stopped by the system" and "not set up yet" (`CountingState`); a paused card's tap resumes from the activity (`TrackingControl`, now also behind Settings' switch and Today's card).
+- [x] Generated preview (API 35+) and a static fallback preview
+- [x] Per-widget settings (not planned; owner's request): background, Chiaro's six colours, opacity, content switches, the ring's side, with the real card as a live preview.
 
 **Acceptance:**
-- All sizes are legible on at least 2 launchers (e.g. Pixel Launcher and One UI), in light and dark themes.
-- The widget updates within about 5 s of the screen turning on.
-- The logs show no widget updates while the screen is off.
+- [x] All sizes are legible on at least 2 launchers (e.g. Pixel Launcher and One UI), in light and dark themes.
+  - Confirmed by the owner on the device (25 Sep 2026). Every form at every reference size, in every dress, is also drawn by `WidgetGalleryTest` into `widget/build/screenshots`.
+- [x] The widget updates within about 5 s of the screen turning on.
+  - Confirmed by the owner on the device; by construction too (a repaint right after the screen-on flush).
+- [x] The logs show no widget updates while the screen is off.
+  - Confirmed by the owner on the device; pinned by `WidgetUpdatePolicyTest`.
 
 ### Phase 5 — History and insights
 
@@ -632,7 +647,7 @@ Include:
 | Play policy review of the `health` foreground service (only if Phase 9 happens) | Delay of a Play release | Continuous step tracking is the documented use case; prepare the declaration and video early |
 | Users dislike the persistent notification | Uninstalls | Low-importance, useful content (live steps); explain why in onboarding; the user can minimize the channel |
 | Abrupt power loss | Steps since the last batch are lost | Bounded by the latency window (10 min with the screen off), and only for steps the processor has not been awake for since; the wake-up variant was weighed and rejected (`docs/adr/0002-sensor-reporting.md`) |
-| Android 17 RemoteViews bitmap cap | Widget crash | Tiny or no bitmaps; test on API 37 |
+| Android 17 RemoteViews bitmap cap | Widget crash | One ring bitmap per card, capped at 416 px a side (0.7 MB); the bars are boxes; test on API 37 |
 
 ---
 
@@ -682,10 +697,18 @@ Include:
 - Onboarding stores nothing until the end, and the profile only if its page was not skipped. The battery page appears only for the makers in `OemTips` and opens the app's own settings page (where Android 14+ keeps "Unrestricted"), never the forbidden exemption request.
 - Icons are drawn in the app (`PassoIcons`), no icon library.
 - **README screenshots** (`docs/screenshots/`): drawn by the `ReadmeScreenshots` tests from realistic sample days, in English, only with `-PupdateScreenshots` (so an ordinary test run never rewrites a committed image). Owner's rule: regenerate them when a change alters what they show, and add one when a phase brings something worth showing.
+- **Phase 4: two widgets in Chiaro's dress** (`docs/adr/0005-widgets.md`, owner's request): «At a glance» (the ring, the count, the sentence, the day by hour) and «In words» (Chiaro's «In parole»), one size spec (default 4×1, minimum 1×1, no maximum), Chiaro's card, six colours, opacity and ink rule, per-widget settings with a live preview.
+- **Widget progress ring: a bitmap** (the §7 spike), painted at the size shown, capped at 416 px a side; the 21 vector levels would have put the arc and the usual-day notch on 5% steps.
+- **Widget repaints are pushed and decided by a pure policy** (`WidgetUpdatePolicy`): at screen-on, at most once a minute while it stays on, at once for a new day or a met goal, never with the screen off, except one repaint each for a change in tracking or a setting.
+- **The widget's count is Today's**: `TodayOverview` over the stored minutes and the service's buffer; the merge (`withPending`) and the usual day (`TrackingRepository.typicalDay`) moved to `:core:data` so both read one implementation.
+- **A count that is not moving says so on the card** (`CountingState`: paused, stopped by the system, no permission), in the sentence's place; a paused card's tap opens the app asking it to resume (`TrackingControl`, which Settings and Today now use too), because the activity may start the foreground service and a broadcast may not.
+- `LiveSteps.serviceRunning`: whether the service lives in this process, so a card drawn by a process the system restarted without it says "Not counting" instead of a number that has stopped.
+- **PassoColors.attention**: Chiaro's freshness ink, for "not live right now".
+- **Glance 1.2.0 on WorkManager 2.10.5** (device report, 25 Sep 2026: both cards stuck on Glance's loading spinner). Glance asks only for WorkManager 2.7.1 (2021), which is what resolved; it is now pinned to Chiaro's 2.10.5, proven under Glance widgets on the owner's phone, and with it both cards draw there (confirmed by the owner, same day). Glance stays on the latest stable, newer than Chiaro's 1.1.1 (owner's choice). WorkManager's `WAKE_LOCK` and `ACCESS_NETWORK_STATE` stay as it declares them, as in Chiaro (§10).
+- **A widget never waits forever**: the read behind a card is bounded (10 s) and cannot throw; a failure is logged under `PassoWidget` and drawn as "Today's steps can't be read right now", and the next repaint tries again.
 
 ### Open
 
 - Backup rules (Phase 7): `tracker_state` (boot count, last counter value) describes one device's sensor and must not be restored onto another, or the first sample there would be read against the wrong baseline. Decide the allowlist with that in mind.
 - Walk detection thresholds (60 spm per minute, 2-minute gaps, 10-minute default minimum): tune after the Phase 5 field test.
-- Should a 7-day mini chart be offered in the 4x2 widget as an alternative to today's hourly bars (widget configuration)?
-- Widget progress ring: bitmap or vector levels (Phase 4 spike)?
+- Should a 7-day mini chart be offered in the 4x2 widget as an alternative to today's hourly bars (widget configuration)? Now a natural option on «At a glance»'s settings screen, once Phase 5 has the week.

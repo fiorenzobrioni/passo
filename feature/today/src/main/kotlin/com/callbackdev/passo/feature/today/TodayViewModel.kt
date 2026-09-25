@@ -7,16 +7,17 @@ import com.callbackdev.passo.core.data.settings.SettingsRepository
 import com.callbackdev.passo.core.data.tracking.LiveSteps
 import com.callbackdev.passo.core.data.tracking.LiveToday
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
+import com.callbackdev.passo.core.data.tracking.withPending
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.today.DayMinute
 import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.today.TypicalDay
-import com.callbackdev.passo.core.domain.today.TypicalDayCalculator
 import com.callbackdev.passo.core.domain.today.minuteOfDay
 import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.UserSettings
 import com.callbackdev.passo.core.tracking.StepTracking
+import com.callbackdev.passo.core.tracking.TrackingControl
 import com.callbackdev.passo.core.tracking.TrackingReadiness
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -52,6 +53,7 @@ constructor(
     @ApplicationContext private val context: Context,
     private val tracking: TrackingRepository,
     private val settingsRepository: SettingsRepository,
+    private val control: TrackingControl,
     liveSteps: LiveSteps,
 ) : ViewModel() {
     private val readiness = MutableStateFlow(StepTracking.readiness(context))
@@ -102,9 +104,7 @@ constructor(
      */
     fun resumeTracking() {
         viewModelScope.launch {
-            tracking.forgetBaseline()
-            settingsRepository.updateSettings { it.copy(trackingEnabled = true) }
-            StepTracking.start(context)
+            control.resume()
             refreshReadiness()
         }
     }
@@ -118,7 +118,7 @@ constructor(
         val date = inputs.moment.date
         val epochDay = date.toEpochDay()
         val live = inputs.live?.takeIf { it.localEpochDay == epochDay }
-        val dayMinutes = merge(inputs.stored, live?.pending.orEmpty()).map {
+        val dayMinutes = inputs.stored.withPending(live?.pending.orEmpty()).map {
             DayMinute(minuteOfDay(it.epochMinute, it.localEpochDay, zone), it.steps)
         }
         val overview = TodayOverview.of(
@@ -146,27 +146,8 @@ constructor(
         )
     }
 
-    private suspend fun typicalFor(date: LocalDate): TypicalDay? {
-        val zone = ZoneId.systemDefault()
-        val candidates = TypicalDayCalculator.candidateDays(date.toEpochDay())
-        val byDay = tracking.minutesOn(candidates)
-        return TypicalDayCalculator.typical(
-            candidates.map { day ->
-                byDay[day].orEmpty().map { DayMinute(minuteOfDay(it.epochMinute, it.localEpochDay, zone), it.steps) }
-            },
-        )
-    }
-
-    /** The stored minutes plus the ones the service holds, added per minute. */
-    private fun merge(stored: List<MinuteSteps>, pending: List<MinuteSteps>): List<MinuteSteps> {
-        if (pending.isEmpty()) return stored
-        val byMinute = LinkedHashMap<Long, MinuteSteps>()
-        for (minute in stored + pending) {
-            val existing = byMinute[minute.epochMinute]
-            byMinute[minute.epochMinute] = existing?.copy(steps = existing.steps + minute.steps) ?: minute
-        }
-        return byMinute.values.toList()
-    }
+    private suspend fun typicalFor(date: LocalDate): TypicalDay? =
+        tracking.typicalDay(date.toEpochDay(), ZoneId.systemDefault())
 
     private data class Moment(val date: LocalDate, val minute: Double) {
         companion object {

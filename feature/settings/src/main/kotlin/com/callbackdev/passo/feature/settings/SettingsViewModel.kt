@@ -4,10 +4,9 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.callbackdev.passo.core.data.settings.SettingsRepository
-import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.UserSettings
-import com.callbackdev.passo.core.tracking.StepTracking
+import com.callbackdev.passo.core.tracking.TrackingControl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.SharingStarted
@@ -31,7 +30,7 @@ class SettingsViewModel
 constructor(
     @ApplicationContext private val context: Context,
     private val repository: SettingsRepository,
-    private val tracking: TrackingRepository,
+    private val control: TrackingControl,
 ) : ViewModel() {
     private val version: String = runCatching {
         context.packageManager.getPackageInfo(context.packageName, 0).versionName
@@ -59,11 +58,7 @@ constructor(
      * by the first sample after it.
      */
     fun setTracking(enabled: Boolean) {
-        viewModelScope.launch {
-            if (enabled) tracking.forgetBaseline()
-            repository.updateSettings { it.copy(trackingEnabled = enabled) }
-            if (enabled) StepTracking.start(context) else StepTracking.stop(context)
-        }
+        viewModelScope.launch { if (enabled) control.resume() else control.pause() }
     }
 
     private companion object {

@@ -38,4 +38,18 @@ All notable changes to Passo are documented here. The format follows
 - A short first run (welcome, profile, goal, permissions, and a battery tip on the phones that
   need one), and Settings: profile, goal, units, the usual-day line, theme, palette and
   typeface (Google Sans, Inter or the system's, as in Chiaro), language, pausing the count.
+- Two home-screen widgets (Phase 4), in the same dress as Chiaro's so the two apps' cards sit
+  side by side: «At a glance» (today's ring, with a notch where a usual day stands by now, the
+  count, the goal, the day's sentence, and on a wide tall card today's steps hour by hour) and
+  «In words» (the day in type alone: the count large, the sentence, the goal, distance and
+  calories, and on a tall card the day in figures). Both resize from one cell up and lay
+  themselves out for every size.
+- Each widget has its own settings, from a long press on the home screen: light, dark, the
+  phone's own or one of six colours, any opacity, what it shows, and which side the ring is on,
+  with the card itself as a live preview at every size.
+- A widget whose count is not moving says so: paused (a tap resumes it), stopped by the system
+  (a tap restarts it) or without the permission (a tap opens the app to allow it).
+- The widgets repaint when the screen comes on, at most once a minute while it stays on, and
+  never while it is off. If today's steps cannot be read, a widget says so instead of loading
+  forever.
 - Passo now looks like Chiaro: the same colors, typefaces, shapes and motion.

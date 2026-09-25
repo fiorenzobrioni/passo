@@ -8,7 +8,7 @@
 
 A private, battery-friendly Android pedometer that counts every step, even if you never open the app.
 It turns those steps into useful numbers: distance, calories, active time, goals and trends.
-A resizable home-screen widget keeps the numbers visible at a glance.
+Two resizable home-screen widgets keep the numbers visible at a glance.
 
 ## Why this app
 
@@ -96,13 +96,15 @@ Passo does one thing and does it well. It counts steps with the phone's own hard
 - **Not real-time:** there is no "walk finished" notification, because detecting the end of a walk live would mean waking the CPU with the screen off.
 - Settings: on/off toggle (to keep the UI minimal if the user prefers) and minimum walk duration (5, 10 or 15 minutes).
 
-### Widget (Jetpack Glance)
+### Widgets (Jetpack Glance)
 
-- Resizable from 1x1 to 4x2, with a layout that adapts to the actual size.
-- The 4x2 size includes a mini chart of today's steps by hour, built without images.
-- Material 3 dynamic colors, light and dark.
+- Two widgets, in the dress of Chiaro's pair so the family's cards sit side by side as one (decided in Phase 4, `docs/adr/0005-widgets.md`):
+  - **At a glance**: today's ring (with the usual-day notch), the count, the goal and the day's sentence; on a wide tall card, today's steps hour by hour in 24 bars, built without images.
+  - **In words**: the same day in type alone, Chiaro's «In parole»: the count large, the sentence, the goal, distance and calories, and on a tall card the day in figures.
+- The same sizes for both: from one cell to as large as the launcher allows, 4x1 by default, with a layout for every size.
+- Per widget: a light, dark or phone-following card, or one of Chiaro's six colours, any opacity, and which content it carries.
 - Updates quickly when the screen turns on, is throttled while the screen is on, and never updates while the screen is off.
-- A clear "tracking paused" state with tap-to-resume.
+- A clear "tracking paused" state with tap-to-resume, and the same for a missing permission or a stopped service.
 
 ### System surfaces
 

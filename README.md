@@ -5,7 +5,7 @@
 **Every step, counted. On your phone, and nowhere else.**
 
 A private, battery-friendly Android pedometer that counts every step, even if you never open the app.
-Free, no account, no ads, no tracking, and no network permission at all.
+Free, no account, no ads, no tracking, and no permission to use the internet at all.
 
 ![Platform](https://img.shields.io/badge/platform-Android-2E6B3E?labelColor=FCFAF6)
 ![CI](https://img.shields.io/github/actions/workflow/status/fiorenzobrioni/passo/android-ci.yml?branch=main&label=CI&labelColor=FCFAF6&color=2E6B3E)
@@ -18,10 +18,10 @@ Free, no account, no ads, no tracking, and no network permission at all.
 </div>
 
 > [!NOTE]
-> Passo is in early development: Phases 0 to 3 of [the plan](./PLANNING.md) are built (the
-> step tracking engine, the metrics, the Today screen, the first run and Settings). It has run
-> on a phone, but the multi-day field test of the tracking engine is still to do, and there is
-> no usable release yet.
+> Passo is in early development: Phases 0 to 4 of [the plan](./PLANNING.md) are built (the
+> step tracking engine, the metrics, the Today screen, the first run, Settings and the two
+> home-screen widgets). It has run on a phone, but the multi-day field test of the tracking
+> engine is still to do, and there is no usable release yet.
 
 ## Screenshots
 
@@ -46,6 +46,16 @@ Free, no account, no ads, no tracking, and no network permission at all.
     <td align="center"><b>A goal</b> that says what it means in kilometres and minutes.</td>
     <td align="center"><b>Settings,</b> with the same palettes and typefaces as Chiaro.</td>
   </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/widgets.png" width="250" alt="The two widgets on a home screen: At a glance with its ring, In words, a terracotta pair side by side, and the day hour by hour"></td>
+    <td align="center"><img src="docs/screenshots/widget-settings.png" width="250" alt="One widget's settings: the card as it will look, its sizes, the background colour, the opacity and the content"></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Two widgets,</b> At a glance and In words, in the same dress as Chiaro's.</td>
+    <td align="center"><b>Each widget its own look:</b> Chiaro's six colours, any opacity, what it shows.</td>
+    <td></td>
+  </tr>
 </table>
 
 Drawn from the app's own screens with realistic sample days (the phone's status bar is not in
@@ -60,8 +70,8 @@ low-power hardware step counter, keeps the data on the device, and turns those s
 useful numbers: distance, active calories, active and brisk minutes, goals, streaks, records,
 and the walks you took, recognized on their own.
 
-It keeps counting across reboots and full shutdowns without you ever opening it, and a
-resizable home-screen widget answers "how am I doing today?" at a glance.
+It keeps counting across reboots and full shutdowns without you ever opening it, and two
+resizable home-screen widgets answer "how am I doing today?" at a glance.
 
 ## What it does now
 
@@ -74,6 +84,13 @@ resizable home-screen widget answers "how am I doing today?" at a glance.
   and a battery tip on the phones whose battery manager stops background apps.
 - **Settings**: height, weight and step length, the goal, metric or imperial units, theme,
   palette and typeface, language, and a pause.
+- **Two home-screen widgets**, dressed like Chiaro's so the two apps sit side by side:
+  **At a glance** (today's ring, the count, the day's sentence and, on a wide tall card, the
+  day hour by hour) and **In words** (the same day in type alone: the count large, the
+  sentence, the goal, distance and calories, and on a tall card the day in figures). Both go
+  from one cell to as large as your launcher allows and lay themselves out for every size.
+  Each one can be light, dark, follow the phone or wear one of six colours, at any opacity. A
+  paused count says so, and a tap resumes it.
 
 ## What is coming (v1.0)
 
@@ -83,7 +100,6 @@ resizable home-screen widget answers "how am I doing today?" at a glance.
 - **History and insights**: the day hour by hour, week, month and year charts with the goal
   line, a calendar of goal days, streaks, personal records and lifetime distance.
 - **Goals**: an optional "goal reached" notification, an evening nudge, a weekly summary.
-- **Widget**: resizable from 1x1 to 4x2, with today's steps by hour at the largest size.
 - **Everywhere else**: an ongoing notification with today's steps, a Quick Settings tile,
   export to CSV and JSON, import from a backup.
 
@@ -105,8 +121,9 @@ walk.
 The step counter runs on a low-power chip that collects steps while the phone sleeps and hands
 them over in batches. Passo keeps a small foreground service alive (Android requires it to
 receive sensor data and to save the count before a shutdown), but it does not wake the phone
-on a timer, holds no wakelocks, and updates the widget and the notification only while the
-screen is on. The target is at most about 1% of a day's battery.
+on a timer, and it updates the widgets and the notification only while the screen is on: the
+widgets are told when something changed, at most once a minute, and never poll. The target is
+at most about 1% of a day's battery.
 
 ## Building
 

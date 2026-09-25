@@ -19,7 +19,9 @@ import androidx.core.content.ContextCompat
 import com.callbackdev.passo.core.data.tracking.LiveSteps
 import com.callbackdev.passo.core.data.tracking.LiveToday
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
+import com.callbackdev.passo.core.data.widget.WidgetUpdates
 import com.callbackdev.passo.core.domain.tracking.StepLedger
+import com.callbackdev.passo.core.domain.widget.WidgetEvent
 import com.callbackdev.passo.core.model.DiagnosticsEvent
 import com.callbackdev.passo.core.model.DiagnosticsType
 import dagger.hilt.android.AndroidEntryPoint
@@ -52,12 +54,19 @@ import javax.inject.Inject
  * [SCREEN_OFF_LATENCY_US] and nothing here runs on a timer. The ticker and the notification
  * updates live only while the screen is on. Everything runs on the main thread, so the ledger
  * needs no locking; the database work runs on Room's own executor.
+ *
+ * The home-screen widgets hear from here what moves them ([WidgetUpdates], PLANNING.md §7): the
+ * screen coming on (after the flush, so the batch of the screen-off is in), the count, a new
+ * day, and the service itself starting and stopping. Whether that repaints is the widgets'
+ * policy; this side only reports, and reports nothing on a timer.
  */
 @AndroidEntryPoint
 class StepTrackingService : Service() {
     @Inject lateinit var repository: TrackingRepository
 
     @Inject lateinit var liveSteps: LiveSteps
+
+    @Inject lateinit var widgets: WidgetUpdates
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val persistMutex = Mutex()
@@ -127,16 +136,22 @@ class StepTrackingService : Service() {
 
     override fun onDestroy() {
         liveSteps.publish(null)
+        liveSteps.setServiceRunning(false)
         unregisterReceivers()
         sensorSource.close()
         // Whatever is still buffered is written on a scope that outlives this one. If the
         // process dies first, the stored state is older than the counter and the next sample
         // recomputes the delta: nothing is lost, only the minutes may shift.
+        // A stopped service cannot repaint at the next screen-on, so the widgets hear it now,
+        // after the last write, and show the count it stopped at.
         val batch = ledger?.drain()
         if (batch != null) {
             FinalWrites.launch {
                 persistMutex.withLock { repository.persist(batch, System.currentTimeMillis()) }
+                widgets.notify(WidgetEvent.TRACKING_STATE)
             }
+        } else {
+            widgets.notify(WidgetEvent.TRACKING_STATE)
         }
         scope.cancel()
         super.onDestroy()
@@ -152,6 +167,8 @@ class StepTrackingService : Service() {
             registerReceivers()
             launch { sensorSource.readings.collect(::onReading) }
             persist()
+            liveSteps.setServiceRunning(true)
+            widgets.notify(WidgetEvent.TRACKING_STATE)
             onScreenChanged(powerManager.isInteractive)
         }
     }
@@ -163,6 +180,7 @@ class StepTrackingService : Service() {
                 if (ledger.record(reading.sample, snapshots.current())) scope.launch { persist() }
                 publishLive()
                 scheduleNotification()
+                displayedToday()?.let { widgets.notify(WidgetEvent.STEPS, it) }
             }
 
             SensorReading.FlushCompleted -> {
@@ -231,7 +249,9 @@ class StepTrackingService : Service() {
                 sensorSource.register(SCREEN_ON_LATENCY_US)
                 startTicker()
                 notifyNow()
+                widgets.notify(WidgetEvent.SCREEN_ON)
             } else {
+                widgets.notify(WidgetEvent.SCREEN_OFF)
                 tickerJob?.cancel()
                 notifyJob?.cancel()
                 flushSensor()
@@ -264,6 +284,8 @@ class StepTrackingService : Service() {
             ledger?.note(DiagnosticsEvent(System.currentTimeMillis(), DiagnosticsType.TIME_CHANGED, action))
             persist()
             if (interactive) notifyNow()
+            // The date may have moved with the clock; the policy repaints only with the screen on.
+            widgets.notify(WidgetEvent.DAY_CHANGED)
         }
     }
 
@@ -279,6 +301,7 @@ class StepTrackingService : Service() {
                         scope.launch {
                             flushSensor()
                             notifyNow()
+                            widgets.notify(WidgetEvent.SCREEN_ON)
                         }
                     }
             }
@@ -374,6 +397,7 @@ class StepTrackingService : Service() {
                     persistMutex.withLock { refreshStoredTodayLocked() }
                     publishLive()
                     notifyNow()
+                    widgets.notify(WidgetEvent.DAY_CHANGED)
                 }
             }
         }
