@@ -4,6 +4,7 @@ import com.callbackdev.passo.core.data.db.DiagnosticsEventEntity
 import com.callbackdev.passo.core.data.db.MinuteStepsEntity
 import com.callbackdev.passo.core.data.db.TrackerStateEntity
 import com.callbackdev.passo.core.data.db.TrackingDao
+import com.callbackdev.passo.core.data.db.toEntity
 import com.callbackdev.passo.core.data.db.toModel
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
 import com.callbackdev.passo.core.data.time.TodaySource
@@ -18,6 +19,7 @@ import com.callbackdev.passo.core.model.DiagnosticsEvent
 import com.callbackdev.passo.core.model.DiagnosticsType
 import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.Profile
+import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.TrackerState
 import com.callbackdev.passo.core.model.UserSettings
 import kotlinx.coroutines.flow.Flow
@@ -91,9 +93,10 @@ constructor(
 
     /**
      * Writes a batch from the ledger in one transaction (PLANNING.md §4.5), with the summaries
-     * of the days it touches recomputed for the current profile and goal.
+     * of the days it touches recomputed for the current profile and goal, and [session] (the
+     * outing under way, as the batch's steps leave it) in the same transaction.
      */
-    suspend fun persist(batch: LedgerBatch, nowWallMillis: Long) = summaryLock.withLock {
+    suspend fun persist(batch: LedgerBatch, nowWallMillis: Long, session: Session? = null) = summaryLock.withLock {
         val current = preferences.current()
         dao.writeBatch(
             increments = batch.increments.map { MinuteStepsEntity(it.epochMinute, it.localEpochDay, it.steps) },
@@ -113,6 +116,7 @@ constructor(
             goalSteps = current.settings.dailyGoalSteps,
             today = todaySource.epochDay(),
             diagnosticsKept = TrackingConstants.DIAGNOSTICS_LOG_SIZE,
+            session = session?.toEntity(),
         )
     }
 
