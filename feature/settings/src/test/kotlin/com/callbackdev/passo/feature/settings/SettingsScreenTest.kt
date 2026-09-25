@@ -104,6 +104,20 @@ class SettingsScreenTest {
     }
 
     @Test
+    fun `the guide is the first thing in the list`() {
+        var opened = false
+        compose.setContent {
+            PassoTheme {
+                SettingsScreen(state, onBack = {}, actions = SettingsActions(openGuide = { opened = true }))
+            }
+        }
+
+        compose.onNodeWithText("How Passo works").assertIsDisplayed()
+        compose.onNodeWithTag(SettingsTags.GUIDE).performClick()
+        assertThat(opened).isTrue()
+    }
+
+    @Test
     fun `the outings keep a door here when Today's button goes`() {
         var settings = state.settings
         var opened = false

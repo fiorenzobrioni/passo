@@ -116,6 +116,7 @@ fun SettingsRoute(
     onBack: () -> Unit,
     onCalibrate: (CalibratedStep) -> Unit,
     onOpenSessions: () -> Unit,
+    onOpenGuide: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
     dataViewModel: DataViewModel = hiltViewModel(),
 ) {
@@ -131,6 +132,7 @@ fun SettingsRoute(
             setTracking = viewModel::setTracking,
             calibrate = onCalibrate,
             openSessions = onOpenSessions,
+            openGuide = onOpenGuide,
         ),
         data = data,
         dataActions = DataActions(
@@ -154,6 +156,7 @@ class SettingsActions(
     val setTracking: (Boolean) -> Unit = {},
     val calibrate: (CalibratedStep) -> Unit = {},
     val openSessions: () -> Unit = {},
+    val openGuide: () -> Unit = {},
 )
 
 /**
@@ -231,6 +234,7 @@ private fun SettingsList(
     val files = rememberDataFiles(dataActions)
 
     LazyColumn(modifier = modifier.testTag(SettingsTags.LIST), contentPadding = PaddingValues(bottom = 32.dp)) {
+        item { GuideCard(actions.openGuide) }
         item { GroupHeader(stringResource(R.string.settings_group_profile)) }
         item {
             SettingsGroup {
@@ -939,6 +943,37 @@ private fun TileRow() {
     )
 }
 
+/**
+ * The way to the guide, first in the list as in Chiaro's Settings: the place a reader comes back
+ * to the day the question arrives, which a card shown once on Today could never be.
+ */
+@Composable
+private fun GuideCard(onOpenGuide: () -> Unit) {
+    Surface(
+        onClick = onOpenGuide,
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        shape = GroupShape,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = ScreenMargin, end = ScreenMargin, top = 8.dp)
+            .testTag(SettingsTags.GUIDE),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            modifier = Modifier.padding(16.dp),
+        ) {
+            Icon(PassoIcons.Info, contentDescription = null, modifier = Modifier.size(24.dp))
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.weight(1f)) {
+                Text(stringResource(R.string.settings_guide), style = MaterialTheme.typography.titleSmall)
+                Text(stringResource(R.string.settings_guide_note), style = MaterialTheme.typography.bodyMedium)
+            }
+            Icon(PassoIcons.ChevronRight, contentDescription = null)
+        }
+    }
+}
+
 @Composable
 private fun PrivacyCard() {
     Surface(
@@ -1275,6 +1310,7 @@ object SettingsTags {
     const val NOTIFICATION = "settings_notification"
     const val WALKS = "settings_walks"
     const val OUTINGS = "settings_outings"
+    const val GUIDE = "settings_guide"
     const val START_OUTING_BUTTON = "settings_start_outing_button"
     const val GOAL_REACHED = "settings_goal_reached"
     const val EVENING_REMINDER = "settings_evening_reminder"

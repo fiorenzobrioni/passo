@@ -133,6 +133,8 @@ Added to v1.0 at the owner's request (Phase 10, `docs/adr/0009-sessions.md`). An
 - App language, Italian or English, through Android's per-app language setting.
 - Walk detection on or off, and minimum walk duration.
 - Show or hide the "typical day" line on the Today sparkline.
+- Show or hide Today's "Start an outing" button; the Outings page stays one row away in Settings.
+- The guide, as in Chiaro: a tour of the three screens and the outings, what each one answers and what a screen cannot say out loud, illustrated with the app's own components. From the top of Settings, and from Today's first-day card.
 - A pause or resume tracking toggle.
 
 ### Data

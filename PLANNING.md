@@ -50,7 +50,8 @@ passo/
 │   ├── insights/           # records, streaks, totals
 │   ├── settings/           # Settings, your data (export, import), the step calibration
 │   ├── onboarding/
-│   └── sessions/           # the Outings page and the outing editor (Phase 10)
+│   ├── sessions/           # the Outings page and the outing editor (Phase 10)
+│   └── guide/              # the guide, in Chiaro's shape
 ├── widget/                 # Glance widget(s), receiver, update coordinator
 ├── docs/                   # ADRs, formulas, battery test notes
 ├── VISION.md
@@ -687,6 +688,7 @@ implementation, above all in UI and UX); decisions in `docs/adr/0011-export-impo
   - Brought forward to Phase 5 (owner's request), `docs/adr/0007-backup.md`. `full_backup_content` is not needed: it is read only below Android 12, and minSdk is 34. Backup and restore confirmed by the owner on the device (25 Sep 2026); the export round trip is still Phase 7's.
 - [x] Step length calibration wizard (walk a known distance, start/stop, compute and save)
   - "Measure your step" (Settings' profile, and a button in each step-length dialog): the walking or the running step, a distance picked (50 m to 2 km, or yards), Start, the count while the page is looked at, Stop, the length with what it came from and what it changes, Save. The hardware counter is read directly (`StepCounterProbe`) only while the page is on screen, and flushed at Stop; `StepCalibration` refuses fewer than 30 steps or a length the app would not accept, with its arithmetic, and says a pace that does not match the step. A walking step is stored as measured (`StepLengthMode.CALIBRATED`).
+- [x] The guide (owner's request, 25 Sep 2026; §15): `:feature:guide`, a tour of the three screens and the outings in Chiaro's shape, from the top of Settings and from Today's first-day card
 - [ ] Accessibility pass (TalkBack, font scale 200%, contrast, touch targets)
 - [ ] Adaptive layouts for tablets and foldables
 - [ ] Baseline Profiles; R8 full mode; startup check
@@ -930,6 +932,8 @@ Include:
 - **§3 reviewed at Phase 7**: the diagram and its paths now describe the app as built (outings, live state in the process, pushed widget updates, goal alarms, the tile, the two doors of control, data in and out, the calibration).
 
 - **Today's "Start an outing" is the reader's to take away** (owner's question, 25 Sep 2026): a switch in a new Settings group, Outings, on by default. A reader who never walks with a goal should not see the invitation every day; the one on the fence still meets it. The switch hides the button only: an outing under way (started from the launcher's long press or the evening reminder) still shows its card, because hiding it would be the screen lying. The button was the only door to the Outings page inside the app, so the group opens with one of its own, "Your outings", which stays whatever the switch says. The evening reminder's "Walk now" is left as it is: it belongs to the reminder, which has its own switch, and one setting reaching into another's notification would be harder to predict than either. The choice travels with the backup, like the typical-day line.
+
+- **The guide, in Chiaro's shape** (owner's request, 25 Sep 2026): `:feature:guide`, a tour of the three screens and the outings, what each one answers, and the things a screen cannot say out loud (steps arrive in batches and still land in their minute, a shutdown loses nothing, walks are found when you look, a day keeps its goal and its estimates, a streak waits for midnight, Passo wakes the phone only for an outing, what Android's backup is), closing on where the numbers come from. Chiaro's two rules hold it: it never teaches a control and never justifies an absence. It teaches with the app's own components (the ring with its notch, two metric tiles, History's bar chart with a goal that steps), each captioned as an example and drawn in the reader's units and first day of the week. Its own module, not a part of Settings: it reads nothing but the settings and belongs to no screen. The doors: a card at the top of Settings, as in Chiaro, where it stays for the day the question arrives, and an action on Today's first-day card, the one day the questions come on their own; no second one-time card on Today, which already has one. The widgets' chapter gets its own icon (`PassoIcons.Widgets`) rather than borrowing one that says something else.
 
 ### Open
 

@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -94,6 +95,7 @@ class TodayScreenTest {
         onResume: () -> Unit = {},
         onAllow: () -> Unit = {},
         onOpenSessions: () -> Unit = {},
+        onOpenGuide: () -> Unit = {},
         sessionActions: SessionCardActions = SessionCardActions(),
     ) {
         compose.setContent {
@@ -106,6 +108,7 @@ class TodayScreenTest {
                     onResume = onResume,
                     onCelebrated = {},
                     onOpenSessions = onOpenSessions,
+                    onOpenGuide = onOpenGuide,
                     sessionActions = { sessionActions },
                 )
             }
@@ -269,10 +272,14 @@ class TodayScreenTest {
     }
 
     @Test
-    fun `the first day explains why it starts from zero`() {
-        show(state(firstDay = true))
+    fun `the first day explains why it starts from zero, and offers the guide`() {
+        var guide = false
+        show(state(firstDay = true), onOpenGuide = { guide = true })
 
         compose.onNodeWithText("Counting starts today").assertExists()
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasText("How Passo works"))
+        compose.onNodeWithText("How Passo works").performClick()
+        assertThat(guide).isTrue()
     }
 
     @Test

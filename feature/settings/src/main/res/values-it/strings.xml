@@ -8,6 +8,9 @@
     <string name="settings_decrease">Meno</string>
     <string name="settings_increase">Più</string>
 
+    <string name="settings_guide">Come funziona Passo</string>
+    <string name="settings_guide_note">Le tre schermate, le uscite, da dove vengono i numeri</string>
+
     <string name="settings_group_profile">Profilo</string>
     <string name="settings_height">Altezza</string>
     <string name="settings_weight">Peso</string>

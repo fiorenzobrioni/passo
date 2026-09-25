@@ -8,6 +8,9 @@
     <string name="settings_decrease">Less</string>
     <string name="settings_increase">More</string>
 
+    <string name="settings_guide">How Passo works</string>
+    <string name="settings_guide_note">The three screens, the outings, where the numbers come from</string>
+
     <string name="settings_group_profile">Profile</string>
     <string name="settings_height">Height</string>
     <string name="settings_weight">Weight</string>

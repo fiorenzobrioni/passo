@@ -88,6 +88,12 @@ Free, no account, no ads, no tracking, and no permission to use the internet at 
     <td align="center"><b>Your data, in a file you keep:</b> every minute, day and outing, or a table for a spreadsheet.</td>
     <td align="center"><b>An import shows what it holds first,</b> then joins it with what the phone has. Nothing is deleted.</td>
   </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/guide.png" width="250" alt="The guide: what Passo does, the three screens with their icons, and how Passo counts"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>The guide:</b> what each screen answers, and what a screen cannot say out loud.</td>
+  </tr>
 </table>
 
 Drawn from the app's own screens with realistic sample days (the phone's status bar is not in
@@ -141,8 +147,12 @@ resizable home-screen widgets answer "how am I doing today?" at a glance.
   joined with what the phone already has: nothing is deleted, nothing is counted twice. You
   pick where the file goes, so Passo needs no storage permission.
 - **Settings**: height, weight and step length, the goal, the notifications, metric or
-  imperial units, the first day of the week, walks, theme, palette and typeface, language, and
-  a pause.
+  imperial units, the first day of the week, walks, outings, theme, palette and typeface,
+  language, and a pause.
+- **A guide**, as in Chiaro: the three screens and the outings, what each one answers, and
+  the things a screen cannot say out loud (why the count can jump when you look at it, why a
+  new goal leaves past days alone), shown with the app's own ring and charts. At the top of
+  Settings, and on the first day.
 - **Two home-screen widgets**, dressed like Chiaro's so the two apps sit side by side:
   **At a glance** (today's ring, the count, the day's sentence and, on a wide tall card, the
   day hour by hour) and **In words** (the same day in type alone: the count large, the

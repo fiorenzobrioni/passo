@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="guide_title">The guide</string>
+    <string name="guide_back">Back</string>
+    <string name="guide_intro">Passo counts your steps with the phone’s own step counter, even when the app is closed, and turns them into a day you can read: a sentence first, then the numbers. This guide walks through the three screens and the outings, says what each one answers, and points out the things worth knowing that a screen cannot say out loud.</string>
+
+    <!-- The map -->
+    <string name="guide_map_title">The three screens</string>
+    <string name="guide_map_today_name">Today</string>
+    <string name="guide_map_today">How the day is going, against your goal and your usual day.</string>
+    <string name="guide_map_history_name">History</string>
+    <string name="guide_map_history">Every day counted, by day, week, month and year.</string>
+    <string name="guide_map_insights_name">Insights</string>
+    <string name="guide_map_insights">Streaks, records and averages, as the days add up.</string>
+    <string name="guide_map_note">The settings are behind the gear at the top of each screen. Your outings start from Today, or from the settings.</string>
+
+    <!-- How Passo counts -->
+    <string name="guide_counting_title">How Passo counts</string>
+    <string name="guide_counting_p1">The phone has a step counter of its own, a small chip that counts with very little battery. Passo reads it in the background from the moment the phone starts, whether you open the app or not, and keeps what it reads on the phone.</string>
+    <string name="guide_counting_notification_title">The notification that stays</string>
+    <string name="guide_counting_notification_body">Android asks an app that keeps working in the background to say so. Passo’s notification shows today’s steps and never makes a sound; in the settings it can be made smaller, or turned off, and counting goes on.</string>
+    <string name="guide_counting_late_title">Steps that arrive in a batch</string>
+    <string name="guide_counting_late_body">With the screen off, the chip holds the steps and hands them over a few minutes at a time, so the phone can sleep. That is why the count can jump when you look at it. Each batch says when its steps were taken, so they land in the right minute and on the right day, midnight included.</string>
+    <string name="guide_counting_restart_title">Off for the night</string>
+    <string name="guide_counting_restart_body">Switching the phone off or restarting it loses nothing: Passo saves the count as the phone shuts down and picks it up again at the next start, on its own. Only a phone that goes dark all at once, with a flat battery, can lose its last few minutes.</string>
+    <string name="guide_counting_stops_title">When counting stops</string>
+    <string name="guide_counting_stops_body">Without the “Physical activity” permission Passo cannot read the step counter, and while counting is paused the steps you take are not counted. Either way Today says so at the top, with the way back.</string>
+
+    <!-- Today -->
+    <string name="guide_today_title">Today</string>
+    <string name="guide_today_p1">The ring is today’s steps against today’s goal. The small notch on it is where a usual day of the same weekday stands by this hour, so the ring alone says whether the day is ahead or behind.</string>
+    <string name="guide_sample_of_goal">of %1$s steps</string>
+    <string name="guide_today_ring_caption">An example: a day a little ahead of the notch of a usual day.</string>
+    <string name="guide_today_sentence_title">The sentence</string>
+    <string name="guide_today_sentence_body">One line under the ring says how the day is going: ahead of your usual pace or behind it, how many steps are left and how long a brisk walk that is, or when the goal was reached.</string>
+    <string name="guide_today_day_title">Your day</string>
+    <string name="guide_today_day_body">The chart adds up the steps from midnight: it climbs where you walked and stays flat where you sat. The dashed line is a usual day of the same weekday, the average of the last four weeks, drawn once two of them are recorded. A day with almost no steps, a phone left at home, is left out of it.</string>
+    <string name="guide_today_walks_title">Walks, found for you</string>
+    <string name="guide_today_walks_body">Stretches of steady walking or running, found in the steps already counted: no extra sensor and no extra battery. A pause of up to two minutes, at a light or a door, does not end one. They appear when you look, not while you walk: noticing the end of a walk as it happens would mean waking the phone.</string>
+    <string name="guide_today_estimates_title">Estimates, and what they rest on</string>
+    <string name="guide_today_estimates_body">Distance is your steps times your step. Calories are the energy of the movement alone, on top of what your body burns at rest. An active minute has 40 steps or more; a brisk one has 100 or more, the pace of moderate exercise. Your height, your weight and a step you measure bring every estimate closer to you.</string>
+    <string name="guide_sample_distance">Distance</string>
+    <string name="guide_sample_distance_meaning">Estimate, with a step of %1$s</string>
+    <string name="guide_sample_brisk">Brisk minutes</string>
+    <plurals name="guide_sample_brisk_left">
+        <item quantity="one">%1$d more for today’s share of the WHO’s 150 a week</item>
+        <item quantity="other">%1$d more for today’s share of the WHO’s 150 a week</item>
+    </plurals>
+    <string name="guide_today_estimates_caption">An example: two tiles, each with the line that says what the number rests on, or what is left to do.</string>
+
+    <!-- Outings -->
+    <string name="guide_outings_title">Outings</string>
+    <string name="guide_outings_p1">An outing is a walk or a run you start on purpose, with one goal: a number of steps, a distance, minutes in motion, or what is left of today’s goal. A pace to keep is up to you.</string>
+    <string name="guide_outings_signals_title">Signals you read in a pocket</string>
+    <string name="guide_outings_signals_body">On the way the phone vibrates at the shares you choose, in a count: one short pulse at a quarter, two at half, three at three quarters, and one long one at the goal. They follow the phone’s silent mode. If you want, a voice in your headphones says the same, with what is left and how your pace is going, in a voice installed on the phone.</string>
+    <string name="guide_outings_motion_title">Time in motion</string>
+    <string name="guide_outings_motion_body">An outing’s minutes are measured from your steps, not by a clock: a wait at a traffic light does not count against it.</string>
+    <string name="guide_outings_end_title">It ends by itself</string>
+    <string name="guide_outings_end_body">At its goal, where “Keep going” gives it a quarter of an hour more; after 15 minutes without a step; or after an hour paused. Then it takes the place of the walk it was, on Today and in History, with how much of its goal was done.</string>
+    <string name="guide_outings_battery_title">The one time Passo wakes the phone</string>
+    <string name="guide_outings_battery_body">For the signals to arrive on time, while an outing is counting the step counter reports about every half minute as you walk, and not at all while you stand still. Before it and after it, nothing changes.</string>
+    <string name="guide_outings_start_title">Where they start</string>
+    <string name="guide_outings_start_body">From Today or the settings, from a long press on Passo’s icon, which offers the ones you started last, and from the evening reminder’s “Walk now”.</string>
+
+    <!-- History -->
+    <string name="guide_history_title">History</string>
+    <string name="guide_history_p1">Every day Passo has counted, as a day hour by hour, a week, a month or a year, each opened by one sentence before any number; a week, a month or a year also says how it went against the one before.</string>
+    <string name="guide_sample_touch">Touch a bar to read it</string>
+    <!-- One bar of the example: «Thu: 10,240 steps, goal met». -->
+    <string name="guide_sample_bar">%1$s: %2$s steps, %3$s</string>
+    <string name="guide_sample_goal_met">goal met</string>
+    <string name="guide_sample_goal_short">under the goal</string>
+    <string name="guide_history_week_description">An example week of steps by day, with the goal raised midweek.</string>
+    <string name="guide_history_week_caption">An example: a week. The line is each day’s goal, and it steps up where the goal was raised; the days at their goal wear its color.</string>
+    <string name="guide_history_goal_title">Every day keeps its goal</string>
+    <string name="guide_history_goal_body">A new goal counts from today. The days already over keep the goal they had, so a streak or a record never changes behind your back.</string>
+    <string name="guide_history_frozen_title">And its estimates</string>
+    <string name="guide_history_frozen_body">A new height, weight or step changes distance and calories from today on. Past days keep the estimates they were recorded with, unless you ask the settings to work them out again.</string>
+    <string name="guide_history_uncounted_title">Not counted is not zero</string>
+    <string name="guide_history_uncounted_body">The days before Passo was set up have no bar and no color: “not counted” is not the same as a day without steps.</string>
+
+    <!-- Insights -->
+    <string name="guide_insights_title">Insights</string>
+    <string name="guide_insights_p1">What the days add up to: the streak of days at your goal, your best day, week and month, and your average day over the last week, the last month and since the first.</string>
+    <string name="guide_insights_streak_title">The streak waits for midnight</string>
+    <string name="guide_insights_streak_body">A day still under way never breaks a streak: until midnight it can still reach its goal. The moment it does, it joins the streak.</string>
+
+    <!-- Widgets and the tile -->
+    <string name="guide_widgets_title">On the home screen</string>
+    <string name="guide_widgets_two_title">Two widgets</string>
+    <string name="guide_widgets_two_body">“At a glance” carries the ring and the day’s sentence; “In words” says the same day in type alone. Both fit any size, from a single cell up, and each has its own card, color and opacity.</string>
+    <string name="guide_widgets_wait_title">They wait until you look</string>
+    <string name="guide_widgets_wait_body">The widgets and the notification are brought up to date when the screen turns on, and never while it is off; the Quick Settings tile, while its panel is open. A count nobody can see is not worth the battery.</string>
+
+    <!-- Your data -->
+    <string name="guide_data_title">Your data</string>
+    <string name="guide_data_p1">Passo has no internet permission at all: it sends nothing, to anyone. Your steps, your days and your outings stay in the app, on this phone.</string>
+    <string name="guide_data_p2">If the phone’s backup is on, Android includes Passo’s days and settings in it, as it does for other apps: that copy is Android’s, not Passo’s. For a copy of your own, the settings write every day and outing to a file you keep, or a table for a spreadsheet, and read a file back without deleting anything.</string>
+    <string name="guide_data_p3" formatted="false">Where the numbers come from: the step is 41.5% of your height (41.3% for women), the rule pedometers have long used; calories follow the American College of Sports Medicine’s equations for walking and running; brisk walking starts at 100 steps a minute (the CADENCE-adults study, 2019); and the 150 minutes a week are the World Health Organization’s (2020).</string>
+</resources>
