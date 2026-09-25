@@ -68,6 +68,13 @@ class MeasureFormatterTest {
     }
 
     @Test
+    fun `a short distance is whole metres, or whole yards`() {
+        assertThat(english.shortDistance(400.0)).isEqualTo(Measure("400", MeasureUnit.METER))
+        assertThat(italian.shortDistance(1_500.0)).isEqualTo(Measure("1.500", MeasureUnit.METER))
+        assertThat(imperial.shortDistance(91.44)).isEqualTo(Measure("100", MeasureUnit.YARD))
+    }
+
+    @Test
     fun `minutes and cadence are whole numbers`() {
         assertThat(english.minutes(1_440)).isEqualTo(Measure("1,440", MeasureUnit.MINUTE))
         assertThat(italian.cadence(112)).isEqualTo(Measure("112", MeasureUnit.STEPS_PER_MINUTE))

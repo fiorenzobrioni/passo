@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Export and import (PLANNING.md §11 Phase 7, ADR 0011). -->
+<resources>
+    <string name="settings_group_data">Your data</string>
+    <string name="data_backup">Back up to a file</string>
+    <string name="data_backup_note">%1$s and %2$s, to the minute, with your profile and settings. Import it here or on another phone.</string>
+    <string name="data_backup_note_empty">Your profile and settings: no steps recorded yet.</string>
+    <plurals name="data_days">
+        <item quantity="one">%1$s day</item>
+        <item quantity="other">%1$s days</item>
+    </plurals>
+    <plurals name="data_outings">
+        <item quantity="one">%1$s outing</item>
+        <item quantity="other">%1$s outings</item>
+    </plurals>
+    <string name="data_import">Import a backup</string>
+    <string name="data_import_note">From a file Passo wrote. Nothing on this phone is deleted.</string>
+    <string name="data_table">Export for a spreadsheet</string>
+    <string name="data_table_note">CSV: one row per day, per minute or per outing.</string>
+    <string name="data_busy_writing">Writing the file…</string>
+    <string name="data_busy_reading">Reading the file…</string>
+    <string name="data_busy_importing">Importing…</string>
+
+    <string name="data_table_title">Export for a spreadsheet</string>
+    <string name="data_table_explanation">One file, one table, distances in %1$s. The column names stay in English, so a formula works in any language.</string>
+    <string name="data_units_km">kilometres</string>
+    <string name="data_units_mi">miles</string>
+    <string name="data_table_days">Days</string>
+    <string name="data_table_days_note">One row per day: steps, the goal, the estimates.</string>
+    <string name="data_table_minutes">Minutes</string>
+    <string name="data_table_minutes_note">One row per minute with steps: the finest the history goes.</string>
+    <string name="data_table_outings">Outings</string>
+    <string name="data_table_outings_note">One row per outing: its goal, how it went, its estimates.</string>
+    <string name="data_table_export">Export</string>
+
+    <string name="data_ok">OK</string>
+    <string name="data_saved_title">Backup saved</string>
+    <string name="data_saved_body">%1$s and %2$s in %3$s.</string>
+    <string name="data_saved_body_unnamed">%1$s and %2$s saved.</string>
+    <string name="data_table_saved_title">Table saved</string>
+    <plurals name="data_table_saved_body">
+        <item quantity="one">%1$s row in %2$s.</item>
+        <item quantity="other">%1$s rows in %2$s.</item>
+    </plurals>
+    <plurals name="data_table_saved_body_unnamed">
+        <item quantity="one">%1$s row saved.</item>
+        <item quantity="other">%1$s rows saved.</item>
+    </plurals>
+    <string name="data_imported_title">Backup imported</string>
+    <plurals name="data_imported_added">
+        <item quantity="one">%1$s day added</item>
+        <item quantity="other">%1$s days added</item>
+    </plurals>
+    <plurals name="data_imported_merged">
+        <item quantity="one">%1$s day joined with this phone’s</item>
+        <item quantity="other">%1$s days joined with this phone’s</item>
+    </plurals>
+    <plurals name="data_imported_same">
+        <item quantity="one">%1$s day already here</item>
+        <item quantity="other">%1$s days already here</item>
+    </plurals>
+    <plurals name="data_imported_outings">
+        <item quantity="one">%1$s outing added</item>
+        <item quantity="other">%1$s outings added</item>
+    </plurals>
+    <string name="data_imported_preferences">profile and settings taken from the file</string>
+    <string name="data_imported_nothing">Everything in it was already here.</string>
+
+    <string name="data_failed_write_title">The file could not be written</string>
+    <string name="data_failed_write_body">The place you picked refused it, or has no room left. Try another one.</string>
+    <string name="data_failed_read_title">The file could not be read</string>
+    <string name="data_failed_read_body">Passo could not open it. If it is in a cloud folder, make sure it is downloaded, then try again.</string>
+    <string name="data_failed_not_passo_title">This is not a Passo backup</string>
+    <string name="data_failed_not_passo_body">Passo imports only the files it writes with Back up to a file. A spreadsheet table cannot be imported.</string>
+    <string name="data_failed_too_new_title">This backup is from a newer Passo</string>
+    <string name="data_failed_too_new_body">Update Passo on this phone to import it. Nothing was imported.</string>
+    <string name="data_failed_damaged_title">This backup is damaged</string>
+    <string name="data_failed_damaged_body">It was cut short or changed, and cannot be read to its end. Nothing was imported.</string>
+
+    <string name="data_preview_title">Import this backup?</string>
+    <string name="data_preview_written">Written on %1$s at %2$s, by Passo %3$s.</string>
+    <string name="data_preview_written_unversioned">Written on %1$s at %2$s.</string>
+    <plurals name="data_preview_days">
+        <item quantity="one">%1$s day of steps</item>
+        <item quantity="other">%1$s days of steps</item>
+    </plurals>
+    <string name="data_preview_range">From %1$s to %2$s</string>
+    <string name="data_preview_no_days">No steps recorded</string>
+    <string name="data_preview_no_outings">No outings</string>
+    <string name="data_preview_merge">Days this phone already has are joined minute by minute, keeping the larger count: nothing here is deleted, and nothing is counted twice.</string>
+    <string name="data_preview_preferences">Also take its profile and settings</string>
+    <string name="data_preview_preferences_note">Height, weight, step, goal, units, appearance and notifications. Days already over keep their estimates.</string>
+    <string name="data_preview_import">Import</string>
+</resources>

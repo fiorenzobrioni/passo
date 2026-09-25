@@ -8,6 +8,7 @@ import kotlin.math.roundToInt
  */
 object UnitConversions {
     const val METERS_PER_MILE: Double = 1_609.344
+    const val METERS_PER_YARD: Double = 0.9144
     const val METERS_PER_FOOT: Double = 0.3048
     const val METERS_PER_INCH: Double = 0.0254
     const val KG_PER_POUND: Double = 0.453_592_37
@@ -16,6 +17,10 @@ object UnitConversions {
     fun metersToMiles(meters: Double): Double = meters / METERS_PER_MILE
 
     fun milesToMeters(miles: Double): Double = miles * METERS_PER_MILE
+
+    fun metersToYards(meters: Double): Double = meters / METERS_PER_YARD
+
+    fun yardsToMeters(yards: Double): Double = yards * METERS_PER_YARD
 
     fun metersToInches(meters: Double): Double = meters / METERS_PER_INCH
 

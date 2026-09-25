@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Esportazione e importazione (PLANNING.md §11 Fase 7, ADR 0011). -->
+<resources>
+    <string name="settings_group_data">I tuoi dati</string>
+    <string name="data_backup">Salva una copia in un file</string>
+    <string name="data_backup_note">%1$s e %2$s, minuto per minuto, con profilo e impostazioni. Puoi importarla qui o su un altro telefono.</string>
+    <string name="data_backup_note_empty">Profilo e impostazioni: nessun passo registrato finora.</string>
+    <plurals name="data_days">
+        <item quantity="one">%1$s giorno</item>
+        <item quantity="many">%1$s giorni</item>
+        <item quantity="other">%1$s giorni</item>
+    </plurals>
+    <plurals name="data_outings">
+        <item quantity="one">%1$s uscita</item>
+        <item quantity="many">%1$s uscite</item>
+        <item quantity="other">%1$s uscite</item>
+    </plurals>
+    <string name="data_import">Importa una copia</string>
+    <string name="data_import_note">Da un file scritto da Passo. Niente di ciò che c’è sul telefono viene cancellato.</string>
+    <string name="data_table">Esporta per un foglio di calcolo</string>
+    <string name="data_table_note">CSV: una riga per giorno, per minuto o per uscita.</string>
+    <string name="data_busy_writing">Scrittura del file…</string>
+    <string name="data_busy_reading">Lettura del file…</string>
+    <string name="data_busy_importing">Importazione…</string>
+
+    <string name="data_table_title">Esporta per un foglio di calcolo</string>
+    <string name="data_table_explanation">Un file, una tabella, distanze in %1$s. I nomi delle colonne restano in inglese, così una formula funziona in ogni lingua.</string>
+    <string name="data_units_km">chilometri</string>
+    <string name="data_units_mi">miglia</string>
+    <string name="data_table_days">Giorni</string>
+    <string name="data_table_days_note">Una riga per giorno: passi, obiettivo, stime.</string>
+    <string name="data_table_minutes">Minuti</string>
+    <string name="data_table_minutes_note">Una riga per ogni minuto con passi: il dettaglio più fine dello storico.</string>
+    <string name="data_table_outings">Uscite</string>
+    <string name="data_table_outings_note">Una riga per uscita: obiettivo, com’è andata, stime.</string>
+    <string name="data_table_export">Esporta</string>
+
+    <string name="data_ok">OK</string>
+    <string name="data_saved_title">Copia salvata</string>
+    <string name="data_saved_body">%1$s e %2$s in %3$s.</string>
+    <string name="data_saved_body_unnamed">%1$s e %2$s salvati.</string>
+    <string name="data_table_saved_title">Tabella salvata</string>
+    <plurals name="data_table_saved_body">
+        <item quantity="one">%1$s riga in %2$s.</item>
+        <item quantity="many">%1$s righe in %2$s.</item>
+        <item quantity="other">%1$s righe in %2$s.</item>
+    </plurals>
+    <plurals name="data_table_saved_body_unnamed">
+        <item quantity="one">%1$s riga salvata.</item>
+        <item quantity="many">%1$s righe salvate.</item>
+        <item quantity="other">%1$s righe salvate.</item>
+    </plurals>
+    <string name="data_imported_title">Copia importata</string>
+    <plurals name="data_imported_added">
+        <item quantity="one">%1$s giorno aggiunto</item>
+        <item quantity="many">%1$s giorni aggiunti</item>
+        <item quantity="other">%1$s giorni aggiunti</item>
+    </plurals>
+    <plurals name="data_imported_merged">
+        <item quantity="one">%1$s giorno unito a quelli del telefono</item>
+        <item quantity="many">%1$s giorni uniti a quelli del telefono</item>
+        <item quantity="other">%1$s giorni uniti a quelli del telefono</item>
+    </plurals>
+    <plurals name="data_imported_same">
+        <item quantity="one">%1$s giorno era già qui</item>
+        <item quantity="many">%1$s giorni erano già qui</item>
+        <item quantity="other">%1$s giorni erano già qui</item>
+    </plurals>
+    <plurals name="data_imported_outings">
+        <item quantity="one">%1$s uscita aggiunta</item>
+        <item quantity="many">%1$s uscite aggiunte</item>
+        <item quantity="other">%1$s uscite aggiunte</item>
+    </plurals>
+    <string name="data_imported_preferences">profilo e impostazioni presi dal file</string>
+    <string name="data_imported_nothing">Tutto quello che conteneva era già qui.</string>
+
+    <string name="data_failed_write_title">Non è stato possibile scrivere il file</string>
+    <string name="data_failed_write_body">Il posto scelto l’ha rifiutato, o non ha più spazio. Provane un altro.</string>
+    <string name="data_failed_read_title">Non è stato possibile leggere il file</string>
+    <string name="data_failed_read_body">Passo non è riuscito ad aprirlo. Se è in una cartella nel cloud, assicurati che sia scaricato e riprova.</string>
+    <string name="data_failed_not_passo_title">Questa non è una copia di Passo</string>
+    <string name="data_failed_not_passo_body">Passo importa solo i file che scrive con Salva una copia in un file. Una tabella per foglio di calcolo non si può importare.</string>
+    <string name="data_failed_too_new_title">Questa copia viene da un Passo più recente</string>
+    <string name="data_failed_too_new_body">Aggiorna Passo su questo telefono per importarla. Non è stato importato niente.</string>
+    <string name="data_failed_damaged_title">Questa copia è danneggiata</string>
+    <string name="data_failed_damaged_body">È stata troncata o modificata, e non si riesce a leggerla fino in fondo. Non è stato importato niente.</string>
+
+    <string name="data_preview_title">Importare questa copia?</string>
+    <string name="data_preview_written">Scritta il %1$s alle %2$s, da Passo %3$s.</string>
+    <string name="data_preview_written_unversioned">Scritta il %1$s alle %2$s.</string>
+    <plurals name="data_preview_days">
+        <item quantity="one">%1$s giorno di passi</item>
+        <item quantity="many">%1$s giorni di passi</item>
+        <item quantity="other">%1$s giorni di passi</item>
+    </plurals>
+    <string name="data_preview_range">Dal %1$s al %2$s</string>
+    <string name="data_preview_no_days">Nessun passo registrato</string>
+    <string name="data_preview_no_outings">Nessuna uscita</string>
+    <string name="data_preview_merge">I giorni che il telefono ha già vengono uniti minuto per minuto, tenendo il conteggio più alto: qui non si cancella niente, e niente viene contato due volte.</string>
+    <string name="data_preview_preferences">Prendi anche profilo e impostazioni</string>
+    <string name="data_preview_preferences_note">Altezza, peso, passo, obiettivo, unità, aspetto e notifiche. I giorni già conclusi tengono le loro stime.</string>
+    <string name="data_preview_import">Importa</string>
+</resources>

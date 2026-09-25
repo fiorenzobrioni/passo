@@ -8,6 +8,9 @@ import com.callbackdev.passo.core.data.db.toEntity
 import com.callbackdev.passo.core.data.db.toModel
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
 import com.callbackdev.passo.core.data.time.TodaySource
+import com.callbackdev.passo.core.domain.backup.Backup
+import com.callbackdev.passo.core.domain.backup.BackupMerge
+import com.callbackdev.passo.core.domain.backup.DayMergePlan
 import com.callbackdev.passo.core.domain.today.DayMinute
 import com.callbackdev.passo.core.domain.today.TypicalDay
 import com.callbackdev.passo.core.domain.today.TypicalDayCalculator
@@ -158,6 +161,46 @@ constructor(
      */
     suspend fun forgetBaseline() = summaryLock.withLock { dao.deleteTrackerState() }
 
+    /**
+     * Brings a backup's days in (ADR 0011), merged with this phone's by `BackupMerge`: every
+     * minute at the larger of its two counts, the file's own days as the file froze them, this
+     * phone's frozen days taking only the added steps' share, today with today's profile and
+     * goal. Under the lock, so no batch of the service lands between the read and the write;
+     * one transaction, so an import is all there or not at all.
+     */
+    suspend fun importDays(backup: Backup): DayMergePlan = summaryLock.withLock {
+        val today = todaySource.epochDay()
+        val current = preferences.current()
+        val incoming = backup.days.flatMap { it.minutes }
+        val days = buildSet {
+            backup.days.mapTo(this) { it.summary.localEpochDay }
+            if (incoming.isNotEmpty()) {
+                addAll(dao.daysWithMinutesBetween(incoming.minOf { it.epochMinute }, incoming.maxOf { it.epochMinute }))
+            }
+        }.toList()
+        // In slices: SQLite bounds the number of values one statement may carry.
+        val local = days.chunked(QUERY_CHUNK).flatMap { dao.minutesOnDays(it) }
+            .map { MinuteSteps(it.epochMinute, it.localEpochDay, it.steps) }
+            .groupBy { it.localEpochDay }
+        val summaries = dao.allSummaries().associate { it.localEpochDay to it.toModel() }
+        val plan = BackupMerge.days(
+            backup = backup,
+            local = local,
+            localSummaries = summaries,
+            today = today,
+            profile = current.profile,
+            goalSteps = current.settings.dailyGoalSteps,
+        )
+        dao.importDays(
+            minutes = plan.minutes.map { MinuteStepsEntity(it.epochMinute, it.localEpochDay, it.steps) },
+            summaries = plan.summaries.map { it.toEntity() },
+        )
+        plan
+    }
+
+    /** How many days are recorded, as it changes. */
+    fun observeDayCount(): Flow<Int> = dao.observeDayCount()
+
     /** "Apply profile to past data": every recorded day recomputed with the current profile. */
     suspend fun applyProfileToPastDays() = summaryLock.withLock {
         dao.recomputeAll(todaySource.epochDay(), preferences.current().profile)
@@ -214,5 +257,9 @@ constructor(
         DiagnosticsType.entries.firstOrNull {
             it.name == row.type
         }?.let { DiagnosticsEvent(row.wallMillis, it, row.detail) }
+    }
+
+    private companion object {
+        const val QUERY_CHUNK = 500
     }
 }

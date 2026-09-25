@@ -25,6 +25,20 @@ class ProfileInputsTest {
     }
 
     @Test
+    fun `a calibration distance moves by ten metres, or ten yards stored as metres`() {
+        val metric = ProfileInputs.calibrationDistance(UnitSystem.METRIC)
+        assertThat(metric.snap(104.0)).isWithin(1e-9).of(100.0)
+        assertThat(metric.up(100.0)).isWithin(1e-9).of(110.0)
+        assertThat(metric.snap(10.0)).isWithin(1e-9).of(50.0)
+
+        val imperial = ProfileInputs.calibrationDistance(UnitSystem.IMPERIAL)
+        val hundredYards = ProfileInputs.defaultCalibrationDistance(UnitSystem.IMPERIAL)
+        assertThat(hundredYards).isWithin(1e-9).of(91.44)
+        assertThat(imperial.snap(hundredYards)).isWithin(1e-9).of(91.44)
+        assertThat(UnitConversions.metersToYards(imperial.up(hundredYards))).isWithin(1e-9).of(110.0)
+    }
+
+    @Test
     fun `pounds are stored as kilograms`() {
         val scale = ProfileInputs.weight(UnitSystem.IMPERIAL)
 

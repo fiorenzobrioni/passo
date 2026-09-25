@@ -47,6 +47,15 @@ class MeasureFormatter(private val locale: Locale, val units: UnitSystem) {
         return Measure(decimal(value, decimals, decimals, RoundingMode.FLOOR), unit)
     }
 
+    /**
+     * A short stretch, whole metres or yards: the known distance walked to calibrate the step.
+     * Rounded to the nearest, since it is a distance the reader chose, not one being covered.
+     */
+    fun shortDistance(meters: Double): Measure = when (units) {
+        UnitSystem.METRIC -> Measure(decimal(meters, 0, 0), MeasureUnit.METER)
+        UnitSystem.IMPERIAL -> Measure(decimal(UnitConversions.metersToYards(meters), 0, 0), MeasureUnit.YARD)
+    }
+
     /** Kilocalories, whole: the estimate is not better than that. */
     fun energy(kcal: Double): Measure = Measure(decimal(kcal, 0, 0), MeasureUnit.KILOCALORIE)
 

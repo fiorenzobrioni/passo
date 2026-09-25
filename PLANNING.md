@@ -577,17 +577,24 @@ Built with the owner's request of Phases 3 and 5 (a clean implementation, above 
 
 ### Phase 7 — Data, calibration and polish
 
-- [ ] Export to CSV and JSON, import from JSON (Storage Access Framework)
+Export, import and calibration built with the owner's request of Phases 3, 5 and 6 (a clean
+implementation, above all in UI and UX); decisions in `docs/adr/0011-export-import-and-calibration.md`.
+
+- [x] Export to CSV and JSON, import from JSON (Storage Access Framework)
+  - A "Your data" group in Settings: a backup to one JSON file (every minute with its day, the frozen summaries, the outings and their plans, the profile and the settings; the diagnostics log out, never back in; no tracker state), three CSV tables for a spreadsheet (days, minutes, outings), and the import. `BackupCodec`, `BackupMerge` and `CsvExport` in `:core:domain`, `BackupRepository` in `:core:data`, the file picker's `CreateDocument`/`OpenDocument` in the screen: no storage permission.
+  - *Decided:* the import **merges** and never deletes (every minute at the larger of its two counts, the file's own days as it froze them, this phone's frozen days taking only the added steps' share, plans and outings matched), so a new phone that already counted keeps its steps and the same file imported twice changes nothing. It is previewed before anything is written, with its profile and settings as one choice. Outcomes are cards, not toasts.
 - [x] `data_extraction_rules.xml` and `full_backup_content` for Auto Backup and device transfer
   - Brought forward to Phase 5 (owner's request), `docs/adr/0007-backup.md`. `full_backup_content` is not needed: it is read only below Android 12, and minSdk is 34. Backup and restore confirmed by the owner on the device (25 Sep 2026); the export round trip is still Phase 7's.
-- [ ] Step length calibration wizard (walk a known distance, start/stop, compute and save)
+- [x] Step length calibration wizard (walk a known distance, start/stop, compute and save)
+  - "Measure your step" (Settings' profile, and a button in each step-length dialog): the walking or the running step, a distance picked (50 m to 2 km, or yards), Start, the count while the page is looked at, Stop, the length with what it came from and what it changes, Save. The hardware counter is read directly (`StepCounterProbe`) only while the page is on screen, and flushed at Stop; `StepCalibration` refuses fewer than 30 steps or a length the app would not accept, with its arithmetic, and says a pace that does not match the step. A walking step is stored as measured (`StepLengthMode.CALIBRATED`).
 - [ ] Accessibility pass (TalkBack, font scale 200%, contrast, touch targets)
 - [ ] Adaptive layouts for tablets and foldables
 - [ ] Baseline Profiles; R8 full mode; startup check
 
 **Acceptance:**
-- Export followed by import on a clean install reproduces the history exactly.
-- The accessibility scanner reports no critical issues.
+- [x] Export followed by import on a clean install reproduces the history exactly.
+  - `BackupRepositoryTest`, between two real Room databases and settings files: every summary, minute, outing, plan, the profile and the settings (not the other phone's first-run state or tracker state), through the encoded file. To confirm on devices, through a file app and a cloud folder (owner).
+- [ ] The accessibility scanner reports no critical issues.
 
 ### Phase 8 — Release on GitHub
 
@@ -664,7 +671,7 @@ Added to v1.0 at the owner's request (25 Sep 2026), after Phase 6 and before Pha
 
 - **Unit (JVM):** `StepAccountant`, calculators, streaks and records, formatting. Use a fake clock and system snapshot. This is where most of the test effort goes.
 - **Robolectric:** Room DAOs and transactions, receivers, the notification builder.
-- **Compose UI tests:** onboarding, Today, Settings, History, Insights, the Outings page and its editor.
+- **Compose UI tests:** onboarding, Today, Settings (with its data rows), the step calibration, History, Insights, the Outings page and its editor.
 - **Glance:** unit tests for the layout chosen at each size.
 - **Manual device protocol** (`docs/testing/device-protocol.md`):
   - reboot
@@ -813,6 +820,12 @@ Include:
 
 - **Outings: the voice's tone and variety** (owner's question, ADR 0010): classic, with one earned "Well done" at the goal and an invitation, not a verdict, below the pace; variety from what happened (the pace kept, the day's goal brought), never a phrase at random. No male/female picker: the engine does not tell voices apart, so Passo uses the voice chosen in the system's settings and links there ("Change voice").
 - **Outings: the voice** (`docs/adr/0010-voice.md`, owner's second iteration): off by default, per outing; headphones only, or out loud too when the ringer is on; the system's engine with an offline voice in the app's language, never network synthesis; navigation-guidance audio ducking the music; bound only while an outing that speaks lasts. No wake lock: whether a sentence can wait for the next wake with the screen off and no music is left to the device test, and a short wake lock, if needed, is the owner's decision.
+
+- **Phase 7: export, import and calibration** (`docs/adr/0011-export-import-and-calibration.md`, owner's request of a clean implementation, above all in UI and UX). One JSON backup and three CSV tables through the Storage Access Framework; an import that merges and never deletes, previewed first; the step measured by walking a known distance, with the hardware counter read directly while the page is on screen.
+- **The backup format is kotlinx.serialization in `:core:domain`**, the library already in the catalog for the navigation routes (not a new dependency), over DTOs apart from the model. `format` and `version` say what a file is; a newer version asks for an update, a broken file says it is damaged, anything else is not a Passo backup.
+- **Import merges by the larger count per minute, never the sum**: two phones in one pocket walked one minute. A day only the file has is taken as the file froze it (the round trip is exact); a frozen day of this phone takes only the added steps' share (`withLateSteps`), keeping its goal. Idempotent by construction.
+- **CSV: fixed English headers with units in their names, RFC 4180, UTF-8 with a BOM**, distances in the reader's units; a field that starts like a formula is written as text.
+- **The calibration does not use the tracking service**: the counter's values at Start and Stop are exact whatever the service, a pause or midnight did in between. Its listener lives only while the page is visible (no wake-ups, no wake lock); Start survives the process being stopped (`SavedStateHandle`).
 
 ### Open
 

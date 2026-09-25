@@ -60,11 +60,11 @@ that does not match it.
 | Module | Kind | Holds |
 |---|---|---|
 | `:core:model` | pure Kotlin/JVM | data classes shared by everything |
-| `:core:domain` | pure Kotlin/JVM | `StepAccountant`, metric calculators, `WalkDetector`, `TypicalDayCalculator`, `PeriodOverview`, `Insights` (streaks, records, averages), `SessionTracker` and `SessionPlans` (outings) |
-| `:core:data` | Android library | Room (steps, tracker state, outings), DataStore (settings, profile), repositories exposing `Flow` |
-| `:core:tracking` | Android library | `StepTrackingService` (FGS type `health`), sensor source, receivers, ongoing notification |
+| `:core:domain` | pure Kotlin/JVM | `StepAccountant`, metric calculators, `WalkDetector`, `TypicalDayCalculator`, `PeriodOverview`, `Insights` (streaks, records, averages), `SessionTracker` and `SessionPlans` (outings), the backup file and its merge (`BackupCodec`, `BackupMerge`, `CsvExport`), `StepCalibration` |
+| `:core:data` | Android library | Room (steps, tracker state, outings), DataStore (settings, profile), repositories exposing `Flow`, `BackupRepository` (export, import) |
+| `:core:tracking` | Android library | `StepTrackingService` (FGS type `health`), sensor source, receivers, ongoing notification, `StepCounterProbe` (the calibration's direct read) |
 | `:core:designsystem` | Android library | M3 theme, typography, shared components, the Canvas charts (`DayTrendChart`, `BarChart`), `CalendarHeatmap`, `WalkList` and `OutingList`, `SessionCard`, date formatting |
-| `:feature:*` | Android library | `today`, `history`, `insights`, `settings`, `onboarding`, `sessions` (the Outings page and editor) |
+| `:feature:*` | Android library | `today`, `history`, `insights`, `settings` (with your data and the step calibration), `onboarding`, `sessions` (the Outings page and editor) |
 | `:widget` | Android library | the two Glance widgets («At a glance», «In words»), their settings screen, the update coordinator |
 | `:app` | application | `Application`, `MainActivity`, navigation (the bottom bar: Today, History, Insights), DI entry points; wires everything |
 

@@ -3,6 +3,8 @@
 <resources>
     <string name="measure_kilometers">%1$s km</string>
     <string name="measure_miles">%1$s mi</string>
+    <string name="measure_meters">%1$s m</string>
+    <string name="measure_yards">%1$s yd</string>
     <string name="measure_kilocalories">%1$s kcal</string>
     <string name="measure_kilograms">%1$s kg</string>
     <string name="measure_pounds">%1$s lb</string>
