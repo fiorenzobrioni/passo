@@ -35,6 +35,16 @@ abstract class TrackingDao {
     @Query("SELECT * FROM minute_steps WHERE localEpochDay = :localEpochDay ORDER BY epochMinute")
     abstract suspend fun minutesOn(localEpochDay: Long): List<MinuteStepsEntity>
 
+    @Query("SELECT * FROM minute_steps WHERE localEpochDay = :localEpochDay ORDER BY epochMinute")
+    abstract fun observeMinutesOn(localEpochDay: Long): Flow<List<MinuteStepsEntity>>
+
+    @Query("SELECT * FROM minute_steps WHERE localEpochDay IN (:days) ORDER BY epochMinute")
+    abstract suspend fun minutesOnDays(days: List<Long>): List<MinuteStepsEntity>
+
+    /** The first day with steps recorded; null before the first. */
+    @Query("SELECT MIN(localEpochDay) FROM daily_summary")
+    abstract fun observeFirstRecordedDay(): Flow<Long?>
+
     @Query("SELECT * FROM daily_summary WHERE localEpochDay = :localEpochDay")
     abstract suspend fun summary(localEpochDay: Long): DailySummaryEntity?
 
@@ -146,6 +156,9 @@ abstract class TrackingDao {
 
     private suspend fun summarizeFromMinutes(day: Long, profile: Profile, goalSteps: Int, finalized: Boolean) =
         DaySummaries.summarize(day, minuteCountsOn(day), profile, goalSteps, finalized)
+
+    @Query("DELETE FROM tracker_state")
+    abstract suspend fun deleteTrackerState()
 
     @Query("SELECT * FROM minute_steps WHERE epochMinute = :epochMinute")
     protected abstract suspend fun minute(epochMinute: Long): MinuteStepsEntity?

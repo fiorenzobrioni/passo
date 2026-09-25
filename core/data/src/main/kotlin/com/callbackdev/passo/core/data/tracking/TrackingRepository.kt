@@ -12,6 +12,7 @@ import com.callbackdev.passo.core.domain.tracking.TrackingConstants
 import com.callbackdev.passo.core.model.DailySummary
 import com.callbackdev.passo.core.model.DiagnosticsEvent
 import com.callbackdev.passo.core.model.DiagnosticsType
+import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.TrackerState
 import com.callbackdev.passo.core.model.UserSettings
@@ -106,6 +107,16 @@ constructor(
         settings
     }
 
+    /**
+     * Forgets where the counter stood, so the next sample is a new baseline, as at the first
+     * run. Called when the reader resumes a pause: the hardware counter kept counting while
+     * the service was stopped, and without this the first sample after the pause would add
+     * every step of it. A pause is the reader saying "don't count these" (PLANNING.md §15).
+     * Only while the service is stopped; under the lock, so it never lands between a write's
+     * steps and its state.
+     */
+    suspend fun forgetBaseline() = summaryLock.withLock { dao.deleteTrackerState() }
+
     /** "Apply profile to past data": every recorded day recomputed with the current profile. */
     suspend fun applyProfileToPastDays() = summaryLock.withLock {
         dao.recomputeAll(todaySource.epochDay(), preferences.current().profile)
@@ -115,11 +126,23 @@ constructor(
 
     fun observeStepsOn(localEpochDay: Long): Flow<Int> = dao.observeStepsOn(localEpochDay)
 
+    /** The minutes of one day, as they are written; oldest first. */
+    fun observeMinutesOn(localEpochDay: Long): Flow<List<MinuteSteps>> = dao.observeMinutesOn(localEpochDay)
+        .map { rows -> rows.map { MinuteSteps(it.epochMinute, it.localEpochDay, it.steps) } }
+
+    /** The minutes of several days, grouped by day; a day without steps is absent. */
+    suspend fun minutesOn(days: List<Long>): Map<Long, List<MinuteSteps>> = dao.minutesOnDays(days)
+        .map { MinuteSteps(it.epochMinute, it.localEpochDay, it.steps) }
+        .groupBy { it.localEpochDay }
+
+    /** The first day with steps recorded, null before the first: the day tracking began. */
+    fun observeFirstRecordedDay(): Flow<Long?> = dao.observeFirstRecordedDay()
+
     /** One day's summary; null for a day with no steps recorded. */
     fun observeSummary(localEpochDay: Long): Flow<DailySummary?> =
         dao.observeSummary(localEpochDay).map { it?.toModel() }
 
-    /** The summaries of the days between [fromDay] and [toDay] included, oldest first; days without steps are absent. */
+    /** The summaries from [fromDay] to [toDay] included, oldest first; a day without steps is absent. */
     fun observeSummaries(fromDay: Long, toDay: Long): Flow<List<DailySummary>> =
         dao.observeSummaries(fromDay, toDay).map { rows -> rows.map { it.toModel() } }
 

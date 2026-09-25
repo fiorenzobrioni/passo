@@ -105,9 +105,14 @@ Comments explain *why*, not what.
 ## Design
 
 Passo keeps the same visual language as Chiaro, for the app screens and for the widget, so the
-family reads as one. `:core:designsystem` holds it as roles (color, type, shape), never as
-hexes inside a composable. Until the first real screen (Phase 3) the theme is Material 3 with
-dynamic color and the baseline schemes.
+family reads as one (`docs/adr/0004-design-language.md`). `:core:designsystem` holds it as roles
+(color, type, shape), never as hexes inside a composable: Chiaro's two generated dresses
+(`theme/Scheme.kt`, copied, never hand-edited), Google Sans / Inter / system type, Chiaro's
+shapes and springs, and every animation collapses to a fade under reduced motion. Its principles
+hold here too: one sentence before any number, every number with the line that says what it
+means, estimates that say so, no dead tab and no switch for a feature that has not shipped.
+Icons are `PassoIcons`, drawn in code. The Compose UI tests write screenshots to each module's
+`build/screenshots`: look at them after changing a screen.
 
 ## Signing and CI
 

@@ -30,3 +30,12 @@ All notable changes to Passo are documented here. The format follows
 - A daily goal that is kept with each day. Changing your weight, step length or goal updates
   today only: days already over keep the numbers they had, unless you ask to apply the new
   profile to the past.
+- The Today screen (Phase 3): a ring that shows the day's steps against the goal and where a
+  usual day of the same weekday stands at this hour, one sentence that says how the day is
+  going and what is left, a chart of the day you can read with a finger, and distance,
+  calories, active and brisk minutes and cadence, each with what it means. It counts live while
+  it is open.
+- A short first run (welcome, profile, goal, permissions, and a battery tip on the phones that
+  need one), and Settings: profile, goal, units, the usual-day line, theme, palette and
+  typeface (Google Sans, Inter or the system's, as in Chiaro), language, pausing the count.
+- Passo now looks like Chiaro: the same colors, typefaces, shapes and motion.

@@ -1,18 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="setup_permission_title">Fai vedere i tuoi passi a Passo</string>
-    <string name="setup_permission_body">Android chiama questo permesso «Attività fisica». Passo lo usa solo per leggere il contapassi del telefono, e i tuoi passi non lasciano mai il telefono. Se consenti anche le notifiche, il conteggio di oggi compare nella notifica che tiene attivo il conteggio.</string>
-    <string name="setup_permission_allow">Consenti</string>
-    <string name="setup_permission_denied_body">Il permesso è stato negato. Puoi consentire «Attività fisica» nelle impostazioni dell’app.</string>
-    <string name="setup_permission_open_settings">Apri impostazioni</string>
     <string name="setup_no_sensor_title">Questo telefono non ha un contapassi</string>
     <string name="setup_no_sensor_body">Passo conta i passi solo con il sensore contapassi del telefono, e questo dispositivo non ce l’ha. Qui Passo non ha niente da contare.</string>
-    <string name="setup_tracking_title">Passo sta contando i tuoi passi</string>
-    <string name="setup_tracking_body">Puoi chiudere l’app. Il conteggio continua in background e riparte da solo dopo un riavvio.</string>
-    <plurals name="setup_tracking_steps_today">
-        <item quantity="one">%1$s passo oggi</item>
-        <item quantity="other">%1$s passi oggi</item>
-        <!-- CLDR "many": exact millions (1.000.000 passi). Digits read the same as "other". -->
-        <item quantity="many">%1$s passi oggi</item>
+
+    <string name="onboarding_progress">Passaggio %1$d di %2$d</string>
+    <string name="onboarding_continue">Continua</string>
+    <string name="onboarding_back">Indietro</string>
+    <string name="onboarding_skip">Salta</string>
+    <string name="onboarding_done">Inizia a contare</string>
+
+    <string name="onboarding_welcome_tagline">Ogni passo, anche ad app chiusa.</string>
+    <string name="onboarding_welcome_start">Iniziamo</string>
+    <string name="onboarding_welcome_counts_title">Conta da solo</string>
+    <string name="onboarding_welcome_counts_body">Con il contapassi del telefono, in background, e riparte da solo dopo un riavvio.</string>
+    <string name="onboarding_welcome_private_title">Resta sul telefono</string>
+    <string name="onboarding_welcome_private_body">Niente account e nessun permesso di accesso a internet: i tuoi passi non lasciano mai il telefono.</string>
+    <string name="onboarding_welcome_battery_title">Leggero sulla batteria</string>
+    <string name="onboarding_welcome_battery_body">Il conteggio lo fa un chip a basso consumo; Passo sveglia il telefono solo quando serve.</string>
+
+    <string name="onboarding_profile_title">Due numeri per le stime</string>
+    <string name="onboarding_profile_body">Altezza e peso servono solo per distanza e calorie. Se li salti valgono dei valori medi; puoi cambiarli quando vuoi dalle Impostazioni.</string>
+    <string name="onboarding_height">Altezza</string>
+    <string name="onboarding_weight">Peso</string>
+    <string name="onboarding_step_estimate">Lunghezza del passo stimata: %1$s</string>
+    <string name="onboarding_sex">Sesso, per stimare la lunghezza del passo</string>
+    <string name="onboarding_sex_female">Donna</string>
+    <string name="onboarding_sex_male">Uomo</string>
+    <string name="onboarding_sex_unsaid">Preferisco non dirlo</string>
+    <string name="onboarding_decrease">Meno</string>
+    <string name="onboarding_increase">Più</string>
+
+    <string name="onboarding_goal_title">Il tuo obiettivo giornaliero</string>
+    <string name="onboarding_goal_consequence">Circa %1$s, cioè %2$s a passo svelto</string>
+    <string name="onboarding_goal_note">Intorno agli 8.000 passi al giorno i benefici per la salute cominciano a stabilizzarsi: uno studio del 2022 su 15 coorti ha trovato la gran parte del guadagno sotto quella soglia, e sempre meno sopra.</string>
+    <plurals name="onboarding_minutes">
+        <item quantity="one">%1$d minuto</item>
+        <item quantity="many">%1$d minuti</item>
+        <item quantity="other">%1$d minuti</item>
     </plurals>
+    <string name="onboarding_hours_minutes">%1$d h %2$d min</string>
+
+    <string name="onboarding_permissions_title">Un permesso per contare</string>
+    <string name="onboarding_permissions_activity_title">Attività fisica</string>
+    <string name="onboarding_permissions_activity_body">Permette a Passo di leggere il contapassi del telefono. Senza, non si può contare niente.</string>
+    <string name="onboarding_permissions_notifications_title">Notifiche, facoltative</string>
+    <string name="onboarding_permissions_notifications_body">Android mostra una notifica fissa mentre un’app conta in background; con le notifiche consentite riporta i passi di oggi. Se le neghi, il conteggio continua lo stesso.</string>
+    <string name="onboarding_permissions_allow">Consenti</string>
+    <string name="onboarding_permissions_granted">Consentito: Passo sta contando.</string>
+    <string name="onboarding_permissions_denied">Negato. Senza questo permesso Passo non può contare: puoi consentirlo adesso o più tardi, da Oggi.</string>
+    <string name="onboarding_permissions_open_settings">Apri impostazioni</string>
+    <string name="onboarding_permissions_later">Più tardi</string>
+
+    <string name="onboarding_battery_title">Un’ultima cosa sui telefoni %1$s</string>
+    <string name="onboarding_battery_body">Alcuni telefoni chiudono le app in background per risparmiare batteria, e Passo smetterebbe di contare. Se il conteggio si ferma, consenti a Passo di restare attivo: su quasi tutti i telefoni è la pagina Batteria dell’app, «Senza restrizioni».</string>
+    <string name="onboarding_battery_settings">Apri le impostazioni di Passo</string>
+    <string name="onboarding_battery_guide">Guida per i telefoni %1$s</string>
 </resources>

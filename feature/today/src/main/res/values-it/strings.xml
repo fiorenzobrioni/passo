@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="today_settings">Impostazioni</string>
+
+    <!-- L'anello -->
+    <string name="today_of_goal">su %1$s passi</string>
+    <string name="today_goal_reached">Obiettivo raggiunto</string>
+    <string name="today_ring_description">%1$s passi su %2$s, %3$s dell’obiettivo</string>
+    <string name="today_ring_description_reached">Obiettivo raggiunto.</string>
+    <string name="today_ring_description_usual">Una giornata tipica a quest’ora è a %1$s.</string>
+
+    <!-- La frase che apre la schermata -->
+    <string name="today_headline_no_steps">Ancora nessun passo, oggi</string>
+    <string name="today_headline_goal_reached">Obiettivo raggiunto alle %1$s</string>
+    <plurals name="today_headline_ahead">
+        <item quantity="one">%1$s passo avanti rispetto al solito</item>
+        <item quantity="many">%1$s passi avanti rispetto al solito</item>
+        <item quantity="other">%1$s passi avanti rispetto al solito</item>
+    </plurals>
+    <plurals name="today_headline_behind">
+        <item quantity="one">%1$s passo indietro rispetto al solito</item>
+        <item quantity="many">%1$s passi indietro rispetto al solito</item>
+        <item quantity="other">%1$s passi indietro rispetto al solito</item>
+    </plurals>
+    <string name="today_headline_on_pace">In linea con il tuo solito ritmo</string>
+    <plurals name="today_headline_to_go">
+        <item quantity="one">Ne manca %1$s: circa %2$s a passo svelto</item>
+        <item quantity="many">Ne mancano %1$s: circa %2$s a passo svelto</item>
+        <item quantity="other">Ne mancano %1$s: circa %2$s a passo svelto</item>
+    </plurals>
+    <plurals name="today_headline_over">
+        <item quantity="one">%1$s passo oltre l’obiettivo</item>
+        <item quantity="many">%1$s passi oltre l’obiettivo</item>
+        <item quantity="other">%1$s passi oltre l’obiettivo</item>
+    </plurals>
+    <plurals name="today_duration_minutes">
+        <item quantity="one">%1$d minuto</item>
+        <item quantity="many">%1$d minuti</item>
+        <item quantity="other">%1$d minuti</item>
+    </plurals>
+    <string name="today_duration_hours_minutes">%1$d h %2$d min</string>
+
+    <!-- Le schede di stato -->
+    <string name="today_status_permission_title">Passo non sta contando</string>
+    <string name="today_status_permission_body">Serve il permesso «Attività fisica» per leggere il contapassi del telefono. I tuoi passi non lasciano mai il telefono.</string>
+    <string name="today_status_permission_action">Consenti</string>
+    <string name="today_status_permission_settings">Apri impostazioni</string>
+    <string name="today_status_paused_title">Conteggio in pausa</string>
+    <string name="today_status_paused_body">I passi che fai mentre è in pausa non vengono contati.</string>
+    <string name="today_status_paused_action">Riprendi</string>
+    <string name="today_first_day_title">Il conteggio parte da oggi</string>
+    <string name="today_first_day_body">Passo conta da quando l’hai configurato, quindi i passi fatti prima, oggi, non ci sono. Da domani ogni giornata è completa.</string>
+
+    <!-- Il grafico della giornata -->
+    <string name="today_trend_title">La tua giornata</string>
+    <string name="today_trend_legend_today">Oggi</string>
+    <string name="today_trend_legend_usual">Di solito</string>
+    <string name="today_trend_legend_goal">Obiettivo</string>
+    <string name="today_trend_now">Adesso</string>
+    <plurals name="today_trend_steps">
+        <item quantity="one">%1$s passo</item>
+        <item quantity="many">%1$s passi</item>
+        <item quantity="other">%1$s passi</item>
+    </plurals>
+    <string name="today_trend_usual">di solito %1$s</string>
+    <string name="today_trend_caption">«Di solito» è la media dello stesso giorno della settimana nelle ultime 4 settimane. Tocca il grafico per leggerlo.</string>
+    <string name="today_trend_caption_no_usual">Tocca il grafico per leggerlo. La linea «di solito» compare quando ci sono due settimane passate dello stesso giorno.</string>
+    <plurals name="today_trend_description">
+        <item quantity="one">La tua giornata finora: %1$s passo.</item>
+        <item quantity="many">La tua giornata finora: %1$s passi.</item>
+        <item quantity="other">La tua giornata finora: %1$s passi.</item>
+    </plurals>
+    <plurals name="today_trend_description_ahead">
+        <item quantity="one">%1$s in più del solito a quest’ora.</item>
+        <item quantity="many">%1$s in più del solito a quest’ora.</item>
+        <item quantity="other">%1$s in più del solito a quest’ora.</item>
+    </plurals>
+    <plurals name="today_trend_description_behind">
+        <item quantity="one">%1$s in meno del solito a quest’ora.</item>
+        <item quantity="many">%1$s in meno del solito a quest’ora.</item>
+        <item quantity="other">%1$s in meno del solito a quest’ora.</item>
+    </plurals>
+    <string name="today_trend_description_on_pace">Più o meno quanti di solito a quest’ora.</string>
+
+    <!-- Le metriche -->
+    <string name="today_metric_distance">Distanza</string>
+    <string name="today_metric_distance_meaning">Stima, con un passo di %1$s</string>
+    <string name="today_metric_calories">Calorie attive</string>
+    <string name="today_metric_calories_meaning">Stima: solo il movimento, oltre al consumo a riposo</string>
+    <string name="today_metric_active">Minuti attivi</string>
+    <string name="today_metric_active_meaning">Minuti con almeno 40 passi</string>
+    <string name="today_metric_brisk">Minuti a passo svelto</string>
+    <plurals name="today_metric_brisk_left">
+        <item quantity="one">Ancora %1$d per la quota di oggi dei 150 a settimana dell’OMS</item>
+        <item quantity="many">Ancora %1$d per la quota di oggi dei 150 a settimana dell’OMS</item>
+        <item quantity="other">Ancora %1$d per la quota di oggi dei 150 a settimana dell’OMS</item>
+    </plurals>
+    <string name="today_metric_brisk_done">Quota di oggi dei 150 a settimana dell’OMS: fatta</string>
+    <string name="today_metric_cadence">Cadenza media</string>
+    <string name="today_metric_cadence_relaxed">Passo tranquillo, sotto il passo svelto</string>
+    <string name="today_metric_cadence_brisk">Passo svelto: intensità moderata</string>
+    <string name="today_metric_cadence_vigorous">Passo molto svelto: intensità vigorosa</string>
+    <string name="today_metric_spoken">%1$s: %2$s. %3$s</string>
+</resources>

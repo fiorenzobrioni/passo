@@ -7,14 +7,20 @@ import java.time.LocalTime
  * The reader's settings (PLANNING.md §5), apart from the [Profile]. Defaults are the values a
  * fresh install starts with; `null` where a field follows the system instead.
  *
+ * The appearance defaults are Chiaro's (the family reads as one, `docs/adr/0004-design-language.md`):
+ * the vivid dress, Google Sans, and the app's own colors rather than the wallpaper's.
+ *
  * @property firstDayOfWeek null follows the locale.
+ * @property onboardingCompleted the first-run flow has been through to its end, or skipped.
  */
 data class UserSettings(
     val dailyGoalSteps: Int = DEFAULT_DAILY_GOAL_STEPS,
     val units: UnitPreference = UnitPreference.SYSTEM,
     val firstDayOfWeek: DayOfWeek? = null,
     val theme: ThemeMode = ThemeMode.SYSTEM,
-    val dynamicColor: Boolean = true,
+    val palette: AppPalette = AppPalette.VIVID,
+    val font: AppFont = AppFont.GOOGLE_SANS,
+    val dynamicColor: Boolean = false,
     val goalReachedNotification: Boolean = false,
     val eveningReminder: Boolean = false,
     val eveningReminderTime: LocalTime = DEFAULT_EVENING_REMINDER_TIME,
@@ -23,6 +29,7 @@ data class UserSettings(
     val walkDetection: Boolean = true,
     val minWalkMinutes: Int = DEFAULT_MIN_WALK_MINUTES,
     val typicalDayLine: Boolean = true,
+    val onboardingCompleted: Boolean = false,
 ) {
     companion object {
         /**
@@ -60,4 +67,23 @@ enum class ThemeMode {
     SYSTEM,
     LIGHT,
     DARK,
+}
+
+/**
+ * Which of the two dresses the app wears when it is not wearing the wallpaper's, as in Chiaro:
+ * [PAPER], warm white and amber; [VIVID], cool white and azure, the default.
+ */
+enum class AppPalette {
+    PAPER,
+    VIVID,
+}
+
+/**
+ * The typeface, as in Chiaro: two bundled faces, the same drawing on every phone, and the
+ * phone's own sans as the third answer.
+ */
+enum class AppFont {
+    GOOGLE_SANS,
+    INTER,
+    SYSTEM,
 }

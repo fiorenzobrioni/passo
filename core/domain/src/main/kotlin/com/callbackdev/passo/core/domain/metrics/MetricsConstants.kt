@@ -52,6 +52,43 @@ object MetricsConstants {
      */
     const val RUNNING_CADENCE: Int = 140
 
+    /**
+     * 130 steps per minute marks vigorous walking (about 6 METs) in the same CADENCE-adults
+     * study. Used only to put the average cadence in words.
+     */
+    const val VIGOROUS_CADENCE: Int = 130
+
+    // --- Guidelines -----------------------------------------------------------------------
+
+    /**
+     * The weekly moderate-intensity activity the WHO recommends to adults: 150 to 300
+     * minutes (WHO guidelines on physical activity and sedentary behaviour, 2020). Since
+     * 2020 every minute counts, not only bouts of ten, so brisk minutes (moderate-intensity
+     * walking, [BRISK_MINUTE_THRESHOLD]) add up to it directly.
+     */
+    const val WHO_WEEKLY_MODERATE_MINUTES: Int = 150
+
+    /** A day's share of [WHO_WEEKLY_MODERATE_MINUTES], rounded up: 150 / 7 = 21.4 → 22. */
+    const val DAILY_BRISK_SHARE_MINUTES: Int = (WHO_WEEKLY_MODERATE_MINUTES + 6) / 7
+
+    // --- Typical day (PLANNING.md §6.2) ---------------------------------------------------
+
+    /** How many past weeks of the same weekday make the typical day. */
+    const val TYPICAL_DAY_WEEKS: Int = 4
+
+    /**
+     * A day under this many steps is left out of the typical day: the phone stayed at home,
+     * or tracking was paused, and averaging it in would drag "usual" towards a day that did
+     * not happen.
+     */
+    const val TYPICAL_DAY_MIN_STEPS: Int = 500
+
+    /** With fewer valid days than this there is no "usual" to speak of. */
+    const val TYPICAL_DAY_MIN_VALID_DAYS: Int = 2
+
+    /** The typical day's resolution: 15-minute slots, 96 of them. */
+    const val TYPICAL_DAY_SLOT_MINUTES: Int = 15
+
     // --- Energy ---------------------------------------------------------------------------
 
     /**

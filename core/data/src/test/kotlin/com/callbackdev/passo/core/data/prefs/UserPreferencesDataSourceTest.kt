@@ -5,6 +5,8 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.callbackdev.passo.core.data.TestDataStore
+import com.callbackdev.passo.core.model.AppFont
+import com.callbackdev.passo.core.model.AppPalette
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.Sex
 import com.callbackdev.passo.core.model.StepLengthMode
@@ -67,7 +69,9 @@ class UserPreferencesDataSourceTest {
             units = UnitPreference.IMPERIAL,
             firstDayOfWeek = DayOfWeek.SUNDAY,
             theme = ThemeMode.DARK,
-            dynamicColor = false,
+            palette = AppPalette.PAPER,
+            font = AppFont.INTER,
+            dynamicColor = true,
             goalReachedNotification = true,
             eveningReminder = true,
             eveningReminderTime = LocalTime.of(21, 30),
@@ -76,6 +80,7 @@ class UserPreferencesDataSourceTest {
             walkDetection = false,
             minWalkMinutes = 15,
             typicalDayLine = false,
+            onboardingCompleted = true,
         )
 
         assertThat(source.updateSettings { settings }).isEqualTo(settings)

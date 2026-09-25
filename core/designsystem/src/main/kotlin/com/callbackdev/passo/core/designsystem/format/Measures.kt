@@ -7,6 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import com.callbackdev.passo.core.designsystem.R
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.settings.resolve
@@ -40,6 +43,22 @@ fun List<Measure>.text(): String {
     val parts = ArrayList<String>(size)
     for (measure in this) parts += measure.text()
     return parts.joinToString(" ")
+}
+
+/**
+ * A measure with its unit set apart in [unitStyle]: the number is the reading, the unit a quiet
+ * suffix («4,21 km» with the km small), wherever the unit's resource puts it.
+ */
+@Composable
+fun Measure.annotated(unitStyle: SpanStyle): AnnotatedString {
+    val full = text()
+    val start = full.indexOf(number)
+    return buildAnnotatedString {
+        append(full)
+        if (start < 0) return@buildAnnotatedString
+        if (start > 0) addStyle(unitStyle, 0, start)
+        if (start + number.length < full.length) addStyle(unitStyle, start + number.length, full.length)
+    }
 }
 
 fun Resources.format(measure: Measure): String = getString(measure.unit.formatRes, measure.number)

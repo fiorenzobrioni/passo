@@ -1,0 +1,201 @@
+package com.callbackdev.passo.feature.today
+
+import android.content.Context
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.callbackdev.passo.core.data.settings.SettingsRepository
+import com.callbackdev.passo.core.data.tracking.LiveSteps
+import com.callbackdev.passo.core.data.tracking.LiveToday
+import com.callbackdev.passo.core.data.tracking.TrackingRepository
+import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.today.DayMinute
+import com.callbackdev.passo.core.domain.today.TodayOverview
+import com.callbackdev.passo.core.domain.today.TypicalDay
+import com.callbackdev.passo.core.domain.today.TypicalDayCalculator
+import com.callbackdev.passo.core.domain.today.minuteOfDay
+import com.callbackdev.passo.core.model.MinuteSteps
+import com.callbackdev.passo.core.model.Profile
+import com.callbackdev.passo.core.model.UserSettings
+import com.callbackdev.passo.core.tracking.StepTracking
+import com.callbackdev.passo.core.tracking.TrackingReadiness
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
+import javax.inject.Inject
+
+/**
+ * Today (PLANNING.md §11 Phase 3). Everything here runs only while the screen is collected
+ * (`WhileSubscribed`), which is only while it is visible, so with the screen off nothing ticks
+ * (§9): the minute clock, the typical day recomputed every 15 minutes (§6.2), the live count.
+ */
+@HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
+class TodayViewModel
+@Inject
+constructor(
+    @ApplicationContext private val context: Context,
+    private val tracking: TrackingRepository,
+    private val settingsRepository: SettingsRepository,
+    liveSteps: LiveSteps,
+) : ViewModel() {
+    private val readiness = MutableStateFlow(StepTracking.readiness(context))
+    private val celebratedOn = MutableStateFlow<LocalDate?>(null)
+
+    private val clock: Flow<Moment> = flow {
+        while (true) {
+            emit(Moment.now())
+            delay(MILLIS_PER_MINUTE - System.currentTimeMillis() % MILLIS_PER_MINUTE)
+        }
+    }.distinctUntilChanged().shareIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), replay = 1)
+
+    private val day: Flow<LocalDate> = clock.map { it.date }.distinctUntilChanged()
+
+    private val minutes: Flow<List<MinuteSteps>> = day.flatMapLatest { tracking.observeMinutesOn(it.toEpochDay()) }
+
+    private val typical: Flow<TypicalDay?> = combine(
+        day,
+        clock.map { it.minute.toInt() / TYPICAL_REFRESH_MINUTES }.distinctUntilChanged(),
+        settingsRepository.settings.map { it.typicalDayLine }.distinctUntilChanged(),
+    ) { date, _, shown -> date to shown }
+        .map { (date, shown) -> if (shown) typicalFor(date) else null }
+
+    private val inputs: Flow<Inputs> =
+        combine(clock, minutes, liveSteps.today, typical) { moment, stored, live, usual ->
+            Inputs(moment, stored, live, usual)
+        }
+
+    private val preferences: Flow<Preferences> = combine(
+        settingsRepository.settings,
+        settingsRepository.profile,
+        readiness,
+        tracking.observeFirstRecordedDay(),
+        celebratedOn,
+    ) { settings, profile, ready, firstDay, celebrated -> Preferences(settings, profile, ready, firstDay, celebrated) }
+
+    val state: StateFlow<TodayUiState?> = combine(inputs, preferences, ::build)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), null)
+
+    /** On every return to the screen: a permission can change in the system's settings. */
+    fun refreshReadiness() {
+        readiness.value = StepTracking.readiness(context)
+    }
+
+    /**
+     * Resumes a pause: counting starts again from now. The baseline is forgotten first, so the
+     * steps the hardware counted during the pause are not added in one go at the first sample.
+     */
+    fun resumeTracking() {
+        viewModelScope.launch {
+            tracking.forgetBaseline()
+            settingsRepository.updateSettings { it.copy(trackingEnabled = true) }
+            StepTracking.start(context)
+            refreshReadiness()
+        }
+    }
+
+    fun celebrated(date: LocalDate) {
+        celebratedOn.value = date
+    }
+
+    private fun build(inputs: Inputs, prefs: Preferences): TodayUiState {
+        val zone = ZoneId.systemDefault()
+        val date = inputs.moment.date
+        val epochDay = date.toEpochDay()
+        val live = inputs.live?.takeIf { it.localEpochDay == epochDay }
+        val dayMinutes = merge(inputs.stored, live?.pending.orEmpty()).map {
+            DayMinute(minuteOfDay(it.epochMinute, it.localEpochDay, zone), it.steps)
+        }
+        val overview = TodayOverview.of(
+            minutes = dayMinutes,
+            profile = prefs.profile,
+            goalSteps = prefs.settings.dailyGoalSteps,
+            nowMinute = inputs.moment.minute,
+            typical = inputs.typical,
+            liveSteps = live?.steps,
+        )
+        val status = when {
+            prefs.readiness == TrackingReadiness.PERMISSION_NEEDED -> TrackingStatus.PERMISSION_NEEDED
+            !prefs.settings.trackingEnabled -> TrackingStatus.PAUSED
+            else -> TrackingStatus.COUNTING
+        }
+        return TodayUiState(
+            date = date,
+            nowMinute = inputs.moment.minute,
+            overview = overview,
+            status = status,
+            units = prefs.settings.units,
+            walkingStepLength = StepLengths.of(prefs.profile).walkingMeters,
+            firstDay = prefs.firstRecordedDay == null || prefs.firstRecordedDay >= epochDay,
+            celebrate = overview.goalReachedAt != null && prefs.celebratedOn != date,
+        )
+    }
+
+    private suspend fun typicalFor(date: LocalDate): TypicalDay? {
+        val zone = ZoneId.systemDefault()
+        val candidates = TypicalDayCalculator.candidateDays(date.toEpochDay())
+        val byDay = tracking.minutesOn(candidates)
+        return TypicalDayCalculator.typical(
+            candidates.map { day ->
+                byDay[day].orEmpty().map { DayMinute(minuteOfDay(it.epochMinute, it.localEpochDay, zone), it.steps) }
+            },
+        )
+    }
+
+    /** The stored minutes plus the ones the service holds, added per minute. */
+    private fun merge(stored: List<MinuteSteps>, pending: List<MinuteSteps>): List<MinuteSteps> {
+        if (pending.isEmpty()) return stored
+        val byMinute = LinkedHashMap<Long, MinuteSteps>()
+        for (minute in stored + pending) {
+            val existing = byMinute[minute.epochMinute]
+            byMinute[minute.epochMinute] = existing?.copy(steps = existing.steps + minute.steps) ?: minute
+        }
+        return byMinute.values.toList()
+    }
+
+    private data class Moment(val date: LocalDate, val minute: Double) {
+        companion object {
+            fun now(): Moment {
+                val zone = ZoneId.systemDefault()
+                val time = LocalTime.now(zone)
+                return Moment(LocalDate.now(zone), time.hour * 60.0 + time.minute)
+            }
+        }
+    }
+
+    private data class Inputs(
+        val moment: Moment,
+        val stored: List<MinuteSteps>,
+        val live: LiveToday?,
+        val typical: TypicalDay?,
+    )
+
+    private data class Preferences(
+        val settings: UserSettings,
+        val profile: Profile,
+        val readiness: TrackingReadiness,
+        val firstRecordedDay: Long?,
+        val celebratedOn: LocalDate?,
+    )
+
+    private companion object {
+        const val MILLIS_PER_MINUTE = 60_000L
+        const val TYPICAL_REFRESH_MINUTES = 15
+        const val STOP_TIMEOUT_MILLIS = 5_000L
+    }
+}

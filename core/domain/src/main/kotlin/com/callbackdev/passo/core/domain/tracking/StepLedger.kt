@@ -45,6 +45,9 @@ class StepLedger(initialState: TrackerState?) {
     fun pendingStepsOn(localEpochDay: Long): Int =
         pending.values.filter { it.localEpochDay == localEpochDay }.sumOf { it.steps }
 
+    /** The buffered minutes of one local day, oldest first. */
+    fun pendingOn(localEpochDay: Long): List<MinuteSteps> = pending.values.filter { it.localEpochDay == localEpochDay }
+
     /**
      * Accounts [sample]. Returns true when the buffer should be written now: the first
      * baseline, a new boot session or a counter reset (the state they establish is too

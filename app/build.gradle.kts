@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.passo.android.application)
     alias(libs.plugins.passo.android.compose)
     alias(libs.plugins.passo.android.hilt)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 // The version lives in gradle.properties; versionCode follows from it (PLANNING.md §11 Phase 8),
@@ -97,4 +98,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+    implementation(libs.kotlinx.serialization.json)
 }

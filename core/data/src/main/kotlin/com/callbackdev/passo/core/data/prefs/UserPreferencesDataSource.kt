@@ -10,6 +10,8 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.callbackdev.passo.core.domain.metrics.sanitized
+import com.callbackdev.passo.core.model.AppFont
+import com.callbackdev.passo.core.model.AppPalette
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.Sex
 import com.callbackdev.passo.core.model.StepLengthMode
@@ -98,6 +100,8 @@ constructor(private val dataStore: DataStore<Preferences>) {
             units = prefs[Keys.UNITS].toEnumOrNull<UnitPreference>() ?: defaults.units,
             firstDayOfWeek = prefs[Keys.FIRST_DAY_OF_WEEK].toEnumOrNull<DayOfWeek>(),
             theme = prefs[Keys.THEME].toEnumOrNull<ThemeMode>() ?: defaults.theme,
+            palette = prefs[Keys.PALETTE].toEnumOrNull<AppPalette>() ?: defaults.palette,
+            font = prefs[Keys.FONT].toEnumOrNull<AppFont>() ?: defaults.font,
             dynamicColor = prefs[Keys.DYNAMIC_COLOR] ?: defaults.dynamicColor,
             goalReachedNotification = prefs[Keys.GOAL_REACHED_NOTIFICATION] ?: defaults.goalReachedNotification,
             eveningReminder = prefs[Keys.EVENING_REMINDER] ?: defaults.eveningReminder,
@@ -108,6 +112,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
             walkDetection = prefs[Keys.WALK_DETECTION] ?: defaults.walkDetection,
             minWalkMinutes = prefs[Keys.MIN_WALK_MINUTES] ?: defaults.minWalkMinutes,
             typicalDayLine = prefs[Keys.TYPICAL_DAY_LINE] ?: defaults.typicalDayLine,
+            onboardingCompleted = prefs[Keys.ONBOARDING_COMPLETED] ?: defaults.onboardingCompleted,
         ).sanitized()
     }
 
@@ -117,6 +122,8 @@ constructor(private val dataStore: DataStore<Preferences>) {
         prefs.write(Keys.UNITS, old.units.name, new.units.name, defaults.units.name)
         prefs.write(Keys.FIRST_DAY_OF_WEEK, old.firstDayOfWeek?.name, new.firstDayOfWeek?.name)
         prefs.write(Keys.THEME, old.theme.name, new.theme.name, defaults.theme.name)
+        prefs.write(Keys.PALETTE, old.palette.name, new.palette.name, defaults.palette.name)
+        prefs.write(Keys.FONT, old.font.name, new.font.name, defaults.font.name)
         prefs.write(Keys.DYNAMIC_COLOR, old.dynamicColor, new.dynamicColor, defaults.dynamicColor)
         prefs.write(
             Keys.GOAL_REACHED_NOTIFICATION,
@@ -136,6 +143,12 @@ constructor(private val dataStore: DataStore<Preferences>) {
         prefs.write(Keys.WALK_DETECTION, old.walkDetection, new.walkDetection, defaults.walkDetection)
         prefs.write(Keys.MIN_WALK_MINUTES, old.minWalkMinutes, new.minWalkMinutes, defaults.minWalkMinutes)
         prefs.write(Keys.TYPICAL_DAY_LINE, old.typicalDayLine, new.typicalDayLine, defaults.typicalDayLine)
+        prefs.write(
+            Keys.ONBOARDING_COMPLETED,
+            old.onboardingCompleted,
+            new.onboardingCompleted,
+            defaults.onboardingCompleted,
+        )
     }
 
     /** Writes only a field that changed; back at its default, the key goes. */
@@ -156,6 +169,8 @@ constructor(private val dataStore: DataStore<Preferences>) {
         val UNITS = stringPreferencesKey("units")
         val FIRST_DAY_OF_WEEK = stringPreferencesKey("first_day_of_week")
         val THEME = stringPreferencesKey("theme")
+        val PALETTE = stringPreferencesKey("palette")
+        val FONT = stringPreferencesKey("font")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val GOAL_REACHED_NOTIFICATION = booleanPreferencesKey("notify_goal_reached")
         val EVENING_REMINDER = booleanPreferencesKey("notify_evening_reminder")
@@ -165,6 +180,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
         val WALK_DETECTION = booleanPreferencesKey("walk_detection")
         val MIN_WALK_MINUTES = intPreferencesKey("min_walk_minutes")
         val TYPICAL_DAY_LINE = booleanPreferencesKey("typical_day_line")
+        val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
     }
 
     companion object {

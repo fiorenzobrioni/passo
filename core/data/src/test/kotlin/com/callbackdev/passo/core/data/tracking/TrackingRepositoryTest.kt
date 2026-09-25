@@ -286,6 +286,27 @@ class TrackingRepositoryTest {
     }
 
     @Test
+    fun `resuming a pause forgets the baseline and keeps the steps`() = runTest {
+        write(dayMinute, day, 100)
+
+        repository.forgetBaseline()
+
+        assertThat(repository.trackerState()).isNull()
+        assertThat(repository.stepsOn(day)).isEqualTo(100)
+    }
+
+    @Test
+    fun `the minutes and the first day are observed`() = runTest {
+        write(dayMinute, day, 100)
+        write(dayMinute + 1, day, 20)
+        write(nextDayMinute, day + 1, 5)
+
+        assertThat(repository.observeMinutesOn(day).first().map { it.steps }).containsExactly(100, 20).inOrder()
+        assertThat(repository.minutesOn(listOf(day, day + 1, day + 2)).keys).containsExactly(day, day + 1)
+        assertThat(repository.observeFirstRecordedDay().first()).isEqualTo(day)
+    }
+
+    @Test
     fun `the summary flow follows the writes`() = runTest {
         write(dayMinute, day, 100)
 
