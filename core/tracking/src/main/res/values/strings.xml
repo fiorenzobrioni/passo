@@ -123,11 +123,18 @@
         <item quantity="other">%1$d steps a minute: on pace.</item>
     </plurals>
     <plurals name="spoken_pace_below">
-        <item quantity="one">%1$d step a minute: below your pace.</item>
-        <item quantity="other">%1$d steps a minute: below your pace.</item>
+        <item quantity="one">%1$d step a minute: pick up the pace a little.</item>
+        <item quantity="other">%1$d steps a minute: pick up the pace a little.</item>
     </plurals>
-    <!-- «Goal reached: 20 minutes. 2,140 steps.» -->
-    <string name="spoken_goal">Goal reached: %1$s. %2$s.</string>
+    <!-- The goal, then what happened: how the pace was kept, and the day's goal if this outing
+         brought it. Classic, not a coach: one «Well done» to close, earned. -->
+    <!-- «Goal reached: 20 minutes, 2,140 steps.» -->
+    <string name="spoken_goal">Goal reached: %1$s, %2$s.</string>
+    <!-- A steps goal: «Goal reached: 3,020 steps.» -->
+    <string name="spoken_goal_steps">Goal reached: %1$s.</string>
+    <string name="spoken_mostly_at_pace">Almost all of it at your pace.</string>
+    <string name="spoken_day_goal">Today’s goal is reached too.</string>
+    <string name="spoken_well_done">Well done.</string>
     <!-- «17 of 20 minutes at your pace.» -->
     <string name="spoken_zone">%1$d of %2$s at your pace.</string>
 </resources>

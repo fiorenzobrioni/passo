@@ -811,6 +811,7 @@ Include:
 - **Outings: an outing replaces the walk found in its minutes** in Today's and History's lists, and is listed whatever the walk-detection switch says.
 - **Outings on the widgets and the tile** (owner's question during the phase): in the sentence's place, no new element, so the widgets' layout arithmetic is unchanged; «Brisk walk: 12 of 20 min», wrapping at the colon with the progress kept whole.
 
+- **Outings: the voice's tone and variety** (owner's question, ADR 0010): classic, with one earned "Well done" at the goal and an invitation, not a verdict, below the pace; variety from what happened (the pace kept, the day's goal brought), never a phrase at random. No male/female picker: the engine does not tell voices apart, so Passo uses the voice chosen in the system's settings and links there ("Change voice").
 - **Outings: the voice** (`docs/adr/0010-voice.md`, owner's second iteration): off by default, per outing; headphones only, or out loud too when the ringer is on; the system's engine with an offline voice in the app's language, never network synthesis; navigation-guidance audio ducking the music; bound only while an outing that speaks lasts. No wake lock: whether a sentence can wait for the next wake with the screen off and no music is left to the device test, and a short wake lock, if needed, is the owner's decision.
 
 ### Open

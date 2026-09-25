@@ -667,7 +667,14 @@ class StepTrackingService : Service() {
                     if (session.vibrate && allowed) SessionHaptics.play(this, signal.milestone)
                     if (session.voice != SessionVoice.OFF && allowed) {
                         val cadence = current.cadenceAt(System.currentTimeMillis())
-                        speak(SessionAnnouncement.milestone(session, signal.milestone, cadence), session)
+                        // At the goal: whether this outing's steps also took the day across its own.
+                        val dayGoal = signal.milestone == SessionMilestone.GOAL &&
+                            SessionAnnouncement.broughtDayGoal(
+                                todaySteps = displayedToday() ?: 0,
+                                sessionSteps = session.totals.steps,
+                                dailyGoalSteps = preferences?.settings?.dailyGoalSteps ?: Int.MAX_VALUE,
+                            )
+                        speak(SessionAnnouncement.milestone(session, signal.milestone, cadence, dayGoal), session)
                     }
                     // Once, even with the screen off: whoever looks next sees where it stands.
                     if (signal.milestone != SessionMilestone.GOAL) notifyNow()

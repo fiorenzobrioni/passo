@@ -64,13 +64,35 @@ class SessionAnnouncementTest {
     }
 
     @Test
-    fun `the goal says what it came to`() {
+    fun `the goal says what it came to, from what happened`() {
         val goal = SessionAnnouncement.milestone(session, SessionMilestone.GOAL, cadence = 108)
+        assertThat(goal).isEqualTo(
+            SessionAnnouncement.GoalReached(
+                SessionAmount(SessionGoalKind.TIME, 20.0),
+                1_050,
+                PaceSummary.Part(9, 10),
+                false,
+            ),
+        )
+        val kept = session.copy(totals = session.totals.copy(zoneMillis = session.totals.movingMillis - 30_000))
+        assertThat(SessionAnnouncement.goal(kept).pace).isEqualTo(PaceSummary.Mostly)
         assertThat(
-            goal,
-        ).isEqualTo(SessionAnnouncement.GoalReached(SessionAmount(SessionGoalKind.TIME, 20.0), 1_050, 9, 10))
-        val free = SessionAnnouncement.goal(session.copy(intensity = SessionIntensity.FREE))
-        assertThat(free.zoneMinutes).isNull()
+            SessionAnnouncement.goal(session.copy(intensity = SessionIntensity.FREE)).pace,
+        ).isEqualTo(PaceSummary.None)
+        assertThat(SessionAnnouncement.goal(session.copy(restOfDay = true)).dayGoalReached).isTrue()
+    }
+
+    @Test
+    fun `the day's goal is news only when this outing brought it`() {
+        assertThat(
+            SessionAnnouncement.broughtDayGoal(todaySteps = 8_300, sessionSteps = 2_000, dailyGoalSteps = 8_000),
+        ).isTrue()
+        assertThat(
+            SessionAnnouncement.broughtDayGoal(todaySteps = 9_500, sessionSteps = 1_000, dailyGoalSteps = 8_000),
+        ).isFalse()
+        assertThat(
+            SessionAnnouncement.broughtDayGoal(todaySteps = 7_000, sessionSteps = 2_000, dailyGoalSteps = 8_000),
+        ).isFalse()
     }
 
     @Test

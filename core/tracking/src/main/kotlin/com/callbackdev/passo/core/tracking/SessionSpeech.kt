@@ -18,6 +18,7 @@ import com.callbackdev.passo.core.designsystem.format.intensityPhrase
 import com.callbackdev.passo.core.designsystem.format.measureFormatter
 import com.callbackdev.passo.core.designsystem.format.sessionName
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
+import com.callbackdev.passo.core.domain.sessions.PaceSummary
 import com.callbackdev.passo.core.domain.sessions.PaceVerdict
 import com.callbackdev.passo.core.domain.sessions.SessionAmount
 import com.callbackdev.passo.core.domain.sessions.SessionAnnouncement
@@ -143,7 +144,7 @@ class SessionSpeech(context: Context) {
             if (releaseWhenQuiet) shutdown()
             return
         }
-        val voice = offlineVoice(engine, app.resources.configuration.locales[0])
+        val voice = chosenVoice(engine, app.resources.configuration.locales[0])
         if (voice == null) {
             state.value = VoiceAvailability.NO_OFFLINE_VOICE
             queued = null
@@ -237,6 +238,27 @@ class SessionSpeech(context: Context) {
         fun settingsIntent(): Intent = Intent("com.android.settings.TTS_SETTINGS")
 
         /**
+         * The voice the reader chose for [locale]'s language in the system's text-to-speech
+         * settings (where a voice is picked by ear, male or female, with a sample), when it is
+         * installed and needs no network; else the best offline one. Passo offers no picker of
+         * its own: the engine does not say which voice is which, and a guessed label would be
+         * worse than none.
+         */
+        internal fun chosenVoice(engine: TextToSpeech, locale: Locale): Voice? {
+            val preferred = try {
+                engine.setLanguage(locale)
+                engine.voice
+            } catch (e: RuntimeException) {
+                null
+            }
+            return preferred?.takeIf { it.usable(locale) } ?: offlineVoice(engine, locale)
+        }
+
+        private fun Voice.usable(locale: Locale): Boolean = this.locale.language == locale.language &&
+            !isNetworkConnectionRequired &&
+            TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in features
+
+        /**
          * The best installed voice for [locale]'s language that needs no network: the same
          * country first, then the better quality, then the quicker one.
          */
@@ -247,11 +269,7 @@ class SessionSpeech(context: Context) {
                 null
             } ?: return null
             return voices
-                .filter {
-                    it.locale.language == locale.language &&
-                        !it.isNetworkConnectionRequired &&
-                        TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in it.features
-                }
+                .filter { it.usable(locale) }
                 .maxWithOrNull(
                     compareBy<Voice>({ it.locale.country == locale.country }, { it.quality }, { -it.latency }),
                 )
@@ -279,19 +297,25 @@ internal fun Context.spoken(announcement: SessionAnnouncement, session: Session,
 
         is SessionAnnouncement.GoalReached -> {
             val steps = res.spokenAmount(SessionAmount(SessionGoalKind.STEPS, announcement.steps.toDouble()), format)
-            val goal = res.getString(R.string.spoken_goal, res.spokenAmount(announcement.goal, format), steps)
-            val zone = announcement.zoneMinutes?.let {
-                res.getString(
+            val goal = when (announcement.goal.kind) {
+                // The goal was the steps: said once.
+                SessionGoalKind.STEPS, SessionGoalKind.REST_OF_DAY -> res.getString(R.string.spoken_goal_steps, steps)
+
+                else -> res.getString(R.string.spoken_goal, res.spokenAmount(announcement.goal, format), steps)
+            }
+            val pace = when (val kept = announcement.pace) {
+                PaceSummary.None -> null
+
+                PaceSummary.Mostly -> res.getString(R.string.spoken_mostly_at_pace)
+
+                is PaceSummary.Part -> res.getString(
                     R.string.spoken_zone,
-                    it,
-                    res.getQuantityString(
-                        R.plurals.spoken_minutes,
-                        announcement.movingMinutes,
-                        announcement.movingMinutes,
-                    ),
+                    kept.zoneMinutes,
+                    res.getQuantityString(R.plurals.spoken_minutes, kept.movingMinutes, kept.movingMinutes),
                 )
             }
-            listOfNotNull(goal, zone).joinToString(" ")
+            val day = res.getString(R.string.spoken_day_goal).takeIf { announcement.dayGoalReached }
+            listOfNotNull(goal, pace, day, res.getString(R.string.spoken_well_done)).joinToString(" ")
         }
     }
 }

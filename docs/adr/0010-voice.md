@@ -33,7 +33,24 @@ has earbuds in, and a vibration is easy to miss.
    engine; it is not a permission).
 4. **Over the music.** Navigation-guidance audio with a transient focus that lets the music
    duck, given back when the sentence ends.
-5. **Bound only while needed.** The engine is bound when an outing that speaks starts (or is
+5. **The tone: classic, with a sober warmth; never a coach** (owner's question, 25 Sep 2026).
+   Passo speaks as its screens do: the fact first, estimates as estimates, no cheering. Two
+   touches of warmth, both earned: below the pace, an invitation rather than a verdict ("pick
+   up the pace a little" / "accelera un po'"); at the goal, one "Well done" / "Ben fatto" to
+   close. Cheering at every signal would be noise by the third outing.
+6. **Variety from what happened, never from chance.** The milestone sentences keep one shape,
+   on purpose: in a pocket they are learned like the vibrations, and a listener parses a known
+   shape at once. What changes is what is true of this outing: "Almost all of it at your pace"
+   from nine tenths of its time in motion at the pace (the minutes otherwise), "Today's goal is
+   reached too" when this outing's steps took the day across its goal, the goal said once when
+   it was steps. No phrase is drawn at random.
+7. **Which voice: the system's choice, no picker in Passo** (owner's question). The engine's
+   API does not say whether a voice is male or female; a label guessed from names such as
+   "it-it-x-itb-local" would be worse than none. The system's text-to-speech settings let the
+   reader pick a voice by ear, with a sample: Passo uses the voice chosen there for the app's
+   language (when it is installed and offline; the best offline one otherwise), and the editor's
+   "Change voice" opens that page.
+8. **Bound only while needed.** The engine is bound when an outing that speaks starts (or is
    picked up after a restart), and released after its last sentence; the editor binds it only
    while it shows a plan that speaks, to say whether a voice is there and to let the reader
    hear one ("Hear it": the plan's own halfway, with its numbers).

@@ -548,19 +548,30 @@ private fun VoiceChoice(state: PlanEditorState, actions: PlanEditorActions) {
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                        AssistChip(
-                            onClick = actions.tryVoice,
-                            enabled = state.voiceAvailability == VoiceAvailability.READY,
-                            label = { Text(stringResource(R.string.editor_voice_try)) },
-                            leadingIcon = {
-                                Icon(
-                                    PassoIcons.Voice,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(AssistChipDefaults.IconSize),
-                                )
-                            },
-                            modifier = Modifier.testTag(EditorTags.TRY_VOICE),
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            AssistChip(
+                                onClick = actions.tryVoice,
+                                enabled = state.voiceAvailability == VoiceAvailability.READY,
+                                label = { Text(stringResource(R.string.editor_voice_try)) },
+                                leadingIcon = {
+                                    Icon(
+                                        PassoIcons.Voice,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(AssistChipDefaults.IconSize),
+                                    )
+                                },
+                                modifier = Modifier.testTag(EditorTags.TRY_VOICE),
+                            )
+                            // Which voice (male or female, and its accent) is the system's choice,
+                            // made by ear with its samples: Passo cannot tell the voices apart.
+                            TextButton(
+                                onClick = actions.openVoiceSettings,
+                                modifier = Modifier.testTag(EditorTags.CHANGE_VOICE),
+                            ) { Text(stringResource(R.string.editor_voice_change)) }
+                        }
                     }
 
                     VoiceAvailability.NO_OFFLINE_VOICE -> {
@@ -638,6 +649,7 @@ object EditorTags {
     const val TRY = "editor_try"
     const val VOICE = "editor_voice"
     const val TRY_VOICE = "editor_try_voice"
+    const val CHANGE_VOICE = "editor_change_voice"
     const val SAVE = "editor_save"
     const val DELETE = "editor_delete"
     const val CONFIRM_DELETE = "editor_confirm_delete"

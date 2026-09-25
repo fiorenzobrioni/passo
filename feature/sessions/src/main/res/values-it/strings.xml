@@ -79,4 +79,5 @@
     <string name="editor_voice_missing">Questo telefono non ha una voce offline in questa lingua. Installala nelle impostazioni di sintesi vocale del sistema: fino ad allora i segnali sono solo vibrazioni.</string>
     <string name="editor_voice_install">Installa una voce</string>
     <string name="editor_voice_no_engine">Questo telefono non ha un motore di sintesi vocale: i segnali sono solo vibrazioni.</string>
+    <string name="editor_voice_change">Cambia voce</string>
 </resources>

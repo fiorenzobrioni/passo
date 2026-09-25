@@ -82,4 +82,5 @@
     <string name="editor_voice_missing">This phone has no offline voice in this language. Install one in the system’s text-to-speech settings: until then the signals are vibrations only.</string>
     <string name="editor_voice_install">Install a voice</string>
     <string name="editor_voice_no_engine">This phone has no text-to-speech engine: the signals are vibrations only.</string>
+    <string name="editor_voice_change">Change voice</string>
 </resources>

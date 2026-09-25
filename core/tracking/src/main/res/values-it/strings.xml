@@ -135,15 +135,19 @@
         <item quantity="other">Tre quarti fatti. Mancano %1$s.</item>
     </plurals>
     <plurals name="spoken_pace_on">
-        <item quantity="one">%1$d passo al minuto: a ritmo.</item>
-        <item quantity="many">%1$d passi al minuto: a ritmo.</item>
-        <item quantity="other">%1$d passi al minuto: a ritmo.</item>
+        <item quantity="one">%1$d passo al minuto: sei a ritmo.</item>
+        <item quantity="many">%1$d passi al minuto: sei a ritmo.</item>
+        <item quantity="other">%1$d passi al minuto: sei a ritmo.</item>
     </plurals>
     <plurals name="spoken_pace_below">
-        <item quantity="one">%1$d passo al minuto: sotto il tuo ritmo.</item>
-        <item quantity="many">%1$d passi al minuto: sotto il tuo ritmo.</item>
-        <item quantity="other">%1$d passi al minuto: sotto il tuo ritmo.</item>
+        <item quantity="one">%1$d passo al minuto: accelera un po’.</item>
+        <item quantity="many">%1$d passi al minuto: accelera un po’.</item>
+        <item quantity="other">%1$d passi al minuto: accelera un po’.</item>
     </plurals>
-    <string name="spoken_goal">Obiettivo raggiunto: %1$s. %2$s.</string>
+    <string name="spoken_goal">Obiettivo raggiunto: %1$s, %2$s.</string>
+    <string name="spoken_goal_steps">Obiettivo raggiunto: %1$s.</string>
+    <string name="spoken_mostly_at_pace">Quasi tutto al tuo ritmo.</string>
+    <string name="spoken_day_goal">Anche l’obiettivo di oggi è raggiunto.</string>
+    <string name="spoken_well_done">Ben fatto.</string>
     <string name="spoken_zone">%1$d su %2$s al tuo ritmo.</string>
 </resources>

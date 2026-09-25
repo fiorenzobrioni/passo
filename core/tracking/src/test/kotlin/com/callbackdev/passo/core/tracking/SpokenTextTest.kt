@@ -59,10 +59,29 @@ class SpokenTextTest {
             cadence = 92,
             pace = PaceVerdict.BELOW,
         )
-        assertThat(say(slow)).isEqualTo("Three quarters done. 5 minutes to go. 92 steps a minute: below your pace.")
+        assertThat(
+            say(slow),
+        ).isEqualTo("Three quarters done. 5 minutes to go. 92 steps a minute: pick up the pace a little.")
         assertThat(
             say(SessionAnnouncement.goal(walk)),
-        ).isEqualTo("Goal reached: 20 minutes. 2,140 steps. 17 of 20 minutes at your pace.")
+        ).isEqualTo("Goal reached: 20 minutes, 2,140 steps. 17 of 20 minutes at your pace. Well done.")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS")
+    fun `the goal says what happened, and a steps goal its steps once`() {
+        val kept = walk.copy(totals = walk.totals.copy(zoneMillis = 19 * 60_000L + 30_000))
+        assertThat(say(SessionAnnouncement.goal(kept, dayGoalReached = true))).isEqualTo(
+            "Goal reached: 20 minutes, 2,140 steps. Almost all of it at your pace. Today’s goal is reached too. Well done.",
+        )
+        val rest = walk.copy(
+            goalKind = SessionGoalKind.STEPS,
+            goalValue = 2_100,
+            restOfDay = true,
+            intensity = SessionIntensity.FREE,
+        )
+        assertThat(say(SessionAnnouncement.goal(rest)))
+            .isEqualTo("Goal reached: 2,140 steps. Today’s goal is reached too. Well done.")
     }
 
     @Test
@@ -91,11 +110,13 @@ class SpokenTextTest {
             104,
             PaceVerdict.ON_PACE,
         )
-        assertThat(say(one)).isEqualTo("Tre quarti fatti. Manca 1 minuto. 104 passi al minuto: a ritmo.")
+        assertThat(say(one)).isEqualTo("Tre quarti fatti. Manca 1 minuto. 104 passi al minuto: sei a ritmo.")
         val ten = one.copy(milestone = SessionMilestone.HALF, left = SessionAmount(SessionGoalKind.TIME, 10.0))
-        assertThat(say(ten)).isEqualTo("Metà strada. Mancano 10 minuti. 104 passi al minuto: a ritmo.")
+        assertThat(say(ten)).isEqualTo("Metà strada. Mancano 10 minuti. 104 passi al minuto: sei a ritmo.")
         assertThat(
             say(SessionAnnouncement.goal(walk)),
-        ).isEqualTo("Obiettivo raggiunto: 20 minuti. 2.140 passi. 17 su 20 minuti al tuo ritmo.")
+        ).isEqualTo("Obiettivo raggiunto: 20 minuti, 2.140 passi. 17 su 20 minuti al tuo ritmo. Ben fatto.")
+        val slow = ten.copy(cadence = 92, pace = PaceVerdict.BELOW)
+        assertThat(say(slow)).isEqualTo("Metà strada. Mancano 10 minuti. 92 passi al minuto: accelera un po’.")
     }
 }
