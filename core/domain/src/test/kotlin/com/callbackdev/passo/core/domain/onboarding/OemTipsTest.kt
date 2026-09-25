@@ -5,18 +5,23 @@ import org.junit.Test
 
 class OemTipsTest {
     @Test
-    fun `known manufacturers get their page`() {
-        assertThat(OemTips.slugFor("Xiaomi")).isEqualTo("xiaomi")
-        assertThat(OemTips.slugFor("POCO")).isEqualTo("xiaomi")
-        assertThat(OemTips.slugFor("samsung")).isEqualTo("samsung")
-        assertThat(OemTips.slugFor("HMD Global")).isEqualTo("nokia")
-        assertThat(OemTips.pageFor("samsung")).isEqualTo("https://dontkillmyapp.com/samsung")
+    fun `known manufacturers get the tip`() {
+        assertThat(OemTips.needsTip("Xiaomi")).isTrue()
+        assertThat(OemTips.needsTip("POCO")).isTrue()
+        assertThat(OemTips.needsTip("HMD Global")).isTrue()
+        assertThat(OemTips.needsTip(" OnePlus ")).isTrue()
     }
 
     @Test
     fun `phones without a known battery manager get no tip`() {
-        assertThat(OemTips.slugFor("Google")).isNull()
-        assertThat(OemTips.slugFor("Fairphone")).isNull()
-        assertThat(OemTips.slugFor("")).isNull()
+        assertThat(OemTips.needsTip("Google")).isFalse()
+        assertThat(OemTips.needsTip("Fairphone")).isFalse()
+        assertThat(OemTips.needsTip("")).isFalse()
+    }
+
+    @Test
+    fun `samsung phones get no tip, since One UI 6 leaves typed foreground services alone`() {
+        assertThat(OemTips.needsTip("samsung")).isFalse()
+        assertThat(OemTips.needsTip("Samsung")).isFalse()
     }
 }

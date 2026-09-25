@@ -361,7 +361,7 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
    - `adb shell dumpsys sensorservice` (confirm batching is active)
    - Doze simulation: `adb shell dumpsys deviceidle force-idle`
    - Battery Historian for the longer field tests
-7. OEM task killers: onboarding shows manufacturer-specific guidance (link to dontkillmyapp.com) only when `Build.MANUFACTURER` is on a known list.
+7. OEM task killers: onboarding shows a battery tip, with a button to the app's own settings page, only when `Build.MANUFACTURER` is on a known list (`OemTips`). Samsung is not on it (§15).
 
 ---
 
@@ -465,7 +465,7 @@ Built in Chiaro's design language (owner's request): its colors, typefaces, shap
 - [x] Tracking status banner: permission missing, paused, sensor missing
   - Missing permission and pause are cards on Today with the button that fixes them; a missing sensor is the blocking screen of §4.6, before anything else.
 - [x] Onboarding: welcome, profile (skippable), goal, permissions, OEM tips
-  - The OEM page only on the makers in `OemTips` (§9 rule 7), with the app's own settings page and the dontkillmyapp.com guide; never `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` (§10).
+  - The OEM page only on the makers in `OemTips` (§9 rule 7), with the app's own settings page; never `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` (§10). The dontkillmyapp.com link and Samsung were dropped later (§15).
 - [x] Settings screen (profile, goal, units, theme, language, typical-day line, pause tracking)
   - Plus palette, typeface and wallpaper colors (Chiaro's appearance group, with its live preview), "Apply profile to past data", privacy, the GPL-3.0 notice and the credits (Phase 0's pending About item). First day of the week, walk detection and notifications wait for the features they drive.
 - [x] Complete Italian and English strings; plurals; content descriptions (the sparkline gets a spoken summary, e.g. "6,200 steps, 1,240 more than usual at this time")
@@ -729,6 +729,7 @@ Include:
 - **Walk types**: a run from an average 140 spm over the walk; mixed when walking and running minutes are each at least 30% of it (§6.1's refinement, `MIXED_WALK_SHARE`).
 - **Backup, decided** (owner's question, `docs/adr/0007-backup.md`): `allowBackup` was already true by default, backing up everything. Now declared, with an allowlist (the database and the settings file) for cloud backup and device transfer alike. The tracker state travels inside the database, and the service drops it on the first start of an installation that did not write it (`TrackingRepository.adoptTrackerState`, keyed on the app's first-install time stored with the settings), so a restore never adds another phone's counter. The no-`INTERNET` rule is unchanged (Android sends the copy); the app's wording now says Passo "sends nothing", and Settings says what Android's backup does. Auto Backup skips an app with a running foreground service, so the cloud copy is taken mostly while counting is paused; `backupInForeground` was rejected, since it would let the backup kill the service.
 - **Walk detection thresholds kept** (60 steps a minute, pauses of up to 2 minutes, 10 minutes by default): the walks found on the owner's field-test days matched the ones walked (25 Sep 2026).
+- **Battery tip: no Samsung, no external guide** (owner's question, 25 Sep 2026): Samsung is off the `OemTips` list. Since One UI 6 (Android 14, which is Passo's minSdk, so every Samsung that can install it) Samsung has committed, with Google, to letting the foreground services of apps that target Android 14 and declare their type run as intended; Passo's service is typed `health`. The tip would warn about a problem those phones no longer have. The page keeps its text and the button to the app's own settings page (where Android 14+ keeps "Unrestricted") on the other makers, but no longer links to dontkillmyapp.com: a community page, dated, out of style with the app and the only place Passo sent anyone to the web, for a step the button already covers.
 
 ### Open
 

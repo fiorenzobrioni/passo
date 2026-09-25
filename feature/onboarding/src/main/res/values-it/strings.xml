@@ -54,5 +54,4 @@
     <string name="onboarding_battery_title">Un’ultima cosa sui telefoni %1$s</string>
     <string name="onboarding_battery_body">Alcuni telefoni chiudono le app in background per risparmiare batteria, e Passo smetterebbe di contare. Se il conteggio si ferma, consenti a Passo di restare attivo: su quasi tutti i telefoni è la pagina Batteria dell’app, «Senza restrizioni».</string>
     <string name="onboarding_battery_settings">Apri le impostazioni di Passo</string>
-    <string name="onboarding_battery_guide">Guida per i telefoni %1$s</string>
 </resources>
