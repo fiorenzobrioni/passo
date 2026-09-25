@@ -374,7 +374,7 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
 | `FOREGROUND_SERVICE` | Normal | Foreground service |
 | `FOREGROUND_SERVICE_HEALTH` | Normal | Foreground service of type `health` |
 | `RECEIVE_BOOT_COMPLETED` | Normal | Restart tracking after boot |
-| `WAKE_LOCK` | Normal | Brought by WorkManager, which Glance runs its widget sessions on (Phase 4): held by the job while a card is drawn. Passo's own code takes none. WorkManager's `ACCESS_NETWORK_STATE` is removed from the merged manifest |
+| `WAKE_LOCK`, `ACCESS_NETWORK_STATE` | Normal | Brought by WorkManager, which Glance runs its widget sessions on (Phase 4): the wake lock is held by the job while a card is drawn; the network state lets nothing leave the phone without `INTERNET`. Passo's own code uses neither |
 | `<uses-feature android:name="android.hardware.sensor.stepcounter" android:required="true"/>` | Feature | Documents the requirement; filters devices on a future Play listing. It does not block APK installs, so the app also checks the sensor at runtime |
 
 **Forbidden:** `INTERNET`, `ACCESS_*_LOCATION`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`, `HIGH_SAMPLING_RATE_SENSORS`, `BODY_SENSORS`.
@@ -704,7 +704,8 @@ Include:
 - **A count that is not moving says so on the card** (`CountingState`: paused, stopped by the system, no permission), in the sentence's place; a paused card's tap opens the app asking it to resume (`TrackingControl`, which Settings and Today now use too), because the activity may start the foreground service and a broadcast may not.
 - `LiveSteps.serviceRunning`: whether the service lives in this process, so a card drawn by a process the system restarted without it says "Not counting" instead of a number that has stopped.
 - **PassoColors.attention**: Chiaro's freshness ink, for "not live right now".
-- Glance's WorkManager: `WAKE_LOCK` stays (§10), `ACCESS_NETWORK_STATE` is removed from the merged manifest.
+- **Glance 1.2.0 on WorkManager 2.10.5** (device report, 25 Sep 2026: both cards stuck on Glance's loading spinner). Glance asks only for WorkManager 2.7.1 (2021), which is what resolved; it is now pinned to Chiaro's 2.10.5, proven under Glance widgets on the owner's phone. Glance stays on the latest stable, newer than Chiaro's 1.1.1 (owner's choice). WorkManager's `WAKE_LOCK` and `ACCESS_NETWORK_STATE` stay as it declares them, as in Chiaro (§10).
+- **A widget never waits forever**: the read behind a card is bounded (10 s) and cannot throw; a failure is logged under `PassoWidget` and drawn as "Today's steps can't be read right now", and the next repaint tries again.
 
 ### Open
 

@@ -48,6 +48,8 @@
     <string name="widget_status_permission_short">Manca il permesso</string>
     <string name="widget_setup_title">Passo non sta ancora contando</string>
     <string name="widget_setup_hint">Tocca per configurarlo</string>
+    <string name="widget_unavailable_title">Non riesco a leggere i passi di oggi</string>
+    <string name="widget_unavailable_hint">Tocca per aprire Passo</string>
     <string name="widget_no_sensor_title">Nessun contapassi</string>
     <string name="widget_no_sensor_hint">Questo telefono non ha il sensore dei passi</string>
 

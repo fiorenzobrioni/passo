@@ -1,6 +1,7 @@
 package com.callbackdev.passo.widget
 
 import android.content.Context
+import android.util.Log
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
 import com.callbackdev.passo.core.data.tracking.LiveSteps
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
@@ -14,8 +15,11 @@ import com.callbackdev.passo.core.domain.widget.CountingState
 import com.callbackdev.passo.core.model.UserSettings
 import com.callbackdev.passo.core.tracking.StepTracking
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeout
 import java.time.LocalDateTime
 import java.time.ZoneId
 import javax.inject.Inject
@@ -26,7 +30,20 @@ import javax.inject.Singleton
  * ([TodayOverview] over the stored minutes plus the service's buffer), read at render time and
  * never invented. [day] is null when there is no day to draw ([CountingState.hasCount]).
  */
-data class WidgetModel(val look: WidgetLook, val settings: UserSettings, val state: CountingState, val day: WidgetDay?)
+data class WidgetModel(
+    val look: WidgetLook,
+    val settings: UserSettings,
+    val state: CountingState,
+    val day: WidgetDay?,
+    /** The day could not be read (an error, or a read that did not finish in time): said, not waited on. */
+    val unavailable: Boolean = false,
+) {
+    companion object {
+        /** A card that says it could not read the day, in the default dress. */
+        fun unavailable(): WidgetModel =
+            WidgetModel(WidgetLook(), UserSettings(), CountingState.COUNTING, null, unavailable = true)
+    }
+}
 
 /**
  * Today, as a widget draws it.
@@ -86,6 +103,16 @@ constructor(
         return WidgetModel(look, settings, state, WidgetDay(overview, HourlySteps.of(minutes), nowMinute))
     }
 
+    /**
+     * [load] for a card that is waiting to be drawn: never longer than [LOAD_TIMEOUT_MILLIS] and
+     * never an exception, because Glance shows its loading spinner until `provideContent` is
+     * reached and a card stuck on it says nothing to anybody (device report, 25 Sep 2026). A
+     * failure is logged under [TAG] and drawn as a card that says the day could not be read, and
+     * the next repaint tries again.
+     */
+    suspend fun loadForCard(appWidgetId: Int): WidgetModel =
+        guardedLoad(LOAD_TIMEOUT_MILLIS, "widget $appWidgetId") { load(appWidgetId) }
+
     private suspend fun typicalFor(day: Long, zone: ZoneId): TypicalDay? = typicalLock.withLock {
         val key = day to zone
         if (typicalKey != key) {
@@ -95,7 +122,34 @@ constructor(
         typical
     }
 
-    private companion object {
-        const val MINUTES_PER_HOUR = 60
+    companion object {
+        /** The log tag of everything the widgets report: `adb logcat -s PassoWidget`. */
+        const val TAG: String = "PassoWidget"
+
+        /** A read is a few queries on the phone's own storage; ten seconds is something wrong. */
+        const val LOAD_TIMEOUT_MILLIS: Long = 10_000L
+        private const val MINUTES_PER_HOUR = 60
     }
+}
+
+/**
+ * [load], bounded by [timeoutMillis] and never throwing but for cancellation: a failure is logged
+ * as [what] and becomes [WidgetModel.unavailable]. Split off the loader so a test can pin it.
+ */
+internal suspend fun guardedLoad(timeoutMillis: Long, what: String, load: suspend () -> WidgetModel): WidgetModel =
+    try {
+        withTimeout(timeoutMillis) { load() }
+    } catch (e: TimeoutCancellationException) {
+        logWidgetFailure("Reading today for $what took over $timeoutMillis ms", e)
+        WidgetModel.unavailable()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        logWidgetFailure("Reading today for $what failed", e)
+        WidgetModel.unavailable()
+    }
+
+/** The log line of a failed read; quiet on a JVM without Android's log, where the tests run. */
+private fun logWidgetFailure(message: String, error: Throwable) {
+    runCatching { Log.w(WidgetModelLoader.TAG, message, error) }
 }

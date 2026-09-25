@@ -5,7 +5,7 @@
 **Every step, counted. On your phone, and nowhere else.**
 
 A private, battery-friendly Android pedometer that counts every step, even if you never open the app.
-Free, no account, no ads, no tracking, and no network permission at all.
+Free, no account, no ads, no tracking, and no permission to use the internet at all.
 
 ![Platform](https://img.shields.io/badge/platform-Android-2E6B3E?labelColor=FCFAF6)
 ![CI](https://img.shields.io/github/actions/workflow/status/fiorenzobrioni/passo/android-ci.yml?branch=main&label=CI&labelColor=FCFAF6&color=2E6B3E)

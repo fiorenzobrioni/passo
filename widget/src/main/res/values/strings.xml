@@ -49,6 +49,8 @@
     <string name="widget_status_permission_short">No permission</string>
     <string name="widget_setup_title">Passo is not counting yet</string>
     <string name="widget_setup_hint">Tap to set it up</string>
+    <string name="widget_unavailable_title">Today’s steps can’t be read right now</string>
+    <string name="widget_unavailable_hint">Tap to open Passo</string>
     <string name="widget_no_sensor_title">No step counter</string>
     <string name="widget_no_sensor_hint">This phone has no step sensor</string>
 

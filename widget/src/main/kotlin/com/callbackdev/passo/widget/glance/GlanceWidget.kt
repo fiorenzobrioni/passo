@@ -42,6 +42,7 @@ import androidx.glance.unit.ColorProvider
 import com.callbackdev.passo.core.designsystem.theme.WidgetDress
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.widget.CountingState
+import com.callbackdev.passo.widget.CardModels
 import com.callbackdev.passo.widget.FACT_SP
 import com.callbackdev.passo.widget.MessageContent
 import com.callbackdev.passo.widget.PassoWidgetReceiver
@@ -73,7 +74,6 @@ import com.callbackdev.passo.widget.statusText
 import com.callbackdev.passo.widget.textEm
 import com.callbackdev.passo.widget.textInkBalance
 import com.callbackdev.passo.widget.widgetDressFor
-import com.callbackdev.passo.widget.widgetEntryPoint
 import com.callbackdev.passo.widget.widgetFormatter
 import com.callbackdev.passo.widget.withSlack
 
@@ -91,12 +91,12 @@ class GlanceWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val appWidgetId = runCatching { GlanceAppWidgetManager(context).getAppWidgetId(id) }.getOrDefault(0)
-        val loader = context.widgetEntryPoint().loader()
+        val models = CardModels(context, appWidgetId)
         // Read before the load, so only a change after it reloads (WidgetRefresh).
         val loadedAt = WidgetRefresh.revision.value
-        val initial = loader.load(appWidgetId)
+        val initial = models.load()
         provideContent {
-            GlanceWidgetContent(rememberWidgetModel(initial, loadedAt) { loader.load(appWidgetId) })
+            GlanceWidgetContent(rememberWidgetModel(initial, loadedAt) { models.load() })
         }
     }
 
@@ -129,7 +129,7 @@ internal fun GlanceWidgetContent(model: WidgetModel) {
     }
     WidgetCard(model, dress, paddingHorizontal = horizontal, paddingVertical = vertical) { palette ->
         if (day == null || form == null) {
-            MessageContent(messageTitle(context, model.state), messageHint(context, model.state), palette)
+            MessageContent(messageTitle(context, model), messageHint(context, model), palette)
             return@WidgetCard
         }
         val parts = CardParts(context, model, day, palette, widgetFormatter(context, model.settings))

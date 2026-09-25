@@ -3,6 +3,7 @@ package com.callbackdev.passo.widget
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
+import android.util.Log
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
@@ -82,6 +83,22 @@ internal interface WidgetEntryPoint {
 
 internal fun Context.widgetEntryPoint(): WidgetEntryPoint =
     EntryPointAccessors.fromApplication(applicationContext, WidgetEntryPoint::class.java)
+
+/**
+ * Where one card's model comes from, for its `provideGlance`: the loader when the graph can hand
+ * one over, and otherwise a card that says the day could not be read. Either way the card reaches
+ * `provideContent`: Glance keeps its loading spinner on screen until it does.
+ */
+internal class CardModels(context: Context, private val appWidgetId: Int) {
+    private val loader: WidgetModelLoader? = try {
+        context.widgetEntryPoint().loader()
+    } catch (e: Exception) {
+        Log.e(WidgetModelLoader.TAG, "No model loader for widget $appWidgetId", e)
+        null
+    }
+
+    suspend fun load(): WidgetModel = loader?.loadForCard(appWidgetId) ?: WidgetModel.unavailable()
+}
 
 /** A removed card takes its look with it. */
 abstract class PassoWidgetReceiver : GlanceAppWidgetReceiver() {

@@ -2,18 +2,12 @@
 <!--
   The home-screen widgets (PLANNING.md §7): two receivers and the settings screen the launcher
   opens on a long press. No permission of their own: the cards read what the tracking service
-  already stored, in this process. Glance brings WorkManager and its WAKE_LOCK, held by the
-  system's job while a card is being drawn; nothing here schedules work of its own.
+  already stored, in this process. Glance brings WorkManager, with its WAKE_LOCK (held by the
+  job while a card is being drawn) and ACCESS_NETWORK_STATE (which lets nothing leave the phone:
+  there is no INTERNET permission). Both are left as WorkManager declares them, as in Chiaro:
+  removing the second was the one change here that nothing on a phone had ever run with.
 -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
-
-    <!-- Glance runs its sessions on WorkManager, which declares the network state for workers
-         that wait on a connection. Glance's never do, and Passo has no network: removed, so
-         the merged manifest carries no network permission of any kind (docs/adr/0005). -->
-    <uses-permission
-        android:name="android.permission.ACCESS_NETWORK_STATE"
-        tools:node="remove" />
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application android:supportsRtl="true">
         <!-- Reached from the launcher's reconfigure flow. Exported, because the launcher starts

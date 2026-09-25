@@ -35,6 +35,7 @@ import androidx.glance.text.TextStyle
 import com.callbackdev.passo.core.designsystem.format.format
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.widget.CountingState
+import com.callbackdev.passo.widget.CardModels
 import com.callbackdev.passo.widget.FACT_SP
 import com.callbackdev.passo.widget.MessageContent
 import com.callbackdev.passo.widget.PassoWidgetReceiver
@@ -64,7 +65,6 @@ import com.callbackdev.passo.widget.sentence
 import com.callbackdev.passo.widget.statusText
 import com.callbackdev.passo.widget.textEm
 import com.callbackdev.passo.widget.widgetDressFor
-import com.callbackdev.passo.widget.widgetEntryPoint
 import com.callbackdev.passo.widget.widgetFormatter
 import com.callbackdev.passo.widget.withSlack
 
@@ -81,11 +81,12 @@ class WordsWidget : GlanceAppWidget() {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val appWidgetId = runCatching { GlanceAppWidgetManager(context).getAppWidgetId(id) }.getOrDefault(0)
-        val loader = context.widgetEntryPoint().loader()
+        val models = CardModels(context, appWidgetId)
+        // Read before the load, so only a change after it reloads (WidgetRefresh).
         val loadedAt = WidgetRefresh.revision.value
-        val initial = loader.load(appWidgetId)
+        val initial = models.load()
         provideContent {
-            WordsWidgetContent(rememberWidgetModel(initial, loadedAt) { loader.load(appWidgetId) })
+            WordsWidgetContent(rememberWidgetModel(initial, loadedAt) { models.load() })
         }
     }
 
@@ -110,7 +111,7 @@ internal fun WordsWidgetContent(model: WidgetModel) {
     val oneRow = form == WordsForm.LINE || form == WordsForm.ROW
     WidgetCard(model, dress, paddingVertical = if (oneRow) WidgetCardPaddingSnug else WidgetCardPadding) { palette ->
         if (day == null || form == null) {
-            MessageContent(messageTitle(context, model.state), messageHint(context, model.state), palette)
+            MessageContent(messageTitle(context, model), messageHint(context, model), palette)
             return@WidgetCard
         }
         val parts = WordsParts(context, model, day, palette, widgetFormatter(context, model.settings))

@@ -50,5 +50,6 @@ All notable changes to Passo are documented here. The format follows
 - A widget whose count is not moving says so: paused (a tap resumes it), stopped by the system
   (a tap restarts it) or without the permission (a tap opens the app to allow it).
 - The widgets repaint when the screen comes on, at most once a minute while it stays on, and
-  never while it is off.
+  never while it is off. If today's steps cannot be read, a widget says so instead of loading
+  forever.
 - Passo now looks like Chiaro: the same colors, typefaces, shapes and motion.

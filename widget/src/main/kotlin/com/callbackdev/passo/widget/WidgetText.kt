@@ -74,13 +74,21 @@ internal fun statusText(context: Context, state: CountingState, short: Boolean =
     return context.getString(if (short) word else long)
 }
 
-/** The whole card's message when there is no day to draw ([CountingState.hasCount] false). */
-internal fun messageTitle(context: Context, state: CountingState): String = context.getString(
-    if (state == CountingState.NO_SENSOR) R.string.widget_no_sensor_title else R.string.widget_setup_title,
+/** The whole card's message when there is no day to draw: none to read yet, none readable, or no sensor. */
+internal fun messageTitle(context: Context, model: WidgetModel): String = context.getString(
+    when {
+        model.unavailable -> R.string.widget_unavailable_title
+        model.state == CountingState.NO_SENSOR -> R.string.widget_no_sensor_title
+        else -> R.string.widget_setup_title
+    },
 )
 
-internal fun messageHint(context: Context, state: CountingState): String = context.getString(
-    if (state == CountingState.NO_SENSOR) R.string.widget_no_sensor_hint else R.string.widget_setup_hint,
+internal fun messageHint(context: Context, model: WidgetModel): String = context.getString(
+    when {
+        model.unavailable -> R.string.widget_unavailable_hint
+        model.state == CountingState.NO_SENSOR -> R.string.widget_no_sensor_hint
+        else -> R.string.widget_setup_hint
+    },
 )
 
 /** «of 10,000 steps», the line under the number on «At a glance»; [short] drops the word. */

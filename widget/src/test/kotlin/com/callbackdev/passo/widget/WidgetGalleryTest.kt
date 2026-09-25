@@ -120,6 +120,11 @@ class WidgetGalleryTest {
             board.row(Grants.FourByOne to renderCard(context, Grants.FourByOne) { GlanceWidgetContent(model) })
             board.row(Grants.FourByOne to renderCard(context, Grants.FourByOne) { WordsWidgetContent(model) })
         }
+        board.row(
+            Grants.FourByOne to renderCard(context, Grants.FourByOne) {
+                GlanceWidgetContent(WidgetModel.unavailable())
+            },
+        )
         val paused = WidgetSamples.model(state = CountingState.PAUSED)
         board.row(
             Grants.OneByOne to renderCard(context, Grants.OneByOne) { GlanceWidgetContent(paused) },

@@ -9,7 +9,7 @@ this repository.
 Material 3, Glance widget). It counts every step with the phone's own hardware step counter,
 even if the app is never opened, keeps the data on the device, and derives everything else
 from those steps: distance, active calories, active and brisk minutes, goals, streaks, walks,
-trends. No account, no ads, no network permission at all. It belongs to a small family of
+trends. No account, no ads, no internet permission at all. It belongs to a small family of
 single-purpose apps by callbackdev, with **Chiaro** (weather) and **Saldo** (finance): same
 developer identity, same build and release setup, and the same visual language.
 

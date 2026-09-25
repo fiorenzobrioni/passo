@@ -3,6 +3,7 @@ package com.callbackdev.passo.widget
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.os.Build
+import android.util.Log
 import androidx.collection.intSetOf
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
@@ -10,6 +11,7 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import com.callbackdev.passo.widget.glance.GlanceWidgetReceiver
 import com.callbackdev.passo.widget.words.WordsWidgetReceiver
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * The picker's generated previews (Android 15+): the real cards, drawn from [WidgetSamples] by
@@ -25,8 +27,14 @@ object WidgetPreviews {
         if (store.data.first()[PublishedFor] == appVersion) return
         val manager = GlanceAppWidgetManager(context)
         val categories = intSetOf(AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN)
+        // Bounded: this runs at every app start until it succeeds, and nothing is worth a
+        // coroutine left hanging on the launcher's side of a binder call.
         val results = listOf(GlanceWidgetReceiver::class, WordsWidgetReceiver::class).map { receiver ->
-            runCatching { manager.setWidgetPreviews(receiver, categories) }.getOrNull()
+            runCatching {
+                withTimeoutOrNull(PUBLISH_TIMEOUT_MILLIS) { manager.setWidgetPreviews(receiver, categories) }
+            }
+                .onFailure { Log.w(WidgetModelLoader.TAG, "Publishing the picker preview failed", it) }
+                .getOrNull()
         }
         if (results.all { it == GlanceAppWidgetManager.SET_WIDGET_PREVIEWS_RESULT_SUCCESS }) {
             store.edit { it[PublishedFor] = appVersion }
@@ -34,4 +42,5 @@ object WidgetPreviews {
     }
 
     private val PublishedFor = longPreferencesKey("previews_published_for")
+    private const val PUBLISH_TIMEOUT_MILLIS = 30_000L
 }

@@ -70,10 +70,18 @@ part in the style of Chiaro's «Colpo d'occhio».
 10. **Previews**: a static `previewLayout` of the default card for the picker, and on Android 15+
     the generated previews (`providePreview` from a seeded sample day), published once per app
     version because the platform rate-limits the call.
-11. **Glance brings WorkManager**, which runs Glance's sessions. Its `WAKE_LOCK` stays (it is held
-    by the job while a card is drawn, which the policy allows only with the screen on, bar the
-    two events above); its `ACCESS_NETWORK_STATE` is removed from the merged manifest, since
-    Glance's workers never wait on a network and Passo has none.
+11. **Glance brings WorkManager**, which runs Glance's sessions, and asks only for 2.7.1 (2021):
+    with nothing else pinning it, that is what shipped, and on the owner's phone both cards stayed
+    on Glance's loading spinner (device report, 25 Sep 2026). WorkManager is now **pinned to 2.10.5**,
+    Chiaro's version, the one proven under Glance widgets on that phone, and Glance stays on the
+    latest stable (1.2.0, newer than Chiaro's 1.1.1: the owner asked for the most modern one). Its
+    `WAKE_LOCK` (held by the job while a card is drawn) and `ACCESS_NETWORK_STATE` (nothing can
+    leave the phone without `INTERNET`) stay as WorkManager declares them, as in Chiaro: the
+    first version removed the second, the one change nothing on a phone had run with.
+12. **A card never waits forever.** Glance keeps its loading spinner until `provideContent` is
+    reached, so the read is bounded (10 s) and cannot throw: a failure is logged under the tag
+    `PassoWidget` and drawn as a card that says the day could not be read, and the next repaint
+    tries again (`guardedLoad`, `GuardedLoadTest`).
 
 ## Consequences
 
