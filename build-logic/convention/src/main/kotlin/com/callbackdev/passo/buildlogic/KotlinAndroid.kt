@@ -38,6 +38,17 @@ internal fun Project.configureKotlinAndroid(android: CommonExtension) {
         failOnNoDiscoveredTests.set(false)
     }
 
+    // The README's screenshots (docs/screenshots) are drawn by the `ReadmeScreenshots` tests,
+    // and only on request: `./gradlew test -PupdateScreenshots`. Without the property those
+    // tests are skipped, so an ordinary run never rewrites a committed image.
+    if (providers.gradleProperty("updateScreenshots").isPresent) {
+        val screenshots = rootProject.layout.projectDirectory.dir("docs/screenshots").asFile.absolutePath
+        tasks.withType<Test>().configureEach {
+            systemProperty("passo.readmeScreenshots", screenshots)
+            outputs.upToDateWhen { false }
+        }
+    }
+
     dependencies {
         add("testImplementation", libs.library("junit"))
         add("testImplementation", libs.library("truth"))

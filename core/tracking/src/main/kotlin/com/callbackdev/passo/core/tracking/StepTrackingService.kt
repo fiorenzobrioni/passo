@@ -16,6 +16,8 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
+import com.callbackdev.passo.core.data.tracking.LiveSteps
+import com.callbackdev.passo.core.data.tracking.LiveToday
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.domain.tracking.StepLedger
 import com.callbackdev.passo.core.model.DiagnosticsEvent
@@ -55,6 +57,8 @@ import javax.inject.Inject
 class StepTrackingService : Service() {
     @Inject lateinit var repository: TrackingRepository
 
+    @Inject lateinit var liveSteps: LiveSteps
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val persistMutex = Mutex()
 
@@ -68,6 +72,10 @@ class StepTrackingService : Service() {
     private var receiversRegistered = false
     private var interactive = false
     private var storedToday: StoredDay? = null
+
+    // Today's steps drained from the ledger and being written: counted on screen until the
+    // stored total is read back with them in it, so the number never dips during a write.
+    private var inFlightToday = 0
     private var pendingFlush: CompletableDeferred<Unit>? = null
     private var screenJob: Job? = null
     private var tickerJob: Job? = null
@@ -118,6 +126,7 @@ class StepTrackingService : Service() {
     }
 
     override fun onDestroy() {
+        liveSteps.publish(null)
         unregisterReceivers()
         sensorSource.close()
         // Whatever is still buffered is written on a scope that outlives this one. If the
@@ -152,6 +161,7 @@ class StepTrackingService : Service() {
             is SensorReading.Sample -> {
                 val ledger = ledger ?: return
                 if (ledger.record(reading.sample, snapshots.current())) scope.launch { persist() }
+                publishLive()
                 scheduleNotification()
             }
 
@@ -170,16 +180,21 @@ class StepTrackingService : Service() {
             val ledger = ledger ?: return@withLock
             val batch = ledger.drain()
             if (batch != null) {
+                val day = today()
+                inFlightToday = batch.increments.filter { it.localEpochDay == day }.sumOf { it.steps }
                 try {
                     repository.persist(batch, System.currentTimeMillis())
                 } catch (e: Exception) {
                     // Back in the buffer: the next write carries it again, with the live state.
                     Log.e(TAG, "Writing the step buffer failed", e)
                     ledger.restore(batch)
+                    inFlightToday = 0
                     return@withLock
                 }
             }
             refreshStoredTodayLocked()
+            inFlightToday = 0
+            publishLive()
         }
     }
 
@@ -320,7 +335,18 @@ class StepTrackingService : Service() {
         val stored = storedToday ?: return null
         val day = today()
         if (stored.day != day) return null
-        return stored.steps + (ledger?.pendingStepsOn(day) ?: 0)
+        return stored.steps + inFlightToday + (ledger?.pendingStepsOn(day) ?: 0)
+    }
+
+    /**
+     * Hands today's live count to the screens ([LiveSteps]). The pending minutes exclude the
+     * batch being written: a screen adds them to the stored minutes, which will hold that
+     * batch once the write lands, and must never count it twice.
+     */
+    private fun publishLive() {
+        val steps = displayedToday()
+        val day = today()
+        liveSteps.publish(steps?.let { LiveToday(day, it, ledger?.pendingOn(day).orEmpty()) })
     }
 
     /** At most one update every [NOTIFY_INTERVAL_MS], trailing, and only with the screen on. */
@@ -346,6 +372,7 @@ class StepTrackingService : Service() {
                 delay(MILLIS_PER_MINUTE - System.currentTimeMillis() % MILLIS_PER_MINUTE)
                 if (storedToday?.day != today()) {
                     persistMutex.withLock { refreshStoredTodayLocked() }
+                    publishLive()
                     notifyNow()
                 }
             }

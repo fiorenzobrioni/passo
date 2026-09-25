@@ -42,7 +42,8 @@ minSdk 34, compile/targetSdk 37. Java 21.
 - On a machine with no system JDK, prepend `JAVA_HOME="/c/Program Files/Android/Android Studio/jbr"`.
 - **Maven Central answers HTTP 429** (Too Many Requests; it happens in the Claude Code cloud
   sandbox): add `--init-script gradle/google-maven-mirror.init.gradle.kts` to any command. It
-  puts Google's mirror of Maven Central first, for that run only; nothing in the build changes.
+  puts Google's mirror of Maven Central first, and points Robolectric's own `android-all`
+  download at it, for that run only; nothing in the build changes.
 
 **Convention plugins** (`build-logic/convention`): `passo.android.application`,
 `passo.android.library`, `passo.android.compose`, `passo.android.feature`, `passo.android.hilt`,
@@ -104,9 +105,23 @@ Comments explain *why*, not what.
 ## Design
 
 Passo keeps the same visual language as Chiaro, for the app screens and for the widget, so the
-family reads as one. `:core:designsystem` holds it as roles (color, type, shape), never as
-hexes inside a composable. Until the first real screen (Phase 3) the theme is Material 3 with
-dynamic color and the baseline schemes.
+family reads as one (`docs/adr/0004-design-language.md`). `:core:designsystem` holds it as roles
+(color, type, shape), never as hexes inside a composable: Chiaro's two generated dresses
+(`theme/Scheme.kt`, copied, never hand-edited), Google Sans / Inter / system type, Chiaro's
+shapes and springs, and every animation collapses to a fade under reduced motion. Its principles
+hold here too: one sentence before any number, every number with the line that says what it
+means, estimates that say so, no dead tab and no switch for a feature that has not shipped.
+Icons are `PassoIcons`, drawn in code. The Compose UI tests write screenshots to each module's
+`build/screenshots`: look at them after changing a screen.
+
+**README screenshots** (`docs/screenshots/`, shown in the root `README.md`): drawn by the
+`ReadmeScreenshots` test classes of the feature modules, from realistic sample data, in English,
+and only on request: `./gradlew test -PupdateScreenshots` (plus the mirror init script in the
+sandbox). Two standing rules (owner's):
+- **Regenerate them** whenever a change alters what an existing one shows, and look at them
+  before committing.
+- **Add one** when a phase brings something worth showing (a new screen, the widget), with its
+  caption in the README's table; keep the set small, the meaningful views only.
 
 ## Signing and CI
 

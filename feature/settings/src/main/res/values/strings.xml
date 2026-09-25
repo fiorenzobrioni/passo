@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Settings</string>
+    <string name="settings_back">Back</string>
+    <string name="settings_save">Save</string>
+    <string name="settings_cancel">Cancel</string>
+    <string name="settings_clear">Clear</string>
+    <string name="settings_decrease">Less</string>
+    <string name="settings_increase">More</string>
+
+    <string name="settings_group_profile">Profile</string>
+    <string name="settings_height">Height</string>
+    <string name="settings_weight">Weight</string>
+    <string name="settings_not_set">Not set: average values are used</string>
+    <string name="settings_sex">Sex</string>
+    <string name="settings_sex_female">Female</string>
+    <string name="settings_sex_male">Male</string>
+    <string name="settings_sex_unsaid">Not said</string>
+    <string name="settings_step_length">Step length</string>
+    <string name="settings_step_length_auto">Estimated from your height: %1$s</string>
+    <string name="settings_step_length_auto_default">Average, without a height: %1$s</string>
+    <string name="settings_step_length_manual">Yours: %1$s</string>
+    <string name="settings_step_length_calibrated">Measured: %1$s</string>
+    <string name="settings_running_step_length">Running step length</string>
+    <string name="settings_running_auto">1.3 × the walking step: %1$s</string>
+    <string name="settings_running_manual">Yours: %1$s</string>
+    <string name="settings_choice_estimate">Estimate it</string>
+    <string name="settings_choice_mine">Set my own</string>
+    <string name="settings_apply_past">Apply the profile to past days</string>
+    <string name="settings_apply_past_note">Past days keep the estimates they were recorded with.</string>
+    <string name="settings_apply_past_title">Recompute every past day?</string>
+    <string name="settings_apply_past_body">Distance and calories of every recorded day are computed again with the current profile. Steps and goals do not change. It cannot be undone.</string>
+    <string name="settings_apply_past_confirm">Recompute</string>
+
+    <string name="settings_group_goal">Goal</string>
+    <string name="settings_goal">Daily goal</string>
+    <plurals name="settings_goal_value">
+        <item quantity="one">%1$s step</item>
+        <item quantity="other">%1$s steps</item>
+    </plurals>
+    <string name="settings_goal_note">A new goal counts from today; past days keep theirs.</string>
+
+    <string name="settings_group_units">Units</string>
+    <string name="settings_units">Units</string>
+    <string name="settings_units_system">Same as the phone (%1$s)</string>
+    <string name="settings_units_metric">Metric: km, kg, cm</string>
+    <string name="settings_units_imperial">Imperial: mi, lb, ft</string>
+    <string name="settings_units_metric_short">metric</string>
+    <string name="settings_units_imperial_short">imperial</string>
+
+    <string name="settings_group_today">Today</string>
+    <string name="settings_typical_line">Usual day line</string>
+    <string name="settings_typical_line_note">On the chart and the ring: where a usual day of the same weekday stands.</string>
+
+    <string name="settings_group_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="settings_theme_system">Same as the phone</string>
+    <string name="settings_theme_light">Light</string>
+    <string name="settings_theme_dark">Dark</string>
+    <string name="settings_palette">Palette</string>
+    <string name="settings_palette_paper">Paper</string>
+    <string name="settings_palette_vivid">Vivid</string>
+    <string name="settings_palette_note">Paper is warm white and amber. Vivid is cool white and azure. The same two as Chiaro.</string>
+    <string name="settings_font">Typeface</string>
+    <string name="settings_font_google_sans">Google Sans</string>
+    <string name="settings_font_inter">Inter</string>
+    <string name="settings_font_system">System</string>
+    <string name="settings_font_note">Google Sans and Inter come with the app, so they look the same on every phone. System takes the font your phone is set in.</string>
+    <string name="settings_dynamic_color">Wallpaper colors</string>
+    <string name="settings_dynamic_color_note">The colors come from your wallpaper instead of the palette above.</string>
+    <string name="settings_preview_caption">of %1$s steps</string>
+    <string name="settings_preview_ahead">%1$s ahead of usual</string>
+
+    <string name="settings_group_language">Language</string>
+    <string name="settings_language">App language</string>
+    <string name="settings_language_system">Same as the phone</string>
+
+    <string name="settings_group_tracking">Counting</string>
+    <string name="settings_tracking">Count steps</string>
+    <string name="settings_tracking_on">On, in the background</string>
+    <string name="settings_tracking_off">Paused: steps taken now are not counted</string>
+
+    <string name="settings_privacy">Privacy</string>
+    <string name="settings_privacy_headline">No account, no ads, no tracking.</string>
+    <string name="settings_privacy_body">Passo has no internet permission at all: your steps, your profile and your settings stay on the phone and never leave it.</string>
+
+    <string name="settings_group_about">About</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_developer">Developer</string>
+    <string name="settings_developer_note" translatable="false">Callback Dev</string>
+    <string name="settings_copyright">Copyright</string>
+    <string name="settings_copyright_note" translatable="false">© 2026 Fiorenzo Brioni</string>
+    <string name="settings_license">License</string>
+    <string name="settings_license_note">GPL-3.0: free to use, study, change and share, with no warranty</string>
+    <string name="settings_source_code">Source code</string>
+    <string name="settings_source_code_note">Free software, GPL-3.0, on GitHub</string>
+
+    <string name="settings_group_credits">Credits</string>
+    <string name="settings_credit_font">Typefaces</string>
+    <string name="settings_credit_font_note">Inter by Rasmus Andersson and Google Sans by Google, both SIL Open Font License 1.1</string>
+    <string name="settings_credit_font_inuse">in use: %1$s</string>
+    <string name="settings_credit_font_inuse_system">in use: the font your phone is set in</string>
+    <string name="settings_credit_sources">Formulas</string>
+    <string name="settings_credit_sources_note">Distance and calories follow the ACSM equations; the cadence bands, the CADENCE-adults study; the brisk minutes, the WHO guidelines</string>
+</resources>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="today_settings">Settings</string>
+
+    <!-- The ring -->
+    <string name="today_of_goal">of %1$s steps</string>
+    <string name="today_goal_reached">Goal reached</string>
+    <string name="today_ring_description">%1$s steps of %2$s, %3$s of the goal</string>
+    <string name="today_ring_description_reached">Goal reached.</string>
+    <string name="today_ring_description_usual">A usual day is at %1$s by now.</string>
+
+    <!-- The headline: one sentence before any number -->
+    <string name="today_headline_no_steps">No steps yet today</string>
+    <string name="today_headline_goal_reached">Goal reached at %1$s</string>
+    <plurals name="today_headline_ahead">
+        <item quantity="one">%1$s step ahead of your usual pace</item>
+        <item quantity="other">%1$s steps ahead of your usual pace</item>
+    </plurals>
+    <plurals name="today_headline_behind">
+        <item quantity="one">%1$s step behind your usual pace</item>
+        <item quantity="other">%1$s steps behind your usual pace</item>
+    </plurals>
+    <string name="today_headline_on_pace">Right on your usual pace</string>
+    <plurals name="today_headline_to_go">
+        <item quantity="one">%1$s step to go: about %2$s of brisk walking</item>
+        <item quantity="other">%1$s steps to go: about %2$s of brisk walking</item>
+    </plurals>
+    <plurals name="today_headline_over">
+        <item quantity="one">%1$s step past your goal</item>
+        <item quantity="other">%1$s steps past your goal</item>
+    </plurals>
+    <plurals name="today_duration_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
+    <string name="today_duration_hours_minutes">%1$d h %2$d min</string>
+
+    <!-- The status cards -->
+    <string name="today_status_permission_title">Passo is not counting</string>
+    <string name="today_status_permission_body">It needs the “Physical activity” permission to read the phone’s step counter. Your steps never leave the phone.</string>
+    <string name="today_status_permission_action">Allow</string>
+    <string name="today_status_permission_settings">Open settings</string>
+    <string name="today_status_paused_title">Counting is paused</string>
+    <string name="today_status_paused_body">Steps you take while it is paused are not counted.</string>
+    <string name="today_status_paused_action">Resume</string>
+    <string name="today_first_day_title">Counting starts today</string>
+    <string name="today_first_day_body">Passo counts from the moment it was set up, so steps taken earlier today are not here. From tomorrow every day is complete.</string>
+
+    <!-- The day's chart -->
+    <string name="today_trend_title">Your day</string>
+    <string name="today_trend_legend_today">Today</string>
+    <string name="today_trend_legend_usual">Usual</string>
+    <string name="today_trend_legend_goal">Goal</string>
+    <string name="today_trend_now">Now</string>
+    <plurals name="today_trend_steps">
+        <item quantity="one">%1$s step</item>
+        <item quantity="other">%1$s steps</item>
+    </plurals>
+    <string name="today_trend_usual">usual %1$s</string>
+    <string name="today_trend_caption">Usual is the average of the same weekday over the last 4 weeks. Touch the chart to read it.</string>
+    <string name="today_trend_caption_no_usual">Touch the chart to read it. The usual line appears once two past weeks of the same weekday are recorded.</string>
+    <plurals name="today_trend_description">
+        <item quantity="one">Your day so far: %1$s step.</item>
+        <item quantity="other">Your day so far: %1$s steps.</item>
+    </plurals>
+    <plurals name="today_trend_description_ahead">
+        <item quantity="one">%1$s more than usual at this time.</item>
+        <item quantity="other">%1$s more than usual at this time.</item>
+    </plurals>
+    <plurals name="today_trend_description_behind">
+        <item quantity="one">%1$s fewer than usual at this time.</item>
+        <item quantity="other">%1$s fewer than usual at this time.</item>
+    </plurals>
+    <string name="today_trend_description_on_pace">About as many as usual at this time.</string>
+
+    <!-- The metric tiles -->
+    <string name="today_metric_distance">Distance</string>
+    <string name="today_metric_distance_meaning">Estimate, with a step of %1$s</string>
+    <string name="today_metric_calories">Active calories</string>
+    <string name="today_metric_calories_meaning">Estimate: movement only, on top of your resting burn</string>
+    <string name="today_metric_active">Active minutes</string>
+    <string name="today_metric_active_meaning">Minutes with 40 steps or more</string>
+    <string name="today_metric_brisk">Brisk minutes</string>
+    <plurals name="today_metric_brisk_left">
+        <item quantity="one">%1$d more for today’s share of the WHO’s 150 a week</item>
+        <item quantity="other">%1$d more for today’s share of the WHO’s 150 a week</item>
+    </plurals>
+    <string name="today_metric_brisk_done">Today’s share of the WHO’s 150 a week: done</string>
+    <string name="today_metric_cadence">Average cadence</string>
+    <string name="today_metric_cadence_relaxed">A relaxed pace, below brisk walking</string>
+    <string name="today_metric_cadence_brisk">A brisk pace: moderate intensity</string>
+    <string name="today_metric_cadence_vigorous">A very brisk pace: vigorous intensity</string>
+    <string name="today_metric_spoken">%1$s: %2$s. %3$s</string>
+</resources>

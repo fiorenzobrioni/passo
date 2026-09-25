@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_title">Impostazioni</string>
+    <string name="settings_back">Indietro</string>
+    <string name="settings_save">Salva</string>
+    <string name="settings_cancel">Annulla</string>
+    <string name="settings_clear">Togli</string>
+    <string name="settings_decrease">Meno</string>
+    <string name="settings_increase">Più</string>
+
+    <string name="settings_group_profile">Profilo</string>
+    <string name="settings_height">Altezza</string>
+    <string name="settings_weight">Peso</string>
+    <string name="settings_not_set">Non impostato: valgono valori medi</string>
+    <string name="settings_sex">Sesso</string>
+    <string name="settings_sex_female">Donna</string>
+    <string name="settings_sex_male">Uomo</string>
+    <string name="settings_sex_unsaid">Non indicato</string>
+    <string name="settings_step_length">Lunghezza del passo</string>
+    <string name="settings_step_length_auto">Stimata dall’altezza: %1$s</string>
+    <string name="settings_step_length_auto_default">Media, senza altezza: %1$s</string>
+    <string name="settings_step_length_manual">La tua: %1$s</string>
+    <string name="settings_step_length_calibrated">Misurata: %1$s</string>
+    <string name="settings_running_step_length">Lunghezza del passo di corsa</string>
+    <string name="settings_running_auto">1,3 × il passo di camminata: %1$s</string>
+    <string name="settings_running_manual">La tua: %1$s</string>
+    <string name="settings_choice_estimate">Stimala</string>
+    <string name="settings_choice_mine">Imposto la mia</string>
+    <string name="settings_apply_past">Applica il profilo ai giorni passati</string>
+    <string name="settings_apply_past_note">I giorni passati tengono le stime con cui sono stati registrati.</string>
+    <string name="settings_apply_past_title">Ricalcolare tutti i giorni passati?</string>
+    <string name="settings_apply_past_body">Distanza e calorie di ogni giorno registrato vengono ricalcolate con il profilo attuale. Passi e obiettivi non cambiano. Non si può annullare.</string>
+    <string name="settings_apply_past_confirm">Ricalcola</string>
+
+    <string name="settings_group_goal">Obiettivo</string>
+    <string name="settings_goal">Obiettivo giornaliero</string>
+    <plurals name="settings_goal_value">
+        <item quantity="one">%1$s passo</item>
+        <item quantity="many">%1$s passi</item>
+        <item quantity="other">%1$s passi</item>
+    </plurals>
+    <string name="settings_goal_note">Un nuovo obiettivo vale da oggi; i giorni passati tengono il loro.</string>
+
+    <string name="settings_group_units">Unità</string>
+    <string name="settings_units">Unità di misura</string>
+    <string name="settings_units_system">Come il telefono (%1$s)</string>
+    <string name="settings_units_metric">Metriche: km, kg, cm</string>
+    <string name="settings_units_imperial">Imperiali: mi, lb, ft</string>
+    <string name="settings_units_metric_short">metriche</string>
+    <string name="settings_units_imperial_short">imperiali</string>
+
+    <string name="settings_group_today">Oggi</string>
+    <string name="settings_typical_line">Linea della giornata tipica</string>
+    <string name="settings_typical_line_note">Sul grafico e sull’anello: dove si trova di solito lo stesso giorno della settimana.</string>
+
+    <string name="settings_group_appearance">Aspetto</string>
+    <string name="settings_theme">Tema</string>
+    <string name="settings_theme_system">Come il telefono</string>
+    <string name="settings_theme_light">Chiaro</string>
+    <string name="settings_theme_dark">Scuro</string>
+    <string name="settings_palette">Palette</string>
+    <string name="settings_palette_paper">Carta</string>
+    <string name="settings_palette_vivid">Brillante</string>
+    <string name="settings_palette_note">Carta è bianco caldo e ambra. Brillante è bianco freddo e azzurro. Le stesse due di Chiaro.</string>
+    <string name="settings_font">Carattere</string>
+    <string name="settings_font_google_sans">Google Sans</string>
+    <string name="settings_font_inter">Inter</string>
+    <string name="settings_font_system">Di sistema</string>
+    <string name="settings_font_note">Google Sans e Inter vengono con l’app, quindi si vedono uguali su ogni telefono. Di sistema prende il carattere impostato sul telefono.</string>
+    <string name="settings_dynamic_color">Colori dallo sfondo</string>
+    <string name="settings_dynamic_color_note">I colori arrivano dallo sfondo del telefono invece che dalla palette qui sopra.</string>
+    <string name="settings_preview_caption">su %1$s passi</string>
+    <string name="settings_preview_ahead">%1$s avanti rispetto al solito</string>
+
+    <string name="settings_group_language">Lingua</string>
+    <string name="settings_language">Lingua dell’app</string>
+    <string name="settings_language_system">Come il telefono</string>
+
+    <string name="settings_group_tracking">Conteggio</string>
+    <string name="settings_tracking">Conta i passi</string>
+    <string name="settings_tracking_on">Attivo, in background</string>
+    <string name="settings_tracking_off">In pausa: i passi di adesso non vengono contati</string>
+
+    <string name="settings_privacy">Privacy</string>
+    <string name="settings_privacy_headline">Niente account, niente pubblicità, niente tracciamento.</string>
+    <string name="settings_privacy_body">Passo non ha alcun permesso di accesso a internet: passi, profilo e impostazioni restano sul telefono e non lo lasciano mai.</string>
+
+    <string name="settings_group_about">Informazioni</string>
+    <string name="settings_version">Versione</string>
+    <string name="settings_developer">Sviluppo</string>
+    <string name="settings_copyright">Copyright</string>
+    <string name="settings_license">Licenza</string>
+    <string name="settings_license_note">GPL-3.0: libera di usare, studiare, modificare e condividere, senza garanzia</string>
+    <string name="settings_source_code">Codice sorgente</string>
+    <string name="settings_source_code_note">Software libero, GPL-3.0, su GitHub</string>
+
+    <string name="settings_group_credits">Riconoscimenti</string>
+    <string name="settings_credit_font">Caratteri</string>
+    <string name="settings_credit_font_note">Inter di Rasmus Andersson e Google Sans di Google, entrambi SIL Open Font License 1.1</string>
+    <string name="settings_credit_font_inuse">in uso: %1$s</string>
+    <string name="settings_credit_font_inuse_system">in uso: il carattere impostato sul telefono</string>
+    <string name="settings_credit_sources">Formule</string>
+    <string name="settings_credit_sources_note">Distanza e calorie seguono le equazioni dell’ACSM; le fasce di cadenza, lo studio CADENCE-adults; i minuti a passo svelto, le linee guida dell’OMS</string>
+</resources>

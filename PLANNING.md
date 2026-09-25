@@ -15,7 +15,7 @@
 | Build | Gradle with Kotlin DSL; version catalog (`gradle/libs.versions.toml`); convention plugins in `build-logic/` |
 | JDK | Toolchain 21, `jvmTarget` 21 |
 | SDK levels | `minSdk 34`, `targetSdk 37`, `compileSdk 37` |
-| UI | Jetpack Compose, Material 3 (dynamic color), edge-to-edge |
+| UI | Jetpack Compose, Material 3 in Chiaro's design language (its generated schemes, dynamic color on request), edge-to-edge |
 | Widget | Jetpack Glance (`glance-appwidget` + `glance-material3`), latest stable (1.2.x at the time of writing) |
 | Architecture | MVVM with unidirectional data flow; coroutines and `Flow` |
 | Dependency injection | Hilt (`hilt-work` only if WorkManager is ever introduced) |
@@ -248,11 +248,11 @@ data class DiagnosticsEventEntity(
 
 All constants live in one file (`MetricsConstants.kt`) with comments that cite their sources. All defaults are to be validated.
 
-- **Default walking step length:** `height × 0.415`. If height is unknown, 0.70 m.
+- **Default walking step length:** `height × 0.415` (`× 0.413` when the profile says female). If height is unknown, 0.70 m.
 - **Running step length:** default `walking × 1.3`, user-editable. It applies to minutes with a cadence of at least `RUNNING_CADENCE` (140 spm).
 - **Distance:** the sum over minutes of `steps × stepLength(cadence)`.
 - **Active calories (net):** the sum over minutes of `distanceKm × weightKg × k(cadence)`.
-  - `k_walk ≈ 0.5 kcal/kg/km`, rising slightly for brisk cadences.
+  - `k_walk ≈ 0.5 kcal/kg/km`, rising slightly for brisk cadences: flat up to 100 spm, then linearly to 0.6 just below 140 spm (Phase 2, §15).
   - `k_run ≈ 1.0 kcal/kg/km`.
   - Default weight if not set: 70 kg.
   - Net means basal metabolism is not included. The UI calls this "active calories".
@@ -389,8 +389,8 @@ Phases 1 and 4 need **field testing on a physical device**; an emulator is not e
 
 - [x] Create the repo; add `README.md`, `LICENSE` (GPL-3.0 full text), `.gitignore`, `.editorconfig`
   - *Deviation:* the repo is `fiorenzobrioni/passo`, not `passo-android`: the sibling repos carry the bare app name.
-- [ ] Short GPL-3.0 notice in the README and in the app's About screen (added in Phase 3)
-  - README done; the About screen comes with Phase 3.
+- [x] Short GPL-3.0 notice in the README and in the app's About screen (added in Phase 3)
+  - README in Phase 0; the About group of Settings in Phase 3.
 - [x] Gradle setup: version catalog, `build-logic` convention plugins, module skeleton (§2)
 - [x] Hilt, Compose, Material 3 theme with dynamic color, and an empty `MainActivity` with an edge-to-edge `Scaffold`
 - [x] `strings.xml` for `values/` (English) and `values-it/`; `locales_config.xml` for per-app language
@@ -432,31 +432,49 @@ Phases 1 and 4 need **field testing on a physical device**; an emulator is not e
 
 ### Phase 2 — Profile, settings, metrics
 
-- [ ] DataStore settings and profile repository
-- [ ] Calculators in `core:domain`: distance, calories, active and brisk minutes, cadence, with unit tests
-- [ ] `DailySummary` recomputation for today; freezing past days; "Apply profile to past data"
-- [ ] Units (metric and imperial) with formatting helpers, and locale-aware number formatting
+- [x] DataStore settings and profile repository
+  - `UserPreferencesDataSource` stores only the fields that differ from their default and reads back anything out of range as the default; `SettingsRepository` is what the screens use. A profile or goal change goes through `TrackingRepository`, which freezes the past first (§15, `docs/adr/0003-daily-summaries.md`).
+- [x] Calculators in `core:domain`: distance, calories, active and brisk minutes, cadence, with unit tests
+  - `MetricsCalculator`, `StepLengths`, `ProfileLimits`, `DaySummaries`; every constant in `MetricsConstants.kt` with its source.
+- [x] `DailySummary` recomputation for today; freezing past days; "Apply profile to past data"
+  - Open days are recomputed at every write; the first write after midnight finalizes the day; late steps on a finalized day add only their own share. "Apply profile to past data" is `SettingsRepository.applyProfileToPastDays()`; its button comes with the Settings screen (Phase 3).
+- [x] Units (metric and imperial) with formatting helpers, and locale-aware number formatting
+  - `MeasureFormatter` and `UnitConversions` in `core:domain` (numbers only); the unit symbols are string resources in `core:designsystem` (`Measure.text()`, `Resources.format`).
 
 **Acceptance:**
-- Calculator tests cover defaults, edge cases (0 steps, missing profile) and unit conversion.
-- Changing the weight updates today only, unless "Apply to past data" is used.
+- [x] Calculator tests cover defaults, edge cases (0 steps, missing profile) and unit conversion.
+- [x] Changing the weight updates today only, unless "Apply to past data" is used.
+  - Both on a real Room database (`TrackingRepositoryTest`), including a day still open at the change and late steps after it.
 
 ### Phase 3 — Today screen and onboarding
 
-- [ ] Navigation shell: Today, History, Insights, Settings
-- [ ] Today: progress ring, metric cards, live updates while visible (low-latency sensor registration while the app is visible)
-- [ ] Today: day trend sparkline (cumulative steps, goal line, dashed typical-day line, "ahead/behind" label), drawn with a small custom Compose `Canvas`
-- [ ] `TypicalDayCalculator` in `core:domain` with unit tests (§6.2)
-- [ ] Tracking status banner: permission missing, paused, sensor missing
-- [ ] Onboarding: welcome, profile (skippable), goal, permissions, OEM tips
-- [ ] Settings screen (profile, goal, units, theme, language, typical-day line, pause tracking)
-- [ ] Complete Italian and English strings; plurals; content descriptions (the sparkline gets a spoken summary, e.g. "6,200 steps, 1,240 more than usual at this time")
+Built in Chiaro's design language (owner's request): its colors, typefaces, shapes, motion and principles, `docs/adr/0004-design-language.md`.
+
+- [x] Navigation shell: Today, History, Insights, Settings
+  - *Deviation:* Today and Settings only (Navigation 3, Settings from the gear, Chiaro's page transition). The bottom bar arrives with its second tab in Phase 5: tabs that lead nowhere would be the screen lying about the app (Chiaro's rule).
+- [x] Today: progress ring, metric cards, live updates while visible (low-latency sensor registration while the app is visible)
+  - The ring also carries a notch where a usual day stands at this hour. Live: the service publishes today's stored-plus-buffered count to an in-process `LiveSteps`, read only while Today is collected; the sensor already reports within 1 s with the screen on (§4.3). Tiles: distance and calories (estimates, with what they rest on), active and brisk minutes (the brisk ones against the day's share of the WHO's 150 a week), average cadence with its bands (drawn only when there are active minutes).
+- [x] Today: day trend sparkline (cumulative steps, goal line, dashed typical-day line, "ahead/behind" label), drawn with a small custom Compose `Canvas`
+  - Read with a finger (tap to pin, drag to scrub, a haptic tick per hour); the rest of the day shaded; the usual line goes on past now; draws itself in along time. The "ahead/behind" is the headline sentence and the readout above the chart.
+- [x] `TypicalDayCalculator` in `core:domain` with unit tests (§6.2)
+  - With `DayCurve` and `TodayOverview` (the headline's choice, the pace, the brisk share, the cadence band), all unit-tested.
+- [x] Tracking status banner: permission missing, paused, sensor missing
+  - Missing permission and pause are cards on Today with the button that fixes them; a missing sensor is the blocking screen of §4.6, before anything else.
+- [x] Onboarding: welcome, profile (skippable), goal, permissions, OEM tips
+  - The OEM page only on the makers in `OemTips` (§9 rule 7), with the app's own settings page and the dontkillmyapp.com guide; never `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` (§10).
+- [x] Settings screen (profile, goal, units, theme, language, typical-day line, pause tracking)
+  - Plus palette, typeface and wallpaper colors (Chiaro's appearance group, with its live preview), "Apply profile to past data", privacy, the GPL-3.0 notice and the credits (Phase 0's pending About item). First day of the week, walk detection and notifications wait for the features they drive.
+- [x] Complete Italian and English strings; plurals; content descriptions (the sparkline gets a spoken summary, e.g. "6,200 steps, 1,240 more than usual at this time")
 
 **Acceptance:**
-- A fresh install through to tracking takes under 1 minute.
-- Every state in the status banner can be reproduced and recovered from.
-- The typical-day line is hidden with fewer than 2 valid days and appears automatically afterwards.
-- UI tests cover onboarding and Today.
+- [x] A fresh install through to tracking takes under 1 minute.
+  - Confirmed by the owner on a Samsung Galaxy S24 Ultra. The shortest path: Get started, Skip, Continue, Allow (and the two system dialogs), Start counting.
+- [x] Every state in the status banner can be reproduced and recovered from.
+  - UI tests for permission and pause with their buttons; resuming forgets the baseline (§15).
+- [x] The typical-day line is hidden with fewer than 2 valid days and appears automatically afterwards.
+  - `TypicalDayCalculatorTest`; the line and the notch follow the value, and the caption says when it will appear.
+- [x] UI tests cover onboarding and Today.
+  - Compose tests on Robolectric for Today, onboarding and Settings; they also write screenshots to each module's `build/screenshots`.
 
 ### Phase 4 — Widget
 
@@ -645,10 +663,28 @@ Include:
 - Until Phase 2, `daily_summary` rows carry only `steps` and a provisional goal (`DEFAULT_GOAL_STEPS`, 8 000); no day is finalized, so Phase 2 computes the metrics of every day recorded before it.
 - `gradle/google-maven-mirror.init.gradle.kts`: an **opt-in** init script (never applied by the build) that puts Google's mirror of Maven Central first, for sandboxes where Maven Central answers HTTP 429, as the Claude Code cloud environment does. Used for the Phase 1 builds there; CLAUDE.md says when to add it.
 - Italian plurals carry the CLDR `many` form too (exact millions), identical to `other`: lint asks for it.
+- **Phase 2: summaries, the profile and the frozen past** (`docs/adr/0003-daily-summaries.md`). An open day is recomputed from its minutes at every write; the first write after a day is over finalizes it with the profile and goal in effect until then. A profile or goal change first finalizes the open past days with the old values, then stores the new ones, then recomputes today, under one lock with the service's writes. Steps that reach a finalized day late add only their own share (the difference they make to their minute, priced with the current profile), so the rest of the day never changes. Only "Apply profile to past data" rewrites finalized days.
+- Schema v1 is kept in Phase 2: the average cadence is not stored, because it does not depend on the profile and a screen can compute it from the day's minutes.
+- The daily goal is a setting (`UserSettings.dailyGoalSteps`, default 8 000, accepted 500 to 100 000); the Phase 1 constant `DEFAULT_GOAL_STEPS` is gone.
+- **Energy cost by cadence:** 0.5 kcal/kg/km below 100 spm, rising linearly to 0.6 just below 140, 1.0 from 140 (ACSM walking and running equations; the brisk rise from the classic energy-speed curves). Flat below 100 on purpose: in one-minute buckets a low count is mostly a minute walked in part, not a slow gait.
+- **Profile limits:** height 0.5 to 2.5 m, weight 20 to 350 kg, walking step 0.2 to 1.5 m, running step 0.2 to 2.5 m. A value outside is treated as not given (the default applies) and is not stored.
+- **Sex** changes only the height ratio of the default step length (0.413 instead of 0.415); with no height it changes nothing.
+- **Units:** "System" (the default) follows the phone's region, not the app's language: the United States, Liberia, Myanmar and the United Kingdom walk in miles, everyone else in kilometres. Numbers are formatted in the app's language. Values are always stored metric.
+- **Formatting:** `core:domain` formats the number (locale digits, fixed decimals per magnitude so a live value does not change width, distances rounded down so a distance is never shown as covered before it is); the unit symbol is a string resource in `core:designsystem`, in English and Italian.
+- DataStore stores only the fields that differ from their default, so an improved default reaches everyone who never moved away from it; a stored value that cannot be read back (out of range, an unknown enum name from a newer build) reads as the default.
+- The Maven Central mirror init script also points **Robolectric** at the mirror (`robolectric.dependency.repo.url`): Robolectric downloads its `android-all` jar itself, at test time, and got HTTP 429 in the cloud sandbox too.
+- **Phase 3: Chiaro's design language** (`docs/adr/0004-design-language.md`, owner's request): Chiaro's two generated dresses (Vivid default, Paper), its semantic pass pair for a met goal and its warm ramp for effort, Google Sans (default) / Inter / system with Chiaro's bundled OFL files, its shapes, springs, reduced motion and page transition. Dynamic color is **off** by default, as in Chiaro (Phase 2 had it on).
+- The shell has **no bottom bar until Phase 5**: Today and Settings (from the gear). A bar with History and Insights leading nowhere would be the screen lying.
+- **Live count while visible**: `LiveSteps`, published by the service with what it already computes for the notification (stored + the batch being written + buffered), read only while Today is collected. The minutes on screen are the stored ones plus the buffered ones; the count never goes back during a write.
+- **Pause means "don't count these"**: resuming forgets the tracker's baseline (`TrackingRepository.forgetBaseline`), so the first sample after a pause is a new baseline; otherwise the cumulative counter would add every step of the pause at once. A pause survives a reboot: the boot and update receivers read the setting before starting.
+- The typical day is also the **ring's notch**; the headline compares with it (ahead, behind, or on pace within 5% or 150 steps) and the second line says what is left in minutes of brisk walking (100 spm).
+- **Brisk minutes are shown against the day's share of the WHO's 150 a week** (22), since the 2020 guidelines count every minute of moderate activity; cadence in words by the CADENCE-adults bands (100 and 130 spm).
+- Onboarding stores nothing until the end, and the profile only if its page was not skipped. The battery page appears only for the makers in `OemTips` and opens the app's own settings page (where Android 14+ keeps "Unrestricted"), never the forbidden exemption request.
+- Icons are drawn in the app (`PassoIcons`), no icon library.
+- **README screenshots** (`docs/screenshots/`): drawn by the `ReadmeScreenshots` tests from realistic sample days, in English, only with `-PupdateScreenshots` (so an ordinary test run never rewrites a committed image). Owner's rule: regenerate them when a change alters what they show, and add one when a phase brings something worth showing.
 
 ### Open
 
-- Visual language: Passo keeps Chiaro's look for the app and the widget, so the family reads as one. What carries over (palette, type, shape, motion, the widget card) is decided before the first real screen, in Phase 3; until then the theme is Material 3 with dynamic color and the baseline schemes.
 - Backup rules (Phase 7): `tracker_state` (boot count, last counter value) describes one device's sensor and must not be restored onto another, or the first sample there would be read against the wrong baseline. Decide the allowlist with that in mind.
 - Walk detection thresholds (60 spm per minute, 2-minute gaps, 10-minute default minimum): tune after the Phase 5 field test.
 - Should a 7-day mini chart be offered in the 4x2 widget as an alternative to today's hourly bars (widget configuration)?

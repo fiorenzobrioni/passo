@@ -2,12 +2,22 @@ package com.callbackdev.passo.core.tracking
 
 import android.Manifest
 import android.app.ForegroundServiceStartNotAllowedException
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.hardware.SensorManager
 import android.util.Log
 import androidx.core.content.ContextCompat
+import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 /** Whether tracking can run on this device, right now. */
 enum class TrackingReadiness {
@@ -37,6 +47,32 @@ object StepTracking {
         ContextCompat.checkSelfPermission(context, Manifest.permission.ACTIVITY_RECOGNITION) ==
             PackageManager.PERMISSION_GRANTED
 
+    /** Stops tracking at the reader's request ("Pause tracking"); the service writes its buffer first. */
+    fun stop(context: Context) {
+        context.stopService(Intent(context, StepTrackingService::class.java))
+    }
+
+    /**
+     * Starts tracking from a boot or update broadcast, unless the reader paused it: a pause is
+     * a choice, and a reboot must not undo it. The setting is read off the main thread while
+     * the broadcast is held open with `goAsync`, which keeps the start inside the broadcast's
+     * exemption from the background-start restriction.
+     */
+    fun startFromBroadcast(receiver: BroadcastReceiver, context: Context) {
+        val pending = receiver.goAsync()
+        val app = context.applicationContext
+        BroadcastWork.launch {
+            try {
+                val preferences = EntryPointAccessors.fromApplication(app, TrackingEntryPoint::class.java).preferences()
+                if (preferences.current().settings.trackingEnabled) start(app)
+            } finally {
+                pending.finish()
+            }
+        }
+    }
+
+    private val BroadcastWork = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
     /**
      * Starts (or re-confirms) the tracking service if it can run. The check comes first on
      * purpose: a service started with `startForegroundService` must call `startForeground`,
@@ -57,4 +93,11 @@ object StepTracking {
             false
         }
     }
+}
+
+/** What the receivers need from the graph; they are not Hilt entry points themselves. */
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+internal interface TrackingEntryPoint {
+    fun preferences(): UserPreferencesDataSource
 }

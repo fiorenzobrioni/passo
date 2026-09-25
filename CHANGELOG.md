@@ -23,3 +23,19 @@ All notable changes to Passo are documented here. The format follows
   reboots, sensor resets, midnight, time-zone and clock changes.
 - A notification with today's steps, and a first screen that asks for the "Physical activity"
   permission (or explains a phone without a step counter).
+- Distance, active calories, active minutes, brisk minutes and cadence for every day (Phase 2),
+  estimated from the steps and an optional profile (height, weight, step length), with the
+  sources of every formula in the code. Metric and imperial units, and numbers written the way
+  your language writes them.
+- A daily goal that is kept with each day. Changing your weight, step length or goal updates
+  today only: days already over keep the numbers they had, unless you ask to apply the new
+  profile to the past.
+- The Today screen (Phase 3): a ring that shows the day's steps against the goal and where a
+  usual day of the same weekday stands at this hour, one sentence that says how the day is
+  going and what is left, a chart of the day you can read with a finger, and distance,
+  calories, active and brisk minutes and cadence, each with what it means. It counts live while
+  it is open.
+- A short first run (welcome, profile, goal, permissions, and a battery tip on the phones that
+  need one), and Settings: profile, goal, units, the usual-day line, theme, palette and
+  typeface (Google Sans, Inter or the system's, as in Chiaro), language, pausing the count.
+- Passo now looks like Chiaro: the same colors, typefaces, shapes and motion.

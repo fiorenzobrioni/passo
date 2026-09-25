@@ -1,16 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="setup_permission_title">Let Passo see your steps</string>
-    <string name="setup_permission_body">Android calls this permission “Physical activity”. Passo uses it only to read your phone’s step counter, and your steps never leave the phone. Allow notifications too, and today’s count shows in the notification that keeps counting running.</string>
-    <string name="setup_permission_allow">Allow</string>
-    <string name="setup_permission_denied_body">The permission was turned down. You can allow “Physical activity” in the app’s settings.</string>
-    <string name="setup_permission_open_settings">Open settings</string>
     <string name="setup_no_sensor_title">This phone has no step counter</string>
     <string name="setup_no_sensor_body">Passo counts steps only with the phone’s own step counter sensor, and this device doesn’t have one. There is nothing Passo can count here.</string>
-    <string name="setup_tracking_title">Passo is counting your steps</string>
-    <string name="setup_tracking_body">You can close the app. Counting goes on in the background, and starts again by itself after a restart.</string>
-    <plurals name="setup_tracking_steps_today">
-        <item quantity="one">%1$s step today</item>
-        <item quantity="other">%1$s steps today</item>
+
+    <string name="onboarding_app_name" translatable="false">Passo</string>
+    <string name="onboarding_progress">Step %1$d of %2$d</string>
+    <string name="onboarding_continue">Continue</string>
+    <string name="onboarding_back">Back</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_done">Start counting</string>
+
+    <string name="onboarding_welcome_tagline">Every step, even with the app closed.</string>
+    <string name="onboarding_welcome_start">Get started</string>
+    <string name="onboarding_welcome_counts_title">It counts by itself</string>
+    <string name="onboarding_welcome_counts_body">With your phone’s own step counter, in the background, and again by itself after a restart.</string>
+    <string name="onboarding_welcome_private_title">It stays on your phone</string>
+    <string name="onboarding_welcome_private_body">No account and no internet permission: your steps never leave the phone.</string>
+    <string name="onboarding_welcome_battery_title">It is light on the battery</string>
+    <string name="onboarding_welcome_battery_body">The counting is done by a low-power chip; Passo wakes the phone only when there is a reason to.</string>
+
+    <string name="onboarding_profile_title">Two numbers for the estimates</string>
+    <string name="onboarding_profile_body">Height and weight are used only for distance and calories. Skip them and average values are used; you can change them any time in Settings.</string>
+    <string name="onboarding_height">Height</string>
+    <string name="onboarding_weight">Weight</string>
+    <string name="onboarding_step_estimate">Estimated step length: %1$s</string>
+    <string name="onboarding_sex">Sex, for the step length estimate</string>
+    <string name="onboarding_sex_female">Female</string>
+    <string name="onboarding_sex_male">Male</string>
+    <string name="onboarding_sex_unsaid">Rather not say</string>
+    <string name="onboarding_decrease">Less</string>
+    <string name="onboarding_increase">More</string>
+
+    <string name="onboarding_goal_title">Your daily goal</string>
+    <string name="onboarding_goal_consequence">About %1$s, or %2$s of brisk walking</string>
+    <string name="onboarding_goal_note">Around 8,000 steps a day the health benefits start to level off: a 2022 study of 15 cohorts found most of the gain below that, and less and less above it.</string>
+    <plurals name="onboarding_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
     </plurals>
+    <string name="onboarding_hours_minutes">%1$d h %2$d min</string>
+
+    <string name="onboarding_permissions_title">One permission to count</string>
+    <string name="onboarding_permissions_activity_title">Physical activity</string>
+    <string name="onboarding_permissions_activity_body">Lets Passo read the phone’s step counter. Without it nothing can be counted.</string>
+    <string name="onboarding_permissions_notifications_title">Notifications, optional</string>
+    <string name="onboarding_permissions_notifications_body">Android shows a fixed notification while an app counts in the background; with notifications allowed it carries today’s steps. Turned down, counting goes on all the same.</string>
+    <string name="onboarding_permissions_allow">Allow</string>
+    <string name="onboarding_permissions_granted">Allowed: Passo is counting.</string>
+    <string name="onboarding_permissions_denied">Turned down. Passo cannot count without it: you can allow it now or later, from Today.</string>
+    <string name="onboarding_permissions_open_settings">Open settings</string>
+    <string name="onboarding_permissions_later">Later</string>
+
+    <string name="onboarding_battery_title">One last thing on %1$s phones</string>
+    <string name="onboarding_battery_body">Some phones stop apps in the background to save battery, and Passo would stop counting with them. If counting ever stops, let Passo run in the background: on most phones it is the app’s Battery page, “Unrestricted”.</string>
+    <string name="onboarding_battery_settings">Open Passo’s settings</string>
+    <string name="onboarding_battery_guide">Guide for %1$s phones</string>
 </resources>
