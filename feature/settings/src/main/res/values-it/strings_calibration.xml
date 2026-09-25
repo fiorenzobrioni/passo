@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- La misura del passo (PLANNING.md §11 Fase 7): una distanza nota, senza GPS. -->
+<resources>
+    <string name="calibration_title">Misura il tuo passo</string>
+    <string name="calibration_intro">Percorri una distanza che conosci, e Passo ne ricava la lunghezza del tuo passo.</string>
+    <string name="calibration_intro_note">Niente GPS: il contapassi conta i passi, tu dai la distanza. Ogni stima di distanza e calorie si basa su questa lunghezza.</string>
+
+    <string name="calibration_what">Cosa misurare</string>
+    <string name="calibration_walking">Passo di camminata</string>
+    <string name="calibration_running">Passo di corsa</string>
+    <string name="calibration_now">Ora</string>
+    <string name="calibration_now_measured">%1$s, misurato</string>
+    <string name="calibration_now_manual">%1$s, impostato da te</string>
+    <string name="calibration_now_height">%1$s, stimato dall’altezza</string>
+    <string name="calibration_now_default">%1$s, la media senza altezza</string>
+    <string name="calibration_now_running_auto">%1$s, 1,3 × il passo di camminata</string>
+
+    <string name="calibration_distance">La distanza</string>
+    <string name="calibration_distance_hint">Una pista di atletica misura %1$s nella corsia interna, un campo da calcio circa %2$s di lunghezza. Più è lungo il tratto, migliore è la misura.</string>
+
+    <string name="calibration_how">Come si fa</string>
+    <string name="calibration_how_start">Mettiti alla partenza e tocca Via.</string>
+    <string name="calibration_how_walk">Cammina fino all’arrivo al tuo passo di sempre. Il telefono può restare in tasca: ogni passo viene contato.</string>
+    <string name="calibration_how_run">Corri fino all’arrivo al tuo ritmo abituale. Il telefono può restare in tasca: ogni passo viene contato.</string>
+    <string name="calibration_how_stop">All’arrivo, prendi il telefono e tocca Stop.</string>
+    <string name="calibration_waiting_note">In attesa del contapassi. Se tarda, fai qualche passo e torna alla partenza.</string>
+
+    <string name="calibration_permission_title">Passo non riesce a leggere il contapassi</string>
+    <string name="calibration_permission_body">Per misurare il passo serve il permesso per l’attività fisica, lo stesso con cui Passo conta.</string>
+    <string name="calibration_permission_action">Consenti</string>
+
+    <string name="calibration_start">Via</string>
+    <string name="calibration_waiting">In attesa del contapassi…</string>
+    <string name="calibration_walking_to">Stai camminando per %1$s</string>
+    <string name="calibration_running_to">Stai correndo per %1$s</string>
+    <plurals name="calibration_steps">
+        <item quantity="one">passo dal via</item>
+        <item quantity="many">passi dal via</item>
+        <item quantity="other">passi dal via</item>
+    </plurals>
+    <string name="calibration_pocket">Il telefono può restare in tasca: i passi vengono contati lo stesso, e li vedi qui quando guardi.</string>
+    <string name="calibration_stop">Stop</string>
+    <string name="calibration_measuring">Lettura degli ultimi passi…</string>
+    <string name="calibration_restart">Torna alla partenza</string>
+
+    <string name="calibration_result_walking">Il tuo passo di camminata</string>
+    <string name="calibration_result_running">Il tuo passo di corsa</string>
+    <plurals name="calibration_result_detail">
+        <item quantity="one">%1$s passo su %2$s.</item>
+        <item quantity="many">%1$s passi su %2$s.</item>
+        <item quantity="other">%1$s passi su %2$s.</item>
+    </plurals>
+    <plurals name="calibration_result_detail_cadence">
+        <item quantity="one">%1$s passo su %2$s, a %3$s.</item>
+        <item quantity="many">%1$s passi su %2$s, a %3$s.</item>
+        <item quantity="other">%1$s passi su %2$s, a %3$s.</item>
+    </plurals>
+    <string name="calibration_change">Con quello nuovo</string>
+    <string name="calibration_change_same">Le distanze restano quasi le stesse</string>
+    <string name="calibration_change_longer">Le distanze risultano più lunghe del %1$s</string>
+    <string name="calibration_change_shorter">Le distanze risultano più corte del %1$s</string>
+    <string name="calibration_pace_run_title">Era un ritmo di corsa</string>
+    <string name="calibration_pace_run_body">%1$s è una corsa. Per misurare il passo di camminata, percorri la distanza al tuo passo di sempre.</string>
+    <string name="calibration_pace_walk_title">Era un ritmo di camminata</string>
+    <string name="calibration_pace_walk_body">%1$s è una camminata: Passo usa il passo di corsa solo nei minuti da %2$s in su.</string>
+    <string name="calibration_saved_note">Distanza e calorie di oggi seguono il passo nuovo. I giorni passati tengono le loro, a meno che tu non applichi il profilo anche a loro nelle Impostazioni.</string>
+    <string name="calibration_save">Salva</string>
+    <string name="calibration_again">Rifai il percorso</string>
+
+    <string name="calibration_too_few_title">Troppo pochi passi per misurare</string>
+    <plurals name="calibration_too_few_body">
+        <item quantity="one">Tra Via e Stop è stato contato solo %1$s passo. Percorri tutta la distanza prima di toccare Stop.</item>
+        <item quantity="many">Tra Via e Stop sono stati contati solo %1$s passi. Percorri tutta la distanza prima di toccare Stop.</item>
+        <item quantity="other">Tra Via e Stop sono stati contati solo %1$s passi. Percorri tutta la distanza prima di toccare Stop.</item>
+    </plurals>
+    <string name="calibration_implausible_title">Non può essere un passo</string>
+    <plurals name="calibration_implausible_body">
+        <item quantity="one">%2$s in %1$s passo farebbero %3$s a passo. Controlla la distanza impostata, e percorrila tutta.</item>
+        <item quantity="many">%2$s in %1$s passi farebbero %3$s a passo. Controlla la distanza impostata, e percorrila tutta.</item>
+        <item quantity="other">%2$s in %1$s passi farebbero %3$s a passo. Controlla la distanza impostata, e percorrila tutta.</item>
+    </plurals>
+    <string name="calibration_reset_title">Il contapassi è ripartito da zero</string>
+    <string name="calibration_reset_body">Durante il percorso il telefono ha riavviato il contapassi, quindi non c’è niente da misurare. Rifai il percorso.</string>
+
+    <string name="calibration_leave_title">Uscire senza salvare?</string>
+    <string name="calibration_leave_walking">I passi fatti finora non vengono usati.</string>
+    <string name="calibration_leave_result">Il tuo passo resta com’è.</string>
+    <string name="calibration_leave">Esci</string>
+    <string name="calibration_stay">Resta</string>
+</resources>

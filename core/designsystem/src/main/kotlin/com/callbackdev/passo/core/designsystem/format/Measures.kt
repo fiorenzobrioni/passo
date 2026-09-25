@@ -72,6 +72,8 @@ private val MeasureUnit.formatRes: Int
     get() = when (this) {
         MeasureUnit.KILOMETER -> R.string.measure_kilometers
         MeasureUnit.MILE -> R.string.measure_miles
+        MeasureUnit.METER -> R.string.measure_meters
+        MeasureUnit.YARD -> R.string.measure_yards
         MeasureUnit.KILOCALORIE -> R.string.measure_kilocalories
         MeasureUnit.KILOGRAM -> R.string.measure_kilograms
         MeasureUnit.POUND -> R.string.measure_pounds

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The step calibration (PLANNING.md §11 Phase 7): walk a known distance, no GPS. -->
+<resources>
+    <string name="calibration_title">Measure your step</string>
+    <string name="calibration_intro">Walk a distance you know, and Passo works out the length of your step from it.</string>
+    <string name="calibration_intro_note">No GPS: the step counter counts the steps, you give the distance. Every distance and calorie estimate rests on this length.</string>
+
+    <string name="calibration_what">What to measure</string>
+    <string name="calibration_walking">Walking step</string>
+    <string name="calibration_running">Running step</string>
+    <string name="calibration_now">Now</string>
+    <string name="calibration_now_measured">%1$s, measured</string>
+    <string name="calibration_now_manual">%1$s, set by you</string>
+    <string name="calibration_now_height">%1$s, estimated from your height</string>
+    <string name="calibration_now_default">%1$s, the average without a height</string>
+    <string name="calibration_now_running_auto">%1$s, 1.3 × your walking step</string>
+
+    <string name="calibration_distance">The distance</string>
+    <string name="calibration_distance_hint">A running track is %1$s around its inside lane, a football pitch about %2$s long. The longer the walk, the better the measure.</string>
+
+    <string name="calibration_how">How it goes</string>
+    <string name="calibration_how_start">Stand at the start and tap Start.</string>
+    <string name="calibration_how_walk">Walk to the finish at your everyday pace. The phone can stay in your pocket: every step is counted.</string>
+    <string name="calibration_how_run">Run to the finish at your usual pace. The phone can stay in your pocket: every step is counted.</string>
+    <string name="calibration_how_stop">At the finish, take the phone out and tap Stop.</string>
+    <string name="calibration_waiting_note">Waiting for the step counter. If it takes long, take a few steps and come back to the start.</string>
+
+    <string name="calibration_permission_title">Passo can’t read the step counter</string>
+    <string name="calibration_permission_body">Measuring your step needs the physical activity permission, the one Passo counts with.</string>
+    <string name="calibration_permission_action">Allow</string>
+
+    <string name="calibration_start">Start</string>
+    <string name="calibration_waiting">Waiting for the step counter…</string>
+    <string name="calibration_walking_to">Walking %1$s</string>
+    <string name="calibration_running_to">Running %1$s</string>
+    <plurals name="calibration_steps">
+        <item quantity="one">step since Start</item>
+        <item quantity="other">steps since Start</item>
+    </plurals>
+    <string name="calibration_pocket">The phone can stay in your pocket: the steps are counted all the same, and show here when you look.</string>
+    <string name="calibration_stop">Stop</string>
+    <string name="calibration_measuring">Reading the last steps…</string>
+    <string name="calibration_restart">Back to the start</string>
+
+    <string name="calibration_result_walking">Your walking step</string>
+    <string name="calibration_result_running">Your running step</string>
+    <plurals name="calibration_result_detail">
+        <item quantity="one">%1$s step over %2$s.</item>
+        <item quantity="other">%1$s steps over %2$s.</item>
+    </plurals>
+    <plurals name="calibration_result_detail_cadence">
+        <item quantity="one">%1$s step over %2$s, at %3$s.</item>
+        <item quantity="other">%1$s steps over %2$s, at %3$s.</item>
+    </plurals>
+    <string name="calibration_change">With the new one</string>
+    <string name="calibration_change_same">Distances stay about the same</string>
+    <string name="calibration_change_longer">Distances read %1$s longer</string>
+    <string name="calibration_change_shorter">Distances read %1$s shorter</string>
+    <string name="calibration_pace_run_title">That was a running pace</string>
+    <string name="calibration_pace_run_body">%1$s is a run. To measure your walking step, walk the distance at your everyday pace.</string>
+    <string name="calibration_pace_walk_title">That was a walking pace</string>
+    <string name="calibration_pace_walk_body">%1$s is a walk: Passo uses the running step only for minutes at %2$s or more.</string>
+    <string name="calibration_saved_note">Today’s distance and calories follow the new step. Past days keep theirs, unless you apply the profile to them in Settings.</string>
+    <string name="calibration_save">Save</string>
+    <string name="calibration_again">Walk again</string>
+
+    <string name="calibration_too_few_title">Too few steps to measure</string>
+    <plurals name="calibration_too_few_body">
+        <item quantity="one">Only %1$s step was counted between Start and Stop. Walk the whole distance before tapping Stop.</item>
+        <item quantity="other">Only %1$s steps were counted between Start and Stop. Walk the whole distance before tapping Stop.</item>
+    </plurals>
+    <string name="calibration_implausible_title">That can’t be a step</string>
+    <plurals name="calibration_implausible_body">
+        <item quantity="one">%2$s in %1$s step would be %3$s a step. Check the distance you set, and walk all of it.</item>
+        <item quantity="other">%2$s in %1$s steps would be %3$s a step. Check the distance you set, and walk all of it.</item>
+    </plurals>
+    <string name="calibration_reset_title">The step counter restarted</string>
+    <string name="calibration_reset_body">The phone restarted its step counter during the walk, so there is nothing to measure. Walk it again.</string>
+
+    <string name="calibration_leave_title">Leave without saving?</string>
+    <string name="calibration_leave_walking">The steps walked so far are not used.</string>
+    <string name="calibration_leave_result">Your step stays as it is.</string>
+    <string name="calibration_leave">Leave</string>
+    <string name="calibration_stay">Stay</string>
+</resources>

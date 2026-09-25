@@ -62,6 +62,29 @@ abstract class SessionDao {
     @Insert
     abstract suspend fun insertSession(session: SessionEntity): Long
 
+    /** Every outing, oldest first: for the export. */
+    @Query("SELECT * FROM session ORDER BY startedAtMillis")
+    abstract suspend fun allSessions(): List<SessionEntity>
+
+    @Query("SELECT COUNT(*) FROM session")
+    abstract fun observeSessionCount(): Flow<Int>
+
+    /**
+     * The outings and plans an import brings (`BackupMerge`), in one transaction: the plans
+     * first, after the phone's own, then the outings with their plan ids made this phone's.
+     * Returns the ids the new outings got.
+     */
+    @Transaction
+    open suspend fun importOutings(
+        plans: List<Pair<Long, SessionPlanEntity>>,
+        planIds: Map<Long, Long>,
+        sessions: (Map<Long, Long>) -> List<SessionEntity>,
+    ): List<Long> {
+        val ids = HashMap(planIds)
+        for ((fileId, plan) in plans) ids[fileId] = appendPlan(plan)
+        return sessions(ids).map { insertSession(it) }
+    }
+
     @Upsert
     abstract suspend fun upsertSession(session: SessionEntity)
 

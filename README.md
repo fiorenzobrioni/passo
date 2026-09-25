@@ -21,7 +21,8 @@ Free, no account, no ads, no tracking, and no permission to use the internet at 
 > Passo is in early development: Phases 0 to 6 and 10 of [the plan](./PLANNING.md) are built
 > (the step tracking engine, the metrics, the Today screen, the first run, Settings, the two
 > home-screen widgets, History, Insights and walks, the goal notifications, the Quick Settings
-> tile, and outings: walks with a goal). It has run on a phone, but the multi-day
+> tile, and outings: walks with a goal), and of Phase 7 the export, the import and the step
+> calibration. It has run on a phone, but the multi-day
 > field test of the tracking engine is still to do, and there is no usable release yet.
 
 ## Screenshots
@@ -77,6 +78,16 @@ Free, no account, no ads, no tracking, and no permission to use the internet at 
     <td align="center"><b>Under way,</b> on Today and in the notification: where it stands, and your pace against its own.</td>
     <td align="center"><b>Signals you can feel or hear:</b> one, two, three short pulses, one long at the goal, and a voice in your headphones if you want it.</td>
   </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/calibration.png" width="250" alt="Measure your step: 131 steps over 100 m make a walking step of 76 cm, against 74 cm estimated from the height, so distances read 3% longer"></td>
+    <td align="center"><img src="docs/screenshots/settings-data.png" width="250" alt="Settings, your data: a backup saved with 412 days and 38 outings, and the rows to back up, import and export for a spreadsheet"></td>
+    <td align="center"><img src="docs/screenshots/data-import.png" width="250" alt="Importing a backup: when it was written, 413 days of steps and 38 outings, how it joins this phone's days, and the choice to take its profile and settings"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Your step, measured:</b> walk a distance you know, no GPS, and see what it changes before you keep it.</td>
+    <td align="center"><b>Your data, in a file you keep:</b> every minute, day and outing, or a table for a spreadsheet.</td>
+    <td align="center"><b>An import shows what it holds first,</b> then joins it with what the phone has. Nothing is deleted.</td>
+  </tr>
 </table>
 
 Drawn from the app's own screens with realistic sample days (the phone's status bar is not in
@@ -121,6 +132,14 @@ resizable home-screen widgets answer "how am I doing today?" at a glance.
   afterwards with how much of its goal was done.
 - **Insights**: the streak of days at your goal, your best day, week and month, averages over
   the last 7 and 30 days, and what it all adds up to since the first day.
+- **Measure your step**: walk a distance you know (a running track, a football pitch) with
+  the phone in your pocket, and Passo works out your walking or running step from the steps
+  it counted. No GPS. It says what the new step changes before you keep it.
+- **Your data, in files you keep**: a backup of everything (every minute, every day as it was
+  recorded, your outings, profile and settings) to one file, or a table of days, minutes or
+  outings for a spreadsheet. A backup imported here or on a new phone is shown first, then
+  joined with what the phone already has: nothing is deleted, nothing is counted twice. You
+  pick where the file goes, so Passo needs no storage permission.
 - **Settings**: height, weight and step length, the goal, the notifications, metric or
   imperial units, the first day of the week, walks, theme, palette and typeface, language, and
   a pause.
@@ -140,8 +159,7 @@ resizable home-screen widgets answer "how am I doing today?" at a glance.
 
 ## What is coming (v1.0)
 
-- **Data**: export to CSV and JSON, import from a backup, and a short walk to measure your
-  step length.
+- **Polish**: an accessibility pass, layouts for tablets and foldables, and a faster start.
 
 Distance and calories are **estimates**, and Passo says so. The formulas are documented and
 you can tune them: height, weight, your own step length, measured with a short calibration
@@ -152,6 +170,8 @@ walk.
 - **No `INTERNET` permission.** Passo cannot send anything anywhere. The build fails if a
   network, location, exact-alarm or body-sensor permission ever appears in the app, from any
   library.
+- **Your files are yours.** An export goes where you pick in Android's file picker, and an
+  import reads only the file you open there: Passo asks for no storage permission.
 - **Android's backup, decided.** If you turned on your phone's backup, Android (not Passo)
   keeps a copy of your step history, profile and settings in your Google account, encrypted
   with your screen lock, and moves them to a new phone. Nothing else is in it, and on the new

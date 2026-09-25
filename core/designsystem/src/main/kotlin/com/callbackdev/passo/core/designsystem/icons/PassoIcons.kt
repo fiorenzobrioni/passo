@@ -502,6 +502,81 @@ object PassoIcons {
         }
     }
 
+    /** An arrow rising out of a tray: a file written for the reader to keep (the export). */
+    val Export: ImageVector by lazy {
+        icon("export") {
+            tray()
+            moveTo(12f, 15f)
+            lineTo(12f, 3.5f)
+            moveTo(7.5f, 8f)
+            lineTo(12f, 3.5f)
+            lineTo(16.5f, 8f)
+        }
+    }
+
+    /** An arrow coming down into a tray: a file taken back in (the import). */
+    val Import: ImageVector by lazy {
+        icon("import") {
+            tray()
+            moveTo(12f, 3.5f)
+            lineTo(12f, 15f)
+            moveTo(7.5f, 10.5f)
+            lineTo(12f, 15f)
+            lineTo(16.5f, 10.5f)
+        }
+    }
+
+    /** A sheet ruled in rows and columns: a table for a spreadsheet. */
+    val Table: ImageVector by lazy {
+        icon("table") {
+            moveTo(6f, 4f)
+            lineTo(18f, 4f)
+            curveTo(19.1f, 4f, 20f, 4.9f, 20f, 6f)
+            lineTo(20f, 18f)
+            curveTo(20f, 19.1f, 19.1f, 20f, 18f, 20f)
+            lineTo(6f, 20f)
+            curveTo(4.9f, 20f, 4f, 19.1f, 4f, 18f)
+            lineTo(4f, 6f)
+            curveTo(4f, 4.9f, 4.9f, 4f, 6f, 4f)
+            close()
+            moveTo(4f, 9.5f)
+            lineTo(20f, 9.5f)
+            moveTo(4f, 14.8f)
+            lineTo(20f, 14.8f)
+            moveTo(10f, 9.5f)
+            lineTo(10f, 20f)
+        }
+    }
+
+    /** A ruler laid across, its marks long and short: a length measured (the step calibration). */
+    val Ruler: ImageVector by lazy {
+        icon("ruler") {
+            moveTo(3.5f, 8f)
+            lineTo(20.5f, 8f)
+            curveTo(21.05f, 8f, 21.5f, 8.45f, 21.5f, 9f)
+            lineTo(21.5f, 15f)
+            curveTo(21.5f, 15.55f, 21.05f, 16f, 20.5f, 16f)
+            lineTo(3.5f, 16f)
+            curveTo(2.95f, 16f, 2.5f, 15.55f, 2.5f, 15f)
+            lineTo(2.5f, 9f)
+            curveTo(2.5f, 8.45f, 2.95f, 8f, 3.5f, 8f)
+            close()
+            for ((x, long) in listOf(6.5f to false, 9.5f to true, 12.5f to false, 15.5f to true, 18.5f to false)) {
+                moveTo(x, 8f)
+                lineTo(x, if (long) 12.5f else 10.8f)
+            }
+        }
+    }
+
+    private fun PathBuilder.tray() {
+        moveTo(4f, 14f)
+        lineTo(4f, 18f)
+        curveTo(4f, 19.1f, 4.9f, 20f, 6f, 20f)
+        lineTo(18f, 20f)
+        curveTo(19.1f, 20f, 20f, 19.1f, 20f, 18f)
+        lineTo(20f, 14f)
+    }
+
     private fun icon(name: String, autoMirror: Boolean = false, draw: PathBuilder.() -> Unit): ImageVector =
         ImageVector.Builder(
             name = "passo_$name",

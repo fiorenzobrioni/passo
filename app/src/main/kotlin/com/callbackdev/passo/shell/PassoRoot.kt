@@ -40,6 +40,7 @@ import com.callbackdev.passo.R
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.PassoMotion
 import com.callbackdev.passo.core.designsystem.theme.reducedMotion
+import com.callbackdev.passo.core.domain.calibration.CalibratedStep
 import com.callbackdev.passo.core.tracking.TrackingReadiness
 import com.callbackdev.passo.feature.history.HistoryRoute
 import com.callbackdev.passo.feature.history.HistoryTarget
@@ -49,6 +50,7 @@ import com.callbackdev.passo.feature.onboarding.OnboardingRoute
 import com.callbackdev.passo.feature.sessions.PlanEditorRoute
 import com.callbackdev.passo.feature.sessions.SessionsRoute
 import com.callbackdev.passo.feature.settings.SettingsRoute
+import com.callbackdev.passo.feature.settings.calibration.CalibrationRoute
 import com.callbackdev.passo.feature.today.TodayRoute
 import kotlinx.serialization.Serializable
 
@@ -63,6 +65,10 @@ data object SettingsKey : NavKey
 /** The Outings page, from Today (PLANNING.md §11 Phase 10). */
 @Serializable
 data object SessionsKey : NavKey
+
+/** Measuring the walking or the running step, from Settings (PLANNING.md §11 Phase 7). */
+@Serializable
+data class CalibrationKey(val step: CalibratedStep) : NavKey
 
 /** The editor of one outing; a new one when [planId] is null. */
 @Serializable
@@ -106,7 +112,10 @@ private fun MainPages() {
                         onOpenSessions = { backStack.add(SessionsKey) },
                     )
                 }
-                entry<SettingsKey> { SettingsRoute(onBack = { back() }) }
+                entry<SettingsKey> {
+                    SettingsRoute(onBack = { back() }, onCalibrate = { backStack.add(CalibrationKey(it)) })
+                }
+                entry<CalibrationKey> { key -> CalibrationRoute(step = key.step, onDone = { back() }) }
                 entry<SessionsKey> {
                     SessionsRoute(onBack = { back() }, onEdit = { backStack.add(PlanEditorKey(it)) })
                 }

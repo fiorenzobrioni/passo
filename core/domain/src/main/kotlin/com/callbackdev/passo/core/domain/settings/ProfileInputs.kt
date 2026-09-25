@@ -43,6 +43,25 @@ object ProfileInputs {
         UnitSystem.IMPERIAL -> InputScale(inches(20)..inches(71), UnitConversions.METERS_PER_INCH / 2)
     }
 
+    /**
+     * The known distance walked to measure the step (the calibration wizard): 50 m to 2 km by
+     * 10 m, or 50 to 2,200 yards by 10. Fifty is about seventy steps, where one step more or
+     * less still moves the result by under 2%; a longer walk measures better.
+     */
+    fun calibrationDistance(units: UnitSystem): InputScale = when (units) {
+        UnitSystem.METRIC -> InputScale(50.0..2_000.0, 10.0)
+        UnitSystem.IMPERIAL -> InputScale(yards(50)..yards(2_200), UnitConversions.METERS_PER_YARD * 10)
+    }
+
+    /**
+     * What the distance picker shows first: 100 m, or 100 yards. Long enough to measure well, and
+     * the length of a straight on a running track or of a football pitch.
+     */
+    fun defaultCalibrationDistance(units: UnitSystem): Double = when (units) {
+        UnitSystem.METRIC -> 100.0
+        UnitSystem.IMPERIAL -> yards(100)
+    }
+
     /** The daily goal: 1,000 to 30,000 in steps of 500. */
     val goal: InputScale = InputScale(1_000.0..30_000.0, 500.0)
 
@@ -51,6 +70,8 @@ object ProfileInputs {
     const val DEFAULT_WEIGHT_KG: Double = 70.0
 
     private fun inches(value: Int) = UnitConversions.inchesToMeters(value.toDouble())
+
+    private fun yards(value: Int) = UnitConversions.yardsToMeters(value.toDouble())
 
     private fun pounds(value: Int) = UnitConversions.poundsToKg(value.toDouble())
 }

@@ -78,6 +78,7 @@ import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
+import com.callbackdev.passo.core.domain.calibration.CalibratedStep
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.goals.GoalSchedule
 import com.callbackdev.passo.core.domain.metrics.StepLengths
@@ -100,13 +101,25 @@ import com.callbackdev.passo.core.tracking.GoalNotificationsBlock
 import com.callbackdev.passo.core.tracking.NotificationVisibility
 import com.callbackdev.passo.core.tracking.StepsTile
 import com.callbackdev.passo.core.tracking.TileRequestResult
+import com.callbackdev.passo.feature.settings.data.DataActions
+import com.callbackdev.passo.feature.settings.data.DataDialogs
+import com.callbackdev.passo.feature.settings.data.DataGroup
+import com.callbackdev.passo.feature.settings.data.DataUiState
+import com.callbackdev.passo.feature.settings.data.DataViewModel
+import com.callbackdev.passo.feature.settings.data.rememberDataFiles
 import java.time.DayOfWeek
 import java.time.LocalTime
 import java.time.format.TextStyle
 
 @Composable
-fun SettingsRoute(onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsRoute(
+    onBack: () -> Unit,
+    onCalibrate: (CalibratedStep) -> Unit,
+    viewModel: SettingsViewModel = hiltViewModel(),
+    dataViewModel: DataViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val data by dataViewModel.state.collectAsStateWithLifecycle()
     SettingsScreen(
         state = state,
         onBack = onBack,
@@ -115,6 +128,18 @@ fun SettingsRoute(onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewMod
             updateProfile = viewModel::updateProfile,
             applyProfileToPastDays = viewModel::applyProfileToPastDays,
             setTracking = viewModel::setTracking,
+            calibrate = onCalibrate,
+        ),
+        data = data,
+        dataActions = DataActions(
+            writeBackup = dataViewModel::writeBackup,
+            writeTable = dataViewModel::writeTable,
+            readBackup = dataViewModel::readBackup,
+            confirmImport = dataViewModel::confirmImport,
+            cancelImport = dataViewModel::cancelImport,
+            dismissOutcome = dataViewModel::dismissOutcome,
+            backupFileName = dataViewModel::backupFileName,
+            tableFileName = dataViewModel::tableFileName,
         ),
     )
 }
@@ -125,6 +150,7 @@ class SettingsActions(
     val updateProfile: ((Profile) -> Profile) -> Unit = {},
     val applyProfileToPastDays: () -> Unit = {},
     val setTracking: (Boolean) -> Unit = {},
+    val calibrate: (CalibratedStep) -> Unit = {},
 )
 
 /**
@@ -141,6 +167,8 @@ fun SettingsScreen(
     onBack: () -> Unit,
     actions: SettingsActions,
     modifier: Modifier = Modifier,
+    data: DataUiState = DataUiState(),
+    dataActions: DataActions = DataActions(),
 ) {
     val scroll = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     Scaffold(
@@ -160,7 +188,7 @@ fun SettingsScreen(
         // Until the store's first answer the list is not drawn: a screen of defaults that may be
         // about to change is a lie with good intentions.
         if (state != null) {
-            SettingsList(state, actions, Modifier.fillMaxSize().padding(padding))
+            SettingsList(state, actions, data, dataActions, Modifier.fillMaxSize().padding(padding))
         }
     }
 }
@@ -184,13 +212,20 @@ private enum class Dialog {
 }
 
 @Composable
-private fun SettingsList(state: SettingsUiState, actions: SettingsActions, modifier: Modifier) {
+private fun SettingsList(
+    state: SettingsUiState,
+    actions: SettingsActions,
+    data: DataUiState,
+    dataActions: DataActions,
+    modifier: Modifier,
+) {
     val context = LocalContext.current
     val settings = state.settings
     val profile = state.profile
     val format = rememberMeasureFormatter(settings.units)
     var dialog by rememberSaveable { mutableStateOf<Dialog?>(null) }
     val lengths = StepLengths.of(profile)
+    val files = rememberDataFiles(dataActions)
 
     LazyColumn(modifier = modifier.testTag(SettingsTags.LIST), contentPadding = PaddingValues(bottom = 32.dp)) {
         item { GroupHeader(stringResource(R.string.settings_group_profile)) }
@@ -234,6 +269,14 @@ private fun SettingsList(state: SettingsUiState, actions: SettingsActions, modif
                         stringResource(R.string.settings_running_auto, format.stepLength(lengths.runningMeters).text())
                     },
                     onClick = { dialog = Dialog.RUNNING_STEP_LENGTH },
+                )
+                GroupDivider()
+                ValueRow(
+                    label = stringResource(R.string.settings_calibrate),
+                    value = stringResource(R.string.settings_calibrate_note),
+                    trailing = true,
+                    onClick = { actions.calibrate(CalibratedStep.WALKING) },
+                    modifier = Modifier.testTag(SettingsTags.CALIBRATE),
                 )
                 GroupDivider()
                 ValueRow(
@@ -385,6 +428,9 @@ private fun SettingsList(state: SettingsUiState, actions: SettingsActions, modif
             }
         }
 
+        item { GroupHeader(stringResource(R.string.settings_group_data)) }
+        item { DataGroup(data, format, files, dataActions.dismissOutcome) }
+
         item { GroupHeader(stringResource(R.string.settings_privacy)) }
         item { PrivacyCard() }
 
@@ -431,6 +477,8 @@ private fun SettingsList(state: SettingsUiState, actions: SettingsActions, modif
         }
     }
 
+    DataDialogs(data, format, files, dataActions)
+
     val close = { dialog = null }
     val clearHeight = { actions.updateProfile { it.copy(heightMeters = null) } }
     val clearWeight = { actions.updateProfile { it.copy(weightKg = null) } }
@@ -474,12 +522,20 @@ private fun SettingsList(state: SettingsUiState, actions: SettingsActions, modif
             format = format,
             onSave = { own ->
                 actions.updateProfile {
-                    if (own == null) {
-                        it.copy(stepLengthMode = StepLengthMode.AUTO, walkingStepLengthMeters = null)
-                    } else {
-                        it.copy(stepLengthMode = StepLengthMode.MANUAL, walkingStepLengthMeters = own)
+                    when {
+                        own == null -> it.copy(stepLengthMode = StepLengthMode.AUTO, walkingStepLengthMeters = null)
+
+                        // Kept as it was: a measured step stays measured.
+                        own == it.walkingStepLengthMeters && it.stepLengthMode != StepLengthMode.AUTO -> it
+
+                        else -> it.copy(stepLengthMode = StepLengthMode.MANUAL, walkingStepLengthMeters = own)
                     }
                 }
+            },
+            measure = stringResource(R.string.settings_measure_walking),
+            onMeasure = {
+                dialog = null
+                actions.calibrate(CalibratedStep.WALKING)
             },
             onDismiss = close,
         )
@@ -491,6 +547,11 @@ private fun SettingsList(state: SettingsUiState, actions: SettingsActions, modif
             estimate = StepLengths.of(profile.copy(runningStepLengthMeters = null)).runningMeters,
             format = format,
             onSave = { own -> actions.updateProfile { it.copy(runningStepLengthMeters = own) } },
+            measure = stringResource(R.string.settings_measure_running),
+            onMeasure = {
+                dialog = null
+                actions.calibrate(CalibratedStep.RUNNING)
+            },
             onDismiss = close,
         )
 
@@ -982,10 +1043,19 @@ private fun LengthDialog(
     estimate: Double,
     format: MeasureFormatter,
     onSave: (Double?) -> Unit,
+    measure: String,
+    onMeasure: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     var mine by remember { mutableStateOf(own != null) }
     var value by remember { mutableDoubleStateOf(scale.snap(own ?: estimate)) }
+    // A length of the reader's own that the stepper was not moved from is saved as it is, not
+    // rounded to the stepper's centimetre: a measured 72.6 cm stays 72.6.
+    var moved by remember { mutableStateOf(false) }
+    val pick: (Double) -> Unit = {
+        value = it
+        moved = true
+    }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
@@ -1006,19 +1076,34 @@ private fun LengthDialog(
                     ValueStepper(
                         value = value.toFloat(),
                         range = scale.range.start.toFloat()..scale.range.endInclusive.toFloat(),
-                        text = format.stepLength(value).text(),
-                        onValueChange = { value = scale.snap(it.toDouble()) },
-                        onDecrease = { value = scale.down(value) },
-                        onIncrease = { value = scale.up(value) },
+                        text = format.stepLength(if (moved || own == null) value else own).text(),
+                        onValueChange = { pick(scale.snap(it.toDouble())) },
+                        onDecrease = { pick(scale.down(value)) },
+                        onIncrease = { pick(scale.up(value)) },
                         decreaseLabel = stringResource(R.string.settings_decrease),
                         increaseLabel = stringResource(R.string.settings_increase),
                     )
+                }
+                TextButton(
+                    onClick = onMeasure,
+                    modifier = Modifier.padding(top = 4.dp).testTag(SettingsTags.MEASURE),
+                ) {
+                    Icon(PassoIcons.Ruler, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Text(measure, modifier = Modifier.padding(start = 8.dp))
                 }
             }
         },
         confirmButton = {
             TextButton(onClick = {
-                onSave(if (mine) value else null)
+                onSave(
+                    if (!mine) {
+                        null
+                    } else if (moved || own == null) {
+                        value
+                    } else {
+                        own
+                    },
+                )
                 onDismiss()
             }) { Text(stringResource(R.string.settings_save)) }
         },
@@ -1169,4 +1254,6 @@ object SettingsTags {
     const val WEEKLY_SUMMARY = "settings_weekly_summary"
     const val NOTIFICATIONS_BLOCKED = "settings_notifications_blocked"
     const val TILE = "settings_tile"
+    const val CALIBRATE = "settings_calibrate"
+    const val MEASURE = "settings_measure"
 }

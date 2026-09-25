@@ -10,6 +10,10 @@ data class Measure(val number: String, val unit: MeasureUnit)
 enum class MeasureUnit {
     KILOMETER,
     MILE,
+
+    /** A short distance, whole: a measured stretch walked to calibrate the step (Phase 7). */
+    METER,
+    YARD,
     KILOCALORIE,
     KILOGRAM,
     POUND,

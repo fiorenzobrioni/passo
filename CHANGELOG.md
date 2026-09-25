@@ -99,6 +99,15 @@ All notable changes to Passo are documented here. The format follows
   on silent). It uses a voice installed on the phone, never one from the internet, and lowers
   your music for a moment rather than stopping it. Off unless you turn it on for an outing;
   the editor lets you hear it first.
+- Your data, in files you keep (Phase 7): a backup of everything (every minute, every day as
+  it was recorded, the outings, the profile and the settings) to one file, and tables of days,
+  minutes or outings for a spreadsheet. A backup imported on this or another phone is shown
+  first, then joined with what the phone already has: nothing is deleted, nothing is counted
+  twice, and on a new phone the history comes back exactly. No storage permission: you pick
+  where the file goes.
+- Measure your step: walk a distance you know (a track, a pitch) with the phone in your
+  pocket, and Passo works out your walking or running step from the steps it counted, says
+  what it changes, and keeps it if you want. No GPS.
 
 ### Changed
 

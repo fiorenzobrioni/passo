@@ -60,6 +60,35 @@ abstract class TrackingDao {
     @Query("SELECT * FROM diagnostics_event ORDER BY id")
     abstract suspend fun diagnostics(): List<DiagnosticsEventEntity>
 
+    /** How many days are recorded: what an export would carry, said before it is made. */
+    @Query("SELECT COUNT(*) FROM daily_summary")
+    abstract fun observeDayCount(): Flow<Int>
+
+    /** Every minute ever recorded, oldest first: the export's history, whole. */
+    @Query("SELECT * FROM minute_steps ORDER BY epochMinute")
+    abstract suspend fun allMinutes(): List<MinuteStepsEntity>
+
+    /** The days holding a minute between [fromMinute] and [toMinute]: where an import may land. */
+    @Query("SELECT DISTINCT localEpochDay FROM minute_steps WHERE epochMinute BETWEEN :fromMinute AND :toMinute")
+    abstract suspend fun daysWithMinutesBetween(fromMinute: Long, toMinute: Long): List<Long>
+
+    /**
+     * The summaries and the minutes read together, so an export never pairs a day's summary
+     * with minutes a batch changed between the two reads.
+     */
+    @Transaction
+    open suspend fun history(): StepHistory = StepHistory(allSummaries(), allMinutes())
+
+    /**
+     * An import's writes (`BackupMerge`), in one transaction: each minute at its new count, each
+     * summary as the merge decided it. Nothing is deleted.
+     */
+    @Transaction
+    open suspend fun importDays(minutes: List<MinuteStepsEntity>, summaries: List<DailySummaryEntity>) {
+        upsertMinutes(minutes)
+        upsertSummaries(summaries)
+    }
+
     /**
      * Writes one batch atomically: minute increments, the counter state they lead to, the
      * summaries of the days they touch, the log lines, and the outing under way as those steps
@@ -179,7 +208,7 @@ abstract class TrackingDao {
     protected abstract suspend fun openSummariesFrom(today: Long): List<DailySummaryEntity>
 
     @Query("SELECT * FROM daily_summary ORDER BY localEpochDay")
-    protected abstract suspend fun allSummaries(): List<DailySummaryEntity>
+    abstract suspend fun allSummaries(): List<DailySummaryEntity>
 
     @Query("UPDATE minute_steps SET steps = steps + :steps WHERE epochMinute = :epochMinute")
     protected abstract suspend fun addToMinute(epochMinute: Long, steps: Int): Int
@@ -189,6 +218,12 @@ abstract class TrackingDao {
 
     @Upsert
     protected abstract suspend fun upsertSummary(summary: DailySummaryEntity)
+
+    @Upsert
+    protected abstract suspend fun upsertSummaries(summaries: List<DailySummaryEntity>)
+
+    @Upsert
+    protected abstract suspend fun upsertMinutes(minutes: List<MinuteStepsEntity>)
 
     @Upsert
     protected abstract suspend fun upsertSession(session: SessionEntity)
@@ -204,3 +239,6 @@ abstract class TrackingDao {
     )
     protected abstract suspend fun trimDiagnostics(kept: Int)
 }
+
+/** Every summary and every minute, as one consistent read. */
+data class StepHistory(val summaries: List<DailySummaryEntity>, val minutes: List<MinuteStepsEntity>)

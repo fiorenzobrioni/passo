@@ -26,6 +26,10 @@
     <string name="settings_running_manual">La tua: %1$s</string>
     <string name="settings_choice_estimate">Stimala</string>
     <string name="settings_choice_mine">Imposto la mia</string>
+    <string name="settings_calibrate">Misura il tuo passo</string>
+    <string name="settings_calibrate_note">Percorri una distanza che conosci: niente GPS, e ogni distanza si avvicina alla tua</string>
+    <string name="settings_measure_walking">Misuralo camminando</string>
+    <string name="settings_measure_running">Misuralo correndo</string>
     <string name="settings_apply_past">Applica il profilo ai giorni passati</string>
     <string name="settings_apply_past_note">I giorni passati tengono le stime con cui sono stati registrati.</string>
     <string name="settings_apply_past_title">Ricalcolare tutti i giorni passati?</string>
@@ -127,7 +131,7 @@
 
     <string name="settings_privacy">Privacy</string>
     <string name="settings_privacy_headline">Niente account, niente pubblicità, niente tracciamento.</string>
-    <string name="settings_privacy_body">Passo non ha alcun permesso di accesso a internet, quindi non può mandare da nessuna parte passi, profilo e impostazioni: restano sul telefono. Solo il backup di Android, se l’hai attivato, ne tiene una copia nel tuo account Google, cifrata con il blocco schermo, per ritrovarli su un telefono nuovo.</string>
+    <string name="settings_privacy_body">Passo non ha alcun permesso di accesso a internet, quindi non può mandare da nessuna parte passi, profilo e impostazioni: restano sul telefono, a meno che non li esporti tu in un file. Il backup di Android, se l’hai attivato, ne tiene una copia nel tuo account Google, cifrata con il blocco schermo, per ritrovarli su un telefono nuovo.</string>
 
     <string name="settings_group_about">Informazioni</string>
     <string name="settings_version">Versione</string>

@@ -40,15 +40,15 @@ passo/
 ├── build-logic/            # Convention plugins (android-library, compose, hilt, room…)
 ├── core/
 │   ├── model/              # Pure Kotlin data classes (no Android deps)
-│   ├── domain/             # Pure Kotlin: StepAccountant, calculators, streaks/records
+│   ├── domain/             # Pure Kotlin: StepAccountant, calculators, streaks/records, outings, backup format
 │   ├── data/               # Room DB, DAOs, DataStore, repositories
 │   ├── tracking/           # StepTrackingService, sensor source, receivers, notification
-│   └── designsystem/       # M3 theme, typography, shared components (ring, metric card)
+│   └── designsystem/       # M3 theme, typography, shared components, charts, icons
 ├── feature/
 │   ├── today/
 │   ├── history/
 │   ├── insights/           # records, streaks, totals
-│   ├── settings/
+│   ├── settings/           # Settings, your data (export, import), the step calibration
 │   ├── onboarding/
 │   └── sessions/           # the Outings page and the outing editor (Phase 10)
 ├── widget/                 # Glance widget(s), receiver, update coordinator
@@ -68,20 +68,120 @@ Rules:
 
 ## 3. Architecture overview
 
+Reviewed at Phase 7 (25 Sep 2026) against the code: the Phase 1 diagram showed the tracking
+path alone; the app now also has outings, in-process live state, pushed widget updates, goal
+alarms, the tile, the export and import, and the calibration.
+
 ```mermaid
 flowchart LR
-    SENSOR["Step counter sensor (HW, batched)"] -->|"events with timestamps"| SVC["StepTrackingService<br/>(FGS type health)"]
-    BOOT["BOOT_COMPLETED<br/>MY_PACKAGE_REPLACED"] -->|start| SVC
-    SVC --> ACC["StepAccountant<br/>(pure Kotlin)"]
-    ACC -->|"minute buckets + state<br/>(single transaction)"| DB[("Room")]
-    DB --> REPO["Repositories (Flow)"]
-    REPO --> UI["Compose UI"]
-    REPO --> WIDGET["Glance widget"]
-    REPO --> TILE["QS tile"]
-    SVC -->|"screen on, throttled"| WIDGET
-    SVC -->|"screen on, throttled"| NOTIF["Ongoing notification"]
-    DS[("DataStore<br/>settings/profile")] --> REPO
+    subgraph PHONE["Android"]
+        SENSOR["Hardware step counter<br/>(non-wake-up, batched in the hub)"]
+        BCAST["Boot, update, screen,<br/>shutdown, time broadcasts"]
+        ABK["Android backup<br/>(allowlist, ADR 0007)"]
+        SAF[/"Files, through the<br/>Storage Access Framework"/]
+    end
+
+    subgraph TRACKING[":core:tracking"]
+        SVC["StepTrackingService<br/>(FGS type health)"]
+        SURF["Counting notification<br/>StepsTileService · shortcuts"]
+        GOALS["GoalNotifier<br/>(inexact alarms)"]
+        PROBE["StepCounterProbe<br/>(calibration page only)"]
+    end
+
+    subgraph DOMAIN[":core:domain (pure Kotlin)"]
+        ACC["StepAccountant → StepLedger<br/>SessionTracker"]
+        READ["TodayOverview · PeriodOverview · Insights<br/>WalkDetector · TypicalDayCalculator"]
+        POLICY["WidgetUpdatePolicy"]
+        BK["BackupCodec · BackupMerge · CsvExport<br/>StepCalibration"]
+    end
+
+    subgraph DATA[":core:data"]
+        REPO["Repositories (Flow)<br/>Tracking · Session · Settings · Backup"]
+        DB[("Room: minutes, summaries,<br/>tracker state, outings, log")]
+        DS[("DataStore: profile, settings")]
+        LIVE["LiveSteps · LiveSession<br/>(in process, never stored)"]
+    end
+
+    UI["Compose screens (:feature:*)"]
+    WIDGET["Glance widgets (:widget)"]
+
+    SENSOR -->|"samples with timestamps"| SVC
+    BCAST --> SVC
+    SVC <--> ACC
+    SVC -->|"one transaction per batch:<br/>minutes, summaries, state, outing"| REPO
+    REPO <--> DB
+    REPO <--> DS
+    SVC -->|"stored + buffered"| LIVE
+    SVC -->|"WidgetUpdates"| POLICY
+    POLICY -->|"screen on only"| WIDGET
+    SVC -->|"screen on, 5 s at most"| SURF
+    SVC -->|"goal reached, on samples"| GOALS
+    REPO --> READ
+    LIVE --> READ
+    READ --> UI
+    READ --> WIDGET
+    READ --> SURF
+    UI -->|"profile, goal, settings:<br/>past days frozen first"| REPO
+    UI -->|"outing commands (intents)"| SVC
+    UI <-->|"export, import"| BK
+    BK <--> REPO
+    BK <--> SAF
+    SENSOR -.->|"Start and Stop"| PROBE
+    PROBE -.-> UI
+    DB -.-> ABK
+    DS -.-> ABK
 ```
+
+**The write path, and its one writer.** Only the service writes steps. The sensor's samples go
+through `StepAccountant` (deltas into minutes, §4.4) and `StepLedger` (the buffer and its write
+triggers, §4.5); `SessionTracker` measures the outing under way from the same deltas. A batch
+is written by `TrackingRepository.persist` in **one** Room transaction: the minutes, the
+summaries of the days they touch, the tracker state, the log lines and the outing. The same
+repository is the only way to change the profile or the goal, and the import's only way in: one
+lock orders all of them, so a day is frozen before a new profile or goal can reach it (§5,
+ADR 0003) and no batch lands inside an import.
+
+**The read path is computed, not stored.** The screens, the widgets and the notification read
+the repositories' `Flow`s and derive everything in `:core:domain`: today's sentence and pace
+(`TodayOverview`), the periods (`PeriodOverview`), records and streaks (`Insights`), walks and
+the usual day. Nothing of it runs in the background or is cached in a table (§5, §6).
+
+**Live state stays in the process.** Between two writes the service publishes today's stored
+plus buffered count (`LiveSteps`) and the outing as it stands (`LiveSession`). Today, the tile
+and the widgets add it to what is stored (`withPending`, `byDayWithLive`), so every surface
+shows the same count and it never goes back during a write. It is never persisted: the
+database is the truth after any crash.
+
+**Surfaces update only when someone can see them** (§7, §8, §9). The service tells the widgets
+through `WidgetUpdates` (declared in `:core:data`, so the service never depends on `:widget`),
+and `WidgetUpdatePolicy` decides now, later or not at all; with the screen off, only a change
+of tracking state or of a setting repaints. The notification follows the screen; the tile reads
+only between `onStartListening` and `onStopListening`. Goal reached rides on the samples; the
+evening reminder and the weekly summary are one inexact alarm each (`GoalNotifier`), after a
+catch-up with the sensor (`TrackerLink`).
+
+**Control has two doors.** Pause and resume go through `TrackingControl` (Settings' switch,
+Today's card, a paused widget's or tile's tap): a pause stops the service, which writes its
+buffer as it goes; a resume forgets the baseline, then starts the service from the activity,
+where a foreground service may start (a widget's tap opens the app to do it). An outing's
+start, pause, resume, stop and "keep going" are intents to the running service
+(`SessionControl`), from the screens, the notification's actions, the launcher's shortcuts and
+the evening reminder's "Walk now".
+
+**Data in and out, by the reader or by Android** (Phase 7, ADR 0011; ADR 0007). The reader's
+export writes the whole history as JSON, or a table as CSV, to a file the system's picker
+chose; the import reads one back and merges it (`BackupMerge`: every minute at its larger
+count, never deleting). Android's backup copies the database and the settings file, nothing
+else; a tracker state from another installation is dropped (`adoptTrackerState`). Passo itself
+has no network access either way.
+
+**The calibration reads the counter directly** (`StepCounterProbe`), only while its page is on
+screen: the counter is cumulative, so its values at Start and Stop measure the walk whatever
+happened in between, independently of the service.
+
+`:app` wires the graph (Hilt), holds the activity and the navigation (Navigation 3: the three
+tabs, Settings, the Outings page and editor, the calibration), and starts the service when the
+app is opened.
 
 ---
 
@@ -577,17 +677,24 @@ Built with the owner's request of Phases 3 and 5 (a clean implementation, above 
 
 ### Phase 7 — Data, calibration and polish
 
-- [ ] Export to CSV and JSON, import from JSON (Storage Access Framework)
+Export, import and calibration built with the owner's request of Phases 3, 5 and 6 (a clean
+implementation, above all in UI and UX); decisions in `docs/adr/0011-export-import-and-calibration.md`.
+
+- [x] Export to CSV and JSON, import from JSON (Storage Access Framework)
+  - A "Your data" group in Settings: a backup to one JSON file (every minute with its day, the frozen summaries, the outings and their plans, the profile and the settings; the diagnostics log out, never back in; no tracker state), three CSV tables for a spreadsheet (days, minutes, outings), and the import. `BackupCodec`, `BackupMerge` and `CsvExport` in `:core:domain`, `BackupRepository` in `:core:data`, the file picker's `CreateDocument`/`OpenDocument` in the screen: no storage permission.
+  - *Decided:* the import **merges** and never deletes (every minute at the larger of its two counts, the file's own days as it froze them, this phone's frozen days taking only the added steps' share, plans and outings matched), so a new phone that already counted keeps its steps and the same file imported twice changes nothing. It is previewed before anything is written, with its profile and settings as one choice. Outcomes are cards, not toasts.
 - [x] `data_extraction_rules.xml` and `full_backup_content` for Auto Backup and device transfer
   - Brought forward to Phase 5 (owner's request), `docs/adr/0007-backup.md`. `full_backup_content` is not needed: it is read only below Android 12, and minSdk is 34. Backup and restore confirmed by the owner on the device (25 Sep 2026); the export round trip is still Phase 7's.
-- [ ] Step length calibration wizard (walk a known distance, start/stop, compute and save)
+- [x] Step length calibration wizard (walk a known distance, start/stop, compute and save)
+  - "Measure your step" (Settings' profile, and a button in each step-length dialog): the walking or the running step, a distance picked (50 m to 2 km, or yards), Start, the count while the page is looked at, Stop, the length with what it came from and what it changes, Save. The hardware counter is read directly (`StepCounterProbe`) only while the page is on screen, and flushed at Stop; `StepCalibration` refuses fewer than 30 steps or a length the app would not accept, with its arithmetic, and says a pace that does not match the step. A walking step is stored as measured (`StepLengthMode.CALIBRATED`).
 - [ ] Accessibility pass (TalkBack, font scale 200%, contrast, touch targets)
 - [ ] Adaptive layouts for tablets and foldables
 - [ ] Baseline Profiles; R8 full mode; startup check
 
 **Acceptance:**
-- Export followed by import on a clean install reproduces the history exactly.
-- The accessibility scanner reports no critical issues.
+- [x] Export followed by import on a clean install reproduces the history exactly.
+  - `BackupRepositoryTest`, between two real Room databases and settings files: every summary, minute, outing, plan, the profile and the settings (not the other phone's first-run state or tracker state), through the encoded file. To confirm on devices, through a file app and a cloud folder (owner).
+- [ ] The accessibility scanner reports no critical issues.
 
 ### Phase 8 — Release on GitHub
 
@@ -664,7 +771,7 @@ Added to v1.0 at the owner's request (25 Sep 2026), after Phase 6 and before Pha
 
 - **Unit (JVM):** `StepAccountant`, calculators, streaks and records, formatting. Use a fake clock and system snapshot. This is where most of the test effort goes.
 - **Robolectric:** Room DAOs and transactions, receivers, the notification builder.
-- **Compose UI tests:** onboarding, Today, Settings, History, Insights, the Outings page and its editor.
+- **Compose UI tests:** onboarding, Today, Settings (with its data rows), the step calibration, History, Insights, the Outings page and its editor.
 - **Glance:** unit tests for the layout chosen at each size.
 - **Manual device protocol** (`docs/testing/device-protocol.md`):
   - reboot
@@ -813,6 +920,13 @@ Include:
 
 - **Outings: the voice's tone and variety** (owner's question, ADR 0010): classic, with one earned "Well done" at the goal and an invitation, not a verdict, below the pace; variety from what happened (the pace kept, the day's goal brought), never a phrase at random. No male/female picker: the engine does not tell voices apart, so Passo uses the voice chosen in the system's settings and links there ("Change voice").
 - **Outings: the voice** (`docs/adr/0010-voice.md`, owner's second iteration): off by default, per outing; headphones only, or out loud too when the ringer is on; the system's engine with an offline voice in the app's language, never network synthesis; navigation-guidance audio ducking the music; bound only while an outing that speaks lasts. No wake lock: whether a sentence can wait for the next wake with the screen off and no music is left to the device test, and a short wake lock, if needed, is the owner's decision.
+
+- **Phase 7: export, import and calibration** (`docs/adr/0011-export-import-and-calibration.md`, owner's request of a clean implementation, above all in UI and UX). One JSON backup and three CSV tables through the Storage Access Framework; an import that merges and never deletes, previewed first; the step measured by walking a known distance, with the hardware counter read directly while the page is on screen.
+- **The backup format is kotlinx.serialization in `:core:domain`**, the library already in the catalog for the navigation routes (not a new dependency), over DTOs apart from the model. `format` and `version` say what a file is; a newer version asks for an update, a broken file says it is damaged, anything else is not a Passo backup.
+- **Import merges by the larger count per minute, never the sum**: two phones in one pocket walked one minute. A day only the file has is taken as the file froze it (the round trip is exact); a frozen day of this phone takes only the added steps' share (`withLateSteps`), keeping its goal. Idempotent by construction.
+- **CSV: fixed English headers with units in their names, RFC 4180, UTF-8 with a BOM**, distances in the reader's units; a field that starts like a formula is written as text.
+- **The calibration does not use the tracking service**: the counter's values at Start and Stop are exact whatever the service, a pause or midnight did in between. Its listener lives only while the page is visible (no wake-ups, no wake lock); Start survives the process being stopped (`SavedStateHandle`).
+- **§3 reviewed at Phase 7**: the diagram and its paths now describe the app as built (outings, live state in the process, pushed widget updates, goal alarms, the tile, the two doors of control, data in and out, the calibration).
 
 ### Open
 
