@@ -1,19 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Placeholder mark (Phase 0): a progress ring three quarters full, the motif of the Today
-     screen and the widget. The real icon is a Phase 8 task. Everything sits inside the 66dp
-     safe zone of the 108dp adaptive canvas. -->
+<!-- Written by tools/draw_launcher_icon.py: change the script and run it, never this file.
+
+     The mark: Chiaro's ring (radius 21, stroke 10, the same warm white under it) in the
+     greens of a day filling up, and where Chiaro has its sun, mirrored to the upper left,
+     a shoe print in the sun's amber. The print cuts the ring with a 2.6 gap, as the sun
+     does, and walks clockwise, the way the ring fills: the step that closes the day.
+     Everything sits inside the 33-unit safe circle of every launcher mask.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path
-        android:pathData="M54,32 A22,22 0 1,1 53.99,32"
-        android:strokeWidth="7"
-        android:strokeColor="@color/ic_launcher_track" />
-    <path
-        android:pathData="M54,32 A22,22 0 1,1 32,54"
-        android:strokeLineCap="round"
-        android:strokeWidth="7"
-        android:strokeColor="@color/ic_launcher_ink" />
+<group>
+<clip-path android:pathData="M 0,0 H 108 V 108 H 0 Z M 46.72,29.19 L 46.25,28.90 L 45.76,28.65 L 45.25,28.44 L 44.74,28.27 L 44.22,28.14 L 43.69,28.05 L 43.15,28.01 L 42.63,28.01 L 42.10,28.05 L 41.59,28.13 L 41.09,28.25 L 40.60,28.40 L 40.13,28.59 L 39.68,28.80 L 39.24,29.04 L 38.82,29.30 L 38.41,29.58 L 38.02,29.88 L 37.64,30.21 L 37.27,30.54 L 36.92,30.90 L 36.57,31.27 L 36.24,31.65 L 36.01,31.94 L 35.78,32.23 L 35.56,32.52 L 35.35,32.81 L 35.15,33.11 L 34.95,33.41 L 34.76,33.71 L 34.57,34.02 L 34.39,34.33 L 34.22,34.64 L 34.05,34.95 L 33.89,35.27 L 33.73,35.58 L 33.58,35.90 L 33.43,36.22 L 33.29,36.54 L 33.16,36.86 L 33.03,37.18 L 32.90,37.50 L 32.78,37.83 L 32.67,38.15 L 32.55,38.47 L 32.45,38.80 L 31.80,40.82 L 39.93,47.25 L 41.67,46.18 L 41.88,46.05 L 42.08,45.92 L 42.30,45.79 L 42.51,45.65 L 42.73,45.51 L 42.96,45.36 L 43.19,45.21 L 43.42,45.06 L 43.65,44.89 L 43.89,44.73 L 44.13,44.56 L 44.37,44.38 L 44.61,44.20 L 44.86,44.01 L 45.11,43.81 L 45.35,43.61 L 45.60,43.40 L 45.85,43.19 L 46.10,42.97 L 46.35,42.74 L 46.60,42.51 L 46.85,42.27 L 47.10,42.01 L 47.47,41.61 L 47.84,41.19 L 48.19,40.76 L 48.51,40.30 L 48.82,39.84 L 49.10,39.35 L 49.35,38.86 L 49.58,38.34 L 49.78,37.81 L 49.94,37.27 L 50.07,36.71 L 50.16,36.14 L 50.21,35.55 L 50.21,34.96 L 50.15,34.36 L 50.04,33.75 L 49.88,33.16 L 49.66,32.57 L 49.38,32.00 L 49.04,31.45 L 48.65,30.92 L 48.22,30.43 L 47.73,29.96 L 47.20,29.52 Z"/>
+<group>
+<clip-path android:pathData="M 0,0 H 108 V 108 H 0 Z M 31.90,39.48 L 31.70,39.60 L 31.50,39.73 L 31.31,39.86 L 31.12,39.99 L 30.94,40.13 L 30.76,40.28 L 30.58,40.42 L 30.40,40.57 L 30.23,40.73 L 30.07,40.88 L 29.91,41.04 L 29.75,41.21 L 29.59,41.38 L 29.44,41.54 L 29.29,41.72 L 29.14,41.89 L 29.00,42.07 L 28.86,42.25 L 28.72,42.43 L 28.58,42.62 L 28.45,42.81 L 28.32,43.00 L 28.19,43.20 L 27.98,43.53 L 27.78,43.90 L 27.60,44.27 L 27.44,44.64 L 27.31,45.02 L 27.19,45.40 L 27.10,45.79 L 27.03,46.17 L 26.99,46.56 L 26.97,46.95 L 26.97,47.34 L 27.00,47.73 L 27.05,48.11 L 27.13,48.48 L 27.23,48.85 L 27.36,49.21 L 27.50,49.56 L 27.67,49.90 L 27.86,50.22 L 28.07,50.53 L 28.30,50.83 L 28.54,51.11 L 28.81,51.37 L 29.09,51.62 L 29.38,51.85 L 29.70,52.06 L 30.02,52.26 L 30.37,52.42 L 30.72,52.57 L 31.08,52.69 L 31.45,52.78 L 31.82,52.85 L 32.20,52.90 L 32.58,52.92 L 32.96,52.91 L 33.35,52.88 L 33.73,52.83 L 34.11,52.76 L 34.49,52.66 L 34.86,52.53 L 35.23,52.39 L 35.59,52.22 L 35.94,52.04 L 36.29,51.83 L 36.63,51.60 L 36.96,51.35 L 37.29,51.09 L 37.58,50.82 L 37.74,50.67 L 37.90,50.52 L 38.06,50.36 L 38.21,50.21 L 38.37,50.05 L 38.52,49.90 L 38.66,49.74 L 38.81,49.58 L 38.95,49.42 L 39.10,49.25 L 39.23,49.09 L 39.37,48.92 L 39.51,48.76 L 39.64,48.59 L 39.76,48.42 L 39.89,48.24 L 40.01,48.07 L 40.13,47.89 L 40.25,47.71 L 40.36,47.53 L 40.47,47.35 L 40.57,47.17 L 40.67,46.98 L 41.71,44.92 L 33.60,38.51 Z"/>
+<group>
+<clip-path android:pathData="M 0,0 H 108 V 108 H 0 Z M 47.14,39.61 L 47.61,38.97 L 48.00,38.27 L 48.30,37.53 L 48.49,36.75 L 48.59,35.96 L 48.57,35.16 L 48.46,34.37 L 48.24,33.60 L 47.92,32.86 L 47.51,32.18 L 47.01,31.55 L 46.44,30.99 L 45.80,30.52 L 45.10,30.13 L 44.36,29.83 L 43.58,29.64 L 42.79,29.54 L 41.99,29.56 L 41.20,29.67 L 40.43,29.89 L 39.69,30.21 L 39.00,30.62 L 38.38,31.12 L 37.82,31.69 L 28.59,42.54 L 28.11,43.19 L 27.72,43.89 L 27.43,44.63 L 27.23,45.40 L 27.14,46.20 L 27.15,47.00 L 27.27,47.79 L 27.49,48.56 L 27.80,49.29 L 28.21,49.98 L 28.71,50.61 L 29.28,51.16 L 29.93,51.64 L 30.63,52.03 L 31.37,52.33 L 32.14,52.52 L 32.94,52.61 L 33.74,52.60 L 34.53,52.49 L 35.30,52.27 L 36.03,51.95 L 36.72,51.54 L 37.35,51.04 L 37.90,50.47 Z"/>
+<path android:pathData="M 33.00,54.00 a 21.00,21.00 0 1,0 42.00,0 a 21.00,21.00 0 1,0 -42.00,0 z" android:strokeWidth="10.00" android:fillColor="#00000000">
+    <aapt:attr name="android:strokeColor">
+        <gradient android:type="sweep" android:centerX="54.00" android:centerY="54.00">
+                <item android:offset="0.0000" android:color="#FF35A55E"/>
+                <item android:offset="0.0611" android:color="#FF2B9E56"/>
+                <item android:offset="0.6106" android:color="#FF0B5B33"/>
+                <item android:offset="0.6111" android:color="#FF0B5B33"/>
+                <item android:offset="0.6116" android:color="#FF74CF91"/>
+                <item android:offset="1.0000" android:color="#FF35A55E"/>
+        </gradient>
+    </aapt:attr>
+</path>
+</group>
+</group>
+</group>
+<path android:pathData="M 45.63,31.60 C 48.81,34.02 47.78,37.62 45.24,40.20 C 43.50,41.97 41.65,43.14 40.11,44.09 L 34.83,39.89 C 35.56,37.54 36.64,35.22 38.23,33.33 C 40.43,30.71 43.03,29.67 45.63,31.60 Z">
+    <aapt:attr name="android:fillColor">
+        <gradient android:type="linear" android:startX="45.49" android:startY="31.48" android:endX="30.46" android:endY="49.38">
+            <item android:offset="0" android:color="#FFFFC658"/>
+            <item android:offset="1" android:color="#FFEF8618"/>
+        </gradient>
+    </aapt:attr>
+</path>
+<path android:pathData="M 33.36,41.64 L 38.43,45.65 C 37.92,46.70 36.94,47.87 35.82,48.91 C 34.01,50.62 31.99,50.66 30.75,49.62 C 29.44,48.53 29.07,46.60 30.38,44.60 C 31.21,43.31 32.20,42.28 33.36,41.64 Z">
+    <aapt:attr name="android:fillColor">
+        <gradient android:type="linear" android:startX="45.49" android:startY="31.48" android:endX="30.46" android:endY="49.38">
+            <item android:offset="0" android:color="#FFFFC658"/>
+            <item android:offset="1" android:color="#FFEF8618"/>
+        </gradient>
+    </aapt:attr>
+</path>
 </vector>

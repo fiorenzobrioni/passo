@@ -117,7 +117,9 @@ family reads as one (`docs/adr/0004-design-language.md`). `:core:designsystem` h
 shapes and springs, and every animation collapses to a fade under reduced motion. Its principles
 hold here too: one sentence before any number, every number with the line that says what it
 means, estimates that say so, no dead tab and no switch for a feature that has not shipped.
-Icons are `PassoIcons`, drawn in code. The Compose UI tests write screenshots to each module's
+Icons are `PassoIcons`, drawn in code. The launcher icon (Chiaro's ring, with a shoe print
+where Chiaro has its sun) is written by `tools/draw_launcher_icon.py`: change the script and
+re-run it, never the two XML layers. The Compose UI tests write screenshots to each module's
 `build/screenshots`: look at them after changing a screen.
 
 **Widgets** (`docs/adr/0005-widgets.md`): Chiaro's card, colours and ink rule, carried over; the
