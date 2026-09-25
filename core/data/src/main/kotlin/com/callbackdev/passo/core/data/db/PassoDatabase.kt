@@ -11,6 +11,8 @@ import androidx.room.RoomDatabase
  *
  * - v1: steps, summaries, the tracker state, the log.
  * - v2: the outings and their plans (Phase 10); two new tables, nothing else touched.
+ * - v3: whether an outing speaks (`voice`, Phase 10's second iteration), a column with a default
+ *   on each of the two; every plan and outing before it is silent, as it was.
  */
 @Database(
     entities = [
@@ -21,9 +23,9 @@ import androidx.room.RoomDatabase
         SessionPlanEntity::class,
         SessionEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
-    autoMigrations = [AutoMigration(from = 1, to = 2)],
+    autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3)],
 )
 abstract class PassoDatabase : RoomDatabase() {
     abstract fun trackingDao(): TrackingDao

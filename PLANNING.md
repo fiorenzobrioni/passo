@@ -238,6 +238,7 @@ data class DiagnosticsEventEntity(
 - **No tables for walks or the typical day.** Both are computed on read from `minute_steps` (§6.1, §6.2). Add a cache table only if profiling shows a need.
 - **Schema v2 (Phase 10), an auto-migration adding two tables and touching nothing else:**
   - `session_plan`: the reader's outings (name or null, goal kind and value, intensity, milestones as a bit set, vibrate, position, last started).
+  - v3: `voice` (`OFF`, `HEADPHONES`, `ALWAYS`) on both, default `OFF` (the voice, ADR 0010).
   - `session`: each outing walked, with its goal copied at the start (frozen like a day), its state (`ACTIVE`, `PAUSED`, `FINISHED`) and end reason, its totals (steps, time in motion, time at its pace, estimated distance and energy), its last step and last measured moment, the milestones already told. The one under way is written in the step batch's transaction (§4.5).
 
 ### DataStore (Preferences)
@@ -387,6 +388,7 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
 | `RECEIVE_BOOT_COMPLETED` | Normal | Restart tracking after boot |
 | `VIBRATE` | Normal | An outing's signals, in their own patterns (Phase 10) |
 | `POST_PROMOTED_NOTIFICATIONS` | Normal | The outing under way as a Live Update on Android 16+ (Phase 10) |
+| `<queries>` for `TTS_SERVICE` | Manifest | Lets Android 11+ show Passo the text-to-speech engine, for the outings' voice (ADR 0010). Not a permission |
 | `WAKE_LOCK`, `ACCESS_NETWORK_STATE` | Normal | Brought by WorkManager, which Glance runs its widget sessions on (Phase 4): the wake lock is held by the job while a card is drawn; the network state lets nothing leave the phone without `INTERNET`. Passo's own code uses neither |
 | `android:allowBackup="true"` + `dataExtractionRules` | Manifest | Android's backup and device transfer carry the step history, the profile and the settings, an allowlist (`docs/adr/0007-backup.md`). No permission: Android sends the copy, not Passo |
 | `<uses-feature android:name="android.hardware.sensor.stepcounter" android:required="true"/>` | Feature | Documents the requirement; filters devices on a future Play listing. It does not block APK installs, so the app also checks the sensor at runtime |
@@ -636,7 +638,8 @@ Added to v1.0 at the owner's request (25 Sep 2026), after Phase 6 and before Pha
 - [x] The launcher's long press (the three last started), the evening reminder's "Walk now", both widgets and the Quick Settings tile saying the outing while it is under way (owner's request).
 - [x] Strings in English and Italian.
 - [ ] On a device (owner): an outing with the screen off (signals on time, the vibrations felt and told apart), the Android 16 Live Update, a reboot and a forgotten outing, and the battery check of an outing (§9).
-- Later (second iteration, owner's choice): spoken signals through the headphones, with the system's offline voices.
+- [x] The voice (second iteration, owner's choice; `docs/adr/0010-voice.md`): per outing off, headphones or always (out loud only when the ringer is on); the start, each chosen signal with what is left and the pace, the goal with what it came to, every amount in words in English and Italian; the system's engine with an offline voice only, over ducked music; "Hear it" and a missing voice stated in the editor. Schema v3 (`voice` on both tables, default off).
+- [ ] On a device (owner): the voice with and without headphones, with music playing, and with the screen off and no music (the one case ADR 0010 leaves to measure).
 
 **Edge cases** (the engine's in `SessionTrackerTest` and `SessionPlansTest`, the storage's in `SessionRepositoryTest`; a restart and a paused count are the service's, by construction, to check on the device):
 
@@ -807,6 +810,9 @@ Include:
 - **Outings: the notification permission is asked in context**, at the first start without it, not in onboarding (which already asks it): `VIBRATE` and `POST_PROMOTED_NOTIFICATIONS` are normal permissions, granted at install.
 - **Outings: an outing replaces the walk found in its minutes** in Today's and History's lists, and is listed whatever the walk-detection switch says.
 - **Outings on the widgets and the tile** (owner's question during the phase): in the sentence's place, no new element, so the widgets' layout arithmetic is unchanged; «Brisk walk: 12 of 20 min», wrapping at the colon with the progress kept whole.
+
+- **Outings: the voice's tone and variety** (owner's question, ADR 0010): classic, with one earned "Well done" at the goal and an invitation, not a verdict, below the pace; variety from what happened (the pace kept, the day's goal brought), never a phrase at random. No male/female picker: the engine does not tell voices apart, so Passo uses the voice chosen in the system's settings and links there ("Change voice").
+- **Outings: the voice** (`docs/adr/0010-voice.md`, owner's second iteration): off by default, per outing; headphones only, or out loud too when the ringer is on; the system's engine with an offline voice in the app's language, never network synthesis; navigation-guidance audio ducking the music; bound only while an outing that speaks lasts. No wake lock: whether a sentence can wait for the next wake with the screen off and no music is left to the device test, and a short wake lock, if needed, is the owner's decision.
 
 ### Open
 

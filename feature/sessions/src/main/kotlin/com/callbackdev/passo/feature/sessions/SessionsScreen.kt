@@ -70,6 +70,7 @@ import com.callbackdev.passo.core.domain.sessions.SessionConstants
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionPlan
+import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.tracking.GoalNotificationsBlock
 import com.callbackdev.passo.core.tracking.SessionSignalsAccess
 
@@ -427,7 +428,7 @@ private fun estimateLine(plan: SessionPlan, state: SessionsUiState, format: Meas
     }
 }
 
-/** «Signals at 25%, 50% and at the goal, with vibration». */
+/** «Signals at 25%, 50% and at the goal, with vibration and voice». */
 @Composable
 private fun signalsLine(plan: SessionPlan, format: MeasureFormatter): String {
     val shares = plan.milestones.sortedBy { it.percent }.joinToString(", ") { format.percent(it.percent / 100.0) }
@@ -436,7 +437,13 @@ private fun signalsLine(plan: SessionPlan, format: MeasureFormatter): String {
     } else {
         stringResource(R.string.sessions_signals, shares)
     }
-    return if (plan.vibrate) stringResource(R.string.sessions_signals_vibrate, signals) else signals
+    val voice = plan.voice != SessionVoice.OFF
+    return when {
+        plan.vibrate && voice -> stringResource(R.string.sessions_signals_vibrate_voice, signals)
+        plan.vibrate -> stringResource(R.string.sessions_signals_vibrate, signals)
+        voice -> stringResource(R.string.sessions_signals_voice, signals)
+        else -> signals
+    }
 }
 
 /** Hooks for the UI tests. */

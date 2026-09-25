@@ -9,27 +9,37 @@ import com.callbackdev.passo.core.data.settings.SettingsRepository
 import com.callbackdev.passo.core.data.tracking.LiveSteps
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.sessions.SessionAmount
+import com.callbackdev.passo.core.domain.sessions.SessionAnnouncement
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
+import com.callbackdev.passo.core.domain.sessions.cadenceFloor
 import com.callbackdev.passo.core.domain.settings.resolve
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionPlan
+import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.UnitSystem
 import com.callbackdev.passo.core.tracking.SessionHaptics
 import com.callbackdev.passo.core.tracking.SessionShortcuts
+import com.callbackdev.passo.core.tracking.SessionSpeech
+import com.callbackdev.passo.core.tracking.VoiceAvailability
+import com.callbackdev.passo.core.tracking.spokenSample
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
+import kotlin.math.ceil
 
 /**
  * The editor of one outing.
@@ -38,6 +48,8 @@ import javax.inject.Inject
  * @property draft the plan as edited so far.
  * @property imperial distances step by quarter miles.
  * @property canVibrate the phone has a vibrator: without one the switch is not offered.
+ * @property voiceAvailability whether the phone can speak in the app's language, once asked
+ *   (the engine is bound only when the outing speaks, or the reader picks a voice).
  */
 @Immutable
 data class PlanEditorState(
@@ -49,6 +61,7 @@ data class PlanEditorState(
     val lengths: StepLengths,
     val restOfDaySteps: Int,
     val canVibrate: Boolean,
+    val voiceAvailability: VoiceAvailability = VoiceAvailability.UNKNOWN,
 ) {
     val changed: Boolean get() = draft != original
 }
@@ -68,7 +81,13 @@ constructor(
     private val liveSteps: LiveSteps,
 ) : ViewModel() {
     private val editor = MutableStateFlow<PlanEditorState?>(null)
-    val state: StateFlow<PlanEditorState?> = editor.asStateFlow()
+
+    // Bound only while the editor shows a plan that speaks; released with the view model.
+    private val speech = SessionSpeech(context)
+
+    val state: StateFlow<PlanEditorState?> = combine(editor, speech.availability) { state, voice ->
+        state?.copy(voiceAvailability = voice)
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     /** Starts editing plan [id], or a new plan when it is null. */
     fun open(id: Long?) {
@@ -80,6 +99,7 @@ constructor(
             val plan = stored ?: SessionPlans.NEW
             val day = LocalDate.now(ZoneId.systemDefault()).toEpochDay()
             val steps = liveSteps.today.value?.takeIf { it.localEpochDay == day }?.steps ?: tracking.stepsOn(day)
+            if (plan.voice != SessionVoice.OFF) speech.prepare()
             editor.value = PlanEditorState(
                 original = plan,
                 draft = plan,
@@ -127,6 +147,42 @@ constructor(
 
     fun tryVibration(milestone: SessionMilestone) = SessionHaptics.play(context, milestone)
 
+    fun voice(voice: SessionVoice) {
+        if (voice != SessionVoice.OFF) speech.prepare()
+        edit { it.draft.copy(voice = voice) }
+    }
+
+    /** The outing's halfway, as it would be said: the same words, the reader's own numbers. */
+    fun tryVoice() {
+        val state = editor.value ?: return
+        val plan = state.draft
+        val half = when (plan.goalKind) {
+            SessionGoalKind.REST_OF_DAY -> SessionAmount(
+                SessionGoalKind.STEPS,
+                (state.restOfDaySteps / 2).coerceAtLeast(1).toDouble(),
+            )
+
+            SessionGoalKind.TIME -> SessionAmount(plan.goalKind, ceil(plan.goalValue / 2.0))
+
+            else -> SessionAmount(plan.goalKind, plan.goalValue / 2.0)
+        }
+        val cadence = plan.intensity.cadenceFloor?.plus(SAMPLE_CADENCE_MARGIN)
+        val sample = SessionAnnouncement.Milestone(
+            SessionMilestone.HALF,
+            half,
+            cadence,
+            SessionAnnouncement.verdict(plan.intensity, cadence),
+        )
+        speech.preview(context.spokenSample(sample, state.units))
+    }
+
+    /** The editor is left: the engine is let go (the view model outlives the page). */
+    fun close() = speech.release()
+
+    override fun onCleared() {
+        speech.release()
+    }
+
     /** Writes the draft, then [done]. */
     fun save(done: () -> Unit) {
         val state = editor.value ?: return
@@ -157,5 +213,8 @@ constructor(
 
     private companion object {
         const val MAX_NAME = 40
+
+        /** The sample walks a little above its pace, as a reader keeping it would. */
+        const val SAMPLE_CADENCE_MARGIN = 8
     }
 }

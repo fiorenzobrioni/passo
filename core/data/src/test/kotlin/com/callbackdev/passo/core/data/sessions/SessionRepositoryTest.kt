@@ -20,6 +20,7 @@ import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionTotals
+import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.TrackerState
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.cancel
@@ -158,6 +159,38 @@ class SessionRepositoryTest {
                 assertThat(cursor.getInt(0)).isEqualTo(0)
             }
         }
+    }
+
+    @Test
+    fun `version 2 migrates to 3 with every plan silent`() {
+        migrations.createDatabase(MIGRATION_DB, 2).use { db ->
+            db.execSQL(
+                "INSERT INTO session_plan (name, goalKind, goalValue, intensity, milestones, vibrate, position, " +
+                    "lastUsedAtMillis) VALUES (NULL, 'TIME', 20, 'BRISK', 2, 1, 0, NULL)",
+            )
+        }
+        migrations.runMigrationsAndValidate(MIGRATION_DB, 3, true).use { db ->
+            db.query("SELECT voice FROM session_plan").use { cursor ->
+                assertThat(cursor.moveToFirst()).isTrue()
+                assertThat(cursor.getString(0)).isEqualTo("OFF")
+            }
+        }
+    }
+
+    @Test
+    fun `a plan keeps its voice`() = runTest {
+        val id = repository.savePlan(
+            SessionPlan(
+                goalKind = SessionGoalKind.TIME,
+                goalValue = 30,
+                intensity = SessionIntensity.RUN,
+                voice = SessionVoice.ALWAYS,
+            ),
+        )
+        assertThat(repository.plan(id)?.voice).isEqualTo(SessionVoice.ALWAYS)
+        val started = repository.insert(SessionPlans.start(repository.plan(id)!!, 0, day, 0, 8_000)!!)
+        assertThat(repository.liveSession()?.voice).isEqualTo(SessionVoice.ALWAYS)
+        assertThat(started.voice).isEqualTo(SessionVoice.ALWAYS)
     }
 
     private companion object {

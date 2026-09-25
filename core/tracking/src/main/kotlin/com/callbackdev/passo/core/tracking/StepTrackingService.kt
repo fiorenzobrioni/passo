@@ -29,6 +29,7 @@ import com.callbackdev.passo.core.data.widget.WidgetUpdates
 import com.callbackdev.passo.core.domain.goals.GoalReached
 import com.callbackdev.passo.core.domain.metrics.MetricsCalculator
 import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.sessions.SessionAnnouncement
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.sessions.SessionSignal
 import com.callbackdev.passo.core.domain.sessions.SessionTracker
@@ -46,6 +47,7 @@ import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionState
+import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.UnitPreference
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CancellationException
@@ -119,6 +121,7 @@ class StepTrackingService : Service() {
     private lateinit var snapshots: SystemSnapshots
     private lateinit var notifications: TrackingNotifications
     private lateinit var sessionNotifications: SessionNotifications
+    private lateinit var speech: SessionSpeech
     private lateinit var sensorSource: StepSensorSource
     private lateinit var powerManager: PowerManager
 
@@ -171,6 +174,7 @@ class StepTrackingService : Service() {
         snapshots = SystemSnapshots(contentResolver)
         notifications = TrackingNotifications(this).also { it.ensureChannel() }
         sessionNotifications = SessionNotifications(this).also { it.ensureChannel() }
+        speech = SessionSpeech(this)
         sensorSource = StepSensorSource(
             sensorManager = requireNotNull(getSystemService(SensorManager::class.java)) { "No SensorManager" },
             handler = Handler(Looper.getMainLooper()),
@@ -222,6 +226,7 @@ class StepTrackingService : Service() {
         liveSteps.publish(null)
         liveSteps.setServiceRunning(false)
         liveSession.publish(null)
+        speech.release()
         unregisterReceivers()
         sensorSource.close()
         // Whatever is still buffered is written on a scope that outlives this one. If the
@@ -275,7 +280,10 @@ class StepTrackingService : Service() {
             goalToldDay = preferencesSource.goalNoticeDay()
             // An outing the system interrupted (the process died): it goes on from where it was
             // written, and the steps meanwhile reach it with the next sample.
-            sessions.liveSession()?.let { tracker = newTracker(it) }
+            sessions.liveSession()?.let {
+                tracker = newTracker(it)
+                if (it.voice != SessionVoice.OFF) speech.prepare()
+            }
             registerReceivers()
             // A reminder about to read the count asks for the sensor's batch first.
             link.attach { withContext(Dispatchers.Main.immediate) { flushSensor() } }
@@ -653,9 +661,20 @@ class StepTrackingService : Service() {
         for (signal in signals) {
             when (signal) {
                 is SessionSignal.Milestone -> {
-                    val session = tracker?.session ?: continue
-                    if (session.vibrate && sessionNotifications.signalsAllowed()) {
-                        SessionHaptics.play(this, signal.milestone)
+                    val current = tracker ?: continue
+                    val session = current.session
+                    val allowed = sessionNotifications.signalsAllowed()
+                    if (session.vibrate && allowed) SessionHaptics.play(this, signal.milestone)
+                    if (session.voice != SessionVoice.OFF && allowed) {
+                        val cadence = current.cadenceAt(System.currentTimeMillis())
+                        // At the goal: whether this outing's steps also took the day across its own.
+                        val dayGoal = signal.milestone == SessionMilestone.GOAL &&
+                            SessionAnnouncement.broughtDayGoal(
+                                todaySteps = displayedToday() ?: 0,
+                                sessionSteps = session.totals.steps,
+                                dailyGoalSteps = preferences?.settings?.dailyGoalSteps ?: Int.MAX_VALUE,
+                            )
+                        speak(SessionAnnouncement.milestone(session, signal.milestone, cadence, dayGoal), session)
                     }
                     // Once, even with the screen off: whoever looks next sees where it stands.
                     if (signal.milestone != SessionMilestone.GOAL) notifyNow()
@@ -668,8 +687,10 @@ class StepTrackingService : Service() {
 
     private fun onSessionFinished(finished: SessionSignal.Finished) {
         val session = finished.session
-        // Kept a while after its goal, for "Keep going"; otherwise it is over here.
+        // Kept a while after its goal, for "Keep going"; otherwise it is over here. The voice is
+        // let go once its last sentence is said.
         if (session.end != SessionEnd.GOAL || !finished.kept) tracker = null
+        speech.release()
         sessionDirty = false
         scope.launch {
             persistMutex.withLock {
@@ -793,11 +814,20 @@ class StepTrackingService : Service() {
         val saved = persistMutex.withLock { sessions.insert(session) }
         if (plan.id != 0L) sessions.markPlanUsed(plan.id, now)
         tracker = newTracker(saved, current.profile)
+        if (saved.voice != SessionVoice.OFF && sessionNotifications.signalsAllowed()) {
+            speak(SessionAnnouncement.started(saved), saved)
+        }
         applyRegistration()
         notifyNow()
         publishSession()
         widgets.notify(WidgetEvent.TRACKING_STATE)
         SessionShortcuts.update(this, sessions.plansByUse(), current.settings.units)
+    }
+
+    /** One sentence of [session]'s, through the route its voice allows (headphones, ringer). */
+    private fun speak(announcement: SessionAnnouncement, session: Session) {
+        val units = preferences?.settings?.units ?: UnitPreference.SYSTEM
+        speech.say(spoken(announcement, session, units), session.voice)
     }
 
     private suspend fun newTracker(session: Session, profile: Profile? = null): SessionTracker {

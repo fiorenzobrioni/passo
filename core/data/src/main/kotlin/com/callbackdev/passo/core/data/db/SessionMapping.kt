@@ -8,6 +8,7 @@ import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionTotals
+import com.callbackdev.passo.core.model.SessionVoice
 
 /** Null for a row a newer build wrote with a kind this one does not know: it is left out. */
 internal fun SessionPlanEntity.toModel(): SessionPlan? {
@@ -20,6 +21,7 @@ internal fun SessionPlanEntity.toModel(): SessionPlan? {
         intensity = intensity.toEnumOrNull<SessionIntensity>() ?: SessionIntensity.FREE,
         milestones = milestones.toMilestones(),
         vibrate = vibrate,
+        voice = voice.toEnumOrNull<SessionVoice>() ?: SessionVoice.OFF,
         position = position,
         lastUsedAtMillis = lastUsedAtMillis,
     )
@@ -35,6 +37,7 @@ internal fun SessionPlan.toEntity() = SessionPlanEntity(
     vibrate = vibrate,
     position = position,
     lastUsedAtMillis = lastUsedAtMillis,
+    voice = voice.name,
 )
 
 internal fun SessionEntity.toModel(): Session? {
@@ -49,6 +52,7 @@ internal fun SessionEntity.toModel(): Session? {
         intensity = intensity.toEnumOrNull<SessionIntensity>() ?: SessionIntensity.FREE,
         milestones = milestones.toMilestones(),
         vibrate = vibrate,
+        voice = voice.toEnumOrNull<SessionVoice>() ?: SessionVoice.OFF,
         localEpochDay = localEpochDay,
         startedAtMillis = startedAtMillis,
         // An unknown state from a newer build is over: nothing here would know how to go on.
@@ -95,6 +99,7 @@ internal fun Session.toEntity() = SessionEntity(
     pausedAtMillis = pausedAtMillis,
     reachedAtMillis = reachedAtMillis,
     toldMilestones = toldMilestones.toBits(),
+    voice = voice.name,
 )
 
 private fun Set<SessionMilestone>.toBits(): Int = fold(0) { bits, milestone -> bits or (1 shl milestone.ordinal) }

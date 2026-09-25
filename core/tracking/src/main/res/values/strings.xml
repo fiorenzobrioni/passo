@@ -87,4 +87,54 @@
     <!-- «Brisk walk: goal reached». -->
     <string name="session_goal_title">%1$s: goal reached</string>
     <string name="evening_reminder_walk_now">Walk now</string>
+    <!-- Spoken signals (Phase 10, the voice): said aloud, so every amount is in words. -->
+    <plurals name="spoken_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
+    <plurals name="spoken_steps">
+        <item quantity="one">%1$s step</item>
+        <item quantity="other">%1$s steps</item>
+    </plurals>
+    <plurals name="spoken_kilometres">
+        <item quantity="one">%1$s kilometre</item>
+        <item quantity="other">%1$s kilometres</item>
+    </plurals>
+    <plurals name="spoken_miles">
+        <item quantity="one">%1$s mile</item>
+        <item quantity="other">%1$s miles</item>
+    </plurals>
+    <!-- «Brisk walk: off you go. 20 minutes at a brisk pace.» -->
+    <string name="spoken_started">%1$s: off you go. %2$s.</string>
+    <plurals name="spoken_quarter">
+        <item quantity="one">A quarter done. %1$s to go.</item>
+        <item quantity="other">A quarter done. %1$s to go.</item>
+    </plurals>
+    <plurals name="spoken_half">
+        <item quantity="one">Halfway. %1$s to go.</item>
+        <item quantity="other">Halfway. %1$s to go.</item>
+    </plurals>
+    <plurals name="spoken_three_quarters">
+        <item quantity="one">Three quarters done. %1$s to go.</item>
+        <item quantity="other">Three quarters done. %1$s to go.</item>
+    </plurals>
+    <plurals name="spoken_pace_on">
+        <item quantity="one">%1$d step a minute: on pace.</item>
+        <item quantity="other">%1$d steps a minute: on pace.</item>
+    </plurals>
+    <plurals name="spoken_pace_below">
+        <item quantity="one">%1$d step a minute: pick up the pace a little.</item>
+        <item quantity="other">%1$d steps a minute: pick up the pace a little.</item>
+    </plurals>
+    <!-- The goal, then what happened: how the pace was kept, and the day's goal if this outing
+         brought it. Classic, not a coach: one «Well done» to close, earned. -->
+    <!-- «Goal reached: 20 minutes, 2,140 steps.» -->
+    <string name="spoken_goal">Goal reached: %1$s, %2$s.</string>
+    <!-- A steps goal: «Goal reached: 3,020 steps.» -->
+    <string name="spoken_goal_steps">Goal reached: %1$s.</string>
+    <string name="spoken_mostly_at_pace">Almost all of it at your pace.</string>
+    <string name="spoken_day_goal">Today’s goal is reached too.</string>
+    <string name="spoken_well_done">Well done.</string>
+    <!-- «17 of 20 minutes at your pace.» -->
+    <string name="spoken_zone">%1$d of %2$s at your pace.</string>
 </resources>

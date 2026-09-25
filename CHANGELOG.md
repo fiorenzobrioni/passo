@@ -94,6 +94,11 @@ All notable changes to Passo are documented here. The format follows
   launcher's long press or from the evening reminder's "Walk now"; see it in the widgets and the
   Quick Settings tile while it lasts, and in the day's walks afterwards, with how much of its
   goal was done.
+- A voice for outings, if you want it: the start, each signal with what is left and your
+  pace, and the goal, spoken through your headphones (or out loud too, when the phone is not
+  on silent). It uses a voice installed on the phone, never one from the internet, and lowers
+  your music for a moment rather than stopping it. Off unless you turn it on for an outing;
+  the editor lets you hear it first.
 
 ### Changed
 

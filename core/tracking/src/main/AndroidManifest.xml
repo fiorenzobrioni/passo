@@ -25,6 +25,14 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
 
+    <!-- The outings' voice (docs/adr/0010-voice.md): since Android 11 an app sees a
+         text-to-speech engine only if it says it looks for one. Not a permission. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
+
     <application>
         <service
             android:name=".StepTrackingService"

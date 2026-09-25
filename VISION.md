@@ -107,7 +107,7 @@ Added to v1.0 at the owner's request (Phase 10, `docs/adr/0009-sessions.md`). An
 - **Time in motion, from the steps:** a stop at a traffic light does not count. The cadence now is said against the outing's own ("on pace", "below your pace").
 - **Where it shows:** Today (a button to start one, then its card), the Outings page with the reader's outings (three to start with: a brisk 20 minutes, a 30-minute run, the rest of the day), the launcher's long press, the evening reminder's "Walk now", both widgets and the Quick Settings tile while one is under way, and History and Today's list of the day's walks, in the place of the walk it was, with its goal and how much of it was done.
 - **Battery:** only while an outing is counting, the phone's wake-up step counter reports within 30 seconds, about two brief wakes a minute while walking and none while still; everything else is as before. It ends by itself at its goal, after 15 minutes without a step, or after an hour paused.
-- **Later (not v1.0):** spoken signals through the headphones, with the system's offline voices.
+- **A voice, if you want it** (off by default, per outing; `docs/adr/0010-voice.md`): the start, each signal with what is left and your pace, and the goal, spoken through headphones, or out loud too when the phone is not silenced. The system's engine with a voice installed on the phone, never one from the network; the music dims for a moment.
 
 ### Widgets (Jetpack Glance)
 

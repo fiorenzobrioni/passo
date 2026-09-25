@@ -469,6 +469,23 @@ object PassoIcons {
         }
     }
 
+    /** A speaker with two waves: spoken signals. */
+    val Voice: ImageVector by lazy {
+        icon("voice") {
+            moveTo(4f, 9.5f)
+            lineTo(7.5f, 9.5f)
+            lineTo(12f, 5.5f)
+            lineTo(12f, 18.5f)
+            lineTo(7.5f, 14.5f)
+            lineTo(4f, 14.5f)
+            close()
+            moveTo(15.5f, 9.5f)
+            arcTo(3.5f, 3.5f, 0f, isMoreThanHalf = false, isPositiveArc = true, x1 = 15.5f, y1 = 14.5f)
+            moveTo(18f, 7f)
+            arcTo(7f, 7f, 0f, isMoreThanHalf = false, isPositiveArc = true, x1 = 18f, y1 = 17f)
+        }
+    }
+
     /** A winding way from a dot to a flag: an outing, walked on purpose. */
     val Outing: ImageVector by lazy {
         icon("outing") {
