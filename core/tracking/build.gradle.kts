@@ -21,4 +21,7 @@ dependencies {
 
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.junit)
+    // GoalNotifierTest runs on a real in-memory database and settings file, as the data tests do.
+    testImplementation(libs.androidx.room.runtime)
+    testImplementation(libs.androidx.datastore.preferences)
 }

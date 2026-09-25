@@ -22,6 +22,19 @@ enum class Trend {
     UP,
     DOWN,
     STEADY,
+    ;
+
+    companion object {
+        /** Within 5% either way it is "about the same": a smaller difference is noise. */
+        const val STEADY_BAND: Double = 0.05
+
+        /** The trend of a [change] in share: 0.12 is 12% more. */
+        fun of(change: Double): Trend = when {
+            change >= STEADY_BAND -> UP
+            change <= -STEADY_BAND -> DOWN
+            else -> STEADY
+        }
+    }
 }
 
 /** The one sentence Insights opens with. */
@@ -146,12 +159,7 @@ data class Insights(
 
                 averageLast7 != null && averagePrevious7 != null && averagePrevious7 > 0 -> {
                     val change = (averageLast7 - averagePrevious7) / averagePrevious7
-                    val trend = when {
-                        change >= STEADY_BAND -> Trend.UP
-                        change <= -STEADY_BAND -> Trend.DOWN
-                        else -> Trend.STEADY
-                    }
-                    InsightsHeadline.LastWeek(averageLast7.roundToInt(), trend, change)
+                    InsightsHeadline.LastWeek(averageLast7.roundToInt(), Trend.of(change), change)
                 }
 
                 else -> InsightsHeadline.Average(averageAll, all.size)
@@ -214,8 +222,5 @@ data class Insights(
 
         /** One day at the goal is a day, not a streak: the sentence speaks of one from two. */
         private const val MIN_STREAK_TO_TELL = 2
-
-        /** Within 5% either way the week is "about the same": a smaller difference is noise. */
-        private const val STEADY_BAND = 0.05
     }
 }

@@ -31,4 +31,60 @@
         <item quantity="other">%1$d minuti</item>
     </plurals>
     <string name="tracking_duration_hours_minutes">%1$d h %2$d min</string>
+
+    <!-- Obiettivi e promemoria (PLANNING.md §8): ciascuno a scelta, dalle Impostazioni. -->
+    <string name="goals_channel_name">Obiettivi e promemoria</string>
+    <string name="goals_channel_description">L’obiettivo raggiunto, il promemoria della sera e il riepilogo della settimana: ciascuno solo se l’hai attivato nelle impostazioni di Passo.</string>
+
+    <plurals name="goal_reached_title">
+        <item quantity="one">Obiettivo raggiunto: %1$s passo</item>
+        <item quantity="many">Obiettivo raggiunto: %1$s passi</item>
+        <item quantity="other">Obiettivo raggiunto: %1$s passi</item>
+    </plurals>
+    <string name="goal_reached_at">Raggiunto alle %1$s.</string>
+    <plurals name="goal_reached_streak">
+        <item quantity="one">Raggiunto alle %1$s: %2$d giorno di fila all’obiettivo.</item>
+        <item quantity="many">Raggiunto alle %1$s: %2$d giorni di fila all’obiettivo.</item>
+        <item quantity="other">Raggiunto alle %1$s: %2$d giorni di fila all’obiettivo.</item>
+    </plurals>
+
+    <plurals name="evening_reminder_title">
+        <item quantity="one">Manca %1$s passo</item>
+        <item quantity="many">Mancano %1$s passi</item>
+        <item quantity="other">Mancano %1$s passi</item>
+    </plurals>
+    <string name="evening_reminder_text">Circa %1$s a passo svelto e arrivi a %2$s.</string>
+    <string name="evening_reminder_so_far">Finora %1$s: %2$s dell’obiettivo.</string>
+
+    <string name="weekly_title_every_day">La settimana scorsa: obiettivo ogni giorno</string>
+    <string name="weekly_title_up">La settimana scorsa: +%1$s di passi sulla precedente</string>
+    <string name="weekly_title_down">La settimana scorsa: −%1$s di passi sulla precedente</string>
+    <string name="weekly_title_steady">La settimana scorsa: più o meno i passi della precedente</string>
+    <plurals name="weekly_title_goal_days">
+        <item quantity="one">La settimana scorsa: %1$d giorno su %2$d all’obiettivo</item>
+        <item quantity="many">La settimana scorsa: %1$d giorni su %2$d all’obiettivo</item>
+        <item quantity="other">La settimana scorsa: %1$d giorni su %2$d all’obiettivo</item>
+    </plurals>
+    <string name="weekly_totals">%1$s passi, %2$s al giorno in media</string>
+    <plurals name="weekly_goal_days">
+        <item quantity="one">%1$d giorno su %2$d all’obiettivo</item>
+        <item quantity="many">%1$d giorni su %2$d all’obiettivo</item>
+        <item quantity="other">%1$d giorni su %2$d all’obiettivo</item>
+    </plurals>
+    <string name="weekly_best_day">Giorno migliore: %1$s, %2$s passi</string>
+
+    <!-- Il riquadro delle Impostazioni rapide: letto solo mentre il pannello è aperto. -->
+    <string name="tile_label">Passi di oggi</string>
+    <plurals name="tile_steps">
+        <item quantity="one">%1$s passo</item>
+        <item quantity="many">%1$s passi</item>
+        <item quantity="other">%1$s passi</item>
+    </plurals>
+    <string name="tile_progress">%1$s dell’obiettivo</string>
+    <string name="tile_goal_reached">Obiettivo raggiunto</string>
+    <string name="tile_paused">In pausa</string>
+    <string name="tile_stopped">Non sta contando</string>
+    <string name="tile_permission">Manca il permesso</string>
+    <string name="tile_not_set_up">Da configurare</string>
+    <string name="tile_no_sensor">Nessun contapassi</string>
 </resources>

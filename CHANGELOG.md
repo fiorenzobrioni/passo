@@ -75,6 +75,16 @@ All notable changes to Passo are documented here. The format follows
   calories, and a bar towards the goal. Updated only while the screen is on, as before.
 - Settings says how the counting notification shows and opens Android's page for it, where it
   can be minimized (no icon in the status bar) or turned off. Passo keeps counting either way.
+- Goal notifications (Phase 6), each off until you turn it on in Settings: the goal reached,
+  once a day and never twice (not after a restart, not after a time-zone change), with the
+  time and the streak it extends; an evening reminder at the time you pick, only if the day is
+  below the share of the goal you choose (until it is met, below 75%, below half), saying the
+  steps left and the brisk walk they take; and a weekly summary on the first day of the week,
+  with the week's steps, its days at the goal, its best day and how it compares with the week
+  before. If Android is blocking them, Settings says so and opens the page that fixes it.
+- A Quick Settings tile (Phase 6) with today's steps and the share of the goal, or why the
+  count is not moving; it reads only while the panel is open, and a tap opens Today (or
+  resumes a paused count). Settings adds it with one tap.
 
 ### Changed
 

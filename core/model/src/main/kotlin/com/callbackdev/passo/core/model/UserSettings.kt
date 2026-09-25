@@ -11,6 +11,8 @@ import java.time.LocalTime
  * the vivid dress, Google Sans, and the app's own colors rather than the wallpaper's.
  *
  * @property firstDayOfWeek null follows the locale.
+ * @property eveningReminderThresholdPercent the evening reminder comes only while today's steps
+ *   are below this share of the goal: 100 is "until the goal is met".
  * @property onboardingCompleted the first-run flow has been through to its end, or skipped.
  */
 data class UserSettings(
@@ -24,6 +26,7 @@ data class UserSettings(
     val goalReachedNotification: Boolean = false,
     val eveningReminder: Boolean = false,
     val eveningReminderTime: LocalTime = DEFAULT_EVENING_REMINDER_TIME,
+    val eveningReminderThresholdPercent: Int = DEFAULT_EVENING_REMINDER_THRESHOLD,
     val weeklySummary: Boolean = false,
     val trackingEnabled: Boolean = true,
     val walkDetection: Boolean = true,
@@ -42,7 +45,18 @@ data class UserSettings(
         /** The goals the settings accept; a stored value outside falls back to the default. */
         val DAILY_GOAL_RANGE: IntRange = 500..100_000
 
+        /**
+         * 20:00: late enough that the day has mostly been walked, early enough that a walk
+         * after dinner still fits in it.
+         */
         val DEFAULT_EVENING_REMINDER_TIME: LocalTime = LocalTime.of(20, 0)
+
+        /**
+         * The shares of the goal the evening reminder can wait below: until it is met, below
+         * three quarters, below half. 100 by default: the reminder is for the goal.
+         */
+        val EVENING_REMINDER_THRESHOLDS: List<Int> = listOf(100, 75, 50)
+        const val DEFAULT_EVENING_REMINDER_THRESHOLD: Int = 100
 
         /** The minimum walk durations the settings offer (VISION.md, walk detection). */
         val MIN_WALK_MINUTES_CHOICES: List<Int> = listOf(5, 10, 15)

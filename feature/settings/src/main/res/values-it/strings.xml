@@ -41,6 +41,28 @@
     </plurals>
     <string name="settings_goal_note">Un nuovo obiettivo vale da oggi; i giorni passati tengono il loro.</string>
 
+    <string name="settings_group_notifications">Notifiche</string>
+    <string name="settings_goal_reached">Quando raggiungi l’obiettivo</string>
+    <string name="settings_goal_reached_note">Una volta al giorno. A schermo spento può arrivare qualche minuto dopo: Passo non sveglia il telefono per questo.</string>
+    <string name="settings_evening_reminder">Promemoria serale</string>
+    <string name="settings_evening_reminder_note">Alle %1$s, %2$s: i passi che mancano e il tempo per farli.</string>
+    <string name="settings_reminder_time">Ora</string>
+    <string name="settings_reminder_time_note">Passo non usa allarmi esatti: il promemoria può arrivare qualche minuto dopo quest’ora.</string>
+    <string name="settings_reminder_threshold">Ricordamelo</string>
+    <string name="settings_reminder_threshold_note">Una giornata sopra questa parte del suo obiettivo non riceve nulla. Un obiettivo raggiunto non riceve mai il promemoria.</string>
+    <string name="settings_reminder_threshold_100">Finché l’obiettivo non è raggiunto</string>
+    <string name="settings_reminder_threshold_75">Sotto il 75% dell’obiettivo</string>
+    <string name="settings_reminder_threshold_50">Sotto metà dell’obiettivo</string>
+    <string name="settings_reminder_when_100">se l’obiettivo non è ancora raggiunto</string>
+    <string name="settings_reminder_when_75">se la giornata è sotto il 75% dell’obiettivo</string>
+    <string name="settings_reminder_when_50">se la giornata è sotto metà dell’obiettivo</string>
+    <string name="settings_weekly_summary">Riepilogo settimanale</string>
+    <string name="settings_weekly_summary_note">Ogni %1$s alle %2$s: i passi della settimana passata, i giorni all’obiettivo e il migliore.</string>
+    <string name="settings_notifications_blocked_title">Le notifiche di Passo sono disattivate</string>
+    <string name="settings_notifications_blocked_channel_title">Le notifiche degli obiettivi sono disattivate nelle impostazioni di Android</string>
+    <string name="settings_notifications_blocked_body">Quello che hai attivato qui non può comparire finché Android non lo lascia passare.</string>
+    <string name="settings_notifications_blocked_action">Attiva</string>
+
     <string name="settings_group_units">Unità e calendario</string>
     <string name="settings_units">Unità di misura</string>
     <string name="settings_units_system">Come il telefono (%1$s)</string>
@@ -98,6 +120,10 @@
     <string name="settings_notification_shown">Nella barra di stato: Android la richiede finché Passo conta. Se la disattivi, conta lo stesso</string>
     <string name="settings_notification_minimized">Ridotta al minimo: una riga in fondo all’elenco, nessuna icona nella barra di stato</string>
     <string name="settings_notification_off">Disattivata: Passo continua a contare, tra le app attive</string>
+    <string name="settings_tile">Riquadro delle Impostazioni rapide</string>
+    <string name="settings_tile_note">I passi di oggi nel pannello che scorri dall’alto, letti solo mentre è aperto. Tocca per aggiungerlo.</string>
+    <string name="settings_tile_added">Nelle tue Impostazioni rapide: letto solo mentre il pannello è aperto</string>
+    <string name="settings_tile_failed">Aggiungilo dal pannello: tocca la matita e trascina «Passi di oggi»</string>
 
     <string name="settings_privacy">Privacy</string>
     <string name="settings_privacy_headline">Niente account, niente pubblicità, niente tracciamento.</string>

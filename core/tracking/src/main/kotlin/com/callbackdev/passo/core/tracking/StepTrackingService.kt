@@ -23,6 +23,7 @@ import com.callbackdev.passo.core.data.tracking.LiveToday
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.data.tracking.withPending
 import com.callbackdev.passo.core.data.widget.WidgetUpdates
+import com.callbackdev.passo.core.domain.goals.GoalReached
 import com.callbackdev.passo.core.domain.today.DayMinute
 import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.today.minuteOfDay
@@ -80,6 +81,10 @@ class StepTrackingService : Service() {
 
     @Inject lateinit var preferencesSource: UserPreferencesDataSource
 
+    @Inject lateinit var goals: GoalNotifier
+
+    @Inject lateinit var link: TrackerLink
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val persistMutex = Mutex()
 
@@ -117,6 +122,10 @@ class StepTrackingService : Service() {
     // keeps its expanded form instead of falling back to the count until the next step.
     private var shownContent: NotificationContent? = null
     private var lastNotifyElapsed = 0L
+
+    // The last day whose goal was seen reached, as stored: checked on every sample without a
+    // read. The store has the last word (GoalNotifier claims the day there).
+    private var goalToldDay: Long? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -168,6 +177,7 @@ class StepTrackingService : Service() {
     }
 
     override fun onDestroy() {
+        link.attach(null)
         liveSteps.publish(null)
         liveSteps.setServiceRunning(false)
         unregisterReceivers()
@@ -204,7 +214,10 @@ class StepTrackingService : Service() {
                     DiagnosticsEvent(System.currentTimeMillis(), DiagnosticsType.RESTORED, "tracker state dropped"),
                 )
             }
+            goalToldDay = preferencesSource.goalNoticeDay()
             registerReceivers()
+            // A reminder about to read the count asks for the sensor's batch first.
+            link.attach { withContext(Dispatchers.Main.immediate) { flushSensor() } }
             launch { sensorSource.readings.collect(::onReading) }
             launch { preferencesSource.data.distinctUntilChanged().collect(::onPreferences) }
             persist()
@@ -224,7 +237,10 @@ class StepTrackingService : Service() {
                 if (ledger.record(reading.sample, snapshots.current())) scope.launch { persist() }
                 publishLive()
                 scheduleNotification()
-                displayedToday()?.let { widgets.notify(WidgetEvent.STEPS, it) }
+                displayedToday()?.let {
+                    widgets.notify(WidgetEvent.STEPS, it)
+                    checkGoal(it)
+                }
             }
 
             SensorReading.FlushCompleted -> {
@@ -436,6 +452,19 @@ class StepTrackingService : Service() {
             shownContent = content
             notifications.update(content)
         }
+    }
+
+    /**
+     * "Goal reached", once a day (PLANNING.md §8): noticed here, on the samples the service
+     * receives anyway, so it costs no wake of its own. With the screen off it can come a few
+     * minutes after the step that made it, as late as the sensor's batch.
+     */
+    private fun checkGoal(steps: Int) {
+        val goal = preferences?.settings?.dailyGoalSteps ?: return
+        val day = today()
+        if (!GoalReached.isNews(day, steps, goal, goalToldDay)) return
+        goalToldDay = day
+        goals.goalReached(day)
     }
 
     /** A new goal, profile or units: the numbers change, and are shown if someone can see them. */

@@ -18,9 +18,10 @@ Free, no account, no ads, no tracking, and no permission to use the internet at 
 </div>
 
 > [!NOTE]
-> Passo is in early development: Phases 0 to 5 of [the plan](./PLANNING.md) are built (the
+> Passo is in early development: Phases 0 to 6 of [the plan](./PLANNING.md) are built (the
 > step tracking engine, the metrics, the Today screen, the first run, Settings, the two
-> home-screen widgets, History, Insights and walks). It has run on a phone, but the multi-day
+> home-screen widgets, History, Insights and walks, the goal notifications and the Quick
+> Settings tile). It has run on a phone, but the multi-day
 > field test of the tracking engine is still to do, and there is no usable release yet.
 
 ## Screenshots
@@ -49,12 +50,12 @@ Free, no account, no ads, no tracking, and no permission to use the internet at 
   <tr>
     <td align="center"><img src="docs/screenshots/widgets.png" width="250" alt="The two widgets on a home screen: At a glance with its ring, In words, a terracotta pair side by side, and the day hour by hour"></td>
     <td align="center"><img src="docs/screenshots/widget-settings.png" width="250" alt="One widget's settings: the card as it will look, its sizes, the background colour, the opacity and the content"></td>
-    <td></td>
+    <td align="center"><img src="docs/screenshots/settings-notifications.png" width="250" alt="Settings, notifications: goal reached, the evening reminder with its time and threshold, the weekly summary"></td>
   </tr>
   <tr>
     <td align="center"><b>Two widgets,</b> At a glance and In words, in the same dress as Chiaro's.</td>
     <td align="center"><b>Each widget its own look:</b> Chiaro's six colours, any opacity, what it shows.</td>
-    <td></td>
+    <td align="center"><b>Notifications you choose:</b> goal reached, an evening reminder, a weekly summary.</td>
   </tr>
   <tr>
     <td align="center"><img src="docs/screenshots/history-day.png" width="250" alt="History, one day: goal met with 10,415 steps, three walks, the steps hour by hour with the walks marked"></td>
@@ -101,8 +102,9 @@ resizable home-screen widgets answer "how am I doing today?" at a glance.
   extra sensor, no background work, and a switch to turn them off.
 - **Insights**: the streak of days at your goal, your best day, week and month, averages over
   the last 7 and 30 days, and what it all adds up to since the first day.
-- **Settings**: height, weight and step length, the goal, metric or imperial units, the first
-  day of the week, walks, theme, palette and typeface, language, and a pause.
+- **Settings**: height, weight and step length, the goal, the notifications, metric or
+  imperial units, the first day of the week, walks, theme, palette and typeface, language, and
+  a pause.
 - **Two home-screen widgets**, dressed like Chiaro's so the two apps sit side by side:
   **At a glance** (today's ring, the count, the day's sentence and, on a wide tall card, the
   day hour by hour) and **In words** (the same day in type alone: the count large, the
@@ -110,12 +112,17 @@ resizable home-screen widgets answer "how am I doing today?" at a glance.
   from one cell to as large as your launcher allows and lay themselves out for every size.
   Each one can be light, dark, follow the phone or wear one of six colours, at any opacity. A
   paused count says so, and a tap resumes it.
+- **Notifications, each one if you want it**: the goal reached (once a day, with the streak it
+  extends), an evening reminder at the time you pick when the day is behind (with the steps
+  left and the walk they take), and a summary of the week that ended. The counting
+  notification shows the day when you expand it.
+- **A Quick Settings tile** with today's steps and the share of the goal, read only while the
+  panel is open. Settings adds it with one tap.
 
 ## What is coming (v1.0)
 
-- **Goals**: an optional "goal reached" notification, an evening nudge, a weekly summary.
-- **Everywhere else**: an ongoing notification with today's steps, a Quick Settings tile,
-  export to CSV and JSON, import from a backup.
+- **Data**: export to CSV and JSON, import from a backup, and a short walk to measure your
+  step length.
 
 Distance and calories are **estimates**, and Passo says so. The formulas are documented and
 you can tune them: height, weight, your own step length, measured with a short calibration
@@ -140,7 +147,10 @@ The step counter runs on a low-power chip that collects steps while the phone sl
 them over in batches. Passo keeps a small foreground service alive (Android requires it to
 receive sensor data and to save the count before a shutdown), but it does not wake the phone
 on a timer, and it updates the widgets and the notification only while the screen is on: the
-widgets are told when something changed, at most once a minute, and never poll. The target is
+widgets are told when something changed, at most once a minute, and never poll. The goal
+notifications add at most one wake a day (the evening reminder, if you turn it on); the goal
+reached rides on the steps Passo already receives, and the weekly summary waits for the phone
+to be awake. The target is
 at most about 1% of a day's battery.
 
 ## Building

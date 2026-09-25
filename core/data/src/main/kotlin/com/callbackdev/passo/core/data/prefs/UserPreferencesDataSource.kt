@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.callbackdev.passo.core.domain.goals.GoalReached
 import com.callbackdev.passo.core.domain.metrics.sanitized
 import com.callbackdev.passo.core.model.AppFont
 import com.callbackdev.passo.core.model.AppPalette
@@ -89,6 +90,30 @@ constructor(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it[Keys.TRACKER_INSTALLATION] = installedAtMillis }
     }
 
+    /**
+     * The last day whose goal was seen reached, told or not: the record that makes "goal
+     * reached" once a day, across reboots and clock changes (`GoalReached`). Kept with the
+     * settings, not with the steps: it is a fact about the notifications, not about the day.
+     */
+    suspend fun goalNoticeDay(): Long? = dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .first()[Keys.GOAL_NOTICE_DAY]
+
+    /**
+     * Records [epochDay] as told, unless a later day already is; returns whether it was
+     * recorded now. One edit, so two callers racing can never both win the same day.
+     */
+    suspend fun claimGoalNoticeDay(epochDay: Long): Boolean {
+        var claimed = false
+        dataStore.edit { prefs ->
+            if (GoalReached.isLaterDay(epochDay, prefs[Keys.GOAL_NOTICE_DAY])) {
+                prefs[Keys.GOAL_NOTICE_DAY] = epochDay
+                claimed = true
+            }
+        }
+        return claimed
+    }
+
     private fun readProfile(prefs: Preferences) = Profile(
         heightMeters = prefs[Keys.HEIGHT_M],
         weightKg = prefs[Keys.WEIGHT_KG],
@@ -121,6 +146,8 @@ constructor(private val dataStore: DataStore<Preferences>) {
             eveningReminder = prefs[Keys.EVENING_REMINDER] ?: defaults.eveningReminder,
             eveningReminderTime = prefs[Keys.EVENING_REMINDER_MINUTE]?.toLocalTimeOrNull()
                 ?: defaults.eveningReminderTime,
+            eveningReminderThresholdPercent = prefs[Keys.EVENING_REMINDER_THRESHOLD]
+                ?: defaults.eveningReminderThresholdPercent,
             weeklySummary = prefs[Keys.WEEKLY_SUMMARY] ?: defaults.weeklySummary,
             trackingEnabled = prefs[Keys.TRACKING_ENABLED] ?: defaults.trackingEnabled,
             walkDetection = prefs[Keys.WALK_DETECTION] ?: defaults.walkDetection,
@@ -151,6 +178,12 @@ constructor(private val dataStore: DataStore<Preferences>) {
             old.eveningReminderTime.minuteOfDay(),
             new.eveningReminderTime.minuteOfDay(),
             defaults.eveningReminderTime.minuteOfDay(),
+        )
+        prefs.write(
+            Keys.EVENING_REMINDER_THRESHOLD,
+            old.eveningReminderThresholdPercent,
+            new.eveningReminderThresholdPercent,
+            defaults.eveningReminderThresholdPercent,
         )
         prefs.write(Keys.WEEKLY_SUMMARY, old.weeklySummary, new.weeklySummary, defaults.weeklySummary)
         prefs.write(Keys.TRACKING_ENABLED, old.trackingEnabled, new.trackingEnabled, defaults.trackingEnabled)
@@ -189,6 +222,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
         val GOAL_REACHED_NOTIFICATION = booleanPreferencesKey("notify_goal_reached")
         val EVENING_REMINDER = booleanPreferencesKey("notify_evening_reminder")
         val EVENING_REMINDER_MINUTE = intPreferencesKey("evening_reminder_minute_of_day")
+        val EVENING_REMINDER_THRESHOLD = intPreferencesKey("evening_reminder_threshold_percent")
         val WEEKLY_SUMMARY = booleanPreferencesKey("notify_weekly_summary")
         val TRACKING_ENABLED = booleanPreferencesKey("tracking_enabled")
         val WALK_DETECTION = booleanPreferencesKey("walk_detection")
@@ -197,6 +231,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
 
         val TRACKER_INSTALLATION = longPreferencesKey("tracker_installation")
+        val GOAL_NOTICE_DAY = longPreferencesKey("goal_notice_epoch_day")
     }
 
     companion object {
@@ -212,6 +247,9 @@ internal fun UserSettings.sanitized(): UserSettings {
         dailyGoalSteps = dailyGoalSteps.takeIf { it in UserSettings.DAILY_GOAL_RANGE } ?: defaults.dailyGoalSteps,
         minWalkMinutes = minWalkMinutes.takeIf { it in UserSettings.MIN_WALK_MINUTES_CHOICES }
             ?: defaults.minWalkMinutes,
+        eveningReminderThresholdPercent = eveningReminderThresholdPercent
+            .takeIf { it in UserSettings.EVENING_REMINDER_THRESHOLDS }
+            ?: defaults.eveningReminderThresholdPercent,
         // Stored to the minute: seconds would only make two equal times differ.
         eveningReminderTime = eveningReminderTime.withSecond(0).withNano(0),
     )

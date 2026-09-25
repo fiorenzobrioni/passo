@@ -4,10 +4,8 @@ import android.Manifest
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
 import android.content.pm.PackageManager
-import android.text.format.DateFormat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
@@ -16,8 +14,6 @@ import com.callbackdev.passo.core.designsystem.format.measureFormatter
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.model.UnitPreference
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 
 /**
  * What the ongoing notification says.
@@ -56,7 +52,7 @@ internal class TrackingNotifications(private val context: Context) {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_steps)
             .setContentTitle(context.getString(R.string.tracking_notification_title))
-            .setContentIntent(openAppIntent())
+            .setContentIntent(context.openAppIntent())
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setSilent(true)
@@ -99,12 +95,12 @@ internal class TrackingNotifications(private val context: Context) {
     fun expandedText(day: TodayOverview, format: MeasureFormatter): String {
         val res = context.resources
         val sentence =
-            day.goalReachedAt?.let { res.getString(R.string.tracking_notification_goal_reached, clockTime(it)) }
+            day.goalReachedAt?.let { res.getString(R.string.tracking_notification_goal_reached, context.clockTime(it)) }
                 ?: res.getQuantityString(
                     R.plurals.tracking_notification_to_go,
                     day.remaining,
                     format.steps(day.remaining),
-                    duration(TodayOverview.minutesToWalk(day.remaining)),
+                    context.walkDuration(TodayOverview.minutesToWalk(day.remaining)),
                 )
         val goal = res.getString(
             R.string.tracking_notification_pair,
@@ -127,36 +123,8 @@ internal class TrackingNotifications(private val context: Context) {
         return listOf(sentence, goal, estimates).joinToString("\n")
     }
 
-    /** «25 minutes», or «1 h 20 min» from an hour up, as Today writes it. */
-    private fun duration(minutes: Int): String = if (minutes < MINUTES_PER_HOUR) {
-        context.resources.getQuantityString(R.plurals.tracking_duration_minutes, minutes, minutes)
-    } else {
-        context.getString(
-            R.string.tracking_duration_hours_minutes,
-            minutes / MINUTES_PER_HOUR,
-            minutes % MINUTES_PER_HOUR,
-        )
-    }
-
-    /** A clock time the way the phone shows times: 24-hour or not, as the reader set it. */
-    private fun clockTime(minuteOfDay: Int): String {
-        val locale = context.resources.configuration.locales[0]
-        val skeleton = if (DateFormat.is24HourFormat(context)) "Hm" else "hm"
-        val pattern = DateFormat.getBestDateTimePattern(locale, skeleton)
-        return LocalTime.of((minuteOfDay / MINUTES_PER_HOUR) % HOURS_PER_DAY, minuteOfDay % MINUTES_PER_HOUR)
-            .format(DateTimeFormatter.ofPattern(pattern, locale))
-    }
-
-    // The launcher intent: this module does not know the app's activity, and should not.
-    private fun openAppIntent(): PendingIntent? =
-        context.packageManager.getLaunchIntentForPackage(context.packageName)?.let {
-            PendingIntent.getActivity(context, 0, it, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        }
-
     companion object {
         const val CHANNEL_ID = "tracking"
         const val NOTIFICATION_ID = 1
-        private const val MINUTES_PER_HOUR = 60
-        private const val HOURS_PER_DAY = 24
     }
 }

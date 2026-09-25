@@ -1,8 +1,17 @@
 package com.callbackdev.passo.feature.settings
 
+import android.Manifest
+import android.app.Application
+import android.app.NotificationManager
+import android.content.Context
 import android.graphics.Bitmap
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -12,6 +21,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.model.Profile
@@ -21,9 +31,11 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.io.File
+import java.time.LocalTime
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -136,12 +148,107 @@ class SettingsScreenTest {
     }
 
     @Test
+    fun `the goal notifications are switches, and the reminder's time and threshold follow its switch`() {
+        grantNotifications()
+        var settings by mutableStateOf(state.settings)
+        compose.setContent {
+            PassoTheme {
+                SettingsScreen(
+                    state.copy(settings = settings),
+                    onBack = {},
+                    actions = SettingsActions(updateSettings = { settings = it(settings) }),
+                )
+            }
+        }
+
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(SettingsTags.WEEKLY_SUMMARY))
+        compose.onNodeWithText("At 8:00 PM, if the goal is not met yet: the steps left, and the walk they take.")
+            .assertIsDisplayed()
+        compose.onNodeWithText("at 9:00 AM: last week’s steps", substring = true).assertIsDisplayed()
+        // Off, the reminder's rows say what they would do but cannot be changed.
+        compose.onNodeWithText("Remind me").assertIsNotEnabled()
+
+        compose.onNodeWithTag(SettingsTags.EVENING_REMINDER).performClick()
+        assertThat(settings.eveningReminder).isTrue()
+        compose.onNodeWithText("Remind me").performClick()
+        compose.onNodeWithText("Below half of the goal").performClick()
+        assertThat(settings.eveningReminderThresholdPercent).isEqualTo(50)
+        compose.onNodeWithText("At 8:00 PM, if the day is below half of the goal", substring = true)
+            .assertIsDisplayed()
+
+        compose.onNodeWithTag(SettingsTags.GOAL_REACHED).performClick()
+        compose.onNodeWithTag(SettingsTags.WEEKLY_SUMMARY).performClick()
+        assertThat(settings.goalReachedNotification).isTrue()
+        assertThat(settings.weeklySummary).isTrue()
+        compose.onNodeWithTag(SettingsTags.NOTIFICATIONS_BLOCKED).assertDoesNotExist()
+        snapshot("settings_goal_notifications")
+    }
+
+    @Test
+    fun `the reminder's time is picked on the clock`() {
+        grantNotifications()
+        var settings by mutableStateOf(state.settings.copy(eveningReminder = true))
+        compose.setContent {
+            PassoTheme {
+                SettingsScreen(
+                    state.copy(settings = settings),
+                    onBack = {},
+                    actions = SettingsActions(updateSettings = { settings = it(settings) }),
+                )
+            }
+        }
+
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasText("Time"))
+        compose.onNodeWithText("Time").performClick()
+        compose.onNodeWithText("Passo uses no exact alarms", substring = true).assertIsDisplayed()
+        snapshot("settings_reminder_time")
+        compose.onNodeWithText("Save").performClick()
+        assertThat(settings.eveningReminderTime).isEqualTo(LocalTime.of(20, 0))
+    }
+
+    @Test
+    fun `a goal notification that Android would drop says so, with the way to fix it`() {
+        shadowOf(context.getSystemService(NotificationManager::class.java)).setNotificationsEnabled(false)
+        val on = state.copy(settings = state.settings.copy(eveningReminder = true))
+        compose.setContent { PassoTheme { SettingsScreen(on, onBack = {}, actions = SettingsActions()) } }
+
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(SettingsTags.NOTIFICATIONS_BLOCKED))
+        compose.onNodeWithText("Notifications are off for Passo").assertIsDisplayed()
+        compose.onNodeWithText("Turn on").assertHasClickAction()
+        snapshot("settings_notifications_blocked")
+    }
+
+    @Test
+    fun `with every goal notification off, a block is nobody's business`() {
+        shadowOf(context.getSystemService(NotificationManager::class.java)).setNotificationsEnabled(false)
+        compose.setContent { PassoTheme { SettingsScreen(state, onBack = {}, actions = SettingsActions()) } }
+
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(SettingsTags.WEEKLY_SUMMARY))
+        compose.onNodeWithTag(SettingsTags.NOTIFICATIONS_BLOCKED).assertDoesNotExist()
+    }
+
+    @Test
+    fun `the tile row says what the tile does and what it costs`() {
+        compose.setContent { PassoTheme { SettingsScreen(state, onBack = {}, actions = SettingsActions()) } }
+
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(SettingsTags.TILE))
+        compose.onNodeWithText("Quick Settings tile").assertIsDisplayed()
+        compose.onNodeWithText("read only while it is open", substring = true).assertIsDisplayed()
+    }
+
+    @Test
     fun `the licence and the typefaces are credited`() {
         compose.setContent { PassoTheme { SettingsScreen(state, onBack = {}, actions = SettingsActions()) } }
 
         compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasText("Typefaces"))
         compose.onNodeWithText("in use: Google Sans", substring = true).assertIsDisplayed()
         compose.onNodeWithText("free to use, study", substring = true).assertExists()
+    }
+
+    private val context: Context get() = ApplicationProvider.getApplicationContext()
+
+    private fun grantNotifications() {
+        shadowOf(context as Application).grantPermissions(Manifest.permission.POST_NOTIFICATIONS)
     }
 
     private fun snapshot(name: String) {

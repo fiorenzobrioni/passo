@@ -3,7 +3,8 @@
   The tracking engine's permissions and components (PLANNING.md §4.1, §10). This is the whole
   list Passo holds: activity recognition to read the step counter, a foreground service of type
   health to keep reading it, the boot broadcast to start again without being opened, and
-  notifications (optional). `checkForbiddenPermissions` guards the rest.
+  notifications (optional). `checkForbiddenPermissions` guards the rest: the goal alarms are
+  inexact and need no permission, and the Quick Settings tile needs none either.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
@@ -41,6 +42,31 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
             </intent-filter>
         </receiver>
+
+        <!-- The evening reminder and the weekly summary (explicit alarm intents), and the clock
+             or the zone changing under them. Both system broadcasts are exempt from the limits
+             on implicit broadcasts, so a manifest receiver hears them. -->
+        <receiver
+            android:name=".GoalAlarmReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.TIME_SET" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Today's steps in Quick Settings. Exported to the system UI alone: only a holder of
+             BIND_QUICK_SETTINGS_TILE (the system) can bind it. -->
+        <service
+            android:name=".StepsTileService"
+            android:exported="true"
+            android:icon="@drawable/ic_stat_steps"
+            android:label="@string/tile_label"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

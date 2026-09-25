@@ -1,10 +1,15 @@
 package com.callbackdev.passo.feature.settings
 
+import android.Manifest
 import android.app.LocaleManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
+import android.text.format.DateFormat
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -26,8 +31,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -48,6 +55,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -58,9 +66,12 @@ import com.callbackdev.passo.core.designsystem.components.InfoRow
 import com.callbackdev.passo.core.designsystem.components.ProgressRing
 import com.callbackdev.passo.core.designsystem.components.RadioDialog
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
+import com.callbackdev.passo.core.designsystem.components.StatusCard
+import com.callbackdev.passo.core.designsystem.components.StatusTone
 import com.callbackdev.passo.core.designsystem.components.SwitchRow
 import com.callbackdev.passo.core.designsystem.components.ValueRow
 import com.callbackdev.passo.core.designsystem.components.ValueStepper
+import com.callbackdev.passo.core.designsystem.format.clockTime
 import com.callbackdev.passo.core.designsystem.format.rememberMeasureFormatter
 import com.callbackdev.passo.core.designsystem.format.text
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
@@ -68,6 +79,7 @@ import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
+import com.callbackdev.passo.core.domain.goals.GoalSchedule
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.settings.InputScale
 import com.callbackdev.passo.core.domain.settings.ProfileInputs
@@ -83,8 +95,13 @@ import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.UnitSystem
 import com.callbackdev.passo.core.model.UserSettings
 import com.callbackdev.passo.core.tracking.CountingNotification
+import com.callbackdev.passo.core.tracking.GoalNotificationsAccess
+import com.callbackdev.passo.core.tracking.GoalNotificationsBlock
 import com.callbackdev.passo.core.tracking.NotificationVisibility
+import com.callbackdev.passo.core.tracking.StepsTile
+import com.callbackdev.passo.core.tracking.TileRequestResult
 import java.time.DayOfWeek
+import java.time.LocalTime
 import java.time.format.TextStyle
 
 @Composable
@@ -156,6 +173,8 @@ private enum class Dialog {
     RUNNING_STEP_LENGTH,
     APPLY_PAST,
     GOAL,
+    REMINDER_TIME,
+    REMINDER_THRESHOLD,
     UNITS,
     FIRST_DAY_OF_WEEK,
     MIN_WALK,
@@ -238,6 +257,16 @@ private fun SettingsList(state: SettingsUiState, actions: SettingsActions, modif
                     onClick = { dialog = Dialog.GOAL },
                 )
             }
+        }
+
+        item { GroupHeader(stringResource(R.string.settings_group_notifications)) }
+        item {
+            GoalNotificationsGroup(
+                settings = settings,
+                onChange = actions.updateSettings,
+                onPickTime = { dialog = Dialog.REMINDER_TIME },
+                onPickThreshold = { dialog = Dialog.REMINDER_THRESHOLD },
+            )
         }
 
         item { GroupHeader(stringResource(R.string.settings_group_units)) }
@@ -351,6 +380,8 @@ private fun SettingsList(state: SettingsUiState, actions: SettingsActions, modif
                 )
                 GroupDivider()
                 NotificationRow()
+                GroupDivider()
+                TileRow()
             }
         }
 
@@ -486,6 +517,26 @@ private fun SettingsList(state: SettingsUiState, actions: SettingsActions, modif
             note = stringResource(R.string.settings_goal_note),
             onSave = { v -> actions.updateSettings { it.copy(dailyGoalSteps = v.toInt()) } },
             onClear = null,
+            onDismiss = close,
+        )
+
+        Dialog.REMINDER_TIME -> TimeDialog(
+            title = stringResource(R.string.settings_evening_reminder),
+            initial = settings.eveningReminderTime,
+            note = stringResource(R.string.settings_reminder_time_note),
+            onSave = { time -> actions.updateSettings { it.copy(eveningReminderTime = time) } },
+            onDismiss = close,
+        )
+
+        Dialog.REMINDER_THRESHOLD -> RadioDialog(
+            title = stringResource(R.string.settings_reminder_threshold),
+            options = UserSettings.EVENING_REMINDER_THRESHOLDS.map { it to thresholdLabel(it) },
+            selected = settings.eveningReminderThresholdPercent,
+            explanation = stringResource(R.string.settings_reminder_threshold_note),
+            onSelect = { percent ->
+                actions.updateSettings { it.copy(eveningReminderThresholdPercent = percent) }
+                dialog = null
+            },
             onDismiss = close,
         )
 
@@ -681,6 +732,127 @@ private fun NotificationRow() {
     )
 }
 
+/**
+ * Goal reached, the evening reminder and the weekly summary (PLANNING.md §8). Turning one on asks
+ * for the notification permission where Android still can; where it cannot, or the reader
+ * silenced them in the system, a card over the group says so and opens the page that fixes it,
+ * so a switch that is on never promises what Android drops.
+ */
+@Composable
+private fun GoalNotificationsGroup(
+    settings: UserSettings,
+    onChange: ((UserSettings) -> UserSettings) -> Unit,
+    onPickTime: () -> Unit,
+    onPickThreshold: () -> Unit,
+) {
+    val context = LocalContext.current
+    var block by remember { mutableStateOf(GoalNotificationsAccess.block(context)) }
+    LifecycleResumeEffect(Unit) {
+        block = GoalNotificationsAccess.block(context)
+        onPauseOrDispose {}
+    }
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        block = GoalNotificationsAccess.block(context)
+    }
+    val turn: (Boolean, (UserSettings, Boolean) -> UserSettings) -> Unit = { on, transform ->
+        onChange { transform(it, on) }
+        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        if (on && !granted) permission.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
+    val anyOn = settings.goalReachedNotification || settings.eveningReminder || settings.weeklySummary
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        if (anyOn && block != GoalNotificationsBlock.NONE) {
+            StatusCard(
+                icon = PassoIcons.Bell,
+                title = stringResource(
+                    if (block == GoalNotificationsBlock.CHANNEL) {
+                        R.string.settings_notifications_blocked_channel_title
+                    } else {
+                        R.string.settings_notifications_blocked_title
+                    },
+                ),
+                body = stringResource(R.string.settings_notifications_blocked_body),
+                tone = StatusTone.PROBLEM,
+                action = stringResource(R.string.settings_notifications_blocked_action),
+                onAction = {
+                    runCatching { context.startActivity(GoalNotificationsAccess.settingsIntent(context, block)) }
+                },
+                modifier = Modifier.padding(horizontal = ScreenMargin).testTag(SettingsTags.NOTIFICATIONS_BLOCKED),
+            )
+        }
+        SettingsGroup {
+            SwitchRow(
+                label = stringResource(R.string.settings_goal_reached),
+                note = stringResource(R.string.settings_goal_reached_note),
+                checked = settings.goalReachedNotification,
+                onChange = { on -> turn(on) { s, v -> s.copy(goalReachedNotification = v) } },
+                modifier = Modifier.testTag(SettingsTags.GOAL_REACHED),
+            )
+            GroupDivider()
+            SwitchRow(
+                label = stringResource(R.string.settings_evening_reminder),
+                note = stringResource(
+                    R.string.settings_evening_reminder_note,
+                    clockTime(settings.eveningReminderTime.minuteOfDay()),
+                    thresholdClause(settings.eveningReminderThresholdPercent),
+                ),
+                checked = settings.eveningReminder,
+                onChange = { on -> turn(on) { s, v -> s.copy(eveningReminder = v) } },
+                modifier = Modifier.testTag(SettingsTags.EVENING_REMINDER),
+            )
+            GroupDivider()
+            ValueRow(
+                label = stringResource(R.string.settings_reminder_time),
+                value = clockTime(settings.eveningReminderTime.minuteOfDay()),
+                onClick = onPickTime,
+                enabled = settings.eveningReminder,
+            )
+            GroupDivider()
+            ValueRow(
+                label = stringResource(R.string.settings_reminder_threshold),
+                value = thresholdLabel(settings.eveningReminderThresholdPercent),
+                onClick = onPickThreshold,
+                enabled = settings.eveningReminder,
+            )
+            GroupDivider()
+            SwitchRow(
+                label = stringResource(R.string.settings_weekly_summary),
+                note = stringResource(
+                    R.string.settings_weekly_summary_note,
+                    weekdayName(firstDayOfWeek(settings.firstDayOfWeek, systemLocale())),
+                    clockTime(GoalSchedule.WEEKLY_SUMMARY_TIME.minuteOfDay()),
+                ),
+                checked = settings.weeklySummary,
+                onChange = { on -> turn(on) { s, v -> s.copy(weeklySummary = v) } },
+                modifier = Modifier.testTag(SettingsTags.WEEKLY_SUMMARY),
+            )
+        }
+    }
+}
+
+/**
+ * The Quick Settings tile: one system prompt adds it. The row says where it stands once the
+ * system has answered; before that Passo cannot know, and does not guess.
+ */
+@Composable
+private fun TileRow() {
+    val context = LocalContext.current
+    var result by rememberSaveable { mutableStateOf<TileRequestResult?>(null) }
+    ValueRow(
+        label = stringResource(R.string.settings_tile),
+        value = stringResource(
+            when (result) {
+                TileRequestResult.ADDED, TileRequestResult.ALREADY_ADDED -> R.string.settings_tile_added
+                TileRequestResult.FAILED -> R.string.settings_tile_failed
+                TileRequestResult.NOT_ADDED, null -> R.string.settings_tile_note
+            },
+        ),
+        onClick = { StepsTile.requestAdd(context) { result = it } },
+        modifier = Modifier.testTag(SettingsTags.TILE),
+    )
+}
+
 @Composable
 private fun PrivacyCard() {
     Surface(
@@ -753,6 +925,48 @@ private fun StepperDialog(
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_cancel)) }
             }
         },
+    )
+}
+
+/** A time of day on the clock dial, 12 or 24 hours as the phone shows them; saved on confirm. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun TimeDialog(
+    title: String,
+    initial: LocalTime,
+    note: String,
+    onSave: (LocalTime) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val context = LocalContext.current
+    val state = rememberTimePickerState(
+        initialHour = initial.hour,
+        initialMinute = initial.minute,
+        is24Hour = DateFormat.is24HourFormat(context),
+    )
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(title) },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                TimePicker(state = state)
+                Text(
+                    note,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                onSave(LocalTime.of(state.hour, state.minute))
+                onDismiss()
+            }) { Text(stringResource(R.string.settings_save)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_cancel)) } },
     )
 }
 
@@ -833,6 +1047,35 @@ private fun sexLabel(sex: Sex?): String = when (sex) {
     null -> stringResource(R.string.settings_sex_unsaid)
 }
 
+@Composable
+private fun thresholdLabel(percent: Int): String = stringResource(
+    when (percent) {
+        75 -> R.string.settings_reminder_threshold_75
+        50 -> R.string.settings_reminder_threshold_50
+        else -> R.string.settings_reminder_threshold_100
+    },
+)
+
+/** The threshold as it reads inside the reminder's sentence: «if the goal is not met yet». */
+@Composable
+private fun thresholdClause(percent: Int): String = stringResource(
+    when (percent) {
+        75 -> R.string.settings_reminder_when_75
+        50 -> R.string.settings_reminder_when_50
+        else -> R.string.settings_reminder_when_100
+    },
+)
+
+/** A weekday as a sentence uses it: «Monday», «lunedì». */
+@Composable
+private fun weekdayName(day: DayOfWeek): String =
+    day.getDisplayName(TextStyle.FULL, LocalConfiguration.current.locales[0])
+
+/** The phone's own region, which the first day of the week follows until the reader picks one. */
+private fun systemLocale() = android.content.res.Resources.getSystem().configuration.locales[0]
+
+private fun LocalTime.minuteOfDay(): Int = hour * 60 + minute
+
 /** The first day of the week in words; «Same as the phone (Monday)» when it follows the region. */
 @Composable
 private fun firstDayLabel(day: DayOfWeek?): String {
@@ -840,8 +1083,7 @@ private fun firstDayLabel(day: DayOfWeek?): String {
     fun name(of: DayOfWeek) =
         of.getDisplayName(TextStyle.FULL_STANDALONE, locale).replaceFirstChar { it.titlecase(locale) }
     return if (day == null) {
-        val region = android.content.res.Resources.getSystem().configuration.locales[0]
-        stringResource(R.string.settings_first_day_system, name(firstDayOfWeek(null, region)))
+        stringResource(R.string.settings_first_day_system, name(firstDayOfWeek(null, systemLocale())))
     } else {
         name(day)
     }
@@ -922,4 +1164,9 @@ object SettingsTags {
     const val TRACKING = "settings_tracking"
     const val NOTIFICATION = "settings_notification"
     const val WALKS = "settings_walks"
+    const val GOAL_REACHED = "settings_goal_reached"
+    const val EVENING_REMINDER = "settings_evening_reminder"
+    const val WEEKLY_SUMMARY = "settings_weekly_summary"
+    const val NOTIFICATIONS_BLOCKED = "settings_notifications_blocked"
+    const val TILE = "settings_tile"
 }
