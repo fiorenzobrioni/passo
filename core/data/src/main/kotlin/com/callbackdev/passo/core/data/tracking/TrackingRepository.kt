@@ -7,6 +7,10 @@ import com.callbackdev.passo.core.data.db.TrackingDao
 import com.callbackdev.passo.core.data.db.toModel
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
 import com.callbackdev.passo.core.data.time.TodaySource
+import com.callbackdev.passo.core.domain.today.DayMinute
+import com.callbackdev.passo.core.domain.today.TypicalDay
+import com.callbackdev.passo.core.domain.today.TypicalDayCalculator
+import com.callbackdev.passo.core.domain.today.minuteOfDay
 import com.callbackdev.passo.core.domain.tracking.LedgerBatch
 import com.callbackdev.passo.core.domain.tracking.TrackingConstants
 import com.callbackdev.passo.core.model.DailySummary
@@ -20,6 +24,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -134,6 +139,21 @@ constructor(
     suspend fun minutesOn(days: List<Long>): Map<Long, List<MinuteSteps>> = dao.minutesOnDays(days)
         .map { MinuteSteps(it.epochMinute, it.localEpochDay, it.steps) }
         .groupBy { it.localEpochDay }
+
+    /**
+     * The usual day for [today]: the mean of the same weekday over the past weeks
+     * ([TypicalDayCalculator], PLANNING.md §6.2), with each minute placed in [zone]. Null until
+     * enough of those days are recorded.
+     */
+    suspend fun typicalDay(today: Long, zone: ZoneId): TypicalDay? {
+        val candidates = TypicalDayCalculator.candidateDays(today)
+        val byDay = minutesOn(candidates)
+        return TypicalDayCalculator.typical(
+            candidates.map { day ->
+                byDay[day].orEmpty().map { DayMinute(minuteOfDay(it.epochMinute, it.localEpochDay, zone), it.steps) }
+            },
+        )
+    }
 
     /** The first day with steps recorded, null before the first: the day tracking began. */
     fun observeFirstRecordedDay(): Flow<Long?> = dao.observeFirstRecordedDay()

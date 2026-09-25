@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The two cards, as the launcher's picker names them (Chiaro's names, so the family reads as one). -->
+    <string name="widget_glance_label">At a glance</string>
+    <string name="widget_glance_desc">Today\'s steps on a ring, the day\'s sentence where there is room and, on a wide tall card, the day hour by hour</string>
+    <string name="widget_words_label">In words</string>
+    <string name="widget_words_desc">Words and figures: today\'s steps large, the day\'s sentence, the goal and, on a tall card, the day in figures</string>
+
+    <!-- The day's sentence, brief -->
+    <string name="widget_sentence_no_steps">No steps yet today</string>
+    <string name="widget_sentence_goal_reached">Goal reached at %1$s</string>
+    <plurals name="widget_sentence_ahead">
+        <item quantity="one">%1$s step ahead of usual</item>
+        <item quantity="other">%1$s steps ahead of usual</item>
+    </plurals>
+    <plurals name="widget_sentence_behind">
+        <item quantity="one">%1$s step behind usual</item>
+        <item quantity="other">%1$s steps behind usual</item>
+    </plurals>
+    <string name="widget_sentence_on_pace">Right on your usual pace</string>
+    <plurals name="widget_sentence_to_go">
+        <item quantity="one">%1$s step to go</item>
+        <item quantity="other">%1$s steps to go</item>
+    </plurals>
+
+    <!-- The goal and the estimates -->
+    <plurals name="widget_goal_of">
+        <item quantity="one">of %1$s step</item>
+        <item quantity="other">of %1$s steps</item>
+    </plurals>
+    <string name="widget_goal_of_short">of %1$s</string>
+    <string name="widget_goal_share">%1$s of %2$s</string>
+    <string name="widget_goal_reached_mark">Goal reached:</string>
+    <!-- ≈ says "estimate" where a line has no room for the word. -->
+    <string name="widget_metrics_line">≈ %1$s · %2$s</string>
+    <string name="widget_eyebrow">Steps today</string>
+    <string name="widget_eyebrow_short">Today</string>
+    <string name="widget_detail_distance">walked, estimated</string>
+    <string name="widget_detail_calories">active, estimated</string>
+    <string name="widget_detail_active">active</string>
+    <string name="widget_detail_brisk">at a brisk pace</string>
+
+    <!-- When the count is not moving, and what a tap does -->
+    <string name="widget_status_paused">Paused · tap to resume</string>
+    <string name="widget_status_stopped">Not counting · tap to restart</string>
+    <string name="widget_status_permission">No permission · tap to allow</string>
+    <string name="widget_status_paused_short">Paused</string>
+    <string name="widget_status_stopped_short">Not counting</string>
+    <string name="widget_status_permission_short">No permission</string>
+    <string name="widget_setup_title">Passo is not counting yet</string>
+    <string name="widget_setup_hint">Tap to set it up</string>
+    <string name="widget_no_sensor_title">No step counter</string>
+    <string name="widget_no_sensor_hint">This phone has no step sensor</string>
+
+    <!-- For screen readers -->
+    <plurals name="widget_ring_description">
+        <item quantity="one">%1$s step of %2$s, %3$s of the goal.</item>
+        <item quantity="other">%1$s steps of %2$s, %3$s of the goal.</item>
+    </plurals>
+    <string name="widget_ring_reached">Goal reached.</string>
+    <string name="widget_hours_description">Today hour by hour. The busiest hour so far: %1$s, with %2$s steps.</string>
+    <string name="widget_hours_description_empty">Today hour by hour: no steps yet.</string>
+
+    <!-- The settings screen of one widget -->
+    <string name="widget_config_title">This widget</string>
+    <string name="widget_config_preview_desc">Widget preview</string>
+    <string name="widget_config_size_placed">As placed</string>
+    <string name="widget_config_resize_hint">On the home screen, long-press the widget and drag its edges: it lays itself out again.</string>
+    <string name="widget_config_background">Background</string>
+    <string name="widget_bg_light">Light</string>
+    <string name="widget_bg_dark">Dark</string>
+    <string name="widget_bg_system">Same as the phone</string>
+    <string name="widget_bg_color">A colour</string>
+    <string name="widget_color_blue">Blue</string>
+    <string name="widget_color_azure">Light blue</string>
+    <string name="widget_color_green">Green</string>
+    <string name="widget_color_teal">Sea green</string>
+    <string name="widget_color_plum">Violet</string>
+    <string name="widget_color_clay">Terracotta</string>
+    <string name="widget_config_opacity">Background opacity</string>
+    <string name="widget_opacity_full">Solid</string>
+    <string name="widget_opacity_transparent">See-through</string>
+    <string name="widget_opacity_percent">%1$d%%</string>
+    <string name="widget_config_content">Content</string>
+    <string name="widget_config_show_sentence">The day\'s sentence</string>
+    <string name="widget_config_show_sentence_note">Ahead of or behind a usual day, the steps still to go, or when the goal was met. Shown where the card has room for it.</string>
+    <string name="widget_config_show_hours">The day hour by hour</string>
+    <string name="widget_config_show_hours_note">Today\'s steps in 24 bars, the hour under way highlighted. On cards at least three cells wide and two rows tall.</string>
+    <string name="widget_config_show_goal">The goal</string>
+    <string name="widget_config_show_goal_note">How much of today\'s goal is walked, under the sentence, with a check once it is met.</string>
+    <string name="widget_config_show_metrics">Distance and calories</string>
+    <string name="widget_config_show_metrics_note">Estimated from your steps and your profile, as in the app. Shown where the card has room for them.</string>
+    <string name="widget_config_show_details">The day in figures</string>
+    <string name="widget_config_show_details_note">Distance, calories, active and brisk minutes, one per line, in words. Only where the card is tall enough.</string>
+    <string name="widget_config_arrangement">Arrangement</string>
+    <string name="widget_arrangement_ring_start">Ring on the left, sentence at the far edge</string>
+    <string name="widget_arrangement_ring_end">Ring on the right, sentence beside the number</string>
+    <string name="widget_config_done">Done</string>
+
+    <!-- What the card carries at the size shown in the preview -->
+    <string name="glance_form_dot">One cell: the ring, with today\'s steps inside it.</string>
+    <string name="glance_form_narrow">A narrow row: the ring, today\'s steps and the goal. From four cells the day\'s sentence joins them.</string>
+    <string name="glance_form_wide">A wide row: the day\'s sentence too, at the far edge.</string>
+    <string name="glance_form_tall">Two rows and up: the ring at the top, then the steps, the sentence and the goal.</string>
+    <string name="glance_form_panel">Wide and tall: the row on top, and under it the day hour by hour.</string>
+    <string name="words_form_line">One or two cells: today\'s steps and, where it fits, the goal. From three cells the day\'s sentence joins them.</string>
+    <string name="words_form_row">One row: today\'s steps on the left, the day\'s sentence and the facts at the far edge.</string>
+    <string name="words_form_stack">Narrow and tall: the steps large, the sentence and the goal under them. With more height, the day in figures.</string>
+    <string name="words_form_panel">Wide and tall: the steps large beside the day\'s sentence. With more height, the day in figures.</string>
+    <!-- The picker's static preview: sample values, never a reading -->
+    <string name="widget_preview_count">7,855</string>
+    <string name="widget_preview_goal">of 10,000 steps</string>
+    <string name="widget_preview_sentence">1,484 steps ahead of usual</string>
+    <string name="widget_preview_share">78% of 10,000</string>
+</resources>

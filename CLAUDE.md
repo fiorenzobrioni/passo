@@ -65,7 +65,7 @@ that does not match it.
 | `:core:tracking` | Android library | `StepTrackingService` (FGS type `health`), sensor source, receivers, ongoing notification |
 | `:core:designsystem` | Android library | M3 theme, typography, shared components, the Canvas charts |
 | `:feature:*` | Android library | `today`, `history`, `insights`, `settings`, `onboarding` |
-| `:widget` | Android library | the Glance widget, its receiver and update coordinator |
+| `:widget` | Android library | the two Glance widgets («At a glance», «In words»), their settings screen, the update coordinator |
 | `:app` | application | `Application`, `MainActivity`, navigation, DI entry points; wires everything |
 
 Rules: `:core:model` and `:core:domain` stay pure Kotlin/JVM; if a class there needs a `Context`
@@ -114,9 +114,14 @@ means, estimates that say so, no dead tab and no switch for a feature that has n
 Icons are `PassoIcons`, drawn in code. The Compose UI tests write screenshots to each module's
 `build/screenshots`: look at them after changing a screen.
 
+**Widgets** (`docs/adr/0005-widgets.md`): Chiaro's card, colours and ink rule, carried over; the
+forms' arithmetic is pure (`GlanceLayout.kt`, `WordsLayout.kt`) and pinned by tests at Chiaro's
+reference grants, and `WidgetGalleryTest` draws every form to `widget/build/screenshots`: look at
+them after changing a card. Glance drops the eleventh child of a container silently: count them.
+
 **README screenshots** (`docs/screenshots/`, shown in the root `README.md`): drawn by the
-`ReadmeScreenshots` test classes of the feature modules, from realistic sample data, in English,
-and only on request: `./gradlew test -PupdateScreenshots` (plus the mirror init script in the
+`ReadmeScreenshots` test classes of the feature modules and `:widget`, from realistic sample
+data, in English, and only on request: `./gradlew test -PupdateScreenshots` (plus the mirror init script in the
 sandbox). Two standing rules (owner's):
 - **Regenerate them** whenever a change alters what an existing one shows, and look at them
   before committing.

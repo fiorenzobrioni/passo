@@ -26,10 +26,37 @@ class LiveSteps
 constructor() {
     private val state = MutableStateFlow<LiveToday?>(null)
 
+    private val running = MutableStateFlow(false)
+
     /** Null while the service is not running, or has not read today's stored count yet. */
     val today: StateFlow<LiveToday?> = state.asStateFlow()
+
+    /**
+     * Whether the tracking service is alive in this process. A widget drawn by a process that
+     * was started without it (after the system stopped the service) says so, rather than
+     * showing a count that has stopped moving as if it still moved.
+     */
+    val serviceRunning: StateFlow<Boolean> = running.asStateFlow()
 
     fun publish(today: LiveToday?) {
         state.value = today
     }
+
+    fun setServiceRunning(alive: Boolean) {
+        running.value = alive
+    }
+}
+
+/**
+ * A day's stored minutes plus the ones the service still holds, added per minute: what a
+ * screen or a widget shows is the stored truth and the buffer, never one of the two.
+ */
+fun List<MinuteSteps>.withPending(pending: List<MinuteSteps>): List<MinuteSteps> {
+    if (pending.isEmpty()) return this
+    val byMinute = LinkedHashMap<Long, MinuteSteps>()
+    for (minute in this + pending) {
+        val existing = byMinute[minute.epochMinute]
+        byMinute[minute.epochMinute] = existing?.copy(steps = existing.steps + minute.steps) ?: minute
+    }
+    return byMinute.values.toList()
 }

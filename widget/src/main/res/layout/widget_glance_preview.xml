@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  «At a glance» as the launcher's picker draws it where it asks for a static layout: the picker
+  never runs the widget's code, so this is sample values in the default dress (the blue card,
+  white ink), the wide one-row form of the default 4×1 placement, with the widget's numbers:
+  14 dp at the edges and 6 above and below, the ring 56 dp and 12 dp from the words, the count
+  at 33 sp Bold over the goal at 16 sp, the sentence at 16 sp Medium against the far edge.
+  Sample data only: a preview is a drawing of the product, never a reading.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_preview_card"
+    android:baselineAligned="false"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingStart="14dp"
+    android:paddingTop="6dp"
+    android:paddingEnd="14dp"
+    android:paddingBottom="6dp"
+    tools:ignore="HardcodedText">
+
+    <FrameLayout
+        android:layout_width="56dp"
+        android:layout_height="56dp">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:importantForAccessibility="no"
+            android:src="@drawable/widget_preview_ring" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:fontFamily="sans-serif-medium"
+            android:text="78%"
+            android:textColor="@color/widget_preview_ink"
+            android:textSize="15sp" />
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:paddingStart="12dp"
+        android:paddingEnd="0dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:includeFontPadding="false"
+            android:singleLine="true"
+            android:text="@string/widget_preview_count"
+            android:textColor="@color/widget_preview_ink"
+            android:textSize="33sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="true"
+            android:text="@string/widget_preview_goal"
+            android:textColor="@color/widget_preview_ink_dim"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:ellipsize="end"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="end"
+        android:maxLines="3"
+        android:paddingStart="12dp"
+        android:paddingEnd="0dp"
+        android:text="@string/widget_preview_sentence"
+        android:textAlignment="viewEnd"
+        android:textColor="@color/widget_preview_ink"
+        android:textSize="16sp" />
+</LinearLayout>

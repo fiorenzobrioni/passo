@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_glance_label">Colpo d\'occhio</string>
+    <string name="widget_glance_desc">I passi di oggi su un anello, la frase del giorno dove c\'è spazio e, su una card larga e alta, la giornata ora per ora</string>
+    <string name="widget_words_label">In parole</string>
+    <string name="widget_words_desc">Parole e numeri: i passi di oggi in grande, la frase del giorno, l\'obiettivo e, su una card alta, la giornata in cifre</string>
+
+    <string name="widget_sentence_no_steps">Ancora nessun passo oggi</string>
+    <string name="widget_sentence_goal_reached">Obiettivo raggiunto alle %1$s</string>
+    <plurals name="widget_sentence_ahead">
+        <item quantity="one">%1$s passo in più del solito</item>
+        <item quantity="many">%1$s passi in più del solito</item>
+        <item quantity="other">%1$s passi in più del solito</item>
+    </plurals>
+    <plurals name="widget_sentence_behind">
+        <item quantity="one">%1$s passo in meno del solito</item>
+        <item quantity="many">%1$s passi in meno del solito</item>
+        <item quantity="other">%1$s passi in meno del solito</item>
+    </plurals>
+    <string name="widget_sentence_on_pace">In linea con il tuo solito ritmo</string>
+    <plurals name="widget_sentence_to_go">
+        <item quantity="one">Manca %1$s passo</item>
+        <item quantity="many">Mancano %1$s passi</item>
+        <item quantity="other">Mancano %1$s passi</item>
+    </plurals>
+
+    <plurals name="widget_goal_of">
+        <item quantity="one">di %1$s passo</item>
+        <item quantity="many">di %1$s passi</item>
+        <item quantity="other">di %1$s passi</item>
+    </plurals>
+    <string name="widget_goal_of_short">di %1$s</string>
+    <string name="widget_goal_share">%1$s di %2$s</string>
+    <string name="widget_goal_reached_mark">Obiettivo raggiunto:</string>
+    <string name="widget_metrics_line">≈ %1$s · %2$s</string>
+    <string name="widget_eyebrow">Passi oggi</string>
+    <string name="widget_eyebrow_short">Oggi</string>
+    <string name="widget_detail_distance">percorsi, stima</string>
+    <string name="widget_detail_calories">attive, stima</string>
+    <string name="widget_detail_active">di attività</string>
+    <string name="widget_detail_brisk">a passo svelto</string>
+
+    <string name="widget_status_paused">In pausa · tocca per riprendere</string>
+    <string name="widget_status_stopped">Non sta contando · tocca per riavviare</string>
+    <string name="widget_status_permission">Manca il permesso · tocca per darlo</string>
+    <string name="widget_status_paused_short">In pausa</string>
+    <string name="widget_status_stopped_short">Non sta contando</string>
+    <string name="widget_status_permission_short">Manca il permesso</string>
+    <string name="widget_setup_title">Passo non sta ancora contando</string>
+    <string name="widget_setup_hint">Tocca per configurarlo</string>
+    <string name="widget_no_sensor_title">Nessun contapassi</string>
+    <string name="widget_no_sensor_hint">Questo telefono non ha il sensore dei passi</string>
+
+    <plurals name="widget_ring_description">
+        <item quantity="one">%1$s passo su %2$s, %3$s dell\'obiettivo.</item>
+        <item quantity="many">%1$s passi su %2$s, %3$s dell\'obiettivo.</item>
+        <item quantity="other">%1$s passi su %2$s, %3$s dell\'obiettivo.</item>
+    </plurals>
+    <string name="widget_ring_reached">Obiettivo raggiunto.</string>
+    <string name="widget_hours_description">Oggi ora per ora. L\'ora più attiva finora: le %1$s, con %2$s passi.</string>
+    <string name="widget_hours_description_empty">Oggi ora per ora: ancora nessun passo.</string>
+
+    <string name="widget_config_title">Questo widget</string>
+    <string name="widget_config_preview_desc">Anteprima del widget</string>
+    <string name="widget_config_size_placed">Com\'è ora</string>
+    <string name="widget_config_resize_hint">Sulla schermata Home tieni premuto il widget e trascinane i bordi: si ridispone da solo.</string>
+    <string name="widget_config_background">Sfondo</string>
+    <string name="widget_bg_light">Chiaro</string>
+    <string name="widget_bg_dark">Scuro</string>
+    <string name="widget_bg_system">Come il telefono</string>
+    <string name="widget_bg_color">Un colore</string>
+    <string name="widget_color_blue">Blu</string>
+    <string name="widget_color_azure">Blu chiaro</string>
+    <string name="widget_color_green">Verde</string>
+    <string name="widget_color_teal">Verde acqua</string>
+    <string name="widget_color_plum">Viola</string>
+    <string name="widget_color_clay">Terracotta</string>
+    <string name="widget_config_opacity">Opacità dello sfondo</string>
+    <string name="widget_opacity_full">Pieno</string>
+    <string name="widget_opacity_transparent">Trasparente</string>
+    <string name="widget_opacity_percent">%1$d%%</string>
+    <string name="widget_config_content">Contenuto</string>
+    <string name="widget_config_show_sentence">La frase del giorno</string>
+    <string name="widget_config_show_sentence_note">Avanti o indietro rispetto a un giorno come tanti, i passi che mancano, o quando hai raggiunto l\'obiettivo. Compare dove la card ha spazio.</string>
+    <string name="widget_config_show_hours">La giornata ora per ora</string>
+    <string name="widget_config_show_hours_note">I passi di oggi in 24 barre, con l\'ora in corso in evidenza. Sulle card larghe almeno tre celle e alte due righe.</string>
+    <string name="widget_config_show_goal">L\'obiettivo</string>
+    <string name="widget_config_show_goal_note">Quanto dell\'obiettivo di oggi hai già camminato, sotto la frase, con una spunta quando è raggiunto.</string>
+    <string name="widget_config_show_metrics">Distanza e calorie</string>
+    <string name="widget_config_show_metrics_note">Stimate dai tuoi passi e dal tuo profilo, come nell\'app. Compaiono dove la card ha spazio.</string>
+    <string name="widget_config_show_details">La giornata in cifre</string>
+    <string name="widget_config_show_details_note">Distanza, calorie, minuti di attività e a passo svelto, uno per riga, in parole. Solo dove la card è alta abbastanza.</string>
+    <string name="widget_config_arrangement">Disposizione</string>
+    <string name="widget_arrangement_ring_start">Anello a sinistra, frase al bordo opposto</string>
+    <string name="widget_arrangement_ring_end">Anello a destra, frase accanto al numero</string>
+    <string name="widget_config_done">Fatto</string>
+
+    <string name="glance_form_dot">Una cella: l\'anello, con dentro i passi di oggi.</string>
+    <string name="glance_form_narrow">Una riga stretta: l\'anello, i passi di oggi e l\'obiettivo. Da quattro celle arriva anche la frase del giorno.</string>
+    <string name="glance_form_wide">Una riga larga: anche la frase del giorno, al bordo opposto.</string>
+    <string name="glance_form_tall">Due righe e più: l\'anello in alto, sotto i passi, la frase e l\'obiettivo.</string>
+    <string name="glance_form_panel">Larga e alta: la riga in alto e sotto la giornata ora per ora.</string>
+    <string name="words_form_line">Una o due celle: i passi di oggi e, dove ci sta, l\'obiettivo. Da tre celle arriva anche la frase del giorno.</string>
+    <string name="words_form_row">Una riga: i passi di oggi a sinistra, la frase del giorno e i fatti al bordo opposto.</string>
+    <string name="words_form_stack">Stretta e alta: i passi in grande, sotto la frase e l\'obiettivo. Con più altezza, la giornata in cifre.</string>
+    <string name="words_form_panel">Larga e alta: i passi in grande accanto alla frase del giorno. Con più altezza, la giornata in cifre.</string>
+    <!-- The picker's static preview: sample values, never a reading -->
+    <string name="widget_preview_count">7.855</string>
+    <string name="widget_preview_goal">di 10.000 passi</string>
+    <string name="widget_preview_sentence">1.484 passi in più del solito</string>
+    <string name="widget_preview_share">78% di 10.000</string>
+</resources>

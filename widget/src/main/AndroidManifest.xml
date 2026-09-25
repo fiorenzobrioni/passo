@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The home-screen widgets (PLANNING.md §7): two receivers and the settings screen the launcher
+  opens on a long press. No permission of their own: the cards read what the tracking service
+  already stored, in this process. Glance brings WorkManager and its WAKE_LOCK, held by the
+  system's job while a card is being drawn; nothing here schedules work of its own.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Glance runs its sessions on WorkManager, which declares the network state for workers
+         that wait on a connection. Glance's never do, and Passo has no network: removed, so
+         the merged manifest carries no network permission of any kind (docs/adr/0005). -->
+    <uses-permission
+        android:name="android.permission.ACCESS_NETWORK_STATE"
+        tools:node="remove" />
+
+    <application android:supportsRtl="true">
+        <!-- Reached from the launcher's reconfigure flow. Exported, because the launcher starts
+             it; taskAffinity empty, so it never lands on top of the app's own task. -->
+        <activity
+            android:name=".config.WidgetConfigActivity"
+            android:excludeFromRecents="true"
+            android:exported="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.Passo.WidgetConfig">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <!-- exported=false: the system delivers APPWIDGET_* to them regardless. -->
+        <receiver
+            android:name=".glance.GlanceWidgetReceiver"
+            android:exported="false"
+            android:label="@string/widget_glance_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_glance_info" />
+        </receiver>
+        <receiver
+            android:name=".words.WordsWidgetReceiver"
+            android:exported="false"
+            android:label="@string/widget_words_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_words_info" />
+        </receiver>
+    </application>
+
+</manifest>

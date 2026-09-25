@@ -1,5 +1,6 @@
 package com.callbackdev.passo
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,11 +15,14 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.callbackdev.passo.core.data.settings.SettingsRepository
+import com.callbackdev.passo.core.data.widget.WidgetUpdates
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
+import com.callbackdev.passo.core.domain.widget.WidgetEvent
 import com.callbackdev.passo.core.model.AppFont
 import com.callbackdev.passo.core.model.AppPalette
 import com.callbackdev.passo.core.model.ThemeMode
 import com.callbackdev.passo.core.tracking.StepTracking
+import com.callbackdev.passo.core.tracking.TrackingControl
 import com.callbackdev.passo.core.tracking.TrackingReadiness
 import com.callbackdev.passo.shell.PassoRoot
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,11 +33,16 @@ import javax.inject.Inject
 /**
  * The one activity. It wears the reader's appearance (theme, palette, typeface), hands the
  * pages to [PassoRoot], and on every return (re)starts tracking unless the reader paused it:
- * opening the app is the documented way back after a force stop (PLANNING.md §4.2).
+ * opening the app is the documented way back after a force stop (PLANNING.md §4.2). A paused
+ * widget's tap lands here too, asking to resume ([TrackingControl.EXTRA_RESUME]).
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @Inject lateinit var settingsRepository: SettingsRepository
+
+    @Inject lateinit var trackingControl: TrackingControl
+
+    @Inject lateinit var widgets: WidgetUpdates
 
     private var readiness by mutableStateOf(TrackingReadiness.READY)
 
@@ -41,6 +50,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         readiness = StepTracking.readiness(this)
+        if (savedInstanceState == null) resumeIfAsked(intent)
         setContent {
             val settings by settingsRepository.settings.collectAsStateWithLifecycle(initialValue = null)
             val dark = when (settings?.theme) {
@@ -68,14 +78,30 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        resumeIfAsked(intent)
+    }
+
     override fun onResume() {
         super.onResume()
         // Also on the way back from the system's settings, where the permission may have changed.
         readiness = StepTracking.readiness(this)
+        // A revoked permission kills the process without a word to the widgets: they learn it here.
+        widgets.notify(WidgetEvent.TRACKING_STATE)
         lifecycleScope.launch {
             if (readiness == TrackingReadiness.READY && settingsRepository.settings.first().trackingEnabled) {
                 StepTracking.start(this@MainActivity)
             }
+        }
+    }
+
+    /** The widget's "tap to resume" (PLANNING.md §7): once per tap, not again on a rotation. */
+    private fun resumeIfAsked(intent: Intent?) {
+        if (intent?.getBooleanExtra(TrackingControl.EXTRA_RESUME, false) != true) return
+        intent.removeExtra(TrackingControl.EXTRA_RESUME)
+        lifecycleScope.launch {
+            if (!settingsRepository.settings.first().trackingEnabled) trackingControl.resume()
         }
     }
 }
