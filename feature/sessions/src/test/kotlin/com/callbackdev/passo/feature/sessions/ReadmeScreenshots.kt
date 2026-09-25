@@ -14,8 +14,10 @@ import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.SessionMilestone
+import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.tracking.GoalNotificationsBlock
+import com.callbackdev.passo.core.tracking.VoiceAvailability
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Rule
@@ -66,6 +68,7 @@ class ReadmeScreenshots {
     fun outingEditor() {
         val plan = plans[0].copy(
             milestones = setOf(SessionMilestone.QUARTER, SessionMilestone.HALF, SessionMilestone.THREE_QUARTERS),
+            voice = SessionVoice.HEADPHONES,
         )
         val state = PlanEditorState(
             original = plan,
@@ -76,9 +79,10 @@ class ReadmeScreenshots {
             lengths = lengths,
             restOfDaySteps = 2_145,
             canVibrate = true,
+            voiceAvailability = VoiceAvailability.READY,
         )
         compose.setContent { PassoTheme { PlanEditorScreen(state, onBack = {}, actions = PlanEditorActions()) } }
-        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.VIBRATE))
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.TRY_VOICE))
         save("outing-editor")
     }
 

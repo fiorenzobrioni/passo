@@ -68,4 +68,18 @@
     <string name="editor_delete_title">Delete this outing?</string>
     <string name="editor_delete_body">The outings already walked with it stay in History.</string>
     <string name="editor_cancel">Cancel</string>
+    <string name="sessions_signals_voice">%1$s, with voice</string>
+    <string name="sessions_signals_vibrate_voice">%1$s, with vibration and voice</string>
+    <string name="editor_voice">Voice</string>
+    <string name="editor_voice_off">Off</string>
+    <string name="editor_voice_headphones">Headphones</string>
+    <string name="editor_voice_always">Always</string>
+    <string name="editor_voice_off_note">The signals are vibrations only.</string>
+    <string name="editor_voice_headphones_note">Through headphones only: the start, each signal with what is left and your pace, and the goal. Your music dims for a moment.</string>
+    <string name="editor_voice_always_note">Through headphones, or out loud from the phone when it is not on silent.</string>
+    <string name="editor_voice_offline">A voice installed on this phone: Passo sends nothing.</string>
+    <string name="editor_voice_try">Hear it</string>
+    <string name="editor_voice_missing">This phone has no offline voice in this language. Install one in the system’s text-to-speech settings: until then the signals are vibrations only.</string>
+    <string name="editor_voice_install">Install a voice</string>
+    <string name="editor_voice_no_engine">This phone has no text-to-speech engine: the signals are vibrations only.</string>
 </resources>

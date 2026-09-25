@@ -1,5 +1,6 @@
 package com.callbackdev.passo.core.data.db
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
@@ -70,6 +71,7 @@ data class SessionPlanEntity(
     val vibrate: Boolean,
     val position: Int,
     val lastUsedAtMillis: Long?,
+    @ColumnInfo(defaultValue = "OFF") val voice: String = "OFF",
 )
 
 /**
@@ -103,4 +105,5 @@ data class SessionEntity(
     val pausedAtMillis: Long?,
     val reachedAtMillis: Long?,
     val toldMilestones: Int,
+    @ColumnInfo(defaultValue = "OFF") val voice: String = "OFF",
 )

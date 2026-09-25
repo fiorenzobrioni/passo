@@ -160,6 +160,7 @@ object SessionPlans {
             intensity = plan.intensity,
             milestones = plan.milestones.filter { it in SessionMilestone.CHOOSABLE }.toSet(),
             vibrate = plan.vibrate,
+            voice = plan.voice,
             localEpochDay = localEpochDay,
             startedAtMillis = nowMillis,
         )

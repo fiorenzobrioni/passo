@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -23,7 +24,9 @@ import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionPlan
+import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.UnitPreference
+import com.callbackdev.passo.core.tracking.VoiceAvailability
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -108,6 +111,50 @@ class PlanEditorScreenTest {
         assertThat(saved).isTrue()
         compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.VIBRATE))
         snapshot("editor_signals")
+    }
+
+    @Test
+    fun `the voice is chosen, heard first, and says where it speaks`() {
+        var editor by mutableStateOf(state().copy(voiceAvailability = VoiceAvailability.READY))
+        var heard = false
+        val actions = PlanEditorActions(
+            voice = { editor = editor.copy(draft = editor.draft.copy(voice = it)) },
+            tryVoice = { heard = true },
+        )
+        compose.setContent { PassoTheme { PlanEditorScreen(editor, onBack = {}, actions = actions) } }
+
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.VOICE))
+        compose.onNodeWithText("The signals are vibrations only.").assertIsDisplayed()
+        compose.onNodeWithTag("${EditorTags.VOICE}-HEADPHONES").performClick()
+        assertThat(editor.draft.voice).isEqualTo(SessionVoice.HEADPHONES)
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.TRY_VOICE))
+        compose.onNodeWithText("Through headphones only", substring = true).assertIsDisplayed()
+        compose.onNodeWithTag(EditorTags.TRY_VOICE).performClick()
+        assertThat(heard).isTrue()
+        snapshot("editor_voice")
+    }
+
+    @Test
+    fun `without an offline voice it says how to get one`() {
+        var opened = false
+        val missing = state().let {
+            it.copy(
+                draft = it.draft.copy(voice = SessionVoice.ALWAYS),
+                voiceAvailability = VoiceAvailability.NO_OFFLINE_VOICE,
+            )
+        }
+        compose.setContent {
+            PassoTheme(darkTheme = true) {
+                PlanEditorScreen(missing, onBack = {
+                }, actions = PlanEditorActions(openVoiceSettings = { opened = true }))
+            }
+        }
+
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasText("Install a voice"))
+        compose.onNodeWithText("no offline voice in this language", substring = true).assertIsDisplayed()
+        snapshot("editor_voice_missing_dark")
+        compose.onNodeWithText("Install a voice").performClick()
+        assertThat(opened).isTrue()
     }
 
     @Test

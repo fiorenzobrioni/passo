@@ -70,12 +70,12 @@ Free, no account, no ads, no tracking, and no permission to use the internet at 
   <tr>
     <td align="center"><img src="docs/screenshots/outings.png" width="250" alt="Outings: a brisk walk of 20 minutes, a 30-minute run and the rest of the day, each with what it comes to and its signals"></td>
     <td align="center"><img src="docs/screenshots/today-outing.png" width="250" alt="Today with a brisk walk under way: 12 of 20 minutes, past halfway, 112 steps a minute on pace"></td>
-    <td align="center"><img src="docs/screenshots/outing-editor.png" width="250" alt="Editing an outing: what it comes to with your step, the signals at 25, 50 and 75 percent, the vibrations to try"></td>
+    <td align="center"><img src="docs/screenshots/outing-editor.png" width="250" alt="Editing an outing: the signals at 25, 50 and 75 percent, the vibrations to try, and the voice through headphones"></td>
   </tr>
   <tr>
     <td align="center"><b>Outings:</b> a walk with a goal, one touch from starting.</td>
     <td align="center"><b>Under way,</b> on Today and in the notification: where it stands, and your pace against its own.</td>
-    <td align="center"><b>Signals you can feel:</b> one, two, three short pulses, one long at the goal. Try them first.</td>
+    <td align="center"><b>Signals you can feel or hear:</b> one, two, three short pulses, one long at the goal, and a voice in your headphones if you want it.</td>
   </tr>
 </table>
 
@@ -113,8 +113,10 @@ resizable home-screen widgets answer "how am I doing today?" at a glance.
 - **Outings**: a walk or a run with a goal, started on purpose. One goal (steps, a distance,
   minutes in motion, or the rest of today's goal) and, if you want, a pace to keep (brisk,
   vigorous, running). On the way the phone vibrates at the shares you choose, in a count you
-  can read in a pocket, and once, long, at the goal; the counting notification follows it,
-  with Pause and Stop. Start one from Today, from the app icon's long press or from the evening
+  can read in a pocket, and once, long, at the goal; if you want, a voice in your headphones
+  says what is left and how your pace is going (a voice installed on the phone: Passo still
+  sends nothing). The counting notification follows it, with Pause and Stop. Start one from
+  Today, from the app icon's long press or from the evening
   reminder; the widgets and the tile show it while it lasts, and the day's walks keep it
   afterwards with how much of its goal was done.
 - **Insights**: the streak of days at your goal, your best day, week and month, averages over

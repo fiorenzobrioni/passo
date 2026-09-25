@@ -95,7 +95,8 @@ fun Resources.planDescription(plan: SessionPlan, format: MeasureFormatter): Stri
 fun Resources.sessionGoalDescription(session: Session, format: MeasureFormatter): String =
     intensityPhrase(session.intensity, sessionAmount(session.goal(), format))
 
-private fun Resources.intensityPhrase(intensity: SessionIntensity, amount: String): String = getString(
+/** [amount] at [intensity]'s pace: «20 min at a brisk pace». Shared with the spoken signals. */
+fun Resources.intensityPhrase(intensity: SessionIntensity, amount: String): String = getString(
     when (intensity) {
         SessionIntensity.FREE -> R.string.session_plan_free
         SessionIntensity.BRISK -> R.string.session_plan_brisk

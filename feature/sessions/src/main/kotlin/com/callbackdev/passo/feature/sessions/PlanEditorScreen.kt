@@ -39,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,6 +47,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -75,11 +77,16 @@ import com.callbackdev.passo.core.domain.sessions.typicalCadence
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
+import com.callbackdev.passo.core.model.SessionVoice
+import com.callbackdev.passo.core.tracking.SessionSpeech
+import com.callbackdev.passo.core.tracking.VoiceAvailability
 
 /** The outing editor for plan [planId] (null: a new one), with its draft in [viewModel]. */
 @Composable
 fun PlanEditorRoute(planId: Long?, onDone: () -> Unit, viewModel: PlanEditorViewModel = hiltViewModel()) {
     LaunchedEffect(planId) { viewModel.open(planId) }
+    DisposableEffect(Unit) { onDispose { viewModel.close() } }
+    val context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val current = state?.takeIf { it.isNew == (planId == null) && (planId == null || it.original.id == planId) }
     PlanEditorScreen(
@@ -94,6 +101,9 @@ fun PlanEditorRoute(planId: Long?, onDone: () -> Unit, viewModel: PlanEditorView
             milestone = viewModel::milestone,
             vibrate = viewModel::vibrate,
             tryVibration = viewModel::tryVibration,
+            voice = viewModel::voice,
+            tryVoice = viewModel::tryVoice,
+            openVoiceSettings = { runCatching { context.startActivity(SessionSpeech.settingsIntent()) } },
             save = { viewModel.save(onDone) },
             delete = { viewModel.delete(onDone) },
         ),
@@ -110,6 +120,9 @@ class PlanEditorActions(
     val milestone: (SessionMilestone, Boolean) -> Unit = { _, _ -> },
     val vibrate: (Boolean) -> Unit = {},
     val tryVibration: (SessionMilestone) -> Unit = {},
+    val voice: (SessionVoice) -> Unit = {},
+    val tryVoice: () -> Unit = {},
+    val openVoiceSettings: () -> Unit = {},
     val save: () -> Unit = {},
     val delete: () -> Unit = {},
 )
@@ -360,6 +373,7 @@ private fun EditorList(state: PlanEditorState, actions: PlanEditorActions, modif
                 }
             }
         }
+        item(key = "voice") { VoiceChoice(state, actions) }
     }
 }
 
@@ -462,6 +476,115 @@ private fun Estimate(state: PlanEditorState, format: MeasureFormatter) {
     }
 }
 
+/**
+ * Whether the outing also speaks, and where: never, through headphones, or out loud when the
+ * phone is not silenced. What the phone can do about it is said under it: the voice to hear
+ * first, or the one to install.
+ */
+@Composable
+private fun VoiceChoice(state: PlanEditorState, actions: PlanEditorActions) {
+    val voice = state.draft.voice
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 12.dp)) {
+        SettingsGroup {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.padding(horizontal = ScreenMargin, vertical = 14.dp),
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        PassoIcons.Voice,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(24.dp),
+                    )
+                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(stringResource(R.string.editor_voice), style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            text = stringResource(
+                                when (voice) {
+                                    SessionVoice.OFF -> R.string.editor_voice_off_note
+                                    SessionVoice.HEADPHONES -> R.string.editor_voice_headphones_note
+                                    SessionVoice.ALWAYS -> R.string.editor_voice_always_note
+                                },
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                val choices = listOf(
+                    SessionVoice.OFF to R.string.editor_voice_off,
+                    SessionVoice.HEADPHONES to R.string.editor_voice_headphones,
+                    SessionVoice.ALWAYS to R.string.editor_voice_always,
+                )
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().testTag(EditorTags.VOICE)) {
+                    choices.forEachIndexed { index, (choice, label) ->
+                        SegmentedButton(
+                            selected = voice == choice,
+                            onClick = { actions.voice(choice) },
+                            shape = SegmentedButtonDefaults.itemShape(index, choices.size),
+                            // No check mark: three words must fit a narrow phone, and the fill
+                            // already says which is chosen (and so does the semantics).
+                            icon = {},
+                            label = { Text(stringResource(label), maxLines = 1) },
+                            modifier = Modifier.testTag("${EditorTags.VOICE}-${choice.name}"),
+                        )
+                    }
+                }
+            }
+        }
+        if (voice != SessionVoice.OFF) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(horizontal = ScreenMargin + 4.dp),
+            ) {
+                when (state.voiceAvailability) {
+                    VoiceAvailability.READY, VoiceAvailability.UNKNOWN -> {
+                        Text(
+                            stringResource(R.string.editor_voice_offline),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        AssistChip(
+                            onClick = actions.tryVoice,
+                            enabled = state.voiceAvailability == VoiceAvailability.READY,
+                            label = { Text(stringResource(R.string.editor_voice_try)) },
+                            leadingIcon = {
+                                Icon(
+                                    PassoIcons.Voice,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(AssistChipDefaults.IconSize),
+                                )
+                            },
+                            modifier = Modifier.testTag(EditorTags.TRY_VOICE),
+                        )
+                    }
+
+                    VoiceAvailability.NO_OFFLINE_VOICE -> {
+                        Text(
+                            stringResource(R.string.editor_voice_missing),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        TextButton(onClick = actions.openVoiceSettings) {
+                            Text(stringResource(R.string.editor_voice_install))
+                        }
+                    }
+
+                    VoiceAvailability.NO_ENGINE -> Text(
+                        stringResource(R.string.editor_voice_no_engine),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+    }
+}
+
 /** Each signal, felt before it is chosen: the patterns are learned here, not on the road. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -513,6 +636,8 @@ object EditorTags {
     const val MILESTONE = "editor_milestone"
     const val VIBRATE = "editor_vibrate"
     const val TRY = "editor_try"
+    const val VOICE = "editor_voice"
+    const val TRY_VOICE = "editor_try_voice"
     const val SAVE = "editor_save"
     const val DELETE = "editor_delete"
     const val CONFIRM_DELETE = "editor_confirm_delete"

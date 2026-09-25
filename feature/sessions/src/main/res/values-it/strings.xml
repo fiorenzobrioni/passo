@@ -65,4 +65,18 @@
     <string name="editor_delete_title">Eliminare questa uscita?</string>
     <string name="editor_delete_body">Le uscite già fatte restano nello Storico.</string>
     <string name="editor_cancel">Annulla</string>
+    <string name="sessions_signals_voice">%1$s, con voce</string>
+    <string name="sessions_signals_vibrate_voice">%1$s, con vibrazione e voce</string>
+    <string name="editor_voice">Voce</string>
+    <string name="editor_voice_off">No</string>
+    <string name="editor_voice_headphones">Cuffie</string>
+    <string name="editor_voice_always">Sempre</string>
+    <string name="editor_voice_off_note">I segnali sono solo vibrazioni.</string>
+    <string name="editor_voice_headphones_note">Solo nelle cuffie: la partenza, ogni segnale con quanto manca e il ritmo, l’obiettivo. La musica si abbassa per un momento.</string>
+    <string name="editor_voice_always_note">Nelle cuffie, oppure ad alta voce dal telefono quando non è in silenzioso.</string>
+    <string name="editor_voice_offline">Una voce installata sul telefono: Passo non invia nulla.</string>
+    <string name="editor_voice_try">Ascoltala</string>
+    <string name="editor_voice_missing">Questo telefono non ha una voce offline in questa lingua. Installala nelle impostazioni di sintesi vocale del sistema: fino ad allora i segnali sono solo vibrazioni.</string>
+    <string name="editor_voice_install">Installa una voce</string>
+    <string name="editor_voice_no_engine">Questo telefono non ha un motore di sintesi vocale: i segnali sono solo vibrazioni.</string>
 </resources>

@@ -52,6 +52,17 @@ enum class SessionMilestone(val percent: Int) {
 }
 
 /**
+ * Whether an outing also speaks its signals (the second iteration of Phase 10): never, only
+ * through headphones (or other private audio: earbuds, a hearing aid, a car's Bluetooth), or
+ * also through the phone's speaker when the phone is not silenced.
+ */
+enum class SessionVoice {
+    OFF,
+    HEADPHONES,
+    ALWAYS,
+}
+
+/**
  * An outing the reader keeps, ready to start (the Outings page).
  *
  * @property name the reader's own name for it; null to be named from its goal and intensity.
@@ -60,6 +71,7 @@ enum class SessionMilestone(val percent: Int) {
  * @property milestones the shares told on the way, among [SessionMilestone.CHOOSABLE]; the goal
  *   is always told.
  * @property vibrate each signal also vibrates, in its own pattern, for a phone in a pocket.
+ * @property voice each signal is also spoken, and where.
  */
 data class SessionPlan(
     val id: Long = 0,
@@ -69,6 +81,7 @@ data class SessionPlan(
     val intensity: SessionIntensity,
     val milestones: Set<SessionMilestone> = SessionMilestone.DEFAULT,
     val vibrate: Boolean = true,
+    val voice: SessionVoice = SessionVoice.OFF,
     val position: Int = 0,
     val lastUsedAtMillis: Long? = null,
 )
@@ -148,6 +161,7 @@ data class Session(
     val intensity: SessionIntensity,
     val milestones: Set<SessionMilestone>,
     val vibrate: Boolean,
+    val voice: SessionVoice = SessionVoice.OFF,
     val localEpochDay: Long,
     val startedAtMillis: Long,
     val state: SessionState = SessionState.ACTIVE,
