@@ -528,12 +528,12 @@ Built in Chiaro's design language, like Phase 3 (owner's request: a clean implem
 - [x] Navigation shell, completed: the bottom bar with Today, History and Insights (Phase 3's deviation), Material's fade through between tabs, Back to Today.
 
 **Acceptance:**
-- [ ] The year view with 365 days of data renders in under 16 ms per frame on a mid-range device.
-  - *Pending (owner, on a device).* By construction it is twelve bars from at most 366 rows, computed once per change off the main thread.
+- [x] The year view with 365 days of data renders in under 16 ms per frame on a mid-range device.
+  - Confirmed by the owner on the device (25 Sep 2026). By construction too: twelve bars from at most 366 rows, computed once per change off the main thread.
 - [x] Records and streak tests pass, including goal changes across days.
   - `InsightsTest`, `PeriodOverviewTest`.
-- [ ] Walks detected on field-test days match what the user remembers (start and end within a few minutes).
-  - *Pending (owner, field test).*
+- [x] Walks detected on field-test days match what the user remembers (start and end within a few minutes).
+  - Confirmed by the owner on the device (25 Sep 2026), with the default thresholds.
 - [x] With walk detection off, no walk UI appears anywhere.
   - Walks are null all the way to the screen when it is off (`TodayUiState.walks`, `DayDetail.walks`); `HistoryScreenTest` checks the day page.
 
@@ -553,7 +553,7 @@ Built in Chiaro's design language, like Phase 3 (owner's request: a clean implem
 
 - [ ] Export to CSV and JSON, import from JSON (Storage Access Framework)
 - [x] `data_extraction_rules.xml` and `full_backup_content` for Auto Backup and device transfer
-  - Brought forward to Phase 5 (owner's request), `docs/adr/0007-backup.md`. `full_backup_content` is not needed: it is read only below Android 12, and minSdk is 34. Still to verify on a device with `bmgr`, together with the export round trip.
+  - Brought forward to Phase 5 (owner's request), `docs/adr/0007-backup.md`. `full_backup_content` is not needed: it is read only below Android 12, and minSdk is 34. Backup and restore confirmed by the owner on the device (25 Sep 2026); the export round trip is still Phase 7's.
 - [ ] Step length calibration wizard (walk a known distance, start/stop, compute and save)
 - [ ] Accessibility pass (TalkBack, font scale 200%, contrast, touch targets)
 - [ ] Adaptive layouts for tablets and foldables
@@ -728,8 +728,8 @@ Include:
 - **The bottom bar** (Today, History, Insights), with Material's fade through and Back to Today; Settings from each tab's gear. History pages from the first recorded day to today; its charts and Insights' records are the way down to a month or a day.
 - **Walk types**: a run from an average 140 spm over the walk; mixed when walking and running minutes are each at least 30% of it (§6.1's refinement, `MIXED_WALK_SHARE`).
 - **Backup, decided** (owner's question, `docs/adr/0007-backup.md`): `allowBackup` was already true by default, backing up everything. Now declared, with an allowlist (the database and the settings file) for cloud backup and device transfer alike. The tracker state travels inside the database, and the service drops it on the first start of an installation that did not write it (`TrackingRepository.adoptTrackerState`, keyed on the app's first-install time stored with the settings), so a restore never adds another phone's counter. The no-`INTERNET` rule is unchanged (Android sends the copy); the app's wording now says Passo "sends nothing", and Settings says what Android's backup does. Auto Backup skips an app with a running foreground service, so the cloud copy is taken mostly while counting is paused; `backupInForeground` was rejected, since it would let the backup kill the service.
+- **Walk detection thresholds kept** (60 steps a minute, pauses of up to 2 minutes, 10 minutes by default): the walks found on the owner's field-test days matched the ones walked (25 Sep 2026).
 
 ### Open
 
-- Walk detection thresholds (60 spm per minute, 2-minute gaps, 10-minute default minimum): tune after the Phase 5 field test.
 - Should a 7-day mini chart be offered in the 4x2 widget as an alternative to today's hourly bars (widget configuration)? Now a natural option on «At a glance»'s settings screen, once Phase 5 has the week.

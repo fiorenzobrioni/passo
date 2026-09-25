@@ -54,5 +54,4 @@ had since that phone started: steps from before Passo was there.
   dependable way to move history; backup is a convenience on top.
 - Auto Backup's quota is 25 MB per app; the database grows by a few MB a year (§5), well under
   it for years. Past it, Android stops the cloud copy, not the app.
-- To be verified on a device in Phase 7 with `adb shell bmgr backupnow` and a restore, together
-  with the export and import round trip.
+- Backup and restore confirmed by the owner on the device (25 Sep 2026).

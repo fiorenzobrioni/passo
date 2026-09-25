@@ -57,8 +57,9 @@ Compose `Canvas`.
 ## Consequences
 
 - A cadence of 140 spm or more across a whole walk makes it a run; both walking and running for
-  30% of it make it mixed. The thresholds are to be tuned after the field test (§15, Open).
-- The year view draws twelve bars from at most 366 rows; the 16 ms frame budget of the phase's
-  acceptance is far from reach, though it is still to be confirmed on a mid-range phone.
+  30% of it make it mixed. The thresholds are kept: the walks found on the owner's field-test
+  days matched the ones walked (25 Sep 2026).
+- The year view draws twelve bars from at most 366 rows, within the 16 ms frame budget of the
+  phase's acceptance (confirmed by the owner on the device, 25 Sep 2026).
 - The README screenshots do not show the bottom bar, which belongs to the shell and not to the
   screens the tests draw.
