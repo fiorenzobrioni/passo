@@ -73,7 +73,8 @@ part in the style of Chiaro's «Colpo d'occhio».
 11. **Glance brings WorkManager**, which runs Glance's sessions, and asks only for 2.7.1 (2021):
     with nothing else pinning it, that is what shipped, and on the owner's phone both cards stayed
     on Glance's loading spinner (device report, 25 Sep 2026). WorkManager is now **pinned to 2.10.5**,
-    Chiaro's version, the one proven under Glance widgets on that phone, and Glance stays on the
+    Chiaro's version, the one proven under Glance widgets on that phone (and with it both cards
+    draw there, confirmed by the owner the same day), and Glance stays on the
     latest stable (1.2.0, newer than Chiaro's 1.1.1: the owner asked for the most modern one). Its
     `WAKE_LOCK` (held by the job while a card is drawn) and `ACCESS_NETWORK_STATE` (nothing can
     leave the phone without `INTERNET`) stay as WorkManager declares them, as in Chiaro: the
