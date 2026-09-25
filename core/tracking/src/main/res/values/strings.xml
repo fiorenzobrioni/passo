@@ -1,10 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="tracking_channel_name">Step counting</string>
-    <string name="tracking_channel_description">The notification that keeps step counting running. You can minimize it from here.</string>
+    <string name="tracking_channel_description">The notification that keeps step counting running. You can minimize it or turn it off from here: Passo keeps counting.</string>
     <string name="tracking_notification_title">Counting your steps</string>
     <plurals name="tracking_notification_steps">
         <item quantity="one">%1$s step today</item>
         <item quantity="other">%1$s steps today</item>
     </plurals>
+
+    <!-- The expanded notification: the day's sentence, the goal, the estimates. -->
+    <string name="tracking_notification_goal_reached">Goal reached at %1$s</string>
+    <plurals name="tracking_notification_to_go">
+        <item quantity="one">%1$s step to go:\nabout %2$s of brisk walking</item>
+        <item quantity="other">%1$s steps to go:\nabout %2$s of brisk walking</item>
+    </plurals>
+    <string name="tracking_notification_goal">%1$s of %2$s</string>
+    <plurals name="tracking_notification_active">
+        <item quantity="one">%1$s active minute</item>
+        <item quantity="other">%1$s active minutes</item>
+    </plurals>
+    <string name="tracking_notification_pair">%1$s · %2$s</string>
+    <string name="tracking_notification_estimates">Estimated: %1$s · %2$s</string>
+    <plurals name="tracking_duration_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
+    <string name="tracking_duration_hours_minutes">%1$d h %2$d min</string>
 </resources>

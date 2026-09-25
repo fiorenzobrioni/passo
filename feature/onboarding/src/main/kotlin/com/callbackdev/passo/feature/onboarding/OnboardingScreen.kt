@@ -61,7 +61,6 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -73,7 +72,6 @@ import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.designsystem.theme.reducedMotion
 import com.callbackdev.passo.core.domain.metrics.StepLengths
-import com.callbackdev.passo.core.domain.onboarding.OemTips
 import com.callbackdev.passo.core.domain.settings.InputScale
 import com.callbackdev.passo.core.domain.settings.ProfileInputs
 import com.callbackdev.passo.core.domain.today.TodayOverview
@@ -546,8 +544,7 @@ private fun PermissionsPage(state: OnboardingState) {
 @Composable
 private fun BatteryPage(state: OnboardingState) {
     val context = LocalContext.current
-    val brand = state.manufacturer
-    PageTitle(stringResource(R.string.onboarding_battery_title, brand))
+    PageTitle(stringResource(R.string.onboarding_battery_title, state.manufacturer))
     PageBody(stringResource(R.string.onboarding_battery_body))
     Spacer(Modifier.height(20.dp))
     OutlinedButton(
@@ -564,17 +561,6 @@ private fun BatteryPage(state: OnboardingState) {
         Icon(PassoIcons.Battery, contentDescription = null, modifier = Modifier.size(20.dp))
         Spacer(Modifier.size(8.dp))
         Text(stringResource(R.string.onboarding_battery_settings))
-    }
-    state.oemSlug?.let { slug ->
-        TextButton(
-            onClick = {
-                // The browser opens the page; the app itself has no network access.
-                runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, OemTips.pageFor(slug).toUri())) }
-            },
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text(stringResource(R.string.onboarding_battery_guide, brand))
-        }
     }
 }
 

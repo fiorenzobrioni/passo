@@ -34,7 +34,7 @@ enum class OnboardingStep {
  * The first run's draft. Nothing is stored until the end, so leaving halfway leaves nothing
  * half-set; the profile is stored only if the reader went through its page rather than skipping.
  *
- * @property oemSlug the dontkillmyapp.com page for this phone's maker, null when it needs no tip.
+ * @property batteryTip whether this phone's maker stops background apps, so the tip is shown.
  */
 data class OnboardingState(
     val step: OnboardingStep = OnboardingStep.WELCOME,
@@ -46,11 +46,11 @@ data class OnboardingState(
     val units: UnitPreference = UnitPreference.SYSTEM,
     val activityGranted: Boolean = false,
     val permissionAsked: Boolean = false,
-    val oemSlug: String? = null,
+    val batteryTip: Boolean = false,
     val manufacturer: String = "",
 ) {
     val steps: List<OnboardingStep>
-        get() = OnboardingStep.entries.filter { it != OnboardingStep.BATTERY || oemSlug != null }
+        get() = OnboardingStep.entries.filter { it != OnboardingStep.BATTERY || batteryTip }
 }
 
 /**
@@ -69,7 +69,7 @@ constructor(
     private val mutableState = MutableStateFlow(
         OnboardingState(
             activityGranted = StepTracking.hasActivityRecognition(context),
-            oemSlug = OemTips.slugFor(manufacturer),
+            batteryTip = OemTips.needsTip(manufacturer),
             manufacturer = manufacturer.replaceFirstChar { it.uppercase() },
         ),
     )

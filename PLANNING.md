@@ -340,8 +340,9 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
 ## 8. Notifications and Quick Settings tile
 
 - **Channel `tracking`** (low importance, silent, `setOnlyAlertOnce`): the ongoing foreground service notification.
-  - Content: steps, goal progress bar, distance.
-  - Updated only while the screen is on, at most every 5 s.
+  - Content: collapsed, today's steps; expanded, the way to the goal (or when it was reached), the share of the goal with the active minutes, the estimated distance and calories, and a progress bar to the goal.
+  - Updated only while the screen is on, at most every 5 s. Both forms are built in the same update; today's minutes are read again only after a write.
+  - How it shows (in full, minimized, off) is the reader's, on the system's channel page: Settings reads it and opens that page (§15).
 - **Channel `goals`** (default importance, opt-in): goal reached once per day, the evening reminder, the weekly summary.
   - Scheduled with inexact `AlarmManager.setWindow()`. No exact alarm permission.
 - If `POST_NOTIFICATIONS` is denied, the foreground service still runs; its notification only shows in the system's task manager. Explain this in onboarding; don't block on it.
@@ -361,7 +362,7 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
    - `adb shell dumpsys sensorservice` (confirm batching is active)
    - Doze simulation: `adb shell dumpsys deviceidle force-idle`
    - Battery Historian for the longer field tests
-7. OEM task killers: onboarding shows manufacturer-specific guidance (link to dontkillmyapp.com) only when `Build.MANUFACTURER` is on a known list.
+7. OEM task killers: onboarding shows a battery tip, with a button to the app's own settings page, only when `Build.MANUFACTURER` is on a known list (`OemTips`). Samsung is not on it (§15).
 
 ---
 
@@ -465,7 +466,7 @@ Built in Chiaro's design language (owner's request): its colors, typefaces, shap
 - [x] Tracking status banner: permission missing, paused, sensor missing
   - Missing permission and pause are cards on Today with the button that fixes them; a missing sensor is the blocking screen of §4.6, before anything else.
 - [x] Onboarding: welcome, profile (skippable), goal, permissions, OEM tips
-  - The OEM page only on the makers in `OemTips` (§9 rule 7), with the app's own settings page and the dontkillmyapp.com guide; never `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` (§10).
+  - The OEM page only on the makers in `OemTips` (§9 rule 7), with the app's own settings page; never `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` (§10). The dontkillmyapp.com link and Samsung were dropped later (§15).
 - [x] Settings screen (profile, goal, units, theme, language, typical-day line, pause tracking)
   - Plus palette, typeface and wallpaper colors (Chiaro's appearance group, with its live preview), "Apply profile to past data", privacy, the GPL-3.0 notice and the credits (Phase 0's pending About item). First day of the week, walk detection and notifications wait for the features they drive.
 - [x] Complete Italian and English strings; plurals; content descriptions (the sparkline gets a spoken summary, e.g. "6,200 steps, 1,240 more than usual at this time")
@@ -543,7 +544,8 @@ Built in Chiaro's design language, like Phase 3 (owner's request: a clean implem
 - [ ] Evening reminder (inexact window alarm, configurable time and threshold)
 - [ ] Weekly summary notification (optional)
 - [ ] Quick Settings tile
-- [ ] Rich ongoing notification (progress bar, distance), throttled while the screen is on
+- [x] Rich ongoing notification (progress bar, distance), throttled while the screen is on
+  - Brought forward (owner's request): expanded with `BigTextStyle`, from the same `TodayOverview` as Today and the widgets, without the usual day. Plus the Settings row for how it shows (§15).
 
 **Acceptance:**
 - No duplicate goal notifications across reboots or time-zone changes.
@@ -729,6 +731,8 @@ Include:
 - **Walk types**: a run from an average 140 spm over the walk; mixed when walking and running minutes are each at least 30% of it (§6.1's refinement, `MIXED_WALK_SHARE`).
 - **Backup, decided** (owner's question, `docs/adr/0007-backup.md`): `allowBackup` was already true by default, backing up everything. Now declared, with an allowlist (the database and the settings file) for cloud backup and device transfer alike. The tracker state travels inside the database, and the service drops it on the first start of an installation that did not write it (`TrackingRepository.adoptTrackerState`, keyed on the app's first-install time stored with the settings), so a restore never adds another phone's counter. The no-`INTERNET` rule is unchanged (Android sends the copy); the app's wording now says Passo "sends nothing", and Settings says what Android's backup does. Auto Backup skips an app with a running foreground service, so the cloud copy is taken mostly while counting is paused; `backupInForeground` was rejected, since it would let the backup kill the service.
 - **Walk detection thresholds kept** (60 steps a minute, pauses of up to 2 minutes, 10 minutes by default): the walks found on the owner's field-test days matched the ones walked (25 Sep 2026).
+- **Battery tip: no Samsung, no external guide** (owner's question, 25 Sep 2026): Samsung is off the `OemTips` list. Since One UI 6 (Android 14, which is Passo's minSdk, so every Samsung that can install it) Samsung has committed, with Google, to letting the foreground services of apps that target Android 14 and declare their type run as intended; Passo's service is typed `health`. The tip would warn about a problem those phones no longer have. The page keeps its text and the button to the app's own settings page (where Android 14+ keeps "Unrestricted") on the other makers, but no longer links to dontkillmyapp.com: a community page, dated, out of style with the app and the only place Passo sent anyone to the web, for a step the button already covers.
+- **The counting notification: no in-app switch** (owner's request, 25 Sep 2026): Android raises a foreground service's notification on a channel the app made `IMPORTANCE_MIN` or `NONE` back to `LOW`, unless the reader set that importance (`NotificationManagerService`, the FGS/UIJ importance check). So an app switch that moves it to a quiet channel would not work; only the reader can minimize it or turn it off, on the channel's system page, and Android keeps that choice. Settings reads the channel (`CountingNotification.visibility`) and opens its page; nothing is stored by the app. Turned off, the service still runs and Android lists it among the active apps. The expanded form is `BigTextStyle` rather than a custom layout: the system template follows the phone's theme and every maker's notification shade, and costs nothing beyond the update it rides on. The app starts the service again whenever it is opened, and `startForeground` posts the notification again: the service posts the last content it built, not the bare count, so the expanded form does not vanish until the next step (owner's report: after swiping it away, it came back without it).
 
 ### Open
 

@@ -116,10 +116,11 @@ class OnboardingScreenTest {
     @Test
     fun `the battery tip comes only on the phones that need it`() {
         assertThat(OnboardingState().steps).doesNotContain(OnboardingStep.BATTERY)
-        state = state.copy(step = OnboardingStep.BATTERY, oemSlug = "xiaomi", manufacturer = "Xiaomi")
+        state = state.copy(step = OnboardingStep.BATTERY, batteryTip = true, manufacturer = "Xiaomi")
         show()
         compose.onNodeWithText("One last thing on Xiaomi phones").assertIsDisplayed()
-        compose.onNodeWithText("Guide for Xiaomi phones").assertIsDisplayed()
+        compose.onNodeWithText("Open Passo’s settings").assertIsDisplayed()
+        snapshot("onboarding_battery")
     }
 
     private fun snapshot(name: String) {

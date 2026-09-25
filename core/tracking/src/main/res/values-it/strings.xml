@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="tracking_channel_name">Conteggio dei passi</string>
-    <string name="tracking_channel_description">La notifica che tiene attivo il conteggio dei passi. Da qui puoi ridurla al minimo.</string>
+    <string name="tracking_channel_description">La notifica che tiene attivo il conteggio dei passi. Da qui puoi ridurla al minimo o disattivarla: Passo continua a contare.</string>
     <string name="tracking_notification_title">Sto contando i tuoi passi</string>
     <plurals name="tracking_notification_steps">
         <item quantity="one">%1$s passo oggi</item>
@@ -9,4 +9,26 @@
         <!-- CLDR "many": exact millions (1.000.000 passi). Digits read the same as "other". -->
         <item quantity="many">%1$s passi oggi</item>
     </plurals>
+
+    <!-- La notifica espansa: la frase del giorno, l’obiettivo, le stime. -->
+    <string name="tracking_notification_goal_reached">Obiettivo raggiunto alle %1$s</string>
+    <plurals name="tracking_notification_to_go">
+        <item quantity="one">Ne manca %1$s:\ncirca %2$s a passo svelto</item>
+        <item quantity="many">Ne mancano %1$s:\ncirca %2$s a passo svelto</item>
+        <item quantity="other">Ne mancano %1$s:\ncirca %2$s a passo svelto</item>
+    </plurals>
+    <string name="tracking_notification_goal">%1$s di %2$s</string>
+    <plurals name="tracking_notification_active">
+        <item quantity="one">%1$s minuto attivo</item>
+        <item quantity="many">%1$s minuti attivi</item>
+        <item quantity="other">%1$s minuti attivi</item>
+    </plurals>
+    <string name="tracking_notification_pair">%1$s · %2$s</string>
+    <string name="tracking_notification_estimates">Stima: %1$s · %2$s</string>
+    <plurals name="tracking_duration_minutes">
+        <item quantity="one">%1$d minuto</item>
+        <item quantity="many">%1$d minuti</item>
+        <item quantity="other">%1$d minuti</item>
+    </plurals>
+    <string name="tracking_duration_hours_minutes">%1$d h %2$d min</string>
 </resources>

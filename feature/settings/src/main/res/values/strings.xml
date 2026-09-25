@@ -92,6 +92,10 @@
     <string name="settings_tracking">Count steps</string>
     <string name="settings_tracking_on">On, in the background</string>
     <string name="settings_tracking_off">Paused: steps taken now are not counted</string>
+    <string name="settings_notification">Notification</string>
+    <string name="settings_notification_shown">In the status bar: Android requires it while Passo counts. Turn it off and counting goes on</string>
+    <string name="settings_notification_minimized">Minimized: one line at the bottom of the list, no icon in the status bar</string>
+    <string name="settings_notification_off">Off: Passo keeps counting, listed among the active apps</string>
 
     <string name="settings_privacy">Privacy</string>
     <string name="settings_privacy_headline">No account, no ads, no tracking.</string>

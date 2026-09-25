@@ -54,5 +54,4 @@
     <string name="onboarding_battery_title">One last thing on %1$s phones</string>
     <string name="onboarding_battery_body">Some phones stop apps in the background to save battery, and Passo would stop counting with them. If counting ever stops, let Passo run in the background: on most phones it is the app’s Battery page, “Unrestricted”.</string>
     <string name="onboarding_battery_settings">Open Passo’s settings</string>
-    <string name="onboarding_battery_guide">Guide for %1$s phones</string>
 </resources>

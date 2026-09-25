@@ -94,6 +94,10 @@
     <string name="settings_tracking">Conta i passi</string>
     <string name="settings_tracking_on">Attivo, in background</string>
     <string name="settings_tracking_off">In pausa: i passi di adesso non vengono contati</string>
+    <string name="settings_notification">Notifica</string>
+    <string name="settings_notification_shown">Nella barra di stato: Android la richiede finché Passo conta. Se la disattivi, conta lo stesso</string>
+    <string name="settings_notification_minimized">Ridotta al minimo: una riga in fondo all’elenco, nessuna icona nella barra di stato</string>
+    <string name="settings_notification_off">Disattivata: Passo continua a contare, tra le app attive</string>
 
     <string name="settings_privacy">Privacy</string>
     <string name="settings_privacy_headline">Niente account, niente pubblicità, niente tracciamento.</string>
