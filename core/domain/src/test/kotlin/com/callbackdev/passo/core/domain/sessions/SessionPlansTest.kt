@@ -115,7 +115,9 @@ class SessionPlansTest {
         )
         fun at(minutes: Double) = base.copy(totals = SessionTotals(movingMillis = (minutes * 60_000).toLong()))
         assertThat(SessionHeadline.of(at(0.5))).isInstanceOf(SessionHeadline.Starting::class.java)
-        assertThat(SessionHeadline.of(at(4.0))).isEqualTo(SessionHeadline.Going(SessionAmount(SessionGoalKind.TIME, 16.0)))
+        assertThat(
+            SessionHeadline.of(at(4.0)),
+        ).isEqualTo(SessionHeadline.Going(SessionAmount(SessionGoalKind.TIME, 16.0)))
         assertThat(SessionHeadline.of(at(10.5)))
             .isEqualTo(SessionHeadline.PastHalf(SessionAmount(SessionGoalKind.TIME, 10.0)))
         assertThat(SessionHeadline.of(at(18.0)))

@@ -49,7 +49,8 @@ passo/
 │   ├── history/
 │   ├── insights/           # records, streaks, totals
 │   ├── settings/
-│   └── onboarding/
+│   ├── onboarding/
+│   └── sessions/           # the Outings page and the outing editor (Phase 10)
 ├── widget/                 # Glance widget(s), receiver, update coordinator
 ├── docs/                   # ADRs, formulas, battery test notes
 ├── VISION.md
@@ -235,6 +236,9 @@ data class DiagnosticsEventEntity(
 - Past days are **frozen**, so changing the profile doesn't silently rewrite history. Settings offers **"Apply profile to past data"**, which recomputes every summary from the minute rows.
 - Use Room auto-migrations with exported schemas (`room.schemaLocation`) committed to the repo.
 - **No tables for walks or the typical day.** Both are computed on read from `minute_steps` (§6.1, §6.2). Add a cache table only if profiling shows a need.
+- **Schema v2 (Phase 10), an auto-migration adding two tables and touching nothing else:**
+  - `session_plan`: the reader's outings (name or null, goal kind and value, intensity, milestones as a bit set, vibrate, position, last started).
+  - `session`: each outing walked, with its goal copied at the start (frozen like a day), its state (`ACTIVE`, `PAUSED`, `FINISHED`) and end reason, its totals (steps, time in motion, time at its pace, estimated distance and energy), its last step and last measured moment, the milestones already told. The one under way is written in the step batch's transaction (§4.5).
 
 ### DataStore (Preferences)
 
@@ -242,6 +246,7 @@ data class DiagnosticsEventEntity(
 - Goal, units, first day of week, theme, dynamic color, notification opt-ins, reminder time and threshold, tracking enabled.
 - The last day whose goal was seen reached (not a setting: the record that keeps "goal reached" once a day).
 - Walk detection enabled (default on), minimum walk duration (5, 10 or 15 min; default 10), typical-day line shown (default on).
+- Whether the outing presets were written once (so deleting them is final), and the last finished outing whose card Today has put away.
 
 ---
 
@@ -332,7 +337,8 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
   - Screen on or user present: flush the sensor, then update immediately.
   - While the screen is on: update at most every 60 s, and only if the steps changed (a trailing timer, cancelled at screen-off).
   - Day rollover (detected by the screen-on ticker), goal reached: update immediately.
-  - Settings or profile changed, tracking started or stopped: update immediately, with the screen off too (one repaint, and a stopped service cannot repaint at the next screen-on).
+  - Settings or profile changed, tracking started or stopped, an outing started, paused or ended: update immediately, with the screen off too (one repaint, and a stopped service cannot repaint at the next screen-on).
+- While an outing is under way, both cards say it in the sentence's place («Brisk walk: 12 of 20 min»), as the tile's line does (Phase 10).
   - Screen off: no updates.
 - The widget reads the repository plus the service's in-process buffer (`LiveSteps`), exactly as Today does, so it shows persisted truth and the steps not written yet.
 
@@ -344,7 +350,9 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
   - Content: collapsed, today's steps; expanded, the way to the goal (or when it was reached), the share of the goal with the active minutes, the estimated distance and calories, and a progress bar to the goal.
   - Updated only while the screen is on, at most every 5 s. Both forms are built in the same update; today's minutes are read again only after a write.
   - How it shows (in full, minimized, off) is the reader's, on the system's channel page: Settings reads it and opens that page (§15).
-- **Channel `goals`** (default importance, opt-in): goal reached once per day, the evening reminder, the weekly summary.
+- **During an outing** (Phase 10) the `tracking` notification is the outing's: its name, its sentence, «12 of 20 min», the pace against the outing's, the steps and the estimates, Pause/Resume and Stop. Android 16+: `ProgressStyle` with the milestones as points, promoted to a Live Update (`POST_PROMOTED_NOTIFICATIONS`); below, `BigTextStyle` and a progress bar. Updated as the day's form is (screen on, every 5 s at most), plus once at each milestone.
+- **Channel `sessions`** (default importance, no sound, no vibration of its own): an outing's goal reached, with "Keep going" for 15 minutes. The milestones on the way are Passo's own vibration patterns, played only while this channel is on.
+- **Channel `goals`** (default importance, opt-in): goal reached once per day, the evening reminder (with "Walk now": an outing for the rest of the day), the weekly summary.
   - Goal reached rides on the service's samples. The reminder is an inexact `setAndAllowWhileIdle` with a wakeup, the summary an inexact `RTC` alarm without one; both armed again at every start of the process, every change of what they depend on, every clock or zone change, and every firing. No exact alarm permission (Phase 6, §15).
 - If `POST_NOTIFICATIONS` is denied, the foreground service still runs; its notification only shows in the system's task manager. Explain this in onboarding; don't block on it.
 - **QS tile (`TileService`):** reads today's steps from `onStartListening()` to `onStopListening()`, following the live count meanwhile. It costs nothing when the panel is closed.
@@ -363,7 +371,8 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
    - `adb shell dumpsys sensorservice` (confirm batching is active)
    - Doze simulation: `adb shell dumpsys deviceidle force-idle`
    - Battery Historian for the longer field tests
-7. OEM task killers: onboarding shows a battery tip, with a button to the app's own settings page, only when `Build.MANUFACTURER` is on a known list (`OemTips`). Samsung is not on it (§15).
+7. **The one exception (Phase 10, `docs/adr/0009-sessions.md`):** while an outing the reader started is counting, the wake-up step counter (if the phone has one besides the usual one) reports within 30 s, so its signals reach a phone in a pocket on time: about two brief wakes a minute while walking, none while still, no wake lock or timer of the app's own. Paused, over or with no outing, the registration is the usual one. An outing ends by itself (goal, 15 min still, 1 h paused, 4 h), noticed at a step or a screen-on, never by a timer.
+8. OEM task killers: onboarding shows a battery tip, with a button to the app's own settings page, only when `Build.MANUFACTURER` is on a known list (`OemTips`). Samsung is not on it (§15).
 
 ---
 
@@ -376,6 +385,8 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
 | `FOREGROUND_SERVICE` | Normal | Foreground service |
 | `FOREGROUND_SERVICE_HEALTH` | Normal | Foreground service of type `health` |
 | `RECEIVE_BOOT_COMPLETED` | Normal | Restart tracking after boot |
+| `VIBRATE` | Normal | An outing's signals, in their own patterns (Phase 10) |
+| `POST_PROMOTED_NOTIFICATIONS` | Normal | The outing under way as a Live Update on Android 16+ (Phase 10) |
 | `WAKE_LOCK`, `ACCESS_NETWORK_STATE` | Normal | Brought by WorkManager, which Glance runs its widget sessions on (Phase 4): the wake lock is held by the job while a card is drawn; the network state lets nothing leave the phone without `INTERNET`. Passo's own code uses neither |
 | `android:allowBackup="true"` + `dataExtractionRules` | Manifest | Android's backup and device transfer carry the step history, the profile and the settings, an allowlist (`docs/adr/0007-backup.md`). No permission: Android sends the copy, not Passo |
 | `<uses-feature android:name="android.hardware.sensor.stepcounter" android:required="true"/>` | Feature | Documents the requirement; filters devices on a future Play listing. It does not block APK installs, so the app also checks the sensor at runtime |
@@ -612,13 +623,45 @@ Kept open, not planned yet. Notes to avoid closing the door:
 - [ ] Store listing in Italian and English, with screenshots and a feature graphic
 - [ ] Internal test track, then closed testing (check the current tester requirements for personal developer accounts), then production
 
+
+### Phase 10 — Outings (walks with a goal)
+
+Added to v1.0 at the owner's request (25 Sep 2026), after Phase 6 and before Phases 7 and 8; decisions in `docs/adr/0009-sessions.md`. VISION.md's workout non-goal narrowed to a workout suite. Name: «Uscite» / "Outings".
+
+- [x] Model and engine (`:core:model`, `:core:domain/sessions`): one goal (steps, distance, minutes in motion, the rest of the day) and an optional cadence (free, 100, 130, 140); `SessionTracker` fed every accounted delta: time in motion from the gaps between steps (at most 1.5 s a step), the cadence of the last 30 s, distance and energy per step at that cadence, milestones told once (the highest of several crossed at once), the goal ending it, "Keep going" for 15 min with the steps since, the ends by itself; `SessionPlans` (presets, estimates for the editor, the start that copies the goal), `SessionHeadline`, `DayOutings`.
+- [x] Storage: schema v2 by auto-migration (`session_plan`, `session`), `SessionRepository`, the presets written once, the outing under way written in the step batch's transaction (`TrackingDao.writeBatch`), `LiveSession` for the screens. Migration test from v1.
+- [x] Service: commands as intents (`SessionControl`: start, rest of the day, pause, resume, stop, keep going), the wake-up counter during an outing only, the signals (`SessionHaptics`: 1, 2, 3 short, 1 long), the counting notification as the outing's (collapsed and expanded, `ProgressStyle` and Live Update on Android 16), the goal's notification on the `sessions` channel, an outing picked up after a restart, closed when counting is paused.
+- [x] The Outings page (`:feature:sessions`): the plans with what they come to and their signals, Start, the outing under way, a paused count or silenced signals stated with the way back, the notification permission asked in context at the first start. The editor: name, goal (picked, never typed; quarter miles in miles), pace, the estimate with the reader's step, the signals, "Try them", save, delete, discard asks.
+- [x] Today: "Start an outing", the outing's card (under way, paused, just over with "Keep going" and Close); Today's and History's lists show an outing in place of the walk found in its minutes, with its goal and its outcome, and History's chart marks it.
+- [x] The launcher's long press (the three last started), the evening reminder's "Walk now", both widgets and the Quick Settings tile saying the outing while it is under way (owner's request).
+- [x] Strings in English and Italian.
+- [ ] On a device (owner): an outing with the screen off (signals on time, the vibrations felt and told apart), the Android 16 Live Update, a reboot and a forgotten outing, and the battery check of an outing (§9).
+- Later (second iteration, owner's choice): spoken signals through the headphones, with the system's offline voices.
+
+**Edge cases** (the engine's in `SessionTrackerTest` and `SessionPlansTest`, the storage's in `SessionRepositoryTest`; a restart and a paused count are the service's, by construction, to check on the device):
+
+| Case | Expected behavior |
+|---|---|
+| Standing still, then one step | The step adds 1.5 s, not the stillness |
+| A merged batch (steps without their own timestamps) | Credited with its steps' worth of time, never the whole gap |
+| Several milestones crossed by one batch | Only the highest is told; all are marked told |
+| The goal reached | The outing ends there; later steps are counted aside for "Keep going" (15 min) |
+| No step for 15 min | Ends at its last step, when the next step or the screen notices |
+| Paused for an hour | Ends where it was paused |
+| Open for four hours | Ends at its last step |
+| Fewer than 30 steps | Not kept |
+| The process killed during an outing | Picked up from the last batch; the steps meanwhile arrive with the next sample |
+| Counting paused during an outing | The outing ends |
+| The rest of a day already met | Cannot start (under 100 steps left) |
+| A plan edited or deleted later | Past outings keep the goal they were walked with |
+
 ---
 
 ## 12. Testing strategy
 
 - **Unit (JVM):** `StepAccountant`, calculators, streaks and records, formatting. Use a fake clock and system snapshot. This is where most of the test effort goes.
 - **Robolectric:** Room DAOs and transactions, receivers, the notification builder.
-- **Compose UI tests:** onboarding, Today, Settings, History, Insights.
+- **Compose UI tests:** onboarding, Today, Settings, History, Insights, the Outings page and its editor.
 - **Glance:** unit tests for the layout chosen at each size.
 - **Manual device protocol** (`docs/testing/device-protocol.md`):
   - reboot
@@ -677,6 +720,7 @@ Include:
 | Play policy review of the `health` foreground service (only if Phase 9 happens) | Delay of a Play release | Continuous step tracking is the documented use case; prepare the declaration and video early |
 | Users dislike the persistent notification | Uninstalls | Low-importance, useful content (live steps); explain why in onboarding; the user can minimize the channel |
 | Abrupt power loss | Steps since the last batch are lost | Bounded by the latency window (10 min with the screen off), and only for steps the processor has not been awake for since; the wake-up variant was weighed and rejected (`docs/adr/0002-sensor-reporting.md`) |
+| The wake-up step counter during an outing costs more than planned, or a phone lacks it | Battery, or late signals | Only while an outing counts, two wakes a minute at most while walking, ending by itself; without the sensor the page says signals can be late. To measure on a device (§9) |
 | Android 17 RemoteViews bitmap cap | Widget crash | One ring bitmap per card, capped at 416 px a side (0.7 MB); the bars are boxes; test on API 37 |
 
 ---
@@ -753,6 +797,16 @@ Include:
 - **The weekly summary** comes on the first day of the week at 9:00, and is the week History shows (`WeeklySummary` over `PeriodOverview`), so the two never disagree; a week with no steps sends nothing.
 - **The Quick Settings tile** lives in `:core:tracking` with the counting notification; Settings adds it with `requestAddTileService` and says where it stands only once the system has answered.
 - `Trend.of` and its 5% band moved to the `Trend` enum, shared by Insights and the weekly summary.
+
+- **Phase 10: Outings** (`docs/adr/0009-sessions.md`, owner's request after reviewing the proposal, 25 Sep 2026): walks with one goal and an optional cadence, measured from the steps, with vibration signals and the counting notification as the outing's. Built now, in v1.0. VISION.md's non-goal narrowed to "a workout suite" rather than removed: the rest of workout tracking stays out.
+- **Outings: one quantity per goal**, never two (Apple Watch, Samsung Health and Fitbit do the same): "halfway" and its vibration need one meaning. A pace is a cadence, never minutes per kilometre (no GPS); no calorie goal; no workout type (the step length already follows the cadence).
+- **Outings: the wake-up step counter during an outing only**, with a 30 s latency: the one exception to §9 and ADR 0002, bounded by the walk the reader chose, costing nothing while still. Outside an outing nothing changed.
+- **Outings: time is time in motion**, from the steps (at most 1.5 s credited per step, the active-minute pace): no timer runs, and a stop does not count. It ends by itself at the goal, after 15 min without a step, 1 h paused, or 4 h; noticed at a step or a screen-on.
+- **Outings: vibrations in counts** (1, 2, 3 short, 1 long at the goal), as notification vibrations, silenced with the outings' channel. The milestones are not notifications (the counting one moves); the goal is, with "Keep going".
+- **Outings: the counting notification becomes the outing's**, never a second ongoing one; on Android 16 a `ProgressStyle` Live Update. Robolectric cannot start API 36 on the build's JRE, so that form is checked on a device.
+- **Outings: the notification permission is asked in context**, at the first start without it, not in onboarding (which already asks it): `VIBRATE` and `POST_PROMOTED_NOTIFICATIONS` are normal permissions, granted at install.
+- **Outings: an outing replaces the walk found in its minutes** in Today's and History's lists, and is listed whatever the walk-detection switch says.
+- **Outings on the widgets and the tile** (owner's question during the phase): in the sentence's place, no new element, so the widgets' layout arithmetic is unchanged; «Brisk walk: 12 of 20 min», wrapping at the colon with the progress kept whole.
 
 ### Open
 

@@ -23,7 +23,10 @@ import javax.inject.Singleton
 @Singleton
 class SessionRepository
 @Inject
-constructor(private val dao: SessionDao, private val preferences: UserPreferencesDataSource) {
+constructor(
+    private val dao: SessionDao,
+    private val preferences: UserPreferencesDataSource,
+) {
     private val seedLock = Mutex()
 
     /** The plans, in the reader's order; the presets are written the first time anyone looks. */
@@ -40,7 +43,11 @@ constructor(private val dao: SessionDao, private val preferences: UserPreference
     suspend fun plansByUse(): List<SessionPlan> {
         seedPresets()
         return dao.plans().mapNotNull { it.toModel() }
-            .sortedWith(compareByDescending<SessionPlan> { it.lastUsedAtMillis ?: Long.MIN_VALUE }.thenBy { it.position })
+            .sortedWith(
+                compareByDescending<SessionPlan> {
+                    it.lastUsedAtMillis ?: Long.MIN_VALUE
+                }.thenBy { it.position },
+            )
     }
 
     /** Saves [plan]: a new one goes after the others. Returns its id. */

@@ -35,7 +35,8 @@ object SessionPlans {
     )
 
     /** A new outing in the editor: a brisk walk, the kind most people start with. */
-    val NEW: SessionPlan = SessionPlan(goalKind = SessionGoalKind.TIME, goalValue = 30, intensity = SessionIntensity.BRISK)
+    val NEW: SessionPlan =
+        SessionPlan(goalKind = SessionGoalKind.TIME, goalValue = 30, intensity = SessionIntensity.BRISK)
 
     /**
      * The outing the evening reminder's "Walk now" starts when the reader keeps none for the rest
@@ -54,9 +55,12 @@ object SessionPlans {
     /** The editor's step for [kind]: 500 steps, half a kilometre or a quarter mile, 5 minutes. */
     fun editorStep(kind: SessionGoalKind, imperial: Boolean): Double = when (kind) {
         SessionGoalKind.STEPS -> SessionConstants.STEPS_STEP.toDouble()
+
         SessionGoalKind.DISTANCE ->
             if (imperial) SessionConstants.DISTANCE_STEP_IMPERIAL else SessionConstants.DISTANCE_STEP.toDouble()
+
         SessionGoalKind.TIME -> SessionConstants.TIME_STEP.toDouble()
+
         SessionGoalKind.REST_OF_DAY -> 1.0
     }
 

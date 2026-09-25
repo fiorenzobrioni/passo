@@ -68,11 +68,27 @@ class PlanEditorScreenTest {
         var saved = false
         val actions = PlanEditorActions(
             goalKind = { kind ->
-                editor = editor.copy(draft = editor.draft.copy(goalKind = kind, goalValue = SessionPlans.convert(editor.draft, kind, lengths, 2_400)))
+                editor =
+                    editor.copy(
+                        draft = editor.draft.copy(
+                            goalKind = kind,
+                            goalValue = SessionPlans.convert(editor.draft, kind, lengths, 2_400),
+                        ),
+                    )
             },
             intensity = { editor = editor.copy(draft = editor.draft.copy(intensity = it)) },
             milestone = { m, on ->
-                editor = editor.copy(draft = editor.draft.copy(milestones = if (on) editor.draft.milestones + m else editor.draft.milestones - m))
+                editor =
+                    editor.copy(
+                        draft = editor.draft.copy(
+                            milestones = if (on) {
+                                editor.draft.milestones + m
+                            } else {
+                                editor.draft.milestones -
+                                    m
+                            },
+                        ),
+                    )
             },
             save = { saved = true },
         )
@@ -98,7 +114,9 @@ class PlanEditorScreenTest {
     fun `leaving with changes asks first`() {
         val changed = state().let { it.copy(draft = it.draft.copy(goalValue = 45)) }
         var left = false
-        compose.setContent { PassoTheme { PlanEditorScreen(changed, onBack = { left = true }, actions = PlanEditorActions()) } }
+        compose.setContent {
+            PassoTheme { PlanEditorScreen(changed, onBack = { left = true }, actions = PlanEditorActions()) }
+        }
 
         compose.onNodeWithContentDescription("Back").performClick()
         compose.onNodeWithText("Discard your changes?").assertIsDisplayed()

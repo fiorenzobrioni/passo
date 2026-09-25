@@ -87,9 +87,12 @@ constructor(
     }
 
     /** The service's outing when it runs; the stored one when the system has stopped it. */
-    private val live: Flow<LiveSessionState?> = combine(liveSession.current, sessions.observeLiveSession()) { live, stored ->
-        live ?: stored?.let { LiveSessionState(it, cadence = null, canKeepGoing = false, alertsWhileScreenOff = true) }
-    }
+    private val live: Flow<LiveSessionState?> =
+        combine(liveSession.current, sessions.observeLiveSession()) { live, stored ->
+            live ?: stored?.let {
+                LiveSessionState(it, cadence = null, canKeepGoing = false, alertsWhileScreenOff = true)
+            }
+        }
 
     val state: StateFlow<SessionsUiState?> = combine(
         sessions.plans,

@@ -7,7 +7,8 @@
 ## One-liner
 
 A private, battery-friendly Android pedometer that counts every step, even if you never open the app.
-It turns those steps into useful numbers: distance, calories, active time, goals and trends.
+It turns those steps into useful numbers: distance, calories, active time, goals and trends,
+and into walks with a goal, started on purpose, that tell you on the way.
 Two resizable home-screen widgets keep the numbers visible at a glance.
 
 ## Why this app
@@ -93,8 +94,20 @@ Passo does one thing and does it well. It counts steps with the phone's own hard
 - Each walk shows start and end, duration, steps, distance, active calories, average cadence, and whether it was a walk or a run.
 - Separates intentional walks from scattered steps around the house or office.
 - **Zero battery cost:** walks are computed from data already stored, only when a screen that shows them is opened. No extra sensor, no background work, no Google Activity Recognition API.
-- **Not real-time:** there is no "walk finished" notification, because detecting the end of a walk live would mean waking the CPU with the screen off.
+- **Not real-time:** there is no "walk finished" notification, because detecting the end of a walk live would mean waking the CPU with the screen off. The live case is an outing, which the reader starts on purpose (below).
 - Settings: on/off toggle (to keep the UI minimal if the user prefers) and minimum walk duration (5, 10 or 15 minutes).
+
+### Outings (walks with a goal)
+
+Added to v1.0 at the owner's request (Phase 10, `docs/adr/0009-sessions.md`). An outing is a walk (or a run) started on purpose, with a goal, that tells the reader on the way; it is measured from the steps like everything else.
+
+- **One goal, one pace.** The goal is one quantity: steps, a distance (estimated), minutes in motion, or "the rest of the day" (today's goal less today's count). The pace is optional: free, brisk (100 spm), vigorous (130 spm) or running (140 spm). Never two quantities at once, never a pace in minutes per kilometre (without GPS it would be the cadence in disguise), never a calorie target.
+- **Signals the reader chooses:** at 25, 50 and 75% (50% by default), and always at the goal, which ends the outing. Each vibrates in its own count (one, two, three short pulses, one long one at the goal), so a phone in a pocket is read without looking; the editor lets you feel them first. They follow the phone's silent mode and the outings' notification channel.
+- **The counting notification becomes the outing's** while it lasts, collapsed and expanded, with Pause and Stop; on Android 16 it is a Live Update with the milestones on its bar. The goal reached is a notification of its own, with "Keep going".
+- **Time in motion, from the steps:** a stop at a traffic light does not count. The cadence now is said against the outing's own ("on pace", "below your pace").
+- **Where it shows:** Today (a button to start one, then its card), the Outings page with the reader's outings (three to start with: a brisk 20 minutes, a 30-minute run, the rest of the day), the launcher's long press, the evening reminder's "Walk now", both widgets and the Quick Settings tile while one is under way, and History and Today's list of the day's walks, in the place of the walk it was, with its goal and how much of it was done.
+- **Battery:** only while an outing is counting, the phone's wake-up step counter reports within 30 seconds, about two brief wakes a minute while walking and none while still; everything else is as before. It ends by itself at its goal, after 15 minutes without a step, or after an hour paused.
+- **Later (not v1.0):** spoken signals through the headphones, with the system's offline voices.
 
 ### Widgets (Jetpack Glance)
 
@@ -105,11 +118,12 @@ Passo does one thing and does it well. It counts steps with the phone's own hard
 - Per widget: a light, dark or phone-following card, or one of Chiaro's six colours, any opacity, and which content it carries.
 - Updates quickly when the screen turns on, is throttled while the screen is on, and never updates while the screen is off.
 - A clear "tracking paused" state with tap-to-resume, and the same for a missing permission or a stopped service.
+- While an outing is under way, the sentence's place says it («Brisk walk: 12 of 20 min», or paused), on both cards.
 
 ### System surfaces
 
-- An ongoing, low-importance notification required by the foreground service. It shows today's steps and goal progress.
-- A Quick Settings tile showing today's steps. It refreshes only while the Quick Settings panel is open.
+- An ongoing, low-importance notification required by the foreground service. It shows today's steps and goal progress, or the outing under way.
+- A Quick Settings tile showing today's steps (and the outing under way). It refreshes only while the Quick Settings panel is open.
 
 ### Settings and personalization
 
@@ -134,7 +148,7 @@ Passo does one thing and does it well. It counts steps with the phone's own hard
 ## Out of scope (non-goals)
 
 - Sleep, food, water, heart rate, weight tracking over time.
-- Workouts or exercise sessions started manually (start/stop, workout types, live workout screens). Walks detected automatically from step data are in scope; manual workout tracking is not.
+- A workout suite: a catalogue of sports, training plans, calorie or pace-per-kilometre targets, several goals at once, GPS routes. Outings (one goal of steps, distance or time, with an optional cadence, measured from the steps alone) are in scope since Phase 10; the rest of workout tracking is not.
 - GPS, routes, maps, or anything that needs location permissions.
 - Reading from or writing to Health Connect, Samsung Health, Google Fit, or any other health app in v1.
 - Accounts, cloud sync, social features, leaderboards.
@@ -157,7 +171,7 @@ Passo does one thing and does it well. It counts steps with the phone's own hard
 |---|---|---|
 | Step source | Hardware `Sensor.TYPE_STEP_COUNTER` | Runs on a low-power coprocessor and is cumulative since boot. The accelerometer would drain the battery, and the Google Play services Recording API or Health Connect would add external dependencies. |
 | Background execution | A foreground service of type `health`, with a persistent low-importance notification | Since Android 9, background apps don't receive sensor events. Since Android 9, `ACTION_SHUTDOWN` reaches only receivers registered at runtime, so a live process is needed to save the last count before shutdown. Continuous fitness tracking is exactly the documented use case for the `health` type. |
-| Reporting | Non-wake-up sensor with a large `maxReportLatency` while the screen is off, and low latency while the screen is on | The sensor hub buffers events in its FIFO. Each event keeps its own timestamp, so steps land in the correct minute and day even when they are delivered late. |
+| Reporting | Non-wake-up sensor with a large `maxReportLatency` while the screen is off, and low latency while the screen is on; the wake-up one with a 30 s latency only while an outing is counting | The sensor hub buffers events in its FIFO. Each event keeps its own timestamp, so steps land in the correct minute and day even when they are delivered late. An outing's signals must reach a phone in a pocket on time, at a cost bounded by the walk the reader chose (`docs/adr/0009-sessions.md`). |
 | Platform | `minSdk 34` (Android 14), `targetSdk`/`compileSdk 37` (Android 17) | Foreground service types, the `health` type and per-app languages are all available natively, so no legacy code paths are needed. |
 | UI | Jetpack Compose + Material 3; Jetpack Glance for the widget | Modern and declarative, with one design system shared by the app and the widget. |
 | Charts | Custom Compose `Canvas` components, no third-party chart library | The app needs only a few chart types (sparkline, bars, heatmap). Owning them keeps dependencies minimal and gives full control over style and accessibility. |
@@ -170,7 +184,7 @@ Passo does one thing and does it well. It counts steps with the phone's own hard
 
 - **No lost steps on graceful shutdown.** After a full power-off and power-on cycle, the recorded daily total matches the raw sensor deltas, including the steps taken just before shutdown.
 - **Hands-off.** After a reboot or an app update, tracking resumes without the user opening the app.
-- **Battery.** The app's share of daily battery use is at most about 1% on reference devices with normal use. This is a target, checked with `batterystats` and Battery Historian. There are no app wakelocks or alarms while the screen is off.
+- **Battery.** The app's share of daily battery use is at most about 1% on reference devices with normal use. This is a target, checked with `batterystats` and Battery Historian. There are no app wakelocks or alarms while the screen is off; the one exception is the wake-up step counter's reports while an outing the reader started is counting (`docs/adr/0009-sessions.md`).
 - **Widget freshness.** The widget shows the current count within about 5 seconds of the screen turning on, and is never more than about 60 seconds stale while the screen is on.
 - **Privacy is enforced.** The merged release manifest contains no `INTERNET` and no location permissions, and CI fails if one appears.
 
@@ -185,4 +199,6 @@ Passo does one thing and does it well. It counts steps with the phone's own hard
 - **Brisk minute:** a minute with 100 or more steps, a widely used cadence marker for moderate-intensity walking.
 - **Boot session:** the period between two device boots. The hardware counter restarts from 0 at each boot.
 - **Walk:** a stretch of consecutive minutes with sustained stepping, detected automatically from step data. Called a "run" when the average cadence is at or above the running threshold.
+- **Outing:** a walk or run started on purpose, with one goal (steps, distance, minutes in motion or the rest of the day) and an optional cadence, measured from the steps, with signals on the way. Italian «uscita».
+- **Time in motion:** an outing's time, made of the gaps between its steps: a stop is not in it.
 - **Typical day:** the average cumulative step curve for the same weekday over the last 4 weeks, used as a reference on the Today sparkline.

@@ -28,6 +28,7 @@ import kotlin.math.roundToInt
 fun Resources.sessionName(name: String?, intensity: SessionIntensity, restOfDay: Boolean): String =
     name?.takeIf { it.isNotBlank() } ?: when {
         restOfDay -> getString(R.string.session_name_rest_of_day)
+
         else -> getString(
             when (intensity) {
                 SessionIntensity.FREE -> R.string.session_name_free
@@ -67,7 +68,9 @@ fun Resources.sessionAmount(amount: SessionAmount, format: MeasureFormatter): St
         val steps = amount.value.roundToInt()
         getQuantityString(R.plurals.session_amount_steps, steps, format.steps(steps))
     }
+
     SessionGoalKind.DISTANCE -> format(format.distance(amount.value))
+
     SessionGoalKind.TIME -> format(format.minutes(amount.value.roundToInt()))
 }
 
@@ -109,12 +112,21 @@ fun Resources.sessionProgress(session: Session, format: MeasureFormatter): Strin
 /** The one sentence an outing is told with. */
 fun Resources.sessionHeadline(session: Session, format: MeasureFormatter): String =
     when (val headline = SessionHeadline.of(session)) {
-        is SessionHeadline.Starting -> getString(R.string.session_headline_starting, sessionAmount(headline.goal, format))
+        is SessionHeadline.Starting -> getString(
+            R.string.session_headline_starting,
+            sessionAmount(headline.goal, format),
+        )
+
         is SessionHeadline.Going -> amountPlural(R.plurals.session_headline_going, headline.left, format)
+
         is SessionHeadline.PastHalf -> amountPlural(R.plurals.session_headline_past_half, headline.left, format)
+
         is SessionHeadline.AlmostThere -> amountPlural(R.plurals.session_headline_almost, headline.left, format)
+
         SessionHeadline.Paused -> getString(R.string.session_headline_paused)
+
         is SessionHeadline.Reached -> getString(R.string.session_headline_reached, sessionAmount(headline.goal, format))
+
         is SessionHeadline.Ended -> getString(
             when (headline.end) {
                 SessionEnd.IDLE -> R.string.session_headline_idle

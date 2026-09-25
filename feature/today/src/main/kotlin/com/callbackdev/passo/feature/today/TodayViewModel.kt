@@ -112,9 +112,13 @@ constructor(
         sessions.summarySeen,
     ) { today, live, latest, seen ->
         val stored = today.lastOrNull { it.live }
-        val card = live?.takeIf { it.session.live || it.session.id != seen } ?: stored?.let { LiveSessionState(it, cadence = null, canKeepGoing = false, alertsWhileScreenOff = true) }
-            ?: latest?.takeIf { it.id != seen && today.any { same -> same.id == it.id } }
-                ?.let { LiveSessionState(it, cadence = null, canKeepGoing = false, alertsWhileScreenOff = true) }
+        val card =
+            live?.takeIf { it.session.live || it.session.id != seen }
+                ?: stored?.let {
+                    LiveSessionState(it, cadence = null, canKeepGoing = false, alertsWhileScreenOff = true)
+                }
+                ?: latest?.takeIf { it.id != seen && today.any { same -> same.id == it.id } }
+                    ?.let { LiveSessionState(it, cadence = null, canKeepGoing = false, alertsWhileScreenOff = true) }
         Outings(today, card)
     }
 

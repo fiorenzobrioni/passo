@@ -82,13 +82,13 @@ import com.callbackdev.passo.core.designsystem.components.DayTrend
 import com.callbackdev.passo.core.designsystem.components.DayTrendChart
 import com.callbackdev.passo.core.designsystem.components.MetricTile
 import com.callbackdev.passo.core.designsystem.components.MetricTrack
+import com.callbackdev.passo.core.designsystem.components.OutingList
 import com.callbackdev.passo.core.designsystem.components.ProgressRing
+import com.callbackdev.passo.core.designsystem.components.SessionCard
+import com.callbackdev.passo.core.designsystem.components.SessionCardActions
 import com.callbackdev.passo.core.designsystem.components.StatusCard
 import com.callbackdev.passo.core.designsystem.components.StatusTone
 import com.callbackdev.passo.core.designsystem.components.TrendPoint
-import com.callbackdev.passo.core.designsystem.components.OutingList
-import com.callbackdev.passo.core.designsystem.components.SessionCard
-import com.callbackdev.passo.core.designsystem.components.SessionCardActions
 import com.callbackdev.passo.core.designsystem.format.annotated
 import com.callbackdev.passo.core.designsystem.format.axisHour
 import com.callbackdev.passo.core.designsystem.format.clockTime
@@ -102,10 +102,10 @@ import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
 import com.callbackdev.passo.core.designsystem.theme.reducedMotion
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.metrics.MetricsConstants
+import com.callbackdev.passo.core.domain.sessions.Outing
 import com.callbackdev.passo.core.domain.today.CadenceBand
 import com.callbackdev.passo.core.domain.today.Headline
 import com.callbackdev.passo.core.domain.today.Pace
-import com.callbackdev.passo.core.domain.sessions.Outing
 import java.time.LocalDate
 
 /** Today, with its state from [TodayViewModel] and the permission request it may need. */

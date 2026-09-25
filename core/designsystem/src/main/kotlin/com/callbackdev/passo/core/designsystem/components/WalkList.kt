@@ -15,7 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -24,13 +24,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.callbackdev.passo.core.designsystem.R
 import com.callbackdev.passo.core.designsystem.format.clockTime
-import com.callbackdev.passo.core.designsystem.format.text
-import com.callbackdev.passo.core.designsystem.icons.PassoIcons
-import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.designsystem.format.sessionGoalDescription
 import com.callbackdev.passo.core.designsystem.format.sessionName
 import com.callbackdev.passo.core.designsystem.format.sessionOutcome
+import com.callbackdev.passo.core.designsystem.format.text
+import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
+import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.sessions.Outing
 import com.callbackdev.passo.core.domain.today.MINUTES_PER_DAY
 import com.callbackdev.passo.core.domain.walks.Walk
@@ -73,7 +73,7 @@ fun OutingList(outings: List<Outing>, format: MeasureFormatter, modifier: Modifi
 @Composable
 private fun SessionRow(outing: Outing.Planned, format: MeasureFormatter) {
     val session = outing.session
-    val res = LocalContext.current.resources
+    val res = LocalResources.current
     val name = res.sessionName(session)
     val from = clockTime(outing.startMinute)
     val to = clockTime(outing.endMinute.coerceAtMost(MINUTES_PER_DAY - 1))
@@ -83,7 +83,13 @@ private fun SessionRow(outing: Outing.Planned, format: MeasureFormatter) {
     val steps = pluralStringResource(R.plurals.walk_steps, session.totals.steps, format.steps(session.totals.steps))
     val distance = format.distance(session.totals.distanceMeters).text()
     val movingMinutes = session.totals.movingMillis / MILLIS_PER_MINUTE.toDouble()
-    val cadence = if (movingMinutes >= 1) format.cadence((session.totals.steps / movingMinutes).roundToInt()).text() else null
+    val cadence = if (movingMinutes >=
+        1
+    ) {
+        format.cadence((session.totals.steps / movingMinutes).roundToInt()).text()
+    } else {
+        null
+    }
     val energy = format.energy(session.totals.activeKcal).text()
     val figures = listOfNotNull(steps, distance, cadence, energy).joinToString("  ·  ")
     val spoken = stringResource(R.string.session_spoken, name, from, to, outcome, goal, figures)
@@ -129,7 +135,11 @@ private fun SessionRow(outing: Outing.Planned, format: MeasureFormatter) {
                     style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                     color = MaterialTheme.colorScheme.primary,
                 )
-                Text("·", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    "·",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 if (reached) {
                     Icon(
                         PassoIcons.Check,

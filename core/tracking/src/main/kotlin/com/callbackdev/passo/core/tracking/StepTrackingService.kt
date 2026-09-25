@@ -42,11 +42,11 @@ import com.callbackdev.passo.core.model.DiagnosticsType
 import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.Session
-import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionState
+import com.callbackdev.passo.core.model.UnitPreference
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
@@ -254,6 +254,12 @@ class StepTrackingService : Service() {
 
     private fun startTracking() {
         scope.launch {
+            // A paused count is never started by a side door (an old notification's button, a
+            // shortcut): the steps of the pause would be added at the first sample.
+            if (!preferencesSource.current().settings.trackingEnabled) {
+                stopSelf()
+                return@launch
+            }
             // A state restored from a backup of another installation is not this counter's.
             val adoption = repository.adoptTrackerState(installedAtMillis())
             val ledger = StepLedger(adoption.state)
@@ -716,12 +722,17 @@ class StepTrackingService : Service() {
         try {
             when (command.action) {
                 SessionControl.ACTION_START -> startSession(command.getLongExtra(SessionControl.EXTRA_PLAN_ID, 0L))
+
                 SessionControl.ACTION_START_REST_OF_DAY -> startSession(null)
+
                 SessionControl.ACTION_PAUSE -> changeSession { tracker -> tracker.pause(System.currentTimeMillis()) }
+
                 SessionControl.ACTION_RESUME -> changeSession { tracker -> tracker.resume(System.currentTimeMillis()) }
+
                 SessionControl.ACTION_KEEP_GOING -> if (changeSession { it.keepGoing(System.currentTimeMillis()) }) {
                     sessionNotifications.cancelGoal()
                 }
+
                 SessionControl.ACTION_STOP -> {
                     // The steps up to the touch belong to the outing.
                     flushSensor()
@@ -770,7 +781,8 @@ class StepTrackingService : Service() {
         flushSensor()
         persist()
         val plan = if (planId == null) {
-            sessions.plans.first().firstOrNull { it.goalKind == SessionGoalKind.REST_OF_DAY } ?: SessionPlans.REST_OF_DAY
+            sessions.plans.first().firstOrNull { it.goalKind == SessionGoalKind.REST_OF_DAY }
+                ?: SessionPlans.REST_OF_DAY
         } else {
             sessions.plan(planId) ?: return
         }
@@ -788,10 +800,7 @@ class StepTrackingService : Service() {
         SessionShortcuts.update(this, sessions.plansByUse(), current.settings.units)
     }
 
-    private suspend fun newTracker(
-        session: Session,
-        profile: Profile? = null,
-    ): SessionTracker {
+    private suspend fun newTracker(session: Session, profile: Profile? = null): SessionTracker {
         val measuredWith = profile ?: preferencesSource.current().profile
         return SessionTracker(session, StepLengths.of(measuredWith), MetricsCalculator.weightKg(measuredWith))
     }

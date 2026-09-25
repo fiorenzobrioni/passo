@@ -1,16 +1,16 @@
 package com.callbackdev.passo.widget
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.callbackdev.passo.core.designsystem.theme.WidgetCardColor
+import com.callbackdev.passo.core.domain.widget.CountingState
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionTotals
-import android.content.Context
-import androidx.test.core.app.ApplicationProvider
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.callbackdev.passo.core.designsystem.theme.WidgetCardColor
-import com.callbackdev.passo.core.domain.widget.CountingState
 import com.callbackdev.passo.widget.glance.GlanceWidgetContent
 import com.callbackdev.passo.widget.words.WordsWidgetContent
 import org.junit.Test

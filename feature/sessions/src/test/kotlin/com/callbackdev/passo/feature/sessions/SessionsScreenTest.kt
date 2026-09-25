@@ -55,7 +55,13 @@ class SessionsScreenTest {
         vibrate = true,
         localEpochDay = 0,
         startedAtMillis = 0,
-        totals = SessionTotals(steps = 1_240, movingMillis = 12 * 60_000, zoneMillis = 11 * 60_000, distanceMeters = 905.0, activeKcal = 33.0),
+        totals = SessionTotals(
+            steps = 1_240,
+            movingMillis = 12 * 60_000,
+            zoneMillis = 11 * 60_000,
+            distanceMeters = 905.0,
+            activeKcal = 33.0,
+        ),
     )
 
     private fun state(
@@ -123,7 +129,10 @@ class SessionsScreenTest {
 
     @Test
     fun `with one under way, it is on top and nothing else starts`() {
-        show(state(live = LiveSessionState(walking, cadence = 108, canKeepGoing = false, alertsWhileScreenOff = true)), dark = true)
+        show(
+            state(live = LiveSessionState(walking, cadence = 108, canKeepGoing = false, alertsWhileScreenOff = true)),
+            dark = true,
+        )
 
         compose.onNodeWithText("Past halfway: 8 min to go.").assertIsDisplayed()
         compose.onNodeWithText("108 steps/min: on pace · 1,240 steps").assertIsDisplayed()

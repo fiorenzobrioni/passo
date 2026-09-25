@@ -104,7 +104,15 @@ constructor(
                 DayMinute(minuteOfDay(it.epochMinute, it.localEpochDay, zone), it.steps)
             }
             val computed = MetricsCalculator.day(minutes.map { it.steps }, profile)
-            val walks = if (settings.walkDetection) WalkDetector.detect(minutes, profile, settings.minWalkMinutes) else null
+            val walks = if (settings.walkDetection) {
+                WalkDetector.detect(
+                    minutes,
+                    profile,
+                    settings.minWalkMinutes,
+                )
+            } else {
+                null
+            }
             // A past day keeps the estimates it froze with (PLANNING.md §5); today is still open.
             val frozen = summary?.takeIf { !isToday }
             DayDetail(

@@ -39,8 +39,8 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import com.callbackdev.passo.core.designsystem.theme.WidgetDress
 import com.callbackdev.passo.core.designsystem.format.sessionBrief
+import com.callbackdev.passo.core.designsystem.theme.WidgetDress
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.widget.CountingState
 import com.callbackdev.passo.widget.CardModels

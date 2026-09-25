@@ -65,10 +65,12 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
         if (steps <= 0) return emptyList()
         return when (session.state) {
             SessionState.PAUSED -> emptyList()
+
             SessionState.FINISHED -> {
                 countOvertime(atMillis, steps)
                 emptyList()
             }
+
             SessionState.ACTIVE -> countActive(atMillis, steps)
         }
     }

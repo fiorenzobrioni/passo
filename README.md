@@ -18,10 +18,10 @@ Free, no account, no ads, no tracking, and no permission to use the internet at 
 </div>
 
 > [!NOTE]
-> Passo is in early development: Phases 0 to 6 of [the plan](./PLANNING.md) are built (the
-> step tracking engine, the metrics, the Today screen, the first run, Settings, the two
-> home-screen widgets, History, Insights and walks, the goal notifications and the Quick
-> Settings tile). It has run on a phone, but the multi-day
+> Passo is in early development: Phases 0 to 6 and 10 of [the plan](./PLANNING.md) are built
+> (the step tracking engine, the metrics, the Today screen, the first run, Settings, the two
+> home-screen widgets, History, Insights and walks, the goal notifications, the Quick Settings
+> tile, and outings: walks with a goal). It has run on a phone, but the multi-day
 > field test of the tracking engine is still to do, and there is no usable release yet.
 
 ## Screenshots
@@ -67,6 +67,16 @@ Free, no account, no ads, no tracking, and no permission to use the internet at 
     <td align="center"><b>A month,</b> against each day's goal, and the calendar of how close each day came.</td>
     <td align="center"><b>Insights:</b> the streak, the records (each opens its day, week or month) and the averages.</td>
   </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/outings.png" width="250" alt="Outings: a brisk walk of 20 minutes, a 30-minute run and the rest of the day, each with what it comes to and its signals"></td>
+    <td align="center"><img src="docs/screenshots/today-outing.png" width="250" alt="Today with a brisk walk under way: 12 of 20 minutes, past halfway, 112 steps a minute on pace"></td>
+    <td align="center"><img src="docs/screenshots/outing-editor.png" width="250" alt="Editing an outing: what it comes to with your step, the signals at 25, 50 and 75 percent, the vibrations to try"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Outings:</b> a walk with a goal, one touch from starting.</td>
+    <td align="center"><b>Under way,</b> on Today and in the notification: where it stands, and your pace against its own.</td>
+    <td align="center"><b>Signals you can feel:</b> one, two, three short pulses, one long at the goal. Try them first.</td>
+  </tr>
 </table>
 
 Drawn from the app's own screens with realistic sample days (the phone's status bar is not in
@@ -100,6 +110,13 @@ resizable home-screen widgets answer "how am I doing today?" at a glance.
 - **Walks, found for you**: stretches of walking or running recognized in the steps already
   counted ("10:12 to 10:47, 3,420 steps, 2.6 km, 98 steps/min"), on Today and in History. No
   extra sensor, no background work, and a switch to turn them off.
+- **Outings**: a walk or a run with a goal, started on purpose. One goal (steps, a distance,
+  minutes in motion, or the rest of today's goal) and, if you want, a pace to keep (brisk,
+  vigorous, running). On the way the phone vibrates at the shares you choose, in a count you
+  can read in a pocket, and once, long, at the goal; the counting notification follows it,
+  with Pause and Stop. Start one from Today, from the app icon's long press or from the evening
+  reminder; the widgets and the tile show it while it lasts, and the day's walks keep it
+  afterwards with how much of its goal was done.
 - **Insights**: the streak of days at your goal, your best day, week and month, averages over
   the last 7 and 30 days, and what it all adds up to since the first day.
 - **Settings**: height, weight and step length, the goal, the notifications, metric or
@@ -150,8 +167,9 @@ on a timer, and it updates the widgets and the notification only while the scree
 widgets are told when something changed, at most once a minute, and never poll. The goal
 notifications add at most one wake a day (the evening reminder, if you turn it on); the goal
 reached rides on the steps Passo already receives, and the weekly summary waits for the phone
-to be awake. The target is
-at most about 1% of a day's battery.
+to be awake. During an outing, and only then, the step counter may wake the phone briefly
+(about twice a minute while you walk, never while you stand still) so its signals arrive on
+time. The target is at most about 1% of a day's battery.
 
 ## Building
 

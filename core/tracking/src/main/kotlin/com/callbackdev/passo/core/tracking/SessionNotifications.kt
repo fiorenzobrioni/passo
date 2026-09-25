@@ -136,7 +136,13 @@ internal class SessionNotifications(private val context: Context) {
     private fun detailLines(notice: SessionNotice, format: MeasureFormatter): String {
         val res = context.resources
         val session = notice.session
-        val pace = if (session.state == SessionState.PAUSED) null else res.sessionCadence(notice.cadence, session.intensity, format)
+        val pace = if (session.state ==
+            SessionState.PAUSED
+        ) {
+            null
+        } else {
+            res.sessionCadence(notice.cadence, session.intensity, format)
+        }
         val first = listOfNotNull(pace, res.sessionSteps(session, format)).joinToString(" · ")
         return listOf(first, res.sessionEstimates(session, format)).joinToString("\n")
     }
@@ -177,7 +183,11 @@ internal class SessionNotifications(private val context: Context) {
     }
 
     fun post(notification: android.app.Notification) {
-        if (!canPost()) return
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
         NotificationManagerCompat.from(context).notify(ID_GOAL, notification)
     }
 
@@ -200,8 +210,9 @@ internal class SessionNotifications(private val context: Context) {
         return manager.getNotificationChannel(CHANNEL_ID)?.importance != NotificationManager.IMPORTANCE_NONE
     }
 
-    private fun canPost(): Boolean = ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
-        PackageManager.PERMISSION_GRANTED
+    private fun canPost(): Boolean =
+        ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
 
     companion object {
         const val CHANNEL_ID = "sessions"

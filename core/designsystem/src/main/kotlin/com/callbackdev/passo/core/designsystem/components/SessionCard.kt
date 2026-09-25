@@ -29,7 +29,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
@@ -92,11 +92,12 @@ fun SessionCard(
     actions: SessionCardActions,
     modifier: Modifier = Modifier,
 ) {
-    val res = LocalContext.current.resources
+    val res = LocalResources.current
     val reached = session.reached
     val finished = session.state == SessionState.FINISHED
     val accent = if (reached) PassoTheme.colors.goal else MaterialTheme.colorScheme.primary
     val container = if (reached) PassoTheme.colors.goalContainer else MaterialTheme.colorScheme.primaryContainer
+    val mark = if (reached) PassoTheme.colors.goal else MaterialTheme.colorScheme.onPrimaryContainer
     val name = res.sessionName(session)
     val sentence = res.sessionHeadline(session, format)
     Surface(
@@ -111,13 +112,19 @@ fun SessionCard(
                         Icon(
                             imageVector = sessionIcon(session.intensity),
                             contentDescription = null,
-                            tint = if (reached) PassoTheme.colors.goal else MaterialTheme.colorScheme.onPrimaryContainer,
+                            tint = mark,
                             modifier = Modifier.size(20.dp),
                         )
                     }
                 }
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(name, style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
+                    Text(
+                        name,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.semantics {
+                            heading()
+                        },
+                    )
                     Text(
                         text = when (session.state) {
                             SessionState.ACTIVE -> stringResource(R.string.session_card_under_way)
@@ -134,7 +141,11 @@ fun SessionCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Text(sentence, style = MaterialTheme.typography.titleMedium, modifier = Modifier.testTag(SessionCardTags.SENTENCE))
+            Text(
+                sentence,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.testTag(SessionCardTags.SENTENCE),
+            )
             SessionTrack(
                 session = session,
                 color = accent,
@@ -149,9 +160,19 @@ fun SessionCard(
             )
             val lines = buildList {
                 if (session.state == SessionState.ACTIVE) {
-                    add(listOf(res.sessionCadence(cadence, session.intensity, format), res.sessionSteps(session, format)).joinToString(" · "))
+                    add(
+                        listOf(
+                            res.sessionCadence(cadence, session.intensity, format),
+                            res.sessionSteps(session, format),
+                        ).joinToString(" · "),
+                    )
                 } else {
-                    add(listOfNotNull(res.sessionSteps(session, format), res.sessionZone(session, format)).joinToString(" · "))
+                    add(
+                        listOfNotNull(
+                            res.sessionSteps(session, format),
+                            res.sessionZone(session, format),
+                        ).joinToString(" · "),
+                    )
                 }
                 add(res.sessionEstimates(session, format))
             }
@@ -174,7 +195,10 @@ fun SessionCard(
                             Text(stringResource(R.string.session_card_close))
                         }
                         if (canKeepGoing) {
-                            FilledTonalButton(onClick = actions.onKeepGoing, modifier = Modifier.testTag(SessionCardTags.KEEP_GOING)) {
+                            FilledTonalButton(
+                                onClick = actions.onKeepGoing,
+                                modifier = Modifier.testTag(SessionCardTags.KEEP_GOING),
+                            ) {
                                 ButtonIcon(PassoIcons.Play)
                                 Text(stringResource(R.string.session_card_keep_going))
                             }
@@ -187,12 +211,18 @@ fun SessionCard(
                             Text(stringResource(R.string.session_card_stop))
                         }
                         if (session.state == SessionState.PAUSED) {
-                            FilledTonalButton(onClick = actions.onResume, modifier = Modifier.testTag(SessionCardTags.RESUME)) {
+                            FilledTonalButton(
+                                onClick = actions.onResume,
+                                modifier = Modifier.testTag(SessionCardTags.RESUME),
+                            ) {
                                 ButtonIcon(PassoIcons.Play)
                                 Text(stringResource(R.string.session_card_resume))
                             }
                         } else {
-                            FilledTonalButton(onClick = actions.onPause, modifier = Modifier.testTag(SessionCardTags.PAUSE)) {
+                            FilledTonalButton(
+                                onClick = actions.onPause,
+                                modifier = Modifier.testTag(SessionCardTags.PAUSE),
+                            ) {
                                 ButtonIcon(PassoIcons.Pause)
                                 Text(stringResource(R.string.session_card_pause))
                             }
@@ -214,7 +244,12 @@ private fun ButtonIcon(icon: ImageVector) {
 @Composable
 private fun finishedWhen(session: Session): String {
     val end = session.endedAtMillis ?: session.lastStepAtMillis
-    val range = stringResource(R.string.walk_time_range, clockTime(minuteOfDay(session.startedAtMillis)), clockTime(minuteOfDay(end)))
+    val range =
+        stringResource(
+            R.string.walk_time_range,
+            clockTime(minuteOfDay(session.startedAtMillis)),
+            clockTime(minuteOfDay(end)),
+        )
     val minutes = ((end - session.startedAtMillis) / MILLIS_PER_MINUTE).toInt().coerceAtLeast(1)
     return stringResource(R.string.session_card_when, range, duration(minutes))
 }

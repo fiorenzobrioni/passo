@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -45,12 +46,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -122,7 +122,12 @@ class PlanEditorActions(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PlanEditorScreen(state: PlanEditorState?, onBack: () -> Unit, actions: PlanEditorActions, modifier: Modifier = Modifier) {
+fun PlanEditorScreen(
+    state: PlanEditorState?,
+    onBack: () -> Unit,
+    actions: PlanEditorActions,
+    modifier: Modifier = Modifier,
+) {
     var confirmDiscard by rememberSaveable { mutableStateOf(false) }
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
     val leave = { if (state?.changed == true) confirmDiscard = true else onBack() }
@@ -195,7 +200,9 @@ fun PlanEditorScreen(state: PlanEditorState?, onBack: () -> Unit, actions: PlanE
                 TextButton(onClick = {
                     confirmDelete = false
                     actions.delete()
-                }, modifier = Modifier.testTag(EditorTags.CONFIRM_DELETE)) { Text(stringResource(R.string.editor_delete)) }
+                }, modifier = Modifier.testTag(EditorTags.CONFIRM_DELETE)) {
+                    Text(stringResource(R.string.editor_delete))
+                }
             },
             dismissButton = {
                 TextButton(onClick = { confirmDelete = false }) { Text(stringResource(R.string.editor_cancel)) }
@@ -207,7 +214,7 @@ fun PlanEditorScreen(state: PlanEditorState?, onBack: () -> Unit, actions: PlanE
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 private fun EditorList(state: PlanEditorState, actions: PlanEditorActions, modifier: Modifier) {
-    val res = LocalContext.current.resources
+    val res = LocalResources.current
     val format = rememberMeasureFormatter(state.units)
     val plan = state.draft
     LazyColumn(modifier = modifier.testTag(EditorTags.LIST), contentPadding = PaddingValues(bottom = 24.dp)) {
@@ -219,8 +226,14 @@ private fun EditorList(state: PlanEditorState, actions: PlanEditorActions, modif
                 placeholder = { Text(res.sessionName(plan.copy(name = null))) },
                 supportingText = { Text(stringResource(R.string.editor_name_note)) },
                 singleLine = true,
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Done),
-                modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenMargin, vertical = 8.dp).testTag(EditorTags.NAME),
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Sentences,
+                    imeAction = ImeAction.Done,
+                ),
+                modifier = Modifier.fillMaxWidth().padding(
+                    horizontal = ScreenMargin,
+                    vertical = 8.dp,
+                ).testTag(EditorTags.NAME),
             )
         }
 
@@ -353,18 +366,27 @@ private fun EditorList(state: PlanEditorState, actions: PlanEditorActions, modif
 /** The goal's value, picked on its steps; for the rest of the day, what it means now. */
 @Composable
 private fun GoalValue(state: PlanEditorState, format: MeasureFormatter, actions: PlanEditorActions) {
-    val res = LocalContext.current.resources
+    val res = LocalResources.current
     val plan = state.draft
     Column(modifier = Modifier.padding(horizontal = ScreenMargin, vertical = 12.dp)) {
         if (plan.goalKind == SessionGoalKind.REST_OF_DAY) {
-            Surface(color = MaterialTheme.colorScheme.surfaceContainerLow, shape = GroupShape, modifier = Modifier.fillMaxWidth()) {
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                shape = GroupShape,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(stringResource(R.string.editor_day_note), style = MaterialTheme.typography.bodyLarge)
                     Text(
-                        text = if (state.restOfDaySteps >= com.callbackdev.passo.core.domain.sessions.SessionConstants.MIN_REST_OF_DAY_STEPS) {
+                        text = if (state.restOfDaySteps >=
+                            com.callbackdev.passo.core.domain.sessions.SessionConstants.MIN_REST_OF_DAY_STEPS
+                        ) {
                             stringResource(
                                 R.string.editor_day_now,
-                                res.sessionAmount(SessionAmount(SessionGoalKind.STEPS, state.restOfDaySteps.toDouble()), format),
+                                res.sessionAmount(
+                                    SessionAmount(SessionGoalKind.STEPS, state.restOfDaySteps.toDouble()),
+                                    format,
+                                ),
                             )
                         } else {
                             stringResource(R.string.editor_day_met)
@@ -402,7 +424,7 @@ private fun GoalValue(state: PlanEditorState, format: MeasureFormatter, actions:
 /** «About 2,000 steps and 1.40 km, with your step of 73 cm», in the quantities the goal is not in. */
 @Composable
 private fun Estimate(state: PlanEditorState, format: MeasureFormatter) {
-    val res = LocalContext.current.resources
+    val res = LocalResources.current
     val plan = state.draft
     val estimate = SessionPlans.estimate(plan, state.lengths, state.restOfDaySteps)
     val steps = res.sessionAmount(SessionAmount(SessionGoalKind.STEPS, estimate.steps.toDouble()), format)
@@ -413,7 +435,8 @@ private fun Estimate(state: PlanEditorState, format: MeasureFormatter) {
         SessionGoalKind.DISTANCE -> steps to minutes
         SessionGoalKind.STEPS, SessionGoalKind.REST_OF_DAY -> distance to minutes
     }
-    val running = plan.intensity.typicalCadence >= com.callbackdev.passo.core.domain.metrics.MetricsConstants.RUNNING_CADENCE
+    val running =
+        plan.intensity.typicalCadence >= com.callbackdev.passo.core.domain.metrics.MetricsConstants.RUNNING_CADENCE
     val step = res.format(format.stepLength(state.lengths.forCadence(plan.intensity.typicalCadence)))
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -422,7 +445,12 @@ private fun Estimate(state: PlanEditorState, format: MeasureFormatter) {
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
-                text = stringResource(if (running) R.string.editor_estimate_run else R.string.editor_estimate, first, second, step),
+                text = stringResource(
+                    if (running) R.string.editor_estimate_run else R.string.editor_estimate,
+                    first,
+                    second,
+                    step,
+                ),
                 style = MaterialTheme.typography.bodyLarge,
             )
             Text(
@@ -438,7 +466,10 @@ private fun Estimate(state: PlanEditorState, format: MeasureFormatter) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun TryVibrations(format: MeasureFormatter, onTry: (SessionMilestone) -> Unit) {
-    Column(modifier = Modifier.padding(horizontal = ScreenMargin + 4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(
+        modifier = Modifier.padding(horizontal = ScreenMargin + 4.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
         Text(
             stringResource(R.string.editor_try),
             style = MaterialTheme.typography.labelLarge,
@@ -458,7 +489,11 @@ private fun TryVibrations(format: MeasureFormatter, onTry: (SessionMilestone) ->
                         )
                     },
                     leadingIcon = {
-                        Icon(PassoIcons.Vibrate, contentDescription = null, modifier = Modifier.size(AssistChipDefaults.IconSize))
+                        Icon(
+                            PassoIcons.Vibrate,
+                            contentDescription = null,
+                            modifier = Modifier.size(AssistChipDefaults.IconSize),
+                        )
                     },
                     modifier = Modifier.testTag("${EditorTags.TRY}-${milestone.percent}"),
                 )

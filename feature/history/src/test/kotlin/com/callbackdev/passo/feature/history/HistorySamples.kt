@@ -2,11 +2,13 @@ package com.callbackdev.passo.feature.history
 
 import com.callbackdev.passo.core.domain.metrics.DaySummaries
 import com.callbackdev.passo.core.domain.metrics.MetricsCalculator
+import com.callbackdev.passo.core.domain.sessions.Outing
 import com.callbackdev.passo.core.domain.today.DayMinute
 import com.callbackdev.passo.core.domain.today.HourlySteps
-import com.callbackdev.passo.core.domain.sessions.Outing
-import com.callbackdev.passo.core.domain.walks.WalkDetector
 import com.callbackdev.passo.core.domain.walks.Walk
+import com.callbackdev.passo.core.domain.walks.WalkDetector
+import com.callbackdev.passo.core.model.DailySummary
+import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
@@ -14,8 +16,6 @@ import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionTotals
-import com.callbackdev.passo.core.model.DailySummary
-import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.UnitPreference
 import java.time.DayOfWeek
 import java.time.LocalDate

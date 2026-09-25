@@ -60,11 +60,11 @@ that does not match it.
 | Module | Kind | Holds |
 |---|---|---|
 | `:core:model` | pure Kotlin/JVM | data classes shared by everything |
-| `:core:domain` | pure Kotlin/JVM | `StepAccountant`, metric calculators, `WalkDetector`, `TypicalDayCalculator`, `PeriodOverview`, `Insights` (streaks, records, averages) |
-| `:core:data` | Android library | Room (steps, tracker state), DataStore (settings, profile), repositories exposing `Flow` |
+| `:core:domain` | pure Kotlin/JVM | `StepAccountant`, metric calculators, `WalkDetector`, `TypicalDayCalculator`, `PeriodOverview`, `Insights` (streaks, records, averages), `SessionTracker` and `SessionPlans` (outings) |
+| `:core:data` | Android library | Room (steps, tracker state, outings), DataStore (settings, profile), repositories exposing `Flow` |
 | `:core:tracking` | Android library | `StepTrackingService` (FGS type `health`), sensor source, receivers, ongoing notification |
-| `:core:designsystem` | Android library | M3 theme, typography, shared components, the Canvas charts (`DayTrendChart`, `BarChart`), `CalendarHeatmap`, `WalkList`, date formatting |
-| `:feature:*` | Android library | `today`, `history`, `insights`, `settings`, `onboarding` |
+| `:core:designsystem` | Android library | M3 theme, typography, shared components, the Canvas charts (`DayTrendChart`, `BarChart`), `CalendarHeatmap`, `WalkList` and `OutingList`, `SessionCard`, date formatting |
+| `:feature:*` | Android library | `today`, `history`, `insights`, `settings`, `onboarding`, `sessions` (the Outings page and editor) |
 | `:widget` | Android library | the two Glance widgets («At a glance», «In words»), their settings screen, the update coordinator |
 | `:app` | application | `Application`, `MainActivity`, navigation (the bottom bar: Today, History, Insights), DI entry points; wires everything |
 
@@ -83,7 +83,8 @@ other. All business logic lives in `:core:domain`, with unit tests.
 - **Battery first** (PLANNING.md §9): never poll or run timers while the screen is off; no
   wakelocks (except inside `goAsync()` for the shutdown flush), no exact alarms, no periodic
   workers for tracking; database writes are batched. Widget, notification and tile update
-  only when someone can see them.
+  only when someone can see them. The one exception: the wake-up step counter while an outing
+  the reader started is counting (`docs/adr/0009-sessions.md`); never widen it.
 - **No lost steps.** Don't change the tracking engine without updating the tests for every
   edge case in PLANNING.md §4.6.
 - **Honest estimates.** Distance, calories and active time are shown as estimates; formulas

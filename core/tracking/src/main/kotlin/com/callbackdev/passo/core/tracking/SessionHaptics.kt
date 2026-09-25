@@ -40,7 +40,15 @@ object SessionHaptics {
         SessionMilestone.GOAL -> longArrayOf(0, LONG_MS)
     }
 
-    private fun pulses(count: Int): LongArray = LongArray(count * 2) { i -> if (i % 2 == 0) (if (i == 0) 0 else GAP_MS) else SHORT_MS }
+    private fun pulses(count: Int): LongArray = LongArray(count * 2) { i ->
+        if (i % 2 ==
+            0
+        ) {
+            (if (i == 0) 0 else GAP_MS)
+        } else {
+            SHORT_MS
+        }
+    }
 
     private const val SHORT_MS = 180L
     private const val GAP_MS = 220L

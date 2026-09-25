@@ -45,8 +45,9 @@ class SessionNotificationsTest {
         ),
     )
 
-    private fun ongoing(session: Session, cadence: Int? = 108) =
-        notifications.build(NotificationContent(6_000, session = SessionNotice(session, cadence, UnitPreference.METRIC)))
+    private fun ongoing(session: Session, cadence: Int? = 108) = notifications.build(
+        NotificationContent(6_000, session = SessionNotice(session, cadence, UnitPreference.METRIC)),
+    )
 
     @Test
     fun `under way, the counting notification is the outing's`() {

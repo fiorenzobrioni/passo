@@ -2,6 +2,8 @@ package com.callbackdev.passo.feature.sessions
 
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
@@ -50,8 +53,6 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import com.callbackdev.passo.core.designsystem.components.SessionCard
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
 import com.callbackdev.passo.core.designsystem.components.StatusCard
@@ -74,11 +75,7 @@ import com.callbackdev.passo.core.tracking.SessionSignalsAccess
 
 /** The Outings page with its state, and the notification permission it may ask for. */
 @Composable
-fun SessionsRoute(
-    onBack: () -> Unit,
-    onEdit: (Long?) -> Unit,
-    viewModel: SessionsViewModel = hiltViewModel(),
-) {
+fun SessionsRoute(onBack: () -> Unit, onEdit: (Long?) -> Unit, viewModel: SessionsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var block by remember { mutableStateOf(SessionSignalsAccess.block(context)) }
@@ -196,6 +193,7 @@ private fun SessionsList(
         }
         when (state.status) {
             SessionsStatus.READY -> Unit
+
             SessionsStatus.PAUSED -> item(key = "paused") {
                 StatusCard(
                     icon = PassoIcons.Pause,
@@ -207,6 +205,7 @@ private fun SessionsList(
                     modifier = Modifier.padding(horizontal = ScreenMargin),
                 )
             }
+
             SessionsStatus.PERMISSION_NEEDED -> item(key = "permission") {
                 StatusCard(
                     icon = PassoIcons.Warning,
@@ -330,7 +329,7 @@ private fun PlanCard(
     onStart: () -> Unit,
     onEdit: () -> Unit,
 ) {
-    val res = LocalContext.current.resources
+    val res = LocalResources.current
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         shape = GroupShape,
@@ -340,7 +339,9 @@ private fun PlanCard(
             .testTag("${SessionsTags.PLAN}-${plan.id}"),
     ) {
         Column(
-            modifier = Modifier.clickable(onClick = onEdit).padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
+            modifier = Modifier.clickable(
+                onClick = onEdit,
+            ).padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -399,7 +400,7 @@ private fun PlanMark(icon: ImageVector) {
 /** «About 2,000 steps · 1.40 km, estimated»; for the rest of the day, what it is right now. */
 @Composable
 private fun estimateLine(plan: SessionPlan, state: SessionsUiState, format: MeasureFormatter): String {
-    val res = LocalContext.current.resources
+    val res = LocalResources.current
     val estimate = SessionPlans.estimate(plan, state.lengths, state.restOfDaySteps)
     val distance = res.format(format.distance(estimate.distanceMeters))
     val steps = res.getQuantityString(
@@ -411,9 +412,13 @@ private fun estimateLine(plan: SessionPlan, state: SessionsUiState, format: Meas
     // The two quantities the goal is not in.
     return when {
         plan.goalKind == SessionGoalKind.TIME -> stringResource(R.string.sessions_estimate, steps, distance)
+
         plan.goalKind == SessionGoalKind.STEPS -> stringResource(R.string.sessions_estimate, minutes, distance)
+
         plan.goalKind == SessionGoalKind.DISTANCE -> stringResource(R.string.sessions_estimate, steps, minutes)
+
         state.restOfDaySteps < SessionConstants.MIN_REST_OF_DAY_STEPS -> stringResource(R.string.sessions_rest_met)
+
         else -> stringResource(
             R.string.sessions_rest_now,
             steps,

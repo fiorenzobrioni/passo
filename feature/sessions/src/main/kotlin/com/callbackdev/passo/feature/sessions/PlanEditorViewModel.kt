@@ -112,7 +112,9 @@ constructor(
     }
 
     fun nudge(up: Boolean) = edit { state ->
-        state.draft.copy(goalValue = SessionPlans.nudge(state.draft.goalKind, state.draft.goalValue, up, state.imperial))
+        state.draft.copy(
+            goalValue = SessionPlans.nudge(state.draft.goalKind, state.draft.goalValue, up, state.imperial),
+        )
     }
 
     fun intensity(intensity: SessionIntensity) = edit { it.draft.copy(intensity = intensity) }

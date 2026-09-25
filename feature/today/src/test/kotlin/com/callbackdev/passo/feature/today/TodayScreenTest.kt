@@ -123,7 +123,13 @@ class TodayScreenTest {
         vibrate = true,
         localEpochDay = date.toEpochDay(),
         startedAtMillis = 0,
-        totals = SessionTotals(steps = 1_240, movingMillis = 12 * 60_000, zoneMillis = 11 * 60_000, distanceMeters = 905.0, activeKcal = 33.0),
+        totals = SessionTotals(
+            steps = 1_240,
+            movingMillis = 12 * 60_000,
+            zoneMillis = 11 * 60_000,
+            distanceMeters = 905.0,
+            activeKcal = 33.0,
+        ),
     )
 
     @Test
