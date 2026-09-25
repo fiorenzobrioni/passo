@@ -81,6 +81,7 @@ class UserPreferencesDataSourceTest {
             walkDetection = false,
             minWalkMinutes = 15,
             typicalDayLine = false,
+            startOutingButton = false,
             onboardingCompleted = true,
         )
 

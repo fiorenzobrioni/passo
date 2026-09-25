@@ -50,6 +50,7 @@
     <string name="today_status_paused_action">Riprendi</string>
     <string name="today_first_day_title">Il conteggio parte da oggi</string>
     <string name="today_first_day_body">Passo conta da quando l’hai configurato, quindi i passi fatti prima, oggi, non ci sono. Da domani ogni giornata è completa.</string>
+    <string name="today_first_day_guide">Come funziona Passo</string>
 
     <!-- Il grafico della giornata -->
     <string name="today_trend_title">La tua giornata</string>

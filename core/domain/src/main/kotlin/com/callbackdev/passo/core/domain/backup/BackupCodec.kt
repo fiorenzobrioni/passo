@@ -128,6 +128,7 @@ private fun Backup.toFile() = BackupFile(
         walkDetection = settings.walkDetection,
         minWalkMinutes = settings.minWalkMinutes,
         typicalDayLine = settings.typicalDayLine,
+        startOutingButton = settings.startOutingButton,
     ),
     days = days.sortedBy { it.summary.localEpochDay }.map { day ->
         val summary = day.summary
@@ -219,6 +220,7 @@ private fun BackupFile.toBackup(): Backup {
             walkDetection = settings.walkDetection ?: defaults.walkDetection,
             minWalkMinutes = settings.minWalkMinutes ?: defaults.minWalkMinutes,
             typicalDayLine = settings.typicalDayLine ?: defaults.typicalDayLine,
+            startOutingButton = settings.startOutingButton ?: defaults.startOutingButton,
         ),
         days = days.mapNotNull { it.toDay() }
             // One entry per day: a file edited by hand may repeat one, and the fuller one is kept.

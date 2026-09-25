@@ -568,6 +568,28 @@ object PassoIcons {
         }
     }
 
+    /** A home screen's cards: two small ones over a wide one, the sizes Passo's widgets take. */
+    val Widgets: ImageVector by lazy {
+        icon("widgets") {
+            roundRect(4f, 4f, 11f, 11f, 1.8f)
+            roundRect(13f, 4f, 20f, 11f, 1.8f)
+            roundRect(4f, 13f, 20f, 20f, 1.8f)
+        }
+    }
+
+    private fun PathBuilder.roundRect(left: Float, top: Float, right: Float, bottom: Float, r: Float) {
+        moveTo(left + r, top)
+        lineTo(right - r, top)
+        arcTo(r, r, 0f, isMoreThanHalf = false, isPositiveArc = true, x1 = right, y1 = top + r)
+        lineTo(right, bottom - r)
+        arcTo(r, r, 0f, isMoreThanHalf = false, isPositiveArc = true, x1 = right - r, y1 = bottom)
+        lineTo(left + r, bottom)
+        arcTo(r, r, 0f, isMoreThanHalf = false, isPositiveArc = true, x1 = left, y1 = bottom - r)
+        lineTo(left, top + r)
+        arcTo(r, r, 0f, isMoreThanHalf = false, isPositiveArc = true, x1 = left + r, y1 = top)
+        close()
+    }
+
     private fun PathBuilder.tray() {
         moveTo(4f, 14f)
         lineTo(4f, 18f)

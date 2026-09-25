@@ -13,6 +13,8 @@ import java.time.LocalTime
  * @property firstDayOfWeek null follows the locale.
  * @property eveningReminderThresholdPercent the evening reminder comes only while today's steps
  *   are below this share of the goal: 100 is "until the goal is met".
+ * @property startOutingButton Today shows the button to the Outings page under the day. Off, the
+ *   page is still one row away in Settings, and an outing started elsewhere still shows its card.
  * @property onboardingCompleted the first-run flow has been through to its end, or skipped.
  */
 data class UserSettings(
@@ -32,6 +34,7 @@ data class UserSettings(
     val walkDetection: Boolean = true,
     val minWalkMinutes: Int = DEFAULT_MIN_WALK_MINUTES,
     val typicalDayLine: Boolean = true,
+    val startOutingButton: Boolean = true,
     val onboardingCompleted: Boolean = false,
 ) {
     companion object {

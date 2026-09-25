@@ -94,6 +94,7 @@ dependencies {
     implementation(project(":feature:settings"))
     implementation(project(":feature:onboarding"))
     implementation(project(":feature:sessions"))
+    implementation(project(":feature:guide"))
     implementation(project(":widget"))
 
     implementation(libs.androidx.core.ktx)

@@ -42,6 +42,7 @@ import com.callbackdev.passo.core.designsystem.theme.PassoMotion
 import com.callbackdev.passo.core.designsystem.theme.reducedMotion
 import com.callbackdev.passo.core.domain.calibration.CalibratedStep
 import com.callbackdev.passo.core.tracking.TrackingReadiness
+import com.callbackdev.passo.feature.guide.GuideRoute
 import com.callbackdev.passo.feature.history.HistoryRoute
 import com.callbackdev.passo.feature.history.HistoryTarget
 import com.callbackdev.passo.feature.insights.InsightsRoute
@@ -62,9 +63,13 @@ data object TabsKey : NavKey
 @Serializable
 data object SettingsKey : NavKey
 
-/** The Outings page, from Today (PLANNING.md §11 Phase 10). */
+/** The Outings page, from Today's button and from Settings (PLANNING.md §11 Phase 10). */
 @Serializable
 data object SessionsKey : NavKey
+
+/** The guide, from the top of Settings and from Today's first-day card. */
+@Serializable
+data object GuideKey : NavKey
 
 /** Measuring the walking or the running step, from Settings (PLANNING.md §11 Phase 7). */
 @Serializable
@@ -110,11 +115,18 @@ private fun MainPages() {
                     Tabs(
                         onOpenSettings = { backStack.add(SettingsKey) },
                         onOpenSessions = { backStack.add(SessionsKey) },
+                        onOpenGuide = { backStack.add(GuideKey) },
                     )
                 }
                 entry<SettingsKey> {
-                    SettingsRoute(onBack = { back() }, onCalibrate = { backStack.add(CalibrationKey(it)) })
+                    SettingsRoute(
+                        onBack = { back() },
+                        onCalibrate = { backStack.add(CalibrationKey(it)) },
+                        onOpenSessions = { backStack.add(SessionsKey) },
+                        onOpenGuide = { backStack.add(GuideKey) },
+                    )
                 }
+                entry<GuideKey> { GuideRoute(onBack = { back() }) }
                 entry<CalibrationKey> { key -> CalibrationRoute(step = key.step, onDone = { back() }) }
                 entry<SessionsKey> {
                     SessionsRoute(onBack = { back() }, onEdit = { backStack.add(PlanEditorKey(it)) })
@@ -138,7 +150,7 @@ private enum class Tab(@StringRes val label: Int, val icon: ImageVector) {
  * Insights opens its day, week or month in History.
  */
 @Composable
-private fun Tabs(onOpenSettings: () -> Unit, onOpenSessions: () -> Unit) {
+private fun Tabs(onOpenSettings: () -> Unit, onOpenSessions: () -> Unit, onOpenGuide: () -> Unit) {
     var tab by rememberSaveable { mutableStateOf(Tab.TODAY) }
     var historyTarget by remember { mutableStateOf<HistoryTarget?>(null) }
     val saveable = rememberSaveableStateHolder()
@@ -170,6 +182,7 @@ private fun Tabs(onOpenSettings: () -> Unit, onOpenSessions: () -> Unit) {
                     Tab.TODAY -> TodayRoute(
                         onOpenSettings = onOpenSettings,
                         onOpenSessions = onOpenSessions,
+                        onOpenGuide = onOpenGuide,
                         bottomPadding = bottom,
                     )
 

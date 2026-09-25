@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="guide_title">La guida</string>
+    <string name="guide_back">Indietro</string>
+    <string name="guide_intro">Passo conta i tuoi passi con il contapassi del telefono, anche quando l’app è chiusa, e li trasforma in una giornata che si legge: prima una frase, poi i numeri. Questa guida fa il giro delle tre schermate e delle uscite, dice a cosa risponde ognuna e racconta le cose che vale la pena sapere e che una schermata non può dire da sola.</string>
+
+    <!-- La mappa -->
+    <string name="guide_map_title">Le tre schermate</string>
+    <string name="guide_map_today_name">Oggi</string>
+    <string name="guide_map_today">Come sta andando la giornata, rispetto all’obiettivo e al tuo giorno tipico.</string>
+    <string name="guide_map_history_name">Storico</string>
+    <string name="guide_map_history">Ogni giorno contato, per giorno, settimana, mese e anno.</string>
+    <string name="guide_map_insights_name">Andamento</string>
+    <string name="guide_map_insights">Serie, record e medie, man mano che i giorni si sommano.</string>
+    <string name="guide_map_note">Le impostazioni sono dietro l’ingranaggio in alto in ogni schermata. Le tue uscite partono da Oggi, o dalle impostazioni.</string>
+
+    <!-- Come conta Passo -->
+    <string name="guide_counting_title">Come conta Passo</string>
+    <string name="guide_counting_p1">Il telefono ha un contapassi tutto suo, un piccolo chip che conta consumando pochissima batteria. Passo lo legge in background dal momento in cui il telefono si accende, che tu apra l’app o no, e tiene quello che legge sul telefono.</string>
+    <string name="guide_counting_notification_title">La notifica che resta</string>
+    <string name="guide_counting_notification_body">Android chiede a un’app che lavora in background di dirlo. La notifica di Passo mostra i passi di oggi e non fa mai rumore; nelle impostazioni si può rimpicciolire, o spegnere, e il conteggio continua.</string>
+    <string name="guide_counting_late_title">Passi che arrivano a blocchi</string>
+    <string name="guide_counting_late_body">A schermo spento il chip tiene i passi e li consegna qualche minuto alla volta, così il telefono può dormire. Per questo il numero può fare un salto quando lo guardi. Ogni blocco dice quando i suoi passi sono stati fatti, e così finiscono nel minuto giusto e nel giorno giusto, mezzanotte compresa.</string>
+    <string name="guide_counting_restart_title">Spento per la notte</string>
+    <string name="guide_counting_restart_body">Spegnere o riavviare il telefono non fa perdere niente: Passo salva il conteggio mentre il telefono si spegne e lo riprende da solo alla riaccensione. Solo un telefono che si spegne di colpo, a batteria scarica, può perdere gli ultimi minuti.</string>
+    <string name="guide_counting_stops_title">Quando il conteggio si ferma</string>
+    <string name="guide_counting_stops_body">Senza il permesso «Attività fisica» Passo non può leggere il contapassi, e con il conteggio in pausa i passi che fai non vengono contati. In tutti e due i casi Oggi lo dice in alto, con il modo per ripartire.</string>
+
+    <!-- Oggi -->
+    <string name="guide_today_title">Oggi</string>
+    <string name="guide_today_p1">L’anello sono i passi di oggi rispetto all’obiettivo di oggi. La piccola tacca è dove si trova a quest’ora un giorno tipico dello stesso giorno della settimana: basta l’anello per sapere se la giornata è avanti o indietro.</string>
+    <string name="guide_sample_of_goal">su %1$s passi</string>
+    <string name="guide_today_ring_caption">Un esempio: una giornata un po’ oltre la tacca del giorno tipico.</string>
+    <string name="guide_today_sentence_title">La frase</string>
+    <string name="guide_today_sentence_body">Una riga sotto l’anello dice come sta andando: avanti o indietro rispetto al tuo ritmo solito, quanti passi mancano e quanto cammino svelto ci vuole, o a che ora hai raggiunto l’obiettivo.</string>
+    <string name="guide_today_day_title">La tua giornata</string>
+    <string name="guide_today_day_body">Il grafico somma i passi dalla mezzanotte: sale dove hai camminato e resta piatto dove sei stato fermo. La linea tratteggiata è un giorno tipico dello stesso giorno della settimana, la media delle ultime quattro settimane, e compare quando ce ne sono due registrate. Un giorno quasi senza passi, un telefono dimenticato a casa, non entra nella media.</string>
+    <string name="guide_today_walks_title">Le camminate, trovate per te</string>
+    <string name="guide_today_walks_body">Tratti di camminata o corsa continua, trovati nei passi già contati: nessun sensore in più, nessun consumo in più. Una pausa fino a due minuti, a un semaforo o a una porta, non la interrompe. Compaiono quando guardi, non mentre cammini: accorgersi della fine di una camminata nel momento in cui succede vorrebbe dire svegliare il telefono.</string>
+    <string name="guide_today_estimates_title">Le stime, e su cosa si basano</string>
+    <string name="guide_today_estimates_body">La distanza sono i tuoi passi per la lunghezza del tuo passo. Le calorie sono l’energia del solo movimento, in più di quella che il corpo consuma a riposo. Un minuto attivo ha almeno 40 passi; uno a passo svelto almeno 100, il ritmo dell’esercizio moderato. Altezza, peso e un passo misurato avvicinano ogni stima a te.</string>
+    <string name="guide_sample_distance">Distanza</string>
+    <string name="guide_sample_distance_meaning">Stima, con un passo di %1$s</string>
+    <string name="guide_sample_brisk">Minuti a passo svelto</string>
+    <plurals name="guide_sample_brisk_left">
+        <item quantity="one">Ancora %1$d per la quota di oggi dei 150 a settimana dell’OMS</item>
+        <item quantity="many">Ancora %1$d per la quota di oggi dei 150 a settimana dell’OMS</item>
+        <item quantity="other">Ancora %1$d per la quota di oggi dei 150 a settimana dell’OMS</item>
+    </plurals>
+    <string name="guide_today_estimates_caption">Un esempio: due riquadri, ognuno con la riga che dice su cosa si basa il numero, o cosa resta da fare.</string>
+
+    <!-- Uscite -->
+    <string name="guide_outings_title">Uscite</string>
+    <string name="guide_outings_p1">Un’uscita è una camminata o una corsa che avvii apposta, con un solo obiettivo: un numero di passi, una distanza, dei minuti in movimento, o quello che manca all’obiettivo di oggi. Un ritmo da tenere lo scegli tu, se vuoi.</string>
+    <string name="guide_outings_signals_title">Segnali che si leggono in tasca</string>
+    <string name="guide_outings_signals_body">Lungo la strada il telefono vibra alle quote che scegli, contando: un impulso breve a un quarto, due a metà, tre a tre quarti e uno lungo all’obiettivo. Seguono la modalità silenziosa del telefono. Se vuoi, una voce nelle cuffie dice lo stesso, con quello che manca e come va il ritmo, con una voce installata sul telefono.</string>
+    <string name="guide_outings_motion_title">Il tempo in movimento</string>
+    <string name="guide_outings_motion_body">I minuti di un’uscita si misurano dai tuoi passi, non con un orologio: un’attesa al semaforo non conta.</string>
+    <string name="guide_outings_end_title">Finisce da sola</string>
+    <string name="guide_outings_end_body">All’obiettivo, dove «Continua» le dà ancora un quarto d’ora; dopo 15 minuti senza un passo; o dopo un’ora in pausa. Poi prende il posto della camminata che è stata, in Oggi e nello Storico, con quanta parte dell’obiettivo è stata fatta.</string>
+    <string name="guide_outings_battery_title">L’unica volta che Passo sveglia il telefono</string>
+    <string name="guide_outings_battery_body">Perché i segnali arrivino in tempo, mentre un’uscita conta il contapassi si fa sentire circa ogni mezzo minuto mentre cammini, e per niente mentre stai fermo. Prima e dopo, non cambia nulla.</string>
+    <string name="guide_outings_start_title">Da dove partono</string>
+    <string name="guide_outings_start_body">Da Oggi o dalle impostazioni, dalla pressione lunga sull’icona di Passo, che propone quelle avviate per ultime, e dal «Cammina ora» del promemoria serale.</string>
+
+    <!-- Storico -->
+    <string name="guide_history_title">Storico</string>
+    <string name="guide_history_p1">Ogni giorno che Passo ha contato, come giorno ora per ora, settimana, mese o anno, ognuno aperto da una frase prima dei numeri; una settimana, un mese o un anno dicono anche com’è andata rispetto al precedente.</string>
+    <string name="guide_sample_touch">Tocca una barra per leggerla</string>
+    <!-- Una barra dell'esempio: «gio: 10.240 passi, obiettivo raggiunto». -->
+    <string name="guide_sample_bar">%1$s: %2$s passi, %3$s</string>
+    <string name="guide_sample_goal_met">obiettivo raggiunto</string>
+    <string name="guide_sample_goal_short">sotto l’obiettivo</string>
+    <string name="guide_history_week_description">Una settimana d’esempio di passi per giorno, con l’obiettivo alzato a metà settimana.</string>
+    <string name="guide_history_week_caption">Un esempio: una settimana. La linea è l’obiettivo di ogni giorno, e sale dove l’obiettivo è stato alzato; i giorni all’obiettivo ne prendono il colore.</string>
+    <string name="guide_history_goal_title">Ogni giorno tiene il suo obiettivo</string>
+    <string name="guide_history_goal_body">Un nuovo obiettivo vale da oggi. I giorni già passati tengono quello che avevano, così una serie o un record non cambiano alle tue spalle.</string>
+    <string name="guide_history_frozen_title">E le sue stime</string>
+    <string name="guide_history_frozen_body">Una nuova altezza, un nuovo peso o un nuovo passo cambiano distanza e calorie da oggi in poi. I giorni passati tengono le stime con cui sono stati registrati, a meno che tu non chieda alle impostazioni di ricalcolarle.</string>
+    <string name="guide_history_uncounted_title">Non contato non vuol dire zero</string>
+    <string name="guide_history_uncounted_body">I giorni prima che Passo fosse configurato non hanno barra né colore: «non contato» non è un giorno senza passi.</string>
+
+    <!-- Andamento -->
+    <string name="guide_insights_title">Andamento</string>
+    <string name="guide_insights_p1">Quello che i giorni fanno insieme: la serie di giorni all’obiettivo, il giorno, la settimana e il mese migliori, e il tuo giorno medio nell’ultima settimana, nell’ultimo mese e dal primo giorno.</string>
+    <string name="guide_insights_streak_title">La serie aspetta la mezzanotte</string>
+    <string name="guide_insights_streak_body">Un giorno ancora in corso non interrompe mai una serie: fino a mezzanotte può ancora raggiungere l’obiettivo. Nel momento in cui ci arriva, entra nella serie.</string>
+
+    <!-- Widget e riquadro -->
+    <string name="guide_widgets_title">Nella schermata Home</string>
+    <string name="guide_widgets_two_title">Due widget</string>
+    <string name="guide_widgets_two_body">«Colpo d’occhio» ha l’anello e la frase del giorno; «In parole» dice la stessa giornata solo con il testo. Tutti e due stanno in ogni misura, da una sola cella in su, e ognuno ha la sua scheda, il suo colore e la sua opacità.</string>
+    <string name="guide_widgets_wait_title">Aspettano che guardi</string>
+    <string name="guide_widgets_wait_body">I widget e la notifica si aggiornano quando lo schermo si accende, e mai mentre è spento; il riquadro delle Impostazioni rapide, mentre il pannello è aperto. Un numero che nessuno vede non vale la batteria.</string>
+
+    <!-- I tuoi dati -->
+    <string name="guide_data_title">I tuoi dati</string>
+    <string name="guide_data_p1">Passo non ha nessun permesso per internet: non invia nulla, a nessuno. I tuoi passi, i tuoi giorni e le tue uscite restano nell’app, su questo telefono.</string>
+    <string name="guide_data_p2">Se il backup del telefono è attivo, Android ci mette anche i giorni e le impostazioni di Passo, come fa con le altre app: quella copia è di Android, non di Passo. Per una copia tutta tua, le impostazioni scrivono ogni giorno e ogni uscita in un file che tieni tu, o in una tabella per un foglio di calcolo, e rileggono un file senza cancellare niente.</string>
+    <string name="guide_data_p3" formatted="false">Da dove vengono i numeri: il passo è il 41,5% della tua altezza (41,3% per le donne), la regola usata da sempre dai contapassi; le calorie seguono le equazioni del cammino e della corsa dell’American College of Sports Medicine; il passo svelto comincia a 100 passi al minuto (lo studio CADENCE-adults, 2019); e i 150 minuti a settimana sono dell’Organizzazione Mondiale della Sanità (2020).</string>
+</resources>

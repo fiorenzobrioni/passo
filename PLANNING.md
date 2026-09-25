@@ -50,7 +50,8 @@ passo/
 │   ├── insights/           # records, streaks, totals
 │   ├── settings/           # Settings, your data (export, import), the step calibration
 │   ├── onboarding/
-│   └── sessions/           # the Outings page and the outing editor (Phase 10)
+│   ├── sessions/           # the Outings page and the outing editor (Phase 10)
+│   └── guide/              # the guide, in Chiaro's shape
 ├── widget/                 # Glance widget(s), receiver, update coordinator
 ├── docs/                   # ADRs, formulas, battery test notes
 ├── VISION.md
@@ -346,7 +347,7 @@ data class DiagnosticsEventEntity(
 - Profile: height, weight, sex (optional), step length mode (auto, manual or calibrated), walking step length, running step length.
 - Goal, units, first day of week, theme, dynamic color, notification opt-ins, reminder time and threshold, tracking enabled.
 - The last day whose goal was seen reached (not a setting: the record that keeps "goal reached" once a day).
-- Walk detection enabled (default on), minimum walk duration (5, 10 or 15 min; default 10), typical-day line shown (default on).
+- Walk detection enabled (default on), minimum walk duration (5, 10 or 15 min; default 10), typical-day line shown (default on), Today's "Start an outing" button shown (default on).
 - Whether the outing presets were written once (so deleting them is final), and the last finished outing whose card Today has put away.
 
 ---
@@ -687,6 +688,7 @@ implementation, above all in UI and UX); decisions in `docs/adr/0011-export-impo
   - Brought forward to Phase 5 (owner's request), `docs/adr/0007-backup.md`. `full_backup_content` is not needed: it is read only below Android 12, and minSdk is 34. Backup and restore confirmed by the owner on the device (25 Sep 2026); the export round trip is still Phase 7's.
 - [x] Step length calibration wizard (walk a known distance, start/stop, compute and save)
   - "Measure your step" (Settings' profile, and a button in each step-length dialog): the walking or the running step, a distance picked (50 m to 2 km, or yards), Start, the count while the page is looked at, Stop, the length with what it came from and what it changes, Save. The hardware counter is read directly (`StepCounterProbe`) only while the page is on screen, and flushed at Stop; `StepCalibration` refuses fewer than 30 steps or a length the app would not accept, with its arithmetic, and says a pace that does not match the step. A walking step is stored as measured (`StepLengthMode.CALIBRATED`).
+- [x] The guide (owner's request, 25 Sep 2026; §15): `:feature:guide`, a tour of the three screens and the outings in Chiaro's shape, from the top of Settings and from Today's first-day card
 - [ ] Accessibility pass (TalkBack, font scale 200%, contrast, touch targets)
 - [ ] Adaptive layouts for tablets and foldables
 - [ ] Baseline Profiles; R8 full mode; startup check
@@ -743,6 +745,7 @@ Added to v1.0 at the owner's request (25 Sep 2026), after Phase 6 and before Pha
 - [x] The Outings page (`:feature:sessions`): the plans with what they come to and their signals, Start, the outing under way, a paused count or silenced signals stated with the way back, the notification permission asked in context at the first start. The editor: name, goal (picked, never typed; quarter miles in miles), pace, the estimate with the reader's step, the signals, "Try them", save, delete, discard asks.
 - [x] Today: "Start an outing", the outing's card (under way, paused, just over with "Keep going" and Close); Today's and History's lists show an outing in place of the walk found in its minutes, with its goal and its outcome, and History's chart marks it.
 - [x] The launcher's long press (the three last started), the evening reminder's "Walk now", both widgets and the Quick Settings tile saying the outing while it is under way (owner's request).
+- [x] Settings: an Outings group, with the page's own door ("Your outings") and the switch for Today's button (owner's request, 25 Sep 2026; §15).
 - [x] Strings in English and Italian.
 - [ ] On a device (owner): an outing with the screen off (signals on time, the vibrations felt and told apart), the Android 16 Live Update, a reboot and a forgotten outing, and the battery check of an outing (§9).
 - [x] The voice (second iteration, owner's choice; `docs/adr/0010-voice.md`): per outing off, headphones or always (out loud only when the ringer is on); the start, each chosen signal with what is left and the pace, the goal with what it came to, every amount in words in English and Italian; the system's engine with an offline voice only, over ducked music; "Hear it" and a missing voice stated in the editor. Schema v3 (`voice` on both tables, default off).
@@ -927,6 +930,10 @@ Include:
 - **CSV: fixed English headers with units in their names, RFC 4180, UTF-8 with a BOM**, distances in the reader's units; a field that starts like a formula is written as text.
 - **The calibration does not use the tracking service**: the counter's values at Start and Stop are exact whatever the service, a pause or midnight did in between. Its listener lives only while the page is visible (no wake-ups, no wake lock); Start survives the process being stopped (`SavedStateHandle`).
 - **§3 reviewed at Phase 7**: the diagram and its paths now describe the app as built (outings, live state in the process, pushed widget updates, goal alarms, the tile, the two doors of control, data in and out, the calibration).
+
+- **Today's "Start an outing" is the reader's to take away** (owner's question, 25 Sep 2026): a switch in a new Settings group, Outings, on by default. A reader who never walks with a goal should not see the invitation every day; the one on the fence still meets it. The switch hides the button only: an outing under way (started from the launcher's long press or the evening reminder) still shows its card, because hiding it would be the screen lying. The button was the only door to the Outings page inside the app, so the group opens with one of its own, "Your outings", which stays whatever the switch says. The evening reminder's "Walk now" is left as it is: it belongs to the reminder, which has its own switch, and one setting reaching into another's notification would be harder to predict than either. The choice travels with the backup, like the typical-day line.
+
+- **The guide, in Chiaro's shape** (owner's request, 25 Sep 2026): `:feature:guide`, a tour of the three screens and the outings, what each one answers, and the things a screen cannot say out loud (steps arrive in batches and still land in their minute, a shutdown loses nothing, walks are found when you look, a day keeps its goal and its estimates, a streak waits for midnight, Passo wakes the phone only for an outing, what Android's backup is), closing on where the numbers come from. Chiaro's two rules hold it: it never teaches a control and never justifies an absence. It teaches with the app's own components (the ring with its notch, two metric tiles, History's bar chart with a goal that steps), each captioned as an example and drawn in the reader's units and first day of the week. Its own module, not a part of Settings: it reads nothing but the settings and belongs to no screen. The doors: a card at the top of Settings, as in Chiaro, where it stays for the day the question arrives, and an action on Today's first-day card, the one day the questions come on their own; no second one-time card on Today, which already has one. The widgets' chapter gets its own icon (`PassoIcons.Widgets`) rather than borrowing one that says something else.
 
 ### Open
 

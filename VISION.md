@@ -105,7 +105,7 @@ Added to v1.0 at the owner's request (Phase 10, `docs/adr/0009-sessions.md`). An
 - **Signals the reader chooses:** at 25, 50 and 75% (50% by default), and always at the goal, which ends the outing. Each vibrates in its own count (one, two, three short pulses, one long one at the goal), so a phone in a pocket is read without looking; the editor lets you feel them first. They follow the phone's silent mode and the outings' notification channel.
 - **The counting notification becomes the outing's** while it lasts, collapsed and expanded, with Pause and Stop; on Android 16 it is a Live Update with the milestones on its bar. The goal reached is a notification of its own, with "Keep going".
 - **Time in motion, from the steps:** a stop at a traffic light does not count. The cadence now is said against the outing's own ("on pace", "below your pace").
-- **Where it shows:** Today (a button to start one, then its card), the Outings page with the reader's outings (three to start with: a brisk 20 minutes, a 30-minute run, the rest of the day), the launcher's long press, the evening reminder's "Walk now", both widgets and the Quick Settings tile while one is under way, and History and Today's list of the day's walks, in the place of the walk it was, with its goal and how much of it was done.
+- **Where it shows:** Today (a button to start one, which the reader can take away in Settings, then its card), the Outings page (from Today or from Settings) with the reader's outings (three to start with: a brisk 20 minutes, a 30-minute run, the rest of the day), the launcher's long press, the evening reminder's "Walk now", both widgets and the Quick Settings tile while one is under way, and History and Today's list of the day's walks, in the place of the walk it was, with its goal and how much of it was done.
 - **Battery:** only while an outing is counting, the phone's wake-up step counter reports within 30 seconds, about two brief wakes a minute while walking and none while still; everything else is as before. It ends by itself at its goal, after 15 minutes without a step, or after an hour paused.
 - **A voice, if you want it** (off by default, per outing; `docs/adr/0010-voice.md`): the start, each signal with what is left and your pace, and the goal, spoken through headphones, or out loud too when the phone is not silenced. The system's engine with a voice installed on the phone, never one from the network; the music dims for a moment.
 
@@ -133,6 +133,8 @@ Added to v1.0 at the owner's request (Phase 10, `docs/adr/0009-sessions.md`). An
 - App language, Italian or English, through Android's per-app language setting.
 - Walk detection on or off, and minimum walk duration.
 - Show or hide the "typical day" line on the Today sparkline.
+- Show or hide Today's "Start an outing" button; the Outings page stays one row away in Settings.
+- The guide, as in Chiaro: a tour of the three screens and the outings, what each one answers and what a screen cannot say out loud, illustrated with the app's own components. From the top of Settings, and from Today's first-day card.
 - A pause or resume tracking toggle.
 
 ### Data

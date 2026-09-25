@@ -113,6 +113,7 @@ import java.time.LocalDate
 fun TodayRoute(
     onOpenSettings: () -> Unit,
     onOpenSessions: () -> Unit = {},
+    onOpenGuide: () -> Unit = {},
     bottomPadding: Dp = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
     viewModel: TodayViewModel = hiltViewModel(),
 ) {
@@ -153,6 +154,7 @@ fun TodayRoute(
         onCelebrated = viewModel::celebrated,
         bottomPadding = bottomPadding,
         onOpenSessions = onOpenSessions,
+        onOpenGuide = onOpenGuide,
         sessionActions = { id ->
             SessionCardActions(
                 onPause = viewModel::pauseSession,
@@ -186,6 +188,7 @@ fun TodayScreen(
     modifier: Modifier = Modifier,
     bottomPadding: Dp = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
     onOpenSessions: () -> Unit = {},
+    onOpenGuide: () -> Unit = {},
     sessionActions: (Long) -> SessionCardActions = { SessionCardActions() },
 ) {
     val format = rememberMeasureFormatter(state.units)
@@ -212,7 +215,7 @@ fun TodayScreen(
                         modifier = Modifier.padding(horizontal = ScreenMargin),
                     )
                 }
-            } else if (state.status == TrackingStatus.COUNTING) {
+            } else if (state.status == TrackingStatus.COUNTING && state.startOutingButton) {
                 item(key = "start-outing") { StartOuting(onOpenSessions) }
             }
             if (state.firstDay && state.status == TrackingStatus.COUNTING) {
@@ -222,6 +225,10 @@ fun TodayScreen(
                         title = stringResource(R.string.today_first_day_title),
                         body = stringResource(R.string.today_first_day_body),
                         tone = StatusTone.NOTE,
+                        // The first day is when the questions come: how it counts, what the
+                        // ring's notch is. The guide stays in Settings after it.
+                        action = stringResource(R.string.today_first_day_guide),
+                        onAction = onOpenGuide,
                         modifier = Modifier.padding(horizontal = ScreenMargin),
                     )
                 }
@@ -623,6 +630,8 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawSwatch(color: C
 /**
  * The way to an outing (PLANNING.md §11 Phase 10): one quiet button under the day, to the page
  * where they are kept and started. Not while one is under way: its card stands here instead.
+ * The reader who never walks with a goal can take it away in Settings, where the page stays one
+ * row away; an outing started from a shortcut or a reminder still shows its card.
  */
 @Composable
 private fun StartOuting(onOpenSessions: () -> Unit) {

@@ -31,6 +31,7 @@ enum class TrackingStatus {
  * @property session the outing under way, paused, or just over and not yet put away: the card
  *   under the date (PLANNING.md §11 Phase 10).
  * @property outings today's walks and finished outings in one list, by start.
+ * @property startOutingButton the reader keeps the way to the Outings page on Today (Settings).
  */
 @Immutable
 data class TodayUiState(
@@ -45,4 +46,5 @@ data class TodayUiState(
     val walks: List<Walk>? = null,
     val session: LiveSessionState? = null,
     val outings: List<Outing> = emptyList(),
+    val startOutingButton: Boolean = true,
 )

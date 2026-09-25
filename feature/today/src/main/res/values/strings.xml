@@ -45,6 +45,7 @@
     <string name="today_status_paused_action">Resume</string>
     <string name="today_first_day_title">Counting starts today</string>
     <string name="today_first_day_body">Passo counts from the moment it was set up, so steps taken earlier today are not here. From tomorrow every day is complete.</string>
+    <string name="today_first_day_guide">How Passo works</string>
 
     <!-- The day's chart -->
     <string name="today_trend_title">Your day</string>

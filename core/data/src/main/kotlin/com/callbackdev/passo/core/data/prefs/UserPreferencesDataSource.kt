@@ -174,6 +174,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
             walkDetection = prefs[Keys.WALK_DETECTION] ?: defaults.walkDetection,
             minWalkMinutes = prefs[Keys.MIN_WALK_MINUTES] ?: defaults.minWalkMinutes,
             typicalDayLine = prefs[Keys.TYPICAL_DAY_LINE] ?: defaults.typicalDayLine,
+            startOutingButton = prefs[Keys.START_OUTING_BUTTON] ?: defaults.startOutingButton,
             onboardingCompleted = prefs[Keys.ONBOARDING_COMPLETED] ?: defaults.onboardingCompleted,
         ).sanitized()
     }
@@ -212,6 +213,12 @@ constructor(private val dataStore: DataStore<Preferences>) {
         prefs.write(Keys.MIN_WALK_MINUTES, old.minWalkMinutes, new.minWalkMinutes, defaults.minWalkMinutes)
         prefs.write(Keys.TYPICAL_DAY_LINE, old.typicalDayLine, new.typicalDayLine, defaults.typicalDayLine)
         prefs.write(
+            Keys.START_OUTING_BUTTON,
+            old.startOutingButton,
+            new.startOutingButton,
+            defaults.startOutingButton,
+        )
+        prefs.write(
             Keys.ONBOARDING_COMPLETED,
             old.onboardingCompleted,
             new.onboardingCompleted,
@@ -249,6 +256,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
         val WALK_DETECTION = booleanPreferencesKey("walk_detection")
         val MIN_WALK_MINUTES = intPreferencesKey("min_walk_minutes")
         val TYPICAL_DAY_LINE = booleanPreferencesKey("typical_day_line")
+        val START_OUTING_BUTTON = booleanPreferencesKey("today_start_outing_button")
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
 
         val TRACKER_INSTALLATION = longPreferencesKey("tracker_installation")

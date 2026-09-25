@@ -51,6 +51,7 @@ internal data class SettingsDto(
     val walkDetection: Boolean? = null,
     val minWalkMinutes: Int? = null,
     val typicalDayLine: Boolean? = null,
+    val startOutingButton: Boolean? = null,
 )
 
 /** One day: its summary as it stood, and its minutes as `[epochMinute, steps]`. */

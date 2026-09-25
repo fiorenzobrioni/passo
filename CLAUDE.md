@@ -64,7 +64,7 @@ that does not match it.
 | `:core:data` | Android library | Room (steps, tracker state, outings), DataStore (settings, profile), repositories exposing `Flow`, `BackupRepository` (export, import) |
 | `:core:tracking` | Android library | `StepTrackingService` (FGS type `health`), sensor source, receivers, ongoing notification, `StepCounterProbe` (the calibration's direct read) |
 | `:core:designsystem` | Android library | M3 theme, typography, shared components, the Canvas charts (`DayTrendChart`, `BarChart`), `CalendarHeatmap`, `WalkList` and `OutingList`, `SessionCard`, date formatting |
-| `:feature:*` | Android library | `today`, `history`, `insights`, `settings` (with your data and the step calibration), `onboarding`, `sessions` (the Outings page and editor) |
+| `:feature:*` | Android library | `today`, `history`, `insights`, `settings` (with your data and the step calibration), `onboarding`, `sessions` (the Outings page and editor), `guide` (the guide, in Chiaro's shape) |
 | `:widget` | Android library | the two Glance widgets («At a glance», «In words»), their settings screen, the update coordinator |
 | `:app` | application | `Application`, `MainActivity`, navigation (the bottom bar: Today, History, Insights), DI entry points; wires everything |
 
