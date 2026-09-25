@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -307,14 +308,25 @@ private fun EditorList(state: PlanEditorState, actions: PlanEditorActions, modif
                             modifier = Modifier.testTag("${EditorTags.MILESTONE}-${milestone.percent}"),
                         )
                     }
-                    // The goal is always told: shown chosen, and not to be unchosen.
-                    FilterChip(
-                        selected = true,
-                        onClick = {},
-                        enabled = false,
-                        label = { Text(stringResource(R.string.editor_signal_goal)) },
-                        leadingIcon = { Icon(PassoIcons.Flag, contentDescription = null, modifier = Modifier.size(18.dp)) },
-                    )
+                    // The goal is always told: said, not offered as a choice (a disabled chip
+                    // would read as a signal this outing cannot have).
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.height(48.dp).padding(horizontal = 8.dp),
+                    ) {
+                        Icon(
+                            PassoIcons.Flag,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(18.dp),
+                        )
+                        Text(
+                            stringResource(R.string.editor_signal_goal),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                 }
             }
         }

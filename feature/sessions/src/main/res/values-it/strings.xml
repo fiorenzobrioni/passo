@@ -54,7 +54,7 @@
     <string name="editor_estimate_note">Una stima: l’uscita vera si misura dai tuoi passi.</string>
     <string name="editor_signals">Segnali</string>
     <string name="editor_signals_note">Lungo la strada alle quote che scegli, e sempre all’obiettivo, che conclude l’uscita.</string>
-    <string name="editor_signal_goal">Obiettivo</string>
+    <string name="editor_signal_goal">Obiettivo, sempre</string>
     <string name="editor_vibrate">Vibrazione</string>
     <string name="editor_vibrate_note" formatted="false">Un impulso breve al 25%, due a metà, tre al 75%, uno lungo all’obiettivo. Seguono la modalità silenziosa del telefono.</string>
     <string name="editor_try">Provali</string>

@@ -1,5 +1,11 @@
 package com.callbackdev.passo.widget
 
+import com.callbackdev.passo.core.model.Session
+import com.callbackdev.passo.core.model.SessionGoalKind
+import com.callbackdev.passo.core.model.SessionIntensity
+import com.callbackdev.passo.core.model.SessionMilestone
+import com.callbackdev.passo.core.model.SessionState
+import com.callbackdev.passo.core.model.SessionTotals
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -140,5 +146,34 @@ class WidgetGalleryTest {
         )
         board.row(Grants.FourByTwo to renderCard(context, Grants.FourByTwo) { GlanceWidgetContent(paused) })
         board.draw().saveTo(out, "widget-states")
+    }
+
+    @Test
+    fun `an outing under way takes the sentence's place`() {
+        val outing = Session(
+            planId = 1,
+            name = null,
+            goalKind = SessionGoalKind.TIME,
+            goalValue = 20,
+            intensity = SessionIntensity.BRISK,
+            milestones = setOf(SessionMilestone.HALF),
+            vibrate = true,
+            localEpochDay = 0,
+            startedAtMillis = 0,
+            totals = SessionTotals(steps = 1_240, movingMillis = 12 * 60_000L),
+        )
+        val walking = WidgetSamples.model().copy(session = outing)
+        val paused = walking.copy(session = outing.copy(state = SessionState.PAUSED))
+        val board = HomeBoard(context, widthDp = 380)
+        listOf(walking, paused).forEach { model ->
+            board.row(Grants.FourByOne to renderCard(context, Grants.FourByOne) { GlanceWidgetContent(model) })
+            board.row(Grants.FourByOne to renderCard(context, Grants.FourByOne) { WordsWidgetContent(model) })
+        }
+        board.row(
+            Grants.TwoByTwo to renderCard(context, Grants.TwoByTwo) { GlanceWidgetContent(walking) },
+            Grants.TwoByTwo to renderCard(context, Grants.TwoByTwo) { WordsWidgetContent(walking) },
+        )
+        board.row(Grants.FourByTwo to renderCard(context, Grants.FourByTwo) { GlanceWidgetContent(walking) })
+        board.draw().saveTo(out, "widget-outing")
     }
 }

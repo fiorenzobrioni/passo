@@ -7,10 +7,13 @@ import android.graphics.drawable.Icon
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
+import com.callbackdev.passo.core.data.sessions.LiveSession
 import com.callbackdev.passo.core.data.tracking.LiveSteps
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.designsystem.format.measureFormatter
+import com.callbackdev.passo.core.designsystem.format.sessionBrief
 import com.callbackdev.passo.core.domain.widget.CountingState
+import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.UnitPreference
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -28,7 +31,7 @@ import javax.inject.Inject
  * Today's steps in Quick Settings (PLANNING.md §8). It reads only between
  * [onStartListening] and [onStopListening], which is while the panel is open: a closed panel
  * costs nothing. While open it follows the live count, as Today does, so it moves under the
- * reader's thumb. A tap opens Today; a paused tile's tap opens it asking to resume, as the
+ * reader's thumb; during an outing its line is the outing's. A tap opens Today; a paused tile's tap opens it asking to resume, as the
  * widget's does ([TrackingControl.EXTRA_RESUME]).
  */
 @AndroidEntryPoint
@@ -38,6 +41,8 @@ class StepsTileService : TileService() {
     @Inject lateinit var tracking: TrackingRepository
 
     @Inject lateinit var liveSteps: LiveSteps
+
+    @Inject lateinit var liveSession: LiveSession
 
     private var listening: CoroutineScope? = null
     private var shown: CountingState? = null
@@ -54,7 +59,8 @@ class StepsTileService : TileService() {
                 liveSteps.today,
                 liveSteps.serviceRunning,
                 tracking.observeStepsOn(day),
-            ) { prefs, live, running, stored ->
+                liveSession.current,
+            ) { prefs, live, running, stored, outing ->
                 val settings = prefs.settings
                 val state = CountingState.of(
                     hasSensor = StepTracking.hasStepCounter(this@StepsTileService),
@@ -64,7 +70,14 @@ class StepsTileService : TileService() {
                     serviceRunning = running,
                 )
                 val steps = live?.takeIf { it.localEpochDay == day }?.steps ?: stored
-                TileFace.of(this@StepsTileService, state, steps, settings.dailyGoalSteps, settings.units)
+                TileFace.of(
+                    this@StepsTileService,
+                    state,
+                    steps,
+                    settings.dailyGoalSteps,
+                    settings.units,
+                    outing?.session?.takeIf { it.live },
+                )
             }
                 // A tile that cannot read says nothing new, rather than taking the panel down.
                 .catch { }
@@ -108,7 +121,15 @@ class StepsTileService : TileService() {
 /** What the tile shows: the count with the goal while counting, or why it is not counting. */
 internal data class TileFace(val counting: CountingState, val state: Int, val label: String, val subtitle: String) {
     companion object {
-        fun of(context: Context, counting: CountingState, steps: Int, goalSteps: Int, units: UnitPreference): TileFace {
+        /** With [session] under way, the line under the count is the outing's (PLANNING.md §11 Phase 10). */
+        fun of(
+            context: Context,
+            counting: CountingState,
+            steps: Int,
+            goalSteps: Int,
+            units: UnitPreference,
+            session: Session? = null,
+        ): TileFace {
             val format = context.measureFormatter(units)
             val res = context.resources
             val count = res.getQuantityString(R.plurals.tile_steps, steps, format.steps(steps))
@@ -118,7 +139,9 @@ internal data class TileFace(val counting: CountingState, val state: Int, val la
                     counting,
                     Tile.STATE_ACTIVE,
                     count,
-                    if (steps >= goalSteps) {
+                    if (session != null) {
+                        res.sessionBrief(session, format)
+                    } else if (steps >= goalSteps) {
                         res.getString(R.string.tile_goal_reached)
                     } else {
                         res.getString(R.string.tile_progress, format.percent(steps.toDouble() / goalSteps))

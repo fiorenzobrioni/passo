@@ -80,4 +80,7 @@
     <string name="session_card_progress_description">%1$s, %2$s</string>
     <!-- «18:02–18:24 · 22 min». -->
     <string name="session_card_when">%1$s · %2$s</string>
+    <!-- An outing in a line, for the widgets and the Quick Settings tile. -->
+    <string name="session_brief">%1$s: %2$s</string>
+    <string name="session_brief_paused">%1$s: paused</string>
 </resources>

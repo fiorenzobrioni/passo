@@ -681,6 +681,7 @@ class StepTrackingService : Service() {
         applyRegistration()
         notifyNow()
         publishSession()
+        widgets.notify(WidgetEvent.TRACKING_STATE)
     }
 
     /** Past its "Keep going" window, a goal's outing is over for good: the button goes too. */
@@ -747,6 +748,7 @@ class StepTrackingService : Service() {
         applyRegistration()
         notifyNow()
         publishSession()
+        widgets.notify(WidgetEvent.TRACKING_STATE)
         return true
     }
 
@@ -782,6 +784,7 @@ class StepTrackingService : Service() {
         applyRegistration()
         notifyNow()
         publishSession()
+        widgets.notify(WidgetEvent.TRACKING_STATE)
         SessionShortcuts.update(this, sessions.plansByUse(), current.settings.units)
     }
 

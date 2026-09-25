@@ -74,4 +74,6 @@
     <string name="session_card_paused">In pausa</string>
     <string name="session_card_progress_description">%1$s, %2$s</string>
     <string name="session_card_when">%1$s · %2$s</string>
+    <string name="session_brief">%1$s: %2$s</string>
+    <string name="session_brief_paused">%1$s: in pausa</string>
 </resources>

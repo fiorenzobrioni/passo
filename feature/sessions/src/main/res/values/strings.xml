@@ -57,7 +57,7 @@
     <string name="editor_estimate_note">An estimate: the outing itself is measured from your steps.</string>
     <string name="editor_signals">Signals</string>
     <string name="editor_signals_note">On the way at the shares you choose, and always at the goal, which ends the outing.</string>
-    <string name="editor_signal_goal">Goal</string>
+    <string name="editor_signal_goal">Goal, always</string>
     <string name="editor_vibrate">Vibrate</string>
     <string name="editor_vibrate_note" formatted="false">One short pulse at 25%, two at half, three at 75%, a long one at the goal. They follow the phone’s silent mode.</string>
     <string name="editor_try">Try them</string>

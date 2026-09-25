@@ -14,7 +14,7 @@ enum class WidgetEvent {
     /** The local date changed (the screen-on ticker, a clock or time-zone change). */
     DAY_CHANGED,
 
-    /** Counting started or stopped, or the permission changed. */
+    /** Counting started or stopped, the permission changed, or an outing started, paused or ended. */
     TRACKING_STATE,
 
     /** A setting the widgets draw with (goal, units, appearance), or one widget's own look. */

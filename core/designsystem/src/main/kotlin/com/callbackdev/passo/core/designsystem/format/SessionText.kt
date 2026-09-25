@@ -15,6 +15,7 @@ import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionPlan
+import com.callbackdev.passo.core.model.SessionState
 import kotlin.math.roundToInt
 
 /*
@@ -175,6 +176,19 @@ fun Resources.sessionEstimates(session: Session, format: MeasureFormatter): Stri
     format(format.distance(session.totals.distanceMeters)),
     format(format.energy(session.totals.activeKcal)),
 )
+
+/**
+ * An outing in one line, for a widget or a tile: «Brisk walk: 12 of 20 min», «Run: paused». Where
+ * it wraps, it wraps at the colon: the progress is kept whole.
+ */
+fun Resources.sessionBrief(session: Session, format: MeasureFormatter): String =
+    if (session.state == SessionState.PAUSED) {
+        getString(R.string.session_brief_paused, sessionName(session))
+    } else {
+        getString(R.string.session_brief, sessionName(session), sessionProgress(session, format).replace(' ', NO_BREAK))
+    }
+
+private const val NO_BREAK = '\u00A0'
 
 /** «2,140 steps». */
 fun Resources.sessionSteps(session: Session, format: MeasureFormatter): String =
