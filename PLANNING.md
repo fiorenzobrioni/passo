@@ -467,8 +467,8 @@ Built in Chiaro's design language (owner's request): its colors, typefaces, shap
 - [x] Complete Italian and English strings; plurals; content descriptions (the sparkline gets a spoken summary, e.g. "6,200 steps, 1,240 more than usual at this time")
 
 **Acceptance:**
-- [ ] A fresh install through to tracking takes under 1 minute.
-  - Built for it (four taps: Get started, Skip, Continue, Allow); to be timed on a device.
+- [x] A fresh install through to tracking takes under 1 minute.
+  - Confirmed by the owner on a Samsung Galaxy S24 Ultra. The shortest path: Get started, Skip, Continue, Allow (and the two system dialogs), Start counting.
 - [x] Every state in the status banner can be reproduced and recovered from.
   - UI tests for permission and pause with their buttons; resuming forgets the baseline (§15).
 - [x] The typical-day line is hidden with fewer than 2 valid days and appears automatically afterwards.
@@ -681,6 +681,7 @@ Include:
 - **Brisk minutes are shown against the day's share of the WHO's 150 a week** (22), since the 2020 guidelines count every minute of moderate activity; cadence in words by the CADENCE-adults bands (100 and 130 spm).
 - Onboarding stores nothing until the end, and the profile only if its page was not skipped. The battery page appears only for the makers in `OemTips` and opens the app's own settings page (where Android 14+ keeps "Unrestricted"), never the forbidden exemption request.
 - Icons are drawn in the app (`PassoIcons`), no icon library.
+- **README screenshots** (`docs/screenshots/`): drawn by the `ReadmeScreenshots` tests from realistic sample days, in English, only with `-PupdateScreenshots` (so an ordinary test run never rewrites a committed image). Owner's rule: regenerate them when a change alters what they show, and add one when a phase brings something worth showing.
 
 ### Open
 

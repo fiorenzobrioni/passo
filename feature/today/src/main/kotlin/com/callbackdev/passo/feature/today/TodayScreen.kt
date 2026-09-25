@@ -497,6 +497,7 @@ private fun TrendCard(state: TodayUiState, format: MeasureFormatter) {
                 hourLabels = hours,
                 description = description,
                 readout = { point -> Readout(point, overview.steps, overview.usualNow, format) },
+                modifier = Modifier.testTag(TodayTags.CHART),
             )
             Text(
                 text = if (trend.usual != null) {
@@ -702,5 +703,6 @@ object TodayTags {
     const val HEADLINE = "today_headline"
     const val STATUS = "today_status"
     const val TREND = "today_trend"
+    const val CHART = "today_chart"
     const val METRICS = "today_metrics"
 }

@@ -36,6 +36,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -393,7 +394,12 @@ private fun ProfilePage(state: OnboardingState, actions: OnboardingActions) {
 
 @Composable
 private fun SexChip(current: Sex?, value: Sex?, label: Int, onSelect: (Sex?) -> Unit) {
-    FilterChip(selected = current == value, onClick = { onSelect(value) }, label = { Text(stringResource(label)) })
+    FilterChip(
+        selected = current == value,
+        onClick = { onSelect(value) },
+        label = { Text(stringResource(label)) },
+        colors = chipColors(),
+    )
 }
 
 /** A picker on its own ground: what it is, then the stepper. */
@@ -466,6 +472,7 @@ private fun GoalPage(state: OnboardingState, actions: OnboardingActions) {
                 selected = state.goalSteps == preset,
                 onClick = { actions.setGoal(preset) },
                 label = { Text(format.steps(preset)) },
+                colors = chipColors(),
             )
         }
     }
@@ -484,6 +491,13 @@ private fun GoalPage(state: OnboardingState, actions: OnboardingActions) {
         )
     }
 }
+
+/** A picked chip in the accent, like the stepper beside it (Material's default is the amber secondary). */
+@Composable
+private fun chipColors() = FilterChipDefaults.filterChipColors(
+    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+    selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+)
 
 private val GOAL_PRESETS = listOf(5_000, 8_000, 10_000, 12_000)
 

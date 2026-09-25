@@ -18,9 +18,38 @@ Free, no account, no ads, no tracking, and no network permission at all.
 </div>
 
 > [!NOTE]
-> Passo is in early development (Phase 1 of [the plan](./PLANNING.md): the step tracking
-> engine, which counts in the background but has no real screens yet and has not been field
-> tested on a phone). There is no usable release yet.
+> Passo is in early development: Phases 0 to 3 of [the plan](./PLANNING.md) are built (the
+> step tracking engine, the metrics, the Today screen, the first run and Settings). It has run
+> on a phone, but the multi-day field test of the tracking engine is still to do, and there is
+> no usable release yet.
+
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/today.png" width="250" alt="Today: 7,855 of 10,000 steps, 1,484 ahead of the usual pace, with the day's chart"></td>
+    <td align="center"><img src="docs/screenshots/today-chart.png" width="250" alt="The day's chart read with a finger at 12:55 PM"></td>
+    <td align="center"><img src="docs/screenshots/today-goal-dark.png" width="250" alt="Today in the dark theme: 10,772 steps, goal reached at 5:51 PM"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Today.</b> The ring, with a notch where a usual Thursday stands by now, and one sentence on how the day is going.</td>
+    <td align="center"><b>Your day.</b> Touch the chart to read it at any minute, against a usual day.</td>
+    <td align="center"><b>Goal reached,</b> in the dark theme.</td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/onboarding-welcome.png" width="250" alt="The first run: welcome"></td>
+    <td align="center"><img src="docs/screenshots/onboarding-goal.png" width="250" alt="The first run: the daily goal, with what it means in distance and time"></td>
+    <td align="center"><img src="docs/screenshots/settings-appearance.png" width="250" alt="Settings: appearance, with a live preview"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>First run.</b> Under a minute from install to counting.</td>
+    <td align="center"><b>A goal</b> that says what it means in kilometres and minutes.</td>
+    <td align="center"><b>Settings,</b> with the same palettes and typefaces as Chiaro.</td>
+  </tr>
+</table>
+
+Drawn from the app's own screens with realistic sample days (the phone's status bar is not in
+the picture). They are regenerated with `./gradlew test -PupdateScreenshots`.
 
 ## What Passo is
 
@@ -34,21 +63,29 @@ and the walks you took, recognized on their own.
 It keeps counting across reboots and full shutdowns without you ever opening it, and a
 resizable home-screen widget answers "how am I doing today?" at a glance.
 
-## What it will do (v1.0)
+## What it does now
 
-- **Today**: steps and a progress ring toward your daily goal, the day's distance, active
-  calories, active and brisk minutes, average cadence, and a small line of the day so far
-  against your typical day for that weekday ("+1,240 vs usual").
+- **Today**: steps and a progress ring toward your daily goal, with a notch where a usual day
+  of the same weekday stands at this hour; one sentence on how the day is going and what is
+  left to walk; a chart of the day you can read with a finger; distance, active calories,
+  active and brisk minutes and average cadence, each with a line that says what it means. It
+  counts live while it is open.
+- **A short first run**: welcome, an optional profile, a goal, the one permission it needs,
+  and a battery tip on the phones whose battery manager stops background apps.
+- **Settings**: height, weight and step length, the goal, metric or imperial units, theme,
+  palette and typeface, language, and a pause.
+
+## What is coming (v1.0)
+
 - **Walks, found for you**: continuous stretches of walking or running are recognized from the
   minute-by-minute steps ("10:12 to 10:47, 3,420 steps, 2.6 km, 98 spm"), with no extra
   sensor and no background work.
 - **History and insights**: the day hour by hour, week, month and year charts with the goal
   line, a calendar of goal days, streaks, personal records and lifetime distance.
 - **Goals**: an optional "goal reached" notification, an evening nudge, a weekly summary.
-- **Widget**: resizable from 1x1 to 4x2, with today's steps by hour at the largest size, in
-  your Material You colors.
+- **Widget**: resizable from 1x1 to 4x2, with today's steps by hour at the largest size.
 - **Everywhere else**: an ongoing notification with today's steps, a Quick Settings tile,
-  export to CSV and JSON, import from a backup, metric and imperial units, English and Italian.
+  export to CSV and JSON, import from a backup.
 
 Distance and calories are **estimates**, and Passo says so. The formulas are documented and
 you can tune them: height, weight, your own step length, measured with a short calibration

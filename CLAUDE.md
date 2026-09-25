@@ -114,6 +114,15 @@ means, estimates that say so, no dead tab and no switch for a feature that has n
 Icons are `PassoIcons`, drawn in code. The Compose UI tests write screenshots to each module's
 `build/screenshots`: look at them after changing a screen.
 
+**README screenshots** (`docs/screenshots/`, shown in the root `README.md`): drawn by the
+`ReadmeScreenshots` test classes of the feature modules, from realistic sample data, in English,
+and only on request: `./gradlew test -PupdateScreenshots` (plus the mirror init script in the
+sandbox). Two standing rules (owner's):
+- **Regenerate them** whenever a change alters what an existing one shows, and look at them
+  before committing.
+- **Add one** when a phase brings something worth showing (a new screen, the widget), with its
+  caption in the README's table; keep the set small, the meaningful views only.
+
 ## Signing and CI
 
 - **Debug signing**: `keystore/debug.keystore` is intentionally committed (alias `passo-debug`,
