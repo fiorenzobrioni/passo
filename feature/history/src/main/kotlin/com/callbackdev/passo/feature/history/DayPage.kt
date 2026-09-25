@@ -167,7 +167,7 @@ private fun DayMetrics(detail: DayDetail, format: MeasureFormatter) {
                 label = stringResource(R.string.history_metric_distance),
                 value = distance.annotated(UnitStyle),
                 spokenValue = distance.text(),
-                meaning = stringResource(R.string.history_metric_distance_meaning),
+                meaning = stringResource(R.string.history_metric_distance_day_meaning),
                 modifier = Modifier.weight(1f),
             )
             val energy = format.energy(detail.activeKcal)

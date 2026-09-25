@@ -95,7 +95,7 @@
 
     <string name="settings_privacy">Privacy</string>
     <string name="settings_privacy_headline">No account, no ads, no tracking.</string>
-    <string name="settings_privacy_body">Passo has no internet permission at all: your steps, your profile and your settings stay on the phone and never leave it.</string>
+    <string name="settings_privacy_body">Passo has no internet permission at all, so it cannot send your steps, your profile or your settings anywhere: they stay on the phone. Only Android’s own backup, if you turned it on, keeps a copy in your Google account, encrypted with your screen lock, to bring them to a new phone.</string>
 
     <string name="settings_group_about">About</string>
     <string name="settings_version">Version</string>

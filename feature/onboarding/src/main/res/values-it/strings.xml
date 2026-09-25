@@ -14,7 +14,7 @@
     <string name="onboarding_welcome_counts_title">Conta da solo</string>
     <string name="onboarding_welcome_counts_body">Con il contapassi del telefono, in background, e riparte da solo dopo un riavvio.</string>
     <string name="onboarding_welcome_private_title">Resta sul telefono</string>
-    <string name="onboarding_welcome_private_body">Niente account e nessun permesso di accesso a internet: i tuoi passi non lasciano mai il telefono.</string>
+    <string name="onboarding_welcome_private_body">Niente account e nessun permesso di accesso a internet: Passo tiene i tuoi passi sul telefono e non li manda da nessuna parte.</string>
     <string name="onboarding_welcome_battery_title">Leggero sulla batteria</string>
     <string name="onboarding_welcome_battery_body">Il conteggio lo fa un chip a basso consumo; Passo sveglia il telefono solo quando serve.</string>
 

@@ -36,7 +36,6 @@
     </plurals>
 
     <!-- The streak -->
-    <string name="insights_streak_title">Streak</string>
     <plurals name="insights_streak_days">
         <item quantity="one">day in a row at your goal</item>
         <item quantity="other">days in a row at your goal</item>
@@ -52,7 +51,6 @@
     <string name="insights_day_not_met">%1$s: goal not met</string>
     <string name="insights_day_today_open">%1$s: under way</string>
     <string name="insights_day_not_counted">%1$s: not counted</string>
-    <string name="insights_streak_spoken">%1$s. %2$s</string>
 
     <!-- Records -->
     <string name="insights_group_records">Records</string>
@@ -83,7 +81,10 @@
     </plurals>
     <string name="insights_vs_before_more">%1$s · %2$s more than the 7 days before</string>
     <string name="insights_vs_before_less">%1$s · %2$s fewer than the 7 days before</string>
-    <string name="insights_not_yet">After %1$d complete days</string>
+    <plurals name="insights_not_yet">
+        <item quantity="one">After %1$d complete day</item>
+        <item quantity="other">After %1$d complete days</item>
+    </plurals>
     <string name="insights_averages_caption">Today is left out of the 7 and 30 days until it is over; a day with no steps counts as zero.</string>
 
     <!-- Totals -->

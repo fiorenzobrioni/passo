@@ -121,6 +121,7 @@
     <string name="history_metric_steps">Passi</string>
     <string name="history_metric_distance">Distanza</string>
     <string name="history_metric_distance_meaning">Stima, dalla lunghezza del passo di ogni giorno</string>
+    <string name="history_metric_distance_day_meaning">Stima, dalla lunghezza del tuo passo</string>
     <string name="history_metric_calories">Calorie attive</string>
     <string name="history_metric_calories_meaning">Stima: solo il movimento, oltre al consumo a riposo</string>
     <string name="history_metric_active">Minuti attivi</string>

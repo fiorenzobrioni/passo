@@ -256,9 +256,14 @@ fun BarChart(
             if (spans.isNotEmpty()) {
                 val laneY = plotBottom + LANE_DP.dp.toPx() / 2 + 1.dp.toPx()
                 val thickness = 4.dp.toPx()
+                // Never shorter than a bar is wide: a 15-minute walk is a quarter of an hour's
+                // slot, and a mark that small would not be seen.
+                val minimum = maxOf(barWidth, thickness * 2)
                 for (span in spans) {
-                    val left = span.start * slot
-                    val right = maxOf(span.end * slot, left + thickness)
+                    val middle = (span.start + span.end) / 2 * slot
+                    val half = maxOf((span.end - span.start) * slot, minimum) / 2
+                    val left = (middle - half).coerceAtLeast(0f)
+                    val right = (middle + half).coerceAtMost(plotW)
                     drawRoundRect(
                         colors.tertiary,
                         Offset(left, laneY - thickness / 2),

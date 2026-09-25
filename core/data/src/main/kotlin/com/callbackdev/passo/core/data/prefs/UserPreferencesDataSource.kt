@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.callbackdev.passo.core.domain.metrics.sanitized
 import com.callbackdev.passo.core.model.AppFont
@@ -73,6 +74,19 @@ constructor(private val dataStore: DataStore<Preferences>) {
             updated = new
         }
         return updated
+    }
+
+    /**
+     * The installation the stored tracker state belongs to: the first-install time of the app
+     * that wrote it. It lives here, next to the settings, so that a backup carries it together
+     * with the database it describes; null until a build that knows about it has run.
+     */
+    suspend fun trackerInstallation(): Long? = dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .first()[Keys.TRACKER_INSTALLATION]
+
+    suspend fun setTrackerInstallation(installedAtMillis: Long) {
+        dataStore.edit { it[Keys.TRACKER_INSTALLATION] = installedAtMillis }
     }
 
     private fun readProfile(prefs: Preferences) = Profile(
@@ -181,6 +195,8 @@ constructor(private val dataStore: DataStore<Preferences>) {
         val MIN_WALK_MINUTES = intPreferencesKey("min_walk_minutes")
         val TYPICAL_DAY_LINE = booleanPreferencesKey("typical_day_line")
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+
+        val TRACKER_INSTALLATION = longPreferencesKey("tracker_installation")
     }
 
     companion object {

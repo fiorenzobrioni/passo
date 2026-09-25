@@ -453,7 +453,7 @@ private fun Averages(state: InsightsUiState, format: MeasureFormatter) {
             AverageRow(
                 label = stringResource(R.string.insights_average_7),
                 value = when {
-                    last7 == null -> stringResource(R.string.insights_not_yet, 7)
+                    last7 == null -> pluralStringResource(R.plurals.insights_not_yet, 7, 7)
 
                     previous == null || previous == 0 || last7 == previous -> aDay(last7)
 
@@ -473,7 +473,10 @@ private fun Averages(state: InsightsUiState, format: MeasureFormatter) {
             GroupDivider()
             AverageRow(
                 label = stringResource(R.string.insights_average_30),
-                value = insights.averageLast30?.let { aDay(it) } ?: stringResource(R.string.insights_not_yet, 30),
+                value =
+                insights.averageLast30?.let {
+                    aDay(it)
+                } ?: pluralStringResource(R.plurals.insights_not_yet, 30, 30),
             )
             val first = insights.firstDay
             val all = insights.averageAll

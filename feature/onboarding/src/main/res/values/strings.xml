@@ -15,7 +15,7 @@
     <string name="onboarding_welcome_counts_title">It counts by itself</string>
     <string name="onboarding_welcome_counts_body">With your phone’s own step counter, in the background, and again by itself after a restart.</string>
     <string name="onboarding_welcome_private_title">It stays on your phone</string>
-    <string name="onboarding_welcome_private_body">No account and no internet permission: your steps never leave the phone.</string>
+    <string name="onboarding_welcome_private_body">No account and no internet permission: Passo keeps your steps on the phone and sends them nowhere.</string>
     <string name="onboarding_welcome_battery_title">It is light on the battery</string>
     <string name="onboarding_welcome_battery_body">The counting is done by a low-power chip; Passo wakes the phone only when there is a reason to.</string>
 

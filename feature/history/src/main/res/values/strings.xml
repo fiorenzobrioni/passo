@@ -120,6 +120,7 @@
     <string name="history_metric_steps">Steps</string>
     <string name="history_metric_distance">Distance</string>
     <string name="history_metric_distance_meaning">Estimate, from the step length of each day</string>
+    <string name="history_metric_distance_day_meaning">Estimate, from your step length</string>
     <string name="history_metric_calories">Active calories</string>
     <string name="history_metric_calories_meaning">Estimate: movement only, on top of your resting burn</string>
     <string name="history_metric_active">Active minutes</string>

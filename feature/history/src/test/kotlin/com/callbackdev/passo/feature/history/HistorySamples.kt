@@ -20,7 +20,7 @@ import java.util.Random
 internal object HistorySamples {
     val today: LocalDate = LocalDate.of(2026, 9, 24) // a Thursday
     val profile = Profile(heightMeters = 1.78, weightKg = 74.0)
-    const val GOAL = 8_000
+    const val GOAL = 10_000
     const val NOW_MINUTE = 15 * 60 + 40
 
     fun minutes(date: LocalDate, until: Int = 24 * 60): List<DayMinute> {

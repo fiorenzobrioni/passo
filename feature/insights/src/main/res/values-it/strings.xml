@@ -38,8 +38,6 @@
         <item quantity="many">Nei tuoi primi %1$d giorni. I confronti partono dopo due settimane.</item>
         <item quantity="other">Nei tuoi primi %1$d giorni. I confronti partono dopo due settimane.</item>
     </plurals>
-
-    <string name="insights_streak_title">Serie</string>
     <plurals name="insights_streak_days">
         <item quantity="one">giorno di fila all’obiettivo</item>
         <item quantity="many">giorni di fila all’obiettivo</item>
@@ -57,7 +55,6 @@
     <string name="insights_day_not_met">%1$s: obiettivo non raggiunto</string>
     <string name="insights_day_today_open">%1$s: in corso</string>
     <string name="insights_day_not_counted">%1$s: non contato</string>
-    <string name="insights_streak_spoken">%1$s. %2$s</string>
 
     <string name="insights_group_records">Record</string>
     <string name="insights_record_day">Giorno migliore</string>
@@ -88,7 +85,11 @@
     </plurals>
     <string name="insights_vs_before_more">%1$s · %2$s in più dei 7 giorni prima</string>
     <string name="insights_vs_before_less">%1$s · %2$s in meno dei 7 giorni prima</string>
-    <string name="insights_not_yet">Dopo %1$d giorni completi</string>
+    <plurals name="insights_not_yet">
+        <item quantity="one">Dopo %1$d giorno completo</item>
+        <item quantity="many">Dopo %1$d giorni completi</item>
+        <item quantity="other">Dopo %1$d giorni completi</item>
+    </plurals>
     <string name="insights_averages_caption">Oggi resta fuori dai 7 e dai 30 giorni finché non è finito; un giorno senza passi conta come zero.</string>
 
     <string name="insights_group_totals">Dal %1$s</string>

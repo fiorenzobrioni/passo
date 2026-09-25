@@ -375,6 +375,7 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
 | `FOREGROUND_SERVICE_HEALTH` | Normal | Foreground service of type `health` |
 | `RECEIVE_BOOT_COMPLETED` | Normal | Restart tracking after boot |
 | `WAKE_LOCK`, `ACCESS_NETWORK_STATE` | Normal | Brought by WorkManager, which Glance runs its widget sessions on (Phase 4): the wake lock is held by the job while a card is drawn; the network state lets nothing leave the phone without `INTERNET`. Passo's own code uses neither |
+| `android:allowBackup="true"` + `dataExtractionRules` | Manifest | Android's backup and device transfer carry the step history, the profile and the settings, an allowlist (`docs/adr/0007-backup.md`). No permission: Android sends the copy, not Passo |
 | `<uses-feature android:name="android.hardware.sensor.stepcounter" android:required="true"/>` | Feature | Documents the requirement; filters devices on a future Play listing. It does not block APK installs, so the app also checks the sensor at runtime |
 
 **Forbidden:** `INTERNET`, `ACCESS_*_LOCATION`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`, `HIGH_SAMPLING_RATE_SENSORS`, `BODY_SENSORS`.
@@ -508,19 +509,33 @@ Two widgets, in Chiaro's dress (owner's request): «At a glance» and «In words
 
 ### Phase 5 — History and insights
 
-- [ ] `WalkDetector` in `core:domain` with unit tests (§6.1): gaps bridged, short runs discarded, walk vs run, midnight split, empty day
-- [ ] Day detail: hourly bar chart, walks marked on the chart, list of walks with their metrics
-- [ ] Settings: walk detection toggle and minimum duration
-- [ ] Week, month and year charts with the goal line; swipe or paging between periods
-- [ ] Calendar heatmap of goal completion
-- [ ] Insights: averages, totals, lifetime distance, records, streaks
-- [ ] Chart components in `core:designsystem`, built with Compose `Canvas`: bar chart (hourly, weekly, monthly, yearly) with goal line, calendar heatmap. Shared axis, label and accessibility helpers (each chart exposes a spoken summary and per-bar semantics)
+Built in Chiaro's design language, like Phase 3 (owner's request: a clean implementation, above all in UI and UX); decisions in `docs/adr/0006-history-and-insights.md`.
+
+- [x] `WalkDetector` in `core:domain` with unit tests (§6.1): gaps bridged, short runs discarded, walk vs run, midnight split, empty day
+  - Plus §6.1's optional MIXED type (walking and running minutes each at least 30% of the walk). The average cadence is over the whole walk, pauses included ("35 minutes, 3,420 steps, 98 spm").
+- [x] Day detail: hourly bar chart, walks marked on the chart, list of walks with their metrics
+  - The walks are shaded over their minutes and marked in a lane under the axis; the list gives time, length, type, steps, distance, cadence and calories. A past day shows the estimates it froze with (§5). Today's walks are also listed on Today.
+- [x] Settings: walk detection toggle and minimum duration
+  - Plus the first day of the week (follow the phone, Monday, Sunday, Saturday), which History's weeks and the week record now use.
+- [x] Week, month and year charts with the goal line; swipe or paging between periods
+  - A segmented choice of scale; periods paged with a swipe or the arrows, from the first recorded day to today, with "Latest" to come back. The goal line steps with each day's own goal; a year's bars are each month's average day. A bar opens its day (or, in a year, its month).
+- [x] Calendar heatmap of goal completion
+  - In the month page: how close each day came to its own goal in one hue, a met day in the goal's color with a check, today ringed; a day opens.
+- [x] Insights: averages, totals, lifetime distance, records, streaks
+  - One sentence first (`InsightsHeadline`: best day today, a running streak, the last week against the one before, or the average so far); the streak with the last seven days; best day, week, month and longest streak, each opening in History; averages over the last 7 and 30 complete days and since the first; totals.
+- [x] Chart components in `core:designsystem`, built with Compose `Canvas`: bar chart (hourly, weekly, monthly, yearly) with goal line, calendar heatmap. Shared axis, label and accessibility helpers (each chart exposes a spoken summary and per-bar semantics)
+  - `BarChart`, `CalendarHeatmap` (composable cells rather than a canvas, so each day is a real touch target and node), `WalkList`, shared date formatting (`format/Dates.kt`).
+- [x] Navigation shell, completed: the bottom bar with Today, History and Insights (Phase 3's deviation), Material's fade through between tabs, Back to Today.
 
 **Acceptance:**
-- The year view with 365 days of data renders in under 16 ms per frame on a mid-range device.
-- Records and streak tests pass, including goal changes across days.
-- Walks detected on field-test days match what the user remembers (start and end within a few minutes).
-- With walk detection off, no walk UI appears anywhere.
+- [ ] The year view with 365 days of data renders in under 16 ms per frame on a mid-range device.
+  - *Pending (owner, on a device).* By construction it is twelve bars from at most 366 rows, computed once per change off the main thread.
+- [x] Records and streak tests pass, including goal changes across days.
+  - `InsightsTest`, `PeriodOverviewTest`.
+- [ ] Walks detected on field-test days match what the user remembers (start and end within a few minutes).
+  - *Pending (owner, field test).*
+- [x] With walk detection off, no walk UI appears anywhere.
+  - Walks are null all the way to the screen when it is off (`TodayUiState.walks`, `DayDetail.walks`); `HistoryScreenTest` checks the day page.
 
 ### Phase 6 — Goals and system surfaces
 
@@ -537,7 +552,8 @@ Two widgets, in Chiaro's dress (owner's request): «At a glance» and «In words
 ### Phase 7 — Data, calibration and polish
 
 - [ ] Export to CSV and JSON, import from JSON (Storage Access Framework)
-- [ ] `data_extraction_rules.xml` and `full_backup_content` for Auto Backup and device transfer
+- [x] `data_extraction_rules.xml` and `full_backup_content` for Auto Backup and device transfer
+  - Brought forward to Phase 5 (owner's request), `docs/adr/0007-backup.md`. `full_backup_content` is not needed: it is read only below Android 12, and minSdk is 34. Still to verify on a device with `bmgr`, together with the export round trip.
 - [ ] Step length calibration wizard (walk a known distance, start/stop, compute and save)
 - [ ] Accessibility pass (TalkBack, font scale 200%, contrast, touch targets)
 - [ ] Adaptive layouts for tablets and foldables
@@ -588,7 +604,7 @@ Kept open, not planned yet. Notes to avoid closing the door:
 
 - **Unit (JVM):** `StepAccountant`, calculators, streaks and records, formatting. Use a fake clock and system snapshot. This is where most of the test effort goes.
 - **Robolectric:** Room DAOs and transactions, receivers, the notification builder.
-- **Compose UI tests:** onboarding, Today, Settings.
+- **Compose UI tests:** onboarding, Today, Settings, History, Insights.
 - **Glance:** unit tests for the layout chosen at each size.
 - **Manual device protocol** (`docs/testing/device-protocol.md`):
   - reboot
@@ -707,8 +723,13 @@ Include:
 - **Glance 1.2.0 on WorkManager 2.10.5** (device report, 25 Sep 2026: both cards stuck on Glance's loading spinner). Glance asks only for WorkManager 2.7.1 (2021), which is what resolved; it is now pinned to Chiaro's 2.10.5, proven under Glance widgets on the owner's phone, and with it both cards draw there (confirmed by the owner, same day). Glance stays on the latest stable, newer than Chiaro's 1.1.1 (owner's choice). WorkManager's `WAKE_LOCK` and `ACCESS_NETWORK_STATE` stay as it declares them, as in Chiaro (§10).
 - **A widget never waits forever**: the read behind a card is bounded (10 s) and cannot throw; a failure is logged under `PassoWidget` and drawn as "Today's steps can't be read right now", and the next repaint tries again.
 
+- **Phase 5: History, Insights and walks** (`docs/adr/0006-history-and-insights.md`): everything computed on read in `:core:domain`, only while a screen is visible; each day measured against its own goal; a counted day is any day from the first recorded one to today, zero if nothing was recorded; averages over complete days; past days with their frozen estimates, walks priced with the current profile; today live in every tab (`byDayWithLive`).
+- **One bar chart for hours, days and months** (`BarChart`): the world's scale, the goal as a line that steps with each day's goal, a day to come drawn as nothing and a day of zero as a stub, tap and scrub like Today's chart, one screen-reader node per bar.
+- **The bottom bar** (Today, History, Insights), with Material's fade through and Back to Today; Settings from each tab's gear. History pages from the first recorded day to today; its charts and Insights' records are the way down to a month or a day.
+- **Walk types**: a run from an average 140 spm over the walk; mixed when walking and running minutes are each at least 30% of it (§6.1's refinement, `MIXED_WALK_SHARE`).
+- **Backup, decided** (owner's question, `docs/adr/0007-backup.md`): `allowBackup` was already true by default, backing up everything. Now declared, with an allowlist (the database and the settings file) for cloud backup and device transfer alike. The tracker state travels inside the database, and the service drops it on the first start of an installation that did not write it (`TrackingRepository.adoptTrackerState`, keyed on the app's first-install time stored with the settings), so a restore never adds another phone's counter. The no-`INTERNET` rule is unchanged (Android sends the copy); the app's wording now says Passo "sends nothing", and Settings says what Android's backup does. Auto Backup skips an app with a running foreground service, so the cloud copy is taken mostly while counting is paused; `backupInForeground` was rejected, since it would let the backup kill the service.
+
 ### Open
 
-- Backup rules (Phase 7): `tracker_state` (boot count, last counter value) describes one device's sensor and must not be restored onto another, or the first sample there would be read against the wrong baseline. Decide the allowlist with that in mind.
 - Walk detection thresholds (60 spm per minute, 2-minute gaps, 10-minute default minimum): tune after the Phase 5 field test.
 - Should a 7-day mini chart be offered in the 4x2 widget as an alternative to today's hourly bars (widget configuration)? Now a natural option on «At a glance»'s settings screen, once Phase 5 has the week.

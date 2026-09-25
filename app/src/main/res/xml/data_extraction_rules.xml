@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  What Android's backup and device transfer carry, decided rather than inherited (Phase 5,
+  owner's request; docs/adr/0007-backup.md).
+
+  Without this file the platform backs up everything the app owns, which is the default and
+  not a choice. Passo's data is worth carrying: the step history is the one thing a new phone
+  cannot rebuild. So an allowlist:
+
+  - the database (`passo.db` and its write-ahead log): the steps minute by minute, the daily
+    summaries, the tracker state and the log. The tracker state describes one phone's counter
+    and would be wrong on another; it travels with the rest because it cannot be cut out of
+    the file, and the service drops it on the first start of an installation that did not
+    write it (`TrackingRepository.adoptTrackerState`), so the first sample there is a
+    baseline, as on a first run.
+  - `files/datastore/settings.preferences_pb`: the profile, the goal, the settings, and the
+    installation the tracker state belongs to, which is what makes that check possible.
+
+  Left out by not being named: the widgets' looks (keyed by widget ids, which a restore
+  renews), caches, and `no_backup`.
+
+  The same list twice on purpose: `<cloud-backup>` is the copy Android sends to Google Drive,
+  end-to-end encrypted with the phone's PIN, pattern or password since Android 9, and only if
+  the reader turned backup on; `<device-transfer>` is the direct phone-to-phone move. Passo
+  sends neither itself and needs no permission for them: Android does the moving.
+
+  NOT `android:allowBackup="false"`: on Android 12 and later some makers' phones still move the
+  app's data in a device transfer anyway. An instruction whose effect depends on who made the
+  phone is not a decision (Chiaro's reasoning, the same here).
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="database" path="passo.db" />
+        <include domain="database" path="passo.db-wal" />
+        <include domain="file" path="datastore/settings.preferences_pb" />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="database" path="passo.db" />
+        <include domain="database" path="passo.db-wal" />
+        <include domain="file" path="datastore/settings.preferences_pb" />
+    </device-transfer>
+</data-extraction-rules>

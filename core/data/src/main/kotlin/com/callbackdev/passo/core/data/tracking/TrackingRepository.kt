@@ -29,6 +29,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
+ * The tracker state a service may start from, and whether one was dropped as another
+ * installation's (restored from a backup).
+ */
+data class TrackerAdoption(val state: TrackerState?, val restored: Boolean)
+
+/**
  * The step data as the tracking engine and the screens see it, and the one writer of the daily
  * summaries (PLANNING.md §5).
  *
@@ -55,6 +61,32 @@ constructor(
             lastSampleElapsedNanos = it.lastSampleElapsedNanos,
             lastSampleWallMillis = it.lastSampleWallMillis,
         )
+    }
+
+    /**
+     * The tracker state, if this installation of the app wrote it; forgotten otherwise.
+     *
+     * Android's backup can restore the database onto another phone, or onto this one after a
+     * reinstall. The step history is the reader's and is welcome there; the tracker state is
+     * not: it is where one sensor's counter stood in one boot session, and read against another
+     * counter the first sample would add every step since that phone's boot, or since the
+     * reinstall. So the state carries the installation it belongs to ([installedAtMillis], the
+     * app's first-install time, which a restore or a reinstall renews and an update keeps), and
+     * a state from another one is dropped: the next sample is a baseline, as on a first run.
+     * Before the installation was recorded (a build older than this), a state written before
+     * this installation existed cannot be its own either.
+     */
+    suspend fun adoptTrackerState(installedAtMillis: Long): TrackerAdoption = summaryLock.withLock {
+        val owner = preferences.trackerInstallation()
+        val row = dao.trackerState()
+        val foreign = when {
+            row == null -> false
+            owner != null -> owner != installedAtMillis
+            else -> row.updatedAtMillis < installedAtMillis
+        }
+        if (foreign) dao.deleteTrackerState()
+        if (owner != installedAtMillis) preferences.setTrackerInstallation(installedAtMillis)
+        TrackerAdoption(state = if (foreign) null else trackerState(), restored = foreign)
     }
 
     /**

@@ -159,11 +159,18 @@ class StepTrackingService : Service() {
 
     private fun startTracking() {
         scope.launch {
-            val ledger = StepLedger(repository.trackerState())
+            // A state restored from a backup of another installation is not this counter's.
+            val adoption = repository.adoptTrackerState(installedAtMillis())
+            val ledger = StepLedger(adoption.state)
             this@StepTrackingService.ledger = ledger
             ledger.note(
                 DiagnosticsEvent(System.currentTimeMillis(), DiagnosticsType.SERVICE_START, sensorSource.describe()),
             )
+            if (adoption.restored) {
+                ledger.note(
+                    DiagnosticsEvent(System.currentTimeMillis(), DiagnosticsType.RESTORED, "tracker state dropped"),
+                )
+            }
             registerReceivers()
             launch { sensorSource.readings.collect(::onReading) }
             persist()
@@ -172,6 +179,9 @@ class StepTrackingService : Service() {
             onScreenChanged(powerManager.isInteractive)
         }
     }
+
+    /** When this installation of the app began: renewed by a reinstall or a restore, kept by an update. */
+    private fun installedAtMillis(): Long = packageManager.getPackageInfo(packageName, 0).firstInstallTime
 
     private fun onReading(reading: SensorReading) {
         when (reading) {

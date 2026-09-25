@@ -60,13 +60,13 @@ that does not match it.
 | Module | Kind | Holds |
 |---|---|---|
 | `:core:model` | pure Kotlin/JVM | data classes shared by everything |
-| `:core:domain` | pure Kotlin/JVM | `StepAccountant`, metric calculators, streaks, records, `WalkDetector`, `TypicalDayCalculator` |
+| `:core:domain` | pure Kotlin/JVM | `StepAccountant`, metric calculators, `WalkDetector`, `TypicalDayCalculator`, `PeriodOverview`, `Insights` (streaks, records, averages) |
 | `:core:data` | Android library | Room (steps, tracker state), DataStore (settings, profile), repositories exposing `Flow` |
 | `:core:tracking` | Android library | `StepTrackingService` (FGS type `health`), sensor source, receivers, ongoing notification |
-| `:core:designsystem` | Android library | M3 theme, typography, shared components, the Canvas charts |
+| `:core:designsystem` | Android library | M3 theme, typography, shared components, the Canvas charts (`DayTrendChart`, `BarChart`), `CalendarHeatmap`, `WalkList`, date formatting |
 | `:feature:*` | Android library | `today`, `history`, `insights`, `settings`, `onboarding` |
 | `:widget` | Android library | the two Glance widgets («At a glance», «In words»), their settings screen, the update coordinator |
-| `:app` | application | `Application`, `MainActivity`, navigation, DI entry points; wires everything |
+| `:app` | application | `Application`, `MainActivity`, navigation (the bottom bar: Today, History, Insights), DI entry points; wires everything |
 
 Rules: `:core:model` and `:core:domain` stay pure Kotlin/JVM; if a class there needs a `Context`
 or a `Resources`, it is in the wrong module. Feature modules depend on `core:*`, never on each
@@ -88,7 +88,13 @@ other. All business logic lives in `:core:domain`, with unit tests.
   edge case in PLANNING.md §4.6.
 - **Honest estimates.** Distance, calories and active time are shown as estimates; formulas
   live in `MetricsConstants.kt` with their sources.
-- **Past days are frozen.** A profile change never silently rewrites history.
+- **Past days are frozen.** A profile change never silently rewrites history. Every day is
+  measured against its own stored goal (streaks, records, the goal line).
+- **Backup is an allowlist** (`app/src/main/res/xml/data_extraction_rules.xml`,
+  `docs/adr/0007-backup.md`): the database and the settings file, nothing else. Android sends
+  the copy, so the no-`INTERNET` rule stands; say "Passo sends nothing", never "nothing leaves
+  the phone". A tracker state from another installation is never trusted
+  (`TrackingRepository.adoptTrackerState`).
 - **Every user-facing string is a resource, in English and Italian** (`values/`,
   `values-it/`), with plurals where counts appear. The app language follows the system
   per-app language picker (`locales_config.xml`).
