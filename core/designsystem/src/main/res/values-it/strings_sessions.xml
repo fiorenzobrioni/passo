@@ -65,4 +65,13 @@
     <string name="session_outcome_share">%1$s dell’obiettivo</string>
     <string name="session_estimated">Stima: %1$s · %2$s</string>
     <string name="session_spoken">%1$s dalle %2$s alle %3$s, %4$s: %5$s. %6$s</string>
+    <string name="session_card_pause">Pausa</string>
+    <string name="session_card_resume">Riprendi</string>
+    <string name="session_card_stop">Termina</string>
+    <string name="session_card_keep_going">Continua</string>
+    <string name="session_card_close">Chiudi</string>
+    <string name="session_card_under_way">In corso</string>
+    <string name="session_card_paused">In pausa</string>
+    <string name="session_card_progress_description">%1$s, %2$s</string>
+    <string name="session_card_when">%1$s · %2$s</string>
 </resources>

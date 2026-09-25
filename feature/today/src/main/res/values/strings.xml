@@ -94,4 +94,5 @@
     <string name="today_metric_cadence_brisk">A brisk pace: moderate intensity</string>
     <string name="today_metric_cadence_vigorous">A very brisk pace: vigorous intensity</string>
     <string name="today_metric_spoken">%1$s: %2$s. %3$s</string>
+    <string name="today_start_outing">Start an outing</string>
 </resources>

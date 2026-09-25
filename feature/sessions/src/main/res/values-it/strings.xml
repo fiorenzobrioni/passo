@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- La pagina Uscite e il suo editor (PLANNING.md §11 Fase 10). -->
+<resources>
+    <string name="sessions_title">Uscite</string>
+    <string name="sessions_back">Indietro</string>
+    <string name="sessions_intro">Un’uscita è una camminata con un obiettivo. Avviala e tieni il telefono in tasca: Passo ti avvisa lungo la strada, con una vibrazione che si capisce senza guardare.</string>
+    <string name="sessions_yours">Le tue uscite</string>
+    <string name="sessions_start">Inizia</string>
+    <string name="sessions_edit">Modifica</string>
+    <string name="sessions_new">Nuova uscita</string>
+    <string name="sessions_empty">Nessuna uscita salvata. Creane una: un obiettivo, un ritmo e i segnali che vuoi lungo la strada.</string>
+    <string name="sessions_estimate">Circa %1$s · %2$s, stima</string>
+    <string name="sessions_rest_now">Oggi ne mancano %1$s · %2$s, stima</string>
+    <string name="sessions_rest_met">L’obiettivo di oggi è raggiunto: non manca niente</string>
+    <string name="sessions_signals">Segnali a %1$s e all’obiettivo</string>
+    <string name="sessions_signals_goal_only">Un segnale all’obiettivo</string>
+    <string name="sessions_signals_vibrate">%1$s, con vibrazione</string>
+    <string name="sessions_live_busy">C’è un’uscita in corso: terminala per iniziarne un’altra.</string>
+    <string name="sessions_footer">Distanze e calorie sono stime dal tuo passo. Le vibrazioni seguono la modalità silenziosa del telefono.</string>
+    <string name="sessions_footer_late">Su questo telefono il contapassi non può risvegliarlo: a schermo spento, un segnale può arrivare con qualche minuto di ritardo.</string>
+    <string name="sessions_paused_title">Il conteggio è in pausa</string>
+    <string name="sessions_paused_body">Un’uscita si misura dai tuoi passi: riprendi il conteggio per iniziarne una.</string>
+    <string name="sessions_paused_action">Riprendi</string>
+    <string name="sessions_permission_title">Passo non sta contando</string>
+    <string name="sessions_permission_body">Senza il permesso per l’attività fisica non ci sono passi con cui misurare un’uscita. In Oggi trovi come ridarlo.</string>
+    <string name="sessions_blocked_title">I segnali non ti arriveranno</string>
+    <string name="sessions_blocked_channel_title">I segnali delle uscite sono spenti</string>
+    <string name="sessions_blocked_body">Android non mostra le notifiche di Passo, e le vibrazioni le seguono. L’obiettivo raggiunto lo vedi comunque in Oggi.</string>
+    <string name="sessions_blocked_action">Attiva</string>
+
+    <string name="editor_title_new">Nuova uscita</string>
+    <string name="editor_title_edit">Modifica uscita</string>
+    <string name="editor_save">Salva</string>
+    <string name="editor_delete">Elimina</string>
+    <string name="editor_name">Nome</string>
+    <string name="editor_name_note">Facoltativo: senza, prende il nome dal ritmo.</string>
+    <string name="editor_goal">Obiettivo</string>
+    <string name="editor_goal_steps">Passi</string>
+    <string name="editor_goal_distance">Distanza</string>
+    <string name="editor_goal_time">Tempo</string>
+    <string name="editor_goal_day">Giornata</string>
+    <string name="editor_time_note">Minuti in movimento: una sosta al semaforo non conta.</string>
+    <string name="editor_distance_note">Stimata dai tuoi passi e dalla lunghezza del tuo passo.</string>
+    <string name="editor_steps_note">Ogni passo conta, a qualsiasi ritmo.</string>
+    <string name="editor_day_note">I passi che mancano all’obiettivo di oggi quando parte.</string>
+    <string name="editor_day_now">In questo momento: %1$s.</string>
+    <string name="editor_day_met">L’obiettivo di oggi è già raggiunto.</string>
+    <string name="editor_less">Meno</string>
+    <string name="editor_more">Più</string>
+    <string name="editor_pace">Ritmo</string>
+    <string name="editor_estimate_title">Quanto fa</string>
+    <string name="editor_estimate">Circa %1$s e %2$s, con il tuo passo di %3$s.</string>
+    <string name="editor_estimate_run">Circa %1$s e %2$s, con il tuo passo di corsa di %3$s.</string>
+    <string name="editor_estimate_note">Una stima: l’uscita vera si misura dai tuoi passi.</string>
+    <string name="editor_signals">Segnali</string>
+    <string name="editor_signals_note">Lungo la strada alle quote che scegli, e sempre all’obiettivo, che conclude l’uscita.</string>
+    <string name="editor_signal_goal">Obiettivo</string>
+    <string name="editor_vibrate">Vibrazione</string>
+    <string name="editor_vibrate_note" formatted="false">Un impulso breve al 25%, due a metà, tre al 75%, uno lungo all’obiettivo. Seguono la modalità silenziosa del telefono.</string>
+    <string name="editor_try">Provali</string>
+    <string name="editor_try_goal">Obiettivo</string>
+    <string name="editor_discard_title">Scartare le modifiche?</string>
+    <string name="editor_discard_keep">Continua a modificare</string>
+    <string name="editor_discard">Scarta</string>
+    <string name="editor_delete_title">Eliminare questa uscita?</string>
+    <string name="editor_delete_body">Le uscite già fatte restano nello Storico.</string>
+    <string name="editor_cancel">Annulla</string>
+</resources>

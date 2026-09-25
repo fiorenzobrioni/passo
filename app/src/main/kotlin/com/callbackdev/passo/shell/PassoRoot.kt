@@ -46,6 +46,8 @@ import com.callbackdev.passo.feature.history.HistoryTarget
 import com.callbackdev.passo.feature.insights.InsightsRoute
 import com.callbackdev.passo.feature.onboarding.NoSensorScreen
 import com.callbackdev.passo.feature.onboarding.OnboardingRoute
+import com.callbackdev.passo.feature.sessions.PlanEditorRoute
+import com.callbackdev.passo.feature.sessions.SessionsRoute
 import com.callbackdev.passo.feature.settings.SettingsRoute
 import com.callbackdev.passo.feature.today.TodayRoute
 import kotlinx.serialization.Serializable
@@ -57,6 +59,14 @@ data object TabsKey : NavKey
 /** Settings, from each tab's gear. */
 @Serializable
 data object SettingsKey : NavKey
+
+/** The Outings page, from Today (PLANNING.md §11 Phase 10). */
+@Serializable
+data object SessionsKey : NavKey
+
+/** The editor of one outing; a new one when [planId] is null. */
+@Serializable
+data class PlanEditorKey(val planId: Long?) : NavKey
 
 /**
  * The shell (PLANNING.md §11 Phase 3). Three questions before a page: can this phone count at
@@ -89,10 +99,18 @@ private fun MainPages() {
             popTransitionSpec = { backward(reduced) },
             predictivePopTransitionSpec = { backward(reduced) },
             entryProvider = entryProvider {
-                entry<TabsKey> { Tabs(onOpenSettings = { backStack.add(SettingsKey) }) }
-                entry<SettingsKey> {
-                    SettingsRoute(onBack = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) })
+                val back = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) }
+                entry<TabsKey> {
+                    Tabs(
+                        onOpenSettings = { backStack.add(SettingsKey) },
+                        onOpenSessions = { backStack.add(SessionsKey) },
+                    )
                 }
+                entry<SettingsKey> { SettingsRoute(onBack = { back() }) }
+                entry<SessionsKey> {
+                    SessionsRoute(onBack = { back() }, onEdit = { backStack.add(PlanEditorKey(it)) })
+                }
+                entry<PlanEditorKey> { key -> PlanEditorRoute(planId = key.planId, onDone = { back() }) }
             },
         )
     }
@@ -111,7 +129,7 @@ private enum class Tab(@StringRes val label: Int, val icon: ImageVector) {
  * Insights opens its day, week or month in History.
  */
 @Composable
-private fun Tabs(onOpenSettings: () -> Unit) {
+private fun Tabs(onOpenSettings: () -> Unit, onOpenSessions: () -> Unit) {
     var tab by rememberSaveable { mutableStateOf(Tab.TODAY) }
     var historyTarget by remember { mutableStateOf<HistoryTarget?>(null) }
     val saveable = rememberSaveableStateHolder()
@@ -140,7 +158,11 @@ private fun Tabs(onOpenSettings: () -> Unit) {
         ) { current ->
             saveable.SaveableStateProvider(current.name) {
                 when (current) {
-                    Tab.TODAY -> TodayRoute(onOpenSettings = onOpenSettings, bottomPadding = bottom)
+                    Tab.TODAY -> TodayRoute(
+                        onOpenSettings = onOpenSettings,
+                        onOpenSessions = onOpenSessions,
+                        bottomPadding = bottom,
+                    )
 
                     Tab.HISTORY -> HistoryRoute(
                         onOpenSettings = onOpenSettings,

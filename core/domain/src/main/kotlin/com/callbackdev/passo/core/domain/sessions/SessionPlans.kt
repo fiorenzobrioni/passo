@@ -51,6 +51,45 @@ object SessionPlans {
         SessionGoalKind.REST_OF_DAY -> 0
     }
 
+    /** The editor's step for [kind]: 500 steps, half a kilometre or a quarter mile, 5 minutes. */
+    fun editorStep(kind: SessionGoalKind, imperial: Boolean): Double = when (kind) {
+        SessionGoalKind.STEPS -> SessionConstants.STEPS_STEP.toDouble()
+        SessionGoalKind.DISTANCE ->
+            if (imperial) SessionConstants.DISTANCE_STEP_IMPERIAL else SessionConstants.DISTANCE_STEP.toDouble()
+        SessionGoalKind.TIME -> SessionConstants.TIME_STEP.toDouble()
+        SessionGoalKind.REST_OF_DAY -> 1.0
+    }
+
+    /** [value] on the editor's steps for [kind] (quarter miles for [imperial] distances), in range. */
+    fun snapForEditor(kind: SessionGoalKind, value: Double, imperial: Boolean): Int {
+        if (kind == SessionGoalKind.REST_OF_DAY) return 0
+        val step = editorStep(kind, imperial)
+        val snapped = ((value / step).roundToInt() * step).roundToInt()
+        val range = range(kind)
+        // The lowest step inside the range, so the first press up from it is one step.
+        val floor = (ceil(range.first / step) * step).roundToInt()
+        return snapped.coerceIn(floor, range.last)
+    }
+
+    /** One step up or down from [value] in the editor. */
+    fun nudge(kind: SessionGoalKind, value: Int, up: Boolean, imperial: Boolean): Int {
+        val step = editorStep(kind, imperial)
+        return snapForEditor(kind, value + if (up) step else -step, imperial)
+    }
+
+    fun range(kind: SessionGoalKind): IntRange = when (kind) {
+        SessionGoalKind.STEPS -> SessionConstants.STEPS_RANGE
+        SessionGoalKind.DISTANCE -> SessionConstants.DISTANCE_RANGE
+        SessionGoalKind.TIME -> SessionConstants.TIME_RANGE
+        SessionGoalKind.REST_OF_DAY -> 0..0
+    }
+
+    /**
+     * [value] inside [kind]'s range, not snapped: a distance set in quarter miles stays one. What
+     * an outing starts with.
+     */
+    fun inRange(kind: SessionGoalKind, value: Int): Int = value.coerceIn(range(kind))
+
     /**
      * The value to show when the reader switches the goal to [kind]: the same outing, roughly,
      * in the new quantity, so switching from 20 minutes to steps offers about 2,000 steps.
@@ -106,7 +145,7 @@ object SessionPlans {
     ): Session? {
         val restOfDay = plan.goalKind == SessionGoalKind.REST_OF_DAY
         val kind = if (restOfDay) SessionGoalKind.STEPS else plan.goalKind
-        val value = if (restOfDay) restOfDay(todaySteps, dailyGoalSteps) else clampValue(kind, plan.goalValue)
+        val value = if (restOfDay) restOfDay(todaySteps, dailyGoalSteps) else inRange(kind, plan.goalValue)
         if (restOfDay && value < MIN_REST_OF_DAY_STEPS) return null
         return Session(
             planId = plan.id.takeIf { it != 0L },

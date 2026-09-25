@@ -50,6 +50,24 @@ class SessionPlansTest {
     }
 
     @Test
+    fun `the editor steps by half kilometres, or quarter miles for miles`() {
+        assertThat(SessionPlans.nudge(SessionGoalKind.DISTANCE, 1_500, up = true, imperial = false)).isEqualTo(2_000)
+        assertThat(SessionPlans.nudge(SessionGoalKind.DISTANCE, 500, up = false, imperial = false)).isEqualTo(500)
+        // One mile, then a mile and a quarter.
+        val mile = SessionPlans.snapForEditor(SessionGoalKind.DISTANCE, 1_609.0, imperial = true)
+        assertThat(mile).isEqualTo(1_609)
+        assertThat(SessionPlans.nudge(SessionGoalKind.DISTANCE, mile, up = true, imperial = true)).isEqualTo(2_012)
+        assertThat(SessionPlans.nudge(SessionGoalKind.TIME, 20, up = true, imperial = false)).isEqualTo(25)
+        assertThat(SessionPlans.nudge(SessionGoalKind.STEPS, 30_000, up = true, imperial = false)).isEqualTo(30_000)
+    }
+
+    @Test
+    fun `an outing starts with its plan's value as set, only kept in range`() {
+        val quarterMiles = plan(SessionGoalKind.DISTANCE, 2_012)
+        assertThat(SessionPlans.start(quarterMiles, 0, 0, 0, 8_000)!!.goalValue).isEqualTo(2_012)
+    }
+
+    @Test
     fun `an outing copies its plan's goal at the start`() {
         val source = plan(SessionGoalKind.TIME, 25).copy(
             name = "Park",

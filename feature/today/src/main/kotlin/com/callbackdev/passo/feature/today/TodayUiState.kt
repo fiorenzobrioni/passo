@@ -1,6 +1,8 @@
 package com.callbackdev.passo.feature.today
 
 import androidx.compose.runtime.Immutable
+import com.callbackdev.passo.core.data.sessions.LiveSessionState
+import com.callbackdev.passo.core.domain.sessions.Outing
 import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.walks.Walk
 import com.callbackdev.passo.core.model.UnitPreference
@@ -26,6 +28,9 @@ enum class TrackingStatus {
  * @property celebrate the goal is met and the ring has not bloomed for it yet today.
  * @property walks today's walks so far (PLANNING.md §6.1); null when walk detection is off, and
  *   then no walk appears on the screen.
+ * @property session the outing under way, paused, or just over and not yet put away: the card
+ *   under the date (PLANNING.md §11 Phase 10).
+ * @property outings today's walks and finished outings in one list, by start.
  */
 @Immutable
 data class TodayUiState(
@@ -38,4 +43,6 @@ data class TodayUiState(
     val firstDay: Boolean,
     val celebrate: Boolean,
     val walks: List<Walk>? = null,
+    val session: LiveSessionState? = null,
+    val outings: List<Outing> = emptyList(),
 )

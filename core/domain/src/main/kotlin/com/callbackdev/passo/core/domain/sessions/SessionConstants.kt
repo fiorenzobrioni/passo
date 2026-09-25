@@ -55,9 +55,13 @@ object SessionConstants {
     val STEPS_RANGE: IntRange = 500..30_000
     const val STEPS_STEP: Int = 500
 
-    /** Distances in metres: half a kilometre to a marathon, by half kilometres. */
-    val DISTANCE_RANGE: IntRange = 500..42_000
+    /**
+     * Distances in metres: about a quarter mile to a marathon, by half kilometres, or by quarter
+     * miles for a reader who walks in miles.
+     */
+    val DISTANCE_RANGE: IntRange = 400..42_200
     const val DISTANCE_STEP: Int = 500
+    const val DISTANCE_STEP_IMPERIAL: Double = 402.336
 
     /** Minutes in motion: five minutes to three hours, by five minutes. */
     val TIME_RANGE: IntRange = 5..180

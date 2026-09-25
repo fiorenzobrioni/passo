@@ -98,3 +98,31 @@ object GoalNotificationsAccess {
                 .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
         }
 }
+
+/**
+ * Whether an outing's signals can reach the reader (PLANNING.md §11 Phase 10): its goal
+ * notification and, with it, its vibrations, which follow the outings' channel. The Outings
+ * page says so when they cannot, with the page that fixes it.
+ */
+object SessionSignalsAccess {
+    fun block(context: Context): GoalNotificationsBlock {
+        val manager = NotificationManagerCompat.from(context)
+        if (!manager.areNotificationsEnabled()) return GoalNotificationsBlock.APP
+        val channel = manager.getNotificationChannel(SessionNotifications.CHANNEL_ID)
+        return if (channel?.importance == NotificationManager.IMPORTANCE_NONE) {
+            GoalNotificationsBlock.CHANNEL
+        } else {
+            GoalNotificationsBlock.NONE
+        }
+    }
+
+    fun settingsIntent(context: Context, block: GoalNotificationsBlock): Intent =
+        if (block == GoalNotificationsBlock.CHANNEL) {
+            Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                .putExtra(Settings.EXTRA_CHANNEL_ID, SessionNotifications.CHANNEL_ID)
+        } else {
+            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+        }
+}
