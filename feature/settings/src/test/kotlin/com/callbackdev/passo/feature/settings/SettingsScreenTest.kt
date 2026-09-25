@@ -130,7 +130,7 @@ class SettingsScreenTest {
         compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(SettingsTags.NOTIFICATION))
         compose.onNodeWithText("Notification").assertIsDisplayed()
         compose.onNodeWithText(
-            "In the status bar. You can minimize it or turn it off: Passo keeps counting",
+            "In the status bar: Android requires it while Passo counts. Turn it off and counting goes on",
         ).assertIsDisplayed()
         snapshot("settings_notification")
     }
