@@ -5,3 +5,7 @@ plugins {
 android {
     namespace = "com.callbackdev.passo.feature.insights"
 }
+
+dependencies {
+    testImplementation(libs.androidx.junit)
+}

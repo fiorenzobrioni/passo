@@ -40,17 +40,30 @@
     </plurals>
     <string name="settings_goal_note">A new goal counts from today; past days keep theirs.</string>
 
-    <string name="settings_group_units">Units</string>
+    <string name="settings_group_units">Units and calendar</string>
     <string name="settings_units">Units</string>
     <string name="settings_units_system">Same as the phone (%1$s)</string>
     <string name="settings_units_metric">Metric: km, kg, cm</string>
     <string name="settings_units_imperial">Imperial: mi, lb, ft</string>
     <string name="settings_units_metric_short">metric</string>
     <string name="settings_units_imperial_short">imperial</string>
+    <string name="settings_first_day_of_week">First day of the week</string>
+    <string name="settings_first_day_of_week_note">Where History’s weeks begin, and which days a week’s record adds up.</string>
+    <string name="settings_first_day_system">Same as the phone (%1$s)</string>
 
     <string name="settings_group_today">Today</string>
     <string name="settings_typical_line">Usual day line</string>
     <string name="settings_typical_line_note">On the chart and the ring: where a usual day of the same weekday stands.</string>
+
+    <string name="settings_group_walks">Walks</string>
+    <string name="settings_walks">Find walks</string>
+    <string name="settings_walks_note">Stretches of steady walking or running, found in the steps already counted: no extra sensor, no extra battery.</string>
+    <string name="settings_min_walk">Shortest walk</string>
+    <string name="settings_min_walk_note">A stretch shorter than this is not listed as a walk. Pauses of up to 2 minutes, at a light or a door, do not end one.</string>
+    <plurals name="settings_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
 
     <string name="settings_group_appearance">Appearance</string>
     <string name="settings_theme">Theme</string>

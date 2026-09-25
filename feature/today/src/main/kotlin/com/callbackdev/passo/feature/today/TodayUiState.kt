@@ -2,6 +2,7 @@ package com.callbackdev.passo.feature.today
 
 import androidx.compose.runtime.Immutable
 import com.callbackdev.passo.core.domain.today.TodayOverview
+import com.callbackdev.passo.core.domain.walks.Walk
 import com.callbackdev.passo.core.model.UnitPreference
 import java.time.LocalDate
 
@@ -23,6 +24,8 @@ enum class TrackingStatus {
  *   the distance so the estimate states what it rests on.
  * @property firstDay today is the first day counted: steps from before the install are not in it.
  * @property celebrate the goal is met and the ring has not bloomed for it yet today.
+ * @property walks today's walks so far (PLANNING.md §6.1); null when walk detection is off, and
+ *   then no walk appears on the screen.
  */
 @Immutable
 data class TodayUiState(
@@ -34,4 +37,5 @@ data class TodayUiState(
     val walkingStepLength: Double,
     val firstDay: Boolean,
     val celebrate: Boolean,
+    val walks: List<Walk>? = null,
 )

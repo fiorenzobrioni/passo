@@ -301,6 +301,119 @@ object PassoIcons {
         }
     }
 
+    val ChevronLeft: ImageVector by lazy {
+        icon("chevron_left", autoMirror = true) {
+            moveTo(14.5f, 6f)
+            lineTo(8.5f, 12f)
+            lineTo(14.5f, 18f)
+        }
+    }
+
+    /** A ring nearly closed: Today, the ring the day is drawn in. */
+    val Today: ImageVector by lazy {
+        icon("today") {
+            // Three quarters of a circle and a bit, from the top clockwise: the day's progress.
+            moveTo(12f, 3.5f)
+            arcTo(8.5f, 8.5f, 0f, isMoreThanHalf = true, isPositiveArc = true, x1 = 3.8f, y1 = 9.8f)
+            circle(12f, 12f, 3f)
+        }
+    }
+
+    /** Bars of different heights on a baseline: History. */
+    val History: ImageVector by lazy {
+        icon("history") {
+            moveTo(3.5f, 20f)
+            lineTo(20.5f, 20f)
+            moveTo(6.5f, 16.5f)
+            lineTo(6.5f, 12f)
+            moveTo(10.5f, 16.5f)
+            lineTo(10.5f, 6f)
+            moveTo(14.5f, 16.5f)
+            lineTo(14.5f, 9.5f)
+            moveTo(18.5f, 16.5f)
+            lineTo(18.5f, 4f)
+        }
+    }
+
+    /** A cup on a stand: Insights, where the records are. */
+    val Trophy: ImageVector by lazy {
+        icon("trophy") {
+            moveTo(7.5f, 4f)
+            lineTo(16.5f, 4f)
+            lineTo(16.5f, 9.5f)
+            curveTo(16.5f, 12f, 14.5f, 14f, 12f, 14f)
+            curveTo(9.5f, 14f, 7.5f, 12f, 7.5f, 9.5f)
+            close()
+            moveTo(7.5f, 6f)
+            lineTo(4.5f, 6f)
+            curveTo(4.5f, 8.6f, 5.8f, 10f, 7.8f, 10.3f)
+            moveTo(16.5f, 6f)
+            lineTo(19.5f, 6f)
+            curveTo(19.5f, 8.6f, 18.2f, 10f, 16.2f, 10.3f)
+            moveTo(12f, 14f)
+            lineTo(12f, 17.5f)
+            moveTo(8.5f, 20f)
+            lineTo(15.5f, 20f)
+            lineTo(14.5f, 17.5f)
+            lineTo(9.5f, 17.5f)
+            close()
+        }
+    }
+
+    /** A page of a calendar: the goal calendar. */
+    val Calendar: ImageVector by lazy {
+        icon("calendar") {
+            moveTo(6f, 5f)
+            lineTo(18f, 5f)
+            curveTo(19.1f, 5f, 20f, 5.9f, 20f, 7f)
+            lineTo(20f, 18f)
+            curveTo(20f, 19.1f, 19.1f, 20f, 18f, 20f)
+            lineTo(6f, 20f)
+            curveTo(4.9f, 20f, 4f, 19.1f, 4f, 18f)
+            lineTo(4f, 7f)
+            curveTo(4f, 5.9f, 4.9f, 5f, 6f, 5f)
+            close()
+            moveTo(4f, 9.5f)
+            lineTo(20f, 9.5f)
+            moveTo(8f, 3f)
+            lineTo(8f, 6.5f)
+            moveTo(16f, 3f)
+            lineTo(16f, 6.5f)
+        }
+    }
+
+    /** A path walked, between a start and an end: a walk the app found. */
+    val Walk: ImageVector by lazy {
+        icon("walk") {
+            circle(5.5f, 17.5f, 2f)
+            moveTo(7.5f, 17.5f)
+            lineTo(11f, 17.5f)
+            curveTo(13f, 17.5f, 13f, 12f, 15f, 12f)
+            lineTo(16.5f, 12f)
+            moveTo(16.5f, 12f)
+            lineTo(16.5f, 4.5f)
+            lineTo(20.5f, 6.5f)
+            lineTo(16.5f, 8.5f)
+        }
+    }
+
+    /** A flame over a chain of days: a streak. */
+    val Streak: ImageVector by lazy {
+        icon("streak") {
+            moveTo(12f, 2.5f)
+            curveTo(12.3f, 5f, 16f, 6.5f, 16f, 10.5f)
+            curveTo(16f, 13f, 14.2f, 15f, 12f, 15f)
+            curveTo(9.8f, 15f, 8f, 13f, 8f, 10.8f)
+            curveTo(8f, 8.8f, 9.4f, 8f, 9.7f, 6.3f)
+            curveTo(10.7f, 7.3f, 11f, 8.3f, 11f, 9f)
+            curveTo(11.8f, 7.6f, 12.3f, 5f, 12f, 2.5f)
+            close()
+            circle(5f, 19.5f, 1.5f)
+            circle(12f, 19.5f, 1.5f)
+            circle(19f, 19.5f, 1.5f)
+        }
+    }
+
     private fun icon(name: String, autoMirror: Boolean = false, draw: PathBuilder.() -> Unit): ImageVector =
         ImageVector.Builder(
             name = "passo_$name",

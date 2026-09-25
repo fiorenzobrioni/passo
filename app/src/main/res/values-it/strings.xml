@@ -1,3 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="nav_today">Oggi</string>
+    <string name="nav_history">Storico</string>
+    <string name="nav_insights">Andamento</string>
 </resources>

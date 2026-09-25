@@ -1,5 +1,6 @@
 package com.callbackdev.passo.core.data.tracking
 
+import com.callbackdev.passo.core.model.DailySummary
 import com.callbackdev.passo.core.model.MinuteSteps
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -59,4 +60,23 @@ fun List<MinuteSteps>.withPending(pending: List<MinuteSteps>): List<MinuteSteps>
         byMinute[minute.epochMinute] = existing?.copy(steps = existing.steps + minute.steps) ?: minute
     }
     return byMinute.values.toList()
+}
+
+/**
+ * The recorded days by epoch day, with today's count raised to the service's live one: its row
+ * is written once a minute, and a screen that reads only the row would show a count behind
+ * Today's. The estimates of the row stay as written; only the steps move. [goalSteps] is
+ * today's goal, for a first day that has no row yet.
+ */
+fun List<DailySummary>.byDayWithLive(live: LiveToday?, goalSteps: Int): Map<Long, DailySummary> {
+    val days = associateByTo(HashMap(size + 1)) { it.localEpochDay }
+    if (live != null) {
+        val stored = days[live.localEpochDay]
+        if (stored == null || live.steps > stored.steps) {
+            days[live.localEpochDay] = (
+                stored ?: DailySummary(live.localEpochDay, 0, 0.0, 0.0, 0, 0, goalSteps, finalized = false)
+                ).copy(steps = live.steps)
+        }
+    }
+    return days
 }

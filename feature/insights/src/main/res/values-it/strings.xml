@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="insights_title">Andamento</string>
+    <string name="insights_settings">Impostazioni</string>
+
+    <string name="insights_headline_nothing">L’andamento parte dal tuo primo giorno</string>
+    <string name="insights_detail_nothing">Serie, record e medie compaiono qui man mano che i giorni si sommano, dai passi di questo telefono.</string>
+    <string name="insights_headline_best_today">Oggi è il tuo giorno migliore</string>
+    <plurals name="insights_detail_best_today">
+        <item quantity="one">%1$s passo, più di ogni giorno prima</item>
+        <item quantity="many">%1$s passi, più di ogni giorno prima</item>
+        <item quantity="other">%1$s passi, più di ogni giorno prima</item>
+    </plurals>
+    <plurals name="insights_headline_streak">
+        <item quantity="one">%1$d giorno di fila all’obiettivo</item>
+        <item quantity="many">%1$d giorni di fila all’obiettivo</item>
+        <item quantity="other">%1$d giorni di fila all’obiettivo</item>
+    </plurals>
+    <string name="insights_detail_streak_today">Anche oggi ne fa già parte.</string>
+    <plurals name="insights_detail_streak_open">
+        <item quantity="one">Arriva a %1$s passi oggi per farne %2$d.</item>
+        <item quantity="many">Arriva a %1$s passi oggi per farne %2$d.</item>
+        <item quantity="other">Arriva a %1$s passi oggi per farne %2$d.</item>
+    </plurals>
+    <string name="insights_headline_week_up">Una settimana più attiva della precedente</string>
+    <string name="insights_headline_week_down">Una settimana più tranquilla della precedente</string>
+    <string name="insights_headline_week_steady">Una settimana simile alla precedente</string>
+    <string name="insights_detail_week_up">%1$s passi al giorno negli ultimi 7 giorni, %2$s in più</string>
+    <string name="insights_detail_week_down">%1$s passi al giorno negli ultimi 7 giorni, %2$s in meno</string>
+    <string name="insights_detail_week_steady">%1$s passi al giorno negli ultimi 7 giorni</string>
+    <plurals name="insights_headline_average">
+        <item quantity="one">%1$s passo al giorno in media</item>
+        <item quantity="many">%1$s passi al giorno in media</item>
+        <item quantity="other">%1$s passi al giorno in media</item>
+    </plurals>
+    <plurals name="insights_detail_average">
+        <item quantity="one">Nel tuo primo giorno. I confronti partono dopo due settimane.</item>
+        <item quantity="many">Nei tuoi primi %1$d giorni. I confronti partono dopo due settimane.</item>
+        <item quantity="other">Nei tuoi primi %1$d giorni. I confronti partono dopo due settimane.</item>
+    </plurals>
+
+    <string name="insights_streak_title">Serie</string>
+    <plurals name="insights_streak_days">
+        <item quantity="one">giorno di fila all’obiettivo</item>
+        <item quantity="many">giorni di fila all’obiettivo</item>
+        <item quantity="other">giorni di fila all’obiettivo</item>
+    </plurals>
+    <string name="insights_streak_none">Nessuna serie in corso: un giorno all’obiettivo ne comincia una.</string>
+    <plurals name="insights_streak_longest">
+        <item quantity="one">La più lunga: %1$d giorno, %2$s</item>
+        <item quantity="many">La più lunga: %1$d giorni, %2$s</item>
+        <item quantity="other">La più lunga: %1$d giorni, %2$s</item>
+    </plurals>
+    <string name="insights_streak_longest_now">È la tua serie più lunga.</string>
+    <string name="insights_streak_last_days">Gli ultimi 7 giorni</string>
+    <string name="insights_day_met">%1$s: obiettivo raggiunto</string>
+    <string name="insights_day_not_met">%1$s: obiettivo non raggiunto</string>
+    <string name="insights_day_today_open">%1$s: in corso</string>
+    <string name="insights_day_not_counted">%1$s: non contato</string>
+    <string name="insights_streak_spoken">%1$s. %2$s</string>
+
+    <string name="insights_group_records">Record</string>
+    <string name="insights_record_day">Giorno migliore</string>
+    <string name="insights_record_week">Settimana migliore</string>
+    <string name="insights_record_month">Mese migliore</string>
+    <string name="insights_record_streak">Serie più lunga</string>
+    <plurals name="insights_steps">
+        <item quantity="one">%1$s passo</item>
+        <item quantity="many">%1$s passi</item>
+        <item quantity="other">%1$s passi</item>
+    </plurals>
+    <plurals name="insights_days">
+        <item quantity="one">%1$d giorno</item>
+        <item quantity="many">%1$d giorni</item>
+        <item quantity="other">%1$d giorni</item>
+    </plurals>
+    <string name="insights_record_value">%1$s · %2$s</string>
+    <string name="insights_range">%1$s – %2$s</string>
+
+    <string name="insights_group_averages">Medie</string>
+    <string name="insights_average_7">Ultimi 7 giorni</string>
+    <string name="insights_average_30">Ultimi 30 giorni</string>
+    <string name="insights_average_all">Dal %1$s</string>
+    <plurals name="insights_a_day">
+        <item quantity="one">%1$s passo al giorno</item>
+        <item quantity="many">%1$s passi al giorno</item>
+        <item quantity="other">%1$s passi al giorno</item>
+    </plurals>
+    <string name="insights_vs_before_more">%1$s · %2$s in più dei 7 giorni prima</string>
+    <string name="insights_vs_before_less">%1$s · %2$s in meno dei 7 giorni prima</string>
+    <string name="insights_not_yet">Dopo %1$d giorni completi</string>
+    <string name="insights_averages_caption">Oggi resta fuori dai 7 e dai 30 giorni finché non è finito; un giorno senza passi conta come zero.</string>
+
+    <string name="insights_group_totals">Dal %1$s</string>
+    <string name="insights_total_steps">Passi</string>
+    <plurals name="insights_total_steps_meaning">
+        <item quantity="one">In %1$d giorno di conteggio</item>
+        <item quantity="many">In %1$d giorni di conteggio</item>
+        <item quantity="other">In %1$d giorni di conteggio</item>
+    </plurals>
+    <string name="insights_total_distance">Distanza</string>
+    <string name="insights_total_distance_meaning">Stima, ogni giorno con la sua lunghezza del passo</string>
+    <string name="insights_total_calories">Calorie attive</string>
+    <string name="insights_total_calories_meaning">Stima: solo il movimento</string>
+    <string name="insights_total_goal_days">Giorni all’obiettivo</string>
+    <string name="insights_total_goal_days_meaning">Il %1$s dei giorni contati</string>
+    <string name="insights_metric_spoken">%1$s: %2$s. %3$s</string>
+</resources>

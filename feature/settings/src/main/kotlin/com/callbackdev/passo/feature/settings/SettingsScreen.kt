@@ -70,6 +70,7 @@ import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.settings.InputScale
 import com.callbackdev.passo.core.domain.settings.ProfileInputs
+import com.callbackdev.passo.core.domain.settings.firstDayOfWeek
 import com.callbackdev.passo.core.domain.settings.resolve
 import com.callbackdev.passo.core.model.AppFont
 import com.callbackdev.passo.core.model.AppPalette
@@ -80,6 +81,8 @@ import com.callbackdev.passo.core.model.ThemeMode
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.UnitSystem
 import com.callbackdev.passo.core.model.UserSettings
+import java.time.DayOfWeek
+import java.time.format.TextStyle
 
 @Composable
 fun SettingsRoute(onBack: () -> Unit, viewModel: SettingsViewModel = hiltViewModel()) {
@@ -151,6 +154,8 @@ private enum class Dialog {
     APPLY_PAST,
     GOAL,
     UNITS,
+    FIRST_DAY_OF_WEEK,
+    MIN_WALK,
     THEME,
     PALETTE,
     FONT,
@@ -240,6 +245,12 @@ private fun SettingsList(state: SettingsUiState, actions: SettingsActions, modif
                     value = unitsLabel(settings.units),
                     onClick = { dialog = Dialog.UNITS },
                 )
+                GroupDivider()
+                ValueRow(
+                    label = stringResource(R.string.settings_first_day_of_week),
+                    value = firstDayLabel(settings.firstDayOfWeek),
+                    onClick = { dialog = Dialog.FIRST_DAY_OF_WEEK },
+                )
             }
         }
 
@@ -251,6 +262,30 @@ private fun SettingsList(state: SettingsUiState, actions: SettingsActions, modif
                     note = stringResource(R.string.settings_typical_line_note),
                     checked = settings.typicalDayLine,
                     onChange = { on -> actions.updateSettings { it.copy(typicalDayLine = on) } },
+                )
+            }
+        }
+
+        item { GroupHeader(stringResource(R.string.settings_group_walks)) }
+        item {
+            SettingsGroup {
+                SwitchRow(
+                    label = stringResource(R.string.settings_walks),
+                    note = stringResource(R.string.settings_walks_note),
+                    checked = settings.walkDetection,
+                    onChange = { on -> actions.updateSettings { it.copy(walkDetection = on) } },
+                    modifier = Modifier.testTag(SettingsTags.WALKS),
+                )
+                GroupDivider()
+                ValueRow(
+                    label = stringResource(R.string.settings_min_walk),
+                    value = pluralStringResource(
+                        R.plurals.settings_minutes,
+                        settings.minWalkMinutes,
+                        settings.minWalkMinutes,
+                    ),
+                    onClick = { dialog = Dialog.MIN_WALK },
+                    enabled = settings.walkDetection,
                 )
             }
         }
@@ -455,6 +490,34 @@ private fun SettingsList(state: SettingsUiState, actions: SettingsActions, modif
             selected = settings.units,
             onSelect = { units ->
                 actions.updateSettings { it.copy(units = units) }
+                dialog = null
+            },
+            onDismiss = close,
+        )
+
+        Dialog.FIRST_DAY_OF_WEEK -> RadioDialog(
+            title = stringResource(R.string.settings_first_day_of_week),
+            options = listOf(null, DayOfWeek.MONDAY, DayOfWeek.SUNDAY, DayOfWeek.SATURDAY).map {
+                it to firstDayLabel(it)
+            },
+            selected = settings.firstDayOfWeek,
+            explanation = stringResource(R.string.settings_first_day_of_week_note),
+            onSelect = { day ->
+                actions.updateSettings { it.copy(firstDayOfWeek = day) }
+                dialog = null
+            },
+            onDismiss = close,
+        )
+
+        Dialog.MIN_WALK -> RadioDialog(
+            title = stringResource(R.string.settings_min_walk),
+            options = UserSettings.MIN_WALK_MINUTES_CHOICES.map {
+                it to pluralStringResource(R.plurals.settings_minutes, it, it)
+            },
+            selected = settings.minWalkMinutes,
+            explanation = stringResource(R.string.settings_min_walk_note),
+            onSelect = { minutes ->
+                actions.updateSettings { it.copy(minWalkMinutes = minutes) }
                 dialog = null
             },
             onDismiss = close,
@@ -738,6 +801,20 @@ private fun sexLabel(sex: Sex?): String = when (sex) {
     null -> stringResource(R.string.settings_sex_unsaid)
 }
 
+/** The first day of the week in words; «Same as the phone (Monday)» when it follows the region. */
+@Composable
+private fun firstDayLabel(day: DayOfWeek?): String {
+    val locale = LocalConfiguration.current.locales[0]
+    fun name(of: DayOfWeek) =
+        of.getDisplayName(TextStyle.FULL_STANDALONE, locale).replaceFirstChar { it.titlecase(locale) }
+    return if (day == null) {
+        val region = android.content.res.Resources.getSystem().configuration.locales[0]
+        stringResource(R.string.settings_first_day_system, name(firstDayOfWeek(null, region)))
+    } else {
+        name(day)
+    }
+}
+
 @Composable
 private fun unitsLabel(units: UnitPreference): String = when (units) {
     UnitPreference.SYSTEM -> {
@@ -811,4 +888,5 @@ private fun openUrl(context: Context, url: String) {
 object SettingsTags {
     const val LIST = "settings_list"
     const val TRACKING = "settings_tracking"
+    const val WALKS = "settings_walks"
 }

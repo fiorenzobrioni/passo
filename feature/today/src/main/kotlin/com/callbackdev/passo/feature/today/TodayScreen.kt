@@ -69,6 +69,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -83,7 +84,11 @@ import com.callbackdev.passo.core.designsystem.components.ProgressRing
 import com.callbackdev.passo.core.designsystem.components.StatusCard
 import com.callbackdev.passo.core.designsystem.components.StatusTone
 import com.callbackdev.passo.core.designsystem.components.TrendPoint
+import com.callbackdev.passo.core.designsystem.components.WalkList
 import com.callbackdev.passo.core.designsystem.format.annotated
+import com.callbackdev.passo.core.designsystem.format.axisHour
+import com.callbackdev.passo.core.designsystem.format.clockTime
+import com.callbackdev.passo.core.designsystem.format.longDate
 import com.callbackdev.passo.core.designsystem.format.rememberMeasureFormatter
 import com.callbackdev.passo.core.designsystem.format.text
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
@@ -96,11 +101,16 @@ import com.callbackdev.passo.core.domain.metrics.MetricsConstants
 import com.callbackdev.passo.core.domain.today.CadenceBand
 import com.callbackdev.passo.core.domain.today.Headline
 import com.callbackdev.passo.core.domain.today.Pace
+import com.callbackdev.passo.core.domain.walks.Walk
 import java.time.LocalDate
 
 /** Today, with its state from [TodayViewModel] and the permission request it may need. */
 @Composable
-fun TodayRoute(onOpenSettings: () -> Unit, viewModel: TodayViewModel = hiltViewModel()) {
+fun TodayRoute(
+    onOpenSettings: () -> Unit,
+    bottomPadding: Dp = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+    viewModel: TodayViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val activity = LocalActivity.current
     val context = LocalContext.current
@@ -136,6 +146,7 @@ fun TodayRoute(onOpenSettings: () -> Unit, viewModel: TodayViewModel = hiltViewM
         },
         onResume = viewModel::resumeTracking,
         onCelebrated = viewModel::celebrated,
+        bottomPadding = bottomPadding,
     )
 }
 
@@ -158,9 +169,10 @@ fun TodayScreen(
     onResume: () -> Unit,
     onCelebrated: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
+    bottomPadding: Dp = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
 ) {
     val format = rememberMeasureFormatter(state.units)
-    val bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val bottom = bottomPadding
     // Its own ground and ink, so the page reads right wherever it is drawn.
     Surface(modifier = modifier.fillMaxSize()) {
         LazyColumn(
@@ -183,6 +195,8 @@ fun TodayScreen(
                 }
             }
             item(key = "trend") { TrendCard(state, format) }
+            val walks = state.walks.orEmpty()
+            if (walks.isNotEmpty()) item(key = "walks") { WalksCard(walks, format) }
             item(key = "metrics") { Metrics(state, format) }
         }
     }
@@ -575,6 +589,25 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawSwatch(color: C
     )
 }
 
+/** Today's walks so far, found in the minutes already counted (PLANNING.md §6.1). */
+@Composable
+private fun WalksCard(walks: List<Walk>, format: MeasureFormatter) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = GroupShape,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenMargin).testTag(TodayTags.WALKS),
+    ) {
+        Column {
+            Text(
+                text = stringResource(R.string.today_walks_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp).semantics { heading() },
+            )
+            WalkList(walks, format)
+        }
+    }
+}
+
 /** The metrics, two to a row; the cadence across the page, with its scale. */
 @Composable
 private fun Metrics(state: TodayUiState, format: MeasureFormatter) {
@@ -705,4 +738,5 @@ object TodayTags {
     const val TREND = "today_trend"
     const val CHART = "today_chart"
     const val METRICS = "today_metrics"
+    const val WALKS = "today_walks"
 }

@@ -13,6 +13,7 @@ import com.callbackdev.passo.core.domain.today.DayMinute
 import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.today.TypicalDay
 import com.callbackdev.passo.core.domain.today.minuteOfDay
+import com.callbackdev.passo.core.domain.walks.WalkDetector
 import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.UserSettings
@@ -143,6 +144,11 @@ constructor(
             walkingStepLength = StepLengths.of(prefs.profile).walkingMeters,
             firstDay = prefs.firstRecordedDay == null || prefs.firstRecordedDay >= epochDay,
             celebrate = overview.goalReachedAt != null && prefs.celebratedOn != date,
+            walks = if (prefs.settings.walkDetection) {
+                WalkDetector.detect(dayMinutes, prefs.profile, prefs.settings.minWalkMinutes)
+            } else {
+                null
+            },
         )
     }
 

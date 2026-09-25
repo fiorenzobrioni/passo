@@ -82,6 +82,9 @@
     </plurals>
     <string name="today_trend_description_on_pace">Più o meno quanti di solito a quest’ora.</string>
 
+    <!-- Le camminate -->
+    <string name="today_walks_title">Camminate di oggi</string>
+
     <!-- Le metriche -->
     <string name="today_metric_distance">Distanza</string>
     <string name="today_metric_distance_meaning">Stima, con un passo di %1$s</string>

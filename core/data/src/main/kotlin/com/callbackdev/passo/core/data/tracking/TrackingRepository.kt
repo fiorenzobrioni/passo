@@ -166,6 +166,13 @@ constructor(
     fun observeSummaries(fromDay: Long, toDay: Long): Flow<List<DailySummary>> =
         dao.observeSummaries(fromDay, toDay).map { rows -> rows.map { it.toModel() } }
 
+    /**
+     * Every recorded day, oldest first: what History and Insights are made of. A few thousand
+     * rows after years of use (one per day), read once per change.
+     */
+    fun observeAllSummaries(): Flow<List<DailySummary>> =
+        dao.observeAllSummaries().map { rows -> rows.map { it.toModel() } }
+
     /** The tracking log, oldest first. Unknown types (from a newer build) are skipped. */
     suspend fun diagnostics(): List<DiagnosticsEvent> = dao.diagnostics().mapNotNull { row ->
         DiagnosticsType.entries.firstOrNull {

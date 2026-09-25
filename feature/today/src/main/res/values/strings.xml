@@ -73,6 +73,9 @@
     </plurals>
     <string name="today_trend_description_on_pace">About as many as usual at this time.</string>
 
+    <!-- The walks -->
+    <string name="today_walks_title">Walks today</string>
+
     <!-- The metric tiles -->
     <string name="today_metric_distance">Distance</string>
     <string name="today_metric_distance_meaning">Estimate, with a step of %1$s</string>
