@@ -91,6 +91,12 @@
         <item quantity="other">%1$d minutes</item>
     </plurals>
 
+    <string name="settings_group_outings">Outings</string>
+    <string name="settings_outings">Your outings</string>
+    <string name="settings_outings_note">Walks with a goal: keep them, change them, start one.</string>
+    <string name="settings_start_outing_button">Button on Today</string>
+    <string name="settings_start_outing_button_note">“Start an outing”, under the day. Off, your outings are still here.</string>
+
     <string name="settings_group_appearance">Appearance</string>
     <string name="settings_theme">Theme</string>
     <string name="settings_theme_system">Same as the phone</string>

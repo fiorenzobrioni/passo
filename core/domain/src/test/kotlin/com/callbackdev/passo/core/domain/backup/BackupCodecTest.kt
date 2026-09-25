@@ -41,6 +41,7 @@ class BackupCodecTest {
             eveningReminderTime = LocalTime.of(21, 15),
             eveningReminderThresholdPercent = 75,
             minWalkMinutes = 5,
+            startOutingButton = false,
         ),
         diagnostics = listOf(DiagnosticsEvent(1_790_000_000_000, DiagnosticsType.BOOT, "count=12")),
     )

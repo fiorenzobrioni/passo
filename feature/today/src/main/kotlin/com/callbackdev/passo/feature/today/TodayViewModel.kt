@@ -206,6 +206,7 @@ constructor(
             // The outing under way is the card's; the list holds the ones that are over.
             outings = DayOutings.of(walks, outings.today, zone, System.currentTimeMillis())
                 .filterNot { it is Outing.Planned && it.session.live },
+            startOutingButton = prefs.settings.startOutingButton,
         )
     }
 

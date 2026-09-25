@@ -143,6 +143,21 @@ class TodayScreenTest {
     }
 
     @Test
+    fun `the reader can take the button away`() {
+        show(state().copy(startOutingButton = false))
+
+        compose.onNodeWithTag(TodayTags.START_OUTING).assertDoesNotExist()
+    }
+
+    @Test
+    fun `without the button, an outing under way still has its card`() {
+        val live = LiveSessionState(outing, cadence = 108, canKeepGoing = false, alertsWhileScreenOff = true)
+        show(state().copy(startOutingButton = false, session = live))
+
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(SessionCardTags.CARD))
+    }
+
+    @Test
     fun `an outing under way has its card, with pause and stop`() {
         var paused = false
         val live = LiveSessionState(outing, cadence = 108, canKeepGoing = false, alertsWhileScreenOff = true)

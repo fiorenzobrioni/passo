@@ -346,7 +346,7 @@ data class DiagnosticsEventEntity(
 - Profile: height, weight, sex (optional), step length mode (auto, manual or calibrated), walking step length, running step length.
 - Goal, units, first day of week, theme, dynamic color, notification opt-ins, reminder time and threshold, tracking enabled.
 - The last day whose goal was seen reached (not a setting: the record that keeps "goal reached" once a day).
-- Walk detection enabled (default on), minimum walk duration (5, 10 or 15 min; default 10), typical-day line shown (default on).
+- Walk detection enabled (default on), minimum walk duration (5, 10 or 15 min; default 10), typical-day line shown (default on), Today's "Start an outing" button shown (default on).
 - Whether the outing presets were written once (so deleting them is final), and the last finished outing whose card Today has put away.
 
 ---
@@ -743,6 +743,7 @@ Added to v1.0 at the owner's request (25 Sep 2026), after Phase 6 and before Pha
 - [x] The Outings page (`:feature:sessions`): the plans with what they come to and their signals, Start, the outing under way, a paused count or silenced signals stated with the way back, the notification permission asked in context at the first start. The editor: name, goal (picked, never typed; quarter miles in miles), pace, the estimate with the reader's step, the signals, "Try them", save, delete, discard asks.
 - [x] Today: "Start an outing", the outing's card (under way, paused, just over with "Keep going" and Close); Today's and History's lists show an outing in place of the walk found in its minutes, with its goal and its outcome, and History's chart marks it.
 - [x] The launcher's long press (the three last started), the evening reminder's "Walk now", both widgets and the Quick Settings tile saying the outing while it is under way (owner's request).
+- [x] Settings: an Outings group, with the page's own door ("Your outings") and the switch for Today's button (owner's request, 25 Sep 2026; §15).
 - [x] Strings in English and Italian.
 - [ ] On a device (owner): an outing with the screen off (signals on time, the vibrations felt and told apart), the Android 16 Live Update, a reboot and a forgotten outing, and the battery check of an outing (§9).
 - [x] The voice (second iteration, owner's choice; `docs/adr/0010-voice.md`): per outing off, headphones or always (out loud only when the ringer is on); the start, each chosen signal with what is left and the pace, the goal with what it came to, every amount in words in English and Italian; the system's engine with an offline voice only, over ducked music; "Hear it" and a missing voice stated in the editor. Schema v3 (`voice` on both tables, default off).
@@ -927,6 +928,8 @@ Include:
 - **CSV: fixed English headers with units in their names, RFC 4180, UTF-8 with a BOM**, distances in the reader's units; a field that starts like a formula is written as text.
 - **The calibration does not use the tracking service**: the counter's values at Start and Stop are exact whatever the service, a pause or midnight did in between. Its listener lives only while the page is visible (no wake-ups, no wake lock); Start survives the process being stopped (`SavedStateHandle`).
 - **§3 reviewed at Phase 7**: the diagram and its paths now describe the app as built (outings, live state in the process, pushed widget updates, goal alarms, the tile, the two doors of control, data in and out, the calibration).
+
+- **Today's "Start an outing" is the reader's to take away** (owner's question, 25 Sep 2026): a switch in a new Settings group, Outings, on by default. A reader who never walks with a goal should not see the invitation every day; the one on the fence still meets it. The switch hides the button only: an outing under way (started from the launcher's long press or the evening reminder) still shows its card, because hiding it would be the screen lying. The button was the only door to the Outings page inside the app, so the group opens with one of its own, "Your outings", which stays whatever the switch says. The evening reminder's "Walk now" is left as it is: it belongs to the reminder, which has its own switch, and one setting reaching into another's notification would be harder to predict than either. The choice travels with the backup, like the typical-day line.
 
 ### Open
 

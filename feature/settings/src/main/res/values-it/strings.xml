@@ -93,6 +93,12 @@
         <item quantity="other">%1$d minuti</item>
     </plurals>
 
+    <string name="settings_group_outings">Uscite</string>
+    <string name="settings_outings">Le tue uscite</string>
+    <string name="settings_outings_note">Camminate con un obiettivo: tienile, cambiale, avviane una.</string>
+    <string name="settings_start_outing_button">Bottone in Oggi</string>
+    <string name="settings_start_outing_button_note">«Inizia un’uscita», sotto la giornata. Spento, le tue uscite restano qui.</string>
+
     <string name="settings_group_appearance">Aspetto</string>
     <string name="settings_theme">Tema</string>
     <string name="settings_theme_system">Come il telefono</string>

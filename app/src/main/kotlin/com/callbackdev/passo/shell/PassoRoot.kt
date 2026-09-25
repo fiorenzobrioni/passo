@@ -62,7 +62,7 @@ data object TabsKey : NavKey
 @Serializable
 data object SettingsKey : NavKey
 
-/** The Outings page, from Today (PLANNING.md §11 Phase 10). */
+/** The Outings page, from Today's button and from Settings (PLANNING.md §11 Phase 10). */
 @Serializable
 data object SessionsKey : NavKey
 
@@ -113,7 +113,11 @@ private fun MainPages() {
                     )
                 }
                 entry<SettingsKey> {
-                    SettingsRoute(onBack = { back() }, onCalibrate = { backStack.add(CalibrationKey(it)) })
+                    SettingsRoute(
+                        onBack = { back() },
+                        onCalibrate = { backStack.add(CalibrationKey(it)) },
+                        onOpenSessions = { backStack.add(SessionsKey) },
+                    )
                 }
                 entry<CalibrationKey> { key -> CalibrationRoute(step = key.step, onDone = { back() }) }
                 entry<SessionsKey> {

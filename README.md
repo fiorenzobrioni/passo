@@ -128,7 +128,7 @@ resizable home-screen widgets answer "how am I doing today?" at a glance.
   says what is left and how your pace is going (a voice installed on the phone: Passo still
   sends nothing). The counting notification follows it, with Pause and Stop. Start one from
   Today, from the app icon's long press or from the evening
-  reminder; the widgets and the tile show it while it lasts, and the day's walks keep it
+  reminder (never walk with a goal? Settings takes the button off Today); the widgets and the tile show it while it lasts, and the day's walks keep it
   afterwards with how much of its goal was done.
 - **Insights**: the streak of days at your goal, your best day, week and month, averages over
   the last 7 and 30 days, and what it all adds up to since the first day.

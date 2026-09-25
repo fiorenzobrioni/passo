@@ -115,6 +115,7 @@ import java.time.format.TextStyle
 fun SettingsRoute(
     onBack: () -> Unit,
     onCalibrate: (CalibratedStep) -> Unit,
+    onOpenSessions: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel(),
     dataViewModel: DataViewModel = hiltViewModel(),
 ) {
@@ -129,6 +130,7 @@ fun SettingsRoute(
             applyProfileToPastDays = viewModel::applyProfileToPastDays,
             setTracking = viewModel::setTracking,
             calibrate = onCalibrate,
+            openSessions = onOpenSessions,
         ),
         data = data,
         dataActions = DataActions(
@@ -151,6 +153,7 @@ class SettingsActions(
     val applyProfileToPastDays: () -> Unit = {},
     val setTracking: (Boolean) -> Unit = {},
     val calibrate: (CalibratedStep) -> Unit = {},
+    val openSessions: () -> Unit = {},
 )
 
 /**
@@ -361,6 +364,28 @@ private fun SettingsList(
                     ),
                     onClick = { dialog = Dialog.MIN_WALK },
                     enabled = settings.walkDetection,
+                )
+            }
+        }
+
+        // The Outings page's own door: Today's button is the reader's to take away, the page is not.
+        item { GroupHeader(stringResource(R.string.settings_group_outings)) }
+        item {
+            SettingsGroup {
+                ValueRow(
+                    label = stringResource(R.string.settings_outings),
+                    value = stringResource(R.string.settings_outings_note),
+                    trailing = true,
+                    onClick = actions.openSessions,
+                    modifier = Modifier.testTag(SettingsTags.OUTINGS),
+                )
+                GroupDivider()
+                SwitchRow(
+                    label = stringResource(R.string.settings_start_outing_button),
+                    note = stringResource(R.string.settings_start_outing_button_note),
+                    checked = settings.startOutingButton,
+                    onChange = { on -> actions.updateSettings { it.copy(startOutingButton = on) } },
+                    modifier = Modifier.testTag(SettingsTags.START_OUTING_BUTTON),
                 )
             }
         }
@@ -1249,6 +1274,8 @@ object SettingsTags {
     const val TRACKING = "settings_tracking"
     const val NOTIFICATION = "settings_notification"
     const val WALKS = "settings_walks"
+    const val OUTINGS = "settings_outings"
+    const val START_OUTING_BUTTON = "settings_start_outing_button"
     const val GOAL_REACHED = "settings_goal_reached"
     const val EVENING_REMINDER = "settings_evening_reminder"
     const val WEEKLY_SUMMARY = "settings_weekly_summary"

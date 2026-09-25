@@ -212,7 +212,7 @@ fun TodayScreen(
                         modifier = Modifier.padding(horizontal = ScreenMargin),
                     )
                 }
-            } else if (state.status == TrackingStatus.COUNTING) {
+            } else if (state.status == TrackingStatus.COUNTING && state.startOutingButton) {
                 item(key = "start-outing") { StartOuting(onOpenSessions) }
             }
             if (state.firstDay && state.status == TrackingStatus.COUNTING) {
@@ -623,6 +623,8 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawSwatch(color: C
 /**
  * The way to an outing (PLANNING.md §11 Phase 10): one quiet button under the day, to the page
  * where they are kept and started. Not while one is under way: its card stands here instead.
+ * The reader who never walks with a goal can take it away in Settings, where the page stays one
+ * row away; an outing started from a shortcut or a reminder still shows its card.
  */
 @Composable
 private fun StartOuting(onOpenSessions: () -> Unit) {

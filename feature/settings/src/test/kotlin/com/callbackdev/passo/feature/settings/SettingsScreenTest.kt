@@ -104,6 +104,30 @@ class SettingsScreenTest {
     }
 
     @Test
+    fun `the outings keep a door here when Today's button goes`() {
+        var settings = state.settings
+        var opened = false
+        compose.setContent {
+            PassoTheme {
+                SettingsScreen(
+                    state.copy(settings = settings),
+                    onBack = {},
+                    actions = SettingsActions(
+                        updateSettings = { settings = it(settings) },
+                        openSessions = { opened = true },
+                    ),
+                )
+            }
+        }
+
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(SettingsTags.START_OUTING_BUTTON))
+        compose.onNodeWithTag(SettingsTags.START_OUTING_BUTTON).performClick()
+        assertThat(settings.startOutingButton).isFalse()
+        compose.onNodeWithTag(SettingsTags.OUTINGS).performClick()
+        assertThat(opened).isTrue()
+    }
+
+    @Test
     fun `the first day of the week follows the phone until chosen`() {
         var settings = state.settings
         compose.setContent {
