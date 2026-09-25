@@ -53,6 +53,9 @@ All notable changes to Passo are documented here. The format follows
   never while it is off. If today's steps cannot be read, a widget says so instead of loading
   forever.
 - Passo now looks like Chiaro: the same colors, typefaces, shapes and motion.
+- The app icon: Chiaro's ring in green, with a footprint where Chiaro has its sun, so the two
+  sit side by side on a home screen as one family. Themed icons (Android 13+) get the same
+  drawing.
 - History (Phase 5): a day, a week, a month or a year at a time, swiped or stepped through
   from the first day Passo counted to today. A day shows its steps hour by hour with the walks
   marked on the chart, its measures and its walks; a week, a month and a year show their bars
