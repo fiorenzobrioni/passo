@@ -2,8 +2,8 @@
 <!--
   The tracking engine's permissions and components (PLANNING.md §4.1, §10). This is the whole
   list Passo holds: activity recognition to read the step counter, a foreground service of type
-  health to keep reading it, the boot broadcast to start again without being opened, and
-  notifications (optional). `checkForbiddenPermissions` guards the rest: the goal alarms are
+  health to keep reading it, the boot broadcast to start again without being opened,
+  notifications (optional), and for the outings a vibration and a Live Update. `checkForbiddenPermissions` guards the rest: the goal alarms are
   inexact and need no permission, and the Quick Settings tile needs none either.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -19,6 +19,11 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_HEALTH" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Outings (docs/adr/0009-sessions.md): the signals' own vibration patterns, and the
+         outing under way as a Live Update on Android 16+. Both normal permissions, granted at
+         install, never asked for. -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
 
     <application>
         <service

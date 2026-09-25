@@ -76,4 +76,15 @@
     <string name="tile_permission">No permission</string>
     <string name="tile_not_set_up">Not set up yet</string>
     <string name="tile_no_sensor">No step counter</string>
+    <!-- Outings (PLANNING.md §11 Phase 10). -->
+    <string name="sessions_channel_name">Outings</string>
+    <string name="sessions_channel_description">An outing’s goal reached. Its signals on the way are vibrations, in Passo’s own patterns, and follow this channel: turned off here, they stop too.</string>
+    <string name="session_action_pause">Pause</string>
+    <string name="session_action_resume">Resume</string>
+    <string name="session_action_stop">Stop</string>
+    <string name="session_action_keep_going">Keep going</string>
+    <string name="session_chip_paused">Paused</string>
+    <!-- «Brisk walk: goal reached». -->
+    <string name="session_goal_title">%1$s: goal reached</string>
+    <string name="evening_reminder_walk_now">Walk now</string>
 </resources>

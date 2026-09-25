@@ -21,6 +21,12 @@ data class LedgerBatch(
 )
 
 /**
+ * The steps one sample added and when they were taken, as the accountant accepted them: what an
+ * outing under way is measured from (PLANNING.md §11 Phase 10). Zero for a baseline.
+ */
+data class AccountedSample(val steps: Int, val atWallMillis: Long)
+
+/**
  * The service's in-memory buffer (PLANNING.md §4.5): runs each sample through the
  * [StepAccountant], keeps the increments per minute, and says when they must be written.
  *
@@ -36,6 +42,10 @@ class StepLedger(initialState: TrackerState?) {
     private val diagnostics = mutableListOf<DiagnosticsEvent>()
     private var stateDirty = false
     private var loggedTimestampFallback = false
+
+    /** The last sample [record]ed, as accounted; null before the first. */
+    var lastAccounted: AccountedSample? = null
+        private set
 
     /** Steps accounted but not yet written. */
     val pendingSteps: Int
@@ -58,6 +68,7 @@ class StepLedger(initialState: TrackerState?) {
         val accounting = StepAccountant.account(state, sample, snapshot)
         state = accounting.newState
         stateDirty = true
+        lastAccounted = AccountedSample(accounting.acceptedSteps.toInt(), accounting.newState.lastSampleWallMillis)
         accounting.increments.forEach(::add)
         log(accounting, sample, snapshot)
 
