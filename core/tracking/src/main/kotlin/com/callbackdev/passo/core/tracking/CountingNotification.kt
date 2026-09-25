@@ -57,3 +57,44 @@ object CountingNotification {
         }
     }
 }
+
+/** Why the goal notifications cannot show, if they cannot. */
+enum class GoalNotificationsBlock {
+    /** They can show. */
+    NONE,
+
+    /** Passo may not notify at all: the permission was refused, or its notifications are off. */
+    APP,
+
+    /** Passo may notify, but the reader turned off the goals' channel. */
+    CHANNEL,
+}
+
+/**
+ * Whether the goal notifications the reader turned on can reach them: a switch that is on while
+ * Android drops what it sends would be the screen lying, so Settings says so and opens the page
+ * that fixes it.
+ */
+object GoalNotificationsAccess {
+    fun block(context: Context): GoalNotificationsBlock {
+        val manager = NotificationManagerCompat.from(context)
+        if (!manager.areNotificationsEnabled()) return GoalNotificationsBlock.APP
+        val channel = manager.getNotificationChannel(GoalNotifications.CHANNEL_ID)
+        return if (channel?.importance == NotificationManager.IMPORTANCE_NONE) {
+            GoalNotificationsBlock.CHANNEL
+        } else {
+            GoalNotificationsBlock.NONE
+        }
+    }
+
+    /** The system's page that lifts [block]: the goals' channel, or the app's notifications. */
+    fun settingsIntent(context: Context, block: GoalNotificationsBlock): Intent =
+        if (block == GoalNotificationsBlock.CHANNEL) {
+            Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                .putExtra(Settings.EXTRA_CHANNEL_ID, GoalNotifications.CHANNEL_ID)
+        } else {
+            Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+        }
+}

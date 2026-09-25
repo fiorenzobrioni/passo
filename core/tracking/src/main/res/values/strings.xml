@@ -26,4 +26,54 @@
         <item quantity="other">%1$d minutes</item>
     </plurals>
     <string name="tracking_duration_hours_minutes">%1$d h %2$d min</string>
+
+    <!-- Goals and reminders (PLANNING.md §8): each one opt-in, from Settings. -->
+    <string name="goals_channel_name">Goals and reminders</string>
+    <string name="goals_channel_description">The goal reached, the evening reminder and the weekly summary: each one only if you turned it on in Passo’s settings.</string>
+
+    <plurals name="goal_reached_title">
+        <item quantity="one">Goal reached: %1$s step</item>
+        <item quantity="other">Goal reached: %1$s steps</item>
+    </plurals>
+    <string name="goal_reached_at">Reached at %1$s.</string>
+    <plurals name="goal_reached_streak">
+        <item quantity="one">Reached at %1$s: %2$d day in a row at the goal.</item>
+        <item quantity="other">Reached at %1$s: %2$d days in a row at the goal.</item>
+    </plurals>
+
+    <plurals name="evening_reminder_title">
+        <item quantity="one">%1$s step to go</item>
+        <item quantity="other">%1$s steps to go</item>
+    </plurals>
+    <string name="evening_reminder_text">About %1$s of brisk walking gets you to %2$s.</string>
+    <string name="evening_reminder_so_far">So far %1$s: %2$s of the goal.</string>
+
+    <string name="weekly_title_every_day">Last week: the goal every day</string>
+    <string name="weekly_title_up">Last week: %1$s more steps than the week before</string>
+    <string name="weekly_title_down">Last week: %1$s fewer steps than the week before</string>
+    <string name="weekly_title_steady">Last week: about as many steps as the week before</string>
+    <plurals name="weekly_title_goal_days">
+        <item quantity="one">Last week: %1$d of %2$d days at the goal</item>
+        <item quantity="other">Last week: %1$d of %2$d days at the goal</item>
+    </plurals>
+    <string name="weekly_totals">%1$s steps, %2$s a day on average</string>
+    <plurals name="weekly_goal_days">
+        <item quantity="one">%1$d of %2$d days at the goal</item>
+        <item quantity="other">%1$d of %2$d days at the goal</item>
+    </plurals>
+    <string name="weekly_best_day">Best day: %1$s, %2$s steps</string>
+
+    <!-- The Quick Settings tile: read only while the panel is open. -->
+    <string name="tile_label">Steps today</string>
+    <plurals name="tile_steps">
+        <item quantity="one">%1$s step</item>
+        <item quantity="other">%1$s steps</item>
+    </plurals>
+    <string name="tile_progress">%1$s of the goal</string>
+    <string name="tile_goal_reached">Goal reached</string>
+    <string name="tile_paused">Paused</string>
+    <string name="tile_stopped">Not counting</string>
+    <string name="tile_permission">No permission</string>
+    <string name="tile_not_set_up">Not set up yet</string>
+    <string name="tile_no_sensor">No step counter</string>
 </resources>

@@ -40,6 +40,28 @@
     </plurals>
     <string name="settings_goal_note">A new goal counts from today; past days keep theirs.</string>
 
+    <string name="settings_group_notifications">Notifications</string>
+    <string name="settings_goal_reached">When the goal is reached</string>
+    <string name="settings_goal_reached_note">Once a day. With the screen off it can come a few minutes late: Passo does not wake the phone for it.</string>
+    <string name="settings_evening_reminder">Evening reminder</string>
+    <string name="settings_evening_reminder_note">At %1$s, %2$s: the steps left, and the walk they take.</string>
+    <string name="settings_reminder_time">Time</string>
+    <string name="settings_reminder_time_note">Passo uses no exact alarms: the reminder can come a few minutes after this time.</string>
+    <string name="settings_reminder_threshold">Remind me</string>
+    <string name="settings_reminder_threshold_note">A day above this share of its goal is left alone. A goal met is never reminded.</string>
+    <string name="settings_reminder_threshold_100">Until the goal is met</string>
+    <string name="settings_reminder_threshold_75">Below 75% of the goal</string>
+    <string name="settings_reminder_threshold_50">Below half of the goal</string>
+    <string name="settings_reminder_when_100">if the goal is not met yet</string>
+    <string name="settings_reminder_when_75">if the day is below 75% of the goal</string>
+    <string name="settings_reminder_when_50">if the day is below half of the goal</string>
+    <string name="settings_weekly_summary">Weekly summary</string>
+    <string name="settings_weekly_summary_note">Every %1$s at %2$s: last week’s steps, its days at the goal and its best day.</string>
+    <string name="settings_notifications_blocked_title">Notifications are off for Passo</string>
+    <string name="settings_notifications_blocked_channel_title">Goal notifications are off in Android’s settings</string>
+    <string name="settings_notifications_blocked_body">What you turned on here cannot show until Android lets it through.</string>
+    <string name="settings_notifications_blocked_action">Turn on</string>
+
     <string name="settings_group_units">Units and calendar</string>
     <string name="settings_units">Units</string>
     <string name="settings_units_system">Same as the phone (%1$s)</string>
@@ -96,6 +118,10 @@
     <string name="settings_notification_shown">In the status bar: Android requires it while Passo counts. Turn it off and counting goes on</string>
     <string name="settings_notification_minimized">Minimized: one line at the bottom of the list, no icon in the status bar</string>
     <string name="settings_notification_off">Off: Passo keeps counting, listed among the active apps</string>
+    <string name="settings_tile">Quick Settings tile</string>
+    <string name="settings_tile_note">Today’s steps in the panel you pull down, read only while it is open. Tap to add it.</string>
+    <string name="settings_tile_added">In your Quick Settings: read only while the panel is open</string>
+    <string name="settings_tile_failed">Add it from the panel: tap the pencil and drag in «Steps today»</string>
 
     <string name="settings_privacy">Privacy</string>
     <string name="settings_privacy_headline">No account, no ads, no tracking.</string>

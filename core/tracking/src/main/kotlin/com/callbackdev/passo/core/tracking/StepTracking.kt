@@ -100,4 +100,6 @@ object StepTracking {
 @InstallIn(SingletonComponent::class)
 internal interface TrackingEntryPoint {
     fun preferences(): UserPreferencesDataSource
+
+    fun goals(): GoalNotifier
 }

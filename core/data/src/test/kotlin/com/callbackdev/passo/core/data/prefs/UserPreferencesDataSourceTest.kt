@@ -75,6 +75,7 @@ class UserPreferencesDataSourceTest {
             goalReachedNotification = true,
             eveningReminder = true,
             eveningReminderTime = LocalTime.of(21, 30),
+            eveningReminderThresholdPercent = 75,
             weeklySummary = true,
             trackingEnabled = false,
             walkDetection = false,
@@ -104,6 +105,7 @@ class UserPreferencesDataSourceTest {
             it[intPreferencesKey("daily_goal_steps")] = 3
             it[intPreferencesKey("min_walk_minutes")] = 7
             it[intPreferencesKey("evening_reminder_minute_of_day")] = 5_000
+            it[intPreferencesKey("evening_reminder_threshold_percent")] = 30
             it[doublePreferencesKey("profile_weight_kg")] = 7.0
             it[doublePreferencesKey("profile_height_m")] = 175.0
             it[stringPreferencesKey("theme")] = "SEPIA"
@@ -126,6 +128,28 @@ class UserPreferencesDataSourceTest {
         source.updateSettings { it.copy(eveningReminderTime = LocalTime.of(19, 45, 30)) }
 
         assertThat(source.current().settings.eveningReminderTime).isEqualTo(LocalTime.of(19, 45))
+    }
+
+    @Test
+    fun `a goal reached is claimed once a day, and never for a day before the last one`() = runTest {
+        assertThat(source.goalNoticeDay()).isNull()
+
+        assertThat(source.claimGoalNoticeDay(20_720)).isTrue()
+        assertThat(source.claimGoalNoticeDay(20_720)).isFalse()
+        // A time zone that brings back yesterday's date.
+        assertThat(source.claimGoalNoticeDay(20_719)).isFalse()
+        assertThat(source.goalNoticeDay()).isEqualTo(20_720)
+
+        assertThat(source.claimGoalNoticeDay(20_721)).isTrue()
+        assertThat(source.goalNoticeDay()).isEqualTo(20_721)
+    }
+
+    @Test
+    fun `the day told survives a new instance, as a restart of the process`() = runTest {
+        source.claimGoalNoticeDay(20_720)
+
+        val again = UserPreferencesDataSource(store.dataStore)
+        assertThat(again.claimGoalNoticeDay(20_720)).isFalse()
     }
 
     private suspend fun storedKeys(): List<String> = store.dataStore.data.first().asMap().keys.map { it.name }

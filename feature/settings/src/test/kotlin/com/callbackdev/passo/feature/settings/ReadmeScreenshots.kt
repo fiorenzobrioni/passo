@@ -1,13 +1,17 @@
 package com.callbackdev.passo.feature.settings
 
+import android.Manifest
+import android.app.Application
 import android.graphics.Bitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performScrollToNode
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.model.Profile
@@ -18,9 +22,12 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.io.File
+import java.time.DayOfWeek
+import java.time.LocalTime
 
 /**
  * The README's picture of Settings (docs/screenshots). Run with
@@ -48,6 +55,31 @@ class ReadmeScreenshots {
         compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasText("Wallpaper colors"))
         compose.waitForIdle()
         save("settings-appearance")
+    }
+
+    @Test
+    fun notifications() {
+        // Allowed, as on a phone that said yes in the first run: no "notifications are off" card.
+        shadowOf(ApplicationProvider.getApplicationContext<Application>())
+            .grantPermissions(Manifest.permission.POST_NOTIFICATIONS)
+        val state = SettingsUiState(
+            settings = UserSettings(
+                dailyGoalSteps = 10_000,
+                units = UnitPreference.METRIC,
+                firstDayOfWeek = DayOfWeek.MONDAY,
+                goalReachedNotification = true,
+                eveningReminder = true,
+                eveningReminderTime = LocalTime.of(20, 30),
+                eveningReminderThresholdPercent = 75,
+                weeklySummary = true,
+            ),
+            profile = Profile(heightMeters = 1.78, weightKg = 74.0),
+            version = "0.1.0",
+        )
+        compose.setContent { PassoTheme { SettingsScreen(state, onBack = {}, actions = SettingsActions()) } }
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(SettingsTags.WEEKLY_SUMMARY))
+        compose.waitForIdle()
+        save("settings-notifications")
     }
 
     private fun save(name: String) {

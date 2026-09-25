@@ -239,7 +239,8 @@ data class DiagnosticsEventEntity(
 ### DataStore (Preferences)
 
 - Profile: height, weight, sex (optional), step length mode (auto, manual or calibrated), walking step length, running step length.
-- Goal, units, first day of week, theme, dynamic color, notification opt-ins, reminder time, tracking enabled.
+- Goal, units, first day of week, theme, dynamic color, notification opt-ins, reminder time and threshold, tracking enabled.
+- The last day whose goal was seen reached (not a setting: the record that keeps "goal reached" once a day).
 - Walk detection enabled (default on), minimum walk duration (5, 10 or 15 min; default 10), typical-day line shown (default on).
 
 ---
@@ -344,9 +345,9 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
   - Updated only while the screen is on, at most every 5 s. Both forms are built in the same update; today's minutes are read again only after a write.
   - How it shows (in full, minimized, off) is the reader's, on the system's channel page: Settings reads it and opens that page (§15).
 - **Channel `goals`** (default importance, opt-in): goal reached once per day, the evening reminder, the weekly summary.
-  - Scheduled with inexact `AlarmManager.setWindow()`. No exact alarm permission.
+  - Goal reached rides on the service's samples. The reminder is an inexact `setAndAllowWhileIdle` with a wakeup, the summary an inexact `RTC` alarm without one; both armed again at every start of the process, every change of what they depend on, every clock or zone change, and every firing. No exact alarm permission (Phase 6, §15).
 - If `POST_NOTIFICATIONS` is denied, the foreground service still runs; its notification only shows in the system's task manager. Explain this in onboarding; don't block on it.
-- **QS tile (`TileService`):** reads today's steps in `onStartListening()`. It costs nothing when the panel is closed.
+- **QS tile (`TileService`):** reads today's steps from `onStartListening()` to `onStopListening()`, following the live count meanwhile. It costs nothing when the panel is closed.
 
 ---
 
@@ -540,16 +541,26 @@ Built in Chiaro's design language, like Phase 3 (owner's request: a clean implem
 
 ### Phase 6 — Goals and system surfaces
 
-- [ ] Goal-reached notification (opt-in, once per day, triggered from the service)
-- [ ] Evening reminder (inexact window alarm, configurable time and threshold)
-- [ ] Weekly summary notification (optional)
-- [ ] Quick Settings tile
+Built with the owner's request of Phases 3 and 5 (a clean implementation, above all in UI and UX); decisions in `docs/adr/0008-goals-and-system-surfaces.md`.
+
+- [x] Goal-reached notification (opt-in, once per day, triggered from the service)
+  - Noticed on the samples the service receives anyway (no wake of its own), told once a day by claiming the day in the settings file first (`GoalReached`, `UserPreferencesDataSource.claimGoalNoticeDay`): days only move forward, so a restart, a time zone that brings back yesterday or a lower goal cannot tell it twice. A day seen reached with the notification off is claimed too. It says the minute the goal was met and the streak it extends.
+- [x] Evening reminder (inexact window alarm, configurable time and threshold)
+  - Time on the clock dial (20:00 by default); threshold "until the goal is met" (default), below 75%, below half. It says the steps left and the brisk walk they take, after catching up with the sensor's batch (`TrackerLink`). Silent when the count is not live (paused, stopped, no permission), when it comes over two hours late or past midnight, and never armed for a day already at its goal. *Deviation:* `setAndAllowWhileIdle` (as Chiaro's reminders) rather than `setWindow`: one wake either way, and Doze would hold a window alarm until a maintenance window, too late for a walk (§15).
+- [x] Weekly summary notification (optional)
+  - On the first day of the week at 9:00, the week that ended as History shows it (`WeeklySummary` over `PeriodOverview`): a sentence first (the goal every day, more or fewer steps than the week before, or the days at the goal), then the steps and the daily average, the days at the goal, the best day and the estimates. A non-wakeup alarm: posted the first time the phone is awake after 9:00.
+- [x] Quick Settings tile
+  - `StepsTileService`: the count and the share of the goal while counting, the reason otherwise (paused, not counting, no permission), read between `onStartListening` and `onStopListening` and live while the panel is open. A tap opens Today; a paused tile's tap asks to resume, as the widget's. Settings adds it with the system's own prompt (`requestAddTileService`).
 - [x] Rich ongoing notification (progress bar, distance), throttled while the screen is on
   - Brought forward (owner's request): expanded with `BigTextStyle`, from the same `TodayOverview` as Today and the widgets, without the usual day. Plus the Settings row for how it shows (§15).
+- Plus: Settings' Notifications group, with a card when Android would drop what is turned on (the permission refused, the app's notifications or the goals' channel off) and the button to the page that fixes it; turning one on asks for the permission where Android still can.
 
 **Acceptance:**
-- No duplicate goal notifications across reboots or time-zone changes.
-- The tile reads data only while the Quick Settings panel is open.
+- [x] No duplicate goal notifications across reboots or time-zone changes.
+  - By construction (a claimed day, days only forward) and pinned by `GoalReachedTest`, `UserPreferencesDataSourceTest` and `GoalNotifierTest` (a second process on the same store tells nothing). To confirm on the device.
+- [x] The tile reads data only while the Quick Settings panel is open.
+  - By construction: its only reads live in a scope opened by `onStartListening` and cancelled by `onStopListening`. To confirm on the device.
+- [ ] Battery check at the end of the phase (§9, §12): *pending (owner, on a device)*. Expected: one alarm a day with a wakeup, only with the evening reminder on; nothing else new with the screen off.
 
 ### Phase 7 — Data, calibration and polish
 
@@ -735,6 +746,13 @@ Include:
 - **Battery tip: no Samsung, no external guide** (owner's question, 25 Sep 2026): Samsung is off the `OemTips` list. Since One UI 6 (Android 14, which is Passo's minSdk, so every Samsung that can install it) Samsung has committed, with Google, to letting the foreground services of apps that target Android 14 and declare their type run as intended; Passo's service is typed `health`. The tip would warn about a problem those phones no longer have. The page keeps its text and the button to the app's own settings page (where Android 14+ keeps "Unrestricted") on the other makers, but no longer links to dontkillmyapp.com: a community page, dated, out of style with the app and the only place Passo sent anyone to the web, for a step the button already covers.
 - **The counting notification: no in-app switch** (owner's request, 25 Sep 2026): Android raises a foreground service's notification on a channel the app made `IMPORTANCE_MIN` or `NONE` back to `LOW`, unless the reader set that importance (`NotificationManagerService`, the FGS/UIJ importance check). So an app switch that moves it to a quiet channel would not work; only the reader can minimize it or turn it off, on the channel's system page, and Android keeps that choice. Settings reads the channel (`CountingNotification.visibility`) and opens its page; nothing is stored by the app. Turned off, the service still runs and Android lists it among the active apps. The expanded form is `BigTextStyle` rather than a custom layout: the system template follows the phone's theme and every maker's notification shade, and costs nothing beyond the update it rides on. The app starts the service again whenever it is opened, and `startForeground` posts the notification again: the service posts the last content it built, not the bare count, so the expanded form does not vanish until the next step (owner's report: after swiping it away, it came back without it).
 - **The launcher icon: Chiaro's ring, Passo's step** (owner's request and choice, 25 Sep 2026, over four drawings: one shoe print, one bare foot, two bare feet, two prints on a round-capped ring). The ring is Chiaro's (radius 21, stroke 10, the same warm white ground), in a sweep of greens from a fresh start to the deep green of a met goal, the day filling up clockwise. Where Chiaro has its sun (upper right) Passo has a shoe print, mirrored to the upper left, in the amber of Chiaro's sun, cutting the ring with a gap as the sun does and walking the way the ring fills: the two badges read as a pair, and the mark in the ring's gap becomes the family's signature. One print rather than two, and a sole rather than a bare foot: toes and a second print turn into dots below 48 px, and the sole still reads at 32. The two layers are written by `tools/draw_launcher_icon.py` (standard library only; the cut is an offset outline, restated as nested clips because VectorDrawable has no stroke-to-path) and are not edited by hand; the themed layer is the same drawing as shapes.
+- **Phase 6: goals and system surfaces** (`docs/adr/0008-goals-and-system-surfaces.md`, owner's request of a clean implementation, above all in UI and UX). Goal reached is noticed by the service on the samples it already has, and told once a day by claiming the day in the settings file (days only forward); the evening reminder and the weekly summary are one inexact alarm each, re-armed from a watch on the settings for the life of the process, from the clock and zone broadcasts and at each firing. All three are off by default and opt-in in Settings, which says when Android would drop them.
+- **Evening reminder alarm: `setAndAllowWhileIdle` with a wakeup**, not §8's `setWindow`: the cost is the same single wake, and a window alarm is held by Doze until a maintenance window, which can put a reminder to walk past the time it could be walked. It is armed only while counting is on and never for a day already at its goal; it says nothing when the count is not live, when it comes over two hours late or after midnight. The weekly summary does not wake the phone (`RTC`).
+- **Evening reminder threshold**: until the goal is met (default), below 75%, below half. A goal met is never reminded.
+- **The reminder reads the count after a flush** (`TrackerLink`): with the screen off the sensor hub holds up to ten minutes of steps, and a reminder that forgot the walk just finished would be wrong at the worst moment.
+- **The weekly summary** comes on the first day of the week at 9:00, and is the week History shows (`WeeklySummary` over `PeriodOverview`), so the two never disagree; a week with no steps sends nothing.
+- **The Quick Settings tile** lives in `:core:tracking` with the counting notification; Settings adds it with `requestAddTileService` and says where it stands only once the system has answered.
+- `Trend.of` and its 5% band moved to the `Trend` enum, shared by Insights and the weekly summary.
 
 ### Open
 
