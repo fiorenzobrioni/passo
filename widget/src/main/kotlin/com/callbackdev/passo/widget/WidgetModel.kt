@@ -3,6 +3,8 @@ package com.callbackdev.passo.widget
 import android.content.Context
 import android.util.Log
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
+import com.callbackdev.passo.core.data.sessions.LiveSession
+import com.callbackdev.passo.core.data.sessions.SessionRepository
 import com.callbackdev.passo.core.data.tracking.LiveSteps
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.data.tracking.withPending
@@ -12,6 +14,7 @@ import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.today.TypicalDay
 import com.callbackdev.passo.core.domain.today.minuteOfDay
 import com.callbackdev.passo.core.domain.widget.CountingState
+import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.UserSettings
 import com.callbackdev.passo.core.tracking.StepTracking
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -37,6 +40,8 @@ data class WidgetModel(
     val day: WidgetDay?,
     /** The day could not be read (an error, or a read that did not finish in time): said, not waited on. */
     val unavailable: Boolean = false,
+    /** The outing under way or paused: the sentence's place says it (PLANNING.md §11 Phase 10). */
+    val session: Session? = null,
 ) {
     companion object {
         /** A card that says it could not read the day, in the default dress. */
@@ -66,6 +71,8 @@ constructor(
     private val tracking: TrackingRepository,
     private val liveSteps: LiveSteps,
     private val looks: WidgetLookStore,
+    private val liveSession: LiveSession,
+    private val sessions: SessionRepository,
 ) {
     private val typicalLock = Mutex()
     private var typicalKey: Pair<Long, ZoneId>? = null
@@ -100,7 +107,15 @@ constructor(
             typical = if (settings.typicalDayLine) typicalFor(day, zone) else null,
             liveSteps = live?.steps,
         )
-        return WidgetModel(look, settings, state, WidgetDay(overview, HourlySteps.of(minutes), nowMinute))
+        // The service's outing when it runs (ahead of what it wrote); the stored one otherwise.
+        val session = liveSession.current.value?.session?.takeIf { it.live } ?: sessions.liveSession()
+        return WidgetModel(
+            look,
+            settings,
+            state,
+            WidgetDay(overview, HourlySteps.of(minutes), nowMinute),
+            session = session?.takeIf { state == CountingState.COUNTING },
+        )
     }
 
     /**

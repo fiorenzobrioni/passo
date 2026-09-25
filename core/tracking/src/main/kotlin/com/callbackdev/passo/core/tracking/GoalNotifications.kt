@@ -77,6 +77,12 @@ internal class GoalNotifications(private val context: Context) {
             .setContentText(text)
             .setStyle(NotificationCompat.BigTextStyle().bigText("$text\n$soFar"))
             .setProgress(nudge.goalSteps, nudge.steps, false)
+            // One touch from the reminder to the walk it suggests: an outing for the steps left.
+            .addAction(
+                0,
+                res.getString(R.string.evening_reminder_walk_now),
+                SessionControl.pendingIntent(context, SessionControl.ACTION_START_REST_OF_DAY, REQUEST_WALK_NOW),
+            )
             .build()
     }
 
@@ -168,6 +174,7 @@ internal class GoalNotifications(private val context: Context) {
         private const val REQUEST_GOAL_REACHED = 2
         private const val REQUEST_EVENING_REMINDER = 3
         private const val REQUEST_WEEKLY_SUMMARY = 4
+        private const val REQUEST_WALK_NOW = 15
 
         /** One day at the goal is a day, not a streak (as Insights says it). */
         private const val MIN_STREAK_TO_TELL = 2

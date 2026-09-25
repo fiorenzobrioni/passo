@@ -54,3 +54,53 @@ data class DiagnosticsEventEntity(
     val type: String,
     val detail: String,
 )
+
+/**
+ * An outing the reader keeps, ready to start (PLANNING.md §11 Phase 10). Enums are stored by
+ * name; `milestones` is a bit set of `SessionMilestone` ordinals.
+ */
+@Entity(tableName = "session_plan")
+data class SessionPlanEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String?,
+    val goalKind: String,
+    val goalValue: Int,
+    val intensity: String,
+    val milestones: Int,
+    val vibrate: Boolean,
+    val position: Int,
+    val lastUsedAtMillis: Long?,
+)
+
+/**
+ * One outing: its goal as it was when it started, and what it added up to, measured from the
+ * steps. Written with the step batches while it is under way, in the same transaction as the
+ * counter state, so the two never disagree after a crash (PLANNING.md §4.5).
+ */
+@Entity(tableName = "session", indices = [Index("localEpochDay"), Index("state")])
+data class SessionEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val planId: Long?,
+    val name: String?,
+    val goalKind: String,
+    val goalValue: Int,
+    val restOfDay: Boolean,
+    val intensity: String,
+    val milestones: Int,
+    val vibrate: Boolean,
+    val localEpochDay: Long,
+    val startedAtMillis: Long,
+    val state: String,
+    val endedAtMillis: Long?,
+    val endReason: String?,
+    val steps: Int,
+    val movingMillis: Long,
+    val zoneMillis: Long,
+    val distanceMeters: Double,
+    val activeKcal: Double,
+    val lastStepAtMillis: Long,
+    val lastEventAtMillis: Long,
+    val pausedAtMillis: Long?,
+    val reachedAtMillis: Long?,
+    val toldMilestones: Int,
+)

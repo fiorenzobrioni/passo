@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Le uscite (PLANNING.md §11 Fase 10): le parole comuni a Oggi, Storico, la pagina Uscite e
+     le notifiche. -->
+<resources>
+    <string name="session_name_free">Camminata</string>
+    <string name="session_name_brisk">Camminata svelta</string>
+    <string name="session_name_vigorous">Camminata sostenuta</string>
+    <string name="session_name_run">Corsa</string>
+    <string name="session_name_rest_of_day">Completa la giornata</string>
+
+    <string name="session_intensity_free">Libero</string>
+    <string name="session_intensity_brisk">Svelto</string>
+    <string name="session_intensity_vigorous">Sostenuto</string>
+    <string name="session_intensity_run">Corsa</string>
+    <string name="session_intensity_free_detail">Nessuna cadenza da tenere</string>
+    <string name="session_intensity_brisk_detail">Da 100 passi al minuto: sforzo moderato</string>
+    <string name="session_intensity_vigorous_detail">Da 130 passi al minuto: sforzo intenso</string>
+    <string name="session_intensity_run_detail">Da 140 passi al minuto, con il tuo passo di corsa</string>
+
+    <string name="session_plan_free">%1$s, a ritmo libero</string>
+    <string name="session_plan_brisk">%1$s a passo svelto</string>
+    <string name="session_plan_vigorous">%1$s a passo sostenuto</string>
+    <string name="session_plan_run">%1$s di corsa</string>
+    <string name="session_amount_rest_of_day">Il resto dell’obiettivo di oggi</string>
+    <plurals name="session_amount_steps">
+        <item quantity="one">%1$s passo</item>
+        <item quantity="many">%1$s passi</item>
+        <item quantity="other">%1$s passi</item>
+    </plurals>
+    <string name="session_progress">%1$s di %2$s</string>
+
+    <string name="session_headline_starting">Si parte: mancano %1$s.</string>
+    <plurals name="session_headline_going">
+        <item quantity="one">Manca %1$s.</item>
+        <item quantity="many">Mancano %1$s.</item>
+        <item quantity="other">Mancano %1$s.</item>
+    </plurals>
+    <plurals name="session_headline_past_half">
+        <item quantity="one">Oltre metà strada: manca %1$s.</item>
+        <item quantity="many">Oltre metà strada: mancano %1$s.</item>
+        <item quantity="other">Oltre metà strada: mancano %1$s.</item>
+    </plurals>
+    <plurals name="session_headline_almost">
+        <item quantity="one">Quasi fatto: manca %1$s.</item>
+        <item quantity="many">Quasi fatto: mancano %1$s.</item>
+        <item quantity="other">Quasi fatto: mancano %1$s.</item>
+    </plurals>
+    <string name="session_headline_paused">In pausa. Riprendi quando vuoi.</string>
+    <string name="session_headline_reached">Obiettivo raggiunto: %1$s.</string>
+    <string name="session_headline_stopped">Fermata al %1$s dell’obiettivo.</string>
+    <string name="session_headline_idle">Chiusa da sola al %1$s dell’obiettivo, dopo una lunga sosta.</string>
+    <string name="session_headline_closed">Chiusa al %1$s dell’obiettivo.</string>
+
+    <string name="session_cadence_on_pace">%1$s: a ritmo</string>
+    <string name="session_cadence_below">%1$s: sotto il tuo ritmo</string>
+    <string name="session_cadence_free">%1$s, %2$s</string>
+    <string name="session_cadence_relaxed">passo tranquillo</string>
+    <string name="session_cadence_brisk">passo svelto</string>
+    <string name="session_cadence_vigorous">passo sostenuto</string>
+    <string name="session_cadence_running">corsa</string>
+    <string name="session_cadence_waiting">Cadenza tra qualche secondo</string>
+
+    <string name="session_zone">%1$s di %2$s al ritmo scelto</string>
+    <string name="session_outcome_reached">Obiettivo raggiunto</string>
+    <string name="session_outcome_share">%1$s dell’obiettivo</string>
+    <string name="session_estimated">Stima: %1$s · %2$s</string>
+    <string name="session_spoken">%1$s dalle %2$s alle %3$s, %4$s: %5$s. %6$s</string>
+    <string name="session_card_pause">Pausa</string>
+    <string name="session_card_resume">Riprendi</string>
+    <string name="session_card_stop">Termina</string>
+    <string name="session_card_keep_going">Continua</string>
+    <string name="session_card_close">Chiudi</string>
+    <string name="session_card_under_way">In corso</string>
+    <string name="session_card_paused">In pausa</string>
+    <string name="session_card_progress_description">%1$s, %2$s</string>
+    <string name="session_card_when">%1$s · %2$s</string>
+    <string name="session_brief">%1$s: %2$s</string>
+    <string name="session_brief_paused">%1$s: in pausa</string>
+</resources>

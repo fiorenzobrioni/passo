@@ -3,12 +3,15 @@ package com.callbackdev.passo.feature.history
 import android.content.res.Resources
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.callbackdev.passo.core.data.sessions.SessionRepository
 import com.callbackdev.passo.core.data.settings.SettingsRepository
 import com.callbackdev.passo.core.data.tracking.LiveSteps
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.data.tracking.byDayWithLive
 import com.callbackdev.passo.core.data.tracking.withPending
 import com.callbackdev.passo.core.domain.metrics.MetricsCalculator
+import com.callbackdev.passo.core.domain.sessions.DayOutings
+import com.callbackdev.passo.core.domain.sessions.Outing
 import com.callbackdev.passo.core.domain.settings.firstDayOfWeek
 import com.callbackdev.passo.core.domain.today.DayMinute
 import com.callbackdev.passo.core.domain.today.HourlySteps
@@ -45,6 +48,7 @@ constructor(
     private val tracking: TrackingRepository,
     private val settingsRepository: SettingsRepository,
     private val liveSteps: LiveSteps,
+    private val sessions: SessionRepository,
 ) : ViewModel() {
     private val clock: Flow<Pair<LocalDate, Int>> = flow {
         while (true) {
@@ -84,13 +88,14 @@ constructor(
     /** One day in detail, live while it is today; its walks found only if the reader wants them. */
     fun day(date: LocalDate): Flow<DayDetail> {
         val epochDay = date.toEpochDay()
+        val preferences = combine(settingsRepository.settings, settingsRepository.profile, ::Pair)
         return combine(
             tracking.observeMinutesOn(epochDay),
             tracking.observeSummary(epochDay),
             liveSteps.today,
-            settingsRepository.settings,
-            settingsRepository.profile,
-        ) { stored, summary, live, settings, profile ->
+            preferences,
+            sessions.observeSessionsOn(epochDay),
+        ) { stored, summary, live, (settings, profile), outings ->
             val zone = ZoneId.systemDefault()
             val today = LocalDate.now(zone)
             val isToday = date == today
@@ -99,6 +104,15 @@ constructor(
                 DayMinute(minuteOfDay(it.epochMinute, it.localEpochDay, zone), it.steps)
             }
             val computed = MetricsCalculator.day(minutes.map { it.steps }, profile)
+            val walks = if (settings.walkDetection) {
+                WalkDetector.detect(
+                    minutes,
+                    profile,
+                    settings.minWalkMinutes,
+                )
+            } else {
+                null
+            }
             // A past day keeps the estimates it froze with (PLANNING.md §5); today is still open.
             val frozen = summary?.takeIf { !isToday }
             DayDetail(
@@ -111,17 +125,12 @@ constructor(
                 briskMinutes = frozen?.briskMinutes ?: computed.briskMinutes,
                 averageCadence = computed.averageCadence,
                 hourly = HourlySteps.of(minutes),
-                walks = if (settings.walkDetection) {
-                    WalkDetector.detect(
-                        minutes,
-                        profile,
-                        settings.minWalkMinutes,
-                    )
-                } else {
-                    null
-                },
+                walks = walks,
                 isToday = isToday,
                 currentHour = if (isToday) LocalTime.now(zone).hour else null,
+                // An outing under way is Today's card; History lists the ones that are over.
+                outings = DayOutings.of(walks, outings, zone, System.currentTimeMillis())
+                    .filterNot { it is Outing.Planned && it.session.live },
             )
         }.flowOn(Dispatchers.Default)
     }

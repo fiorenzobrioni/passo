@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.callbackdev.passo.core.designsystem.components.BarChart
 import com.callbackdev.passo.core.designsystem.components.ChartBar
 import com.callbackdev.passo.core.designsystem.components.ChartSpan
-import com.callbackdev.passo.core.designsystem.components.WalkList
+import com.callbackdev.passo.core.designsystem.components.OutingList
 import com.callbackdev.passo.core.designsystem.format.annotated
 import com.callbackdev.passo.core.designsystem.format.axisHour
 import com.callbackdev.passo.core.designsystem.format.clockTime
@@ -38,6 +38,7 @@ import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
+import com.callbackdev.passo.core.domain.sessions.Outing
 import com.callbackdev.passo.core.domain.today.HourlySteps
 
 /**
@@ -60,8 +61,7 @@ internal fun DayPage(detail: DayDetail?, minWalkMinutes: Int, format: MeasureFor
         item(key = "headline") { PageHeadline(dayHeadline(detail, format), dayDetailLine(detail, minWalkMinutes)) }
         item(key = "hours") { HoursCard(detail, format) }
         item(key = "metrics") { DayMetrics(detail, format) }
-        val walks = detail.walks.orEmpty()
-        if (walks.isNotEmpty()) {
+        if (detail.outings.isNotEmpty()) {
             item(key = "walks") {
                 Surface(
                     color = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -76,7 +76,7 @@ internal fun DayPage(detail: DayDetail?, minWalkMinutes: Int, format: MeasureFor
                                 heading()
                             },
                         )
-                        WalkList(walks, format)
+                        OutingList(detail.outings, format)
                         Text(
                             text = stringResource(R.string.history_walks_caption),
                             style = MaterialTheme.typography.bodySmall,
@@ -98,7 +98,7 @@ private fun HoursCard(detail: DayDetail, format: MeasureFormatter) {
         val future = detail.currentHour != null && hour > detail.currentHour
         ChartBar(value = if (future) null else hourly[hour], current = hour == detail.currentHour)
     }
-    val walks = detail.walks.orEmpty()
+    val outings = detail.outings
     val stepsOf = @Composable { steps: Int ->
         pluralStringResource(R.plurals.history_steps, steps, format.steps(steps))
     }
@@ -123,7 +123,7 @@ private fun HoursCard(detail: DayDetail, format: MeasureFormatter) {
     ChartCard(
         title = title,
         caption = stringResource(R.string.history_caption_hours),
-        legend = { if (walks.isNotEmpty()) ChartLegend(goal = false, walks = true) },
+        legend = { if (outings.isNotEmpty()) ChartLegend(goal = false, walks = true) },
         readout = {
             val hour = selected
             val text = when {
@@ -147,7 +147,7 @@ private fun HoursCard(detail: DayDetail, format: MeasureFormatter) {
             selected = selected,
             onSelect = { selected = it },
             scaleLabel = format::steps,
-            spans = walks.map { ChartSpan(it.startMinute / 60f, it.endMinute / 60f) },
+            spans = outings.map { ChartSpan(it.startMinute / 60f, it.endMinute / 60f) },
             scaleFloor = HOUR_SCALE_FLOOR,
             modifier = Modifier.testTag(HistoryTags.CHART),
         )
@@ -204,6 +204,11 @@ private fun DayMetrics(detail: DayDetail, format: MeasureFormatter) {
 }
 
 private const val MINUTES_PER_HOUR = 60
+
+private val Outing.endMinute: Int get() = when (this) {
+    is Outing.Detected -> walk.endMinute
+    is Outing.Planned -> endMinute
+}
 
 /**
  * The hours' scale reaches 1,000 steps at least: about ten minutes of walking. The world's

@@ -87,4 +87,14 @@
     <string name="tile_permission">Manca il permesso</string>
     <string name="tile_not_set_up">Da configurare</string>
     <string name="tile_no_sensor">Nessun contapassi</string>
+    <!-- Le uscite (PLANNING.md §11 Fase 10). -->
+    <string name="sessions_channel_name">Uscite</string>
+    <string name="sessions_channel_description">L’obiettivo di un’uscita raggiunto. I segnali lungo la strada sono vibrazioni, con gli schemi di Passo, e seguono questo canale: spento qui, si fermano anche loro.</string>
+    <string name="session_action_pause">Pausa</string>
+    <string name="session_action_resume">Riprendi</string>
+    <string name="session_action_stop">Termina</string>
+    <string name="session_action_keep_going">Continua</string>
+    <string name="session_chip_paused">In pausa</string>
+    <string name="session_goal_title">%1$s: obiettivo raggiunto</string>
+    <string name="evening_reminder_walk_now">Cammina ora</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.callbackdev.passo.feature.history
 
 import androidx.compose.runtime.Immutable
+import com.callbackdev.passo.core.domain.sessions.Outing
 import com.callbackdev.passo.core.domain.today.HourlySteps
 import com.callbackdev.passo.core.domain.walks.Walk
 import com.callbackdev.passo.core.model.DailySummary
@@ -36,6 +37,8 @@ data class HistoryUiState(
  *   §5: past days are frozen); today's are computed with the current profile, as Today's are.
  * @property averageCadence over the day's active minutes; it does not depend on the profile.
  * @property walks null when walk detection is off: then no walk is drawn and none is listed.
+ * @property outings the day's walks and outings in one list (PLANNING.md §11 Phase 10): an
+ *   outing stands in for the walk found in its minutes, and is listed whatever the switch says.
  */
 @Immutable
 data class DayDetail(
@@ -51,6 +54,7 @@ data class DayDetail(
     val walks: List<Walk>?,
     val isToday: Boolean,
     val currentHour: Int?,
+    val outings: List<Outing> = emptyList(),
 ) {
     val goalReached: Boolean get() = steps >= goalSteps
 }

@@ -2,11 +2,20 @@ package com.callbackdev.passo.feature.history
 
 import com.callbackdev.passo.core.domain.metrics.DaySummaries
 import com.callbackdev.passo.core.domain.metrics.MetricsCalculator
+import com.callbackdev.passo.core.domain.sessions.Outing
 import com.callbackdev.passo.core.domain.today.DayMinute
 import com.callbackdev.passo.core.domain.today.HourlySteps
+import com.callbackdev.passo.core.domain.walks.Walk
 import com.callbackdev.passo.core.domain.walks.WalkDetector
 import com.callbackdev.passo.core.model.DailySummary
 import com.callbackdev.passo.core.model.Profile
+import com.callbackdev.passo.core.model.Session
+import com.callbackdev.passo.core.model.SessionEnd
+import com.callbackdev.passo.core.model.SessionGoalKind
+import com.callbackdev.passo.core.model.SessionIntensity
+import com.callbackdev.passo.core.model.SessionMilestone
+import com.callbackdev.passo.core.model.SessionState
+import com.callbackdev.passo.core.model.SessionTotals
 import com.callbackdev.passo.core.model.UnitPreference
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -86,10 +95,15 @@ internal object HistorySamples {
         minWalkMinutes = 10,
     )
 
-    fun detail(date: LocalDate, walkDetection: Boolean = true): DayDetail {
+    /**
+     * One day in detail; with [outing], its last walk was walked as an outing: a brisk 20
+     * minutes reached (the list shows the outing in its place).
+     */
+    fun detail(date: LocalDate, walkDetection: Boolean = true, outing: Boolean = false): DayDetail {
         val isToday = date == today
         val minutes = minutes(date, if (isToday) NOW_MINUTE else 24 * 60)
         val metrics = MetricsCalculator.day(minutes.map { it.steps }, profile)
+        val walks = if (walkDetection) WalkDetector.detect(minutes, profile, 10) else null
         return DayDetail(
             date = date,
             steps = metrics.steps,
@@ -100,9 +114,38 @@ internal object HistorySamples {
             briskMinutes = metrics.briskMinutes,
             averageCadence = metrics.averageCadence,
             hourly = HourlySteps.of(minutes),
-            walks = if (walkDetection) WalkDetector.detect(minutes, profile, 10) else null,
+            walks = walks,
             isToday = isToday,
             currentHour = if (isToday) NOW_MINUTE / 60 else null,
+            outings = walks.orEmpty().map { walk ->
+                if (outing && walk == walks?.last()) plannedFrom(walk, date) else Outing.Detected(walk)
+            },
         )
+    }
+
+    private fun plannedFrom(walk: Walk, date: LocalDate): Outing.Planned {
+        val session = Session(
+            id = 1,
+            planId = 1,
+            name = null,
+            goalKind = SessionGoalKind.TIME,
+            goalValue = 20,
+            intensity = SessionIntensity.BRISK,
+            milestones = setOf(SessionMilestone.HALF),
+            vibrate = true,
+            localEpochDay = date.toEpochDay(),
+            startedAtMillis = 0,
+            state = SessionState.FINISHED,
+            end = SessionEnd.GOAL,
+            reachedAtMillis = 1,
+            totals = SessionTotals(
+                steps = walk.steps,
+                movingMillis = walk.minutes * 60_000L,
+                zoneMillis = (walk.minutes - 2) * 60_000L,
+                distanceMeters = walk.distanceMeters,
+                activeKcal = walk.activeKcal,
+            ),
+        )
+        return Outing.Planned(session, walk.startMinute, walk.endMinute)
     }
 }

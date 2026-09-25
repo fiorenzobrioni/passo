@@ -3,12 +3,17 @@ package com.callbackdev.passo.feature.today
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.callbackdev.passo.core.data.sessions.LiveSession
+import com.callbackdev.passo.core.data.sessions.LiveSessionState
+import com.callbackdev.passo.core.data.sessions.SessionRepository
 import com.callbackdev.passo.core.data.settings.SettingsRepository
 import com.callbackdev.passo.core.data.tracking.LiveSteps
 import com.callbackdev.passo.core.data.tracking.LiveToday
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.data.tracking.withPending
 import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.sessions.DayOutings
+import com.callbackdev.passo.core.domain.sessions.Outing
 import com.callbackdev.passo.core.domain.today.DayMinute
 import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.today.TypicalDay
@@ -16,7 +21,9 @@ import com.callbackdev.passo.core.domain.today.minuteOfDay
 import com.callbackdev.passo.core.domain.walks.WalkDetector
 import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.Profile
+import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.UserSettings
+import com.callbackdev.passo.core.tracking.SessionControl
 import com.callbackdev.passo.core.tracking.StepTracking
 import com.callbackdev.passo.core.tracking.TrackingControl
 import com.callbackdev.passo.core.tracking.TrackingReadiness
@@ -55,7 +62,9 @@ constructor(
     private val tracking: TrackingRepository,
     private val settingsRepository: SettingsRepository,
     private val control: TrackingControl,
+    private val sessions: SessionRepository,
     liveSteps: LiveSteps,
+    liveSession: LiveSession,
 ) : ViewModel() {
     private val readiness = MutableStateFlow(StepTracking.readiness(context))
     private val celebratedOn = MutableStateFlow<LocalDate?>(null)
@@ -91,7 +100,29 @@ constructor(
         celebratedOn,
     ) { settings, profile, ready, firstDay, celebrated -> Preferences(settings, profile, ready, firstDay, celebrated) }
 
-    val state: StateFlow<TodayUiState?> = combine(inputs, preferences, ::build)
+    /**
+     * Today's outings, and the one the card shows: the service's while it runs (ahead of what it
+     * wrote), the stored one while the system has it stopped; else the last one over today, until
+     * the reader puts it away.
+     */
+    private val outings: Flow<Outings> = combine(
+        day.flatMapLatest { sessions.observeSessionsOn(it.toEpochDay()) },
+        liveSession.current,
+        sessions.observeLatestFinished(),
+        sessions.summarySeen,
+    ) { today, live, latest, seen ->
+        val stored = today.lastOrNull { it.live }
+        val card =
+            live?.takeIf { it.session.live || it.session.id != seen }
+                ?: stored?.let {
+                    LiveSessionState(it, cadence = null, canKeepGoing = false, alertsWhileScreenOff = true)
+                }
+                ?: latest?.takeIf { it.id != seen && today.any { same -> same.id == it.id } }
+                    ?.let { LiveSessionState(it, cadence = null, canKeepGoing = false, alertsWhileScreenOff = true) }
+        Outings(today, card)
+    }
+
+    val state: StateFlow<TodayUiState?> = combine(inputs, preferences, outings, ::build)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), null)
 
     /** On every return to the screen: a permission can change in the system's settings. */
@@ -114,7 +145,28 @@ constructor(
         celebratedOn.value = date
     }
 
-    private fun build(inputs: Inputs, prefs: Preferences): TodayUiState {
+    fun pauseSession() {
+        SessionControl.pause(context)
+    }
+
+    fun resumeSession() {
+        SessionControl.resume(context)
+    }
+
+    fun stopSession() {
+        SessionControl.stop(context)
+    }
+
+    fun keepGoing() {
+        SessionControl.keepGoing(context)
+    }
+
+    /** The finished outing's card is put away; the outing stays in the day's list. */
+    fun closeSession(id: Long) {
+        viewModelScope.launch { sessions.setSummarySeen(id) }
+    }
+
+    private fun build(inputs: Inputs, prefs: Preferences, outings: Outings): TodayUiState {
         val zone = ZoneId.systemDefault()
         val date = inputs.moment.date
         val epochDay = date.toEpochDay()
@@ -130,6 +182,11 @@ constructor(
             typical = inputs.typical,
             liveSteps = live?.steps,
         )
+        val walks = if (prefs.settings.walkDetection) {
+            WalkDetector.detect(dayMinutes, prefs.profile, prefs.settings.minWalkMinutes)
+        } else {
+            null
+        }
         val status = when {
             prefs.readiness == TrackingReadiness.PERMISSION_NEEDED -> TrackingStatus.PERMISSION_NEEDED
             !prefs.settings.trackingEnabled -> TrackingStatus.PAUSED
@@ -144,11 +201,11 @@ constructor(
             walkingStepLength = StepLengths.of(prefs.profile).walkingMeters,
             firstDay = prefs.firstRecordedDay == null || prefs.firstRecordedDay >= epochDay,
             celebrate = overview.goalReachedAt != null && prefs.celebratedOn != date,
-            walks = if (prefs.settings.walkDetection) {
-                WalkDetector.detect(dayMinutes, prefs.profile, prefs.settings.minWalkMinutes)
-            } else {
-                null
-            },
+            walks = walks,
+            session = outings.card,
+            // The outing under way is the card's; the list holds the ones that are over.
+            outings = DayOutings.of(walks, outings.today, zone, System.currentTimeMillis())
+                .filterNot { it is Outing.Planned && it.session.live },
         )
     }
 
@@ -171,6 +228,8 @@ constructor(
         val live: LiveToday?,
         val typical: TypicalDay?,
     )
+
+    private data class Outings(val today: List<Session>, val card: LiveSessionState?)
 
     private data class Preferences(
         val settings: UserSettings,

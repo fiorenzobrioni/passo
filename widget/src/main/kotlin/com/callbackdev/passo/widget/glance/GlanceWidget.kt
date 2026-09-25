@@ -39,6 +39,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
+import com.callbackdev.passo.core.designsystem.format.sessionBrief
 import com.callbackdev.passo.core.designsystem.theme.WidgetDress
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.widget.CountingState
@@ -159,9 +160,13 @@ private class CardParts(
     /** The widest count this day is likely to print, so the number keeps its size as it grows. */
     val heroEm: Float = textEm(format.steps(maxOf(overview.steps, overview.goalSteps)), TextWeight.BOLD)
 
-    /** What the sentence's place says: what a tap does while the count is not moving, else the sentence. */
-    val sentence: String? =
-        statusText(context, model.state) ?: if (model.look.showSentence) sentence(context, overview, format) else null
+    /**
+     * What the sentence's place says: what a tap does while the count is not moving, else the
+     * outing under way, else the sentence.
+     */
+    val sentence: String? = statusText(context, model.state)
+        ?: model.session?.let { context.resources.sessionBrief(it, format) }
+        ?: if (model.look.showSentence) sentence(context, overview, format) else null
     val sentenceIsStatus = status
 
     fun goalLine(room: Dp): String {

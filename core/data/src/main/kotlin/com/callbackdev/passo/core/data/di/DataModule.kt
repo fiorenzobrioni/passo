@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.callbackdev.passo.core.data.db.PassoDatabase
+import com.callbackdev.passo.core.data.db.SessionDao
 import com.callbackdev.passo.core.data.db.TrackingDao
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
 import com.callbackdev.passo.core.data.time.TodaySource
@@ -29,6 +30,9 @@ object DataModule {
 
     @Provides
     fun trackingDao(database: PassoDatabase): TrackingDao = database.trackingDao()
+
+    @Provides
+    fun sessionDao(database: PassoDatabase): SessionDao = database.sessionDao()
 
     /**
      * One instance per process, as DataStore requires. A corrupt file is replaced by an empty

@@ -44,12 +44,13 @@ class HistoryScreenTest {
         dark: Boolean = false,
         target: HistoryTarget? = null,
         walkDetection: Boolean = true,
+        outing: Boolean = false,
     ) {
         compose.setContent {
             PassoTheme(darkTheme = dark) {
                 HistoryScreen(
                     state = state,
-                    dayDetail = { HistorySamples.detail(it, walkDetection) },
+                    dayDetail = { HistorySamples.detail(it, walkDetection, outing) },
                     onOpenSettings = {},
                     target = target,
                 )
@@ -128,6 +129,16 @@ class HistoryScreenTest {
         page().performScrollToNode(hasTestTag(HistoryTags.WALKS))
         compose.onAllNodes(hasContentDescription("Walk from", substring = true)).assertCountEquals(3)
         snapshot("history_day_walks")
+    }
+
+    @Test
+    fun `an outing stands in the list in its walk's place, with its goal`() {
+        show(target = HistoryTarget(PeriodScale.DAY, today.minusDays(1)), outing = true)
+        page().performScrollToNode(hasTestTag(HistoryTags.WALKS))
+        compose.onAllNodes(hasContentDescription("Walk from", substring = true)).assertCountEquals(2)
+        compose.onNode(hasContentDescription("Brisk walk from", substring = true)).assertExists()
+        compose.onNode(hasContentDescription("Goal reached: 20 min at a brisk pace", substring = true)).assertExists()
+        snapshot("history_day_outing")
     }
 
     @Test

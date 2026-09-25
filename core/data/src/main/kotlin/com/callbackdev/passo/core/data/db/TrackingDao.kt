@@ -62,9 +62,10 @@ abstract class TrackingDao {
 
     /**
      * Writes one batch atomically: minute increments, the counter state they lead to, the
-     * summaries of the days they touch, the log lines. Either all of it lands or none of it
-     * does, which is what keeps "stored steps + stored counter" consistent after any crash.
-     * Days that are over by [today] are finalized in the same transaction.
+     * summaries of the days they touch, the log lines, and the outing under way as those steps
+     * leave it. Either all of it lands or none of it does, which is what keeps "stored steps +
+     * stored counter (+ stored outing)" consistent after any crash. Days that are over by
+     * [today] are finalized in the same transaction.
      */
     @Transaction
     open suspend fun writeBatch(
@@ -75,6 +76,7 @@ abstract class TrackingDao {
         goalSteps: Int,
         today: Long,
         diagnosticsKept: Int,
+        session: SessionEntity? = null,
     ) {
         val changes = linkedMapOf<Long, MutableList<MinuteChange>>()
         for (increment in increments) {
@@ -101,6 +103,7 @@ abstract class TrackingDao {
             insertDiagnostics(diagnostics)
             trimDiagnostics(diagnosticsKept)
         }
+        if (session != null) upsertSession(session)
     }
 
     /**
@@ -186,6 +189,9 @@ abstract class TrackingDao {
 
     @Upsert
     protected abstract suspend fun upsertSummary(summary: DailySummaryEntity)
+
+    @Upsert
+    protected abstract suspend fun upsertSession(session: SessionEntity)
 
     @Upsert
     protected abstract suspend fun upsertTrackerState(state: TrackerStateEntity)

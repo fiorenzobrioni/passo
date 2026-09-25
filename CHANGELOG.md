@@ -85,6 +85,15 @@ All notable changes to Passo are documented here. The format follows
 - A Quick Settings tile (Phase 6) with today's steps and the share of the goal, or why the
   count is not moving; it reads only while the panel is open, and a tap opens Today (or
   resumes a paused count). Settings adds it with one tap.
+- Outings (Phase 10): a walk or a run with a goal, started on purpose. One goal (steps, a
+  distance, minutes in motion, or the rest of the day) and an optional pace (brisk, vigorous,
+  running), measured from the steps. On the way it vibrates at the shares you choose (one, two,
+  three short pulses) and once, long, at the goal, so a phone in a pocket is read without
+  looking; the counting notification becomes the outing's, with Pause and Stop (a Live Update
+  on Android 16). Keep your outings on their own page, start one from Today, from the
+  launcher's long press or from the evening reminder's "Walk now"; see it in the widgets and the
+  Quick Settings tile while it lasts, and in the day's walks afterwards, with how much of its
+  goal was done.
 
 ### Changed
 

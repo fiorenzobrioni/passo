@@ -18,12 +18,20 @@ import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import com.callbackdev.passo.core.data.prefs.UserPreferences
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
+import com.callbackdev.passo.core.data.sessions.LiveSession
+import com.callbackdev.passo.core.data.sessions.LiveSessionState
+import com.callbackdev.passo.core.data.sessions.SessionRepository
 import com.callbackdev.passo.core.data.tracking.LiveSteps
 import com.callbackdev.passo.core.data.tracking.LiveToday
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.data.tracking.withPending
 import com.callbackdev.passo.core.data.widget.WidgetUpdates
 import com.callbackdev.passo.core.domain.goals.GoalReached
+import com.callbackdev.passo.core.domain.metrics.MetricsCalculator
+import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.sessions.SessionPlans
+import com.callbackdev.passo.core.domain.sessions.SessionSignal
+import com.callbackdev.passo.core.domain.sessions.SessionTracker
 import com.callbackdev.passo.core.domain.today.DayMinute
 import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.today.minuteOfDay
@@ -32,6 +40,13 @@ import com.callbackdev.passo.core.domain.widget.WidgetEvent
 import com.callbackdev.passo.core.model.DiagnosticsEvent
 import com.callbackdev.passo.core.model.DiagnosticsType
 import com.callbackdev.passo.core.model.MinuteSteps
+import com.callbackdev.passo.core.model.Profile
+import com.callbackdev.passo.core.model.Session
+import com.callbackdev.passo.core.model.SessionEnd
+import com.callbackdev.passo.core.model.SessionGoalKind
+import com.callbackdev.passo.core.model.SessionMilestone
+import com.callbackdev.passo.core.model.SessionState
+import com.callbackdev.passo.core.model.UnitPreference
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
@@ -41,8 +56,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -70,6 +87,13 @@ import javax.inject.Inject
  * screen coming on (after the flush, so the batch of the screen-off is in), the count, a new
  * day, and the service itself starting and stopping. Whether that repaints is the widgets'
  * policy; this side only reports, and reports nothing on a timer.
+ *
+ * An outing (PLANNING.md §11 Phase 10) is measured here too, from the same samples: a
+ * [SessionTracker] fed every accounted delta, written with the step batches in their
+ * transaction. While one is under way, and only then, the sensor is the wake-up counter with a
+ * [SESSION_LATENCY_US] latency, so its signals reach a phone in a pocket on time
+ * (docs/adr/0009-sessions.md); paused, over, or with no outing, the registration is the usual
+ * one. Commands (start, pause, resume, stop, keep going) arrive as intents ([SessionControl]).
  */
 @AndroidEntryPoint
 class StepTrackingService : Service() {
@@ -85,11 +109,16 @@ class StepTrackingService : Service() {
 
     @Inject lateinit var link: TrackerLink
 
+    @Inject lateinit var sessions: SessionRepository
+
+    @Inject lateinit var liveSession: LiveSession
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val persistMutex = Mutex()
 
     private lateinit var snapshots: SystemSnapshots
     private lateinit var notifications: TrackingNotifications
+    private lateinit var sessionNotifications: SessionNotifications
     private lateinit var sensorSource: StepSensorSource
     private lateinit var powerManager: PowerManager
 
@@ -127,12 +156,21 @@ class StepTrackingService : Service() {
     // read. The store has the last word (GoalNotifier claims the day there).
     private var goalToldDay: Long? = null
 
+    // The outing under way or paused; after its goal, kept a while for "Keep going". Written
+    // with the next batch when it changed.
+    private var tracker: SessionTracker? = null
+    private var sessionDirty = false
+
+    // Session commands arrive with the start intents, and wait until tracking has started.
+    private val commands = Channel<Intent>(Channel.UNLIMITED)
+
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()
         snapshots = SystemSnapshots(contentResolver)
         notifications = TrackingNotifications(this).also { it.ensureChannel() }
+        sessionNotifications = SessionNotifications(this).also { it.ensureChannel() }
         sensorSource = StepSensorSource(
             sensorManager = requireNotNull(getSystemService(SensorManager::class.java)) { "No SensorManager" },
             handler = Handler(Looper.getMainLooper()),
@@ -166,11 +204,14 @@ class StepTrackingService : Service() {
             stopSelf()
             return START_NOT_STICKY
         }
+        if (intent?.action in SESSION_ACTIONS) commands.trySend(requireNotNull(intent))
         if (!started) {
             started = true
             startTracking()
         } else if (interactive) {
-            // Opened from the app, so someone is looking: the numbers catch up at once.
+            // Opened from the app, so someone is looking: the numbers catch up at once, and a
+            // forgotten outing is closed where it ended.
+            checkSession()
             notifyNow()
         }
         return START_STICKY
@@ -180,6 +221,7 @@ class StepTrackingService : Service() {
         link.attach(null)
         liveSteps.publish(null)
         liveSteps.setServiceRunning(false)
+        liveSession.publish(null)
         unregisterReceivers()
         sensorSource.close()
         // Whatever is still buffered is written on a scope that outlives this one. If the
@@ -188,12 +230,22 @@ class StepTrackingService : Service() {
         // A stopped service cannot repaint at the next screen-on, so the widgets hear it now,
         // after the last write, and show the count it stopped at.
         val batch = ledger?.drain()
-        if (batch != null) {
-            FinalWrites.launch {
-                persistMutex.withLock { repository.persist(batch, System.currentTimeMillis()) }
-                widgets.notify(WidgetEvent.TRACKING_STATE)
+        val outing = tracker?.takeIf { it.session.live }
+        FinalWrites.launch {
+            persistMutex.withLock {
+                if (batch != null) {
+                    repository.persist(batch, System.currentTimeMillis(), outing?.session)
+                } else if (outing != null) {
+                    sessions.save(outing.session)
+                }
+                // Counting paused by the reader: an outing cannot go on without its steps. A
+                // service the system stopped keeps it, and the next start picks it up.
+                if (outing != null && !preferencesSource.current().settings.trackingEnabled) {
+                    outing.stop(System.currentTimeMillis())?.let { finished ->
+                        if (finished.kept) sessions.save(finished.session) else sessions.delete(finished.session.id)
+                    }
+                }
             }
-        } else {
             widgets.notify(WidgetEvent.TRACKING_STATE)
         }
         scope.cancel()
@@ -202,6 +254,12 @@ class StepTrackingService : Service() {
 
     private fun startTracking() {
         scope.launch {
+            // A paused count is never started by a side door (an old notification's button, a
+            // shortcut): the steps of the pause would be added at the first sample.
+            if (!preferencesSource.current().settings.trackingEnabled) {
+                stopSelf()
+                return@launch
+            }
             // A state restored from a backup of another installation is not this counter's.
             val adoption = repository.adoptTrackerState(installedAtMillis())
             val ledger = StepLedger(adoption.state)
@@ -215,11 +273,15 @@ class StepTrackingService : Service() {
                 )
             }
             goalToldDay = preferencesSource.goalNoticeDay()
+            // An outing the system interrupted (the process died): it goes on from where it was
+            // written, and the steps meanwhile reach it with the next sample.
+            sessions.liveSession()?.let { tracker = newTracker(it) }
             registerReceivers()
             // A reminder about to read the count asks for the sensor's batch first.
             link.attach { withContext(Dispatchers.Main.immediate) { flushSensor() } }
             launch { sensorSource.readings.collect(::onReading) }
             launch { preferencesSource.data.distinctUntilChanged().collect(::onPreferences) }
+            launch { for (command in commands) onSessionCommand(command) }
             persist()
             liveSteps.setServiceRunning(true)
             widgets.notify(WidgetEvent.TRACKING_STATE)
@@ -235,6 +297,7 @@ class StepTrackingService : Service() {
             is SensorReading.Sample -> {
                 val ledger = ledger ?: return
                 if (ledger.record(reading.sample, snapshots.current())) scope.launch { persist() }
+                ledger.lastAccounted?.let { onSessionSteps(it.steps, it.atWallMillis) }
                 publishLive()
                 scheduleNotification()
                 displayedToday()?.let {
@@ -257,17 +320,28 @@ class StepTrackingService : Service() {
         persistMutex.withLock {
             val ledger = ledger ?: return@withLock
             val batch = ledger.drain()
+            // The outing as these steps leave it, in their transaction.
+            val outing = tracker?.session?.takeIf { sessionDirty }
+            sessionDirty = false
             if (batch != null) {
                 val day = today()
                 inFlightToday = batch.increments.filter { it.localEpochDay == day }.sumOf { it.steps }
                 try {
-                    repository.persist(batch, System.currentTimeMillis())
+                    repository.persist(batch, System.currentTimeMillis(), outing)
                 } catch (e: Exception) {
                     // Back in the buffer: the next write carries it again, with the live state.
                     Log.e(TAG, "Writing the step buffer failed", e)
                     ledger.restore(batch)
+                    if (outing != null) sessionDirty = true
                     inFlightToday = 0
                     return@withLock
+                }
+            } else if (outing != null) {
+                try {
+                    sessions.save(outing)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Writing the outing failed", e)
+                    sessionDirty = true
                 }
             }
             refreshStoredTodayLocked()
@@ -307,7 +381,8 @@ class StepTrackingService : Service() {
             if (on) {
                 // What was batched while the screen was off, then live events.
                 flushSensor()
-                sensorSource.register(SCREEN_ON_LATENCY_US)
+                checkSession()
+                applyRegistration()
                 startTicker()
                 notifyNow()
                 widgets.notify(WidgetEvent.SCREEN_ON)
@@ -317,7 +392,7 @@ class StepTrackingService : Service() {
                 notifyJob?.cancel()
                 flushSensor()
                 persist()
-                sensorSource.register(SCREEN_OFF_LATENCY_US)
+                applyRegistration()
             }
         }
     }
@@ -361,6 +436,7 @@ class StepTrackingService : Service() {
                     } else {
                         scope.launch {
                             flushSensor()
+                            checkSession()
                             notifyNow()
                             widgets.notify(WidgetEvent.SCREEN_ON)
                         }
@@ -480,6 +556,12 @@ class StepTrackingService : Service() {
      */
     private suspend fun notificationContent(): NotificationContent {
         val steps = displayedToday()
+        val outing = tracker?.takeIf { it.session.live }
+        if (outing != null) {
+            val units = preferences?.settings?.units ?: UnitPreference.SYSTEM
+            val notice = SessionNotice(outing.session, outing.cadenceAt(System.currentTimeMillis()), units)
+            return NotificationContent(steps, units = units, session = notice)
+        }
         val preferences = preferences ?: return NotificationContent(steps)
         if (steps == null) return NotificationContent(null)
         val zone = ZoneId.systemDefault()
@@ -532,6 +614,197 @@ class StepTrackingService : Service() {
         }
     }
 
+    // --- Outings (PLANNING.md §11 Phase 10) ----------------------------------------------------
+
+    /**
+     * The usual registration, or the outing's: while one is counting, the wake-up counter (if
+     * the phone has one) reporting within [SESSION_LATENCY_US], so a signal is felt on time
+     * with the screen off. Paused, over, or none: exactly the registration of every other
+     * moment (docs/adr/0002-sensor-reporting.md).
+     */
+    private fun applyRegistration() {
+        val measuring = tracker?.session?.state == SessionState.ACTIVE
+        val latency = when {
+            interactive -> SCREEN_ON_LATENCY_US
+            measuring -> SESSION_LATENCY_US
+            else -> SCREEN_OFF_LATENCY_US
+        }
+        sensorSource.register(latency, wakeUp = measuring)
+    }
+
+    private fun onSessionSteps(steps: Int, atWallMillis: Long) {
+        val tracker = tracker ?: return
+        if (steps <= 0) return
+        onSessionSignals(tracker.onSteps(atWallMillis, steps))
+        sessionDirty = true
+        dropExpiredKeepGoing()
+        publishSession()
+    }
+
+    /** Closes an outing left still, paused or open for too long; drops a "Keep going" gone stale. */
+    private fun checkSession() {
+        val tracker = tracker ?: return
+        onSessionSignals(tracker.check(System.currentTimeMillis()))
+        dropExpiredKeepGoing()
+        publishSession()
+    }
+
+    private fun onSessionSignals(signals: List<SessionSignal>) {
+        for (signal in signals) {
+            when (signal) {
+                is SessionSignal.Milestone -> {
+                    val session = tracker?.session ?: continue
+                    if (session.vibrate && sessionNotifications.signalsAllowed()) {
+                        SessionHaptics.play(this, signal.milestone)
+                    }
+                    // Once, even with the screen off: whoever looks next sees where it stands.
+                    if (signal.milestone != SessionMilestone.GOAL) notifyNow()
+                }
+
+                is SessionSignal.Finished -> onSessionFinished(signal)
+            }
+        }
+    }
+
+    private fun onSessionFinished(finished: SessionSignal.Finished) {
+        val session = finished.session
+        // Kept a while after its goal, for "Keep going"; otherwise it is over here.
+        if (session.end != SessionEnd.GOAL || !finished.kept) tracker = null
+        sessionDirty = false
+        scope.launch {
+            persistMutex.withLock {
+                try {
+                    if (finished.kept) sessions.save(session) else sessions.delete(session.id)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Writing the end of an outing failed", e)
+                }
+            }
+        }
+        if (session.end == SessionEnd.GOAL) {
+            val units = preferences?.settings?.units ?: UnitPreference.SYSTEM
+            sessionNotifications.post(sessionNotifications.goalReached(session, units, withKeepGoing = true))
+        }
+        applyRegistration()
+        notifyNow()
+        publishSession()
+        widgets.notify(WidgetEvent.TRACKING_STATE)
+    }
+
+    /** Past its "Keep going" window, a goal's outing is over for good: the button goes too. */
+    private fun dropExpiredKeepGoing() {
+        val current = tracker ?: return
+        val session = current.session
+        if (session.state != SessionState.FINISHED || current.canKeepGoing(System.currentTimeMillis())) return
+        tracker = null
+        publishSession()
+        if (session.end == SessionEnd.GOAL && sessionNotifications.goalShowing()) {
+            val units = preferences?.settings?.units ?: UnitPreference.SYSTEM
+            sessionNotifications.post(sessionNotifications.goalReached(session, units, withKeepGoing = false))
+        }
+    }
+
+    private fun publishSession() {
+        val current = tracker
+        val now = System.currentTimeMillis()
+        liveSession.publish(
+            current?.let {
+                LiveSessionState(
+                    session = it.session,
+                    cadence = it.cadenceAt(now),
+                    canKeepGoing = it.canKeepGoing(now),
+                    alertsWhileScreenOff = sensorSource.wakeUpSensor != null,
+                )
+            },
+        )
+    }
+
+    private suspend fun onSessionCommand(command: Intent) {
+        try {
+            when (command.action) {
+                SessionControl.ACTION_START -> startSession(command.getLongExtra(SessionControl.EXTRA_PLAN_ID, 0L))
+
+                SessionControl.ACTION_START_REST_OF_DAY -> startSession(null)
+
+                SessionControl.ACTION_PAUSE -> changeSession { tracker -> tracker.pause(System.currentTimeMillis()) }
+
+                SessionControl.ACTION_RESUME -> changeSession { tracker -> tracker.resume(System.currentTimeMillis()) }
+
+                SessionControl.ACTION_KEEP_GOING -> if (changeSession { it.keepGoing(System.currentTimeMillis()) }) {
+                    sessionNotifications.cancelGoal()
+                }
+
+                SessionControl.ACTION_STOP -> {
+                    // The steps up to the touch belong to the outing.
+                    flushSensor()
+                    tracker?.stop(System.currentTimeMillis())?.let(::onSessionFinished)
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "An outing's command failed: ${command.action}", e)
+        }
+    }
+
+    /**
+     * Pause, resume, keep going: after the sensor's batch, so the steps up to the touch land on
+     * the right side of it. Returns whether it changed anything.
+     */
+    private suspend fun changeSession(change: (SessionTracker) -> Boolean): Boolean {
+        flushSensor()
+        val tracker = tracker ?: return false
+        if (!change(tracker)) return false
+        sessionDirty = true
+        persist()
+        applyRegistration()
+        notifyNow()
+        publishSession()
+        widgets.notify(WidgetEvent.TRACKING_STATE)
+        return true
+    }
+
+    /**
+     * Starts the outing of [planId], or the rest of the day when it is null. One at a time: with
+     * one under way, the command only brings its notification up to date.
+     */
+    private suspend fun startSession(planId: Long?) {
+        val current = preferencesSource.current()
+        if (!current.settings.trackingEnabled) return
+        if (tracker?.session?.live == true) {
+            notifyNow()
+            return
+        }
+        // A new outing ends the last one's "Keep going".
+        tracker = null
+        sessionNotifications.cancelGoal()
+        // Everything walked until now is the day's, not the outing's.
+        flushSensor()
+        persist()
+        val plan = if (planId == null) {
+            sessions.plans.first().firstOrNull { it.goalKind == SessionGoalKind.REST_OF_DAY }
+                ?: SessionPlans.REST_OF_DAY
+        } else {
+            sessions.plan(planId) ?: return
+        }
+        val now = System.currentTimeMillis()
+        val day = today()
+        val todaySteps = displayedToday() ?: repository.stepsOn(day)
+        val session = SessionPlans.start(plan, now, day, todaySteps, current.settings.dailyGoalSteps) ?: return
+        val saved = persistMutex.withLock { sessions.insert(session) }
+        if (plan.id != 0L) sessions.markPlanUsed(plan.id, now)
+        tracker = newTracker(saved, current.profile)
+        applyRegistration()
+        notifyNow()
+        publishSession()
+        widgets.notify(WidgetEvent.TRACKING_STATE)
+        SessionShortcuts.update(this, sessions.plansByUse(), current.settings.units)
+    }
+
+    private suspend fun newTracker(session: Session, profile: Profile? = null): SessionTracker {
+        val measuredWith = profile ?: preferencesSource.current().profile
+        return SessionTracker(session, StepLengths.of(measuredWith), MetricsCalculator.weightKg(measuredWith))
+    }
+
     private fun today(): Long = LocalDate.now(ZoneId.systemDefault()).toEpochDay()
 
     private data class StoredDay(val day: Long, val steps: Int)
@@ -546,6 +819,22 @@ class StepTrackingService : Service() {
 
         /** Screen on: someone may be looking, deliver within a second. */
         const val SCREEN_ON_LATENCY_US = 1_000_000
+
+        /**
+         * An outing with the screen off: the wake-up counter reports within half a minute, so a
+         * milestone is felt at most that late, for about two brief wakes a minute while walking
+         * and none while still (docs/adr/0009-sessions.md).
+         */
+        const val SESSION_LATENCY_US = 30 * 1_000_000
+
+        val SESSION_ACTIONS = setOf(
+            SessionControl.ACTION_START,
+            SessionControl.ACTION_START_REST_OF_DAY,
+            SessionControl.ACTION_PAUSE,
+            SessionControl.ACTION_RESUME,
+            SessionControl.ACTION_STOP,
+            SessionControl.ACTION_KEEP_GOING,
+        )
 
         /** How long a flush may take before the shutdown gives up on it (PLANNING.md §4.2). */
         const val FLUSH_TIMEOUT_MS = 1_500L

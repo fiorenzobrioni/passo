@@ -1,6 +1,8 @@
 # ADR 0002: Sensor reporting (Phase 1)
 
-- Status: accepted, from the documentation; not measured on a device
+- Status: accepted, from the documentation; not measured on a device. Amended for the length of
+  an outing by `docs/adr/0009-sessions.md` (the wake-up counter while an outing the reader
+  started is counting); unchanged at every other moment.
 - Date: 2026-09-24
 
 ## Context

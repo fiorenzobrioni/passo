@@ -13,11 +13,18 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.callbackdev.passo.core.data.sessions.LiveSessionState
+import com.callbackdev.passo.core.designsystem.components.SessionCardTags
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.today.TypicalDayCalculator
 import com.callbackdev.passo.core.model.Profile
+import com.callbackdev.passo.core.model.Session
+import com.callbackdev.passo.core.model.SessionGoalKind
+import com.callbackdev.passo.core.model.SessionIntensity
+import com.callbackdev.passo.core.model.SessionMilestone
+import com.callbackdev.passo.core.model.SessionTotals
 import com.callbackdev.passo.core.model.UnitPreference
 import org.junit.Assume.assumeTrue
 import org.junit.Before
@@ -83,6 +90,37 @@ class ReadmeScreenshots {
     fun todayGoalReachedDark() {
         show(state(nowMinute = 19 * 60 + 25), dark = true)
         save("today-goal-dark")
+    }
+
+    /** A brisk walk after work, twelve minutes in, as Today shows it while it lasts. */
+    @Test
+    fun todayOuting() {
+        val walk = Session(
+            id = 1,
+            planId = 1,
+            name = null,
+            goalKind = SessionGoalKind.TIME,
+            goalValue = 20,
+            intensity = SessionIntensity.BRISK,
+            milestones = setOf(SessionMilestone.HALF),
+            vibrate = true,
+            localEpochDay = 0,
+            startedAtMillis = 0,
+            totals = SessionTotals(
+                steps = 1_312,
+                movingMillis = 12 * 60_000L + 20_000,
+                zoneMillis = 11 * 60_000L,
+                distanceMeters = 1_312 * StepLengths.of(profile).walkingMeters,
+                activeKcal = 51.0,
+            ),
+        )
+        val state = state(nowMinute = 18 * 60 + 14).copy(
+            session = LiveSessionState(walk, cadence = 112, canKeepGoing = false, alertsWhileScreenOff = true),
+        )
+        show(state)
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(SessionCardTags.CARD))
+        compose.waitForIdle()
+        save("today-outing")
     }
 
     @Test

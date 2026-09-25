@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Outings page and its editor (PLANNING.md §11 Phase 10). -->
+<resources>
+    <string name="sessions_title">Outings</string>
+    <string name="sessions_back">Back</string>
+    <string name="sessions_intro">An outing is a walk with a goal. Start one and keep the phone in your pocket: Passo tells you on the way, with a vibration you can read without looking.</string>
+    <string name="sessions_yours">Your outings</string>
+    <string name="sessions_start">Start</string>
+    <string name="sessions_edit">Edit</string>
+    <string name="sessions_new">New outing</string>
+    <string name="sessions_empty">No outings kept. Make one: a goal, a pace, and the signals you want on the way.</string>
+    <!-- «About 2,000 steps · 1.40 km, estimated». -->
+    <string name="sessions_estimate">About %1$s · %2$s, estimated</string>
+    <string name="sessions_rest_now">%1$s left today · %2$s, estimated</string>
+    <string name="sessions_rest_met">Today’s goal is met: nothing left to walk</string>
+    <!-- «Signals at 25%, 50% and at the goal, with vibration». -->
+    <string name="sessions_signals">Signals at %1$s and at the goal</string>
+    <string name="sessions_signals_goal_only">A signal at the goal</string>
+    <string name="sessions_signals_vibrate">%1$s, with vibration</string>
+    <string name="sessions_live_busy">An outing is under way: stop it to start another.</string>
+    <string name="sessions_footer">Distances and calories are estimates from your step length. Vibrations follow the phone’s silent mode.</string>
+    <string name="sessions_footer_late">On this phone the step counter cannot wake it: with the screen off, a signal can come a few minutes late.</string>
+    <string name="sessions_paused_title">Counting is paused</string>
+    <string name="sessions_paused_body">An outing is measured from your steps: resume counting to start one.</string>
+    <string name="sessions_paused_action">Resume</string>
+    <string name="sessions_permission_title">Passo is not counting</string>
+    <string name="sessions_permission_body">Without the physical activity permission there are no steps to measure an outing with. Today has the way back.</string>
+    <string name="sessions_blocked_title">Its signals will not reach you</string>
+    <string name="sessions_blocked_channel_title">The outings’ signals are turned off</string>
+    <string name="sessions_blocked_body">Android is not showing Passo’s notifications, and the vibrations follow them. The goal reached still shows on Today.</string>
+    <string name="sessions_blocked_action">Turn on</string>
+
+    <string name="editor_title_new">New outing</string>
+    <string name="editor_title_edit">Edit outing</string>
+    <string name="editor_save">Save</string>
+    <string name="editor_delete">Delete</string>
+    <string name="editor_name">Name</string>
+    <string name="editor_name_note">Optional: without one, it is called by its pace.</string>
+    <string name="editor_goal">Goal</string>
+    <string name="editor_goal_steps">Steps</string>
+    <string name="editor_goal_distance">Distance</string>
+    <string name="editor_goal_time">Time</string>
+    <string name="editor_goal_day">The day</string>
+    <string name="editor_time_note">Minutes in motion: a stop at a traffic light does not count.</string>
+    <string name="editor_distance_note">Estimated from your steps and your step length.</string>
+    <string name="editor_steps_note">Every step counts, at any pace.</string>
+    <string name="editor_day_note">The steps missing from today’s goal when it starts.</string>
+    <string name="editor_day_now">Right now: %1$s.</string>
+    <string name="editor_day_met">Today’s goal is already met.</string>
+    <string name="editor_less">Less</string>
+    <string name="editor_more">More</string>
+    <string name="editor_pace">Pace</string>
+    <string name="editor_estimate_title">What it comes to</string>
+    <!-- «About 2,000 steps and 1.40 km, with your step of 70 cm». -->
+    <string name="editor_estimate">About %1$s and %2$s, with your step of %3$s.</string>
+    <string name="editor_estimate_run">About %1$s and %2$s, with your running step of %3$s.</string>
+    <string name="editor_estimate_note">An estimate: the outing itself is measured from your steps.</string>
+    <string name="editor_signals">Signals</string>
+    <string name="editor_signals_note">On the way at the shares you choose, and always at the goal, which ends the outing.</string>
+    <string name="editor_signal_goal">Goal, always</string>
+    <string name="editor_vibrate">Vibrate</string>
+    <string name="editor_vibrate_note" formatted="false">One short pulse at 25%, two at half, three at 75%, a long one at the goal. They follow the phone’s silent mode.</string>
+    <string name="editor_try">Try them</string>
+    <string name="editor_try_goal">Goal</string>
+    <string name="editor_discard_title">Discard your changes?</string>
+    <string name="editor_discard_keep">Keep editing</string>
+    <string name="editor_discard">Discard</string>
+    <string name="editor_delete_title">Delete this outing?</string>
+    <string name="editor_delete_body">The outings already walked with it stay in History.</string>
+    <string name="editor_cancel">Cancel</string>
+</resources>

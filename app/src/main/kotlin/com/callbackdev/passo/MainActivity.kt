@@ -21,6 +21,7 @@ import com.callbackdev.passo.core.domain.widget.WidgetEvent
 import com.callbackdev.passo.core.model.AppFont
 import com.callbackdev.passo.core.model.AppPalette
 import com.callbackdev.passo.core.model.ThemeMode
+import com.callbackdev.passo.core.tracking.SessionControl
 import com.callbackdev.passo.core.tracking.StepTracking
 import com.callbackdev.passo.core.tracking.TrackingControl
 import com.callbackdev.passo.core.tracking.TrackingReadiness
@@ -34,7 +35,8 @@ import javax.inject.Inject
  * The one activity. It wears the reader's appearance (theme, palette, typeface), hands the
  * pages to [PassoRoot], and on every return (re)starts tracking unless the reader paused it:
  * opening the app is the documented way back after a force stop (PLANNING.md §4.2). A paused
- * widget's tap lands here too, asking to resume ([TrackingControl.EXTRA_RESUME]).
+ * widget's tap lands here too, asking to resume ([TrackingControl.EXTRA_RESUME]), and a launcher
+ * shortcut, asking to start an outing ([SessionControl.EXTRA_START_PLAN]).
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -50,7 +52,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         readiness = StepTracking.readiness(this)
-        if (savedInstanceState == null) resumeIfAsked(intent)
+        if (savedInstanceState == null) {
+            resumeIfAsked(intent)
+            startOutingIfAsked(intent)
+        }
         setContent {
             val settings by settingsRepository.settings.collectAsStateWithLifecycle(initialValue = null)
             val dark = when (settings?.theme) {
@@ -81,6 +86,7 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         resumeIfAsked(intent)
+        startOutingIfAsked(intent)
     }
 
     override fun onResume() {
@@ -93,6 +99,19 @@ class MainActivity : ComponentActivity() {
             if (readiness == TrackingReadiness.READY && settingsRepository.settings.first().trackingEnabled) {
                 StepTracking.start(this@MainActivity)
             }
+        }
+    }
+
+    /**
+     * A launcher shortcut's outing, once per touch. Only while counting: an outing is measured
+     * from the steps, and a paused count has none; Today then says why, with its button.
+     */
+    private fun startOutingIfAsked(intent: Intent?) {
+        val planId = intent?.getLongExtra(SessionControl.EXTRA_START_PLAN, 0L) ?: 0L
+        if (planId == 0L) return
+        intent?.removeExtra(SessionControl.EXTRA_START_PLAN)
+        lifecycleScope.launch {
+            if (settingsRepository.settings.first().trackingEnabled) SessionControl.start(this@MainActivity, planId)
         }
     }
 

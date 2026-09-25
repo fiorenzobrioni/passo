@@ -34,6 +34,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -80,11 +82,13 @@ import com.callbackdev.passo.core.designsystem.components.DayTrend
 import com.callbackdev.passo.core.designsystem.components.DayTrendChart
 import com.callbackdev.passo.core.designsystem.components.MetricTile
 import com.callbackdev.passo.core.designsystem.components.MetricTrack
+import com.callbackdev.passo.core.designsystem.components.OutingList
 import com.callbackdev.passo.core.designsystem.components.ProgressRing
+import com.callbackdev.passo.core.designsystem.components.SessionCard
+import com.callbackdev.passo.core.designsystem.components.SessionCardActions
 import com.callbackdev.passo.core.designsystem.components.StatusCard
 import com.callbackdev.passo.core.designsystem.components.StatusTone
 import com.callbackdev.passo.core.designsystem.components.TrendPoint
-import com.callbackdev.passo.core.designsystem.components.WalkList
 import com.callbackdev.passo.core.designsystem.format.annotated
 import com.callbackdev.passo.core.designsystem.format.axisHour
 import com.callbackdev.passo.core.designsystem.format.clockTime
@@ -98,16 +102,17 @@ import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
 import com.callbackdev.passo.core.designsystem.theme.reducedMotion
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.metrics.MetricsConstants
+import com.callbackdev.passo.core.domain.sessions.Outing
 import com.callbackdev.passo.core.domain.today.CadenceBand
 import com.callbackdev.passo.core.domain.today.Headline
 import com.callbackdev.passo.core.domain.today.Pace
-import com.callbackdev.passo.core.domain.walks.Walk
 import java.time.LocalDate
 
 /** Today, with its state from [TodayViewModel] and the permission request it may need. */
 @Composable
 fun TodayRoute(
     onOpenSettings: () -> Unit,
+    onOpenSessions: () -> Unit = {},
     bottomPadding: Dp = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
     viewModel: TodayViewModel = hiltViewModel(),
 ) {
@@ -147,6 +152,16 @@ fun TodayRoute(
         onResume = viewModel::resumeTracking,
         onCelebrated = viewModel::celebrated,
         bottomPadding = bottomPadding,
+        onOpenSessions = onOpenSessions,
+        sessionActions = { id ->
+            SessionCardActions(
+                onPause = viewModel::pauseSession,
+                onResume = viewModel::resumeSession,
+                onStop = viewModel::stopSession,
+                onKeepGoing = viewModel::keepGoing,
+                onClose = { viewModel.closeSession(id) },
+            )
+        },
     )
 }
 
@@ -170,6 +185,8 @@ fun TodayScreen(
     onCelebrated: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
     bottomPadding: Dp = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+    onOpenSessions: () -> Unit = {},
+    sessionActions: (Long) -> SessionCardActions = { SessionCardActions() },
 ) {
     val format = rememberMeasureFormatter(state.units)
     val bottom = bottomPadding
@@ -183,6 +200,21 @@ fun TodayScreen(
             item(key = "hero") {
                 Hero(state, format, askInSettings, onOpenSettings, onAllow, onResume, onCelebrated)
             }
+            val session = state.session
+            if (session != null) {
+                item(key = "session") {
+                    SessionCard(
+                        session = session.session,
+                        cadence = session.cadence,
+                        canKeepGoing = session.canKeepGoing,
+                        format = format,
+                        actions = sessionActions(session.session.id),
+                        modifier = Modifier.padding(horizontal = ScreenMargin),
+                    )
+                }
+            } else if (state.status == TrackingStatus.COUNTING) {
+                item(key = "start-outing") { StartOuting(onOpenSessions) }
+            }
             if (state.firstDay && state.status == TrackingStatus.COUNTING) {
                 item(key = "first-day") {
                     StatusCard(
@@ -195,8 +227,7 @@ fun TodayScreen(
                 }
             }
             item(key = "trend") { TrendCard(state, format) }
-            val walks = state.walks.orEmpty()
-            if (walks.isNotEmpty()) item(key = "walks") { WalksCard(walks, format) }
+            if (state.outings.isNotEmpty()) item(key = "walks") { WalksCard(state.outings, format) }
             item(key = "metrics") { Metrics(state, format) }
         }
     }
@@ -589,9 +620,24 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawSwatch(color: C
     )
 }
 
-/** Today's walks so far, found in the minutes already counted (PLANNING.md §6.1). */
+/**
+ * The way to an outing (PLANNING.md §11 Phase 10): one quiet button under the day, to the page
+ * where they are kept and started. Not while one is under way: its card stands here instead.
+ */
 @Composable
-private fun WalksCard(walks: List<Walk>, format: MeasureFormatter) {
+private fun StartOuting(onOpenSessions: () -> Unit) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+        FilledTonalButton(onClick = onOpenSessions, modifier = Modifier.testTag(TodayTags.START_OUTING)) {
+            Icon(PassoIcons.Outing, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
+            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+            Text(stringResource(R.string.today_start_outing))
+        }
+    }
+}
+
+/** Today's walks and finished outings, found in the minutes already counted (PLANNING.md §6.1). */
+@Composable
+private fun WalksCard(outings: List<Outing>, format: MeasureFormatter) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         shape = GroupShape,
@@ -603,7 +649,7 @@ private fun WalksCard(walks: List<Walk>, format: MeasureFormatter) {
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp).semantics { heading() },
             )
-            WalkList(walks, format)
+            OutingList(outings, format)
         }
     }
 }
@@ -739,4 +785,5 @@ object TodayTags {
     const val CHART = "today_chart"
     const val METRICS = "today_metrics"
     const val WALKS = "today_walks"
+    const val START_OUTING = "today_start_outing"
 }

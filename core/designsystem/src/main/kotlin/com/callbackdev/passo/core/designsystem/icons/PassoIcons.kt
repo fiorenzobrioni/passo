@@ -414,6 +414,77 @@ object PassoIcons {
         }
     }
 
+    /** A rounded square: stop. */
+    val Stop: ImageVector by lazy {
+        icon("stop") {
+            moveTo(8f, 6.5f)
+            lineTo(16f, 6.5f)
+            arcTo(1.5f, 1.5f, 0f, isMoreThanHalf = false, isPositiveArc = true, x1 = 17.5f, y1 = 8f)
+            lineTo(17.5f, 16f)
+            arcTo(1.5f, 1.5f, 0f, isMoreThanHalf = false, isPositiveArc = true, x1 = 16f, y1 = 17.5f)
+            lineTo(8f, 17.5f)
+            arcTo(1.5f, 1.5f, 0f, isMoreThanHalf = false, isPositiveArc = true, x1 = 6.5f, y1 = 16f)
+            lineTo(6.5f, 8f)
+            arcTo(1.5f, 1.5f, 0f, isMoreThanHalf = false, isPositiveArc = true, x1 = 8f, y1 = 6.5f)
+            close()
+        }
+    }
+
+    /** A bin with its lid: delete. */
+    val Trash: ImageVector by lazy {
+        icon("trash") {
+            moveTo(4.5f, 6.5f)
+            lineTo(19.5f, 6.5f)
+            moveTo(9.5f, 6.5f)
+            lineTo(9.5f, 4f)
+            lineTo(14.5f, 4f)
+            lineTo(14.5f, 6.5f)
+            moveTo(6.5f, 6.5f)
+            lineTo(7.5f, 20f)
+            lineTo(16.5f, 20f)
+            lineTo(17.5f, 6.5f)
+            moveTo(10.5f, 10.5f)
+            lineTo(10.5f, 16f)
+            moveTo(13.5f, 10.5f)
+            lineTo(13.5f, 16f)
+        }
+    }
+
+    /** A phone between two short waves: vibration. */
+    val Vibrate: ImageVector by lazy {
+        icon("vibrate") {
+            moveTo(9f, 3.5f)
+            lineTo(15f, 3.5f)
+            lineTo(15f, 20.5f)
+            lineTo(9f, 20.5f)
+            close()
+            moveTo(5.5f, 8f)
+            lineTo(5.5f, 16f)
+            moveTo(2.5f, 10f)
+            lineTo(2.5f, 14f)
+            moveTo(18.5f, 8f)
+            lineTo(18.5f, 16f)
+            moveTo(21.5f, 10f)
+            lineTo(21.5f, 14f)
+        }
+    }
+
+    /** A winding way from a dot to a flag: an outing, walked on purpose. */
+    val Outing: ImageVector by lazy {
+        icon("outing") {
+            circle(5f, 19f, 1.8f)
+            moveTo(6.8f, 19f)
+            lineTo(12f, 19f)
+            curveTo(15f, 19f, 15f, 13f, 12f, 13f)
+            curveTo(9f, 13f, 9f, 9.5f, 12f, 9.5f)
+            lineTo(16f, 9.5f)
+            moveTo(16f, 9.5f)
+            lineTo(16f, 3f)
+            lineTo(20.5f, 5f)
+            lineTo(16f, 7f)
+        }
+    }
+
     private fun icon(name: String, autoMirror: Boolean = false, draw: PathBuilder.() -> Unit): ImageVector =
         ImageVector.Builder(
             name = "passo_$name",

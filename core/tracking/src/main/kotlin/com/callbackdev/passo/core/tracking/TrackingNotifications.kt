@@ -22,11 +22,13 @@ import com.callbackdev.passo.core.model.UnitPreference
  *   shown by mistake.
  * @property day today in full, for the expanded form; null until today's minutes and the
  *   settings have been read, and then the notification is the collapsed form only.
+ * @property session the outing under way: while there is one, the notification is about it.
  */
 internal data class NotificationContent(
     val steps: Int?,
     val day: TodayOverview? = null,
     val units: UnitPreference = UnitPreference.SYSTEM,
+    val session: SessionNotice? = null,
 )
 
 /**
@@ -36,6 +38,8 @@ internal data class NotificationContent(
  * costs no update of its own.
  */
 internal class TrackingNotifications(private val context: Context) {
+    private val sessions = SessionNotifications(context)
+
     fun ensureChannel() {
         val channel = NotificationChannel(
             CHANNEL_ID,
@@ -59,6 +63,7 @@ internal class TrackingNotifications(private val context: Context) {
             .setShowWhen(false)
             .setCategory(NotificationCompat.CATEGORY_STATUS)
             .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+        content.session?.let { return sessions.ongoing(builder, it).build() }
         val day = content.day
         val steps = day?.steps ?: content.steps ?: return builder.build()
         val format = context.measureFormatter(content.units)

@@ -28,15 +28,22 @@ internal sealed interface SensorReading {
  *
  * The sensor is the non-wake-up one (docs/adr/0002-sensor-reporting.md): it never wakes the
  * processor, and a FIFO overflow can only coarsen the minute attribution, since the counter is
- * cumulative and the latest value is always kept.
+ * cumulative and the latest value is always kept. During an outing, and only then, the wake-up
+ * one is used where the phone has it (docs/adr/0009-sessions.md), so a signal reaches a phone in
+ * a pocket on time: the two report the same counter, so switching loses and doubles nothing.
  */
 internal class StepSensorSource(private val sensorManager: SensorManager, private val handler: Handler) {
     val sensor: Sensor? = sensorManager.defaultStepCounter()
+
+    /** The wake-up step counter, when the phone has one besides [sensor]. */
+    val wakeUpSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER, true)
+        ?.takeIf { it != sensor }
 
     private val channel = Channel<SensorReading>(Channel.UNLIMITED)
     val readings: Flow<SensorReading> = channel.receiveAsFlow()
 
     private var registeredLatencyUs: Int? = null
+    private var registeredSensor: Sensor? = null
 
     private val listener = object : SensorEventListener2 {
         override fun onSensorChanged(event: SensorEvent) {
@@ -50,19 +57,23 @@ internal class StepSensorSource(private val sensorManager: SensorManager, privat
         }
     }
 
-    /** Registers with [maxReportLatencyUs], replacing any earlier registration. */
-    fun register(maxReportLatencyUs: Int): Boolean {
-        val sensor = sensor ?: return false
-        if (registeredLatencyUs == maxReportLatencyUs) return true
+    /**
+     * Registers with [maxReportLatencyUs], replacing any earlier registration; the wake-up
+     * counter when [wakeUp] is asked and the phone has one, the usual one otherwise.
+     */
+    fun register(maxReportLatencyUs: Int, wakeUp: Boolean = false): Boolean {
+        val chosen = (if (wakeUp) wakeUpSensor else null) ?: sensor ?: return false
+        if (registeredLatencyUs == maxReportLatencyUs && registeredSensor == chosen) return true
         if (registeredLatencyUs != null) sensorManager.unregisterListener(listener)
         val registered = sensorManager.registerListener(
             listener,
-            sensor,
+            chosen,
             SensorManager.SENSOR_DELAY_NORMAL,
             maxReportLatencyUs,
             handler,
         )
         registeredLatencyUs = maxReportLatencyUs.takeIf { registered }
+        registeredSensor = chosen.takeIf { registered }
         return registered
     }
 
@@ -70,6 +81,7 @@ internal class StepSensorSource(private val sensorManager: SensorManager, privat
         if (registeredLatencyUs == null) return
         sensorManager.unregisterListener(listener)
         registeredLatencyUs = null
+        registeredSensor = null
     }
 
     /**
@@ -86,7 +98,8 @@ internal class StepSensorSource(private val sensorManager: SensorManager, privat
     /** One line for the log: which sensor this device gave us, and how much it can batch. */
     fun describe(): String = sensor?.let {
         "sensor=${it.name} vendor=${it.vendor} version=${it.version} wakeUp=${it.isWakeUpSensor} " +
-            "fifoMax=${it.fifoMaxEventCount} fifoReserved=${it.fifoReservedEventCount}"
+            "fifoMax=${it.fifoMaxEventCount} fifoReserved=${it.fifoReservedEventCount} " +
+            "wakeUpVariant=${wakeUpSensor != null}"
     } ?: "sensor=none"
 }
 

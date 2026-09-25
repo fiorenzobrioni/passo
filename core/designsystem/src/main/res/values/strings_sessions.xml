@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Outings (PLANNING.md §11 Phase 10): the words Today, History, the Outings page and the
+     notifications share. -->
+<resources>
+    <!-- An outing without a name of its own is called by its intensity. -->
+    <string name="session_name_free">Walk</string>
+    <string name="session_name_brisk">Brisk walk</string>
+    <string name="session_name_vigorous">Power walk</string>
+    <string name="session_name_run">Run</string>
+    <string name="session_name_rest_of_day">Finish the day</string>
+
+    <string name="session_intensity_free">Any pace</string>
+    <string name="session_intensity_brisk">Brisk</string>
+    <string name="session_intensity_vigorous">Vigorous</string>
+    <string name="session_intensity_run">Running</string>
+    <string name="session_intensity_free_detail">No cadence to keep</string>
+    <string name="session_intensity_brisk_detail">From 100 steps a minute: moderate effort</string>
+    <string name="session_intensity_vigorous_detail">From 130 steps a minute: vigorous effort</string>
+    <string name="session_intensity_run_detail">From 140 steps a minute, with your running step</string>
+
+    <!-- What an outing is: «20 min at a brisk pace». -->
+    <string name="session_plan_free">%1$s, at any pace</string>
+    <string name="session_plan_brisk">%1$s at a brisk pace</string>
+    <string name="session_plan_vigorous">%1$s at a vigorous pace</string>
+    <string name="session_plan_run">%1$s running</string>
+    <string name="session_amount_rest_of_day">The rest of today’s goal</string>
+    <plurals name="session_amount_steps">
+        <item quantity="one">%1$s step</item>
+        <item quantity="other">%1$s steps</item>
+    </plurals>
+    <!-- Progress in the goal's own quantity: «12 of 20 min», «1,240 of 3,000 steps». -->
+    <string name="session_progress">%1$s of %2$s</string>
+
+    <!-- One sentence before any number. -->
+    <string name="session_headline_starting">Off you go: %1$s to go.</string>
+    <plurals name="session_headline_going">
+        <item quantity="one">%1$s to go.</item>
+        <item quantity="other">%1$s to go.</item>
+    </plurals>
+    <plurals name="session_headline_past_half">
+        <item quantity="one">Past halfway: %1$s to go.</item>
+        <item quantity="other">Past halfway: %1$s to go.</item>
+    </plurals>
+    <plurals name="session_headline_almost">
+        <item quantity="one">Almost there: %1$s to go.</item>
+        <item quantity="other">Almost there: %1$s to go.</item>
+    </plurals>
+    <string name="session_headline_paused">Paused. Resume when you are ready.</string>
+    <string name="session_headline_reached">Goal reached: %1$s.</string>
+    <string name="session_headline_stopped">Stopped at %1$s of the goal.</string>
+    <string name="session_headline_idle">Ended by itself at %1$s of the goal, after a long stop.</string>
+    <string name="session_headline_closed">Closed at %1$s of the goal.</string>
+
+    <!-- The cadence now, against the outing's own. -->
+    <string name="session_cadence_on_pace">%1$s: on pace</string>
+    <string name="session_cadence_below">%1$s: below your pace</string>
+    <string name="session_cadence_free">%1$s, %2$s</string>
+    <string name="session_cadence_relaxed">relaxed</string>
+    <string name="session_cadence_brisk">brisk</string>
+    <string name="session_cadence_vigorous">vigorous</string>
+    <string name="session_cadence_running">running</string>
+    <string name="session_cadence_waiting">Cadence in a few seconds</string>
+
+    <!-- «17 of 20 min at the pace you set». -->
+    <string name="session_zone">%1$s of %2$s at the pace you set</string>
+    <string name="session_outcome_reached">Goal reached</string>
+    <string name="session_outcome_share">%1$s of the goal</string>
+    <string name="session_estimated">Estimated: %1$s · %2$s</string>
+    <!-- Spoken: «Brisk walk from 18:02 to 18:24, goal reached: 20 min at a brisk pace. 2,140 steps, 1.52 km, 91 kcal». -->
+    <string name="session_spoken">%1$s from %2$s to %3$s, %4$s: %5$s. %6$s</string>
+    <!-- Today's card for an outing, and its buttons. -->
+    <string name="session_card_pause">Pause</string>
+    <string name="session_card_resume">Resume</string>
+    <string name="session_card_stop">Stop</string>
+    <string name="session_card_keep_going">Keep going</string>
+    <string name="session_card_close">Close</string>
+    <string name="session_card_under_way">Under way</string>
+    <string name="session_card_paused">Paused</string>
+    <!-- «Brisk walk, 12 of 20 min: past halfway, 8 min to go». -->
+    <string name="session_card_progress_description">%1$s, %2$s</string>
+    <!-- «18:02–18:24 · 22 min». -->
+    <string name="session_card_when">%1$s · %2$s</string>
+    <!-- An outing in a line, for the widgets and the Quick Settings tile. -->
+    <string name="session_brief">%1$s: %2$s</string>
+    <string name="session_brief_paused">%1$s: paused</string>
+</resources>

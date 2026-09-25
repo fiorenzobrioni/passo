@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.hardware.Sensor
 import android.hardware.SensorManager
 import android.util.Log
 import androidx.core.content.ContextCompat
@@ -42,6 +43,17 @@ object StepTracking {
 
     fun hasStepCounter(context: Context): Boolean =
         context.getSystemService(SensorManager::class.java)?.defaultStepCounter() != null
+
+    /**
+     * Whether an outing's signals can wake a phone with the screen off: a wake-up step counter
+     * besides the usual one (docs/adr/0009-sessions.md). Without it they arrive when the phone
+     * next wakes for another reason.
+     */
+    fun hasWakeUpStepCounter(context: Context): Boolean {
+        val manager = context.getSystemService(SensorManager::class.java) ?: return false
+        val wakeUp = manager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER, true)
+        return wakeUp != null && wakeUp != manager.defaultStepCounter()
+    }
 
     fun hasActivityRecognition(context: Context): Boolean =
         ContextCompat.checkSelfPermission(context, Manifest.permission.ACTIVITY_RECOGNITION) ==

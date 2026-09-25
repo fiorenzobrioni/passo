@@ -8,6 +8,13 @@ plugins {
 
 android {
     namespace = "com.callbackdev.passo.core.data"
+
+    // The exported schemas, for the migration tests (MigrationTestHelper reads them as assets).
+    sourceSets {
+        getByName("test") {
+            assets.srcDir("$projectDir/schemas")
+        }
+    }
 }
 
 dependencies {

@@ -33,6 +33,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextAlign
 import androidx.glance.text.TextStyle
 import com.callbackdev.passo.core.designsystem.format.format
+import com.callbackdev.passo.core.designsystem.format.sessionBrief
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.widget.CountingState
 import com.callbackdev.passo.widget.CardModels
@@ -139,9 +140,13 @@ private class WordsParts(
     val heroEm: Float = textEm(format.steps(maxOf(overview.steps, overview.goalSteps)), TextWeight.BOLD)
     val reached = overview.goalReachedAt != null
 
-    /** What the sentence's place says: what a tap does while the count is not moving, else the sentence. */
-    val slot: String? =
-        statusText(context, model.state) ?: if (look.showSentence) sentence(context, overview, format) else null
+    /**
+     * What the sentence's place says: what a tap does while the count is not moving, else the
+     * outing under way, else the sentence.
+     */
+    val slot: String? = statusText(context, model.state)
+        ?: model.session?.let { context.resources.sessionBrief(it, format) }
+        ?: if (look.showSentence) sentence(context, overview, format) else null
     val slotIsStatus = status
 
     fun slotNeeds(width: Dp): Int =
