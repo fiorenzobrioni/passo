@@ -67,6 +67,11 @@ All notable changes to Passo are documented here. The format follows
   week and month and longest streak (each opens in History), averages over the last 7 and 30
   complete days, and what it all adds up to since the first day.
 - A bottom bar for Today, History and Insights, and the first day of the week in Settings.
+- The counting notification, expanded, shows the day (Phase 6): how far the goal is, or when it
+  was reached, the share of the goal with the active minutes, the estimated distance and
+  calories, and a bar towards the goal. Updated only while the screen is on, as before.
+- Settings says how the counting notification shows and opens Android's page for it, where it
+  can be minimized (no icon in the status bar) or turned off. Passo keeps counting either way.
 
 ### Changed
 

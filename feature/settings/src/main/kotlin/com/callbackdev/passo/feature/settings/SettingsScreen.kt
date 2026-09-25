@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.callbackdev.passo.core.designsystem.components.GroupDivider
 import com.callbackdev.passo.core.designsystem.components.GroupHeader
@@ -81,6 +82,8 @@ import com.callbackdev.passo.core.model.ThemeMode
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.UnitSystem
 import com.callbackdev.passo.core.model.UserSettings
+import com.callbackdev.passo.core.tracking.CountingNotification
+import com.callbackdev.passo.core.tracking.NotificationVisibility
 import java.time.DayOfWeek
 import java.time.format.TextStyle
 
@@ -346,6 +349,8 @@ private fun SettingsList(state: SettingsUiState, actions: SettingsActions, modif
                     onChange = actions.setTracking,
                     modifier = Modifier.testTag(SettingsTags.TRACKING),
                 )
+                GroupDivider()
+                NotificationRow()
             }
         }
 
@@ -649,6 +654,33 @@ private const val PREVIEW_USUAL = 0.62f
 /** The preview's own arithmetic: 6,240 against a usual 62% of 8,000 (4,960). */
 private const val PREVIEW_AHEAD = PREVIEW_STEPS - 4_960
 
+/**
+ * The counting notification: how it shows now, and the system's page that changes it. Read again
+ * on every return to the screen, since the change is made there (`CountingNotification`).
+ */
+@Composable
+private fun NotificationRow() {
+    val context = LocalContext.current
+    var visibility by remember { mutableStateOf(CountingNotification.visibility(context)) }
+    LifecycleResumeEffect(Unit) {
+        visibility = CountingNotification.visibility(context)
+        onPauseOrDispose {}
+    }
+    ValueRow(
+        label = stringResource(R.string.settings_notification),
+        value = stringResource(
+            when (visibility) {
+                NotificationVisibility.SHOWN -> R.string.settings_notification_shown
+                NotificationVisibility.MINIMIZED -> R.string.settings_notification_minimized
+                NotificationVisibility.OFF -> R.string.settings_notification_off
+            },
+        ),
+        trailing = true,
+        onClick = { runCatching { context.startActivity(CountingNotification.settingsIntent(context)) } },
+        modifier = Modifier.testTag(SettingsTags.NOTIFICATION),
+    )
+}
+
 @Composable
 private fun PrivacyCard() {
     Surface(
@@ -888,5 +920,6 @@ private fun openUrl(context: Context, url: String) {
 object SettingsTags {
     const val LIST = "settings_list"
     const val TRACKING = "settings_tracking"
+    const val NOTIFICATION = "settings_notification"
     const val WALKS = "settings_walks"
 }

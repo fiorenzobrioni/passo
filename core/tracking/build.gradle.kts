@@ -12,8 +12,13 @@ android {
 
 dependencies {
     implementation(project(":core:data"))
+    // The formatter and the unit strings the notification shares with the screens.
+    implementation(project(":core:designsystem"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.service)
     implementation(libs.kotlinx.coroutines.android)
+
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.junit)
 }

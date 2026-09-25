@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -120,6 +121,18 @@ class SettingsScreenTest {
         snapshot("settings_middle")
         compose.onNodeWithTag(SettingsTags.TRACKING).performClick()
         assertThat(tracking).isFalse()
+    }
+
+    @Test
+    fun `the notification row says how it shows, and that counting goes on without it`() {
+        compose.setContent { PassoTheme { SettingsScreen(state, onBack = {}, actions = SettingsActions()) } }
+
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(SettingsTags.NOTIFICATION))
+        compose.onNodeWithText("Notification").assertIsDisplayed()
+        compose.onNodeWithText(
+            "In the status bar. You can minimize it or turn it off: Passo keeps counting",
+        ).assertIsDisplayed()
+        snapshot("settings_notification")
     }
 
     @Test

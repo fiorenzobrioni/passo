@@ -16,15 +16,23 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
+import com.callbackdev.passo.core.data.prefs.UserPreferences
+import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
 import com.callbackdev.passo.core.data.tracking.LiveSteps
 import com.callbackdev.passo.core.data.tracking.LiveToday
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
+import com.callbackdev.passo.core.data.tracking.withPending
 import com.callbackdev.passo.core.data.widget.WidgetUpdates
+import com.callbackdev.passo.core.domain.today.DayMinute
+import com.callbackdev.passo.core.domain.today.TodayOverview
+import com.callbackdev.passo.core.domain.today.minuteOfDay
 import com.callbackdev.passo.core.domain.tracking.StepLedger
 import com.callbackdev.passo.core.domain.widget.WidgetEvent
 import com.callbackdev.passo.core.model.DiagnosticsEvent
 import com.callbackdev.passo.core.model.DiagnosticsType
+import com.callbackdev.passo.core.model.MinuteSteps
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +41,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -40,6 +49,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
 import javax.inject.Inject
 
@@ -68,6 +78,8 @@ class StepTrackingService : Service() {
 
     @Inject lateinit var widgets: WidgetUpdates
 
+    @Inject lateinit var preferencesSource: UserPreferencesDataSource
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val persistMutex = Mutex()
 
@@ -82,6 +94,15 @@ class StepTrackingService : Service() {
     private var interactive = false
     private var storedToday: StoredDay? = null
 
+    // The goal, the profile and the units, for the expanded notification: held as they change,
+    // never read on a timer.
+    private var preferences: UserPreferences? = null
+
+    // Today's stored minutes, read for the notification only when it is drawn, and read again
+    // only after a write ([storedVersion]): at most one query a minute, with the screen on.
+    private var storedVersion = 0L
+    private var minutesCache: StoredMinutes? = null
+
     // Today's steps drained from the ledger and being written: counted on screen until the
     // stored total is read back with them in it, so the number never dips during a write.
     private var inFlightToday = 0
@@ -89,6 +110,7 @@ class StepTrackingService : Service() {
     private var screenJob: Job? = null
     private var tickerJob: Job? = null
     private var notifyJob: Job? = null
+    private var renderJob: Job? = null
     private var lastNotifyElapsed = 0L
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -115,7 +137,7 @@ class StepTrackingService : Service() {
             ServiceCompat.startForeground(
                 this,
                 TrackingNotifications.NOTIFICATION_ID,
-                notifications.build(displayedToday()),
+                notifications.build(NotificationContent(displayedToday())),
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH,
             )
         } catch (e: SecurityException) {
@@ -173,6 +195,7 @@ class StepTrackingService : Service() {
             }
             registerReceivers()
             launch { sensorSource.readings.collect(::onReading) }
+            launch { preferencesSource.data.distinctUntilChanged().collect(::onPreferences) }
             persist()
             liveSteps.setServiceRunning(true)
             widgets.notify(WidgetEvent.TRACKING_STATE)
@@ -229,6 +252,7 @@ class StepTrackingService : Service() {
     private suspend fun refreshStoredTodayLocked() {
         val day = today()
         storedToday = StoredDay(day, repository.stepsOn(day))
+        storedVersion++
     }
 
     /**
@@ -394,7 +418,58 @@ class StepTrackingService : Service() {
 
     private fun notifyNow() {
         lastNotifyElapsed = SystemClock.elapsedRealtime()
-        notifications.update(displayedToday())
+        // A newer update replaces one still reading: it would post older numbers.
+        renderJob?.cancel()
+        renderJob = scope.launch { notifications.update(notificationContent()) }
+    }
+
+    /** A new goal, profile or units: the numbers change, and are shown if someone can see them. */
+    private fun onPreferences(preferences: UserPreferences) {
+        this.preferences = preferences
+        if (interactive) notifyNow()
+    }
+
+    /**
+     * Today for the notification: the same [TodayOverview] as Today and the widgets, over the
+     * stored minutes plus the buffered ones. Without the usual day: the notification tells the
+     * way to the goal, which needs no history.
+     */
+    private suspend fun notificationContent(): NotificationContent {
+        val steps = displayedToday()
+        val preferences = preferences ?: return NotificationContent(steps)
+        if (steps == null) return NotificationContent(null)
+        val zone = ZoneId.systemDefault()
+        val day = LocalDate.now(zone).toEpochDay()
+        // A read that fails costs the expanded form of this one update, never the service.
+        val stored = try {
+            storedMinutes(day)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Reading today's minutes for the notification failed", e)
+            return NotificationContent(steps)
+        }
+        val minutes = stored.withPending(ledger?.pendingOn(day).orEmpty())
+            .map { DayMinute(minuteOfDay(it.epochMinute, it.localEpochDay, zone), it.steps) }
+        val now = LocalTime.now(zone)
+        val overview = TodayOverview.of(
+            minutes = minutes,
+            profile = preferences.profile,
+            goalSteps = preferences.settings.dailyGoalSteps,
+            nowMinute = (now.hour * MINUTES_PER_HOUR + now.minute).toDouble(),
+            typical = null,
+            liveSteps = steps,
+        )
+        return NotificationContent(steps, overview, preferences.settings.units)
+    }
+
+    private suspend fun storedMinutes(day: Long): List<MinuteSteps> {
+        minutesCache?.takeIf { it.day == day && it.version == storedVersion }?.let { return it.minutes }
+        // Taken before the read: a write that lands during it makes the next update read again.
+        val version = storedVersion
+        val minutes = repository.minutesOn(listOf(day))[day].orEmpty()
+        minutesCache = StoredMinutes(day, version, minutes)
+        return minutes
     }
 
     /** Screen on only: notices the day rolling over, so the notification starts again from 0. */
@@ -417,6 +492,8 @@ class StepTrackingService : Service() {
 
     private data class StoredDay(val day: Long, val steps: Int)
 
+    private class StoredMinutes(val day: Long, val version: Long, val minutes: List<MinuteSteps>)
+
     private companion object {
         const val TAG = "StepTracking"
 
@@ -431,6 +508,7 @@ class StepTrackingService : Service() {
 
         const val NOTIFY_INTERVAL_MS = 5_000L
         const val MILLIS_PER_MINUTE = 60_000L
+        const val MINUTES_PER_HOUR = 60
 
         /** HTC and a few other vendors' fast power-off, which skips ACTION_SHUTDOWN. */
         const val ACTION_QUICKBOOT_POWEROFF = "android.intent.action.QUICKBOOT_POWEROFF"
