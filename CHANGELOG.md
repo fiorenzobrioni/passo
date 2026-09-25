@@ -53,3 +53,24 @@ All notable changes to Passo are documented here. The format follows
   never while it is off. If today's steps cannot be read, a widget says so instead of loading
   forever.
 - Passo now looks like Chiaro: the same colors, typefaces, shapes and motion.
+- History (Phase 5): a day, a week, a month or a year at a time, swiped or stepped through
+  from the first day Passo counted to today. A day shows its steps hour by hour with the walks
+  marked on the chart, its measures and its walks; a week, a month and a year show their bars
+  against each day's own goal, how many days met it and how the period compares with the one
+  before; a month adds a calendar of how close each day came to its goal. Touch a bar or a day
+  to read it and open it.
+- Walks, found on their own in the steps already counted (Phase 5): stretches of steady walking
+  or running, with their time, length, steps, distance, cadence and calories, on Today and in
+  History. No extra sensor and no background work; they can be turned off, and the shortest
+  one counted is 5, 10 or 15 minutes.
+- Insights (Phase 5): the streak of days at your goal with the last seven days, your best day,
+  week and month and longest streak (each opens in History), averages over the last 7 and 30
+  complete days, and what it all adds up to since the first day.
+- A bottom bar for Today, History and Insights, and the first day of the week in Settings.
+
+### Changed
+
+- Android's own backup and phone-to-phone transfer now carry exactly the step history, the
+  profile and the settings, and nothing else. Passo still has no internet permission and sends
+  nothing itself; after a restore it starts counting again from zero steps, so the new phone's
+  earlier steps are never added in one go.

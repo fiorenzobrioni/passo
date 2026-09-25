@@ -286,6 +286,49 @@ class TrackingRepositoryTest {
     }
 
     @Test
+    fun `the tracker state of this installation is kept`() = runTest {
+        repository.persist(LedgerBatch(listOf(MinuteSteps(dayMinute, day, 100)), state, emptyList()), 5_000L)
+
+        val adoption = repository.adoptTrackerState(installedAtMillis = 1_000L)
+
+        assertThat(adoption.restored).isFalse()
+        assertThat(adoption.state).isEqualTo(state)
+        // Recorded now: the next start compares with it, not with the time.
+        assertThat(repository.adoptTrackerState(installedAtMillis = 1_000L).state).isEqualTo(state)
+    }
+
+    @Test
+    fun `a tracker state restored from another installation is dropped, the steps are kept`() = runTest {
+        repository.persist(LedgerBatch(listOf(MinuteSteps(dayMinute, day, 100)), state, emptyList()), 5_000L)
+        repository.adoptTrackerState(installedAtMillis = 1_000L)
+
+        // The same database and settings, restored where the app was installed later.
+        val adoption = repository.adoptTrackerState(installedAtMillis = 9_000L)
+
+        assertThat(adoption.restored).isTrue()
+        assertThat(adoption.state).isNull()
+        assertThat(repository.trackerState()).isNull()
+        assertThat(repository.stepsOn(day)).isEqualTo(100)
+        // From then on the new installation owns what it writes.
+        repository.persist(LedgerBatch(emptyList(), state, emptyList()), 10_000L)
+        assertThat(repository.adoptTrackerState(installedAtMillis = 9_000L).restored).isFalse()
+    }
+
+    @Test
+    fun `an update from a build that did not record the installation keeps its state`() = runTest {
+        // An update from a build that did not record it: the state was written after the install.
+        repository.persist(LedgerBatch(emptyList(), state, emptyList()), 5_000L)
+        assertThat(repository.adoptTrackerState(installedAtMillis = 1_000L).state).isEqualTo(state)
+    }
+
+    @Test
+    fun `before the installation was recorded, a state from before the install is dropped`() = runTest {
+        // A backup made by such a build, restored onto an installation made after it.
+        repository.persist(LedgerBatch(emptyList(), state, emptyList()), 5_000L)
+        assertThat(repository.adoptTrackerState(installedAtMillis = 8_000L).restored).isTrue()
+    }
+
+    @Test
     fun `resuming a pause forgets the baseline and keeps the steps`() = runTest {
         write(dayMinute, day, 100)
 

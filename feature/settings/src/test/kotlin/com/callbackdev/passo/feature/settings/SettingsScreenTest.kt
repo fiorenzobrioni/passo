@@ -70,6 +70,43 @@ class SettingsScreenTest {
     }
 
     @Test
+    fun `walk detection is a switch, and its minimum a choice of three`() {
+        var settings = state.settings
+        compose.setContent {
+            PassoTheme {
+                SettingsScreen(
+                    state.copy(settings = settings),
+                    onBack = {},
+                    actions = SettingsActions(updateSettings = { settings = it(settings) }),
+                )
+            }
+        }
+
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasText("Shortest walk"))
+        compose.onNodeWithText("Shortest walk").performClick()
+        compose.onNodeWithText("15 minutes").performClick()
+        assertThat(settings.minWalkMinutes).isEqualTo(15)
+        compose.onNodeWithTag(SettingsTags.WALKS).performClick()
+        assertThat(settings.walkDetection).isFalse()
+    }
+
+    @Test
+    fun `the first day of the week follows the phone until chosen`() {
+        var settings = state.settings
+        compose.setContent {
+            PassoTheme {
+                SettingsScreen(state, onBack = {
+                }, actions = SettingsActions(updateSettings = { settings = it(settings) }))
+            }
+        }
+
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasText("First day of the week"))
+        compose.onNodeWithText("First day of the week").performClick()
+        compose.onNodeWithText("Monday").performClick()
+        assertThat(settings.firstDayOfWeek).isEqualTo(java.time.DayOfWeek.MONDAY)
+    }
+
+    @Test
     fun `pausing is a switch that says what it means`() {
         var tracking: Boolean? = null
         compose.setContent {

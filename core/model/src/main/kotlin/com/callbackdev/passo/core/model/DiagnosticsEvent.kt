@@ -30,4 +30,10 @@ enum class DiagnosticsType {
 
     /** The wall clock or the time zone changed. */
     TIME_CHANGED,
+
+    /**
+     * A tracker state restored from another installation (a backup) was dropped: the next
+     * sample is a baseline.
+     */
+    RESTORED,
 }

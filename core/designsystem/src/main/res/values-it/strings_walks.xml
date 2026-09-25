@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Le camminate trovate nei passi di un giorno (PLANNING.md §6.1), comuni a Oggi e Storico. -->
+<resources>
+    <string name="walk_type_walk">Camminata</string>
+    <string name="walk_type_run">Corsa</string>
+    <string name="walk_type_mixed">Camminata e corsa</string>
+    <string name="walk_time_range">%1$s–%2$s</string>
+    <plurals name="walk_steps">
+        <item quantity="one">%1$s passo</item>
+        <item quantity="many">%1$s passi</item>
+        <item quantity="other">%1$s passi</item>
+    </plurals>
+    <plurals name="duration_minutes">
+        <item quantity="one">%1$d minuto</item>
+        <item quantity="many">%1$d minuti</item>
+        <item quantity="other">%1$d minuti</item>
+    </plurals>
+    <string name="duration_hours_minutes">%1$d h %2$d min</string>
+    <string name="duration_hours">%1$d h</string>
+    <string name="walk_spoken">%1$s dalle %2$s alle %3$s, %4$s: %5$s, %6$s, %7$s, %8$s</string>
+</resources>

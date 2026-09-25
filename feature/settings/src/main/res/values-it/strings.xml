@@ -41,17 +41,31 @@
     </plurals>
     <string name="settings_goal_note">Un nuovo obiettivo vale da oggi; i giorni passati tengono il loro.</string>
 
-    <string name="settings_group_units">Unità</string>
+    <string name="settings_group_units">Unità e calendario</string>
     <string name="settings_units">Unità di misura</string>
     <string name="settings_units_system">Come il telefono (%1$s)</string>
     <string name="settings_units_metric">Metriche: km, kg, cm</string>
     <string name="settings_units_imperial">Imperiali: mi, lb, ft</string>
     <string name="settings_units_metric_short">metriche</string>
     <string name="settings_units_imperial_short">imperiali</string>
+    <string name="settings_first_day_of_week">Primo giorno della settimana</string>
+    <string name="settings_first_day_of_week_note">Dove cominciano le settimane dello Storico, e quali giorni somma il record di una settimana.</string>
+    <string name="settings_first_day_system">Come il telefono (%1$s)</string>
 
     <string name="settings_group_today">Oggi</string>
     <string name="settings_typical_line">Linea della giornata tipica</string>
     <string name="settings_typical_line_note">Sul grafico e sull’anello: dove si trova di solito lo stesso giorno della settimana.</string>
+
+    <string name="settings_group_walks">Camminate</string>
+    <string name="settings_walks">Trova le camminate</string>
+    <string name="settings_walks_note">Tratti di camminata o corsa continua, trovati nei passi già contati: nessun sensore in più, nessun consumo in più.</string>
+    <string name="settings_min_walk">Camminata più breve</string>
+    <string name="settings_min_walk_note">Un tratto più breve non viene elencato come camminata. Le pause fino a 2 minuti, a un semaforo o a una porta, non la interrompono.</string>
+    <plurals name="settings_minutes">
+        <item quantity="one">%1$d minuto</item>
+        <item quantity="many">%1$d minuti</item>
+        <item quantity="other">%1$d minuti</item>
+    </plurals>
 
     <string name="settings_group_appearance">Aspetto</string>
     <string name="settings_theme">Tema</string>
@@ -83,7 +97,7 @@
 
     <string name="settings_privacy">Privacy</string>
     <string name="settings_privacy_headline">Niente account, niente pubblicità, niente tracciamento.</string>
-    <string name="settings_privacy_body">Passo non ha alcun permesso di accesso a internet: passi, profilo e impostazioni restano sul telefono e non lo lasciano mai.</string>
+    <string name="settings_privacy_body">Passo non ha alcun permesso di accesso a internet, quindi non può mandare da nessuna parte passi, profilo e impostazioni: restano sul telefono. Solo il backup di Android, se l’hai attivato, ne tiene una copia nel tuo account Google, cifrata con il blocco schermo, per ritrovarli su un telefono nuovo.</string>
 
     <string name="settings_group_about">Informazioni</string>
     <string name="settings_version">Versione</string>

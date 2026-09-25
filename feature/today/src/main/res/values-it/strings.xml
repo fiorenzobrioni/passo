@@ -42,7 +42,7 @@
 
     <!-- Le schede di stato -->
     <string name="today_status_permission_title">Passo non sta contando</string>
-    <string name="today_status_permission_body">Serve il permesso «Attività fisica» per leggere il contapassi del telefono. I tuoi passi non lasciano mai il telefono.</string>
+    <string name="today_status_permission_body">Serve il permesso «Attività fisica» per leggere il contapassi del telefono. Passo tiene i tuoi passi sul telefono e non li manda da nessuna parte.</string>
     <string name="today_status_permission_action">Consenti</string>
     <string name="today_status_permission_settings">Apri impostazioni</string>
     <string name="today_status_paused_title">Conteggio in pausa</string>
@@ -81,6 +81,9 @@
         <item quantity="other">%1$s in meno del solito a quest’ora.</item>
     </plurals>
     <string name="today_trend_description_on_pace">Più o meno quanti di solito a quest’ora.</string>
+
+    <!-- Le camminate -->
+    <string name="today_walks_title">Camminate di oggi</string>
 
     <!-- Le metriche -->
     <string name="today_metric_distance">Distanza</string>

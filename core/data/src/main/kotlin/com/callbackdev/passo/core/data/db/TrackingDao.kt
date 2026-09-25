@@ -54,6 +54,9 @@ abstract class TrackingDao {
     @Query("SELECT * FROM daily_summary WHERE localEpochDay BETWEEN :fromDay AND :toDay ORDER BY localEpochDay")
     abstract fun observeSummaries(fromDay: Long, toDay: Long): Flow<List<DailySummaryEntity>>
 
+    @Query("SELECT * FROM daily_summary ORDER BY localEpochDay")
+    abstract fun observeAllSummaries(): Flow<List<DailySummaryEntity>>
+
     @Query("SELECT * FROM diagnostics_event ORDER BY id")
     abstract suspend fun diagnostics(): List<DiagnosticsEventEntity>
 

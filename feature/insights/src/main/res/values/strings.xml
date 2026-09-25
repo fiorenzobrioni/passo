@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="insights_title">Insights</string>
+    <string name="insights_settings">Settings</string>
+
+    <!-- One sentence before any number -->
+    <string name="insights_headline_nothing">Insights start with your first day</string>
+    <string name="insights_detail_nothing">Streaks, records and averages appear here as the days add up, from the steps on this phone.</string>
+    <string name="insights_headline_best_today">Today is your best day yet</string>
+    <plurals name="insights_detail_best_today">
+        <item quantity="one">%1$s step, more than any day before</item>
+        <item quantity="other">%1$s steps, more than any day before</item>
+    </plurals>
+    <plurals name="insights_headline_streak">
+        <item quantity="one">%1$d day in a row at your goal</item>
+        <item quantity="other">%1$d days in a row at your goal</item>
+    </plurals>
+    <string name="insights_detail_streak_today">Today is already part of it.</string>
+    <plurals name="insights_detail_streak_open">
+        <item quantity="one">Reach %1$s steps today to make it %2$d.</item>
+        <item quantity="other">Reach %1$s steps today to make it %2$d.</item>
+    </plurals>
+    <string name="insights_headline_week_up">A stronger week than the one before</string>
+    <string name="insights_headline_week_down">A quieter week than the one before</string>
+    <string name="insights_headline_week_steady">A week much like the one before</string>
+    <string name="insights_detail_week_up">%1$s steps a day over the last 7 days, %2$s more</string>
+    <string name="insights_detail_week_down">%1$s steps a day over the last 7 days, %2$s fewer</string>
+    <string name="insights_detail_week_steady">%1$s steps a day over the last 7 days</string>
+    <plurals name="insights_headline_average">
+        <item quantity="one">%1$s step a day on average</item>
+        <item quantity="other">%1$s steps a day on average</item>
+    </plurals>
+    <plurals name="insights_detail_average">
+        <item quantity="one">Over your first day. Comparisons start after two weeks.</item>
+        <item quantity="other">Over your first %1$d days. Comparisons start after two weeks.</item>
+    </plurals>
+
+    <!-- The streak -->
+    <plurals name="insights_streak_days">
+        <item quantity="one">day in a row at your goal</item>
+        <item quantity="other">days in a row at your goal</item>
+    </plurals>
+    <string name="insights_streak_none">No streak right now: a day at your goal starts one.</string>
+    <plurals name="insights_streak_longest">
+        <item quantity="one">Longest: %1$d day, %2$s</item>
+        <item quantity="other">Longest: %1$d days, %2$s</item>
+    </plurals>
+    <string name="insights_streak_longest_now">This is your longest streak.</string>
+    <string name="insights_streak_last_days">The last 7 days</string>
+    <string name="insights_day_met">%1$s: goal met</string>
+    <string name="insights_day_not_met">%1$s: goal not met</string>
+    <string name="insights_day_today_open">%1$s: under way</string>
+    <string name="insights_day_not_counted">%1$s: not counted</string>
+
+    <!-- Records -->
+    <string name="insights_group_records">Records</string>
+    <string name="insights_record_day">Best day</string>
+    <string name="insights_record_week">Best week</string>
+    <string name="insights_record_month">Best month</string>
+    <string name="insights_record_streak">Longest streak</string>
+    <plurals name="insights_steps">
+        <item quantity="one">%1$s step</item>
+        <item quantity="other">%1$s steps</item>
+    </plurals>
+    <plurals name="insights_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <!-- A record's value and when: «14,280 steps · Mon 14 Sep». -->
+    <string name="insights_record_value">%1$s · %2$s</string>
+    <string name="insights_range">%1$s – %2$s</string>
+
+    <!-- Averages -->
+    <string name="insights_group_averages">Averages</string>
+    <string name="insights_average_7">Last 7 days</string>
+    <string name="insights_average_30">Last 30 days</string>
+    <string name="insights_average_all">Since %1$s</string>
+    <plurals name="insights_a_day">
+        <item quantity="one">%1$s step a day</item>
+        <item quantity="other">%1$s steps a day</item>
+    </plurals>
+    <string name="insights_vs_before_more">%1$s · %2$s more than the 7 days before</string>
+    <string name="insights_vs_before_less">%1$s · %2$s fewer than the 7 days before</string>
+    <plurals name="insights_not_yet">
+        <item quantity="one">After %1$d complete day</item>
+        <item quantity="other">After %1$d complete days</item>
+    </plurals>
+    <string name="insights_averages_caption">Today is left out of the 7 and 30 days until it is over; a day with no steps counts as zero.</string>
+
+    <!-- Totals -->
+    <string name="insights_group_totals">Since %1$s</string>
+    <string name="insights_total_steps">Steps</string>
+    <plurals name="insights_total_steps_meaning">
+        <item quantity="one">In %1$d day of counting</item>
+        <item quantity="other">In %1$d days of counting</item>
+    </plurals>
+    <string name="insights_total_distance">Distance</string>
+    <string name="insights_total_distance_meaning">Estimate, each day with its own step length</string>
+    <string name="insights_total_calories">Active calories</string>
+    <string name="insights_total_calories_meaning">Estimate: movement only</string>
+    <string name="insights_total_goal_days">Days at your goal</string>
+    <string name="insights_total_goal_days_meaning">%1$s of the days counted</string>
+    <string name="insights_metric_spoken">%1$s: %2$s. %3$s</string>
+</resources>

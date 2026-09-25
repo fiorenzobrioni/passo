@@ -37,7 +37,7 @@
 
     <!-- The status cards -->
     <string name="today_status_permission_title">Passo is not counting</string>
-    <string name="today_status_permission_body">It needs the “Physical activity” permission to read the phone’s step counter. Your steps never leave the phone.</string>
+    <string name="today_status_permission_body">It needs the “Physical activity” permission to read the phone’s step counter. Passo keeps your steps on the phone and sends them nowhere.</string>
     <string name="today_status_permission_action">Allow</string>
     <string name="today_status_permission_settings">Open settings</string>
     <string name="today_status_paused_title">Counting is paused</string>
@@ -72,6 +72,9 @@
         <item quantity="other">%1$s fewer than usual at this time.</item>
     </plurals>
     <string name="today_trend_description_on_pace">About as many as usual at this time.</string>
+
+    <!-- The walks -->
+    <string name="today_walks_title">Walks today</string>
 
     <!-- The metric tiles -->
     <string name="today_metric_distance">Distance</string>

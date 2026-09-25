@@ -2,7 +2,7 @@
 
 # 👣 Passo
 
-**Every step, counted. On your phone, and nowhere else.**
+**Every step, counted. Kept on your phone, sent nowhere.**
 
 A private, battery-friendly Android pedometer that counts every step, even if you never open the app.
 Free, no account, no ads, no tracking, and no permission to use the internet at all.
@@ -18,10 +18,10 @@ Free, no account, no ads, no tracking, and no permission to use the internet at 
 </div>
 
 > [!NOTE]
-> Passo is in early development: Phases 0 to 4 of [the plan](./PLANNING.md) are built (the
-> step tracking engine, the metrics, the Today screen, the first run, Settings and the two
-> home-screen widgets). It has run on a phone, but the multi-day field test of the tracking
-> engine is still to do, and there is no usable release yet.
+> Passo is in early development: Phases 0 to 5 of [the plan](./PLANNING.md) are built (the
+> step tracking engine, the metrics, the Today screen, the first run, Settings, the two
+> home-screen widgets, History, Insights and walks). It has run on a phone, but the multi-day
+> field test of the tracking engine is still to do, and there is no usable release yet.
 
 ## Screenshots
 
@@ -56,6 +56,16 @@ Free, no account, no ads, no tracking, and no permission to use the internet at 
     <td align="center"><b>Each widget its own look:</b> Chiaro's six colours, any opacity, what it shows.</td>
     <td></td>
   </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/history-day.png" width="250" alt="History, one day: goal met with 10,415 steps, three walks, the steps hour by hour with the walks marked"></td>
+    <td align="center"><img src="docs/screenshots/history-month.png" width="250" alt="History, one month: the steps day by day against the goal, and the goal calendar"></td>
+    <td align="center"><img src="docs/screenshots/insights.png" width="250" alt="Insights: four days in a row at the goal, the last seven days, and the records"></td>
+  </tr>
+  <tr>
+    <td align="center"><b>A day in History,</b> hour by hour, with the walks Passo found on its own.</td>
+    <td align="center"><b>A month,</b> against each day's goal, and the calendar of how close each day came.</td>
+    <td align="center"><b>Insights:</b> the streak, the records (each opens its day, week or month) and the averages.</td>
+  </tr>
 </table>
 
 Drawn from the app's own screens with realistic sample days (the phone's status bar is not in
@@ -82,8 +92,17 @@ resizable home-screen widgets answer "how am I doing today?" at a glance.
   counts live while it is open.
 - **A short first run**: welcome, an optional profile, a goal, the one permission it needs,
   and a battery tip on the phones whose battery manager stops background apps.
-- **Settings**: height, weight and step length, the goal, metric or imperial units, theme,
-  palette and typeface, language, and a pause.
+- **History**: a day, a week, a month or a year at a time, swiped or stepped through from
+  your first day. A day hour by hour, with its walks; weeks and months against each day's own
+  goal, with how they compare with the one before; a year month by month; and a calendar of
+  how close each day came to its goal. Touch a bar or a day to read it and open it.
+- **Walks, found for you**: stretches of walking or running recognized in the steps already
+  counted ("10:12 to 10:47, 3,420 steps, 2.6 km, 98 steps/min"), on Today and in History. No
+  extra sensor, no background work, and a switch to turn them off.
+- **Insights**: the streak of days at your goal, your best day, week and month, averages over
+  the last 7 and 30 days, and what it all adds up to since the first day.
+- **Settings**: height, weight and step length, the goal, metric or imperial units, the first
+  day of the week, walks, theme, palette and typeface, language, and a pause.
 - **Two home-screen widgets**, dressed like Chiaro's so the two apps sit side by side:
   **At a glance** (today's ring, the count, the day's sentence and, on a wide tall card, the
   day hour by hour) and **In words** (the same day in type alone: the count large, the
@@ -94,11 +113,6 @@ resizable home-screen widgets answer "how am I doing today?" at a glance.
 
 ## What is coming (v1.0)
 
-- **Walks, found for you**: continuous stretches of walking or running are recognized from the
-  minute-by-minute steps ("10:12 to 10:47, 3,420 steps, 2.6 km, 98 spm"), with no extra
-  sensor and no background work.
-- **History and insights**: the day hour by hour, week, month and year charts with the goal
-  line, a calendar of goal days, streaks, personal records and lifetime distance.
 - **Goals**: an optional "goal reached" notification, an evening nudge, a weekly summary.
 - **Everywhere else**: an ongoing notification with today's steps, a Quick Settings tile,
   export to CSV and JSON, import from a backup.
@@ -109,9 +123,13 @@ walk.
 
 ## Private by design
 
-- **No `INTERNET` permission.** Nothing can leave the phone, except through an export you
-  start yourself or Android's own backup. The build fails if a network, location,
-  exact-alarm or body-sensor permission ever appears in the app, from any library.
+- **No `INTERNET` permission.** Passo cannot send anything anywhere. The build fails if a
+  network, location, exact-alarm or body-sensor permission ever appears in the app, from any
+  library.
+- **Android's backup, decided.** If you turned on your phone's backup, Android (not Passo)
+  keeps a copy of your step history, profile and settings in your Google account, encrypted
+  with your screen lock, and moves them to a new phone. Nothing else is in it, and on the new
+  phone counting starts cleanly, without adding that phone's earlier steps.
 - **No account, no analytics, no ads, no crash reporters.**
 - **No other health app needed.** No Health Connect, Google Fit or Samsung Health, no Google
   Play services: the phone's step counter is the only source.

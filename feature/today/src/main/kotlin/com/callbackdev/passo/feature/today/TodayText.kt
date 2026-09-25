@@ -1,57 +1,12 @@
 package com.callbackdev.passo.feature.today
 
-import android.text.format.DateFormat
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import com.callbackdev.passo.core.designsystem.format.clockTime
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.today.Headline
 import com.callbackdev.passo.core.domain.today.Pace
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.format.DateTimeFormatter
-import java.util.Locale
-
-/** The app's current locale: the per-app language when one is picked, else the phone's. */
-@Composable
-@ReadOnlyComposable
-internal fun currentLocale(): Locale = LocalConfiguration.current.locales[0]
-
-/** A clock time the way the phone shows times: 24-hour or not, as the reader set it. */
-@Composable
-internal fun clockTime(minuteOfDay: Int): String {
-    val context = LocalContext.current
-    val pattern = DateFormat.getBestDateTimePattern(
-        currentLocale(),
-        if (DateFormat.is24HourFormat(context)) "Hm" else "hm",
-    )
-    return LocalTime.of(
-        (minuteOfDay / 60) % 24,
-        minuteOfDay % 60,
-    ).format(DateTimeFormatter.ofPattern(pattern, currentLocale()))
-}
-
-/** An hour on the chart's axis: «06» or «6 AM». */
-@Composable
-internal fun axisHour(hour: Int): String {
-    val context = LocalContext.current
-    val pattern = DateFormat.getBestDateTimePattern(
-        currentLocale(),
-        if (DateFormat.is24HourFormat(context)) "HH" else "ha",
-    )
-    return LocalTime.of(hour % 24, 0).format(DateTimeFormatter.ofPattern(pattern, currentLocale()))
-}
-
-/** «Thursday, 25 September», the way the locale writes a day, capitalised as a heading. */
-@Composable
-internal fun longDate(date: LocalDate): String {
-    val locale = currentLocale()
-    val pattern = DateFormat.getBestDateTimePattern(locale, "EEEEdMMMM")
-    return date.format(DateTimeFormatter.ofPattern(pattern, locale)).replaceFirstChar { it.titlecase(locale) }
-}
 
 /** A walk's length: «23 minutes», or «1 h 20 min» from an hour up. */
 @Composable

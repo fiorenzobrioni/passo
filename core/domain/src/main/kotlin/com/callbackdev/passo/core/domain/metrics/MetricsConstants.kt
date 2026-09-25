@@ -89,6 +89,28 @@ object MetricsConstants {
     /** The typical day's resolution: 15-minute slots, 96 of them. */
     const val TYPICAL_DAY_SLOT_MINUTES: Int = 15
 
+    // --- Walks (PLANNING.md §6.1) ---------------------------------------------------------
+
+    /**
+     * A minute is part of a walk from this many steps: more than half of it spent stepping at
+     * an ordinary pace. Below it a minute is steps around the house or the office, which is
+     * what walk detection is there to tell apart. To be tuned in the field (§15).
+     */
+    const val WALK_MINUTE_THRESHOLD: Int = 60
+
+    /**
+     * A walk goes on across this many quieter minutes in a row: a traffic light, a door, a
+     * word with someone. A longer pause ends it.
+     */
+    const val WALK_MAX_GAP_MINUTES: Int = 2
+
+    /**
+     * A walk is called mixed when both its walking and its running minutes are at least this
+     * share of it (§6.1's optional refinement): an interval session, or a run with walking
+     * breaks, is neither a walk nor a run.
+     */
+    const val MIXED_WALK_SHARE: Double = 0.3
+
     // --- Energy ---------------------------------------------------------------------------
 
     /**

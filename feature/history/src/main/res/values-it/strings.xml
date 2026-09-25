@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="history_title">Storico</string>
+    <string name="history_settings">Impostazioni</string>
+    <string name="history_back_to_now">Più recente</string>
+
+    <string name="history_scale_day">Giorno</string>
+    <string name="history_scale_week">Settimana</string>
+    <string name="history_scale_month">Mese</string>
+    <string name="history_scale_year">Anno</string>
+
+    <string name="history_earlier">Precedente</string>
+    <string name="history_later">Successivo</string>
+    <string name="history_today">Oggi</string>
+    <string name="history_yesterday">Ieri</string>
+    <string name="history_this_week">Questa settimana</string>
+    <string name="history_last_week">La settimana scorsa</string>
+    <string name="history_this_month">Questo mese</string>
+    <string name="history_this_year">Quest’anno</string>
+    <string name="history_range">%1$s – %2$s</string>
+
+    <string name="history_day_no_steps">Nessun passo registrato in questo giorno</string>
+    <string name="history_day_no_steps_today">Ancora nessun passo oggi</string>
+    <plurals name="history_day_met">
+        <item quantity="one">Obiettivo raggiunto, con %1$s passo</item>
+        <item quantity="many">Obiettivo raggiunto, con %1$s passi</item>
+        <item quantity="other">Obiettivo raggiunto, con %1$s passi</item>
+    </plurals>
+    <plurals name="history_day_short">
+        <item quantity="one">%1$s passo, %2$s sotto l’obiettivo</item>
+        <item quantity="many">%1$s passi, %2$s sotto l’obiettivo</item>
+        <item quantity="other">%1$s passi, %2$s sotto l’obiettivo</item>
+    </plurals>
+    <plurals name="history_day_to_go">
+        <item quantity="one">%1$s passo finora, ne mancano %2$s</item>
+        <item quantity="many">%1$s passi finora, ne mancano %2$s</item>
+        <item quantity="other">%1$s passi finora, ne mancano %2$s</item>
+    </plurals>
+    <plurals name="history_day_walks">
+        <item quantity="one">%1$d camminata, %2$s in tutto</item>
+        <item quantity="many">%1$d camminate, %2$s in tutto</item>
+        <item quantity="other">%1$d camminate, %2$s in tutto</item>
+    </plurals>
+    <plurals name="history_day_no_walks">
+        <item quantity="one">Nessuna camminata di almeno %1$d minuto</item>
+        <item quantity="many">Nessuna camminata di almeno %1$d minuti</item>
+        <item quantity="other">Nessuna camminata di almeno %1$d minuti</item>
+    </plurals>
+
+    <string name="history_period_nothing">Niente di registrato in questo periodo</string>
+    <plurals name="history_period_goal_days">
+        <item quantity="one">Obiettivo raggiunto %1$d giorno su %2$d</item>
+        <item quantity="many">Obiettivo raggiunto %1$d giorni su %2$d</item>
+        <item quantity="other">Obiettivo raggiunto %1$d giorni su %2$d</item>
+    </plurals>
+    <plurals name="history_period_goal_days_so_far">
+        <item quantity="one">Obiettivo raggiunto %1$d giorno su %2$d, finora</item>
+        <item quantity="many">Obiettivo raggiunto %1$d giorni su %2$d, finora</item>
+        <item quantity="other">Obiettivo raggiunto %1$d giorni su %2$d, finora</item>
+    </plurals>
+    <plurals name="history_period_average">
+        <item quantity="one">%1$s passo al giorno in media</item>
+        <item quantity="many">%1$s passi al giorno in media</item>
+        <item quantity="other">%1$s passi al giorno in media</item>
+    </plurals>
+    <string name="history_vs_week_more">%1$s in più della settimana prima</string>
+    <string name="history_vs_week_less">%1$s in meno della settimana prima</string>
+    <string name="history_vs_week_same">più o meno come la settimana prima</string>
+    <string name="history_vs_month_more">%1$s in più del mese prima</string>
+    <string name="history_vs_month_less">%1$s in meno del mese prima</string>
+    <string name="history_vs_month_same">più o meno come il mese prima</string>
+    <string name="history_vs_year_more">%1$s in più dell’anno prima</string>
+    <string name="history_vs_year_less">%1$s in meno dell’anno prima</string>
+    <string name="history_vs_year_same">più o meno come l’anno prima</string>
+    <string name="history_clauses">%1$s, %2$s</string>
+
+    <string name="history_chart_hours">Passi per ora</string>
+    <string name="history_chart_days">Passi per giorno</string>
+    <string name="history_chart_months">Giorno medio per mese</string>
+    <string name="history_chart_legend_goal">Obiettivo</string>
+    <string name="history_chart_legend_walks">Camminate</string>
+    <string name="history_readout_hint">Tocca una barra per leggerla</string>
+    <string name="history_readout_busiest">Ora più attiva %1$s</string>
+    <plurals name="history_steps">
+        <item quantity="one">%1$s passo</item>
+        <item quantity="many">%1$s passi</item>
+        <item quantity="other">%1$s passi</item>
+    </plurals>
+    <plurals name="history_steps_a_day">
+        <item quantity="one">%1$s al giorno</item>
+        <item quantity="many">%1$s al giorno</item>
+        <item quantity="other">%1$s al giorno</item>
+    </plurals>
+    <string name="history_goal_met">obiettivo raggiunto</string>
+    <plurals name="history_goal_short">
+        <item quantity="one">%1$s sotto l’obiettivo</item>
+        <item quantity="many">%1$s sotto l’obiettivo</item>
+        <item quantity="other">%1$s sotto l’obiettivo</item>
+    </plurals>
+    <plurals name="history_goal_days_short">
+        <item quantity="one">obiettivo raggiunto %1$d giorno</item>
+        <item quantity="many">obiettivo raggiunto %1$d giorni</item>
+        <item quantity="other">obiettivo raggiunto %1$d giorni</item>
+    </plurals>
+    <string name="history_not_counted">non contato</string>
+    <string name="history_open_day">Apri il giorno</string>
+    <string name="history_open_month">Apri il mese</string>
+    <string name="history_caption_hours">In ombra: le camminate trovate da Passo. Tocca una barra per leggere l’ora.</string>
+    <string name="history_caption_days">La linea è l’obiettivo di ogni giorno. Tocca una barra per leggere il giorno, poi aprilo.</string>
+    <string name="history_caption_months">Ogni barra è il giorno medio del mese. Toccane una per leggerla, poi aprila.</string>
+    <string name="history_chart_description">%1$s. %2$s.</string>
+    <string name="history_bar">%1$s: %2$s</string>
+    <string name="history_bar_with_goal">%1$s: %2$s, %3$s</string>
+
+    <string name="history_calendar_title">Calendario dell’obiettivo</string>
+    <string name="history_calendar_less">Meno</string>
+    <string name="history_calendar_more">Più</string>
+    <string name="history_calendar_met">Obiettivo raggiunto</string>
+    <string name="history_calendar_caption">Quanto ogni giorno si è avvicinato al suo obiettivo. Tocca un giorno per aprirlo.</string>
+
+    <string name="history_metric_steps">Passi</string>
+    <string name="history_metric_distance">Distanza</string>
+    <string name="history_metric_distance_meaning">Stima, dalla lunghezza del passo di ogni giorno</string>
+    <string name="history_metric_distance_day_meaning">Stima, dalla lunghezza del tuo passo</string>
+    <string name="history_metric_calories">Calorie attive</string>
+    <string name="history_metric_calories_meaning">Stima: solo il movimento, oltre al consumo a riposo</string>
+    <string name="history_metric_active">Minuti attivi</string>
+    <string name="history_metric_active_meaning">Minuti con almeno 40 passi</string>
+    <string name="history_metric_brisk">Minuti a passo svelto</string>
+    <plurals name="history_metric_brisk_week_left">
+        <item quantity="one">Ne manca %1$d per i 150 a settimana dell’OMS</item>
+        <item quantity="many">Ne mancano %1$d per i 150 a settimana dell’OMS</item>
+        <item quantity="other">Ne mancano %1$d per i 150 a settimana dell’OMS</item>
+    </plurals>
+    <string name="history_metric_brisk_week_done">I 150 a settimana dell’OMS: fatto</string>
+    <string name="history_metric_brisk_day">Almeno 100 passi al minuto: intensità moderata</string>
+    <string name="history_metric_spoken">%1$s: %2$s. %3$s</string>
+
+    <string name="history_walks_title">Camminate</string>
+    <string name="history_walks_caption">Trovate nei passi del giorno, senza altri sensori. Distanza e calorie sono stime.</string>
+
+    <string name="history_empty_title">Lo storico parte dal tuo primo giorno</string>
+    <string name="history_empty_body">Ogni giorno contato da Passo resta qui, sul telefono. Torna domani per il tuo primo giorno completo.</string>
+</resources>
