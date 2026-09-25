@@ -499,12 +499,12 @@ Two widgets, in Chiaro's dress (owner's request): «At a glance» and «In words
 - [x] Per-widget settings (not planned; owner's request): background, Chiaro's six colours, opacity, content switches, the ring's side, with the real card as a live preview.
 
 **Acceptance:**
-- [ ] All sizes are legible on at least 2 launchers (e.g. Pixel Launcher and One UI), in light and dark themes.
-  - Every form at every reference size, in every dress, is drawn by `WidgetGalleryTest` into `widget/build/screenshots`; the launchers are the owner's field test.
-- [ ] The widget updates within about 5 s of the screen turning on.
-  - By construction (a repaint right after the screen-on flush); to confirm on a device.
-- [ ] The logs show no widget updates while the screen is off.
-  - By construction (`WidgetUpdatePolicyTest`); to confirm on a device.
+- [x] All sizes are legible on at least 2 launchers (e.g. Pixel Launcher and One UI), in light and dark themes.
+  - Confirmed by the owner on the device (25 Sep 2026). Every form at every reference size, in every dress, is also drawn by `WidgetGalleryTest` into `widget/build/screenshots`.
+- [x] The widget updates within about 5 s of the screen turning on.
+  - Confirmed by the owner on the device; by construction too (a repaint right after the screen-on flush).
+- [x] The logs show no widget updates while the screen is off.
+  - Confirmed by the owner on the device; pinned by `WidgetUpdatePolicyTest`.
 
 ### Phase 5 — History and insights
 

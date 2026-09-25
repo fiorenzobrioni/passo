@@ -88,6 +88,7 @@ part in the style of Chiaro's «Colpo d'occhio».
 
 - PLANNING.md §7 describes the two cards; the single-widget table is superseded.
 - The acceptance checks that need a phone (two launchers, light and dark, a repaint within about
-  5 s of the screen coming on, no repaint while it is off) are the owner's field test.
+  5 s of the screen coming on, no repaint while it is off) were run and passed by the owner on
+  25 Sep 2026.
 - Chiaro's card colours and ink rule are copied, not shared: a change there is carried here by
   hand, as the schemes are (ADR 0004).
