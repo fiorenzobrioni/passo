@@ -147,9 +147,10 @@ sandbox). Two standing rules (owner's):
   `~/.gradle/gradle.properties` locally, from `ORG_GRADLE_PROJECT_*` env vars in CI). Without
   them the release build is unsigned; `-PsignReleaseWithDebugKey` signs it with the debug key
   for testing only.
-- **Temporary release key**: until the real key exists, `release.yml` signs tags with
-  `keystore/temporary-release.keystore` (committed, public passwords) and forces a
-  pre-release. `keystore/README.md` lists the steps to retire it. Never commit the real key.
+- **Release key in CI**: the four repository secrets `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`,
+  `KEY_ALIAS`, `KEY_PASSWORD` (the same names as Chiaro's); `release.yml` decodes the
+  keystore into the runner's temp folder and fails by name if one is missing. Never commit
+  the real key (`keystore/README.md`).
 - **CI** (`.github/workflows/android-ci.yml`, every push and PR): formatting, forbidden
   permissions, unit tests and lint run *before* the APKs; a red suite must never produce an
   installable artifact. **Release** (`release.yml`, on `v*` tags): the same gates, then the

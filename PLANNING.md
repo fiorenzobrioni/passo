@@ -516,8 +516,8 @@ Phases 1 and 4 need **field testing on a physical device**; an emulator is not e
 - [x] `strings.xml` for `values/` (English) and `values-it/`; `locales_config.xml` for per-app language
 - [x] CI: build, unit tests, lint, formatting, forbidden-permission check
   - Plus the tag-triggered release workflow (Phase 8's, brought forward), so the signing path is exercised from the start.
-- [ ] Generate the **release keystore** now; store it outside the repo with an offline backup, and add it to GitHub Actions secrets. Never commit it. This key signs every future release and must be reused if the app ever goes on Google Play.
-  - *Pending (owner).* Until it exists, tag builds are signed with a committed **temporary** key (`keystore/temporary-release.keystore`) and forced to pre-release. `keystore/README.md` has the steps to create the real key and retire the temporary one.
+- [x] Generate the **release keystore** now; store it outside the repo with an offline backup, and add it to GitHub Actions secrets. Never commit it. This key signs every future release and must be reused if the app ever goes on Google Play.
+  - Created by the owner on 26 Sep 2026 (RSA 4096, valid to 2056) and stored in the four secrets Chiaro uses (`KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`). Checked from a one-off workflow run: the secrets decode, the keystore opens, Gradle signs the release APK with it. The temporary key that stood in until then is deleted; no release was ever signed with it. SHA-256 `8B:40:22:8A:8D:EF:E3:E3:F1:6E:FE:1A:DC:C0:4C:C7:F5:B5:82:E4:18:F0:15:E8:27:B9:59:D5:BF:39:7F:B5`.
 - [x] `CLAUDE.md` (see §13)
 - [x] `docs/adr/0001-foundations.md`: the Phase 0 decisions and their reasons
 
@@ -710,8 +710,9 @@ implementation, above all in UI and UX); decisions in `docs/adr/0011-export-impo
   - build the release APK with R8, signed with the keystore from secrets
   - attach the APK, its SHA-256 checksum and the R8 mapping file to the GitHub Release
   - mark `-beta`/`-rc` tags as pre-releases
-  - Done in Phase 0, with the temporary-key fallback described in Phase 0 (a temporary-key release is always a pre-release).
+  - Done in Phase 0; signed with the real key from secrets since 26 Sep 2026 (the temporary-key fallback is gone).
 - [ ] README: screenshots, features, install instructions (allowing installs from the browser or file manager), how to verify the checksum, and the **signing certificate SHA-256 fingerprint** so users can check the APK is genuine
+  - The fingerprint is in "Installing and verifying" since the key was created (26 Sep 2026).
 - [ ] README: updates. The app has no network access, so it can't check for updates itself; point users to GitHub's "Watch → Releases" notifications or to Obtainium, an app that tracks GitHub releases
 - [ ] Test the full install and update path: install v1.0.0 from the Release, then update to a newer build over it, with data preserved
 
@@ -851,7 +852,7 @@ Include:
 - Formatting: ktlint via Spotless, code style `intellij_idea` (the Kotlin coding conventions), rules in `.editorconfig`.
 - The forbidden-permission gate checks the **merged** manifest of every variant (`:app:checkForbiddenPermissions`, wired to `check`), so a library adding a permission is caught too.
 - Only English and Italian resources ship (`localeFilters`); without it the APK carried the AndroidX libraries' 80-odd languages.
-- Signing as in Chiaro: the debug keystore is committed for good (`passo-debug` / `android`); the real release key never enters the repo. Until it exists, a committed **temporary** release key signs tag builds, which are then forced to pre-release (`keystore/README.md`).
+- Signing as in Chiaro: the debug keystore is committed for good (`passo-debug` / `android`); the real release key never enters the repo. Until it existed, a committed **temporary** release key signed tag builds, forced to pre-release; retired on 26 Sep 2026 (see the next entry below).
 - `failOnNoDiscoveredTests` is off for Android unit tests: Hilt generates test-source stubs, so Gradle 9 failed the skeleton modules that have Hilt and no tests yet.
 - License: **GPL-3.0**.
 - Charts: custom Compose `Canvas` components; no third-party chart library.
@@ -934,6 +935,8 @@ Include:
 - **Today's "Start an outing" is the reader's to take away** (owner's question, 25 Sep 2026): a switch in a new Settings group, Outings, on by default. A reader who never walks with a goal should not see the invitation every day; the one on the fence still meets it. The switch hides the button only: an outing under way (started from the launcher's long press or the evening reminder) still shows its card, because hiding it would be the screen lying. The button was the only door to the Outings page inside the app, so the group opens with one of its own, "Your outings", which stays whatever the switch says. The evening reminder's "Walk now" is left as it is: it belongs to the reminder, which has its own switch, and one setting reaching into another's notification would be harder to predict than either. The choice travels with the backup, like the typical-day line.
 
 - **The guide, in Chiaro's shape** (owner's request, 25 Sep 2026): `:feature:guide`, a tour of the three screens and the outings, what each one answers, and the things a screen cannot say out loud (steps arrive in batches and still land in their minute, a shutdown loses nothing, walks are found when you look, a day keeps its goal and its estimates, a streak waits for midnight, Passo wakes the phone only for an outing, what Android's backup is), closing on where the numbers come from. Chiaro's two rules hold it: it never teaches a control and never justifies an absence. It teaches with the app's own components (the ring with its notch, two metric tiles, History's bar chart with a goal that steps), each captioned as an example and drawn in the reader's units and first day of the week. Its own module, not a part of Settings: it reads nothing but the settings and belongs to no screen. The doors: a card at the top of Settings, as in Chiaro, where it stays for the day the question arrives, and an action on Today's first-day card, the one day the questions come on their own; no second one-time card on Today, which already has one. The widgets' chapter gets its own icon (`PassoIcons.Widgets`) rather than borrowing one that says something else.
+
+- **The real release key, and the temporary one retired** (owner, 26 Sep 2026): the owner created the key and put it in GitHub Secrets under the four names Chiaro's `release.yml` reads. `release.yml` now takes Chiaro's shape: it decodes `KEYSTORE_BASE64` and passes the rest as `ORG_GRADLE_PROJECT_PASSO_*`, with no fallback, and fails by name when a secret is missing (a missing one used to mean the temporary key, now it would mean an unsigned or wrongly signed release). Passo's own gates stay (tag against `passo.versionName`, formatting, permissions, the checksum). `keystore/temporary-release.keystore` is deleted: no tag was ever pushed, so nobody has a build signed with it. The fingerprint is published in the README.
 
 ### Open
 

@@ -25,17 +25,13 @@ local.properties
 gen/
 out/
 
-# Signing. Two keystores are committed ON PURPOSE (keystore/README.md says why):
-#   - keystore/debug.keystore, the shared debug key, for good;
-#   - keystore/temporary-release.keystore, a stand-in release key, only until the real one
-#     is in GitHub Secrets, then deleted.
+# Signing. Only the shared debug key is committed, ON PURPOSE (keystore/README.md says why).
 # The real release key must NEVER enter the repo, whatever its extension.
 *.jks
 *.keystore
 *.p12
 *.pfx
 !keystore/debug.keystore
-!keystore/temporary-release.keystore
 
 # Logs and profiling
 *.log
