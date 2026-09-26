@@ -39,7 +39,9 @@ set the rest.
 8. **Signing, as Chiaro, plus a stand-in release key.** The debug keystore is committed for
    good (`passo-debug` / `android`). The real release key does not exist yet, so tag builds are
    signed with a committed temporary key and forced to pre-release; `keystore/README.md` has
-   the steps that retire it once the real key is in GitHub Secrets.
+   the steps that retire it once the real key is in GitHub Secrets. *Update, 26 Sep 2026:*
+   the real key is in the secrets (the same four names as Chiaro's) and the temporary key
+   is deleted; no release was ever signed with it.
 9. **Versioning now, not in Phase 8.** `passo.versionName` in `gradle.properties` is the one
    place; `versionCode = major * 10000 + minor * 100 + patch`; the release workflow refuses a
    tag that does not match. It had to exist for the release workflow to be testable at all.

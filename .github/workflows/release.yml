@@ -1,13 +1,9 @@
 name: Release
 
 # Fires only on version tags (v0.1.0, v1.0.0, v1.1.0-rc1, ...). Builds the minified APK signed
-# with the release key and publishes it, with its SHA-256 checksum and the R8 mapping, as a
-# GitHub Release (PLANNING.md §11 Phase 8). Per-push testing builds stay in android-ci.yml.
-#
-# TEMPORARY KEY. Until the real release key is in GitHub Secrets, a tag is signed with the
-# stand-in key committed at keystore/temporary-release.keystore, and the release is forced to
-# a pre-release that says so. An APK signed with it can NOT be updated by one signed with the
-# real key (uninstall first, data lost). keystore/README.md has the steps to retire it.
+# with the REAL release key (GitHub Secrets) and publishes it, with its SHA-256 checksum and
+# the R8 mapping, as a GitHub Release (PLANNING.md §11 Phase 8). Per-push testing builds stay
+# in android-ci.yml. keystore/README.md says what the four secrets hold.
 on:
   push:
     tags: ['v*']
@@ -46,20 +42,21 @@ jobs:
       - name: Formatting, permissions, tests, lint
         run: ./gradlew spotlessCheck :app:checkForbiddenPermissions test :app:lintDebug
 
-      # The real key when the secrets exist; otherwise the temporary one from the repo.
-      - name: Prepare the release keystore
-        id: key
+      # A missing secret fails here, by name, rather than as an unsigned APK further down.
+      - name: Decode release keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          if [ -n "$KEYSTORE_BASE64" ]; then
-            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
-            echo "temporary=false" >> "$GITHUB_OUTPUT"
-          else
-            cp keystore/temporary-release.keystore "$RUNNER_TEMP/release.jks"
-            echo "temporary=true" >> "$GITHUB_OUTPUT"
-            echo "::warning::No KEYSTORE_BASE64 secret: signing with the TEMPORARY release key (keystore/README.md)."
-          fi
+          for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::The ${name} secret is missing (keystore/README.md)."
+              exit 1
+            fi
+          done
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
 
       # Gradle picks up ORG_GRADLE_PROJECT_<name> env vars as project properties: the same
       # names the signingConfig reads locally, and nothing secret on the command line.
@@ -67,12 +64,12 @@ jobs:
         run: ./gradlew :app:assembleRelease
         env:
           ORG_GRADLE_PROJECT_PASSO_KEYSTORE: ${{ runner.temp }}/release.jks
-          ORG_GRADLE_PROJECT_PASSO_KEYSTORE_PASSWORD: ${{ steps.key.outputs.temporary == 'true' && 'passo-temporary' || secrets.KEYSTORE_PASSWORD }}
-          ORG_GRADLE_PROJECT_PASSO_KEY_ALIAS: ${{ steps.key.outputs.temporary == 'true' && 'passo-temporary' || secrets.KEY_ALIAS }}
-          ORG_GRADLE_PROJECT_PASSO_KEY_PASSWORD: ${{ steps.key.outputs.temporary == 'true' && 'passo-temporary' || secrets.KEY_PASSWORD }}
+          ORG_GRADLE_PROJECT_PASSO_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          ORG_GRADLE_PROJECT_PASSO_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          ORG_GRADLE_PROJECT_PASSO_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       # Named after the tag: the mapping must stay paired with the exact APK it deobfuscates,
-      # and the checksum lets a reader verify the download (README, "Verify the APK").
+      # and the checksum lets a reader verify the download (README, "Installing and verifying").
       - name: Rename artifacts after the tag, write the checksum
         run: |
           cp app/build/outputs/apk/release/app-release.apk "passo-${GITHUB_REF_NAME}.apk"
@@ -84,18 +81,8 @@ jobs:
       # prefix, not a regex, or the dots in the version would match anything. A missing
       # section falls back to the generated notes rather than failing the release.
       - name: Take the release body from CHANGELOG.md
-        env:
-          TEMPORARY_KEY: ${{ steps.key.outputs.temporary }}
         run: |
           : > release-notes.md
-          if [ "$TEMPORARY_KEY" = "true" ]; then
-            {
-              echo "> [!WARNING]"
-              echo "> Signed with a **temporary key**, for testing only. A later release signed with the"
-              echo "> final key will not install over this one: uninstall first (step data is lost)."
-              echo
-            } >> release-notes.md
-          fi
           if [ -f CHANGELOG.md ]; then
             awk -v pfx="## [${GITHUB_REF_NAME#v}]" '
               index($0, pfx) == 1        { found = 1; next }
@@ -117,6 +104,5 @@ jobs:
             passo-${{ github.ref_name }}.apk.sha256
             mapping-${{ github.ref_name }}.txt
           generate_release_notes: true
-          # A hyphen in the tag (v1.0.0-rc1) is a pre-release by SemVer definition; so is
-          # anything signed with the temporary key, which must never be labeled "Latest".
-          prerelease: ${{ contains(github.ref_name, '-') || steps.key.outputs.temporary == 'true' }}
+          # A hyphen in the tag (v1.0.0-rc1) is a pre-release by SemVer definition.
+          prerelease: ${{ contains(github.ref_name, '-') }}

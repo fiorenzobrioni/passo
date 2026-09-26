@@ -225,10 +225,13 @@ Passo will be published as signed APKs on
 checksum. The app has no network access, so it cannot check for updates itself: use GitHub's
 "Watch, Custom, Releases" notifications, or [Obtainium](https://github.com/ImranR98/Obtainium).
 
-Until the final signing key exists, releases are signed with a **temporary key** and marked as
-pre-releases. A release signed with the final key will not install over one of them: uninstall
-first. The signing certificate's SHA-256 fingerprint will be published here with the first
-real release.
+Every release is signed with the same key. To check that an APK is genuine, compare its signing
+certificate with this SHA-256 fingerprint (`apksigner verify --print-certs passo-vX.Y.Z.apk`, or
+AppVerifier on the phone):
+
+```
+8B:40:22:8A:8D:EF:E3:E3:F1:6E:FE:1A:DC:C0:4C:C7:F5:B5:82:E4:18:F0:15:E8:27:B9:59:D5:BF:39:7F:B5
+```
 
 ## The family
 
