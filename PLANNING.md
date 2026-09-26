@@ -712,7 +712,7 @@ implementation, above all in UI and UX); decisions in `docs/adr/0011-export-impo
   - mark `-beta`/`-rc` tags as pre-releases
   - Done in Phase 0; signed with the real key from secrets since 26 Sep 2026 (the temporary-key fallback is gone).
 - [ ] README: screenshots, features, install instructions (allowing installs from the browser or file manager), how to verify the checksum, and the **signing certificate SHA-256 fingerprint** so users can check the APK is genuine
-  - The fingerprint is in "Installing and verifying" since the key was created (26 Sep 2026).
+  - The fingerprint and the checksum check are in "Installing and verifying" since the key was created (26 Sep 2026).
 - [ ] README: updates. The app has no network access, so it can't check for updates itself; point users to GitHub's "Watch → Releases" notifications or to Obtainium, an app that tracks GitHub releases
 - [ ] Test the full install and update path: install v1.0.0 from the Release, then update to a newer build over it, with data preserved
 

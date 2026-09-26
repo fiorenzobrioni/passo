@@ -55,6 +55,7 @@ set the rest.
 
 - A release before the real key exists installs, but cannot be updated in place by a release
   signed with the real key. Such releases are pre-releases and say so in their notes.
+  *Moot since 26 Sep 2026:* the real key arrived before any tag, so no such release exists.
 - AGP 9 is newer than Chiaro's AGP 8.13: build snippets from Chiaro need translating to the
   new DSL (no `kotlin { }` block from a Kotlin Android plugin, `CommonExtension` without type
   parameters).
