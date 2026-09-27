@@ -120,7 +120,7 @@ internal class SessionNotifications(private val context: Context) {
                         },
                     )
                     .setProgress(scaled)
-                    .setProgressTrackerIcon(IconCompat.createWithResource(context, R.drawable.ic_stat_steps)),
+                    .setProgressTrackerIcon(IconCompat.createWithResource(context, R.drawable.ic_progress_walker)),
             )
         } else {
             builder
