@@ -6,7 +6,7 @@ import android.content.Intent
 import androidx.core.content.ContextCompat
 
 /**
- * The one way to start, pause, resume, stop or keep going an outing (PLANNING.md §11 Phase 10):
+ * The one way to start, pause, resume, stop, keep going or put away an outing (PLANNING.md §11 Phase 10):
  * from Today, from the Outings page, from a launcher shortcut, from the notifications. Each is a
  * command to the tracking service, which is the one that measures the outing; it starts the
  * service if the system had stopped it, as opening the app does.
@@ -24,7 +24,11 @@ object SessionControl {
 
     fun stop(context: Context): Boolean = send(context, command(context, ACTION_STOP))
 
+    /** Reopens an outing just ended by its goal ("Keep going") or by a long stillness ("Resume"). */
     fun keepGoing(context: Context): Boolean = send(context, command(context, ACTION_KEEP_GOING))
+
+    /** The reader put the ended outing away: it can no longer be reopened. */
+    fun dismiss(context: Context): Boolean = send(context, command(context, ACTION_DISMISS))
 
     internal fun startIntent(context: Context, planId: Long): Intent =
         command(context, ACTION_START).putExtra(EXTRA_PLAN_ID, planId)
@@ -60,6 +64,7 @@ object SessionControl {
     internal const val ACTION_RESUME = "com.callbackdev.passo.action.SESSION_RESUME"
     internal const val ACTION_STOP = "com.callbackdev.passo.action.SESSION_STOP"
     internal const val ACTION_KEEP_GOING = "com.callbackdev.passo.action.SESSION_KEEP_GOING"
+    internal const val ACTION_DISMISS = "com.callbackdev.passo.action.SESSION_DISMISS"
     internal const val EXTRA_PLAN_ID = "com.callbackdev.passo.extra.PLAN_ID"
 
     /**

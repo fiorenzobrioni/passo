@@ -102,6 +102,22 @@ class SessionNotificationsTest {
     }
 
     @Test
+    fun `an end by stillness says so, and offers to resume while it can`() {
+        val still = session.copy(state = SessionState.FINISHED, end = SessionEnd.IDLE, endedAtMillis = 1)
+        val sessions = SessionNotifications(context)
+        val notification = sessions.ended(still, UnitPreference.METRIC, canReopen = true)
+
+        assertThat(NotificationCompat.getContentTitle(notification).toString())
+            .isEqualTo("Brisk walk: ended after a long stop")
+        assertThat(NotificationCompat.getContentText(notification).toString())
+            .isEqualTo("Ended by itself at 60% of the goal, after a long stop.")
+        val expanded = notification.extras.getCharSequence(Notification.EXTRA_BIG_TEXT).toString()
+        assertThat(expanded).contains("1,240 steps")
+        assertThat(notification.actions.single().title.toString()).isEqualTo("Resume")
+        assertThat(sessions.ended(still, UnitPreference.METRIC, canReopen = false).actions).isNull()
+    }
+
+    @Test
     fun `the outings' channel makes no sound and no vibration of its own`() {
         SessionNotifications(context).ensureChannel()
         val channel = context.getSystemService(NotificationManager::class.java)
@@ -119,5 +135,7 @@ class SessionNotificationsTest {
         assertThat(SessionHaptics.pattern(SessionMilestone.THREE_QUARTERS).toList())
             .containsExactly(0L, 180L, 220L, 180L, 220L, 180L).inOrder()
         assertThat(SessionHaptics.pattern(SessionMilestone.GOAL).toList()).containsExactly(0L, 900L).inOrder()
+        // The end by stillness: two long pulses, like none of the above.
+        assertThat(SessionHaptics.endedStillPattern().toList()).containsExactly(0L, 500L, 300L, 500L).inOrder()
     }
 }

@@ -57,6 +57,7 @@ import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.sessions.fraction
 import com.callbackdev.passo.core.domain.sessions.progress
 import com.callbackdev.passo.core.model.Session
+import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionState
 import java.time.Instant
@@ -79,7 +80,7 @@ class SessionCardActions(
  * - Under way: the pace now against the outing's own, the steps, the estimates; Pause and Stop.
  * - Paused: the same numbers standing still; Resume and Stop.
  * - Over: when it was and for how long, what it came to, the time at its pace; Close, and "Keep
- *   going" for a while after a goal ([canKeepGoing]).
+ *   going" for a while after a goal ([canKeepGoing]), "Resume" after an end by a long stillness.
  *
  * @param cadence the last half minute's pace, for an outing under way.
  */
@@ -200,7 +201,15 @@ fun SessionCard(
                                 modifier = Modifier.testTag(SessionCardTags.KEEP_GOING),
                             ) {
                                 ButtonIcon(PassoIcons.Play)
-                                Text(stringResource(R.string.session_card_keep_going))
+                                Text(
+                                    stringResource(
+                                        if (session.end == SessionEnd.IDLE) {
+                                            R.string.session_card_resume
+                                        } else {
+                                            R.string.session_card_keep_going
+                                        },
+                                    ),
+                                )
                             }
                         }
                     }

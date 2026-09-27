@@ -1,12 +1,15 @@
 package com.callbackdev.passo.feature.sessions
 
 import android.graphics.Bitmap
+import android.view.View
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -16,6 +19,9 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
+import androidx.core.graphics.Insets
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.metrics.StepLengths
@@ -188,6 +194,33 @@ class PlanEditorScreenTest {
         compose.onNodeWithTag(EditorTags.DELETE).performClick()
         compose.onNodeWithTag(EditorTags.CONFIRM_DELETE).performClick()
         assertThat(deleted).isTrue()
+    }
+
+    @Test
+    fun `with the keyboard up, save rides on it and the last settings are still within reach`() {
+        lateinit var view: View
+        compose.setContent {
+            view = LocalView.current
+            PassoTheme { PlanEditorScreen(state(), onBack = {}, actions = PlanEditorActions()) }
+        }
+        val keyboardPx = 900
+        compose.runOnIdle {
+            val insets = WindowInsetsCompat.Builder()
+                .setInsets(WindowInsetsCompat.Type.ime(), Insets.of(0, 0, 0, keyboardPx))
+                .setVisible(WindowInsetsCompat.Type.ime(), true)
+                .build()
+            ViewCompat.dispatchApplyWindowInsets(view, insets)
+        }
+        compose.waitForIdle()
+        val screen = compose.onRoot().getBoundsInRoot().bottom
+        val keyboardTop = screen - with(compose.density) { keyboardPx.toDp() }
+        val save = compose.onNodeWithTag(EditorTags.SAVE).getBoundsInRoot()
+        assertThat(save.bottom.value).isAtMost(keyboardTop.value + 0.5f)
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.VOICE))
+        compose.onNodeWithTag(EditorTags.VOICE).assertIsDisplayed()
+        assertThat(compose.onNodeWithTag(EditorTags.VOICE).getBoundsInRoot().bottom.value)
+            .isAtMost(save.top.value)
+        snapshot("editor_keyboard")
     }
 
     private fun snapshot(name: String) {

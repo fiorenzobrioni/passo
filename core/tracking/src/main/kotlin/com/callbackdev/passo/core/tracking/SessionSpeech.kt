@@ -95,9 +95,15 @@ class SessionSpeech(context: Context) {
     /** What the engine said when it was bound; [VoiceAvailability.UNKNOWN] before. */
     val availability: StateFlow<VoiceAvailability> = state.asStateFlow()
 
-    /** Binds the engine, if it is not yet: the first sentence then comes without a wait. */
+    /**
+     * Binds the engine, if it is not yet: the first sentence then comes without a wait. An engine
+     * about to be let go after its last sentence is kept instead: an outing taken back speaks on.
+     */
     fun prepare() {
-        if (tts != null) return
+        if (tts != null) {
+            releaseWhenQuiet = false
+            return
+        }
         state.value = VoiceAvailability.UNKNOWN
         tts = try {
             TextToSpeech(app) { status -> main.post { onInit(status) } }
@@ -294,6 +300,11 @@ internal fun Context.spoken(announcement: SessionAnnouncement, session: Session,
         )
 
         is SessionAnnouncement.Milestone -> res.spokenMilestone(announcement, format)
+
+        is SessionAnnouncement.EndedStill -> res.getString(
+            R.string.spoken_ended_still,
+            res.spokenAmount(SessionAmount(SessionGoalKind.STEPS, announcement.steps.toDouble()), format),
+        )
 
         is SessionAnnouncement.GoalReached -> {
             val steps = res.spokenAmount(SessionAmount(SessionGoalKind.STEPS, announcement.steps.toDouble()), format)

@@ -57,7 +57,7 @@
     <string name="guide_outings_motion_title">Il tempo in movimento</string>
     <string name="guide_outings_motion_body">I minuti di un’uscita si misurano dai tuoi passi, non con un orologio: un’attesa al semaforo non conta.</string>
     <string name="guide_outings_end_title">Finisce da sola</string>
-    <string name="guide_outings_end_body">All’obiettivo, dove «Continua» le dà ancora un quarto d’ora; dopo 15 minuti senza un passo; o dopo un’ora in pausa. Poi prende il posto della camminata che è stata, in Oggi e nello Storico, con quanta parte dell’obiettivo è stata fatta.</string>
+    <string name="guide_outings_end_body">All’obiettivo, dove «Continua» le dà ancora un quarto d’ora; dopo 15 minuti senza un passo, che ti dice con due impulsi lunghi (e con la voce, se parla) quando riparti, con «Riprendi» per un quarto d’ora; o dopo un’ora in pausa. Poi prende il posto della camminata che è stata, in Oggi e nello Storico, con quanta parte dell’obiettivo è stata fatta.</string>
     <string name="guide_outings_battery_title">L’unica volta che Passo sveglia il telefono</string>
     <string name="guide_outings_battery_body">Perché i segnali arrivino in tempo, mentre un’uscita conta il contapassi si fa sentire circa ogni mezzo minuto mentre cammini, e per niente mentre stai fermo. Prima e dopo, non cambia nulla.</string>
     <string name="guide_outings_start_title">Da dove partono</string>

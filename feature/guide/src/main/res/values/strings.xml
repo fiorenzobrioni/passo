@@ -56,7 +56,7 @@
     <string name="guide_outings_motion_title">Time in motion</string>
     <string name="guide_outings_motion_body">An outing’s minutes are measured from your steps, not by a clock: a wait at a traffic light does not count against it.</string>
     <string name="guide_outings_end_title">It ends by itself</string>
-    <string name="guide_outings_end_body">At its goal, where “Keep going” gives it a quarter of an hour more; after 15 minutes without a step; or after an hour paused. Then it takes the place of the walk it was, on Today and in History, with how much of its goal was done.</string>
+    <string name="guide_outings_end_body">At its goal, where “Keep going” gives it a quarter of an hour more; after 15 minutes without a step, which it says with two long pulses (and the voice, if it speaks) when you walk on, with “Resume” for a quarter of an hour; or after an hour paused. Then it takes the place of the walk it was, on Today and in History, with how much of its goal was done.</string>
     <string name="guide_outings_battery_title">The one time Passo wakes the phone</string>
     <string name="guide_outings_battery_body">For the signals to arrive on time, while an outing is counting the step counter reports about every half minute as you walk, and not at all while you stand still. Before it and after it, nothing changes.</string>
     <string name="guide_outings_start_title">Where they start</string>

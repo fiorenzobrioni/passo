@@ -45,7 +45,9 @@ sealed interface SessionSignal {
  *   the outing. For [KEEP_GOING_MILLIS] after it the steps are still counted aside, so "Keep
  *   going" reopens it with them.
  * - **It ends by itself** after [IDLE_END_MILLIS] without a step (at its last step), a pause of
- *   [PAUSE_END_MILLIS], or [MAX_SESSION_MILLIS] open; noticed at the next step or [check].
+ *   [PAUSE_END_MILLIS], or [MAX_SESSION_MILLIS] open; noticed at the next step or [check]. An
+ *   end by stillness can be taken back like the goal's, for [KEEP_GOING_MILLIS] from the moment
+ *   it was noticed: a chat with a friend is a stop, not the end of the walk.
  *
  * Not thread-safe: the service drives it from one thread.
  */
@@ -56,7 +58,9 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
     private val window = ArrayDeque<Mark>()
     private var windowFrom: Long = initial.lastEventAtMillis
 
-    // After the goal: the steps since, and the time they reach, for "Keep going".
+    // After the goal or a long stillness: from when "Keep going" can reopen it (null when it
+    // cannot), the steps since, and the time they reach.
+    private var reopenableSince: Long? = null
     private var overtime = SessionTotals()
     private var overtimeLastEvent: Long? = null
 
@@ -94,7 +98,7 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
         return when (current.state) {
             SessionState.ACTIVE -> when {
                 nowMillis - current.lastStepAtMillis > IDLE_END_MILLIS ->
-                    listOf(finish(current.lastStepAtMillis, SessionEnd.IDLE))
+                    listOf(finish(current.lastStepAtMillis, SessionEnd.IDLE, reopenableFrom = nowMillis))
 
                 nowMillis - current.startedAtMillis > MAX_SESSION_MILLIS ->
                     listOf(finish(current.lastStepAtMillis, SessionEnd.CLOSED))
@@ -139,48 +143,65 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
         return finish(maxOf(at, current.startedAtMillis), SessionEnd.STOPPED)
     }
 
-    /** Whether "Keep going" can still reopen it: after its goal, and not too long after. */
+    /**
+     * Whether "Keep going" can still reopen it: after its goal or a long stillness (not a pause
+     * left too long, nor the longest outing, nor the reader's own stop), and not too long after.
+     */
     fun canKeepGoing(nowMillis: Long): Boolean {
-        val current = session
-        val ended = current.endedAtMillis ?: return false
-        return current.state == SessionState.FINISHED && current.end == SessionEnd.GOAL &&
-            nowMillis - ended <= KEEP_GOING_MILLIS
+        val since = reopenableSince ?: return false
+        return session.state == SessionState.FINISHED && nowMillis - since <= KEEP_GOING_MILLIS
     }
 
-    /** Reopens an outing ended by its goal, with the steps taken since. */
-    fun keepGoing(nowMillis: Long): Boolean {
-        if (!canKeepGoing(nowMillis)) return false
+    /**
+     * Reopens an outing ended by its goal or by a long stillness, with the steps taken since; the
+     * stillness itself adds nothing. Returns what those steps crossed on the way (a milestone, or
+     * the goal, which ends it again), or null when it cannot be reopened.
+     */
+    fun keepGoing(nowMillis: Long): List<SessionSignal>? {
+        if (!canKeepGoing(nowMillis)) return null
         val current = session
         val lastEvent = overtimeLastEvent ?: current.endedAtMillis ?: nowMillis
-        session = current.copy(
+        val reopened = current.copy(
             state = SessionState.ACTIVE,
             end = null,
             endedAtMillis = null,
-            totals = current.totals + overtime,
             lastEventAtMillis = lastEvent,
             lastStepAtMillis = maxOf(lastEvent, nowMillis),
         )
+        val since = overtime
         overtime = SessionTotals()
         overtimeLastEvent = null
-        return true
+        reopenableSince = null
+        return advance(reopened, since, nowMillis)
     }
 
     private fun countActive(atMillis: Long, steps: Int): List<SessionSignal> {
         val current = session
-        // A step after a long stillness belongs to the day, not to an outing that was over.
+        // A step after a long stillness belongs to the day, not to an outing that was over; it is
+        // kept aside, as after the goal, in case the reader takes the end back.
         if (atMillis - current.lastStepAtMillis > IDLE_END_MILLIS) {
-            return listOf(finish(current.lastStepAtMillis, SessionEnd.IDLE))
+            val finished = finish(current.lastStepAtMillis, SessionEnd.IDLE, reopenableFrom = atMillis)
+            countOvertime(atMillis, steps)
+            return listOf(finished)
         }
         if (atMillis - current.startedAtMillis > MAX_SESSION_MILLIS) {
             return listOf(finish(current.lastStepAtMillis, SessionEnd.CLOSED))
         }
         val added = measure(atMillis, steps, current.lastEventAtMillis)
-        val before = current.progress()
-        var next = current.copy(
-            totals = current.totals + added,
+        val moved = current.copy(
             lastEventAtMillis = maxOf(atMillis, current.lastEventAtMillis),
             lastStepAtMillis = maxOf(atMillis, current.lastStepAtMillis),
         )
+        return advance(moved, added, atMillis)
+    }
+
+    /**
+     * Adds [added] to [moved] (the outing with its times already brought forward) and says what
+     * it crossed: the highest milestone, and the goal, which ends it at [atMillis].
+     */
+    private fun advance(moved: Session, added: SessionTotals, atMillis: Long): List<SessionSignal> {
+        val before = moved.progress()
+        var next = moved.copy(totals = moved.totals + added)
         val after = next.progress()
         val crossed = (next.milestones + SessionMilestone.GOAL).filter {
             it !in next.toldMilestones && before < it.fraction && after >= it.fraction
@@ -193,14 +214,16 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
         session = next
         if (SessionMilestone.GOAL in crossed && !next.reached) {
             session = next.copy(reachedAtMillis = atMillis)
-            signals += finish(atMillis, SessionEnd.GOAL)
+            signals += finish(atMillis, SessionEnd.GOAL, reopenableFrom = atMillis)
         }
         return signals
     }
 
     private fun countOvertime(atMillis: Long, steps: Int) {
+        val since = reopenableSince ?: return
         val ended = session.endedAtMillis ?: return
-        if (session.end != SessionEnd.GOAL || atMillis - ended > KEEP_GOING_MILLIS) return
+        if (atMillis - since > KEEP_GOING_MILLIS) return
+        // After a stillness the first gap is the stillness: [measure] credits it a step's worth.
         val last = overtimeLastEvent ?: ended
         overtime += measure(atMillis, steps, last)
         overtimeLastEvent = maxOf(atMillis, last)
@@ -225,8 +248,12 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
         )
     }
 
-    private fun finish(atMillis: Long, end: SessionEnd): SessionSignal.Finished {
+    /** Ends it at [atMillis]; [reopenableFrom] is when "Keep going" starts to count, if it may. */
+    private fun finish(atMillis: Long, end: SessionEnd, reopenableFrom: Long? = null): SessionSignal.Finished {
         val current = session
+        reopenableSince = reopenableFrom
+        overtime = SessionTotals()
+        overtimeLastEvent = null
         val finished = current.copy(
             state = SessionState.FINISHED,
             end = end,

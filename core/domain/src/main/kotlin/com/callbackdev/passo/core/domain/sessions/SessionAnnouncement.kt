@@ -20,7 +20,7 @@ enum class PaceVerdict {
 /**
  * What an outing says aloud (Phase 10, second iteration: the voice), one sentence each, in the
  * order the reader lives it: the start, each signal they chose with what is left and how the
- * pace is going, the goal with what it came to. The words are the app's (resources); this is
+ * pace is going, the goal with what it came to, or the end a long stillness brought. The words are the app's (resources); this is
  * what they say.
  */
 sealed interface SessionAnnouncement {
@@ -48,6 +48,12 @@ sealed interface SessionAnnouncement {
         val dayGoalReached: Boolean,
     ) : SessionAnnouncement
 
+    /**
+     * It ended by itself after a long stillness, noticed as the reader walks on: [steps] walked,
+     * and that it can still be taken back.
+     */
+    data class EndedStill(val steps: Int) : SessionAnnouncement
+
     companion object {
         fun started(session: Session): Started = Started(session.goal(), session.intensity, session.restOfDay)
 
@@ -65,6 +71,8 @@ sealed interface SessionAnnouncement {
         } else {
             Milestone(milestone, session.remaining(), cadence, verdict(session.intensity, cadence))
         }
+
+        fun endedStill(session: Session): EndedStill = EndedStill(session.totals.steps)
 
         fun goal(session: Session, dayGoalReached: Boolean = false): GoalReached = GoalReached(
             goal = session.goal(),
