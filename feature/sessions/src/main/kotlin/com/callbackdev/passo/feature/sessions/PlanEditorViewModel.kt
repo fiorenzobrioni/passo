@@ -147,6 +147,8 @@ constructor(
 
     fun tryVibration(milestone: SessionMilestone) = SessionHaptics.play(context, milestone)
 
+    fun tryEndedStill() = SessionHaptics.playEndedStill(context)
+
     fun voice(voice: SessionVoice) {
         if (voice != SessionVoice.OFF) speech.prepare()
         edit { it.draft.copy(voice = voice) }

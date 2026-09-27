@@ -687,9 +687,11 @@ class StepTrackingService : Service() {
 
     private fun onSessionFinished(finished: SessionSignal.Finished) {
         val session = finished.session
-        // Kept a while after its goal, for "Keep going"; otherwise it is over here. The voice is
-        // let go once its last sentence is said.
-        if (session.end != SessionEnd.GOAL || !finished.kept) tracker = null
+        // Kept a while after its goal or a long stillness, for "Keep going" and "Resume";
+        // otherwise it is over here. The voice is let go once its last sentence is said.
+        val reopenable = finished.kept && tracker?.canKeepGoing(System.currentTimeMillis()) == true
+        if (!reopenable) tracker = null
+        if (reopenable && session.end == SessionEnd.IDLE) tellEndedStill(session)
         speech.release()
         sessionDirty = false
         scope.launch {
@@ -701,9 +703,9 @@ class StepTrackingService : Service() {
                 }
             }
         }
-        if (session.end == SessionEnd.GOAL) {
+        if (session.end == SessionEnd.GOAL || reopenable) {
             val units = preferences?.settings?.units ?: UnitPreference.SYSTEM
-            sessionNotifications.post(sessionNotifications.goalReached(session, units, withKeepGoing = true))
+            sessionNotifications.post(sessionNotifications.ended(session, units, canReopen = reopenable))
         }
         applyRegistration()
         notifyNow()
@@ -711,16 +713,31 @@ class StepTrackingService : Service() {
         widgets.notify(WidgetEvent.TRACKING_STATE)
     }
 
-    /** Past its "Keep going" window, a goal's outing is over for good: the button goes too. */
-    private fun dropExpiredKeepGoing() {
+    /**
+     * The end of an outing that stood still too long, told as the reader walks on (or looks):
+     * without it the reader who stopped for a chat learns only later, from the screen, that the
+     * walk they went on with was not counted. Once, as a signal on the way is.
+     */
+    private fun tellEndedStill(session: Session) {
+        if (!sessionNotifications.signalsAllowed()) return
+        if (session.vibrate) SessionHaptics.playEndedStill(this)
+        if (session.voice != SessionVoice.OFF) speak(SessionAnnouncement.endedStill(session), session)
+    }
+
+    /**
+     * Past its "Keep going" window, or put away by the reader ([now]), an ended outing is over
+     * for good: the button goes too.
+     */
+    private fun dropExpiredKeepGoing(now: Boolean = false) {
         val current = tracker ?: return
         val session = current.session
-        if (session.state != SessionState.FINISHED || current.canKeepGoing(System.currentTimeMillis())) return
+        if (session.state != SessionState.FINISHED) return
+        if (!now && current.canKeepGoing(System.currentTimeMillis())) return
         tracker = null
         publishSession()
-        if (session.end == SessionEnd.GOAL && sessionNotifications.goalShowing()) {
+        if (sessionNotifications.endShowing()) {
             val units = preferences?.settings?.units ?: UnitPreference.SYSTEM
-            sessionNotifications.post(sessionNotifications.goalReached(session, units, withKeepGoing = false))
+            sessionNotifications.post(sessionNotifications.ended(session, units, canReopen = false))
         }
     }
 
@@ -750,9 +767,20 @@ class StepTrackingService : Service() {
 
                 SessionControl.ACTION_RESUME -> changeSession { tracker -> tracker.resume(System.currentTimeMillis()) }
 
-                SessionControl.ACTION_KEEP_GOING -> if (changeSession { it.keepGoing(System.currentTimeMillis()) }) {
-                    sessionNotifications.cancelGoal()
+                SessionControl.ACTION_KEEP_GOING -> {
+                    var crossed: List<SessionSignal> = emptyList()
+                    val reopened = changeSession { tracker ->
+                        tracker.keepGoing(System.currentTimeMillis())?.also { crossed = it } != null
+                    }
+                    if (reopened) {
+                        sessionNotifications.cancelEnd()
+                        if (tracker?.session?.voice?.let { it != SessionVoice.OFF } == true) speech.prepare()
+                        // The steps since the end may have crossed a milestone, or the goal.
+                        onSessionSignals(crossed)
+                    }
                 }
+
+                SessionControl.ACTION_DISMISS -> dropExpiredKeepGoing(now = true)
 
                 SessionControl.ACTION_STOP -> {
                     // The steps up to the touch belong to the outing.
@@ -797,7 +825,7 @@ class StepTrackingService : Service() {
         }
         // A new outing ends the last one's "Keep going".
         tracker = null
-        sessionNotifications.cancelGoal()
+        sessionNotifications.cancelEnd()
         // Everything walked until now is the day's, not the outing's.
         flushSensor()
         persist()
@@ -864,6 +892,7 @@ class StepTrackingService : Service() {
             SessionControl.ACTION_RESUME,
             SessionControl.ACTION_STOP,
             SessionControl.ACTION_KEEP_GOING,
+            SessionControl.ACTION_DISMISS,
         )
 
         /** How long a flush may take before the shutdown gives up on it (PLANNING.md §4.2). */

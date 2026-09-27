@@ -58,6 +58,11 @@ while one is under way.
    noticed by the next step or the screen, so a forgotten outing costs nothing); after an
    hour paused; at four hours. One with fewer than 30 steps is not kept. Pausing the count
    ends it. Only one at a time.
+   *Amended 27 Sep 2026 (owner's field test):* the end by stillness is told when it is
+   noticed, usually as the reader walks on (two long pulses, and the voice if the outing
+   speaks), and can be taken back with "Resume" for 15 minutes from then, like the goal's
+   "Keep going", with the steps since and without the stillness. Closing the finished card
+   withdraws both. Nothing new runs for it: it rides on the step batch that noticed the end.
 7. **Stored as it goes, with the steps.** Two new tables (`session_plan`, `session`), schema v2
    by an auto-migration. The outing under way is written in the same transaction as the step
    batch that moved it, so the counter state and the outing never disagree after a crash; a

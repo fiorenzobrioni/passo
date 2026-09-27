@@ -84,8 +84,12 @@
     <string name="session_action_stop">Stop</string>
     <string name="session_action_keep_going">Keep going</string>
     <string name="session_chip_paused">Paused</string>
+    <!-- The outing's notification, paused after "Keep going": the goal is already behind. -->
+    <string name="session_paused_reached">Paused, with the goal reached.</string>
     <!-- «Brisk walk: goal reached». -->
     <string name="session_goal_title">%1$s: goal reached</string>
+    <!-- «Brisk walk: ended after a long stop». -->
+    <string name="session_ended_still_title">%1$s: ended after a long stop</string>
     <string name="evening_reminder_walk_now">Walk now</string>
     <!-- Spoken signals (Phase 10, the voice): said aloud, so every amount is in words. -->
     <plurals name="spoken_minutes">
@@ -135,6 +139,8 @@
     <string name="spoken_mostly_at_pace">Almost all of it at your pace.</string>
     <string name="spoken_day_goal">Today’s goal is reached too.</string>
     <string name="spoken_well_done">Well done.</string>
+    <!-- The outing ended by itself after a long stop, said as the reader walks on. -->
+    <string name="spoken_ended_still">Outing ended after a long stop, at %1$s. You can resume it from the notification.</string>
     <!-- «17 of 20 minutes at your pace.» -->
     <string name="spoken_zone">%1$d of %2$s at your pace.</string>
 </resources>

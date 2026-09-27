@@ -161,8 +161,13 @@ constructor(
         SessionControl.keepGoing(context)
     }
 
-    /** The finished outing's card is put away; the outing stays in the day's list. */
+    /**
+     * The finished outing's card is put away; the outing stays in the day's list. Put away, it is
+     * over for good: "Keep going" or "Resume" is no longer offered, in the notification either.
+     */
     fun closeSession(id: Long) {
+        val reopenable = state.value?.session?.takeIf { it.session.id == id }?.canKeepGoing == true
+        if (reopenable) SessionControl.dismiss(context)
         viewModelScope.launch { sessions.setSummarySeen(id) }
     }
 

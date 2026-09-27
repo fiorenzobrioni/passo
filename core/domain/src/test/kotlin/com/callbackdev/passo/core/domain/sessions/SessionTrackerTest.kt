@@ -207,7 +207,7 @@ class SessionTrackerTest {
         val ended = tracker.session.endedAtMillis!!
         tracker.walk(ended, 50 * 550L)
         assertThat(tracker.session.totals.steps).isEqualTo(100)
-        assertThat(tracker.keepGoing(ended + 60_000)).isTrue()
+        assertThat(tracker.keepGoing(ended + 60_000)).isEmpty()
         assertThat(tracker.session.state).isEqualTo(SessionState.ACTIVE)
         assertThat(tracker.session.totals.steps).isEqualTo(150)
         assertThat(tracker.session.reached).isTrue()
@@ -224,7 +224,7 @@ class SessionTrackerTest {
         tracker.walk(start, 100 * 550L)
         val ended = tracker.session.endedAtMillis!!
         assertThat(tracker.canKeepGoing(ended + SessionConstants.KEEP_GOING_MILLIS)).isTrue()
-        assertThat(tracker.keepGoing(ended + SessionConstants.KEEP_GOING_MILLIS + 1)).isFalse()
+        assertThat(tracker.keepGoing(ended + SessionConstants.KEEP_GOING_MILLIS + 1)).isNull()
     }
 
     @Test
@@ -232,7 +232,86 @@ class SessionTrackerTest {
         val tracker = tracker()
         tracker.walk(start, 60_000)
         tracker.stop(start + 61_000)
-        assertThat(tracker.keepGoing(start + 62_000)).isFalse()
+        assertThat(tracker.keepGoing(start + 62_000)).isNull()
+    }
+
+    @Test
+    fun `an end by stillness can be taken back, with the steps since and without the stillness`() {
+        val tracker = tracker(session(kind = SessionGoalKind.STEPS, value = 1_000, milestones = emptySet()))
+        tracker.walk(start, 100 * 550L)
+        val lastStep = tracker.session.lastStepAtMillis
+        val before = tracker.session.totals
+        // Twenty minutes of chat, then the walk goes on: the first batch notices the end.
+        val back = lastStep + 20 * 60_000
+        val finished = tracker.onSteps(back, 10).single() as SessionSignal.Finished
+        assertThat(finished.session.end).isEqualTo(SessionEnd.IDLE)
+        assertThat(finished.session.endedAtMillis).isEqualTo(lastStep)
+        assertThat(finished.session.totals).isEqualTo(before)
+        // Offered for a while from when it was noticed, not from the last step.
+        assertThat(tracker.canKeepGoing(back + SessionConstants.KEEP_GOING_MILLIS)).isTrue()
+        tracker.walk(back, 20 * 550L)
+        assertThat(tracker.keepGoing(back + 60_000)).isEmpty()
+        val reopened = tracker.session
+        assertThat(reopened.state).isEqualTo(SessionState.ACTIVE)
+        assertThat(reopened.end).isNull()
+        assertThat(reopened.endedAtMillis).isNull()
+        assertThat(reopened.totals.steps).isEqualTo(before.steps + 10 + 20)
+        // The chat is not time in motion: the ten steps that ended it count ten steps' worth.
+        assertThat(reopened.totals.movingMillis - before.movingMillis)
+            .isEqualTo(10 * SessionConstants.MAX_MILLIS_PER_STEP + 20 * 550L)
+        // It counts on as before.
+        tracker.onSteps(back + 60_000 + 550, 1)
+        assertThat(tracker.session.totals.steps).isEqualTo(before.steps + 31)
+        assertThat(tracker.session.state).isEqualTo(SessionState.ACTIVE)
+    }
+
+    @Test
+    fun `an end by stillness found by the screen can be taken back too`() {
+        val tracker = tracker()
+        tracker.walk(start, 60_000)
+        val noticed = start + 60_000 + SessionConstants.IDLE_END_MILLIS + 5 * 60_000
+        assertThat(tracker.check(noticed)).hasSize(1)
+        assertThat(tracker.canKeepGoing(noticed + SessionConstants.KEEP_GOING_MILLIS)).isTrue()
+        assertThat(tracker.keepGoing(noticed + SessionConstants.KEEP_GOING_MILLIS + 1)).isNull()
+        assertThat(tracker.session.state).isEqualTo(SessionState.FINISHED)
+    }
+
+    @Test
+    fun `taking back an end by stillness tells what the steps since crossed`() {
+        val tracker =
+            tracker(session(kind = SessionGoalKind.STEPS, value = 100, milestones = setOf(SessionMilestone.HALF)))
+        tracker.walk(start, 40 * 550L)
+        val lastStep = tracker.session.lastStepAtMillis
+        val back = lastStep + 20 * 60_000
+        tracker.onSteps(back, 20)
+        tracker.walk(back, 50 * 550L)
+        // 110 steps: past halfway and past the goal, which ends it at once, as a goal.
+        val signals = tracker.keepGoing(back + 60_000)!!
+        assertThat((signals.first() as SessionSignal.Milestone).milestone).isEqualTo(SessionMilestone.GOAL)
+        val finished = signals.last() as SessionSignal.Finished
+        assertThat(finished.session.end).isEqualTo(SessionEnd.GOAL)
+        assertThat(finished.session.reached).isTrue()
+        assertThat(finished.session.totals.steps).isEqualTo(110)
+        assertThat(tracker.canKeepGoing(back + 61_000)).isTrue()
+    }
+
+    @Test
+    fun `a pause left too long and the longest outing are not taken back`() {
+        val paused = tracker()
+        paused.walk(start, 60_000)
+        paused.pause(start + 70_000)
+        val at = start + 70_000 + SessionConstants.PAUSE_END_MILLIS + 1
+        assertThat(paused.check(at)).hasSize(1)
+        assertThat(paused.canKeepGoing(at)).isFalse()
+
+        val long = tracker(session(kind = SessionGoalKind.STEPS, value = 30_000))
+        var t = start
+        while (t < start + SessionConstants.MAX_SESSION_MILLIS - 60_000) {
+            long.onSteps(t + 60_000, 100)
+            t += 60_000
+        }
+        long.onSteps(start + SessionConstants.MAX_SESSION_MILLIS + 1_000, 100)
+        assertThat(long.canKeepGoing(start + SessionConstants.MAX_SESSION_MILLIS + 2_000)).isFalse()
     }
 
     @Test

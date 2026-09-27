@@ -59,9 +59,11 @@
     <string name="editor_signals_note">On the way at the shares you choose, and always at the goal, which ends the outing.</string>
     <string name="editor_signal_goal">Goal, always</string>
     <string name="editor_vibrate">Vibrate</string>
-    <string name="editor_vibrate_note" formatted="false">One short pulse at 25%, two at half, three at 75%, a long one at the goal. They follow the phone’s silent mode.</string>
+    <string name="editor_vibrate_note" formatted="false">One short pulse at 25%, two at half, three at 75%, a long one at the goal, two long ones if it ends after a long stop. They follow the phone’s silent mode.</string>
     <string name="editor_try">Try them</string>
     <string name="editor_try_goal">Goal</string>
+    <!-- The end by a long stop, to feel before it comes. -->
+    <string name="editor_try_ended_still">Long stop</string>
     <string name="editor_discard_title">Discard your changes?</string>
     <string name="editor_discard_keep">Keep editing</string>
     <string name="editor_discard">Discard</string>

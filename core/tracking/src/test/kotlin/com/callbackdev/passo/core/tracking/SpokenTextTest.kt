@@ -119,4 +119,20 @@ class SpokenTextTest {
         val slow = ten.copy(cadence = 92, pace = PaceVerdict.BELOW)
         assertThat(say(slow)).isEqualTo("Metà strada. Mancano 10 minuti. 92 passi al minuto: accelera un po’.")
     }
+
+    @Test
+    @Config(qualifiers = "en-rUS")
+    fun `an end by stillness says what was walked, and that it can be resumed`() {
+        val still = walk.copy(totals = walk.totals.copy(steps = 764))
+        assertThat(say(SessionAnnouncement.endedStill(still), still))
+            .isEqualTo("Outing ended after a long stop, at 764 steps. You can resume it from the notification.")
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT")
+    fun `in Italian, an end by stillness`() {
+        val still = walk.copy(totals = walk.totals.copy(steps = 764))
+        assertThat(say(SessionAnnouncement.endedStill(still), still))
+            .isEqualTo("Uscita chiusa dopo una lunga sosta, a 764 passi. Puoi riprenderla dalla notifica.")
+    }
 }

@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
@@ -101,6 +103,7 @@ fun PlanEditorRoute(planId: Long?, onDone: () -> Unit, viewModel: PlanEditorView
             milestone = viewModel::milestone,
             vibrate = viewModel::vibrate,
             tryVibration = viewModel::tryVibration,
+            tryEndedStill = viewModel::tryEndedStill,
             voice = viewModel::voice,
             tryVoice = viewModel::tryVoice,
             openVoiceSettings = { runCatching { context.startActivity(SessionSpeech.settingsIntent()) } },
@@ -120,6 +123,7 @@ class PlanEditorActions(
     val milestone: (SessionMilestone, Boolean) -> Unit = { _, _ -> },
     val vibrate: (Boolean) -> Unit = {},
     val tryVibration: (SessionMilestone) -> Unit = {},
+    val tryEndedStill: () -> Unit = {},
     val voice: (SessionVoice) -> Unit = {},
     val tryVoice: () -> Unit = {},
     val openVoiceSettings: () -> Unit = {},
@@ -177,7 +181,10 @@ fun PlanEditorScreen(
                         onClick = actions.save,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .windowInsetsPadding(WindowInsets.navigationBars)
+                            // Drawn edge to edge, the window no longer shrinks for the keyboard:
+                            // the button rides on it, and the list above ends where it begins,
+                            // so the last settings stay within reach while the name is typed.
+                            .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
                             .padding(horizontal = ScreenMargin, vertical = 12.dp)
                             .testTag(EditorTags.SAVE),
                     ) {
@@ -369,7 +376,7 @@ private fun EditorList(state: PlanEditorState, actions: PlanEditorActions, modif
                             modifier = Modifier.testTag(EditorTags.VIBRATE),
                         )
                     }
-                    if (plan.vibrate) TryVibrations(format, actions.tryVibration)
+                    if (plan.vibrate) TryVibrations(format, actions.tryVibration, actions.tryEndedStill)
                 }
             }
         }
@@ -596,10 +603,13 @@ private fun VoiceChoice(state: PlanEditorState, actions: PlanEditorActions) {
     }
 }
 
-/** Each signal, felt before it is chosen: the patterns are learned here, not on the road. */
+/**
+ * Each signal, felt before it is chosen: the patterns are learned here, not on the road. The end
+ * by a long stop too, the one that comes unexpected and most needs to be told from the goal.
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun TryVibrations(format: MeasureFormatter, onTry: (SessionMilestone) -> Unit) {
+private fun TryVibrations(format: MeasureFormatter, onTry: (SessionMilestone) -> Unit, onTryEndedStill: () -> Unit) {
     Column(
         modifier = Modifier.padding(horizontal = ScreenMargin + 4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -632,6 +642,18 @@ private fun TryVibrations(format: MeasureFormatter, onTry: (SessionMilestone) ->
                     modifier = Modifier.testTag("${EditorTags.TRY}-${milestone.percent}"),
                 )
             }
+            AssistChip(
+                onClick = onTryEndedStill,
+                label = { Text(stringResource(R.string.editor_try_ended_still)) },
+                leadingIcon = {
+                    Icon(
+                        PassoIcons.Vibrate,
+                        contentDescription = null,
+                        modifier = Modifier.size(AssistChipDefaults.IconSize),
+                    )
+                },
+                modifier = Modifier.testTag(EditorTags.TRY_ENDED_STILL),
+            )
         }
     }
 }
@@ -647,6 +669,7 @@ object EditorTags {
     const val MILESTONE = "editor_milestone"
     const val VIBRATE = "editor_vibrate"
     const val TRY = "editor_try"
+    const val TRY_ENDED_STILL = "editor_try_ended_still"
     const val VOICE = "editor_voice"
     const val TRY_VOICE = "editor_try_voice"
     const val CHANGE_VOICE = "editor_change_voice"

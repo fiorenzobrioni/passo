@@ -93,7 +93,9 @@ All notable changes to Passo are documented here. The format follows
   on Android 16). Keep your outings on their own page, start one from Today, from the
   launcher's long press or from the evening reminder's "Walk now"; see it in the widgets and the
   Quick Settings tile while it lasts, and in the day's walks afterwards, with how much of its
-  goal was done.
+  goal was done. An outing that ends by itself after a long stop tells you so when you walk on
+  (two long pulses, and the voice if it speaks), and "Resume" takes it back for a quarter of an
+  hour, with the steps since.
 - A voice for outings, if you want it: the start, each signal with what is left and your
   pace, and the goal, spoken through your headphones (or out loud too, when the phone is not
   on silent). It uses a voice installed on the phone, never one from the internet, and lowers

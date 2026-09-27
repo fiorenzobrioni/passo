@@ -23,6 +23,7 @@ import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.sessions.fraction
 import com.callbackdev.passo.core.domain.sessions.progress
 import com.callbackdev.passo.core.model.Session
+import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.UnitPreference
 import kotlin.math.roundToInt
@@ -43,7 +44,8 @@ internal data class SessionNotice(val session: Session, val cadence: Int?, val u
  *   the milestones marked on it. From Android 16 it asks to be a Live Update (a chip in the
  *   status bar and on the lock screen), which the reader can turn off in the system's settings.
  * - **The goal** is its own notification, on the `sessions` channel, which stays as a record:
- *   what was walked, and "Keep going" for a while after. The milestones on the way are not
+ *   what was walked, and "Keep going" for a while after. So is **an end by stillness**, with
+ *   "Resume" for as long, found by the reader who walks on. The milestones on the way are not
  *   notifications (the shade would fill with them): the ongoing one moves, and the phone
  *   vibrates.
  *
@@ -71,7 +73,13 @@ internal class SessionNotifications(private val context: Context) {
         val format = context.measureFormatter(notice.units)
         val res = context.resources
         val progress = session.progress()
-        val sentence = res.sessionHeadline(session, format)
+        // Paused after "Keep going", the sentence would still be the goal's: Today's card says
+        // "Paused" in its own line above it, the notification has no such line.
+        val sentence = if (session.state == SessionState.PAUSED && session.reached) {
+            context.getString(R.string.session_paused_reached)
+        } else {
+            res.sessionHeadline(session, format)
+        }
         val where = res.sessionProgress(session, format)
         val detail = detailLines(notice, format)
         builder
@@ -118,7 +126,7 @@ internal class SessionNotifications(private val context: Context) {
                         },
                     )
                     .setProgress(scaled)
-                    .setProgressTrackerIcon(IconCompat.createWithResource(context, R.drawable.ic_stat_steps)),
+                    .setProgressTrackerIcon(IconCompat.createWithResource(context, R.drawable.ic_progress_walker)),
             )
         } else {
             builder
@@ -182,21 +190,64 @@ internal class SessionNotifications(private val context: Context) {
         return builder.build()
     }
 
+    /**
+     * An end by a long stillness, noticed as the reader walks on (or looks): what the outing came
+     * to, and "Resume" while it can still be taken back ([withResume]).
+     */
+    fun endedStill(session: Session, units: UnitPreference, withResume: Boolean): android.app.Notification {
+        val format = context.measureFormatter(units)
+        val res = context.resources
+        val summary = listOfNotNull(
+            res.sessionSteps(session, format),
+            res.sessionZone(session, format),
+        ).joinToString(" · ")
+        val sentence = res.sessionHeadline(session, format)
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_stat_steps)
+            .setContentTitle(context.getString(R.string.session_ended_still_title, res.sessionName(session)))
+            .setContentText(sentence)
+            .setStyle(
+                NotificationCompat.BigTextStyle().bigText(
+                    listOf(sentence, summary, res.sessionEstimates(session, format)).joinToString("\n"),
+                ),
+            )
+            .setContentIntent(context.openAppIntent(REQUEST_GOAL))
+            .setAutoCancel(true)
+            .setOnlyAlertOnce(true)
+            .setCategory(NotificationCompat.CATEGORY_WORKOUT)
+        if (withResume) {
+            builder.addAction(
+                0,
+                context.getString(R.string.session_action_resume),
+                SessionControl.pendingIntent(context, SessionControl.ACTION_KEEP_GOING, REQUEST_KEEP_GOING),
+            )
+        }
+        return builder.build()
+    }
+
+    /** The notification of an outing's end that can be taken back: its goal, or a long stillness. */
+    fun ended(session: Session, units: UnitPreference, canReopen: Boolean): android.app.Notification =
+        if (session.end == SessionEnd.GOAL) {
+            goalReached(session, units, withKeepGoing = canReopen)
+        } else {
+            endedStill(session, units, withResume = canReopen)
+        }
+
     fun post(notification: android.app.Notification) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
             PackageManager.PERMISSION_GRANTED
         ) {
             return
         }
-        NotificationManagerCompat.from(context).notify(ID_GOAL, notification)
+        NotificationManagerCompat.from(context).notify(ID_END, notification)
     }
 
-    /** Whether the goal's notification is still in the shade: one put away is not brought back. */
-    fun goalShowing(): Boolean = context.getSystemService(NotificationManager::class.java)
-        ?.activeNotifications?.any { it.id == ID_GOAL } == true
+    /** Whether the end's notification is still in the shade: one put away is not brought back. */
+    fun endShowing(): Boolean = context.getSystemService(NotificationManager::class.java)
+        ?.activeNotifications?.any { it.id == ID_END } == true
 
-    fun cancelGoal() {
-        NotificationManagerCompat.from(context).cancel(ID_GOAL)
+    fun cancelEnd() {
+        NotificationManagerCompat.from(context).cancel(ID_END)
     }
 
     /**
@@ -216,7 +267,9 @@ internal class SessionNotifications(private val context: Context) {
 
     companion object {
         const val CHANNEL_ID = "sessions"
-        const val ID_GOAL = 5
+
+        /** The goal's notification, or the end by stillness's: one outing's end at a time. */
+        const val ID_END = 5
 
         private const val PROGRESS_MAX = 1_000
         private const val REQUEST_PAUSE = 10
