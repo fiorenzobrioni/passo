@@ -84,6 +84,8 @@
     <string name="session_action_stop">Stop</string>
     <string name="session_action_keep_going">Keep going</string>
     <string name="session_chip_paused">Paused</string>
+    <!-- The outing's notification, paused after "Keep going": the goal is already behind. -->
+    <string name="session_paused_reached">Paused, with the goal reached.</string>
     <!-- «Brisk walk: goal reached». -->
     <string name="session_goal_title">%1$s: goal reached</string>
     <!-- «Brisk walk: ended after a long stop». -->

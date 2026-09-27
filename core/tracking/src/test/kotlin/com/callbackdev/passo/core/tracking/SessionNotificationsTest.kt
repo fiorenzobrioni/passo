@@ -80,6 +80,11 @@ class SessionNotificationsTest {
         assertThat(notification.actions.map { it.title.toString() }).containsExactly("Resume", "Stop").inOrder()
         val expanded = notification.extras.getCharSequence(Notification.EXTRA_BIG_TEXT).toString()
         assertThat(expanded).doesNotContain("steps/min")
+
+        // Paused after "Keep going": the pause, and the goal already behind it.
+        val pastGoal = ongoing(session.copy(state = SessionState.PAUSED, pausedAtMillis = 1, reachedAtMillis = 1))
+        assertThat(NotificationCompat.getContentText(pastGoal).toString()).isEqualTo("Paused, with the goal reached.")
+        assertThat(pastGoal.actions.map { it.title.toString() }).containsExactly("Resume", "Stop").inOrder()
     }
 
     @Test

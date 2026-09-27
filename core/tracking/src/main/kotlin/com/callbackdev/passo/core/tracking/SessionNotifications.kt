@@ -73,7 +73,13 @@ internal class SessionNotifications(private val context: Context) {
         val format = context.measureFormatter(notice.units)
         val res = context.resources
         val progress = session.progress()
-        val sentence = res.sessionHeadline(session, format)
+        // Paused after "Keep going", the sentence would still be the goal's: Today's card says
+        // "Paused" in its own line above it, the notification has no such line.
+        val sentence = if (session.state == SessionState.PAUSED && session.reached) {
+            context.getString(R.string.session_paused_reached)
+        } else {
+            res.sessionHeadline(session, format)
+        }
         val where = res.sessionProgress(session, format)
         val detail = detailLines(notice, format)
         builder

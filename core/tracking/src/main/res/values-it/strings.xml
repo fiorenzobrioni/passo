@@ -95,6 +95,7 @@
     <string name="session_action_stop">Termina</string>
     <string name="session_action_keep_going">Continua</string>
     <string name="session_chip_paused">In pausa</string>
+    <string name="session_paused_reached">In pausa, con l’obiettivo raggiunto.</string>
     <string name="session_goal_title">%1$s: obiettivo raggiunto</string>
     <string name="session_ended_still_title">%1$s: chiusa dopo una lunga sosta</string>
     <string name="evening_reminder_walk_now">Cammina ora</string>
