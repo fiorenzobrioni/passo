@@ -120,6 +120,22 @@ class PlanEditorScreenTest {
     }
 
     @Test
+    fun `every vibration can be felt first, the end by a long stop too`() {
+        val felt = mutableListOf<String>()
+        val actions = PlanEditorActions(
+            tryVibration = { felt += it.name },
+            tryEndedStill = { felt += "STILL" },
+        )
+        compose.setContent { PassoTheme { PlanEditorScreen(state(), onBack = {}, actions = actions) } }
+
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.TRY_ENDED_STILL))
+        compose.onNodeWithTag("${EditorTags.TRY}-100").performClick()
+        compose.onNodeWithTag(EditorTags.TRY_ENDED_STILL).assertIsDisplayed()
+        compose.onNodeWithText("Long stop").performClick()
+        assertThat(felt).containsExactly("GOAL", "STILL").inOrder()
+    }
+
+    @Test
     fun `the voice is chosen, heard first, and says where it speaks`() {
         var editor by mutableStateOf(state().copy(voiceAvailability = VoiceAvailability.READY))
         var heard = false
