@@ -1,8 +1,6 @@
 package com.callbackdev.passo.shell
 
-import androidx.activity.compose.BackHandler
-import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -12,35 +10,37 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.saveable.rememberSaveableStateHolder
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
-import com.callbackdev.passo.R
-import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.PassoMotion
 import com.callbackdev.passo.core.designsystem.theme.reducedMotion
-import com.callbackdev.passo.core.domain.calibration.CalibratedStep
 import com.callbackdev.passo.core.tracking.TrackingReadiness
 import com.callbackdev.passo.feature.guide.GuideRoute
 import com.callbackdev.passo.feature.history.HistoryRoute
@@ -53,31 +53,6 @@ import com.callbackdev.passo.feature.sessions.SessionsRoute
 import com.callbackdev.passo.feature.settings.SettingsRoute
 import com.callbackdev.passo.feature.settings.calibration.CalibrationRoute
 import com.callbackdev.passo.feature.today.TodayRoute
-import kotlinx.serialization.Serializable
-
-/** The three tabs, Today, History and Insights, under one bottom bar. */
-@Serializable
-data object TabsKey : NavKey
-
-/** Settings, from each tab's gear. */
-@Serializable
-data object SettingsKey : NavKey
-
-/** The Outings page, from Today's button and from Settings (PLANNING.md §11 Phase 10). */
-@Serializable
-data object SessionsKey : NavKey
-
-/** The guide, from the top of Settings and from Today's first-day card. */
-@Serializable
-data object GuideKey : NavKey
-
-/** Measuring the walking or the running step, from Settings (PLANNING.md §11 Phase 7). */
-@Serializable
-data class CalibrationKey(val step: CalibratedStep) : NavKey
-
-/** The editor of one outing; a new one when [planId] is null. */
-@Serializable
-data class PlanEditorKey(val planId: Long?) : NavKey
 
 /**
  * The shell (PLANNING.md §11 Phase 3). Three questions before a page: can this phone count at
@@ -98,114 +73,110 @@ fun PassoRoot(readiness: TrackingReadiness, onboardingCompleted: Boolean?) {
     }
 }
 
-@Composable
-private fun MainPages() {
-    val backStack = rememberNavBackStack(TabsKey)
-    val reduced = reducedMotion()
-    Surface(modifier = Modifier.fillMaxSize()) {
-        NavDisplay(
-            backStack = backStack,
-            onBack = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) },
-            transitionSpec = { forward(reduced) },
-            popTransitionSpec = { backward(reduced) },
-            predictivePopTransitionSpec = { backward(reduced) },
-            entryProvider = entryProvider {
-                val back = { if (backStack.size > 1) backStack.removeAt(backStack.lastIndex) }
-                entry<TabsKey> {
-                    Tabs(
-                        onOpenSettings = { backStack.add(SettingsKey) },
-                        onOpenSessions = { backStack.add(SessionsKey) },
-                        onOpenGuide = { backStack.add(GuideKey) },
-                    )
-                }
-                entry<SettingsKey> {
-                    SettingsRoute(
-                        onBack = { back() },
-                        onCalibrate = { backStack.add(CalibrationKey(it)) },
-                        onOpenSessions = { backStack.add(SessionsKey) },
-                        onOpenGuide = { backStack.add(GuideKey) },
-                    )
-                }
-                entry<GuideKey> { GuideRoute(onBack = { back() }) }
-                entry<CalibrationKey> { key -> CalibrationRoute(step = key.step, onDone = { back() }) }
-                entry<SessionsKey> {
-                    SessionsRoute(onBack = { back() }, onEdit = { backStack.add(PlanEditorKey(it)) })
-                }
-                entry<PlanEditorKey> { key -> PlanEditorRoute(planId = key.planId, onDone = { back() }) }
-            },
-        )
-    }
-}
-
-private enum class Tab(@StringRes val label: Int, val icon: ImageVector) {
-    TODAY(R.string.nav_today, PassoIcons.Today),
-    HISTORY(R.string.nav_history, PassoIcons.History),
-    INSIGHTS(R.string.nav_insights, PassoIcons.Trophy),
-}
-
 /**
- * Today, History and Insights under Material's bottom bar. Each tab keeps its own place (the
- * week History was on, how far Insights was scrolled) while another is shown. Back from History
- * or Insights goes to Today, the app's first page, and from Today leaves the app. A record in
- * Insights opens its day, week or month in History.
+ * The pages (Chiaro's shell shape, 28 Sep 2026): one `NavDisplay` over one back stack per tab
+ * ([PassoNavigationState]), so every back, from a tab to Today included, is previewed under the
+ * finger. A tap on the bar keeps Material's fade through; everything else wears the page
+ * transition that predictive back seeks.
+ *
+ * The bar is drawn OVER the display rather than in a `Scaffold` around each tab, as in Chiaro: a
+ * bar in the layout would reshape the pages each time it came or went. The tab pages already
+ * scroll under the bar and leave its height free at the bottom ([bottomPadding]), measured from
+ * the bar itself, so they are laid out to the pixel where the old `Scaffold` put them.
  */
 @Composable
-private fun Tabs(onOpenSettings: () -> Unit, onOpenSessions: () -> Unit, onOpenGuide: () -> Unit) {
-    var tab by rememberSaveable { mutableStateOf(Tab.TODAY) }
-    var historyTarget by remember { mutableStateOf<HistoryTarget?>(null) }
-    val saveable = rememberSaveableStateHolder()
+private fun MainPages() {
+    val nav = rememberPassoNavigationState()
     val reduced = reducedMotion()
-    BackHandler(enabled = tab != Tab.TODAY) { tab = Tab.TODAY }
-    Scaffold(
-        bottomBar = {
-            NavigationBar {
-                Tab.entries.forEach { item ->
-                    NavigationBarItem(
-                        selected = item == tab,
-                        onClick = { tab = item },
-                        icon = { Icon(item.icon, contentDescription = null) },
-                        label = { Text(stringResource(item.label)) },
-                        modifier = Modifier.testTag("tab_${item.name.lowercase()}"),
-                    )
-                }
-            }
-        },
-    ) { padding ->
-        val bottom = padding.calculateBottomPadding()
-        AnimatedContent(
-            targetState = tab,
-            transitionSpec = { fadeThrough(reduced) },
-            label = "tab",
-        ) { current ->
-            saveable.SaveableStateProvider(current.name) {
-                when (current) {
-                    Tab.TODAY -> TodayRoute(
-                        onOpenSettings = onOpenSettings,
-                        onOpenSessions = onOpenSessions,
-                        onOpenGuide = onOpenGuide,
-                        bottomPadding = bottom,
-                    )
+    val density = LocalDensity.current
+    // A record in Insights opens its day, week or month in History, once.
+    var historyTarget by remember { mutableStateOf<HistoryTarget?>(null) }
+    // The bar's measured height, system inset included; until the first measure, Material's 80dp.
+    val inset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    var barHeight by remember { mutableStateOf(BAR_HEIGHT + inset) }
 
-                    Tab.HISTORY -> HistoryRoute(
-                        onOpenSettings = onOpenSettings,
-                        target = historyTarget,
-                        onTargetShown = { historyTarget = null },
-                        bottomPadding = bottom,
-                    )
+    val provider = entryProvider<NavKey> {
+        val open = { key: NavKey -> nav.navigate(key) }
+        entry<TodayKey> {
+            TodayRoute(
+                onOpenSettings = { open(SettingsKey) },
+                onOpenSessions = { open(SessionsKey) },
+                onOpenGuide = { open(GuideKey) },
+                bottomPadding = barHeight,
+            )
+        }
+        entry<HistoryKey> {
+            HistoryRoute(
+                onOpenSettings = { open(SettingsKey) },
+                target = historyTarget,
+                onTargetShown = { historyTarget = null },
+                bottomPadding = barHeight,
+            )
+        }
+        entry<InsightsKey> {
+            InsightsRoute(
+                onOpenSettings = { open(SettingsKey) },
+                onOpenPeriod = { scale, date ->
+                    historyTarget = HistoryTarget(scale, date)
+                    nav.switchTab(ShellTab.HISTORY)
+                },
+                bottomPadding = barHeight,
+            )
+        }
+        entry<SettingsKey> {
+            SettingsRoute(
+                onBack = nav::goBack,
+                onCalibrate = { open(CalibrationKey(it)) },
+                onOpenSessions = { open(SessionsKey) },
+                onOpenGuide = { open(GuideKey) },
+            )
+        }
+        entry<GuideKey> { GuideRoute(onBack = nav::goBack) }
+        entry<CalibrationKey> { key -> CalibrationRoute(step = key.step, onDone = nav::goBack) }
+        entry<SessionsKey> {
+            SessionsRoute(onBack = nav::goBack, onEdit = { open(PlanEditorKey(it)) })
+        }
+        entry<PlanEditorKey> { key -> PlanEditorRoute(planId = key.planId, onDone = nav::goBack) }
+    }
 
-                    Tab.INSIGHTS -> InsightsRoute(
-                        onOpenSettings = onOpenSettings,
-                        onOpenPeriod = { scale, date ->
-                            historyTarget = HistoryTarget(scale, date)
-                            tab = Tab.HISTORY
-                        },
-                        bottomPadding = bottom,
-                    )
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            NavDisplay(
+                entries = nav.rememberDecoratedEntries(provider),
+                modifier = Modifier.fillMaxSize(),
+                onBack = nav::goBack,
+                transitionSpec = { if (nav.lastMoveWasTabTap) fadeThrough(reduced) else forward(reduced) },
+                popTransitionSpec = { if (nav.lastMoveWasTabTap) fadeThrough(reduced) else backward(reduced) },
+                predictivePopTransitionSpec = { backward(reduced) },
+            )
+            AnimatedVisibility(
+                visible = nav.showsBottomBar,
+                enter = if (reduced) fadeIn(PassoMotion.fade()) else slideInVertically(tween(NAV_MILLIS)) { it },
+                exit = if (reduced) fadeOut(PassoMotion.fade()) else slideOutVertically(tween(NAV_MILLIS)) { it },
+                modifier = Modifier.align(Alignment.BottomCenter),
+            ) {
+                NavigationBar(
+                    modifier = Modifier.onSizeChanged { size ->
+                        if (size.height > 0) barHeight = with(density) { size.height.toDp() }
+                    },
+                ) {
+                    ShellTab.entries.forEach { item ->
+                        NavigationBarItem(
+                            selected = item == nav.selected,
+                            onClick = { nav.switchTab(item) },
+                            icon = { Icon(item.icon, contentDescription = null) },
+                            label = { Text(stringResource(item.label)) },
+                            modifier = Modifier.testTag("tab_${item.name.lowercase()}"),
+                        )
+                    }
                 }
             }
         }
     }
 }
+
+/** Material's navigation bar height, before the bar has been measured once. */
+private val BAR_HEIGHT = 80.dp
 
 /*
  * Material's fade through between tabs: the page going out fades in 90 ms, the one coming in
