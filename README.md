@@ -21,9 +21,10 @@ Free, no account, no ads, no tracking, and no permission to use the internet at 
 > Passo is in early development: Phases 0 to 6 and 10 of [the plan](./PLANNING.md) are built
 > (the step tracking engine, the metrics, the Today screen, the first run, Settings, the two
 > home-screen widgets, History, Insights and walks, the goal notifications, the Quick Settings
-> tile, and outings: walks with a goal), and of Phase 7 the export, the import and the step
-> calibration. It has run on a phone, but the multi-day
-> field test of the tracking engine is still to do, and there is no usable release yet.
+> tile, and outings: walks with a goal), and of Phase 7 the export, the import, the step
+> calibration, the layout for foldables and the accessibility pass. It has run on a phone, but
+> the multi-day field test of the tracking engine is still to do, and there is no usable
+> release yet.
 
 ## Screenshots
 
@@ -90,9 +91,11 @@ Free, no account, no ads, no tracking, and no permission to use the internet at 
   </tr>
   <tr>
     <td align="center"><img src="docs/screenshots/guide.png" width="250" alt="The guide: what Passo does, the three screens with their icons, and how Passo counts"></td>
+    <td align="center" colspan="2"><img src="docs/screenshots/today-foldable.png" width="510" alt="Today on the inner screen of an open foldable: the date, the ring, the sentence and the day's chart in a column in the middle, the glow behind them across the whole screen"></td>
   </tr>
   <tr>
     <td align="center"><b>The guide:</b> what each screen answers, and what a screen cannot say out loud.</td>
+    <td align="center" colspan="2"><b>On a foldable, open:</b> every page is a column in the middle of the inner screen, readable at a glance mid-walk, instead of stretching across it. Folded, it is the phone layout.</td>
   </tr>
 </table>
 
@@ -166,9 +169,14 @@ resizable home-screen widgets answer "how am I doing today?" at a glance.
   notification shows the day when you expand it.
 - **A Quick Settings tile** with today's steps and the share of the goal, read only while the
   panel is open. Settings adds it with one tap.
+- **Foldables, open or folded**: open, every page (Today, History, Insights, the outings,
+  Settings, the first run) is a column in the middle of the inner screen, while the bars and
+  backgrounds still reach the edges and every list still scrolls from anywhere on the screen.
+  Folded, it is the phone layout, unchanged. Turned on its side, nothing hides under the
+  camera cutout or a side navigation bar.
 - **Made for every reader**: TalkBack reads every screen, every tile and every day of a chart;
-  text up to twice its size reflows rather than breaking a word; an open foldable shows each
-  page as a column in the middle of the screen.
+  text up to twice its size reflows rather than breaking a word; every text colour reads at
+  4.5:1 or better, in every palette and theme; every button has room for a finger.
 
 ## What is coming (v1.0)
 

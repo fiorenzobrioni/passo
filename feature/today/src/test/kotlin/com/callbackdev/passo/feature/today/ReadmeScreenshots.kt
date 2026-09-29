@@ -136,6 +136,14 @@ class ReadmeScreenshots {
         save("today-chart")
     }
 
+    /** An open foldable (the inner screen of a Pixel 9 Pro Fold): the page as a column in the middle. */
+    @Test
+    @Config(qualifiers = "en-rUS-w851dp-h882dp-xhdpi")
+    fun todayFoldable() {
+        show(state(nowMinute = 15 * 60 + 40))
+        save("today-foldable")
+    }
+
     private fun save(name: String) {
         val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
         val dir = File(checkNotNull(output)).apply { mkdirs() }
