@@ -23,6 +23,7 @@ import com.callbackdev.passo.core.model.DailySummary
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.UserSettings
+import com.callbackdev.passo.core.testing.assertAccessible
 import com.callbackdev.passo.feature.settings.data.DataActions
 import com.callbackdev.passo.feature.settings.data.DataFailure
 import com.callbackdev.passo.feature.settings.data.DataOutcome
@@ -170,6 +171,7 @@ class DataSectionTest {
 
     private fun snapshot(name: String) {
         compose.waitForIdle()
+        compose.assertAccessible()
         runCatching {
             val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
             val dir = File("build/screenshots").apply { mkdirs() }

@@ -65,5 +65,7 @@ has earbuds in, and a vibration is easy to miss.
   music playing the audio path keeps the phone awake and this cannot happen. If the field test
   shows late sentences, the fix is a short wake lock around each sentence, a few seconds per
   signal: that would widen ADR 0009's exception and needs the owner's decision first.
+  *Checked in the field (owner, 29 Sep 2026):* the sentences come on time, with and without
+  headphones, with music and without; no wake lock needed.
 - The quality of the voice is the engine's. Which engine, and which voices are installed, are
   the reader's choice in the system's settings.

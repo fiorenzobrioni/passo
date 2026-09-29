@@ -24,9 +24,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 
@@ -152,3 +155,40 @@ private fun lerpRamp(colors: List<Color>, at: Float): Color {
     val index = position.toInt().coerceAtMost(colors.size - 2)
     return androidx.compose.ui.graphics.lerp(colors[index], colors[index + 1], position - index)
 }
+
+/**
+ * Tiles side by side, as many as it holds, each an equal share of the width; one above the other
+ * once a share is too narrow for the reader's text size (Phase 7's large-text pass): at twice the
+ * size, half a small phone breaks "Distance" in the middle of the word. The measure is the share
+ * over the font scale, so a wide window keeps its tiles side by side at any size.
+ */
+@Composable
+fun TilePair(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    val fontScale = LocalDensity.current.fontScale
+    Layout(content, modifier) { measurables, constraints ->
+        val gap = TILE_GAP.roundToPx()
+        val width = constraints.maxWidth
+        val count = measurables.size.coerceAtLeast(1)
+        val share = (width - gap * (count - 1)) / count
+        if (share.toDp() / fontScale >= TILE_MIN_WIDTH) {
+            val placeables = measurables.map { it.measure(Constraints(minWidth = share, maxWidth = share)) }
+            layout(width, placeables.maxOfOrNull { it.height } ?: 0) {
+                placeables.forEachIndexed { i, placeable -> placeable.placeRelative(i * (share + gap), 0) }
+            }
+        } else {
+            val placeables = measurables.map { it.measure(Constraints(minWidth = width, maxWidth = width)) }
+            layout(width, placeables.sumOf { it.height } + gap * (placeables.size - 1).coerceAtLeast(0)) {
+                var y = 0
+                placeables.forEach { placeable ->
+                    placeable.placeRelative(0, y)
+                    y += placeable.height + gap
+                }
+            }
+        }
+    }
+}
+
+private val TILE_GAP = 12.dp
+
+/** A share narrower than this, at the reader's text size, stacks the tiles. */
+private val TILE_MIN_WIDTH = 120.dp

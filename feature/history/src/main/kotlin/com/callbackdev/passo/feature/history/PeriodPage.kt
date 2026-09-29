@@ -2,7 +2,6 @@ package com.callbackdev.passo.feature.history
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,6 +31,7 @@ import com.callbackdev.passo.core.designsystem.components.ChartBar
 import com.callbackdev.passo.core.designsystem.components.HeatLegend
 import com.callbackdev.passo.core.designsystem.components.HeatLevel
 import com.callbackdev.passo.core.designsystem.components.MetricTrack
+import com.callbackdev.passo.core.designsystem.components.TilePair
 import com.callbackdev.passo.core.designsystem.format.annotated
 import com.callbackdev.passo.core.designsystem.format.currentLocale
 import com.callbackdev.passo.core.designsystem.format.datePattern
@@ -42,6 +42,7 @@ import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
+import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.history.PeriodBar
 import com.callbackdev.passo.core.domain.history.PeriodOverview
@@ -67,7 +68,7 @@ internal fun PeriodPage(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize().testTag(HistoryTags.PAGE),
-        contentPadding = PaddingValues(top = 8.dp, bottom = bottomPadding + 24.dp),
+        contentPadding = pageGutter().contentPadding(top = 8.dp, bottom = bottomPadding + 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item(key = "headline") { PageHeadline(periodHeadline(overview), periodDetailLine(overview, format)) }
@@ -228,7 +229,7 @@ private fun PeriodMetrics(overview: PeriodOverview, format: MeasureFormatter) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.padding(horizontal = ScreenMargin).testTag(HistoryTags.METRICS),
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        TilePair {
             val steps = format.integer(totals.steps)
             val average = overview.dailyAverage ?: 0
             HistoryTile(
@@ -237,7 +238,6 @@ private fun PeriodMetrics(overview: PeriodOverview, format: MeasureFormatter) {
                 value = AnnotatedString(steps),
                 spokenValue = steps,
                 meaning = pluralStringResource(R.plurals.history_steps_a_day, average, format.steps(average)),
-                modifier = Modifier.weight(1f),
             )
             val distance = format.distance(totals.distanceMeters)
             HistoryTile(
@@ -246,10 +246,9 @@ private fun PeriodMetrics(overview: PeriodOverview, format: MeasureFormatter) {
                 value = distance.annotated(UnitStyle),
                 spokenValue = distance.text(),
                 meaning = stringResource(R.string.history_metric_distance_meaning),
-                modifier = Modifier.weight(1f),
             )
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        TilePair {
             val energy = format.energy(totals.activeKcal)
             HistoryTile(
                 icon = PassoIcons.Flame,
@@ -257,7 +256,6 @@ private fun PeriodMetrics(overview: PeriodOverview, format: MeasureFormatter) {
                 value = energy.annotated(UnitStyle),
                 spokenValue = energy.text(),
                 meaning = stringResource(R.string.history_metric_calories_meaning),
-                modifier = Modifier.weight(1f),
             )
             val active = format.minutes(totals.activeMinutes)
             HistoryTile(
@@ -266,7 +264,6 @@ private fun PeriodMetrics(overview: PeriodOverview, format: MeasureFormatter) {
                 value = active.annotated(UnitStyle),
                 spokenValue = active.text(),
                 meaning = stringResource(R.string.history_metric_active_meaning),
-                modifier = Modifier.weight(1f),
             )
         }
         if (overview.period.scale == PeriodScale.WEEK) {

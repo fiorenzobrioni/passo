@@ -123,6 +123,7 @@ fun DayTrendChart(
     val labelStyle = MaterialTheme.typography.labelSmall
     val colors = MaterialTheme.colorScheme
     val goalInk = PassoTheme.colors.goal
+    val (gutterDp, axisDp) = chartMargins(measurer, labelStyle, goalLabel)
 
     Column(modifier = modifier.clearAndSetSemantics { contentDescription = description }) {
         readout(point)
@@ -130,8 +131,8 @@ fun DayTrendChart(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(plotHeight)
-                .pointerInput(trend.nowMinute) {
-                    val gutter = GUTTER_DP.dp.toPx()
+                .pointerInput(trend.nowMinute, gutterDp) {
+                    val gutter = gutterDp.toPx()
                     fun minuteAt(x: Float) =
                         (x / (size.width - gutter) * MINUTES_PER_DAY).coerceIn(0f, MINUTES_PER_DAY.toFloat())
                     awaitEachGesture {
@@ -171,8 +172,8 @@ fun DayTrendChart(
                     }
                 },
         ) {
-            val gutter = GUTTER_DP.dp.toPx()
-            val axis = AXIS_DP.dp.toPx()
+            val gutter = gutterDp.toPx()
+            val axis = axisDp.toPx()
             val top = 6.dp.toPx()
             val plotW = size.width - gutter
             val plotBottom = size.height - axis
@@ -200,7 +201,8 @@ fun DayTrendChart(
             val goalText = measurer.measure(goalLabel, labelStyle.copy(color = goalInk))
             drawText(goalText, topLeft = Offset(plotW + 6.dp.toPx(), goalY - goalText.size.height / 2))
 
-            // Hours under the axis.
+            // Hours under the axis; one that would touch the one before is left out (large text).
+            var lastRight = Float.NEGATIVE_INFINITY
             for ((minute, label) in hourLabels) {
                 val text = measurer.measure(label, labelStyle.copy(color = colors.onSurfaceVariant))
                 val cx = x(minute.toFloat())
@@ -211,7 +213,9 @@ fun DayTrendChart(
                     Offset(cx, plotBottom + 3.dp.toPx()),
                     strokeWidth = 1.dp.toPx(),
                 )
+                if (left < lastRight + LABEL_GAP_DP.dp.toPx()) continue
                 drawText(text, topLeft = Offset(left, plotBottom + 5.dp.toPx()))
+                lastRight = left + text.size.width
             }
 
             // A usual day, dashed, the whole day long.
@@ -284,6 +288,4 @@ fun DayTrendChart(
 
 private const val MINUTES_PER_DAY = 1_440
 private const val HEADROOM = 1.12f
-private const val GUTTER_DP = 44
-private const val AXIS_DP = 20
 private const val REVEAL_MILLIS = 900

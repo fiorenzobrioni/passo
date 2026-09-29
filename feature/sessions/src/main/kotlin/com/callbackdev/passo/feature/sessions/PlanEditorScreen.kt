@@ -5,9 +5,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,6 +40,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -60,6 +61,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.callbackdev.passo.core.designsystem.components.GroupHeader
+import com.callbackdev.passo.core.designsystem.components.SegmentLabel
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
 import com.callbackdev.passo.core.designsystem.components.SwitchRow
 import com.callbackdev.passo.core.designsystem.components.ValueStepper
@@ -72,6 +74,8 @@ import com.callbackdev.passo.core.designsystem.format.sessionName
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
+import com.callbackdev.passo.core.designsystem.theme.padding
+import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.sessions.SessionAmount
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
@@ -172,6 +176,7 @@ fun PlanEditorScreen(
                         }
                     }
                 },
+                windowInsets = TopAppBarDefaults.windowInsets.add(pageGutter(sideInsets = false).asInsets()),
             )
         },
         bottomBar = {
@@ -185,6 +190,7 @@ fun PlanEditorScreen(
                             // the button rides on it, and the list above ends where it begins,
                             // so the last settings stay within reach while the name is typed.
                             .windowInsetsPadding(WindowInsets.navigationBars.union(WindowInsets.ime))
+                            .padding(pageGutter(sideInsets = false))
                             .padding(horizontal = ScreenMargin, vertical = 12.dp)
                             .testTag(EditorTags.SAVE),
                     ) {
@@ -237,7 +243,10 @@ private fun EditorList(state: PlanEditorState, actions: PlanEditorActions, modif
     val res = LocalResources.current
     val format = rememberMeasureFormatter(state.units)
     val plan = state.draft
-    LazyColumn(modifier = modifier.testTag(EditorTags.LIST), contentPadding = PaddingValues(bottom = 24.dp)) {
+    LazyColumn(
+        modifier = modifier.testTag(EditorTags.LIST),
+        contentPadding = pageGutter(sideInsets = false).contentPadding(bottom = 24.dp),
+    ) {
         item(key = "name") {
             OutlinedTextField(
                 value = plan.name.orEmpty(),
@@ -273,7 +282,7 @@ private fun EditorList(state: PlanEditorState, actions: PlanEditorActions, modif
                         selected = plan.goalKind == kind,
                         onClick = { actions.goalKind(kind) },
                         shape = SegmentedButtonDefaults.itemShape(index, kinds.size),
-                        label = { Text(stringResource(label), maxLines = 1) },
+                        label = { SegmentLabel(stringResource(label)) },
                     )
                 }
             }
@@ -536,7 +545,7 @@ private fun VoiceChoice(state: PlanEditorState, actions: PlanEditorActions) {
                             // No check mark: three words must fit a narrow phone, and the fill
                             // already says which is chosen (and so does the semantics).
                             icon = {},
-                            label = { Text(stringResource(label), maxLines = 1) },
+                            label = { SegmentLabel(stringResource(label)) },
                             modifier = Modifier.testTag("${EditorTags.VOICE}-${choice.name}"),
                         )
                     }

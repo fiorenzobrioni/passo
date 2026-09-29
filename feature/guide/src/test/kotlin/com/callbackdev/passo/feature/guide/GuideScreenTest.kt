@@ -20,6 +20,8 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.model.UnitPreference
+import com.callbackdev.passo.core.testing.assertAccessible
+import com.callbackdev.passo.core.testing.walkPage
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -133,8 +135,23 @@ class GuideScreenTest {
         snapshot("guide_it")
     }
 
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
+    fun `at twice the text size on a small phone, the guide still reads`() {
+        show()
+        compose.walkPage(hasTestTag(GuideTags.CONTENT), "guide_large_text", maxScreens = 40)
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w841dp-h701dp-xhdpi")
+    fun `on an open foldable the guide is a column in the middle`() {
+        show()
+        compose.walkPage(hasTestTag(GuideTags.CONTENT), "guide_foldable", maxScreens = 2)
+    }
+
     private fun snapshot(name: String) {
         compose.waitForIdle()
+        compose.assertAccessible()
         runCatching {
             val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
             val dir = File("build/screenshots").apply { mkdirs() }

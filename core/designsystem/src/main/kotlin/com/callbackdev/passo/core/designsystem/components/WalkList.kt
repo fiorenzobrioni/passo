@@ -3,6 +3,7 @@ package com.callbackdev.passo.core.designsystem.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -117,11 +118,17 @@ private fun SessionRow(outing: Outing.Planned, format: MeasureFormatter) {
             }
         }
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            // The length goes under the times when the two do not fit one line (large text),
+            // rather than breaking a time in two.
+            FlowRow(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                itemVerticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
                 Text(
-                    text = stringResource(R.string.walk_time_range, from, to),
+                    text = stringResource(R.string.walk_time_range, from.unbroken(), to.unbroken()),
                     style = MaterialTheme.typography.titleSmall.copy(fontFeatureSettings = "tnum"),
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(end = 8.dp),
                 )
                 Text(
                     text = length,
@@ -202,11 +209,17 @@ private fun WalkRow(walk: Walk, format: MeasureFormatter) {
             }
         }
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            // The length goes under the times when the two do not fit one line (large text),
+            // rather than breaking a time in two.
+            FlowRow(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                itemVerticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
                 Text(
-                    text = stringResource(R.string.walk_time_range, from, to),
+                    text = stringResource(R.string.walk_time_range, from.unbroken(), to.unbroken()),
                     style = MaterialTheme.typography.titleSmall.copy(fontFeatureSettings = "tnum"),
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.padding(end = 8.dp),
                 )
                 Text(
                     text = length,
@@ -246,3 +259,6 @@ fun duration(minutes: Int): String = when {
     minutes % 60 == 0 -> stringResource(R.string.duration_hours, minutes / 60)
     else -> stringResource(R.string.duration_hours_minutes, minutes / 60, minutes % 60)
 }
+
+/** A time that never breaks between its number and its «PM»: a long line breaks after the dash. */
+private fun String.unbroken(): String = replace(' ', '\u00A0').replace('\u202F', '\u00A0')

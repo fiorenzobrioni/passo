@@ -37,6 +37,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.selected
@@ -114,6 +115,9 @@ fun BarChart(
     val labelStyle = MaterialTheme.typography.labelSmall
     val colors = MaterialTheme.colorScheme
     val goalInk = PassoTheme.colors.goal
+    // The gutter holds the widest number it may show: the largest goal or bar.
+    val widest = bars.maxOfOrNull { maxOf(it.value ?: 0, it.goal ?: 0) } ?: 0
+    val (gutterDp, axisDp) = chartMargins(measurer, labelStyle, scaleLabel(maxOf(widest, scaleFloor)))
     val chosen = selected
     val currentSelected by rememberUpdatedState(selected)
     val select by rememberUpdatedState(onSelect)
@@ -121,9 +125,9 @@ fun BarChart(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(plotHeight + AXIS_DP.dp + if (spans.isEmpty()) 0.dp else LANE_DP.dp)
-            .pointerInput(bars.size) {
-                val gutter = GUTTER_DP.dp.toPx()
+            .height(plotHeight + axisDp + if (spans.isEmpty()) 0.dp else LANE_DP.dp)
+            .pointerInput(bars.size, gutterDp) {
+                val gutter = gutterDp.toPx()
                 fun barAt(x: Float): Int = (x / ((size.width - gutter) / bars.size)).toInt().coerceIn(0, bars.size - 1)
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
@@ -163,7 +167,7 @@ fun BarChart(
             },
     ) {
         Canvas(Modifier.matchParentSize().semantics { contentDescription = description }) {
-            val gutter = GUTTER_DP.dp.toPx()
+            val gutter = gutterDp.toPx()
             val top = 8.dp.toPx()
             val plotW = size.width - gutter
             val plotBottom = top + plotHeight.toPx() - 8.dp.toPx()
@@ -274,9 +278,12 @@ fun BarChart(
                 labelTop += LANE_DP.dp.toPx()
             }
 
-            // Labels under the axis; the moving bar's in the accent, with a mark.
-            for ((index, label) in axisLabels) {
-                if (index !in bars.indices) continue
+            // Labels under the axis; the moving bar's in the accent, with a mark. It is placed
+            // first, and a label that would touch one already placed is left out (large text).
+            val placed = mutableListOf<ClosedFloatingPointRange<Float>>()
+            val gap = LABEL_GAP_DP.dp.toPx()
+            val ordered = axisLabels.filter { it.first in bars.indices }.sortedByDescending { bars[it.first].current }
+            for ((index, label) in ordered) {
                 val current = bars[index].current
                 val style = if (current) {
                     labelStyle.copy(color = colors.primary, fontWeight = FontWeight.Bold)
@@ -286,12 +293,15 @@ fun BarChart(
                 val text = measurer.measure(label, style)
                 val cx = slot * index + slot / 2
                 val left = (cx - text.size.width / 2).coerceIn(0f, plotW - text.size.width)
+                val span = left - gap..left + text.size.width + gap
+                if (placed.any { it.start < span.endInclusive && span.start < it.endInclusive }) continue
+                placed += span
                 drawText(text, topLeft = Offset(left, labelTop))
             }
         }
 
         // One node per bar for a screen reader, over the plot; they take no touches.
-        Row(Modifier.matchParentSize().padding(end = GUTTER_DP.dp)) {
+        Row(Modifier.matchParentSize().padding(end = gutterDp).testTag(DENSE_TARGETS_TAG)) {
             bars.indices.forEach { i ->
                 Box(
                     Modifier
@@ -340,7 +350,5 @@ internal fun niceTick(max: Float): Int {
 }
 
 private const val HEADROOM = 1.1f
-private const val GUTTER_DP = 44
-private const val AXIS_DP = 20
 private const val LANE_DP = 10
 private const val REVEAL_MILLIS = 700

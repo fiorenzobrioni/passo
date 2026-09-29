@@ -70,6 +70,8 @@ import com.callbackdev.passo.core.designsystem.format.text
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
+import com.callbackdev.passo.core.designsystem.theme.padding
+import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.designsystem.theme.reducedMotion
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.settings.InputScale
@@ -126,10 +128,11 @@ fun OnboardingScreen(state: OnboardingState, actions: OnboardingActions, modifie
     val last = index == order.lastIndex
     val reduced = reducedMotion()
     BackHandler(enabled = index > 0, onBack = actions.back)
+    val gutter = pageGutter()
 
     Surface(modifier = modifier.fillMaxSize().testTag(OnboardingTags.ROOT)) {
         Column(modifier = Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
-            if (state.step != OnboardingStep.WELCOME) Progress(index, order.size)
+            if (state.step != OnboardingStep.WELCOME) Box(Modifier.padding(gutter)) { Progress(index, order.size) }
             AnimatedContent(
                 targetState = state.step,
                 transitionSpec = {
@@ -153,7 +156,9 @@ fun OnboardingScreen(state: OnboardingState, actions: OnboardingActions, modifie
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                        .padding(gutter)
+                        .padding(horizontal = 24.dp, vertical = 16.dp)
+                        .testTag(OnboardingTags.PAGE),
                 ) {
                     when (step) {
                         OnboardingStep.WELCOME -> WelcomePage()
@@ -164,7 +169,7 @@ fun OnboardingScreen(state: OnboardingState, actions: OnboardingActions, modifie
                     }
                 }
             }
-            BottomBar(state, last, actions)
+            Box(Modifier.padding(gutter)) { BottomBar(state, last, actions) }
         }
     }
 }
@@ -567,6 +572,7 @@ private fun BatteryPage(state: OnboardingState) {
 /** Hooks for the UI tests. */
 object OnboardingTags {
     const val ROOT = "onboarding"
+    const val PAGE = "onboarding_page"
     const val PRIMARY = "onboarding_primary"
     const val SKIP = "onboarding_skip"
     const val GRANTED = "onboarding_granted"

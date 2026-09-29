@@ -18,6 +18,8 @@ import com.callbackdev.passo.core.domain.history.PeriodScale
 import com.callbackdev.passo.core.domain.insights.Insights
 import com.callbackdev.passo.core.model.DailySummary
 import com.callbackdev.passo.core.model.UnitPreference
+import com.callbackdev.passo.core.testing.assertAccessible
+import com.callbackdev.passo.core.testing.walkPage
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -97,8 +99,23 @@ class InsightsScreenTest {
         snapshot("insights_dark")
     }
 
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
+    fun `at twice the text size on a small phone, every insight still reads`() {
+        show(state())
+        compose.walkPage(hasTestTag(InsightsTags.LIST), "insights_large_text")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w841dp-h701dp-xhdpi")
+    fun `on an open foldable the insights are a column in the middle`() {
+        show(state())
+        compose.walkPage(hasTestTag(InsightsTags.LIST), "insights_foldable")
+    }
+
     private fun snapshot(name: String) {
         compose.waitForIdle()
+        compose.assertAccessible()
         runCatching {
             val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
             val dir = File("build/screenshots").apply { mkdirs() }

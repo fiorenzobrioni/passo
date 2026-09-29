@@ -16,11 +16,13 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -40,6 +42,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.callbackdev.passo.core.designsystem.theme.PassoMotion
+import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.designsystem.theme.reducedMotion
 import com.callbackdev.passo.core.tracking.TrackingReadiness
 import com.callbackdev.passo.feature.guide.GuideRoute
@@ -159,6 +162,9 @@ private fun MainPages() {
                     modifier = Modifier.onSizeChanged { size ->
                         if (size.height > 0) barHeight = with(density) { size.height.toDp() }
                     },
+                    // On an open foldable the three tabs stand over the page's column, not
+                    // spread across the inner screen; the bar's ground still spans it.
+                    windowInsets = NavigationBarDefaults.windowInsets.add(pageGutter(sideInsets = false).asInsets()),
                 ) {
                     ShellTab.entries.forEach { item ->
                         NavigationBarItem(

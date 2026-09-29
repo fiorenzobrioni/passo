@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
@@ -36,6 +37,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -61,6 +63,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.callbackdev.passo.core.designsystem.components.GroupDivider
 import com.callbackdev.passo.core.designsystem.components.GroupHeader
 import com.callbackdev.passo.core.designsystem.components.InfoRow
+import com.callbackdev.passo.core.designsystem.components.SegmentLabel
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
 import com.callbackdev.passo.core.designsystem.components.StatusCard
 import com.callbackdev.passo.core.designsystem.components.StatusTone
@@ -71,6 +74,8 @@ import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
+import com.callbackdev.passo.core.designsystem.theme.padding
+import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.designsystem.theme.tabular
 import com.callbackdev.passo.core.domain.calibration.CalibratedStep
 import com.callbackdev.passo.core.domain.calibration.CalibrationResult
@@ -154,6 +159,7 @@ fun CalibrationScreen(
                         Icon(PassoIcons.Back, contentDescription = stringResource(R.string.settings_back))
                     }
                 },
+                windowInsets = TopAppBarDefaults.windowInsets.add(pageGutter(sideInsets = false).asInsets()),
             )
         },
         bottomBar = { if (state != null) BottomAction(state, actions) },
@@ -164,6 +170,7 @@ fun CalibrationScreen(
                     .fillMaxSize()
                     .padding(padding)
                     .verticalScroll(rememberScrollState())
+                    .padding(pageGutter(sideInsets = false))
                     .padding(bottom = 24.dp)
                     .testTag(CalibrationTags.PAGE),
             ) {
@@ -235,7 +242,7 @@ private fun Setup(state: CalibrationUiState, actions: CalibrationActions) {
                 selected = state.step == step,
                 onClick = { actions.setStep(step) },
                 shape = SegmentedButtonDefaults.itemShape(index, steps.size),
-                label = { Text(stringResource(label), maxLines = 1) },
+                label = { SegmentLabel(stringResource(label)) },
                 modifier = Modifier.testTag("${CalibrationTags.STEP}-${step.name}"),
             )
         }
@@ -564,6 +571,7 @@ private fun BottomAction(state: CalibrationUiState, actions: CalibrationActions)
             modifier = Modifier
                 .fillMaxWidth()
                 .windowInsetsPadding(WindowInsets.navigationBars)
+                .padding(pageGutter(sideInsets = false))
                 .padding(horizontal = ScreenMargin, vertical = 12.dp),
         ) {
             when (state.phase) {

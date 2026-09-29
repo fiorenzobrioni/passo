@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -50,6 +49,7 @@ import com.callbackdev.passo.core.designsystem.components.GroupDivider
 import com.callbackdev.passo.core.designsystem.components.GroupHeader
 import com.callbackdev.passo.core.designsystem.components.MetricTile
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
+import com.callbackdev.passo.core.designsystem.components.TilePair
 import com.callbackdev.passo.core.designsystem.format.annotated
 import com.callbackdev.passo.core.designsystem.format.datePattern
 import com.callbackdev.passo.core.designsystem.format.monthYear
@@ -62,6 +62,8 @@ import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
+import com.callbackdev.passo.core.designsystem.theme.padding
+import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.history.PeriodScale
 import com.callbackdev.passo.core.domain.insights.InsightsHeadline
@@ -99,7 +101,7 @@ fun InsightsScreen(
         Column(Modifier.fillMaxSize().statusBarsPadding()) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 4.dp, top = 4.dp),
+                modifier = Modifier.fillMaxWidth().padding(pageGutter()).padding(start = 20.dp, end = 4.dp, top = 4.dp),
             ) {
                 Text(
                     text = stringResource(R.string.insights_title),
@@ -121,7 +123,7 @@ private fun InsightsList(state: InsightsUiState, onOpenPeriod: (PeriodScale, Loc
     val insights = state.insights
     LazyColumn(
         modifier = Modifier.fillMaxSize().testTag(InsightsTags.LIST),
-        contentPadding = PaddingValues(top = 8.dp, bottom = bottomPadding + 24.dp),
+        contentPadding = pageGutter().contentPadding(top = 8.dp, bottom = bottomPadding + 24.dp),
     ) {
         item(key = "headline") { Headline(state, format) }
         val firstDay = insights.firstDay ?: return@LazyColumn
@@ -523,7 +525,7 @@ private fun Totals(state: InsightsUiState, format: MeasureFormatter) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.padding(horizontal = ScreenMargin).testTag(InsightsTags.TOTALS),
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        TilePair {
             val steps = format.integer(insights.totalSteps)
             Tile(
                 icon = PassoIcons.Steps,
@@ -535,7 +537,6 @@ private fun Totals(state: InsightsUiState, format: MeasureFormatter) {
                     insights.countedDays,
                     insights.countedDays,
                 ),
-                modifier = Modifier.weight(1f),
             )
             val distance = format.distance(insights.totalDistanceMeters)
             Tile(
@@ -544,10 +545,9 @@ private fun Totals(state: InsightsUiState, format: MeasureFormatter) {
                 value = distance.annotated(unit),
                 spokenValue = distance.text(),
                 meaning = stringResource(R.string.insights_total_distance_meaning),
-                modifier = Modifier.weight(1f),
             )
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        TilePair {
             val energy = format.energy(insights.totalActiveKcal)
             Tile(
                 icon = PassoIcons.Flame,
@@ -555,7 +555,6 @@ private fun Totals(state: InsightsUiState, format: MeasureFormatter) {
                 value = energy.annotated(unit),
                 spokenValue = energy.text(),
                 meaning = stringResource(R.string.insights_total_calories_meaning),
-                modifier = Modifier.weight(1f),
             )
             val days = pluralStringResource(R.plurals.insights_days, insights.goalDays, insights.goalDays)
             val share = if (insights.countedDays == 0) 0.0 else insights.goalDays.toDouble() / insights.countedDays
@@ -565,7 +564,6 @@ private fun Totals(state: InsightsUiState, format: MeasureFormatter) {
                 value = AnnotatedString(days),
                 spokenValue = days,
                 meaning = stringResource(R.string.insights_total_goal_days_meaning, format.percent(share)),
-                modifier = Modifier.weight(1f),
             )
         }
     }

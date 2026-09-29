@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -33,6 +35,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
+import com.callbackdev.passo.core.designsystem.theme.PassoColors
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -117,7 +120,10 @@ fun CalendarHeatmap(
             }
         }
         for (weekStart in weeks) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(CELL_GAP)) {
+            Row(
+                Modifier.fillMaxWidth().testTag(DENSE_TARGETS_TAG),
+                horizontalArrangement = Arrangement.spacedBy(CELL_GAP),
+            ) {
                 for (offset in 0 until DAYS_PER_WEEK) {
                     val date = weekStart.plusDays(offset.toLong())
                     val inMonth = date.month == first.month
@@ -137,11 +143,7 @@ private fun DayCell(date: LocalDate, cell: CalendarCell?, today: Boolean, onDayC
     val scheme = MaterialTheme.colorScheme
     val level = cell?.level ?: HeatLevel.NONE
     val fill = heatColor(level)
-    val ink = when (level) {
-        HeatLevel.NONE -> scheme.outline
-        HeatLevel.ZERO -> scheme.onSurfaceVariant
-        else -> inkOn(fill)
-    }
+    val ink = heatInk(level, scheme, PassoTheme.colors)
     val shape = RoundedCornerShape(10.dp)
     var modifier = Modifier.fillMaxSize().clip(shape).background(fill)
     if (today) modifier = modifier.border(2.dp, scheme.onSurface, shape)
@@ -172,32 +174,48 @@ private fun Modifier.fillMaxSize() = this.then(Modifier.fillMaxWidth().aspectRat
 
 /** The ground of a level: a ramp of the accent from the quiet container to the accent, then the goal's color. */
 @Composable
-fun heatColor(level: HeatLevel): Color {
-    val scheme = MaterialTheme.colorScheme
+fun heatColor(level: HeatLevel): Color = heatFill(level, MaterialTheme.colorScheme, PassoTheme.colors)
+
+internal fun heatFill(level: HeatLevel, scheme: ColorScheme, colors: PassoColors): Color {
     val base = scheme.surfaceContainerHighest
+    // The stops are where a day's number still reads at 4.5:1 in one of the two inks
+    // (ContrastTest): in the middle of the ramp neither ink does, so each theme steps over it
+    // on its own side, the light one late and the dark one early.
+    val stops = if (scheme.surface.luminance() > 0.5f) LIGHT_STOPS else DARK_STOPS
     return when (level) {
         HeatLevel.NONE -> Color.Transparent
         HeatLevel.ZERO -> scheme.surfaceContainerHigh
-        HeatLevel.LOW -> lerp(base, scheme.primary, 0.28f)
-        HeatLevel.MID -> lerp(base, scheme.primary, 0.55f)
-        HeatLevel.HIGH -> lerp(base, scheme.primary, 0.82f)
-        HeatLevel.MET -> PassoTheme.colors.goal
+        HeatLevel.LOW -> lerp(base, scheme.primary, stops[0])
+        HeatLevel.MID -> lerp(base, scheme.primary, stops[1])
+        HeatLevel.HIGH -> lerp(base, scheme.primary, stops[2])
+        HeatLevel.MET -> colors.goal
     }
 }
 
-/** Whichever of the theme's two text inks reads on [fill]. */
-@Composable
-private fun inkOn(fill: Color): Color {
-    val scheme = MaterialTheme.colorScheme
-    val light = if (scheme.onSurface.luminance() >
-        scheme.inverseOnSurface.luminance()
-    ) {
-        scheme.onSurface
-    } else {
-        scheme.inverseOnSurface
-    }
-    val dark = if (light == scheme.onSurface) scheme.inverseOnSurface else scheme.onSurface
-    return if (fill.luminance() < INK_SWITCH_LUMINANCE) light else dark
+private val LIGHT_STOPS = floatArrayOf(0.28f, 0.55f, 0.9f)
+private val DARK_STOPS = floatArrayOf(0.2f, 0.35f, 0.75f)
+
+/**
+ * A day's number on its level. A day with nothing counted (before the first day, or still to
+ * come) is told apart by its missing ground, not by a fainter number: the outline's 4:1 on the
+ * card fell short of the 4.5:1 a number this small needs (Phase 7's accessibility pass).
+ */
+internal fun heatInk(level: HeatLevel, scheme: ColorScheme, colors: PassoColors): Color = when (level) {
+    HeatLevel.NONE, HeatLevel.ZERO -> scheme.onSurfaceVariant
+    else -> inkOn(heatFill(level, scheme, colors), scheme)
+}
+
+/**
+ * Whichever of the theme's two text inks reads better on [fill], by contrast rather than by a
+ * luminance threshold: in the middle of the paper ramp a threshold picked the dark ink at
+ * 2.6:1 where the light one reads at 4.5:1 (Phase 7's accessibility pass).
+ */
+private fun inkOn(fill: Color, scheme: ColorScheme): Color =
+    listOf(scheme.onSurface, scheme.inverseOnSurface).maxBy { contrast(it, fill) }
+
+private fun contrast(a: Color, b: Color): Float {
+    val (light, dark) = listOf(a.luminance(), b.luminance()).sortedDescending()
+    return (light + 0.05f) / (dark + 0.05f)
 }
 
 /** The calendar's key: the ramp between its two words, and the goal's mark. */
@@ -224,7 +242,12 @@ fun HeatLegend(less: String, more: String, met: String, modifier: Modifier = Mod
             Modifier.size(14.dp).clip(RoundedCornerShape(3.dp)).background(goalFill),
             contentAlignment = Alignment.Center,
         ) {
-            Icon(PassoIcons.Check, contentDescription = null, tint = inkOn(goalFill), modifier = Modifier.size(10.dp))
+            Icon(
+                PassoIcons.Check,
+                contentDescription = null,
+                tint = heatInk(HeatLevel.MET, MaterialTheme.colorScheme, PassoTheme.colors),
+                modifier = Modifier.size(10.dp),
+            )
         }
         Spacer(Modifier.width(6.dp))
         Text(met, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -233,4 +256,3 @@ fun HeatLegend(less: String, more: String, met: String, modifier: Modifier = Mod
 
 private val CELL_GAP = 4.dp
 private const val DAYS_PER_WEEK = 7
-private const val INK_SWITCH_LUMINANCE = 0.4f

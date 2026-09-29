@@ -43,7 +43,8 @@ passo/
 │   ├── domain/             # Pure Kotlin: StepAccountant, calculators, streaks/records, outings, backup format
 │   ├── data/               # Room DB, DAOs, DataStore, repositories
 │   ├── tracking/           # StepTrackingService, sensor source, receivers, notification
-│   └── designsystem/       # M3 theme, typography, shared components, charts, icons
+│   ├── designsystem/       # M3 theme, typography, shared components, charts, icons
+│   └── testing/            # test-only: the accessibility checks and the page walk the UI tests share
 ├── feature/
 │   ├── today/
 │   ├── history/
@@ -674,7 +675,8 @@ Built with the owner's request of Phases 3 and 5 (a clean implementation, above 
   - By construction (a claimed day, days only forward) and pinned by `GoalReachedTest`, `UserPreferencesDataSourceTest` and `GoalNotifierTest` (a second process on the same store tells nothing). To confirm on the device.
 - [x] The tile reads data only while the Quick Settings panel is open.
   - By construction: its only reads live in a scope opened by `onStartListening` and cancelled by `onStopListening`. To confirm on the device.
-- [ ] Battery check at the end of the phase (§9, §12): *pending (owner, on a device)*. Expected: one alarm a day with a wakeup, only with the evening reminder on; nothing else new with the screen off.
+- [x] Battery check at the end of the phase (§9, §12). Expected: one alarm a day with a wakeup, only with the evening reminder on; nothing else new with the screen off.
+  - Confirmed by the owner on the device (29 Sep 2026), in the field.
 
 ### Phase 7 — Data, calibration and polish
 
@@ -689,19 +691,23 @@ implementation, above all in UI and UX); decisions in `docs/adr/0011-export-impo
 - [x] Step length calibration wizard (walk a known distance, start/stop, compute and save)
   - "Measure your step" (Settings' profile, and a button in each step-length dialog): the walking or the running step, a distance picked (50 m to 2 km, or yards), Start, the count while the page is looked at, Stop, the length with what it came from and what it changes, Save. The hardware counter is read directly (`StepCounterProbe`) only while the page is on screen, and flushed at Stop; `StepCalibration` refuses fewer than 30 steps or a length the app would not accept, with its arithmetic, and says a pace that does not match the step. A walking step is stored as measured (`StepLengthMode.CALIBRATED`).
 - [x] The guide (owner's request, 25 Sep 2026; §15): `:feature:guide`, a tour of the three screens and the outings in Chiaro's shape, from the top of Settings and from Today's first-day card
-- [ ] Accessibility pass (TalkBack, font scale 200%, contrast, touch targets)
-- [ ] Adaptive layouts for tablets and foldables
+- [x] Accessibility pass (TalkBack, font scale 200%, contrast, touch targets)
+  - `docs/adr/0012-foldables-and-accessibility.md`. A test-only module, `:core:testing`: `assertAccessible()` (every control labelled, every control 48 by 48dp for a finger, as Compose's widened touch areas actually share the space) runs on every state the screen tests draw, and every screen is walked top to bottom at twice the text size on a 360dp phone (`walkPage()`). `ContrastTest` pins every text ink on every ground at 4.5:1, both dresses, both themes.
+  - Found and fixed: the calendar's numbers (2.6:1 mid-ramp, 3.8:1 on uncounted days; the ramp's stops now per theme), the widget's colour swatches (36dp, now 48dp targets), and at twice the text size tiles breaking words (`TilePair`), a chart's title squeezed by its key, chart labels overrunning their margins (`chartMargins`), clipped segmented buttons (`SegmentLabel`), a cut date, a time broken in two, the guide's ring spilling its count. Dense targets (a chart's bars, a month's days, Material's clock dial) are exempt from the size only (`DENSE_TARGETS_TAG`).
+- [x] Adaptive layouts for foldables
+  - *Owner's decision (29 Sep 2026):* **no tablet layout** (Google Fit and Samsung Health have none; Passo is a phone app); foldables yes, at low risk. One centred column at most 640dp wide (`pageGutter()`), grounds, bars and glow still spanning the window, lists still scrolling and swiping from the edge; below 640dp (every phone upright, a folded foldable) the layout is exactly as before. The display cutout and a side navigation bar are now respected on a phone on its side. No second layout, no navigation rail, no new dependency (§15). In the README with its own screenshot (`today-foldable.png`, an open Pixel 9 Pro Fold), at the owner's request.
 - [ ] Baseline Profiles; R8 full mode; startup check
 
 **Acceptance:**
 - [x] Export followed by import on a clean install reproduces the history exactly.
   - `BackupRepositoryTest`, between two real Room databases and settings files: every summary, minute, outing, plan, the profile and the settings (not the other phone's first-run state or tracker state), through the encoded file. To confirm on devices, through a file app and a cloud folder (owner).
 - [ ] The accessibility scanner reports no critical issues.
+  - The Scanner's touch-target and label checks run in every screen test and pass, and the theme's contrast is pinned by `ContrastTest`. The Scanner app itself, over the main screens on a device, is the owner's (with a TalkBack walk and the app on a foldable, opened and folded while on screen).
 
 ### Phase 8 — Release on GitHub
 
-- [ ] App icon (adaptive + monochrome for themed icons), final package name
-  - The icon is done (25 Sep 2026, owner's choice among four drawings): Chiaro's ring with a shoe print where Chiaro has its sun, drawn by `tools/draw_launcher_icon.py` (§15). The package name is still to confirm.
+- [x] App icon (adaptive + monochrome for themed icons), final package name
+  - The icon is done (25 Sep 2026, owner's choice among four drawings): Chiaro's ring with a shoe print where Chiaro has its sun, drawn by `tools/draw_launcher_icon.py` (§15). The package name `com.callbackdev.passo` is confirmed by the owner (29 Sep 2026).
 - [x] Versioning: semantic version tags `vX.Y.Z`; `versionCode` derived from the version (e.g. `major × 10000 + minor × 100 + patch`)
   - Done in Phase 0: `passo.versionName` in `gradle.properties`, code derived in `app/build.gradle.kts`, and `release.yml` refuses a tag that does not match.
 - [ ] `CHANGELOG.md` ("Keep a Changelog" format); release notes in English and Italian
@@ -748,9 +754,11 @@ Added to v1.0 at the owner's request (25 Sep 2026), after Phase 6 and before Pha
 - [x] The launcher's long press (the three last started), the evening reminder's "Walk now", both widgets and the Quick Settings tile saying the outing while it is under way (owner's request).
 - [x] Settings: an Outings group, with the page's own door ("Your outings") and the switch for Today's button (owner's request, 25 Sep 2026; §15).
 - [x] Strings in English and Italian.
-- [ ] On a device (owner): an outing with the screen off (signals on time, the vibrations felt and told apart), the Android 16 Live Update, a reboot and a forgotten outing, and the battery check of an outing (§9).
+- [x] On a device (owner): an outing with the screen off (signals on time, the vibrations felt and told apart), the Android 16 Live Update, a reboot and a forgotten outing, and the battery check of an outing (§9).
+  - Confirmed by the owner in the field (29 Sep 2026).
 - [x] The voice (second iteration, owner's choice; `docs/adr/0010-voice.md`): per outing off, headphones or always (out loud only when the ringer is on); the start, each chosen signal with what is left and the pace, the goal with what it came to, every amount in words in English and Italian; the system's engine with an offline voice only, over ducked music; "Hear it" and a missing voice stated in the editor. Schema v3 (`voice` on both tables, default off).
-- [ ] On a device (owner): the voice with and without headphones, with music playing, and with the screen off and no music (the one case ADR 0010 leaves to measure).
+- [x] On a device (owner): the voice with and without headphones, with music playing, and with the screen off and no music (the one case ADR 0010 leaves to measure).
+  - Confirmed by the owner in the field (29 Sep 2026).
 
 **Edge cases** (the engine's in `SessionTrackerTest` and `SessionPlansTest`, the storage's in `SessionRepositoryTest`; a restart and a paused count are the service's, by construction, to check on the device):
 
@@ -777,7 +785,8 @@ Added to v1.0 at the owner's request (25 Sep 2026), after Phase 6 and before Pha
 
 - **Unit (JVM):** `StepAccountant`, calculators, streaks and records, formatting. Use a fake clock and system snapshot. This is where most of the test effort goes.
 - **Robolectric:** Room DAOs and transactions, receivers, the notification builder.
-- **Compose UI tests:** onboarding, Today, Settings (with its data rows), the step calibration, History, Insights, the Outings page and its editor.
+- **Compose UI tests:** onboarding, Today, Settings (with its data rows), the step calibration, History, Insights, the Outings page and its editor. Each state they draw also passes `assertAccessible()` (`:core:testing`), and each screen is walked at twice the text size on a 360dp phone and on an open foldable (Phase 7, `docs/adr/0012-foldables-and-accessibility.md`).
+- **Contrast:** `ContrastTest`, every text ink on every ground, both dresses and themes, at 4.5:1.
 - **Glance:** unit tests for the layout chosen at each size.
 - **Manual device protocol** (`docs/testing/device-protocol.md`):
   - reboot
@@ -944,6 +953,9 @@ Include:
 - **The outing editor with the keyboard up**: drawn edge to edge, the window no longer shrinks for the keyboard, so the Save bar pads for the keyboard as well as the navigation bar, and the list above ends where it begins; the last settings stay within reach while the name is typed (`PlanEditorScreenTest`).
 
 - **The shell on Chiaro's back stacks** (owner's request, 28 Sep 2026, from Scova's Phase 1): the three tabs were an `AnimatedContent` behind a `BackHandler`, so back from History or Insights swapped to Today only when the finger lifted, with nothing to preview. They are now keys on Navigation 3 back stacks, one per tab (`PassoNavigationState`, Chiaro's `ChiaroNavigationState` shape): Today's stack under the selected tab's, so every back, the tab's included, shows the page underneath while the finger moves; at Today's root the system previews leaving the app. What stays: each tab keeps its place (a saveable-state decorator per stack), a record in Insights still opens its period in History, a tap on the bar keeps Material's fade through (back slides, as every other page), pages opened over a tab still cover the bar, and the ViewModels stay scoped to the activity. What changes on screen: the bar is drawn over the pages, as in Chiaro, and slides away under Settings and the pages opened from it instead of leaving with the tab page; the tab pages leave its measured height free at the bottom, as the `Scaffold` did. `PassoNavigationStateTest` pins what back does; the gesture itself is a device check.
+
+- **No tablet layout; foldables as one centred column** (owner, 29 Sep 2026): Passo is a phone app, and the apps it would be compared with (Google Fit, Samsung Health) have no tablet layout either. A foldable goes on walks, so an open one gets a page column at most 640dp wide in the middle of the screen, with the grounds (the window, the bars, Today's glow) still spanning it and every list still scrolling and swiping from the edge. Chosen over a two-pane layout or a navigation rail because below 640dp nothing changes at all, which keeps the risk to the phone layout at zero, and because both would need a second layout to keep and a new dependency (`docs/adr/0012-foldables-and-accessibility.md`).
+- **The accessibility pass is automated where it can be** (Phase 7): the Scanner's touch-target and label checks run in every screen test (`:core:testing`, a test-only module), contrast is a unit test over the theme, and every screen is walked at twice the text size. Not Google's Accessibility Test Framework itself: a new dependency, for checks the semantics tree already answers. A control's 48dp is measured the way Compose actually hands out touches (a small control's widened area, shared halfway with a neighbour), and dense targets (a chart's bars, a month's days, Material's clock dial) are exempt from the size only, because each is reached one by one with TalkBack. The fixes it led to change nothing at the standard text size except the calendar's colours (the ramp's middle had no ink at 4.5:1) and the widget swatches' spacing.
 
 ### Open
 

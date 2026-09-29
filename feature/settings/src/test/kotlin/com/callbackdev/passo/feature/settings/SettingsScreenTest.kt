@@ -27,6 +27,8 @@ import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.UserSettings
+import com.callbackdev.passo.core.testing.assertAccessible
+import com.callbackdev.passo.core.testing.walkPage
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -289,8 +291,23 @@ class SettingsScreenTest {
         shadowOf(context as Application).grantPermissions(Manifest.permission.POST_NOTIFICATIONS)
     }
 
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
+    fun `at twice the text size on a small phone, every setting still reads`() {
+        compose.setContent { PassoTheme { SettingsScreen(state, onBack = {}, actions = SettingsActions()) } }
+        compose.walkPage(hasTestTag(SettingsTags.LIST), "settings_large_text", maxScreens = 30)
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w841dp-h701dp-xhdpi")
+    fun `on an open foldable the settings are a column in the middle, under a bar that spans the screen`() {
+        compose.setContent { PassoTheme { SettingsScreen(state, onBack = {}, actions = SettingsActions()) } }
+        compose.walkPage(hasTestTag(SettingsTags.LIST), "settings_foldable", maxScreens = 2)
+    }
+
     private fun snapshot(name: String) {
         compose.waitForIdle()
+        compose.assertAccessible()
         runCatching {
             val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
             val dir = File("build/screenshots").apply { mkdirs() }
