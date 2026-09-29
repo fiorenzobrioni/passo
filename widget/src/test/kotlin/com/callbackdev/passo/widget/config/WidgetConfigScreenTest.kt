@@ -17,6 +17,7 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.designsystem.theme.WidgetCardColor
+import com.callbackdev.passo.core.testing.assertAccessible
 import com.callbackdev.passo.widget.WidgetArrangement
 import com.callbackdev.passo.widget.WidgetBackground
 import com.callbackdev.passo.widget.WidgetKind
@@ -105,6 +106,7 @@ class WidgetConfigScreenTest {
     }
 
     private fun save(name: String) {
+        compose.assertAccessible()
         val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
         val dir = File("build/screenshots").apply { mkdirs() }
         File(dir, "$name.png").outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }

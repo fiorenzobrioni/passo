@@ -54,12 +54,15 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.callbackdev.passo.core.designsystem.components.SegmentLabel
 import com.callbackdev.passo.core.designsystem.components.StatusCard
 import com.callbackdev.passo.core.designsystem.components.StatusTone
 import com.callbackdev.passo.core.designsystem.format.rememberMeasureFormatter
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.PassoMotion
 import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
+import com.callbackdev.passo.core.designsystem.theme.padding
+import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.designsystem.theme.reducedMotion
 import com.callbackdev.passo.core.domain.history.Period
 import com.callbackdev.passo.core.domain.history.PeriodOverview
@@ -125,6 +128,9 @@ fun HistoryScreen(
             onTargetShown()
         }
     }
+    // The pages take the gutter inside their lists, so a swipe or a scroll still works from
+    // the edge of an open foldable.
+    val gutter = pageGutter()
     Surface(modifier = modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize().statusBarsPadding()) {
             if (state != null) {
@@ -154,14 +160,16 @@ fun HistoryScreen(
                         if (page != pager.currentPage) pager.scrollToPage(page)
                     }
 
-                    Header(
-                        showLatest = pager.currentPage != count - 1,
-                        onLatest = { scope.launch { pager.animateScrollToPage(count - 1) } },
-                        onOpenSettings = onOpenSettings,
-                    )
-                    ScaleChoice(scale) { chosen ->
-                        anchorDay = anchor.toEpochDay()
-                        scale = chosen
+                    Column(Modifier.padding(gutter)) {
+                        Header(
+                            showLatest = pager.currentPage != count - 1,
+                            onLatest = { scope.launch { pager.animateScrollToPage(count - 1) } },
+                            onOpenSettings = onOpenSettings,
+                        )
+                        ScaleChoice(scale) { chosen ->
+                            anchorDay = anchor.toEpochDay()
+                            scale = chosen
+                        }
                     }
                     if (first == null) {
                         StatusCard(
@@ -169,10 +177,12 @@ fun HistoryScreen(
                             title = stringResource(R.string.history_empty_title),
                             body = stringResource(R.string.history_empty_body),
                             tone = StatusTone.NOTE,
-                            modifier = Modifier.padding(ScreenMargin).testTag(HistoryTags.EMPTY),
+                            modifier = Modifier.padding(gutter).padding(ScreenMargin).testTag(HistoryTags.EMPTY),
                         )
                     } else {
-                        Navigator(pager, count, pages.periodAt(pager.currentPage), today)
+                        Box(Modifier.padding(gutter)) {
+                            Navigator(pager, count, pages.periodAt(pager.currentPage), today)
+                        }
                         Pages(
                             state = state,
                             pager = pager,
@@ -236,8 +246,8 @@ private fun ScaleChoice(scale: PeriodScale, onChoose: (PeriodScale) -> Unit) {
                 // No check mark: four words fit a phone's width only without it.
                 icon = {},
                 label = {
-                    Text(
-                        text = stringResource(
+                    SegmentLabel(
+                        stringResource(
                             when (option) {
                                 PeriodScale.DAY -> R.string.history_scale_day
                                 PeriodScale.WEEK -> R.string.history_scale_week
@@ -245,8 +255,6 @@ private fun ScaleChoice(scale: PeriodScale, onChoose: (PeriodScale) -> Unit) {
                                 PeriodScale.YEAR -> R.string.history_scale_year
                             },
                         ),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
                     )
                 },
             )
@@ -277,7 +285,8 @@ private fun Navigator(pager: PagerState, count: Int, period: Period, today: Loca
                 text = periodTitle(period, today),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
-                maxLines = 1,
+                // Two lines rather than a cut date, at a large text size.
+                maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
             )
             periodSubtitle(period, today)?.let {
@@ -286,7 +295,7 @@ private fun Navigator(pager: PagerState, count: Int, period: Period, today: Loca
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
-                    maxLines = 1,
+                    maxLines = 2,
                 )
             }
         }

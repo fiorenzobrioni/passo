@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
@@ -18,6 +19,8 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.model.UnitPreference
+import com.callbackdev.passo.core.testing.assertAccessible
+import com.callbackdev.passo.core.testing.walkPage
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -123,8 +126,27 @@ class OnboardingScreenTest {
         snapshot("onboarding_battery")
     }
 
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
+    fun `at twice the text size on a small phone, every page still reads`() {
+        show()
+        for (step in state.steps) {
+            state = state.copy(step = step)
+            compose.walkPage(hasTestTag(OnboardingTags.PAGE), "onboarding_large_text_${step.name.lowercase()}")
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w841dp-h701dp-xhdpi")
+    fun `on an open foldable the pages are a column in the middle`() {
+        state = state.copy(step = OnboardingStep.GOAL)
+        show()
+        compose.walkPage(hasTestTag(OnboardingTags.PAGE), "onboarding_foldable_goal")
+    }
+
     private fun snapshot(name: String) {
         compose.waitForIdle()
+        compose.assertAccessible()
         runCatching {
             val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
             val dir = File("build/screenshots").apply { mkdirs() }

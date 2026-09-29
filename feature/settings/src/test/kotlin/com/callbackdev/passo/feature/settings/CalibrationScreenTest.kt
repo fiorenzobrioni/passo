@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -19,6 +20,8 @@ import com.callbackdev.passo.core.domain.calibration.CalibrationResult
 import com.callbackdev.passo.core.domain.calibration.StepCalibration
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.UnitPreference
+import com.callbackdev.passo.core.testing.assertAccessible
+import com.callbackdev.passo.core.testing.walkPage
 import com.callbackdev.passo.feature.settings.calibration.CalibrationActions
 import com.callbackdev.passo.feature.settings.calibration.CalibrationPhase
 import com.callbackdev.passo.feature.settings.calibration.CalibrationScreen
@@ -182,8 +185,23 @@ class CalibrationScreenTest {
         ).assertIsDisplayed()
     }
 
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
+    fun `at twice the text size on a small phone, the measure still reads`() {
+        show(setup)
+        compose.walkPage(hasTestTag(CalibrationTags.PAGE), "calibration_large_text")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w841dp-h701dp-xhdpi")
+    fun `on an open foldable the measure is a column in the middle`() {
+        show(setup)
+        compose.walkPage(hasTestTag(CalibrationTags.PAGE), "calibration_foldable")
+    }
+
     private fun snapshot(name: String) {
         compose.waitForIdle()
+        compose.assertAccessible()
         runCatching {
             val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
             val dir = File("build/screenshots").apply { mkdirs() }

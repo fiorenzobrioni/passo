@@ -74,7 +74,7 @@ that say so, and a screen that never promises what Android will drop.
   permission is the system's. `checkForbiddenPermissions` is unchanged and green.
 - With the evening reminder on, the phone wakes once a day for it, on days below the threshold
   only. Everything else in this phase costs nothing with the screen off. The Phase 6 battery
-  check (§9) is still to run on a device.
+  check (§9) confirmed it on the device (owner, 29 Sep 2026).
 - A phone that is off at 9:00 on the first day of the week skips that summary: the alarm is
   armed again for the next week at boot. Accepted: a late summary of a week already a day old
   would be the lesser product.

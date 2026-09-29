@@ -64,6 +64,7 @@ that does not match it.
 | `:core:data` | Android library | Room (steps, tracker state, outings), DataStore (settings, profile), repositories exposing `Flow`, `BackupRepository` (export, import) |
 | `:core:tracking` | Android library | `StepTrackingService` (FGS type `health`), sensor source, receivers, ongoing notification, `StepCounterProbe` (the calibration's direct read) |
 | `:core:designsystem` | Android library | M3 theme, typography, shared components, the Canvas charts (`DayTrendChart`, `BarChart`), `CalendarHeatmap`, `WalkList` and `OutingList`, `SessionCard`, date formatting |
+| `:core:testing` | Android library, test-only | `assertAccessible()` (labels, 48dp touch targets) and `walkPage()`, shared by the UI tests as `testImplementation` |
 | `:feature:*` | Android library | `today`, `history`, `insights`, `settings` (with your data and the step calibration), `onboarding`, `sessions` (the Outings page and editor), `guide` (the guide, in Chiaro's shape) |
 | `:widget` | Android library | the two Glance widgets («At a glance», «In words»), their settings screen, the update coordinator |
 | `:app` | application | `Application`, `MainActivity`, navigation (the bottom bar: Today, History, Insights), DI entry points; wires everything |
@@ -122,6 +123,13 @@ Icons are `PassoIcons`, drawn in code. The launcher icon (Chiaro's ring, with a 
 where Chiaro has its sun) is written by `tools/draw_launcher_icon.py`: change the script and
 re-run it, never the two XML layers. The Compose UI tests write screenshots to each module's
 `build/screenshots`: look at them after changing a screen.
+
+**Accessibility and foldables** (`docs/adr/0012-foldables-and-accessibility.md`): a screen's
+tests call `assertAccessible()` on what they draw, and walk the page at twice the text size and
+on an open foldable (`walkPage()`); text inks are pinned at 4.5:1 by `ContrastTest`. A page
+leaves `pageGutter()` on each side (in a list's content padding, never by narrowing the list),
+so an open foldable shows a centred column and a phone upright is untouched. Two tiles side by
+side are a `TilePair`, a segmented button's label a `SegmentLabel`. No tablet layout (owner).
 
 **Widgets** (`docs/adr/0005-widgets.md`): Chiaro's card, colours and ink rule, carried over; the
 forms' arithmetic is pure (`GlanceLayout.kt`, `WordsLayout.kt`) and pinned by tests at Chiaro's

@@ -110,6 +110,9 @@ All notable changes to Passo are documented here. The format follows
 - Measure your step: walk a distance you know (a track, a pitch) with the phone in your
   pocket, and Passo works out your walking or running step from the steps it counted, says
   what it changes, and keeps it if you want. No GPS.
+- Foldables (Phase 7): open, every page is a column in the middle of the screen instead of
+  stretching across it; folded, nothing changes. On a phone turned on its side, the display
+  cutout and a side navigation bar no longer cover anything.
 
 ### Changed
 
@@ -117,3 +120,9 @@ All notable changes to Passo are documented here. The format follows
   profile and the settings, and nothing else. Passo still has no internet permission and sends
   nothing itself; after a restore it starts counting again from zero steps, so the new phone's
   earlier steps are never added in one go.
+- Larger text reads better (Phase 7): at up to twice the size, tiles go one above the other
+  instead of breaking a word, chart labels have room and never overlap, the History scale's
+  words stay whole, and a date or a time is no longer cut.
+- The goal calendar's day numbers are easier to read: every level of the calendar now has
+  enough contrast, and the days not counted are no longer faint. The widget's colour choices
+  are easier to tap.

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -88,6 +89,7 @@ import com.callbackdev.passo.core.designsystem.components.SessionCard
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
 import com.callbackdev.passo.core.designsystem.components.StatusCard
 import com.callbackdev.passo.core.designsystem.components.StatusTone
+import com.callbackdev.passo.core.designsystem.components.TilePair
 import com.callbackdev.passo.core.designsystem.components.TrendPoint
 import com.callbackdev.passo.core.designsystem.format.annotated
 import com.callbackdev.passo.core.designsystem.format.axisHour
@@ -97,8 +99,11 @@ import com.callbackdev.passo.core.designsystem.format.rememberMeasureFormatter
 import com.callbackdev.passo.core.designsystem.format.text
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.GroupShape
+import com.callbackdev.passo.core.designsystem.theme.PageGutter
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
+import com.callbackdev.passo.core.designsystem.theme.padding
+import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.designsystem.theme.reducedMotion
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.metrics.MetricsConstants
@@ -193,6 +198,10 @@ fun TodayScreen(
 ) {
     val format = rememberMeasureFormatter(state.units)
     val bottom = bottomPadding
+    // Each item takes the gutter itself rather than the list, so the hero's glow still
+    // reaches both edges of an open foldable.
+    val gutter = pageGutter()
+    val inColumn = Modifier.padding(gutter)
     // Its own ground and ink, so the page reads right wherever it is drawn.
     Surface(modifier = modifier.fillMaxSize()) {
         LazyColumn(
@@ -201,7 +210,7 @@ fun TodayScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item(key = "hero") {
-                Hero(state, format, askInSettings, onOpenSettings, onAllow, onResume, onCelebrated)
+                Hero(state, format, gutter, askInSettings, onOpenSettings, onAllow, onResume, onCelebrated)
             }
             val session = state.session
             if (session != null) {
@@ -212,7 +221,7 @@ fun TodayScreen(
                         canKeepGoing = session.canKeepGoing,
                         format = format,
                         actions = sessionActions(session.session.id),
-                        modifier = Modifier.padding(horizontal = ScreenMargin),
+                        modifier = inColumn.padding(horizontal = ScreenMargin),
                     )
                 }
             } else if (state.status == TrackingStatus.COUNTING && state.startOutingButton) {
@@ -229,13 +238,13 @@ fun TodayScreen(
                         // ring's notch is. The guide stays in Settings after it.
                         action = stringResource(R.string.today_first_day_guide),
                         onAction = onOpenGuide,
-                        modifier = Modifier.padding(horizontal = ScreenMargin),
+                        modifier = inColumn.padding(horizontal = ScreenMargin),
                     )
                 }
             }
-            item(key = "trend") { TrendCard(state, format) }
-            if (state.outings.isNotEmpty()) item(key = "walks") { WalksCard(state.outings, format) }
-            item(key = "metrics") { Metrics(state, format) }
+            item(key = "trend") { Box(inColumn) { TrendCard(state, format) } }
+            if (state.outings.isNotEmpty()) item(key = "walks") { Box(inColumn) { WalksCard(state.outings, format) } }
+            item(key = "metrics") { Box(inColumn) { Metrics(state, format) } }
         }
     }
 }
@@ -250,6 +259,7 @@ fun TodayScreen(
 private fun Hero(
     state: TodayUiState,
     format: MeasureFormatter,
+    gutter: PageGutter,
     askInSettings: Boolean,
     onOpenSettings: () -> Unit,
     onAllow: () -> Unit,
@@ -275,7 +285,8 @@ private fun Hero(
                     1f to surface,
                 ),
             )
-            .statusBarsPadding(),
+            .statusBarsPadding()
+            .padding(gutter),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -534,11 +545,17 @@ private fun TrendCard(state: TodayUiState, format: MeasureFormatter) {
         modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenMargin).testTag(TodayTags.TREND),
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            // The key goes under the title when the two do not fit one line (large text).
+            FlowRow(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
                 Text(
                     text = stringResource(R.string.today_trend_title),
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f).semantics { heading() },
+                    modifier = Modifier.padding(end = 12.dp).semantics { heading() },
                 )
                 Legend(hasUsual = trend.usual != null)
             }
@@ -672,7 +689,7 @@ private fun Metrics(state: TodayUiState, format: MeasureFormatter) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.padding(horizontal = ScreenMargin).testTag(TodayTags.METRICS),
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        TilePair {
             val distance = format.distance(metrics.distanceMeters)
             val stepLength = format.stepLength(state.walkingStepLength).text()
             Tile(
@@ -681,7 +698,6 @@ private fun Metrics(state: TodayUiState, format: MeasureFormatter) {
                 value = distance.annotated(unit),
                 spokenValue = distance.text(),
                 meaning = stringResource(R.string.today_metric_distance_meaning, stepLength),
-                modifier = Modifier.weight(1f),
             )
             val energy = format.energy(metrics.activeKcal)
             Tile(
@@ -690,10 +706,9 @@ private fun Metrics(state: TodayUiState, format: MeasureFormatter) {
                 value = energy.annotated(unit),
                 spokenValue = energy.text(),
                 meaning = stringResource(R.string.today_metric_calories_meaning),
-                modifier = Modifier.weight(1f),
             )
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        TilePair {
             val active = format.minutes(metrics.activeMinutes)
             Tile(
                 icon = PassoIcons.Clock,
@@ -701,7 +716,6 @@ private fun Metrics(state: TodayUiState, format: MeasureFormatter) {
                 value = active.annotated(unit),
                 spokenValue = active.text(),
                 meaning = stringResource(R.string.today_metric_active_meaning),
-                modifier = Modifier.weight(1f),
             )
             val brisk = format.minutes(metrics.briskMinutes)
             val left = state.overview.briskShareLeft
@@ -717,7 +731,6 @@ private fun Metrics(state: TodayUiState, format: MeasureFormatter) {
                 } else {
                     pluralStringResource(R.plurals.today_metric_brisk_left, left, left)
                 },
-                modifier = Modifier.weight(1f),
                 track = {
                     MetricTrack(
                         value = metrics.briskMinutes.toFloat(),

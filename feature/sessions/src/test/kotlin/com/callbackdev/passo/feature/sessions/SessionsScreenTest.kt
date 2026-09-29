@@ -25,6 +25,8 @@ import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.SessionTotals
 import com.callbackdev.passo.core.model.UnitPreference
+import com.callbackdev.passo.core.testing.assertAccessible
+import com.callbackdev.passo.core.testing.walkPage
 import com.callbackdev.passo.core.tracking.GoalNotificationsBlock
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -167,8 +169,23 @@ class SessionsScreenTest {
         snapshot("sessions_blocked")
     }
 
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
+    fun `at twice the text size on a small phone, every outing still reads`() {
+        show(state())
+        compose.walkPage(hasTestTag(SessionsTags.LIST), "sessions_large_text")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w841dp-h701dp-xhdpi")
+    fun `on an open foldable the outings are a column in the middle`() {
+        show(state())
+        compose.walkPage(hasTestTag(SessionsTags.LIST), "sessions_foldable")
+    }
+
     private fun snapshot(name: String) {
         compose.waitForIdle()
+        compose.assertAccessible()
         runCatching {
             val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
             val dir = File("build/screenshots").apply { mkdirs() }

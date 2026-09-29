@@ -16,6 +16,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
+import com.callbackdev.passo.core.designsystem.theme.padding
+import com.callbackdev.passo.core.designsystem.theme.pageGutter
 
 /**
  * A phone without a hardware step counter (PLANNING.md §4.6): a dead end, explained. The APK
@@ -26,7 +28,7 @@ import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 fun NoSensorScreen(modifier: Modifier = Modifier) {
     Surface(modifier = modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp, vertical = 48.dp),
+            modifier = Modifier.fillMaxSize().padding(pageGutter()).padding(horizontal = 32.dp, vertical = 48.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {

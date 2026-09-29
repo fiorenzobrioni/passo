@@ -17,6 +17,7 @@ dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:data"))
     implementation(project(":core:designsystem"))
+    testImplementation(project(":core:testing"))
     implementation(project(":core:tracking"))
 
     implementation(libs.androidx.glance.appwidget)

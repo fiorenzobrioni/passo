@@ -3,6 +3,8 @@ package com.callbackdev.passo.feature.today
 import android.graphics.Bitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertLeftPositionInRootIsEqualTo
+import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
@@ -12,7 +14,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.data.sessions.LiveSessionState
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
@@ -30,6 +34,8 @@ import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionTotals
 import com.callbackdev.passo.core.model.UnitPreference
+import com.callbackdev.passo.core.testing.assertAccessible
+import com.callbackdev.passo.core.testing.walkPage
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -308,6 +314,37 @@ class TodayScreenTest {
         snapshot("today_metrics")
     }
 
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
+    fun `at twice the text size on a small phone, the whole day still reads`() {
+        show(state(firstDay = true))
+
+        compose.onNodeWithTag(TodayTags.HEADLINE).assertIsDisplayed()
+        compose.walkPage(hasTestTag(TodayTags.LIST), "today_large_text")
+    }
+
+    @Test
+    fun `on a phone the cards keep the screen margin`() {
+        show(state())
+
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(TodayTags.METRICS))
+        compose.onNodeWithTag(TodayTags.METRICS).assertLeftPositionInRootIsEqualTo(16.dp).assertWidthIsEqualTo(379.dp)
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w841dp-h701dp-xhdpi")
+    fun `on an open foldable the day is a column in the middle, under a glow that spans the screen`() {
+        show(state())
+
+        // (841 - 640) / 2 on each side, then the cards' own 16dp margin.
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(TodayTags.METRICS))
+        compose.onNodeWithTag(TodayTags.METRICS)
+            .assertLeftPositionInRootIsEqualTo(116.5.dp)
+            .assertWidthIsEqualTo(608.dp)
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToIndex(0)
+        compose.walkPage(hasTestTag(TodayTags.LIST), "today_foldable")
+    }
+
     /**
      * Writes what the screen looks like to `build/screenshots`, for a person to look at: not an
      * assertion, and skipped where the graphics runtime cannot draw.
@@ -319,6 +356,7 @@ class TodayScreenTest {
 
     private fun snapshot(name: String) {
         compose.waitForIdle()
+        compose.assertAccessible()
         runCatching {
             val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
             val dir = File("build/screenshots").apply { mkdirs() }

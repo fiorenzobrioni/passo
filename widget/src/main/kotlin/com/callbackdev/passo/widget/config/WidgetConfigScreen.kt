@@ -6,7 +6,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -25,6 +27,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +49,8 @@ import com.callbackdev.passo.core.designsystem.components.SettingsGroup
 import com.callbackdev.passo.core.designsystem.components.SwitchRow
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.WidgetCardColor
+import com.callbackdev.passo.core.designsystem.theme.padding
+import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.designsystem.theme.widgetCardContainer
 import com.callbackdev.passo.widget.R
 import com.callbackdev.passo.widget.WidgetArrangement
@@ -84,11 +89,20 @@ fun WidgetConfigScreen(
     onOpacityDone: () -> Unit,
     onDone: () -> Unit,
 ) {
-    Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.widget_config_title)) }) }) { padding ->
+    val gutter = pageGutter(sideInsets = false)
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(stringResource(R.string.widget_config_title)) },
+                windowInsets = TopAppBarDefaults.windowInsets.add(gutter.asInsets()),
+            )
+        },
+    ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
                 .verticalScroll(rememberScrollState())
+                .padding(gutter)
                 .padding(bottom = 24.dp)
                 .testTag(WidgetConfigTags.LIST),
         ) {
@@ -236,41 +250,49 @@ private fun BackgroundChoices(look: WidgetLook, model: WidgetModel?, onLook: (Wi
         }
     }
     if (look.background == WidgetBackground.COLOR) {
-        ColorSwatches(look.cardColor, start = 56.dp, end = 16.dp) { onLook(look.copy(cardColor = it)) }
+        ColorSwatches(look.cardColor, start = 50.dp, end = 10.dp) { onLook(look.copy(cardColor = it)) }
     }
 }
 
 @Composable
 private fun ColorSwatches(selected: WidgetCardColor, start: Dp, end: Dp, onPick: (WidgetCardColor) -> Unit) {
     Column(modifier = Modifier.padding(start = start, end = end, bottom = 12.dp)) {
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.selectableGroup()) {
+        // Each colour is a 48dp target around its 36dp disc (the chosen one's included), side by
+        // side: the gaps between the discs are the targets' own. A narrow phone wraps the row.
+        FlowRow(modifier = Modifier.selectableGroup()) {
             WidgetCardColorChoices.forEach { (color, label) ->
                 val chosen = color == selected
                 val name = stringResource(label)
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
-                        .border(
-                            width = if (chosen) 2.dp else 0.dp,
-                            color = if (chosen) MaterialTheme.colorScheme.primary else Color.Transparent,
-                            shape = CircleShape,
-                        )
-                        .padding(if (chosen) 4.dp else 0.dp)
-                        .clip(CircleShape)
-                        .background(widgetCardContainer(color))
+                        .size(48.dp)
                         .selectable(selected = chosen, onClick = { onPick(color) }, role = Role.RadioButton)
                         .semantics { contentDescription = name },
                 ) {
-                    if (chosen) {
-                        // Every card colour is a dark ground under white ink.
-                        Icon(
-                            PassoIcons.Check,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp),
-                        )
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .border(
+                                width = if (chosen) 2.dp else 0.dp,
+                                color = if (chosen) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                shape = CircleShape,
+                            )
+                            .padding(if (chosen) 4.dp else 0.dp)
+                            .clip(CircleShape)
+                            .background(widgetCardContainer(color)),
+                    ) {
+                        if (chosen) {
+                            // Every card colour is a dark ground under white ink.
+                            Icon(
+                                PassoIcons.Check,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        }
                     }
                 }
             }

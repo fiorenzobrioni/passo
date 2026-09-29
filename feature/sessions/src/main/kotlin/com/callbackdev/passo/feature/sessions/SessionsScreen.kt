@@ -8,9 +8,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -65,6 +65,8 @@ import com.callbackdev.passo.core.designsystem.format.sessionName
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
+import com.callbackdev.passo.core.designsystem.theme.padding
+import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.sessions.SessionConstants
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
@@ -158,6 +160,7 @@ fun SessionsScreen(
                         Icon(PassoIcons.Back, contentDescription = stringResource(R.string.sessions_back))
                     }
                 },
+                windowInsets = TopAppBarDefaults.windowInsets.add(pageGutter(sideInsets = false).asInsets()),
                 scrollBehavior = scroll,
             )
         },
@@ -181,7 +184,7 @@ private fun SessionsList(
     val canStart = state.status == SessionsStatus.READY && !busy
     LazyColumn(
         modifier = modifier.testTag(SessionsTags.LIST),
-        contentPadding = PaddingValues(bottom = 32.dp),
+        contentPadding = pageGutter(sideInsets = false).contentPadding(bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item(key = "intro") {

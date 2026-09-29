@@ -5,10 +5,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.add
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -43,6 +47,7 @@ import com.callbackdev.passo.core.designsystem.components.ChartBar
 import com.callbackdev.passo.core.designsystem.components.MetricTile
 import com.callbackdev.passo.core.designsystem.components.MetricTrack
 import com.callbackdev.passo.core.designsystem.components.ProgressRing
+import com.callbackdev.passo.core.designsystem.components.TilePair
 import com.callbackdev.passo.core.designsystem.format.annotated
 import com.callbackdev.passo.core.designsystem.format.currentLocale
 import com.callbackdev.passo.core.designsystem.format.rememberMeasureFormatter
@@ -51,6 +56,8 @@ import com.callbackdev.passo.core.designsystem.format.weekdayShort
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
+import com.callbackdev.passo.core.designsystem.theme.padding
+import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.metrics.MetricsConstants
 import com.callbackdev.passo.core.domain.settings.firstDayOfWeek
@@ -90,6 +97,7 @@ fun GuideScreen(state: GuideUiState?, onBack: () -> Unit, modifier: Modifier = M
                         Icon(PassoIcons.Back, contentDescription = stringResource(R.string.guide_back))
                     }
                 },
+                windowInsets = TopAppBarDefaults.windowInsets.add(pageGutter(sideInsets = false).asInsets()),
                 scrollBehavior = scroll,
             )
         },
@@ -106,6 +114,7 @@ private fun GuideContent(state: GuideUiState, modifier: Modifier) {
         modifier = modifier
             .testTag(GuideTags.CONTENT)
             .verticalScroll(rememberScrollState())
+            .padding(pageGutter(sideInsets = false))
             .padding(start = ScreenMargin, end = ScreenMargin, top = 8.dp, bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -251,6 +260,9 @@ private fun TabRow(icon: ImageVector, @StringRes name: Int, @StringRes body: Int
 /** Today's ring, smaller: a day a little ahead of the notch where a usual day stands by now. */
 @Composable
 private fun RingSample(format: MeasureFormatter) {
+    // The ring grows with the reader's text size, as far as the page allows, so the count
+    // inside it never spills over the arc (Phase 7's large-text pass).
+    val grow = LocalDensity.current.fontScale.coerceAtLeast(1f)
     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
         ProgressRing(
             progress = SAMPLE_STEPS.toFloat() / SAMPLE_GOAL,
@@ -260,7 +272,7 @@ private fun RingSample(format: MeasureFormatter) {
             celebrate = false,
             onCelebrated = {},
             strokeWidth = 12.dp,
-            modifier = Modifier.size(168.dp).testTag(GuideTags.RING),
+            modifier = Modifier.widthIn(max = 168.dp * grow).fillMaxWidth().aspectRatio(1f).testTag(GuideTags.RING),
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
@@ -281,7 +293,7 @@ private fun RingSample(format: MeasureFormatter) {
 @Composable
 private fun MetricSample(format: MeasureFormatter) {
     val unit = SpanStyle(fontSize = 15.sp, fontWeight = FontWeight.Normal)
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+    TilePair {
         val distance = format.distance(SAMPLE_STEPS * SAMPLE_STEP_LENGTH_M)
         val step = format.stepLength(SAMPLE_STEP_LENGTH_M).text()
         val distanceLabel = stringResource(R.string.guide_sample_distance)
@@ -292,7 +304,6 @@ private fun MetricSample(format: MeasureFormatter) {
             value = distance.annotated(unit),
             meaning = distanceMeaning,
             spoken = "$distanceLabel: ${distance.text()}. $distanceMeaning",
-            modifier = Modifier.weight(1f),
         )
         val brisk = format.minutes(SAMPLE_BRISK)
         val left = MetricsConstants.DAILY_BRISK_SHARE_MINUTES - SAMPLE_BRISK
@@ -304,7 +315,6 @@ private fun MetricSample(format: MeasureFormatter) {
             value = brisk.annotated(unit),
             meaning = briskMeaning,
             spoken = "$briskLabel: ${brisk.text()}. $briskMeaning",
-            modifier = Modifier.weight(1f),
             track = {
                 MetricTrack(
                     value = SAMPLE_BRISK.toFloat(),

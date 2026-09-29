@@ -3,7 +3,6 @@ package com.callbackdev.passo.feature.history
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,6 +29,7 @@ import com.callbackdev.passo.core.designsystem.components.BarChart
 import com.callbackdev.passo.core.designsystem.components.ChartBar
 import com.callbackdev.passo.core.designsystem.components.ChartSpan
 import com.callbackdev.passo.core.designsystem.components.OutingList
+import com.callbackdev.passo.core.designsystem.components.TilePair
 import com.callbackdev.passo.core.designsystem.format.annotated
 import com.callbackdev.passo.core.designsystem.format.axisHour
 import com.callbackdev.passo.core.designsystem.format.clockTime
@@ -37,6 +37,7 @@ import com.callbackdev.passo.core.designsystem.format.text
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
+import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.sessions.Outing
 import com.callbackdev.passo.core.domain.today.HourlySteps
@@ -55,7 +56,7 @@ internal fun DayPage(detail: DayDetail?, minWalkMinutes: Int, format: MeasureFor
     }
     LazyColumn(
         modifier = Modifier.fillMaxSize().testTag(HistoryTags.PAGE),
-        contentPadding = PaddingValues(top = 8.dp, bottom = bottomPadding + 24.dp),
+        contentPadding = pageGutter().contentPadding(top = 8.dp, bottom = bottomPadding + 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item(key = "headline") { PageHeadline(dayHeadline(detail, format), dayDetailLine(detail, minWalkMinutes)) }
@@ -160,7 +161,7 @@ private fun DayMetrics(detail: DayDetail, format: MeasureFormatter) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.padding(horizontal = ScreenMargin),
     ) {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        TilePair {
             val distance = format.distance(detail.distanceMeters)
             HistoryTile(
                 icon = PassoIcons.Distance,
@@ -168,7 +169,6 @@ private fun DayMetrics(detail: DayDetail, format: MeasureFormatter) {
                 value = distance.annotated(UnitStyle),
                 spokenValue = distance.text(),
                 meaning = stringResource(R.string.history_metric_distance_day_meaning),
-                modifier = Modifier.weight(1f),
             )
             val energy = format.energy(detail.activeKcal)
             HistoryTile(
@@ -177,10 +177,9 @@ private fun DayMetrics(detail: DayDetail, format: MeasureFormatter) {
                 value = energy.annotated(UnitStyle),
                 spokenValue = energy.text(),
                 meaning = stringResource(R.string.history_metric_calories_meaning),
-                modifier = Modifier.weight(1f),
             )
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        TilePair {
             val active = format.minutes(detail.activeMinutes)
             HistoryTile(
                 icon = PassoIcons.Clock,
@@ -188,7 +187,6 @@ private fun DayMetrics(detail: DayDetail, format: MeasureFormatter) {
                 value = active.annotated(UnitStyle),
                 spokenValue = active.text(),
                 meaning = stringResource(R.string.history_metric_active_meaning),
-                modifier = Modifier.weight(1f),
             )
             val brisk = format.minutes(detail.briskMinutes)
             HistoryTile(
@@ -197,7 +195,6 @@ private fun DayMetrics(detail: DayDetail, format: MeasureFormatter) {
                 value = brisk.annotated(UnitStyle),
                 spokenValue = brisk.text(),
                 meaning = stringResource(R.string.history_metric_brisk_day),
-                modifier = Modifier.weight(1f),
             )
         }
     }

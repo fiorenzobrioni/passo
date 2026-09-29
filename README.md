@@ -166,10 +166,13 @@ resizable home-screen widgets answer "how am I doing today?" at a glance.
   notification shows the day when you expand it.
 - **A Quick Settings tile** with today's steps and the share of the goal, read only while the
   panel is open. Settings adds it with one tap.
+- **Made for every reader**: TalkBack reads every screen, every tile and every day of a chart;
+  text up to twice its size reflows rather than breaking a word; an open foldable shows each
+  page as a column in the middle of the screen.
 
 ## What is coming (v1.0)
 
-- **Polish**: an accessibility pass, layouts for tablets and foldables, and a faster start.
+- **Polish**: a faster start.
 
 Distance and calories are **estimates**, and Passo says so. The formulas are documented and
 you can tune them: height, weight, your own step length, measured with a short calibration

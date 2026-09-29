@@ -12,8 +12,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -60,6 +60,7 @@ import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.callbackdev.passo.core.designsystem.components.DENSE_TARGETS_TAG
 import com.callbackdev.passo.core.designsystem.components.GroupDivider
 import com.callbackdev.passo.core.designsystem.components.GroupHeader
 import com.callbackdev.passo.core.designsystem.components.InfoRow
@@ -78,6 +79,8 @@ import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
+import com.callbackdev.passo.core.designsystem.theme.padding
+import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.domain.calibration.CalibratedStep
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.goals.GoalSchedule
@@ -187,6 +190,7 @@ fun SettingsScreen(
                         Icon(PassoIcons.Back, contentDescription = stringResource(R.string.settings_back))
                     }
                 },
+                windowInsets = TopAppBarDefaults.windowInsets.add(pageGutter(sideInsets = false).asInsets()),
                 scrollBehavior = scroll,
             )
         },
@@ -233,7 +237,10 @@ private fun SettingsList(
     val lengths = StepLengths.of(profile)
     val files = rememberDataFiles(dataActions)
 
-    LazyColumn(modifier = modifier.testTag(SettingsTags.LIST), contentPadding = PaddingValues(bottom = 32.dp)) {
+    LazyColumn(
+        modifier = modifier.testTag(SettingsTags.LIST),
+        contentPadding = pageGutter(sideInsets = false).contentPadding(bottom = 32.dp),
+    ) {
         item { GuideCard(actions.openGuide) }
         item { GroupHeader(stringResource(R.string.settings_group_profile)) }
         item {
@@ -1073,7 +1080,8 @@ private fun TimeDialog(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                TimePicker(state = state)
+                // Material's dial: its hours a little under 48dp apart, set by a drag as much as a tap.
+                TimePicker(state = state, modifier = Modifier.testTag(DENSE_TARGETS_TAG))
                 Text(
                     note,
                     style = MaterialTheme.typography.bodyMedium,

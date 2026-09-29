@@ -6,6 +6,8 @@ import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertLeftPositionInRootIsEqualTo
+import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasContentDescription
@@ -20,9 +22,12 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.history.PeriodScale
+import com.callbackdev.passo.core.testing.assertAccessible
+import com.callbackdev.passo.core.testing.walkPage
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -180,8 +185,29 @@ class HistoryScreenTest {
      * Writes what the screen looks like to `build/screenshots`, for a person to look at: not an
      * assertion, and skipped where the graphics runtime cannot draw.
      */
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
+    fun `at twice the text size on a small phone, a week, a month and a day still read`() {
+        show()
+        compose.walkPage(hasTestTag(HistoryTags.PAGE), "history_large_text_week")
+        compose.onNodeWithText("Month").performClick()
+        compose.walkPage(hasTestTag(HistoryTags.PAGE), "history_large_text_month")
+        compose.onNodeWithText("Day").performClick()
+        compose.walkPage(hasTestTag(HistoryTags.PAGE), "history_large_text_day")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w841dp-h701dp-xhdpi")
+    fun `on an open foldable the period is a column in the middle, and swipes from the edge`() {
+        show()
+        compose.onNodeWithTag(HistoryTags.SCALES).assertLeftPositionInRootIsEqualTo(116.5.dp)
+        compose.onNodeWithTag(HistoryTags.PAGER).assertLeftPositionInRootIsEqualTo(0.dp).assertWidthIsEqualTo(841.dp)
+        compose.walkPage(hasTestTag(HistoryTags.PAGE), "history_foldable_week")
+    }
+
     private fun snapshot(name: String) {
         compose.waitForIdle()
+        compose.assertAccessible()
         runCatching {
             val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
             val dir = File("build/screenshots").apply { mkdirs() }

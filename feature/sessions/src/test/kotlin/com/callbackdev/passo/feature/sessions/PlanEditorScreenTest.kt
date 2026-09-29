@@ -32,6 +32,8 @@ import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.UnitPreference
+import com.callbackdev.passo.core.testing.assertAccessible
+import com.callbackdev.passo.core.testing.walkPage
 import com.callbackdev.passo.core.tracking.VoiceAvailability
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -239,8 +241,23 @@ class PlanEditorScreenTest {
         snapshot("editor_keyboard")
     }
 
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
+    fun `at twice the text size on a small phone, the editor still reads`() {
+        compose.setContent { PassoTheme { PlanEditorScreen(state(), onBack = {}, actions = PlanEditorActions()) } }
+        compose.walkPage(hasTestTag(EditorTags.LIST), "editor_large_text", maxScreens = 20)
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w841dp-h701dp-xhdpi")
+    fun `on an open foldable the editor is a column in the middle`() {
+        compose.setContent { PassoTheme { PlanEditorScreen(state(), onBack = {}, actions = PlanEditorActions()) } }
+        compose.walkPage(hasTestTag(EditorTags.LIST), "editor_foldable")
+    }
+
     private fun snapshot(name: String) {
         compose.waitForIdle()
+        compose.assertAccessible()
         runCatching {
             val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()
             val dir = File("build/screenshots").apply { mkdirs() }
