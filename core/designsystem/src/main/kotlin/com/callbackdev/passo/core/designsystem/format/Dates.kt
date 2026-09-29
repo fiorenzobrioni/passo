@@ -37,6 +37,8 @@ fun axisHour(hour: Int): String {
     val context = LocalContext.current
     val locale = currentLocale()
     val pattern = DateFormat.getBestDateTimePattern(locale, if (DateFormat.is24HourFormat(context)) "HH" else "ha")
+        // Midnight at the end of the day reads 24, as on a 24-hour axis; 12 AM stays 12 AM.
+        .let { if (hour == 24) it.replace('H', 'k') else it }
     return LocalTime.of(hour % 24, 0).format(DateTimeFormatter.ofPattern(pattern, locale))
 }
 

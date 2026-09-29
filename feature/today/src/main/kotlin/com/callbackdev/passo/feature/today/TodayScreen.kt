@@ -290,7 +290,7 @@ private fun Hero(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 4.dp, top = 4.dp),
+            modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 4.dp),
         ) {
             Text(
                 text = longDate(state.date),
@@ -304,7 +304,6 @@ private fun Hero(
         StatusBanner(state.status, askInSettings, onAllow, onResume)
         Ring(state, format, onCelebrated)
         Headline(state, format)
-        Spacer(Modifier.height(8.dp))
     }
 }
 
@@ -559,7 +558,7 @@ private fun TrendCard(state: TodayUiState, format: MeasureFormatter) {
                 )
                 Legend(hasUsual = trend.usual != null)
             }
-            val hours = listOf(0, 6, 12, 18).map { it * 60 to axisHour(it) }
+            val hours = listOf(0, 6, 12, 18, 24).map { it * 60 to axisHour(it) }
             DayTrendChart(
                 trend = trend,
                 goalLabel = format.steps(overview.goalSteps),

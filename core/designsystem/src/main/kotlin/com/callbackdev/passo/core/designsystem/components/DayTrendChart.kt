@@ -79,6 +79,11 @@ data class DayTrend(
  * a dashed line that goes on past now (what usually comes later), and the rest of the day
  * shaded, so the room left to walk in is visible too.
  *
+ * The plot takes the card's whole width, midnight to midnight. The goal's number sits on its
+ * line at the left, under it: the small hours, where no running total has climbed yet, so no
+ * line ever crosses it (over it when the day has gone so far past the goal that the line is
+ * near the floor).
+ *
  * The scale is the world's, not the data's: the whole day across, and up to the goal at least,
  * so a quiet morning looks quiet instead of filling the chart.
  *
@@ -123,7 +128,7 @@ fun DayTrendChart(
     val labelStyle = MaterialTheme.typography.labelSmall
     val colors = MaterialTheme.colorScheme
     val goalInk = PassoTheme.colors.goal
-    val (gutterDp, axisDp) = chartMargins(measurer, labelStyle, goalLabel)
+    val axisDp = chartMargins(measurer, labelStyle, goalLabel).second
 
     Column(modifier = modifier.clearAndSetSemantics { contentDescription = description }) {
         readout(point)
@@ -131,10 +136,8 @@ fun DayTrendChart(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(plotHeight)
-                .pointerInput(trend.nowMinute, gutterDp) {
-                    val gutter = gutterDp.toPx()
-                    fun minuteAt(x: Float) =
-                        (x / (size.width - gutter) * MINUTES_PER_DAY).coerceIn(0f, MINUTES_PER_DAY.toFloat())
+                .pointerInput(trend.nowMinute) {
+                    fun minuteAt(x: Float) = (x / size.width * MINUTES_PER_DAY).coerceIn(0f, MINUTES_PER_DAY.toFloat())
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
                         val start = down.position
@@ -172,10 +175,9 @@ fun DayTrendChart(
                     }
                 },
         ) {
-            val gutter = gutterDp.toPx()
             val axis = axisDp.toPx()
             val top = 6.dp.toPx()
-            val plotW = size.width - gutter
+            val plotW = size.width
             val plotBottom = size.height - axis
             val plotH = plotBottom - top
             val maxToday = trend.today.maxOrNull() ?: 0
@@ -195,11 +197,18 @@ fun DayTrendChart(
                 strokeWidth = 1.dp.toPx(),
             )
 
-            // The goal, labelled in the gutter.
+            // The goal, its number on the line at the left.
             val goalY = y(trend.goal)
             drawLine(goalInk.copy(alpha = 0.7f), Offset(0f, goalY), Offset(plotW, goalY), strokeWidth = 1.5.dp.toPx())
             val goalText = measurer.measure(goalLabel, labelStyle.copy(color = goalInk))
-            drawText(goalText, topLeft = Offset(plotW + 6.dp.toPx(), goalY - goalText.size.height / 2))
+            val goalGap = 3.dp.toPx()
+            val under = goalY + goalGap
+            val goalTop = if (under + goalText.size.height <= plotBottom - goalGap) {
+                under
+            } else {
+                goalY - goalGap - goalText.size.height
+            }
+            drawText(goalText, topLeft = Offset(0f, goalTop))
 
             // Hours under the axis; one that would touch the one before is left out (large text).
             var lastRight = Float.NEGATIVE_INFINITY
