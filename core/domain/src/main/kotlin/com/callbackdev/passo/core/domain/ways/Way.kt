@@ -88,7 +88,7 @@ class WayMap(
     val riverWidthMeters: Double = 0.0,
 )
 
-/** The four ways, shortest first, as the Ways page lists them; and the city walks. */
+/** The five ways, shortest first, as the Ways page lists them; and the city walks. */
 object Ways {
     private val everything: List<Way> by lazy { WayId.entries.map { Way(WayData.source(it)) } }
 

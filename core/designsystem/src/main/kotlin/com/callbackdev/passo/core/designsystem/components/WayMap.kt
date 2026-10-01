@@ -137,13 +137,6 @@ fun WayMapView(
                     val p = map.line.pointAt(it)
                     Offset(projection.x(p.longitude), projection.y(p.latitude))
                 }
-                // A city's walk fills its frame: no corner is free for the country, and the page
-                // names the city anyway.
-                val locator = if (detailed && way.kind == WayKind.WAY) {
-                    locatorBox(size, stops.first(), whole, map.locatorFrame)
-                } else {
-                    null
-                }
                 val labels = if (detailed) {
                     listOfNotNull(
                         names.first() to stops.first(),
@@ -152,6 +145,14 @@ fun WayMapView(
                     ).map { (text, at) -> Label(measurer.measure(text, labelStyle), at) }
                 } else {
                     emptyList()
+                }
+                // A city's walk fills its frame: no corner is free for the country, and the page
+                // names the city anyway. The ends' names are kept clear of it (a touched stop's
+                // is not, or the locator would jump at every touch).
+                val locator = if (detailed && way.kind == WayKind.WAY) {
+                    locatorBox(size, stops.first(), whole, map.locatorFrame, labels.take(2).map { labelRect(it, size) })
+                } else {
+                    null
                 }
                 onDrawBehind {
                     // A country's map is cut out of the sea; a city has no sea around it.
@@ -262,10 +263,11 @@ private fun WayLine.toPath(projection: WayProjection, upTo: Double?): Path = Pat
 }
 
 /**
- * The locator's box: in the corner the way's line leaves most free, away from the start (whose
- * name is drawn there), a third of the map's width at most.
+ * The locator's box: in the corner the way's line leaves most free, away from the start and
+ * clear of the ends' names ([names], where [labelRect] puts them), a third of the map's width at
+ * most.
  */
-private fun Density.locatorBox(size: Size, start: Offset, whole: Path, frame: GeoBox): Rect {
+private fun Density.locatorBox(size: Size, start: Offset, whole: Path, frame: GeoBox, names: List<Rect>): Rect {
     val width = (size.width * LOCATOR_SHARE).coerceAtMost(LOCATOR_MAX.toPx())
     val height = width * frame.aspect.toFloat()
     val margin = 8.dp.toPx()
@@ -278,7 +280,8 @@ private fun Density.locatorBox(size: Size, start: Offset, whole: Path, frame: Ge
     val bounds = whole.getBounds()
     return corners.minBy { corner ->
         val overlap = corner.intersect(bounds).let { if (it.isEmpty) 0f else it.width * it.height }
-        overlap + if (corner.inflate(LABEL_ROOM.toPx()).contains(start)) size.width * size.height else 0f
+        val covered = corner.inflate(LABEL_ROOM.toPx()).contains(start) || names.any { it.overlaps(corner) }
+        overlap + if (covered) size.width * size.height else 0f
     }
 }
 
@@ -303,20 +306,24 @@ private fun DrawScope.drawLocator(box: Rect, land: List<GeoPath>, line: GeoPath,
     drawRoundRect(colors.border, box.topLeft, box.size, radius, style = Stroke(1.dp.toPx()))
 }
 
-/** A name beside its point, on a small pill of the page's colour, kept inside the map. */
-private fun DrawScope.drawLabel(label: Label, colors: WayMapColors) {
+/** Where a name's pill goes: beside its point, on the right if it fits, kept inside the map. */
+private fun Density.labelRect(label: Label, size: Size): Rect {
     val gap = 8.dp.toPx()
-    val padX = 5.dp.toPx()
-    val padY = 2.dp.toPx()
     val text = label.text.size
-    val width = text.width + 2 * padX
-    val height = text.height + 2 * padY
+    val width = text.width + 2 * LABEL_PAD_X.toPx()
+    val height = text.height + 2 * LABEL_PAD_Y.toPx()
     val right = label.at.x + gap + width <= size.width - gap
     val x = (if (right) label.at.x + gap else label.at.x - gap - width)
         .coerceIn(gap, (size.width - width - gap).coerceAtLeast(gap))
     val y = (label.at.y - height / 2f).coerceIn(gap, (size.height - height - gap).coerceAtLeast(gap))
-    drawRoundRect(colors.halo.copy(alpha = PILL_ALPHA), Offset(x, y), Size(width, height), CornerRadius(height / 2))
-    drawText(label.text, colors.ink, Offset(x + padX, y + padY))
+    return Rect(Offset(x, y), Size(width, height))
+}
+
+/** A name beside its point, on a small pill of the page's colour. */
+private fun DrawScope.drawLabel(label: Label, colors: WayMapColors) {
+    val box = labelRect(label, size)
+    drawRoundRect(colors.halo.copy(alpha = PILL_ALPHA), box.topLeft, box.size, CornerRadius(box.height / 2))
+    drawText(label.text, colors.ink, Offset(box.left + LABEL_PAD_X.toPx(), box.top + LABEL_PAD_Y.toPx()))
 }
 
 private const val MIN_ASPECT = 0.62
@@ -343,4 +350,6 @@ private val HERE_HALO = 14.dp
 private val SMALL_HERE_RADIUS = 3.5.dp
 private val SMALL_HERE_HALO = 7.dp
 private val LABEL_ROOM = 40.dp
+private val LABEL_PAD_X = 5.dp
+private val LABEL_PAD_Y = 2.dp
 private val TOUCH_RADIUS = 28.dp

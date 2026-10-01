@@ -15,7 +15,7 @@ moves with the distance their steps measure.
 
 1. **A walk is a `WayId` of kind `WALK`**, with its city's key. The ways and the walks share the
    data script, the data shape (`WaySource`, `Way`, `WayMap`), the journey table, the map, the
-   stamps and the place strings; `Ways.all` stays the four ways and `Ways.walks` lists the walks.
+   stamps and the place strings; `Ways.all` stays the ways and `Ways.walks` lists the walks.
    A second walk in a city is data, not a feature: the page shows one row a walk until a city has
    two (not yet).
 2. **The routes are drawn once, with BRouter, and committed.** `tools/build_ways.py fetch` asks
@@ -24,7 +24,8 @@ moves with the distance their steps measure.
    committed file, so a later change in the map or the router never moves a walk silently. Each
    place is snapped to the route and must lie within 150 m of it, in order. Milan is 9.3 km with
    14 places, London 10.7 km with 17 (fewer than the twenty first planned: every place on the
-   route, and nothing added to fill a count).
+   route, and nothing added to fill a count). Rome, Paris and Madrid followed (2 Oct 2026): 9.6 km
+   with 15 places, 10.4 km with 14, 9.6 km with 14.
 3. **The city behind the line is OpenStreetMap too**: the water (the Thames, the Darsena) as
    areas, the canals (the Navigli) as lines drawn as wide as they are (`riverWidthMeters`, with
    `WayProjection.pixelsPerMeter`), the largest parks as areas, never a street grid. Parks are a
@@ -69,7 +70,9 @@ moves with the distance their steps measure.
 
 - No new permission, no new dependency, no new wake: an outing on a walk is an ordinary outing
   (ADR 0009). The APK grows by a few tens of kilobytes of encoded lines.
-- Rome, Paris and Madrid are content: a `Walk` in `tools/ways_content.py`, its route fetched and
-  committed, its places' sentences checked in two languages.
+- Rome, Paris and Madrid were content only, as foreseen: a `Walk` in `tools/ways_content.py`
+  each, its route fetched and committed, its places' sentences checked in two languages. The five
+  cities are the set (owner); a city's second walk would be the same, with the second level of
+  the page (decision 1) still to build.
 - To be checked on a device (owner): Milan in one outing and London over two, the voice through
   headphones and with the screen off, once on a treadmill.

@@ -804,11 +804,13 @@ while the screen is off. Name: «Cammini» / "Ways". Decisions in `docs/adr/0014
 **The four ways**, as mapped on OpenStreetMap (a way's length is its line's, which is what the
 point moves along). A spread of lengths, so that one is finished in weeks and one takes
 half a year, at an ordinary 5 km a day. The Francigena is its Italian part only (owner, 1 Oct
-2026: from Canterbury, 2,000 km, is too long for everyday walkers):
+2026: from Canterbury, 2,000 km, is too long for everyday walkers). The Camino Portugués joined
+them later as the fifth (below, «Phase 11, later»):
 
 | Way | From, to | About | At 5 km a day |
 |---|---|---|---|
 | Via degli Dei | Bologna, Florence | 123 km, 9 stages | 4 weeks |
+| Camino Portugués (the fifth, added later) | Porto, Santiago de Compostela | 245 km, 12 stages | 7 weeks |
 | Via di Francesco | La Verna, Assisi, Rome | 434 km, 22 stages | 3 months |
 | Camino de Santiago, the French Way | Saint-Jean-Pied-de-Port, Santiago de Compostela | 768 km, 34 stages | 5 months |
 | Via Francigena, the Italian part | Great St Bernard Pass, Rome | 1,020 km, 46 stages | 7 months |
@@ -895,12 +897,29 @@ days in place of the days'); the outing is a distance goal with the walk's place
 Asked for by the owner (2 Oct 2026), after the city walks; not scheduled yet. The set stops at
 **five ways and five cities**: more could come one day, but none is planned.
 
-- [ ] **The Camino Portugués from Porto** (about 240 km, the second most walked way to
+- [x] **The Camino Portugués from Porto** (about 240 km, the second most walked way to
   Santiago), as the fifth way: its OpenStreetMap relation and its stages in
   `tools/ways_content.py`, the locator of Portugal and Spain, its places' sentences checked as
   the others were. The data shape, the map and the credential need nothing new.
-- [ ] **Rome, Paris and Madrid**, one a release, each when its walk is drawn and its places'
+- [x] **Rome, Paris and Madrid**, one a release, each when its walk is drawn and its places'
   sentences checked, after Milan and London.
+  - *Deviation:* all three in the same unreleased version (owner, 2 Oct 2026: "implement the
+    phase"), each drawn and checked on its own; holding one back is data only (its line in
+    `WALKS`, its enum constant and its route).
+- [ ] On a device (owner): the Camino Portugués drawn in both themes; Rome, Paris and Madrid
+  each walked once, with the voice.
+
+Built as the content of the first two parts, with nothing new in the code: the fifth way is the
+Caminho Português's main relation (12786090), whose line the script takes from Porto's
+cathedral to Santiago, 245.3 km with 12 stages and Valença as a place; its locator is the
+Camino Francés's (Spain and Portugal on one peninsula, `IBERIA` in the script). Rome (9.6 km,
+15 places, the Colosseum to St Peter's), Paris (10.4 km, 14, Place des Vosges to the Eiffel
+Tower) and Madrid (9.6 km, 14, the Temple of Debod to the Puerta de Alcalá) are routed by
+BRouter and committed in `tools/walks/`; behind them the Tiber, the Seine, the Manzanares and the
+Retiro's pond, and the cities' largest parks. Every sentence was checked in two Wikipedias where
+they agree (English and Italian, French, Spanish or Portuguese), and rewritten where they do not
+(the Spanish Steps lose their count of steps: 135 in one, 136 in the other). The Ways page lists
+the cities in the owner's order: Milan, Rome, Paris, London, Madrid.
 
 ### Phase 12 — Your year on foot («Il tuo anno a piedi»)
 
@@ -1171,6 +1190,8 @@ Include:
 - **The Camino named as readers know it** (owner, 1 Oct 2026): «Cammino di Santiago» / «Camino de Santiago», with its variant, the French Way (the classic one and the most walked), in the route line. Its stored id stays `CAMINO_FRANCES`.
 
 - **Five ways and five cities, then stop** (owner, 2 Oct 2026): the Camino Portugués from Porto becomes the fifth way, in a later step of Phase 11; the cities stay Milan, London, Rome, Paris and Madrid. More could be added one day, but none is planned.
+- **The fifth way and the other cities, built** (Phase 11, later, 2 Oct 2026; ADRs 0014 and 0015 updated): data only, through the same script. The Camino Portugués is listed second, by its length (245 km), with the French Way's locator, now named for the peninsula. Rome, Paris and Madrid come together rather than one a release, since none of Phase 11 is released yet; each was drawn and checked on its own, and one can be held back by removing its data. France gains a locator frame (unused by the city maps, which have none, but every walk carries one). Where two sources disagree on a number, the sentence does without it. A city's walk starts and ends at a place a reader would name (the Colosseum and St Peter's, Place des Vosges and the Eiffel Tower, the Temple of Debod and the Puerta de Alcalá); Rome's ends where the Francigena and the Via di Francesco end, under its own key, since a walk's place and a way's stage are named differently.
+- **The locator keeps clear of the ends' names** (Phase 11, later, 2 Oct 2026): on the Camino Portugués, a line running north up the middle of its map, every corner was equally free and the locator took the first, over Santiago's name. `WayMapView` now places a name's pill by one rule (`labelRect`) and the locator avoids the start's and the end's pills as it avoids the line; a touched stop's name is left out, or the locator would jump at every touch. The other four ways' maps are unchanged.
 
 ### Open
 

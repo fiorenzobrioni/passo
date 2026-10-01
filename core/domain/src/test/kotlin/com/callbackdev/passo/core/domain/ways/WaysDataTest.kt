@@ -8,15 +8,30 @@ import kotlin.math.abs
 /** The generated data (`tools/build_ways.py`) decodes, and holds what the screens rely on. */
 class WaysDataTest {
     @Test
-    fun `the four ways, shortest first, and the city walks apart`() {
+    fun `the five ways, shortest first, and the city walks apart`() {
         assertThat(Ways.all.map { it.id })
-            .containsExactly(WayId.VIA_DEGLI_DEI, WayId.VIA_DI_FRANCESCO, WayId.CAMINO_FRANCES, WayId.VIA_FRANCIGENA)
+            .containsExactly(
+                WayId.VIA_DEGLI_DEI,
+                WayId.CAMINO_PORTUGUES,
+                WayId.VIA_DI_FRANCESCO,
+                WayId.CAMINO_FRANCES,
+                WayId.VIA_FRANCIGENA,
+            )
             .inOrder()
         assertThat(Ways.all.map { it.lengthMeters }).isInOrder()
         assertThat(Ways.walks.map { it.id })
-            .containsExactly(WayId.MILAN_DUOMO_NAVIGLI, WayId.LONDON_PALACE_TOWER)
+            .containsExactly(
+                WayId.MILAN_DUOMO_NAVIGLI,
+                WayId.ROME_COLOSSEUM_VATICAN,
+                WayId.PARIS_VOSGES_EIFFEL,
+                WayId.LONDON_PALACE_TOWER,
+                WayId.MADRID_DEBOD_RETIRO,
+            )
             .inOrder()
-        assertThat(Ways.walks.map { it.id.city }).containsExactly("milan", "london").inOrder()
+        // The owner's five, and no more planned (PLANNING.md §11 Phase 11, later).
+        assertThat(Ways.walks.map { it.id.city })
+            .containsExactly("milan", "rome", "paris", "london", "madrid")
+            .inOrder()
     }
 
     @Test
@@ -34,6 +49,7 @@ class WaysDataTest {
     fun `lengths as mapped`() {
         fun km(id: WayId) = Ways.of(id).lengthMeters / 1000
         assertThat(km(WayId.VIA_DEGLI_DEI)).isIn(115..130)
+        assertThat(km(WayId.CAMINO_PORTUGUES)).isIn(230..260)
         assertThat(km(WayId.VIA_DI_FRANCESCO)).isIn(400..560)
         assertThat(km(WayId.CAMINO_FRANCES)).isIn(740..800)
         assertThat(km(WayId.VIA_FRANCIGENA)).isIn(950..1_050)
@@ -88,5 +104,13 @@ class WaysDataTest {
         val way = Ways.of(WayId.VIA_FRANCIGENA)
         assertThat(way.stops.first().key).isEqualTo("gran_san_bernardo")
         assertThat(way.stops.last().key).isEqualTo("roma_san_pietro")
+    }
+
+    @Test
+    fun `the Camino Portugués runs from Porto, and ends where the French Way does`() {
+        val way = Ways.of(WayId.CAMINO_PORTUGUES)
+        assertThat(way.stops.first().key).isEqualTo("porto")
+        assertThat(way.stops.last().key).isEqualTo(Ways.of(WayId.CAMINO_FRANCES).stops.last().key)
+        assertThat(way.map.locatorFrame).isEqualTo(Ways.of(WayId.CAMINO_FRANCES).map.locatorFrame)
     }
 }

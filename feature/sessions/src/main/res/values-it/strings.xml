@@ -83,5 +83,5 @@
     <string name="editor_voice_change">Cambia voce</string>
     <!-- The door to the city walks, on the Ways page (Phase 11). -->
     <string name="sessions_cities_title">Passeggia in una città</string>
-    <string name="sessions_cities_body">Milano o Londra, da dove sei: ogni luogo ti viene detto quando i tuoi passi lo raggiungono.</string>
+    <string name="sessions_cities_body">Milano, Roma, Parigi, Londra o Madrid, da dove sei: ogni luogo ti viene detto quando i tuoi passi lo raggiungono.</string>
 </resources>

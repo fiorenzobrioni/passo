@@ -9,29 +9,40 @@ import com.callbackdev.passo.core.model.WayId
 @StringRes
 fun wayNameRes(id: WayId): Int = when (id) {
     WayId.VIA_DEGLI_DEI -> R.string.way_name_via_degli_dei
+    WayId.CAMINO_PORTUGUES -> R.string.way_name_camino_portugues
     WayId.VIA_DI_FRANCESCO -> R.string.way_name_via_di_francesco
     WayId.CAMINO_FRANCES -> R.string.way_name_camino_frances
     WayId.VIA_FRANCIGENA -> R.string.way_name_via_francigena
     WayId.MILAN_DUOMO_NAVIGLI -> R.string.way_name_milan_duomo_navigli
+    WayId.ROME_COLOSSEUM_VATICAN -> R.string.way_name_rome_colosseum_vatican
+    WayId.PARIS_VOSGES_EIFFEL -> R.string.way_name_paris_vosges_eiffel
     WayId.LONDON_PALACE_TOWER -> R.string.way_name_london_palace_tower
+    WayId.MADRID_DEBOD_RETIRO -> R.string.way_name_madrid_debod_retiro
 }
 
 /** Where a way runs, in one line. */
 @StringRes
 fun wayRouteRes(id: WayId): Int = when (id) {
     WayId.VIA_DEGLI_DEI -> R.string.way_route_via_degli_dei
+    WayId.CAMINO_PORTUGUES -> R.string.way_route_camino_portugues
     WayId.VIA_DI_FRANCESCO -> R.string.way_route_via_di_francesco
     WayId.CAMINO_FRANCES -> R.string.way_route_camino_frances
     WayId.VIA_FRANCIGENA -> R.string.way_route_via_francigena
     WayId.MILAN_DUOMO_NAVIGLI -> R.string.way_route_milan_duomo_navigli
+    WayId.ROME_COLOSSEUM_VATICAN -> R.string.way_route_rome_colosseum_vatican
+    WayId.PARIS_VOSGES_EIFFEL -> R.string.way_route_paris_vosges_eiffel
     WayId.LONDON_PALACE_TOWER -> R.string.way_route_london_palace_tower
+    WayId.MADRID_DEBOD_RETIRO -> R.string.way_route_madrid_debod_retiro
 }
 
 /** A walk's outing, as History and Today name it; null for a way, which is not an outing. */
 @StringRes
 fun walkOutingRes(id: WayId): Int? = when (id) {
     WayId.MILAN_DUOMO_NAVIGLI -> R.string.way_outing_milan_duomo_navigli
+    WayId.ROME_COLOSSEUM_VATICAN -> R.string.way_outing_rome_colosseum_vatican
+    WayId.PARIS_VOSGES_EIFFEL -> R.string.way_outing_paris_vosges_eiffel
     WayId.LONDON_PALACE_TOWER -> R.string.way_outing_london_palace_tower
+    WayId.MADRID_DEBOD_RETIRO -> R.string.way_outing_madrid_debod_retiro
     else -> null
 }
 
@@ -47,12 +58,14 @@ fun placeNameRes(key: String): Int = when (key) {
     "astorga" -> R.string.way_place_astorga
     "aulla" -> R.string.way_place_aulla
     "badolo" -> R.string.way_place_badolo
+    "barcelos" -> R.string.way_place_barcelos
     "belorado" -> R.string.way_place_belorado
     "berceto" -> R.string.way_place_berceto
     "bivigliano" -> R.string.way_place_bivigliano
     "bologna" -> R.string.way_place_bologna
     "bolsena" -> R.string.way_place_bolsena
     "burgos" -> R.string.way_place_burgos
+    "caldas_de_reis" -> R.string.way_place_caldas_de_reis
     "camaiore" -> R.string.way_place_camaiore
     "campagnano" -> R.string.way_place_campagnano
     "carrion" -> R.string.way_place_carrion
@@ -101,6 +114,20 @@ fun placeNameRes(key: String): Int = when (key) {
     "los_arcos" -> R.string.way_place_los_arcos
     "lucca" -> R.string.way_place_lucca
     "madonna_dei_fornelli" -> R.string.way_place_madonna_dei_fornelli
+    "madrid_almudena" -> R.string.way_place_madrid_almudena
+    "madrid_angel_caido" -> R.string.way_place_madrid_angel_caido
+    "madrid_cibeles" -> R.string.way_place_madrid_cibeles
+    "madrid_debod" -> R.string.way_place_madrid_debod
+    "madrid_metropolis" -> R.string.way_place_madrid_metropolis
+    "madrid_palacio_de_cristal" -> R.string.way_place_madrid_palacio_de_cristal
+    "madrid_palacio_real" -> R.string.way_place_madrid_palacio_real
+    "madrid_plaza_de_espana" -> R.string.way_place_madrid_plaza_de_espana
+    "madrid_plaza_mayor" -> R.string.way_place_madrid_plaza_mayor
+    "madrid_prado" -> R.string.way_place_madrid_prado
+    "madrid_puerta_de_alcala" -> R.string.way_place_madrid_puerta_de_alcala
+    "madrid_puerta_del_sol" -> R.string.way_place_madrid_puerta_del_sol
+    "madrid_reina_sofia" -> R.string.way_place_madrid_reina_sofia
+    "madrid_retiro_pond" -> R.string.way_place_madrid_retiro_pond
     "mansilla" -> R.string.way_place_mansilla
     "massa" -> R.string.way_place_massa
     "medesano" -> R.string.way_place_medesano
@@ -128,9 +155,25 @@ fun placeNameRes(key: String): Int = when (key) {
     "najera" -> R.string.way_place_najera
     "o_cebreiro" -> R.string.way_place_o_cebreiro
     "o_pedrouzo" -> R.string.way_place_o_pedrouzo
+    "o_porrino" -> R.string.way_place_o_porrino
     "orio_litta" -> R.string.way_place_orio_litta
+    "padron" -> R.string.way_place_padron
     "palas_de_rei" -> R.string.way_place_palas_de_rei
     "pamplona" -> R.string.way_place_pamplona
+    "paris_arc_de_triomphe" -> R.string.way_place_paris_arc_de_triomphe
+    "paris_champs_elysees" -> R.string.way_place_paris_champs_elysees
+    "paris_concorde" -> R.string.way_place_paris_concorde
+    "paris_eiffel" -> R.string.way_place_paris_eiffel
+    "paris_grand_palais" -> R.string.way_place_paris_grand_palais
+    "paris_hotel_de_ville" -> R.string.way_place_paris_hotel_de_ville
+    "paris_louvre" -> R.string.way_place_paris_louvre
+    "paris_notre_dame" -> R.string.way_place_paris_notre_dame
+    "paris_pont_des_arts" -> R.string.way_place_paris_pont_des_arts
+    "paris_pont_neuf" -> R.string.way_place_paris_pont_neuf
+    "paris_sainte_chapelle" -> R.string.way_place_paris_sainte_chapelle
+    "paris_trocadero" -> R.string.way_place_paris_trocadero
+    "paris_tuileries" -> R.string.way_place_paris_tuileries
+    "paris_vosges" -> R.string.way_place_paris_vosges
     "passo_della_cisa" -> R.string.way_place_passo_della_cisa
     "passo_della_futa" -> R.string.way_place_passo_della_futa
     "pavia" -> R.string.way_place_pavia
@@ -143,16 +186,36 @@ fun placeNameRes(key: String): Int = when (key) {
     "ponferrada" -> R.string.way_place_ponferrada
     "pont_saint_martin" -> R.string.way_place_pont_saint_martin
     "ponte_d_arbia" -> R.string.way_place_ponte_d_arbia
+    "ponte_de_lima" -> R.string.way_place_ponte_de_lima
+    "pontevedra" -> R.string.way_place_pontevedra
     "ponticelli" -> R.string.way_place_ponticelli
     "pontremoli" -> R.string.way_place_pontremoli
+    "porto" -> R.string.way_place_porto
     "portomarin" -> R.string.way_place_portomarin
     "puente_la_reina" -> R.string.way_place_puente_la_reina
     "rabanal" -> R.string.way_place_rabanal
     "radicofani" -> R.string.way_place_radicofani
+    "redondela" -> R.string.way_place_redondela
     "rieti" -> R.string.way_place_rieti
     "robbio" -> R.string.way_place_robbio
     "roma_san_pietro" -> R.string.way_place_roma_san_pietro
+    "rome_ara_pacis" -> R.string.way_place_rome_ara_pacis
+    "rome_arch_constantine" -> R.string.way_place_rome_arch_constantine
+    "rome_campidoglio" -> R.string.way_place_rome_campidoglio
+    "rome_campo_de_fiori" -> R.string.way_place_rome_campo_de_fiori
+    "rome_castel_sant_angelo" -> R.string.way_place_rome_castel_sant_angelo
+    "rome_circus_maximus" -> R.string.way_place_rome_circus_maximus
+    "rome_colosseum" -> R.string.way_place_rome_colosseum
+    "rome_mouth_of_truth" -> R.string.way_place_rome_mouth_of_truth
+    "rome_navona" -> R.string.way_place_rome_navona
+    "rome_pantheon" -> R.string.way_place_rome_pantheon
+    "rome_piazza_del_popolo" -> R.string.way_place_rome_piazza_del_popolo
+    "rome_spanish_steps" -> R.string.way_place_rome_spanish_steps
+    "rome_st_peters" -> R.string.way_place_rome_st_peters
+    "rome_trevi" -> R.string.way_place_rome_trevi
+    "rome_vittoriano" -> R.string.way_place_rome_vittoriano
     "roncesvalles" -> R.string.way_place_roncesvalles
+    "rubiaes" -> R.string.way_place_rubiaes
     "saint_jean" -> R.string.way_place_saint_jean
     "san_gimignano" -> R.string.way_place_san_gimignano
     "san_juan_de_ortega" -> R.string.way_place_san_juan_de_ortega
@@ -174,10 +237,13 @@ fun placeNameRes(key: String): Int = when (key) {
     "terradillos" -> R.string.way_place_terradillos
     "trevi" -> R.string.way_place_trevi
     "triacastela" -> R.string.way_place_triacastela
+    "tui" -> R.string.way_place_tui
+    "valenca" -> R.string.way_place_valenca
     "valfabbrica" -> R.string.way_place_valfabbrica
     "vercelli" -> R.string.way_place_vercelli
     "verres" -> R.string.way_place_verres
     "vetralla" -> R.string.way_place_vetralla
+    "vilarinho" -> R.string.way_place_vilarinho
     "villafranca" -> R.string.way_place_villafranca
     "viterbo" -> R.string.way_place_viterbo
     "viverone" -> R.string.way_place_viverone
@@ -191,9 +257,11 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "aosta" -> R.string.way_note_aosta
     "assisi" -> R.string.way_note_assisi
     "astorga" -> R.string.way_note_astorga
+    "barcelos" -> R.string.way_note_barcelos
     "bologna" -> R.string.way_note_bologna
     "bolsena" -> R.string.way_note_bolsena
     "burgos" -> R.string.way_note_burgos
+    "caldas_de_reis" -> R.string.way_note_caldas_de_reis
     "cruz_de_ferro" -> R.string.way_note_cruz_de_ferro
     "fiesole" -> R.string.way_note_fiesole
     "firenze" -> R.string.way_note_firenze
@@ -221,6 +289,20 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "london_westminster_bridge" -> R.string.way_note_london_westminster_bridge
     "lucca" -> R.string.way_note_lucca
     "madonna_dei_fornelli" -> R.string.way_note_madonna_dei_fornelli
+    "madrid_almudena" -> R.string.way_note_madrid_almudena
+    "madrid_angel_caido" -> R.string.way_note_madrid_angel_caido
+    "madrid_cibeles" -> R.string.way_note_madrid_cibeles
+    "madrid_debod" -> R.string.way_note_madrid_debod
+    "madrid_metropolis" -> R.string.way_note_madrid_metropolis
+    "madrid_palacio_de_cristal" -> R.string.way_note_madrid_palacio_de_cristal
+    "madrid_palacio_real" -> R.string.way_note_madrid_palacio_real
+    "madrid_plaza_de_espana" -> R.string.way_note_madrid_plaza_de_espana
+    "madrid_plaza_mayor" -> R.string.way_note_madrid_plaza_mayor
+    "madrid_prado" -> R.string.way_note_madrid_prado
+    "madrid_puerta_de_alcala" -> R.string.way_note_madrid_puerta_de_alcala
+    "madrid_puerta_del_sol" -> R.string.way_note_madrid_puerta_del_sol
+    "madrid_reina_sofia" -> R.string.way_note_madrid_reina_sofia
+    "madrid_retiro_pond" -> R.string.way_note_madrid_retiro_pond
     "milan_arco_della_pace" -> R.string.way_note_milan_arco_della_pace
     "milan_brera" -> R.string.way_note_milan_brera
     "milan_castello" -> R.string.way_note_milan_castello
@@ -237,17 +319,51 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "monteriggioni" -> R.string.way_note_monteriggioni
     "o_cebreiro" -> R.string.way_note_o_cebreiro
     "orio_litta" -> R.string.way_note_orio_litta
+    "padron" -> R.string.way_note_padron
     "pamplona" -> R.string.way_note_pamplona
+    "paris_arc_de_triomphe" -> R.string.way_note_paris_arc_de_triomphe
+    "paris_champs_elysees" -> R.string.way_note_paris_champs_elysees
+    "paris_concorde" -> R.string.way_note_paris_concorde
+    "paris_eiffel" -> R.string.way_note_paris_eiffel
+    "paris_grand_palais" -> R.string.way_note_paris_grand_palais
+    "paris_hotel_de_ville" -> R.string.way_note_paris_hotel_de_ville
+    "paris_louvre" -> R.string.way_note_paris_louvre
+    "paris_notre_dame" -> R.string.way_note_paris_notre_dame
+    "paris_pont_des_arts" -> R.string.way_note_paris_pont_des_arts
+    "paris_pont_neuf" -> R.string.way_note_paris_pont_neuf
+    "paris_sainte_chapelle" -> R.string.way_note_paris_sainte_chapelle
+    "paris_trocadero" -> R.string.way_note_paris_trocadero
+    "paris_tuileries" -> R.string.way_note_paris_tuileries
+    "paris_vosges" -> R.string.way_note_paris_vosges
     "passo_della_cisa" -> R.string.way_note_passo_della_cisa
     "passo_della_futa" -> R.string.way_note_passo_della_futa
     "pavia" -> R.string.way_note_pavia
     "piediluco" -> R.string.way_note_piediluco
     "poggio_bustone" -> R.string.way_note_poggio_bustone
     "ponferrada" -> R.string.way_note_ponferrada
+    "ponte_de_lima" -> R.string.way_note_ponte_de_lima
+    "pontevedra" -> R.string.way_note_pontevedra
+    "porto" -> R.string.way_note_porto
     "puente_la_reina" -> R.string.way_note_puente_la_reina
     "radicofani" -> R.string.way_note_radicofani
+    "redondela" -> R.string.way_note_redondela
     "rieti" -> R.string.way_note_rieti
     "roma_san_pietro" -> R.string.way_note_roma_san_pietro
+    "rome_ara_pacis" -> R.string.way_note_rome_ara_pacis
+    "rome_arch_constantine" -> R.string.way_note_rome_arch_constantine
+    "rome_campidoglio" -> R.string.way_note_rome_campidoglio
+    "rome_campo_de_fiori" -> R.string.way_note_rome_campo_de_fiori
+    "rome_castel_sant_angelo" -> R.string.way_note_rome_castel_sant_angelo
+    "rome_circus_maximus" -> R.string.way_note_rome_circus_maximus
+    "rome_colosseum" -> R.string.way_note_rome_colosseum
+    "rome_mouth_of_truth" -> R.string.way_note_rome_mouth_of_truth
+    "rome_navona" -> R.string.way_note_rome_navona
+    "rome_pantheon" -> R.string.way_note_rome_pantheon
+    "rome_piazza_del_popolo" -> R.string.way_note_rome_piazza_del_popolo
+    "rome_spanish_steps" -> R.string.way_note_rome_spanish_steps
+    "rome_st_peters" -> R.string.way_note_rome_st_peters
+    "rome_trevi" -> R.string.way_note_rome_trevi
+    "rome_vittoriano" -> R.string.way_note_rome_vittoriano
     "roncesvalles" -> R.string.way_note_roncesvalles
     "saint_jean" -> R.string.way_note_saint_jean
     "san_gimignano" -> R.string.way_note_san_gimignano
@@ -258,6 +374,8 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "sarria" -> R.string.way_note_sarria
     "siena" -> R.string.way_note_siena
     "spoleto" -> R.string.way_note_spoleto
+    "tui" -> R.string.way_note_tui
+    "valenca" -> R.string.way_note_valenca
     "vercelli" -> R.string.way_note_vercelli
     "viterbo" -> R.string.way_note_viterbo
     else -> null
