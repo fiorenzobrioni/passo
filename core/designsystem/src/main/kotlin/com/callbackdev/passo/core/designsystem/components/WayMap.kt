@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -80,6 +81,8 @@ fun WayMapView(
         water = PassoTheme.colors.water,
         land = scheme.surfaceContainerHigh,
         park = PassoTheme.colors.park,
+        // A street is a lighter line on the land: white on the light grey, a step up in the dark.
+        street = if (scheme.surface.luminance() > 0.5f) scheme.surfaceContainerLowest else scheme.surfaceBright,
         river = lerp(PassoTheme.colors.water, scheme.onSurfaceVariant, RIVER_INK),
         border = scheme.outline.copy(alpha = BORDER_ALPHA),
         way = scheme.onSurfaceVariant.copy(alpha = WAY_ALPHA),
@@ -126,6 +129,15 @@ fun WayMapView(
                     .coerceAtLeast(RIVER_WIDTH.toPx())
                 val riverInk = if (map.riverWidthMeters > 0) colors.water else colors.river
                 val rivers = map.rivers.map { it.toPath(projection, close = false) }
+                // Streets only on the walk's own page: on a thumbnail they would be noise.
+                val mainStreets = if (detailed) {
+                    map.mainStreets.map {
+                        it.toPath(projection, close = false)
+                    }
+                } else {
+                    emptyList()
+                }
+                val streets = if (detailed) map.streets.map { it.toPath(projection, close = false) } else emptyList()
                 val borders = map.borders.map { it.toPath(projection, close = false) }
                 val whole = map.line.toPath(projection, upTo = null)
                 val walked = walkedMeters?.let { map.line.toPath(projection, upTo = it) }
@@ -160,6 +172,10 @@ fun WayMapView(
                     land.forEach { drawPath(it, colors.land) }
                     parks.forEach { drawPath(it, colors.park) }
                     lakes.forEach { drawPath(it, colors.water) }
+                    // Over a river the streets are its bridges; a canal, drawn as a line, stays on
+                    // top of the streets along its banks.
+                    streets.forEach { drawPath(it, colors.street, style = line(STREET_WIDTH)) }
+                    mainStreets.forEach { drawPath(it, colors.street, style = line(MAIN_STREET_WIDTH)) }
                     rivers.forEach { drawPath(it, riverInk, style = line(riverWidth)) }
                     val dash = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx()))
                     borders.forEach { drawPath(it, colors.border, style = Stroke(1.dp.toPx(), pathEffect = dash)) }
@@ -219,6 +235,7 @@ private class WayMapColors(
     val water: Color,
     val land: Color,
     val park: Color,
+    val street: Color,
     val river: Color,
     val border: Color,
     val way: Color,
@@ -350,6 +367,8 @@ private val HERE_HALO = 14.dp
 private val SMALL_HERE_RADIUS = 3.5.dp
 private val SMALL_HERE_HALO = 7.dp
 private val LABEL_ROOM = 40.dp
+private val STREET_WIDTH = 1.5.dp
+private val MAIN_STREET_WIDTH = 2.5.dp
 private val LABEL_PAD_X = 5.dp
 private val LABEL_PAD_Y = 2.dp
 private val TOUCH_RADIUS = 28.dp

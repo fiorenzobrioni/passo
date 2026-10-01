@@ -401,7 +401,8 @@ class Walk:
     places, in order, and saved in tools/walks/ by the script's `fetch`: the places are the
     route's waypoints, so each lies on the line. Behind it, the city's water and largest parks,
     from OpenStreetMap objects named here by id ("relation/28934"); canals are lines drawn
-    [canal_width] metres wide.
+    [canal_width] metres wide. With [streets], the map also has the city's main streets, faint
+    under the route, so the area can be recognised (downloaded by tiles in `fetch`).
     """
 
     id: str
@@ -418,6 +419,7 @@ class Walk:
     canals: list = field(default_factory=list)
     parks: list = field(default_factory=list)
     canal_width: float = 20.0
+    streets: bool = False
 
 
 MILAN = Walk(
@@ -433,6 +435,7 @@ MILAN = Walk(
     water=["way/345030396"],
     canals=["relation/3340142", "relation/3350738"],
     parks=["relation/10172760", "way/5110320", "way/260829251"],
+    streets=True,
     stops=[
         Stop("milan_duomo", "The Duomo", "Il Duomo", 45.4640, 9.1905,
              note_en="Milan began its cathedral in 1386, and building went on for nearly six centuries.",

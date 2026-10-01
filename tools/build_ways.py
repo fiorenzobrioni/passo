@@ -52,6 +52,14 @@ OSM = "https://api.openstreetmap.org/api/0.6/{}/{}/full"
 # BRouter's walking profile: footways, parks and pedestrian streets first.
 BROUTER = "https://brouter.de/brouter?lonlats={}&profile=hiking-mountain&alternativeidx=0&format=geojson"
 WALK_MAX_SNAP_METRES = 150  # a walk is routed through its places: one farther off is a mistake
+# A city's streets come from the OpenStreetMap API's map call, which answers a small box at a
+# time (50,000 nodes at most): the walk's ground is fetched in tiles of this size, in degrees.
+OSM_MAP = "https://api.openstreetmap.org/api/0.6/map?bbox={:.4f},{:.4f},{:.4f},{:.4f}"
+STREET_TILE = (0.007, 0.010)  # latitude, longitude
+# The streets drawn, in two weights: the arteries, and the streets that give a centre its shape.
+MAIN_STREETS = {"trunk", "primary", "secondary"}
+MINOR_STREETS = {"tertiary", "pedestrian"}
+MIN_STREET_METRES = 150
 NE = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/{}.geojson"
 NE_LAYERS = [
     "ne_10m_land",
@@ -101,6 +109,26 @@ def fetch():
         for ref in walk.water + walk.canals + walk.parks:
             kind, number = ref.split("/")
             download(OSM.format(kind, number), CACHE / f"osm-{kind}-{number}.xml")
+        if walk.streets:
+            for (south, west, north, east), name in street_tiles(walk):
+                download(OSM_MAP.format(west, south, east, north), CACHE / name)
+
+
+def street_tiles(walk):
+    """The walk's ground cut into tiles the map call accepts, with their cache names."""
+    _, ground, _ = frame_of(walk_line(walk))
+    south, west, north, east = ground
+    rows = math.ceil((north - south) / STREET_TILE[0])
+    columns = math.ceil((east - west) / STREET_TILE[1])
+    for row in range(rows):
+        for column in range(columns):
+            tile = (
+                south + row * STREET_TILE[0],
+                west + column * STREET_TILE[1],
+                min(north, south + (row + 1) * STREET_TILE[0]),
+                min(east, west + (column + 1) * STREET_TILE[1]),
+            )
+            yield tile, f"streets-{walk.id.lower()}-{row}-{column}.xml"
 
 
 def download(url, target):
@@ -706,13 +734,15 @@ def build_walk(walk):
     water = city_polygons(walk.water, ground, tolerance, local)
     canals = city_lines(walk.canals, ground, tolerance, local)
     parks = city_polygons(walk.parks, ground, tolerance, local)
+    main_streets, minor_streets = city_streets(walk, ground, tolerance, local) if walk.streets else ([], [])
     locator_box = LOCATORS[walk.country]
     locator_local = Local((locator_box[0] + locator_box[2]) / 2)
     locator_land = polygons("ne_50m_land", locator_box, LOCATOR_TOLERANCE_METRES, locator_local)
     locator_line = simplify(path, LOCATOR_TOLERANCE_METRES, locator_local)
     print(
         f"{walk.id}: {length / 1000:.2f} km, {len(path)} points -> {len(line)}, {len(stops)} places, "
-        f"water {sum(map(len, water))}, canals {sum(map(len, canals))}, parks {sum(map(len, parks))}",
+        f"water {sum(map(len, water))}, canals {sum(map(len, canals))}, parks {sum(map(len, parks))}, "
+        f"streets {sum(map(len, main_streets))} + {sum(map(len, minor_streets))}",
     )
     places, notes = {}, {}
     for stop, distance, _ in stops:
@@ -740,10 +770,83 @@ def build_walk(walk):
         locatorLand = {kotlin_paths(locator_land, 8)},
         locatorLine = {kotlin_string(encode(locator_line, (1e5, 1e5)), 8, len('locatorLine = '))},
         parks = {kotlin_paths(parks, 8)},
-        riverWidthMeters = {walk.canal_width},
+        riverWidthMeters = {walk.canal_width},{streets_block(main_streets, minor_streets)}
     )
 """
     return block, places, notes
+
+
+def city_streets(walk, ground, tolerance, local):
+    """The walk's main and minor streets, from its tiles: each OpenStreetMap way once, joined
+    end to end where they meet, cut to the ground and simplified like the rest of the map."""
+    nodes, ways = {}, {}
+    for _, name in street_tiles(walk):
+        root = ElementTree.parse(CACHE / name).getroot()
+        for n in root.iter("node"):
+            nodes[n.get("id")] = (float(n.get("lat")), float(n.get("lon")))
+        for w in root.iter("way"):
+            tags = {t.get("k"): t.get("v") for t in w.iter("tag")}
+            kind = tags.get("highway")
+            # A pedestrian area (a square) is a shape, not a street.
+            if kind not in MAIN_STREETS | MINOR_STREETS or tags.get("area") == "yes":
+                continue
+            ways[w.get("id")] = (kind, [nd.get("ref") for nd in w.iter("nd")])
+    main, minor = [], []
+    for kind, refs in ways.values():
+        points = [nodes[r] for r in refs if r in nodes]
+        if len(points) >= 2:
+            (main if kind in MAIN_STREETS else minor).append(points)
+    out = []
+    for lines in (main, minor):
+        pieces = []
+        for line in join_lines(lines):
+            for piece in clip_line(line, ground):
+                # A stray piece (a crossing, a bit of a square) reads as noise, not as a street.
+                if cumulative(piece)[-1] < MIN_STREET_METRES:
+                    continue
+                simple = simplify(piece, tolerance, local)
+                if len(simple) >= 2:
+                    pieces.append(simple)
+        out.append(pieces)
+    return out
+
+
+def join_lines(lines):
+    """Lines that share an end, joined into one: fewer, longer paths to encode and to draw."""
+    lines = [list(line) for line in lines]
+    by_end = {}
+    for i, line in enumerate(lines):
+        by_end.setdefault(line[0], set()).add(i)
+        by_end.setdefault(line[-1], set()).add(i)
+    alive = set(range(len(lines)))
+    out = []
+    while alive:
+        i = alive.pop()
+        line = lines[i]
+        for end in (-1, 0):
+            while True:
+                point = line[end]
+                others = [j for j in by_end.get(point, ()) if j in alive]
+                if not others:
+                    break
+                j = others[0]
+                alive.discard(j)
+                other = lines[j]
+                if end == -1:
+                    line = line + (other[1:] if other[0] == point else other[-2::-1])
+                else:
+                    line = (other[:-1] if other[-1] == point else other[:0:-1]) + line
+        out.append(line)
+    return out
+
+
+def streets_block(main, minor):
+    if not main and not minor:
+        return ""
+    return (
+        f"\n        mainStreets = {kotlin_paths(main, 8)},"
+        f"\n        streets = {kotlin_paths(minor, 8)},"
+    )
 
 
 def camel(constant):
