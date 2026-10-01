@@ -1,9 +1,10 @@
 # ADR 0013: Interval walks, and telling a change on time (Phase 13)
 
-- Status: **proposed**. The owner chooses the sensor policy (below) before any code is written.
+- Status: accepted (owner, 1 Oct 2026): option A, minutes in motion, the editor's warning on a
+  phone without a wake-up counter, brisk 100 as the fast pace's default
 - Date: 2026-10-01
-- Would amend: `docs/adr/0009-sessions.md` (decision 5) and PLANNING.md §9.7, for an interval
-  outing only
+- Amends, in the change that builds Phase 13: `docs/adr/0009-sessions.md` (decision 5) and
+  PLANNING.md §9.7, for an interval outing only
 
 ## Context
 
@@ -35,7 +36,7 @@ Two facts from the platform bound every option:
 
 ## The clock: minutes in motion
 
-Proposed: the interval's minutes are **minutes in motion**, the clock every outing already has
+The interval's minutes are **minutes in motion**, the clock every outing already has
 (the gaps between steps, at most 1.5 s each, ADR 0009 decision 2).
 
 - Faithful to what the protocol asks: three minutes of *fast walking*. On the wall clock, a
@@ -43,8 +44,8 @@ Proposed: the interval's minutes are **minutes in motion**, the clock every outi
 - A change can then only fall **while the reader is stepping**, which is exactly when the
   counter reports. The battery design below rests on this.
 - The alternative, the wall clock, is the literal timer. A change falling during a stop would be
-  told at the first step after it. It is the owner's call; it changes the screens' words, not
-  the cost.
+  told at the first step after it. Not chosen: it changes the screens' words, not the cost, and
+  it would let a stop eat a fast interval.
 
 ## Options
 
@@ -57,7 +58,7 @@ phone battery of about 17 Wh (61,000 J).
 | | How | Told late by | Wakes in 30 min | Energy, order of magnitude | Rules touched |
 |---|---|---|---|---|---|
 | Today's outing | wake-up counter, 30 s | up to 30 s, plus the counter's own delay | about 60 | 6 J | none |
-| **A. Adaptive latency** (proposed) | wake-up counter: 30 s, then 2 s in the 40 s before each change | about 2 s, plus the counter's own delay (documented maximum 10 s) | about 250 | 25 J, under 0.05% | §9.7 widened for interval outings |
+| **A. Adaptive latency** (chosen) | wake-up counter: 30 s, then 2 s in the 40 s before each change | about 2 s, plus the counter's own delay (documented maximum 10 s) | about 250 | 25 J, under 0.05% | §9.7 widened for interval outings |
 | B. A + step detector near a change | A, plus the wake-up step detector at zero latency in the 40 s before each change | under 2 s | processor awake about 400 s | 120 to 200 J, about 0.3% | §9.1 (step detector) and §9.7 |
 | C. Short wake lock and a timer | the processor held awake in the 45 s before each change, a coroutine fires the change | about 0 on the wall clock | awake about 450 s | 130 to 230 J, about 0.3% | §9.2 (first wake lock of Passo's own), §9.4 |
 | D. Fixed short latency | wake-up counter at 5 s for the whole outing | up to 5 s, plus the counter's own delay | about 360 | 36 J | §9.7 widened |
@@ -66,7 +67,7 @@ Rejected outright: an exact alarm (forbidden permission); an inexact alarm or Wo
 (minutes of slack, 15 minutes at least); keeping the screen on (far the most expensive); a wake
 lock for the whole outing (the processor awake 30 minutes for ten moments).
 
-### A, in detail (proposed)
+### A, in detail (chosen)
 
 - The outing counts with the wake-up counter at **30 s**, exactly as today.
 - At every report, the tracker knows the time in motion left before the next change. When it is
@@ -104,8 +105,8 @@ told on time, whatever the option.
 The usual counter never wakes the processor: with the screen off, a change would come when the
 phone next wakes for any reason, possibly minutes late. ADR 0009 already says so for its
 milestones. For intervals it defeats the purpose, so the editor says plainly that the changes
-come on time only with the screen on. Hiding the kind on such phones is the alternative (open,
-PLANNING.md §15). Which counter a phone has is in the diagnostics log at every service start.
+come on time only with the screen on. Hiding the kind on such phones was the alternative, not
+chosen: the reader who keeps the screen on, or walks on a treadmill, still has it. Which counter a phone has is in the diagnostics log at every service start.
 
 ## Measuring it
 
@@ -114,11 +115,12 @@ timestamps) and when it was told. A 30-minute interval outing on the owner's pho
 the real delay, without guessing, and `dumpsys batterystats` gives the wakes (§9.6). The numbers
 go to `docs/battery/` and decide between A and B.
 
-## If accepted
+## Consequences
 
 - ADR 0009 decision 5 and PLANNING.md §9.7: "30 s" becomes "30 s, and 2 s in the 40 s before a
   change of an interval outing"; VISION.md's battery success criterion and CLAUDE.md's
-  invariant ("never widen it") are amended in the same words, and nowhere else changes.
+  invariant ("never widen it") are amended in the same words, in the change that builds it
+  (until then they describe the app as it is), and nowhere else changes.
 - No new permission. The sensor, the service and the outing's lifecycle are the ones there are.
 
 ## Sources

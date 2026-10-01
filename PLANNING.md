@@ -800,16 +800,17 @@ while the screen is off. Name: «Cammini» / "Ways". The ADR is written at the p
 
 **The four ways** (lengths and stage counts are approximate here; the official stage tables
 decide them in the phase). A spread of lengths, so that one is finished in weeks and one takes
-a year, at an ordinary 5 km a day:
+half a year, at an ordinary 5 km a day. The Francigena is its Italian part only (owner, 1 Oct
+2026: from Canterbury, 2,000 km, is too long for everyday walkers):
 
 | Way | From, to | About | At 5 km a day |
 |---|---|---|---|
 | Via degli Dei | Bologna, Florence | 130 km, 6 stages | 4 weeks |
 | Via di Francesco | La Verna, Assisi, Rome | 500 km | 3 to 4 months |
 | Camino Francés | Saint-Jean-Pied-de-Port, Santiago de Compostela | 780 km, about 33 stages | 5 months |
-| Via Francigena | Canterbury, Rome | 2,000 km | a year and more |
+| Via Francigena, the Italian part | Great St Bernard Pass, Rome | 1,000 km, about 45 stages | 6 to 7 months |
 
-- [ ] The ways' data, written by a script (`tools/build_ways.py`, re-run, never hand-edited, like the launcher icon): for each way its stages (a key, the name's resource, latitude and longitude, the official distance from the start), the line drawn, simplified to a few hundred points, and the outline of the countries behind it (Natural Earth, public domain, simplified). Output: Kotlin in `:core:domain/ways`. The source of the line is an open question (§15).
+- [ ] The ways' data, written by a script (`tools/build_ways.py`, re-run, never hand-edited, like the launcher icon): for each way its stages (a key, the name's resource, latitude and longitude, the official distance from the start), the line drawn, simplified to a few hundred points, and the outline of the countries behind it (Natural Earth, public domain, simplified). Output: Kotlin in `:core:domain/ways`. The line is the way's OpenStreetMap relation, simplified (owner, §15): the script reads an export saved by hand into `tools/`, never the network at build time; the data is under ODbL, credited in About and in the guide («© OpenStreetMap contributors»), and the derived file says so in its header.
 - [ ] Domain (`:core:domain/ways`, pure, tested): `WayProgress` (from the day totals since the start: the distance walked, the stage reached, the place between two stages, the day each stage was reached, the day it was finished), `WayProjection` (equirectangular around the way's middle latitude, fitted to a box), `WayForecast` (the arrival at the reader's average of the last 28 days, said as an estimate, only with 7 or more days walked), `WayAnnouncement` (the stage just reached, told once).
 - [ ] The distance is the days' own: each finished day's frozen `distanceMeters`, today's live one. A way never keeps a total of its own, so it cannot disagree with History; "Apply profile to past data" and an import move it, on read, and the guide says so.
 - [ ] Storage: a `way_journey` table (id, way key, start day, state `ACTIVE` / `FINISHED` / `LEFT`, finish day, last stage told), by an auto-migration to the next schema version, with its migration test. The stamps' days are computed, not stored. The backup carries the table (a new backup format version; an older file imports as before).
@@ -877,17 +878,17 @@ sets of 3 minutes of slow walking followed by 3 minutes of fast walking, five se
 outing. **In minutes** (owner's request), faithful to the protocol. The live part is the hard
 one: a change of interval must be felt on time with the phone in a pocket and the screen off,
 and Passo has no timer then. The analysis and the options are in
-`docs/adr/0013-interval-walks.md` (**proposed**: the owner decides the sensor policy before any
-code is written, since it amends ADR 0009 and §9.7).
+`docs/adr/0013-interval-walks.md` (accepted 1 Oct 2026: option A, adaptive latency; it amends
+ADR 0009 and §9.7 in the change that builds it).
 
 - [ ] The plan: a new goal kind, intervals: slow minutes and fast minutes (1 to 5, 3 by default), sets (3 to 10, 5 by default), the fast pace (brisk 100 by default, vigorous 130, running 140). It starts slow, as the protocol does. The goal is the end of the last set. The 25, 50 and 75% signals are off for this kind: the changes are the signals. A fourth preset, «Camminata giapponese» / "Japanese walking", 5 × (3 + 3).
-- [ ] The clock: the minutes are minutes in motion, as every outing's (ADR 0013, to be confirmed): a stop at a traffic light does not eat a fast interval.
+- [ ] The clock: the minutes are minutes in motion, as every outing's (ADR 0013): a stop at a traffic light does not eat a fast interval.
 - [ ] Domain (`:core:domain/sessions`): `IntervalSchedule` (where each change falls), the tracker's splits (each interval's steps, time in motion and time at its pace), the change found inside a batch from the steps' own timestamps; several changes in one batch tell the latest only.
 - [ ] The signals: two new vibrations, "faster" and "slower", unlike the five there are now (1, 2, 3 short; the goal's long one; the stillness's two long ones), chosen with the owner in the editor's "Try them". The voice, if the outing speaks: «Veloce, 3 minuti», «Lento», «Ultima serie veloce», and at the goal how many fast intervals were at pace.
-- [ ] The sensor during an interval outing: the policy ADR 0013 settles. With the screen on, the ticker the screen already allows (§9.4) shows the countdown to the next change.
+- [ ] The sensor during an interval outing (ADR 0013, option A): the wake-up counter at 30 s, and at 2 s from 40 s of motion before each change; a change told at the report that reaches it, or at the one whose predicted change falls before the next report; back to 30 s after. ADR 0009, §9.7, VISION.md's battery criterion and CLAUDE.md's invariant amended in the same change. With the screen on, the ticker the screen already allows (§9.4) shows the countdown to the next change.
 - [ ] The notification: on Android 16 the `ProgressStyle` bar in segments, slow and fast in two colours, with a point at each change, and the title saying the interval («Veloce · 1:40»); below, the expanded text says the same.
 - [ ] The result: each fast interval's cadence against its pace, and the sentence («4 fast intervals of 5 at pace»); the card, History and Today's list show it. Storage: a `session_interval` table (outing, index, slow or fast, steps, time in motion, time at pace), by an auto-migration; the backup carries it.
-- [ ] A phone without a wake-up step counter: the editor says that the changes come on time only with the screen on (ADR 0013).
+- [ ] A phone without a wake-up step counter: the kind stays, and the editor says that the changes come on time only with the screen on (ADR 0013).
 - [ ] The diagnostics log: one row per change told, with how late it was against the step that crossed it, so the field test measures the delay instead of guessing it.
 - [ ] Strings in English and Italian; tests (`IntervalScheduleTest`, the tracker's, the editor's UI); CHANGELOG; the guide's outings chapter.
 - [ ] On a device (owner): a 30-minute interval outing with the screen off: each change felt, its delay read from the log, the battery check of §9 (numbers in `docs/battery/`).
@@ -1091,15 +1092,15 @@ Include:
 - **The release page is the CHANGELOG section alone** (owner, 1 Oct 2026, after v1.0.0): `release.yml` no longer appends GitHub's generated list of pull requests, as Saldo's never did, so the three apps' release pages read the same. A tag without its CHANGELOG section now fails the release instead of publishing an empty page.
 
 - **Route maps with GPS stay out** (owner, 1 Oct 2026, after weighing it): recording an outing's route, drawing it and exporting it as GPX would need `ACCESS_FINE_LOCATION` in the manifest, even if off by default. That turns "Passo cannot" into "Passo promises not to", against principles 1 and 3, the non-goals and the build's own gate; the database is in Android's backup allowlist, so routes would travel there; GPS is the most expensive sensor, far beyond ADR 0009's exception; and OpenTracks already does it, offline and without `INTERNET`. The Ways (Phase 11) give the map without the location.
-- **After v1.0: three phases, in the owner's order** (owner, 1 Oct 2026): the Ways (Phase 11, four ways made well), Your year on foot (Phase 12, reachable by hand at any time, not only in December), the interval walk (Phase 13, in minutes, faithful to the protocol; its sensor policy in `docs/adr/0013-interval-walks.md`, proposed).
+- **After v1.0: three phases, in the owner's order** (owner, 1 Oct 2026): the Ways (Phase 11, four ways made well), Your year on foot (Phase 12, reachable by hand at any time, not only in December), the interval walk (Phase 13, in minutes, faithful to the protocol; its sensor policy in `docs/adr/0013-interval-walks.md`).
 - **The peak cadence and the weekly rhythm dropped as features** (owner, 1 Oct 2026: noise): the first is a number that needs a lesson before it means anything, against "one sentence before any number"; the second is a chart for the curious, opened once. The weekday and hour the reader walks most survive as one page of Your year, once a year, where they are a story and not a screen to keep.
+
+- **The Ways: OpenStreetMap lines, four ways, the Francigena's Italian part** (owner, 1 Oct 2026): each way's line is its OpenStreetMap relation, simplified, under ODbL (credited in About and the guide; the derived file published in the repo under ODbL, beside the GPL code), chosen over a schematic of stage towns because the true line is what makes the map worth opening. The four: Via degli Dei, Via di Francesco, Camino Francés, and the Via Francigena from the Great St Bernard Pass to Rome (about 1,000 km): from Canterbury, 2,000 km is too long for everyday walkers.
+- **The interval walk: ADR 0013 accepted** (owner, 1 Oct 2026): option A (the wake-up counter at 30 s, at 2 s in the 40 s of motion before each change; no wake lock, no timer), minutes in motion, a phone without a wake-up counter told in the editor rather than the kind hidden, the fast pace at brisk 100 by default. Option B stays the documented next step if the field test finds the counter's own delay too long.
 
 ### Open
 
-- **The Ways (Phase 11): the line's source.** (a) The stage towns and a few places between them, coordinates being facts, over Natural Earth's outlines (public domain): no licence to carry, a line that reads as a schematic at a short way's scale. (b) The ways' OpenStreetMap relations, simplified: the true line, under ODbL (attribution in About and the guide, the derived file published under ODbL in the repo, beside the GPL code). Recommended: (b) if the owner accepts the attribution, (a) otherwise.
-- **The Ways: which four.** Proposed: Via degli Dei, Via di Francesco, Camino Francés, Via Francigena from Canterbury. Alternatives: the Francigena's Italian part only (Great St Bernard Pass to Rome, about 1,000 km), the Cammino di San Benedetto (Norcia to Montecassino) for the middle one, the Kumano Kodo for one outside Europe.
 - **The Ways on a widget?** Not in Phase 11; a natural line for «In words» later.
 - **Your year: the Today card in December** (one card, once, closed by the reader), or Insights alone.
-- **The interval walk (ADR 0013, proposed):** the sensor policy (A, adaptive latency, proposed; B if the field test asks for it), the clock (minutes in motion, proposed, or the wall clock), a phone without a wake-up counter (say it in the editor, proposed, or hide the kind), the fast pace's default (brisk 100, proposed: the protocol's population is middle-aged and older, and the pace is a proxy for its "70% of peak aerobic capacity", which the editor says).
 
 - Should a 7-day mini chart be offered in the 4x2 widget as an alternative to today's hourly bars (widget configuration)? Now a natural option on «At a glance»'s settings screen, once Phase 5 has the week.
