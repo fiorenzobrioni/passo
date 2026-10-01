@@ -153,7 +153,7 @@ private fun MainPages(openWays: Boolean, onWaysOpened: () -> Unit) {
         entry<GuideKey> { GuideRoute(onBack = nav::goBack) }
         entry<CalibrationKey> { key -> CalibrationRoute(step = key.step, onDone = nav::goBack) }
         entry<SessionsKey> {
-            SessionsRoute(onBack = nav::goBack, onEdit = { open(PlanEditorKey(it)) })
+            SessionsRoute(onBack = nav::goBack, onEdit = { open(PlanEditorKey(it)) }, onOpenWays = { open(WaysKey) })
         }
         entry<PlanEditorKey> { key -> PlanEditorRoute(planId = key.planId, onDone = nav::goBack) }
         entry<WaysKey> { WaysRoute(onBack = nav::goBack, onOpenWay = { way, journey -> open(WayKey(way, journey)) }) }

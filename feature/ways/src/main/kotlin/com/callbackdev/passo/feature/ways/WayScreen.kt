@@ -1,5 +1,9 @@
 package com.callbackdev.passo.feature.ways
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -38,14 +42,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.callbackdev.passo.core.designsystem.components.GroupDivider
+import com.callbackdev.passo.core.designsystem.components.SessionCardActions
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
 import com.callbackdev.passo.core.designsystem.components.WayMapView
 import com.callbackdev.passo.core.designsystem.components.WayStamp
@@ -80,10 +88,22 @@ import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.model.WayJourneyState
 import java.time.LocalDate
 
-/** One way's page, with its state from [WaysViewModel]. */
+/** One way's page, or one city walk's, with its state from [WaysViewModel]. */
 @Composable
 fun WayRoute(way: WayId, journeyId: Long?, onBack: () -> Unit, viewModel: WaysViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    LifecycleResumeEffect(Unit) {
+        viewModel.refreshReadiness()
+        onPauseOrDispose {}
+    }
+    // Asked the first time a walk starts without it: its places are told as notifications'
+    // vibrations. The walk starts either way.
+    var pendingAgain by rememberSaveable { mutableStateOf<Boolean?>(null) }
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        pendingAgain?.let { viewModel.startWalk(way, it) }
+        pendingAgain = null
+    }
     WayScreen(
         state = state,
         way = way,
@@ -92,12 +112,35 @@ fun WayRoute(way: WayId, journeyId: Long?, onBack: () -> Unit, viewModel: WaysVi
         actions = WayActions(
             start = { choice, chosen -> viewModel.start(way, choice, chosen) },
             leave = viewModel::leave,
+            walk = WalkActions(
+                start = { again ->
+                    val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
+                        PackageManager.PERMISSION_GRANTED
+                    if (granted) {
+                        viewModel.startWalk(way, again)
+                    } else {
+                        pendingAgain = again
+                        permission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                },
+                voice = viewModel::setWalkVoice,
+                card = SessionCardActions(
+                    onPause = viewModel::pauseWalk,
+                    onResume = viewModel::resumeWalk,
+                    onStop = viewModel::stopWalk,
+                    onKeepGoing = viewModel::keepGoing,
+                ),
+            ),
         ),
     )
 }
 
 /** What the page can ask for, as functions: the screen is a plain composable a test can draw. */
-class WayActions(val start: (WayStartChoice, LocalDate?) -> Unit = { _, _ -> }, val leave: (Long) -> Unit = {})
+class WayActions(
+    val start: (WayStartChoice, LocalDate?) -> Unit = { _, _ -> },
+    val leave: (Long) -> Unit = {},
+    val walk: WalkActions = WalkActions(),
+)
 
 /**
  * One way (PLANNING.md §11 Phase 11). Its map first, then one sentence of where the reader
@@ -132,9 +175,22 @@ fun WayScreen(
             )
         },
     ) { padding ->
-        if (state != null) {
-            val view = journeyId?.let(state::journey) ?: state.active?.takeIf { it.journey.way == way }
-            WayPage(state, Ways.of(way), view, actions, Modifier.fillMaxSize().padding(padding))
+        val walk = state?.walk(way)
+        when {
+            state == null -> Unit
+
+            walk != null -> WalkPage(
+                state = state,
+                walk = walk,
+                opened = journeyId?.let(state::journey),
+                actions = actions.walk,
+                modifier = Modifier.fillMaxSize().padding(padding),
+            )
+
+            else -> {
+                val view = journeyId?.let(state::journey) ?: state.active?.takeIf { it.journey.way == way }
+                WayPage(state, Ways.of(way), view, actions, Modifier.fillMaxSize().padding(padding))
+            }
         }
     }
 }
@@ -357,7 +413,7 @@ private fun Standing(state: WaysUiState, view: JourneyView, format: MeasureForma
 /** The credential: a stamp for each stage reached, then the stages ahead as their places. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun Credential(state: WaysUiState, way: Way, progress: WayProgress) {
+internal fun Credential(state: WaysUiState, way: Way, progress: WayProgress) {
     val reached = progress.reached.associateBy { it.stop.key }
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
@@ -388,7 +444,7 @@ private fun Credential(state: WaysUiState, way: Way, progress: WayProgress) {
  * as it is walked.
  */
 @Composable
-private fun Stages(state: WaysUiState, way: Way, progress: WayProgress?, format: MeasureFormatter) {
+internal fun Stages(state: WaysUiState, way: Way, progress: WayProgress?, format: MeasureFormatter) {
     val reached = progress?.reached.orEmpty().associateBy { it.stop.key }
     val next = progress?.next
     SettingsGroup(modifier = Modifier.testTag(WaysTags.STAGES)) {

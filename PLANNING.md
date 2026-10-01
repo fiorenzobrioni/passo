@@ -52,7 +52,7 @@ passo/
 │   ├── settings/           # Settings, your data (export, import), the step calibration
 │   ├── onboarding/
 │   ├── sessions/           # the Outings page and the outing editor (Phase 10)
-│   ├── ways/               # the Ways (Phase 11, planned)
+│   ├── ways/               # the Ways and the city walks (Phase 11)
 │   ├── year/               # Your year on foot (Phase 12, planned)
 │   └── guide/              # the guide, in Chiaro's shape
 ├── widget/                 # Glance widget(s), receiver, update coordinator
@@ -340,6 +340,7 @@ data class DiagnosticsEventEntity(
 - Past days are **frozen**, so changing the profile doesn't silently rewrite history. Settings offers **"Apply profile to past data"**, which recomputes every summary from the minute rows.
 - Use Room auto-migrations with exported schemas (`room.schemaLocation`) committed to the repo.
 - **Schema v4 (Phase 11):** `way_journey`, a way the reader started (the way, its start day and instant, its state `ACTIVE` / `FINISHED` / `LEFT`, the day it ended, how far its stages were told). No distance: what was walked is the days' own estimates from the start, read with them (`docs/adr/0014-ways.md`).
+- **Schema v5 (Phase 11, part two):** `session.walk` (the city walk an outing walks, by name; null for every other outing) and `session.walkFromMeters` (where along the walk it began). A walk's journey is a `way_journey` row like a way's; its progress is its outings', read with them (`docs/adr/0015-city-walks.md`).
 - **No tables for walks or the typical day.** Both are computed on read from `minute_steps` (§6.1, §6.2). Add a cache table only if profiling shows a need.
 - **Schema v2 (Phase 10), an auto-migration adding two tables and touching nothing else:**
   - `session_plan`: the reader's outings (name or null, goal kind and value, intensity, milestones as a bit set, vibrate, position, last started).
@@ -861,16 +862,22 @@ city, from the first line of code, so London's second walk is data, not a featur
 city with one walk is one row; the second level (the city's walks) appears only when a city has
 two. The first release has one walk a city.
 
-- [ ] The walks' data, by the same script as the ways (`tools/build_ways.py`): each walk drawn once in a router built on OpenStreetMap data (BRouter), its GPX saved into `tools/` by hand, simplified by the script; its places (a key, the name's resource, latitude and longitude, the distance along the walk, measured by the script); behind it the city's water and largest parks from OpenStreetMap (the Thames, the Tiber, the Seine, the Navigli and the Darsena, the Manzanares), never a street grid. ODbL, credited as for the ways. Between 8 and 12 km a walk, about twenty places.
-- [ ] Indicative walks, decided with the owner when each is drawn: Milan (the Duomo, the Galleria, La Scala, Brera, the Castello Sforzesco, Parco Sempione, the Arco della Pace, Sant'Ambrogio, the Columns of San Lorenzo, the Darsena and the Navigli); London (Westminster, the Elizabeth Tower, Trafalgar Square, the South Bank, the London Eye, Tate Modern, the Millennium Bridge, St Paul's, Borough Market, Tower Bridge, the Tower of London).
-- [ ] The places' sentences: written for Passo, never copied (not from Wikipedia either), each checked against two sources and noted in the script; in English and Italian; one sentence of at most about twenty words, made to be heard; nothing that goes stale (no opening hours, prices or "now showing").
-- [ ] Domain (`:core:domain/ways`): `CityWalkProgress` (the distance done on a walk, summed from the outings walked on it since it was started; the place reached; the next one and how far), the places crossed by a batch (each named once; the voice says the names in order and the last one's sentence).
-- [ ] Storage: the Ways' table with a kind (way or walk), and on `session` a nullable walk key and the distance the outing started from; the backup carries both. A walk's progress is computed from its outings, never kept apart.
-- [ ] The outing: a new goal kind, a walk, its goal the distance left; the 25, 50 and 75% signals off (the places are the signals: one short pulse and the voice); the notification's line is the next place («Next: the Duomo, 600 m»); the goal is the walk's end. Stopped halfway, the walk waits: "Continue from Piazza Navona" starts the next outing where the last one ended; starting again from the beginning asks first.
-- [ ] Screens: the Ways page in two parts, «Cammini» and «Città»; a city's walk with its map (the water, the parks, the route, the places, the point), its places with the day each was reached, Start or Continue. During the outing, its card on Today and the Outings page carries the small map (drawn only while the screen is on). A finished walk stays in "Your ways" with its places and its day.
+- [x] The walks' data, by the same script as the ways (`tools/build_ways.py`): each walk drawn once in a router built on OpenStreetMap data (BRouter), its GPX saved into `tools/` by hand, simplified by the script; its places (a key, the name's resource, latitude and longitude, the distance along the walk, measured by the script); behind it the city's water and largest parks from OpenStreetMap (the Thames, the Tiber, the Seine, the Navigli and the Darsena, the Manzanares), never a street grid. ODbL, credited as for the ways. Between 8 and 12 km a walk, about twenty places.
+- [x] Indicative walks, decided with the owner when each is drawn: Milan (the Duomo, the Galleria, La Scala, Brera, the Castello Sforzesco, Parco Sempione, the Arco della Pace, Sant'Ambrogio, the Columns of San Lorenzo, the Darsena and the Navigli); London (Westminster, the Elizabeth Tower, Trafalgar Square, the South Bank, the London Eye, Tate Modern, the Millennium Bridge, St Paul's, Borough Market, Tower Bridge, the Tower of London).
+- [x] The places' sentences: written for Passo, never copied (not from Wikipedia either), each checked against two sources and noted in the script; in English and Italian; one sentence of at most about twenty words, made to be heard; nothing that goes stale (no opening hours, prices or "now showing").
+- [x] Domain (`:core:domain/ways`): `CityWalkProgress` (the distance done on a walk, summed from the outings walked on it since it was started; the place reached; the next one and how far), the places crossed by a batch (each named once; the voice says the names in order and the last one's sentence).
+- [x] Storage: the Ways' table with a kind (way or walk), and on `session` a nullable walk key and the distance the outing started from; the backup carries both. A walk's progress is computed from its outings, never kept apart.
+- [x] The outing: a new goal kind, a walk, its goal the distance left; the 25, 50 and 75% signals off (the places are the signals: one short pulse and the voice); the notification's line is the next place («Next: the Duomo, 600 m»); the goal is the walk's end. Stopped halfway, the walk waits: "Continue from Piazza Navona" starts the next outing where the last one ended; starting again from the beginning asks first.
+- [x] Screens: the Ways page in two parts, «Cammini» and «Città»; a city's walk with its map (the water, the parks, the route, the places, the point), its places with the day each was reached, Start or Continue. During the outing, its card on Today and the Outings page carries the small map (drawn only while the screen is on). A finished walk stays in "Your ways" with its places and its day.
 - [ ] Your year on foot (Phase 12) names the cities walked that year.
-- [ ] Strings in English and Italian; tests (`CityWalkProgressTest`: a walk over three outings, several places in one batch, the end, a restart); UI tests; a README screenshot (London's map during a walk); CHANGELOG.
+- [x] Strings in English and Italian; tests (`CityWalkProgressTest`: a walk over three outings, several places in one batch, the end, a restart); UI tests; a README screenshot (London's map during a walk); CHANGELOG.
 - [ ] On a device (owner): Milan walked in one outing and London over two, with the voice through headphones and with the screen off; on a treadmill once.
+
+Built as `docs/adr/0015-city-walks.md` records: a walk is a `WayId` of kind `WALK`; the routes
+come from BRouter and are committed in `tools/walks/`; progress is `WalkDays` over the walk's
+outings, computed on read (no `CityWalkProgress` class: `WayProgress` does it, with the outings'
+days in place of the days'); the outing is a distance goal with the walk's places as its signals
+(`SessionSignal.Places`), schema v5.
 
 **Edge cases:**
 
@@ -1158,6 +1165,7 @@ Include:
 - **Your year: one card on Today in December** (owner, 1 Oct 2026): shown once, closed by the reader, on top of the first card in Insights; no notification.
 
 - **The Ways, first part** (Phase 11, 1 Oct 2026; `docs/adr/0014-ways.md`): the lines come from the relations through the Waymarked Trails API, chained by the shortest path over the main ways, simplified by `tools/build_ways.py`, which also writes the place strings; the content lives in `tools/ways_content.py`. A way keeps no distance: it is the days' own, computed on read. A finished way stays finished when its days are measured shorter later. A start is never before the first day counted. A stage is told by `WayNotifier`, which watches the written days only while a way is under way. The backup carries the ways as an added field, without a new format version. The map is `WayMapView` (Canvas) over Natural Earth; `PassoColors` gains `water`, because the dresses put their blue in different roles (Paper's secondary, Vivid's primary) and a sea in amber did not read as one. The ODbL credit is on the Ways page, in the guide, in Settings → Credits, in the README and in `licenses/`.
+- **City walks, built** (Phase 11 part two, 2 Oct 2026; `docs/adr/0015-city-walks.md`): a walk is a `WayId` of kind `WALK`, sharing the ways' script, data shape, journey table, map and stamps. Routes drawn once with BRouter over OpenStreetMap and committed in `tools/walks/` (the build never asks a router); the cities' water, canals and parks from the OpenStreetMap API. Milan 9.3 km with 14 places, London 10.7 km with 17: fewer than the planned twenty, because every place is on the route and none was added to fill a count. An outing on a walk is a distance goal (the distance left) with no quarter signals; its places are told from its stored totals, so a restart tells nothing twice (schema v5: `session.walk`, `session.walkFromMeters`). Progress is the walk's outings since its journey began, computed on read (`WalkDays`); the tracking service finishes the journey at the goal. The voice is a setting of the walks' own (`walkVoice`, headphones by default), since a walk is not a plan. Parks are a new colour role (`PassoColors.park`); a city's map has land around it and no locator. The README gains London during a walk.
 
 - **The Camino named as readers know it** (owner, 1 Oct 2026): «Cammino di Santiago» / «Camino de Santiago», with its variant, the French Way (the classic one and the most walked), in the route line. Its stored id stays `CAMINO_FRANCES`.
 

@@ -1,25 +1,40 @@
 package com.callbackdev.passo.feature.ways
 
+import android.content.Context
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.callbackdev.passo.core.data.sessions.LiveSession
+import com.callbackdev.passo.core.data.sessions.LiveSessionState
+import com.callbackdev.passo.core.data.sessions.SessionRepository
 import com.callbackdev.passo.core.data.settings.SettingsRepository
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.data.ways.WayRepository
 import com.callbackdev.passo.core.data.ways.distances
+import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.ways.WalkDays
+import com.callbackdev.passo.core.domain.ways.Way
 import com.callbackdev.passo.core.domain.ways.WayForecast
 import com.callbackdev.passo.core.domain.ways.WayProgress
 import com.callbackdev.passo.core.domain.ways.WayStartChoice
 import com.callbackdev.passo.core.domain.ways.WayStarts
 import com.callbackdev.passo.core.domain.ways.Ways
+import com.callbackdev.passo.core.model.Session
+import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.model.WayJourney
 import com.callbackdev.passo.core.model.WayJourneyState
+import com.callbackdev.passo.core.model.WayKind
+import com.callbackdev.passo.core.tracking.SessionControl
+import com.callbackdev.passo.core.tracking.StepTracking
+import com.callbackdev.passo.core.tracking.TrackingReadiness
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -40,7 +55,12 @@ import javax.inject.Inject
  * @property pace the reader's usual distance a day, for "about 7 months at your pace"; null
  *   until a week of walking says it.
  * @property active the way under way, if any.
- * @property past the ways finished or left, the latest first.
+ * @property past the ways finished or left and the city walks finished, the latest first.
+ * @property walks the city walks, in the order they are listed.
+ * @property live the outing under way, paused or just ended, whichever it is: one at a time.
+ * @property walkVoice whether a walk's places are said aloud, and where.
+ * @property canWalk whether an outing can start now: counting on, with its permission.
+ * @property stepMeters the reader's walking step, for a walk's steps before it is walked.
  */
 @Immutable
 data class WaysUiState(
@@ -51,10 +71,47 @@ data class WaysUiState(
     val pace: Double?,
     val active: JourneyView?,
     val past: List<JourneyView>,
+    val walks: List<WalkView> = emptyList(),
+    val live: LiveSessionState? = null,
+    val walkVoice: SessionVoice = SessionVoice.HEADPHONES,
+    val canWalk: WalkReadiness = WalkReadiness.READY,
+    val stepMeters: Double = DEFAULT_STEP_METERS,
 ) {
-    fun journey(id: Long): JourneyView? = active?.takeIf { it.journey.id == id } ?: past.firstOrNull {
-        it.journey.id == id
+    fun journey(id: Long): JourneyView? = active?.takeIf { it.journey.id == id }
+        ?: past.firstOrNull { it.journey.id == id }
+        ?: walks.firstNotNullOfOrNull { it.current?.takeIf { view -> view.journey.id == id } }
+
+    fun walk(id: WayId): WalkView? = walks.firstOrNull { it.way.id == id }
+
+    private companion object {
+        const val DEFAULT_STEP_METERS = 0.7
     }
+}
+
+/**
+ * A city walk as its page and its row show it: the journey under way on it, if any (with an
+ * outing live on it, [live]), and the last time it was walked to its end.
+ */
+@Immutable
+data class WalkView(
+    val way: Way,
+    val current: JourneyView?,
+    val lastFinished: JourneyView?,
+    val live: LiveSessionState?,
+) {
+    /** Where the next outing on it starts: where the journey under way stands, or the start. */
+    val fromMeters: Double get() = current?.progress?.walkedMeters ?: 0.0
+}
+
+/** Whether a walk can start now, and if not, why. */
+enum class WalkReadiness {
+    READY,
+
+    /** Counting is paused: a walk is measured from steps. */
+    PAUSED,
+
+    /** No physical activity permission: nothing is counted. */
+    PERMISSION_NEEDED,
 }
 
 /** A journey with where it stands, and when it would arrive at the reader's pace. */
@@ -70,10 +127,39 @@ data class JourneyView(val journey: WayJourney, val progress: WayProgress, val f
 class WaysViewModel
 @Inject
 constructor(
+    @ApplicationContext private val context: Context,
     private val ways: WayRepository,
     tracking: TrackingRepository,
-    settings: SettingsRepository,
+    private val settings: SettingsRepository,
+    sessions: SessionRepository,
+    liveSession: LiveSession,
 ) : ViewModel() {
+    private val readiness = MutableStateFlow(StepTracking.readiness(context))
+
+    /** The service's outing when it runs; the stored one when the system has stopped it. */
+    private val live: Flow<LiveSessionState?> =
+        combine(liveSession.current, sessions.observeLiveSession()) { live, stored ->
+            live ?: stored?.let {
+                LiveSessionState(it, cadence = null, canKeepGoing = false, alertsWhileScreenOff = true)
+            }
+        }
+
+    /** The walks' outings, the live one with its latest totals: they move a walk. */
+    private val walkOutings: Flow<Pair<List<Session>, LiveSessionState?>> =
+        combine(sessions.walkSessions, live) { stored, current ->
+            val outing = current?.session
+            val merged = if (outing?.walk == null) {
+                stored
+            } else {
+                stored.filter { it.id != outing.id } + outing
+            }
+            merged to current
+        }
+
+    private val walkSettings = combine(settings.settings, settings.profile, readiness) { current, profile, ready ->
+        Triple(current, StepLengths.of(profile).walkingMeters, ready)
+    }
+
     private val day: Flow<LocalDate> = flow {
         while (true) {
             emit(LocalDate.now(ZoneId.systemDefault()))
@@ -85,26 +171,60 @@ constructor(
         day,
         ways.journeys,
         tracking.observeAllSummaries(),
-        settings.settings,
-    ) { today, journeys, summaries, current ->
+        walkSettings,
+        walkOutings,
+    ) { today, journeys, summaries, (current, stepMeters, ready), (outings, liveOuting) ->
         val distances = summaries.distances()
         val views = journeys.map { journey ->
-            val progress = WayProgress.of(Ways.of(journey.way), journey, distances, today.toEpochDay())
-            val forecast = if (journey.state == WayJourneyState.ACTIVE && !progress.finished) {
-                WayForecast.of(distances, today, progress.metersLeft)
+            val way = Ways.of(journey.way)
+            if (way.kind == WayKind.WALK) {
+                // A walk moves with its outings, not with the days.
+                JourneyView(
+                    journey,
+                    WayProgress.of(way, journey, WalkDays.of(journey, outings), today.toEpochDay()),
+                    null,
+                )
             } else {
-                null
+                val progress = WayProgress.of(way, journey, distances, today.toEpochDay())
+                val forecast = if (journey.state == WayJourneyState.ACTIVE && !progress.finished) {
+                    WayForecast.of(distances, today, progress.metersLeft)
+                } else {
+                    null
+                }
+                JourneyView(journey, progress, forecast)
             }
-            JourneyView(journey, progress, forecast)
         }
+        val (wayViews, walkViews) = views.partition { it.journey.way.kind == WayKind.WAY }
         WaysUiState(
             today = today,
             units = current.units,
             firstCounted = summaries.minOfOrNull { it.localEpochDay }?.let(LocalDate::ofEpochDay),
             distances = distances,
             pace = WayForecast.pace(distances, today),
-            active = views.firstOrNull { it.journey.state == WayJourneyState.ACTIVE },
-            past = views.filter { it.journey.state != WayJourneyState.ACTIVE },
+            active = wayViews.firstOrNull { it.journey.state == WayJourneyState.ACTIVE },
+            // A walk begun again leaves its earlier journey behind: only the ones walked to the
+            // end are the reader's to keep.
+            past = views.filter {
+                it.journey.state == WayJourneyState.FINISHED ||
+                    (it.journey.state == WayJourneyState.LEFT && it.journey.way.kind == WayKind.WAY)
+            },
+            walks = Ways.walks.map { walk ->
+                val mine = walkViews.filter { it.journey.way == walk.id }
+                WalkView(
+                    way = walk,
+                    current = mine.firstOrNull { it.journey.state == WayJourneyState.ACTIVE },
+                    lastFinished = mine.firstOrNull { it.journey.state == WayJourneyState.FINISHED },
+                    live = liveOuting?.takeIf { it.session.walk == walk.id },
+                )
+            },
+            live = liveOuting,
+            walkVoice = current.walkVoice,
+            canWalk = when {
+                ready == TrackingReadiness.PERMISSION_NEEDED -> WalkReadiness.PERMISSION_NEEDED
+                !current.trackingEnabled -> WalkReadiness.PAUSED
+                else -> WalkReadiness.READY
+            },
+            stepMeters = stepMeters,
         )
     }.flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), null)
@@ -128,6 +248,38 @@ constructor(
             val day = WayStarts.dayOf(choice, today, current.firstCounted, chosen)
             ways.start(way, day, today, System.currentTimeMillis())
         }
+    }
+
+    /**
+     * Starts an outing on the city walk [walk]: from where its journey stands, or, [again],
+     * from its first place on a new one (the tracking service decides, on its own state).
+     */
+    fun startWalk(walk: WayId, again: Boolean) {
+        SessionControl.startWalk(context, walk, again)
+    }
+
+    fun pauseWalk() {
+        SessionControl.pause(context)
+    }
+
+    fun resumeWalk() {
+        SessionControl.resume(context)
+    }
+
+    fun stopWalk() {
+        SessionControl.stop(context)
+    }
+
+    fun keepGoing() {
+        SessionControl.keepGoing(context)
+    }
+
+    fun setWalkVoice(voice: SessionVoice) {
+        viewModelScope.launch { settings.updateSettings { it.copy(walkVoice = voice) } }
+    }
+
+    fun refreshReadiness() {
+        readiness.value = StepTracking.readiness(context)
     }
 
     /** Puts the way [journeyId] down, today, where the reader stands. */

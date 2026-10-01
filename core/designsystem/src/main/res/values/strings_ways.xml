@@ -12,6 +12,10 @@
         <item quantity="one">%1$d stage</item>
         <item quantity="other">%1$d stages</item>
     </plurals>
+    <plurals name="way_places">
+        <item quantity="one">%1$d place</item>
+        <item quantity="other">%1$d places</item>
+    </plurals>
     <plurals name="way_duration_days">
         <item quantity="one">about %1$d day</item>
         <item quantity="other">about %1$d days</item>

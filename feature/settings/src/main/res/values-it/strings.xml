@@ -159,5 +159,5 @@
     <string name="settings_credit_sources">Formule</string>
     <string name="settings_credit_sources_note">Distanza e calorie seguono le equazioni dell’ACSM; le fasce di cadenza, lo studio CADENCE-adults; i minuti a passo svelto, le linee guida dell’OMS</string>
     <string name="settings_credit_maps">Mappe dei cammini</string>
-    <string name="settings_credit_maps_note">I cammini: © OpenStreetMap contributors, Open Database License. Terre e acque: Natural Earth, pubblico dominio</string>
+    <string name="settings_credit_maps_note">I cammini e le passeggiate in città: © OpenStreetMap contributors, Open Database License. Terre e acque dei cammini: Natural Earth, pubblico dominio</string>
 </resources>

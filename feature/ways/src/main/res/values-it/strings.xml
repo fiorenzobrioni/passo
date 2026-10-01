@@ -3,7 +3,7 @@
     <!-- La pagina dei Cammini (PLANNING.md §11 Fase 11) -->
     <string name="ways_title">Cammini</string>
     <string name="ways_back">Indietro</string>
-    <string name="ways_intro">Percorri un cammino dei pellegrini da dove sei: la distanza che cammini ogni giorno ti porta avanti, tappa dopo tappa. Nessuna posizione, solo i tuoi passi.</string>
+    <string name="ways_intro">Percorri un cammino dei pellegrini o una città da dove sei, portato avanti dai tuoi passi: un cammino dalla distanza dei tuoi giorni, una città dalle tue uscite. Nessuna posizione, solo i tuoi passi.</string>
     <string name="ways_group_ways">I cammini</string>
     <string name="ways_group_yours">I tuoi cammini</string>
     <string name="ways_under_way">In corso</string>
@@ -12,7 +12,7 @@
     <string name="ways_row_walked">Percorso dal %1$s al %2$s</string>
     <string name="ways_row_left">Lasciato il %1$s, %2$s</string>
     <string name="ways_footer">Le distanze sono stime, dai tuoi passi e dalla tua falcata: misurare il passo le rende più vere. Un giorno conta come Passo l’ha registrato, così Cronologia, Insights e il tuo cammino sono sempre d’accordo.</string>
-    <string name="ways_credit">Cammini tracciati da OpenStreetMap, © OpenStreetMap contributors (ODbL). Terre e acque: Natural Earth.</string>
+    <string name="ways_credit">Cammini e passeggiate tracciati da OpenStreetMap, © OpenStreetMap contributors (ODbL); le passeggiate instradate con BRouter. Terre e acque dei cammini: Natural Earth.</string>
 
     <!-- La pagina di un cammino -->
     <string name="way_start">Inizia questo cammino</string>
@@ -62,4 +62,30 @@
     <string name="way_start_arrived">Saresti già a %1$s, alla fine del cammino.</string>
     <string name="way_start_confirm">Inizia</string>
     <string name="way_start_pick">Scegli</string>
+    <!-- Le passeggiate in città (Fase 11, seconda parte) -->
+    <string name="ways_group_cities">Città</string>
+    <string name="ways_cities_intro">Una passeggiata in una città, in una o più uscite: ogni luogo ti viene detto, con una frase che lo racconta, quando i tuoi passi lo raggiungono.</string>
+    <string name="ways_row_walk_under_way">In corso: %1$s</string>
+    <string name="ways_row_walk_walked">Percorsa il %1$s</string>
+    <string name="walk_how">Avviala e metti via il telefono: Passo ti dice ogni luogo quando i tuoi passi lo raggiungono, con una breve vibrazione. Fermati quando vuoi: la prossima uscita riprende da lì.</string>
+    <string name="walk_steps">Circa %1$s passi, in una o più uscite.</string>
+    <string name="walk_start">Inizia la passeggiata</string>
+    <string name="walk_continue">Riprendi da %1$s</string>
+    <string name="walk_again">Ricomincia</string>
+    <string name="walk_again_title">Ricominciare dall’inizio?</string>
+    <string name="walk_again_body">La passeggiata riparte da %1$s. Le uscite fatte finora restano in Cronologia.</string>
+    <string name="walk_busy">C’è un’uscita in corso: terminala per iniziare questa passeggiata.</string>
+    <string name="walk_paused">Il conteggio è in pausa: riattivalo nelle Impostazioni per camminare.</string>
+    <string name="walk_permission">Passo ha bisogno del permesso per l’attività fisica per contare questa passeggiata.</string>
+    <string name="walk_voice">Voce</string>
+    <string name="walk_voice_off">No</string>
+    <string name="walk_voice_headphones">Cuffie</string>
+    <string name="walk_voice_always">Sempre</string>
+    <string name="walk_voice_off_note">Una breve vibrazione a ogni luogo, senza parole.</string>
+    <string name="walk_voice_headphones_note">A ogni luogo il suo nome e una frase che lo racconta, solo nelle cuffie.</string>
+    <string name="walk_voice_always_note">Nelle cuffie, oppure ad alta voce dal telefono quando non è in silenzioso.</string>
+    <string name="walk_group_places">Luoghi</string>
+    <string name="walk_credential_caption">Un timbro per ogni luogo raggiunto, con il suo giorno.</string>
+    <string name="walk_walked_on">Percorsa il %1$s: %2$s.</string>
+    <string name="walk_walk_again">Percorrila di nuovo</string>
 </resources>

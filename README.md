@@ -54,6 +54,9 @@ calories are estimates, and Passo says so.
     <td align="center"><img src="docs/screenshots/way-start.png" width="250" alt="Starting a way: from today, from 1 January (you would already be past Vetralla), or from your first day with Passo"><br><sub><b>A start in the past</b> places you at once</sub></td>
   </tr>
   <tr>
+    <td align="center" colspan="3"><img src="docs/screenshots/walk.png" width="250" alt="A walk in London under way: the map from Buckingham Palace along the Thames with the part walked, past the London Eye, and the outing's card: next, the Royal Festival Hall, 230 m"><br><sub><b>City walks</b>: London place by place, walked where you are</sub></td>
+  </tr>
+  <tr>
     <td align="center"><img src="docs/screenshots/widgets.png" width="250" alt="The two widgets on a home screen: At a glance with its ring, In words, a terracotta pair side by side, and the day hour by hour"><br><sub><b>Two widgets</b>: At a glance and In words</sub></td>
     <td align="center"><img src="docs/screenshots/widget-settings.png" width="250" alt="One widget's settings: the card as it will look, its sizes, the background colour, the opacity and the content"><br><sub><b>Widget settings</b>, with a live preview</sub></td>
     <td align="center"><img src="docs/screenshots/settings-notifications.png" width="250" alt="Settings, notifications: goal reached, the evening reminder with its time and threshold, the weekly summary"><br><sub><b>Notifications</b>, each one optional</sub></td>
@@ -87,6 +90,7 @@ Italian). The phone's status bar is not in the pictures. The command that redraw
 - 🎯 **Outings**: a walk or run with a goal, with vibrations or a voice at the milestones you choose.
 - 🏆 **Insights**: your streak, your best day, week and month, and the averages.
 - 🗺️ **Ways**: four pilgrim ways (Via degli Dei, Via di Francesco, Camino de Santiago, Via Francigena) walked from home, stage by stage, with a stamp for each. No location: only your distance.
+- 🏛️ **City walks**: Milan and London, walked where you are in one outing or a few. Each place is told as your steps reach it, with a short vibration and, if you like, a line about it in your headphones.
 - 📏 **Measure your step**: walk a distance you know and Passo works out your step length. No GPS.
 - 🏠 **Two widgets**: At a glance and In words, resizable, in six colours and any opacity.
 - 🔔 **Notifications**: goal reached, an evening reminder, a weekly summary. Each one optional.
@@ -191,7 +195,7 @@ passo/
 ├── feature/                # today, history, insights, sessions, ways, settings, onboarding, guide
 ├── widget/                 # the two Glance widgets and their settings
 ├── build-logic/            # convention plugins, the forbidden-permission check
-├── tools/                  # the launcher icon script, the ways' data script
+├── tools/                  # the launcher icon script, the ways' and walks' data script
 └── keystore/               # the shared debug key (deliberately committed)
 ```
 
@@ -222,6 +226,7 @@ Passo is one of three focused apps with the same look and the same rules:
 [Inter](https://github.com/rsms/inter) under the SIL Open Font License 1.1. Full attributions
 in [licenses/](./licenses/).
 
-The ways are drawn from [OpenStreetMap](https://www.openstreetmap.org/copyright) data,
-© OpenStreetMap contributors, under the Open Database License; the land and water behind them
-from [Natural Earth](https://www.naturalearthdata.com), public domain.
+The ways and the city walks are drawn from [OpenStreetMap](https://www.openstreetmap.org/copyright)
+data, © OpenStreetMap contributors, under the Open Database License (the walks routed with
+[BRouter](https://brouter.de), the cities' water and parks from the same map); the land and
+water behind the ways from [Natural Earth](https://www.naturalearthdata.com), public domain.

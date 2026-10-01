@@ -13,6 +13,11 @@
         <item quantity="many">%1$d tappe</item>
         <item quantity="other">%1$d tappe</item>
     </plurals>
+    <plurals name="way_places">
+        <item quantity="one">%1$d luogo</item>
+        <item quantity="many">%1$d luoghi</item>
+        <item quantity="other">%1$d luoghi</item>
+    </plurals>
     <plurals name="way_duration_days">
         <item quantity="one">circa %1$d giorno</item>
         <item quantity="many">circa %1$d giorni</item>

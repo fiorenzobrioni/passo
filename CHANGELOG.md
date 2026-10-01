@@ -17,6 +17,11 @@ All notable changes to Passo are documented here. The format follows
   OpenStreetMap. The distance of your days carries you along, stage by stage, with a stamp in a
   credential for each and a notification when you reach one. Start today or in the past, and
   find yourself already on the way. No location: only your distance. From Insights.
+- **City walks**: Milan, from the Duomo to the Navigli, and London, from Buckingham Palace to
+  Tower Bridge, walked where you are in one outing or a few. Each place is told as your steps
+  reach it, with a short vibration and, if you like, its name and a line about it in your
+  headphones; the notification says the next one. Stop when you like and continue later from
+  where you were. On the Ways page, and from Outings.
 
 ## [1.0.0] - 2026-10-01
 

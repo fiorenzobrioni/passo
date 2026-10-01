@@ -3,7 +3,7 @@
     <!-- The Ways page (PLANNING.md §11 Phase 11) -->
     <string name="ways_title">Ways</string>
     <string name="ways_back">Back</string>
-    <string name="ways_intro">Walk a pilgrim way from wherever you are: the distance you walk each day carries you along it, stage by stage. No location, only your steps.</string>
+    <string name="ways_intro">Walk a pilgrim way or a city from wherever you are, carried along it by your steps: a way by the distance of your days, a city by your outings. No location, only your steps.</string>
     <string name="ways_group_ways">The ways</string>
     <string name="ways_group_yours">Your ways</string>
     <string name="ways_under_way">Under way</string>
@@ -12,7 +12,7 @@
     <string name="ways_row_walked">Walked from %1$s to %2$s</string>
     <string name="ways_row_left">Left on %1$s, %2$s</string>
     <string name="ways_footer">Distances are estimates, from your steps and your step length: measuring your step makes them truer. A day counts as Passo recorded it, so History, Insights and your way always agree.</string>
-    <string name="ways_credit">Ways drawn from OpenStreetMap, © OpenStreetMap contributors (ODbL). Land and water: Natural Earth.</string>
+    <string name="ways_credit">Ways and walks drawn from OpenStreetMap, © OpenStreetMap contributors (ODbL); the walks routed with BRouter. Land and water of the ways: Natural Earth.</string>
 
     <!-- One way's page -->
     <string name="way_start">Start this way</string>
@@ -60,4 +60,30 @@
     <string name="way_start_arrived">You would already be in %1$s, at its end.</string>
     <string name="way_start_confirm">Start</string>
     <string name="way_start_pick">Choose</string>
+    <!-- City walks (Phase 11, second part) -->
+    <string name="ways_group_cities">Cities</string>
+    <string name="ways_cities_intro">A walk through a city, in one outing or a few: each place is told, with a line about it, as your steps reach it.</string>
+    <string name="ways_row_walk_under_way">Under way: %1$s</string>
+    <string name="ways_row_walk_walked">Walked on %1$s</string>
+    <string name="walk_how">Start it, then put the phone away: Passo tells each place as your steps reach it, with a short vibration. Stop when you like: the next outing goes on from there.</string>
+    <string name="walk_steps">About %1$s steps, in one outing or a few.</string>
+    <string name="walk_start">Start the walk</string>
+    <string name="walk_continue">Continue from %1$s</string>
+    <string name="walk_again">Start again</string>
+    <string name="walk_again_title">Start again from the beginning?</string>
+    <string name="walk_again_body">The walk begins again from %1$s. Your outings so far stay in History.</string>
+    <string name="walk_busy">An outing is under way: end it to start this walk.</string>
+    <string name="walk_paused">Counting is paused: turn it on in Settings to walk.</string>
+    <string name="walk_permission">Passo needs the physical activity permission to count this walk.</string>
+    <string name="walk_voice">Voice</string>
+    <string name="walk_voice_off">Off</string>
+    <string name="walk_voice_headphones">Headphones</string>
+    <string name="walk_voice_always">Always</string>
+    <string name="walk_voice_off_note">A short vibration at each place, nothing said.</string>
+    <string name="walk_voice_headphones_note">At each place its name and a line about it, through headphones only.</string>
+    <string name="walk_voice_always_note">Through headphones, or out loud from the phone when it is not on silent.</string>
+    <string name="walk_group_places">Places</string>
+    <string name="walk_credential_caption">A stamp for each place reached, with its day.</string>
+    <string name="walk_walked_on">Walked on %1$s: %2$s.</string>
+    <string name="walk_walk_again">Walk it again</string>
 </resources>

@@ -60,12 +60,12 @@ that does not match it.
 | Module | Kind | Holds |
 |---|---|---|
 | `:core:model` | pure Kotlin/JVM | data classes shared by everything |
-| `:core:domain` | pure Kotlin/JVM | `StepAccountant`, metric calculators, `WalkDetector`, `TypicalDayCalculator`, `PeriodOverview`, `Insights` (streaks, records, averages), `SessionTracker` and `SessionPlans` (outings), the backup file and its merge (`BackupCodec`, `BackupMerge`, `CsvExport`), `StepCalibration`, the Ways (`Ways`, `WayProgress`, `WayForecast`, `WayAnnouncement`, `WayProjection`, the generated `WayData`) |
+| `:core:domain` | pure Kotlin/JVM | `StepAccountant`, metric calculators, `WalkDetector`, `TypicalDayCalculator`, `PeriodOverview`, `Insights` (streaks, records, averages), `SessionTracker` and `SessionPlans` (outings), the backup file and its merge (`BackupCodec`, `BackupMerge`, `CsvExport`), `StepCalibration`, the Ways and the city walks (`Ways`, `WayProgress`, `WalkDays`, `WalkPlaces`, `WayForecast`, `WayAnnouncement`, `WayProjection`, the generated `WayData`) |
 | `:core:data` | Android library | Room (steps, tracker state, outings, ways), DataStore (settings, profile), repositories exposing `Flow`, `BackupRepository` (export, import), `WayRepository` |
 | `:core:tracking` | Android library | `StepTrackingService` (FGS type `health`), sensor source, receivers, ongoing notification, `StepCounterProbe` (the calibration's direct read), `WayNotifier` (a stage reached) |
 | `:core:designsystem` | Android library | M3 theme, typography, shared components, the Canvas charts (`DayTrendChart`, `BarChart`), `CalendarHeatmap`, `WalkList` and `OutingList`, `SessionCard`, the ways' map and stamps (`WayMapView`, `WayStamp`) and place names, date formatting |
 | `:core:testing` | Android library, test-only | `assertAccessible()` (labels, 48dp touch targets) and `walkPage()`, shared by the UI tests as `testImplementation` |
-| `:feature:*` | Android library | `today`, `history`, `insights`, `settings` (with your data and the step calibration), `onboarding`, `sessions` (the Outings page and editor), `ways` (the Ways and each way's page), `guide` (the guide, in Chiaro's shape) |
+| `:feature:*` | Android library | `today`, `history`, `insights`, `settings` (with your data and the step calibration), `onboarding`, `sessions` (the Outings page and editor), `ways` (the Ways, each way's page and each city walk's), `guide` (the guide, in Chiaro's shape) |
 | `:widget` | Android library | the two Glance widgets («At a glance», «In words»), their settings screen, the update coordinator |
 | `:app` | application | `Application`, `MainActivity`, navigation (the bottom bar: Today, History, Insights), DI entry points; wires everything |
 
@@ -121,10 +121,10 @@ hold here too: one sentence before any number, every number with the line that s
 means, estimates that say so, no dead tab and no switch for a feature that has not shipped.
 Icons are `PassoIcons`, drawn in code. The launcher icon (Chiaro's ring, with a shoe print
 where Chiaro has its sun) is written by `tools/draw_launcher_icon.py`: change the script and
-re-run it, never the two XML layers. Likewise the Ways' data (`docs/adr/0014-ways.md`):
+re-run it, never the two XML layers. Likewise the Ways' and the city walks' data (`docs/adr/0014-ways.md`, `docs/adr/0015-city-walks.md`):
 `tools/build_ways.py` writes `WayData.kt` and the place strings from `tools/ways_content.py`
 (OpenStreetMap lines, ODbL, credited wherever they are read): edit the content and re-run it
-(`fetch` first, for the sources), never the outputs. The Compose UI tests write screenshots to each module's
+(`fetch` first, for the sources; a walk's route is fetched once and committed in `tools/walks/`), never the outputs. The Compose UI tests write screenshots to each module's
 `build/screenshots`: look at them after changing a screen.
 
 **Accessibility and foldables** (`docs/adr/0012-foldables-and-accessibility.md`): a screen's

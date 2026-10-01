@@ -96,7 +96,7 @@ class InsightsScreenTest {
         var opened = false
         show(state(), onOpenWays = { opened = true })
         compose.onNodeWithTag(InsightsTags.LIST).performScrollToNode(hasTestTag(InsightsTags.WAYS_DOOR))
-        compose.onNodeWithText("Walk a pilgrim way").performClick()
+        compose.onNodeWithText("Walk a way or a city").performClick()
         assertThat(opened).isTrue()
         compose.onNodeWithTag(InsightsTags.WAY).assertDoesNotExist()
         snapshot("insights_ways_door")

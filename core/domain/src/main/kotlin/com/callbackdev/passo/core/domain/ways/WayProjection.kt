@@ -28,7 +28,13 @@ class WayProjection(private val frame: GeoBox, width: Float, height: Float, inse
 
     fun y(latitude: Double): Float = (offsetY + (frame.north - latitude) * scale).toFloat()
 
+    /** How many pixels a metre on the ground takes: a city's canal is drawn as wide as it is. */
+    fun pixelsPerMeter(): Float = (scale / METERS_PER_DEGREE).toFloat()
+
     companion object {
+        /** A degree of latitude, in metres, near enough everywhere for a map's line widths. */
+        private const val METERS_PER_DEGREE = 111_320.0
+
         /**
          * The height over width of a map box for [frame]: its own, held between [min] and
          * [max] so that a long, thin way (the Via degli Dei runs north to south, the Camino

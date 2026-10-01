@@ -44,11 +44,13 @@ import com.callbackdev.passo.core.domain.ways.GeoPath
 import com.callbackdev.passo.core.domain.ways.Way
 import com.callbackdev.passo.core.domain.ways.WayLine
 import com.callbackdev.passo.core.domain.ways.WayProjection
+import com.callbackdev.passo.core.model.WayKind
 import kotlin.math.hypot
 
 /**
- * The map of a way (PLANNING.md §11 Phase 11), drawn in code like every chart of Passo: the
- * ground (land, lakes, rivers, borders), the whole way faint, the part walked in the goal's
+ * The map of a way or a city walk (PLANNING.md §11 Phase 11), drawn in code like every chart of
+ * Passo: the ground (land, lakes, rivers, borders; a city's parks, water and canals), the whole
+ * way faint, the part walked in the goal's
  * colour up to the reader's point, and the stops, filled once reached. It knows nothing of where
  * the reader is: their point is their distance along the way.
  *
@@ -77,6 +79,7 @@ fun WayMapView(
     val colors = WayMapColors(
         water = PassoTheme.colors.water,
         land = scheme.surfaceContainerHigh,
+        park = PassoTheme.colors.park,
         river = lerp(PassoTheme.colors.water, scheme.onSurfaceVariant, RIVER_INK),
         border = scheme.outline.copy(alpha = BORDER_ALPHA),
         way = scheme.onSurfaceVariant.copy(alpha = WAY_ALPHA),
@@ -116,7 +119,12 @@ fun WayMapView(
             .drawWithCache {
                 val projection = WayProjection(map.frame, size.width, size.height, inset(size))
                 val land = map.land.map { it.toPath(projection, close = true) }
+                val parks = map.parks.map { it.toPath(projection, close = true) }
                 val lakes = map.lakes.map { it.toPath(projection, close = true) }
+                // A country's rivers are hairlines; a city's canals as wide as they are.
+                val riverWidth = (map.riverWidthMeters.toFloat() * projection.pixelsPerMeter())
+                    .coerceAtLeast(RIVER_WIDTH.toPx())
+                val riverInk = if (map.riverWidthMeters > 0) colors.water else colors.river
                 val rivers = map.rivers.map { it.toPath(projection, close = false) }
                 val borders = map.borders.map { it.toPath(projection, close = false) }
                 val whole = map.line.toPath(projection, upTo = null)
@@ -129,7 +137,13 @@ fun WayMapView(
                     val p = map.line.pointAt(it)
                     Offset(projection.x(p.longitude), projection.y(p.latitude))
                 }
-                val locator = if (detailed) locatorBox(size, stops.first(), whole, map.locatorFrame) else null
+                // A city's walk fills its frame: no corner is free for the country, and the page
+                // names the city anyway.
+                val locator = if (detailed && way.kind == WayKind.WAY) {
+                    locatorBox(size, stops.first(), whole, map.locatorFrame)
+                } else {
+                    null
+                }
                 val labels = if (detailed) {
                     listOfNotNull(
                         names.first() to stops.first(),
@@ -140,10 +154,12 @@ fun WayMapView(
                     emptyList()
                 }
                 onDrawBehind {
-                    drawRect(colors.water)
+                    // A country's map is cut out of the sea; a city has no sea around it.
+                    drawRect(if (way.kind == WayKind.WALK) colors.land else colors.water)
                     land.forEach { drawPath(it, colors.land) }
+                    parks.forEach { drawPath(it, colors.park) }
                     lakes.forEach { drawPath(it, colors.water) }
-                    rivers.forEach { drawPath(it, colors.river, style = Stroke(RIVER_WIDTH.toPx())) }
+                    rivers.forEach { drawPath(it, riverInk, style = line(riverWidth)) }
                     val dash = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx()))
                     borders.forEach { drawPath(it, colors.border, style = Stroke(1.dp.toPx(), pathEffect = dash)) }
                     // Not started, the line is the way itself, at full ink; under way, it steps back
@@ -181,9 +197,12 @@ fun WayMapView(
                         }
                     }
                     here?.let {
-                        drawCircle(colors.walked.copy(alpha = HALO_ALPHA), HERE_HALO.toPx(), it)
-                        drawCircle(colors.halo, HERE_RADIUS.toPx() + 2.dp.toPx(), it)
-                        drawCircle(colors.walked, HERE_RADIUS.toPx(), it)
+                        // A thumbnail's point is smaller: at full size it would cover a city.
+                        val radius = (if (detailed) HERE_RADIUS else SMALL_HERE_RADIUS).toPx()
+                        val halo = (if (detailed) HERE_HALO else SMALL_HERE_HALO).toPx()
+                        drawCircle(colors.walked.copy(alpha = HALO_ALPHA), halo, it)
+                        drawCircle(colors.halo, radius + (if (detailed) 2.dp else 1.5.dp).toPx(), it)
+                        drawCircle(colors.walked, radius, it)
                     }
                     labels.forEach { drawLabel(it, colors) }
                     locator?.let { drawLocator(it, map.locatorLand, map.locatorLine, map.locatorFrame, colors) }
@@ -198,6 +217,7 @@ fun wayMapRatio(frame: GeoBox): Float = (1.0 / WayProjection.boxAspect(frame, MI
 private class WayMapColors(
     val water: Color,
     val land: Color,
+    val park: Color,
     val river: Color,
     val border: Color,
     val way: Color,
@@ -214,7 +234,9 @@ private fun Density.inset(size: IntSize): Float = inset(Size(size.width.toFloat(
 
 private fun Density.inset(size: Size): Float = INSET.toPx().coerceAtMost(size.minDimension / 8f)
 
-private fun DrawScope.line(width: Dp) = Stroke(width.toPx(), cap = StrokeCap.Round, join = StrokeJoin.Round)
+private fun DrawScope.line(width: Dp) = line(width.toPx())
+
+private fun line(width: Float) = Stroke(width, cap = StrokeCap.Round, join = StrokeJoin.Round)
 
 private fun GeoPath.toPath(projection: WayProjection, close: Boolean): Path = Path().also { path ->
     for (i in 0 until size) {
@@ -268,7 +290,14 @@ private fun DrawScope.drawLocator(box: Rect, land: List<GeoPath>, line: GeoPath,
     translate(box.left, box.top) {
         clipRect(0f, 0f, box.width, box.height) {
             land.forEach { drawPath(it.toPath(projection, close = true), colors.land) }
-            drawPath(line.toPath(projection, close = false), colors.walked, style = line(2.5.dp))
+            val path = line.toPath(projection, close = false)
+            val bounds = path.getBounds()
+            // A city's walk is a few pixels on its country: a dot says where it is.
+            if (bounds.maxDimension < LOCATOR_DOT.toPx() * 2) {
+                drawCircle(colors.walked, LOCATOR_DOT.toPx(), bounds.center)
+            } else {
+                drawPath(path, colors.walked, style = line(2.5.dp))
+            }
         }
     }
     drawRoundRect(colors.border, box.topLeft, box.size, radius, style = Stroke(1.dp.toPx()))
@@ -299,6 +328,7 @@ private const val HALO_ALPHA = 0.22f
 private const val PILL_ALPHA = 0.88f
 private const val LOCATOR_SHARE = 0.3f
 private val LOCATOR_MAX = 120.dp
+private val LOCATOR_DOT = 3.5.dp
 private val INSET = 20.dp
 private val RIVER_WIDTH = 1.dp
 private val WAY_WIDTH = 3.dp
@@ -310,5 +340,7 @@ private val PLACE_RADIUS = 2.dp
 private val BEAD_RADIUS = 1.4.dp
 private val HERE_RADIUS = 6.dp
 private val HERE_HALO = 14.dp
+private val SMALL_HERE_RADIUS = 3.5.dp
+private val SMALL_HERE_HALO = 7.dp
 private val LABEL_ROOM = 40.dp
 private val TOUCH_RADIUS = 28.dp

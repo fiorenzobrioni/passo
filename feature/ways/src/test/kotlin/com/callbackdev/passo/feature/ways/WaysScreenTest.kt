@@ -1,17 +1,21 @@
 package com.callbackdev.passo.feature.ways
 
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.callbackdev.passo.core.designsystem.components.SessionCardTags
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.ways.WayStartChoice
+import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.testing.assertAccessible
 import com.callbackdev.passo.core.testing.walkPage
@@ -162,5 +166,116 @@ class WaysScreenTest {
     fun `on an open foldable the ways are a column in the middle`() {
         showList()
         compose.walkPage(hasTestTag(WaysTags.LIST), "ways_foldable", maxScreens = 4)
+    }
+
+    // --- City walks (Phase 11, second part) ---------------------------------------------------
+
+    @Test
+    fun `the cities are listed with where each walk stands`() {
+        var opened: Pair<WayId, Long?>? = null
+        showList(onOpen = { way, journey -> opened = way to journey })
+        compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.CITIES))
+        compose.onNodeWithText("Under way:", substring = true).assertExists()
+        // In its city's row, and in Your ways.
+        compose.onAllNodesWithText("Walked on Sep 12").assertCountEquals(2)
+        snapshot("ways_cities")
+        compose.onNodeWithTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)).performClick()
+        assertThat(opened).isEqualTo(WayId.LONDON_PALACE_TOWER to null)
+    }
+
+    @Test
+    fun `a walk under way shows its outing, with the place ahead`() {
+        showWay(WayId.LONDON_PALACE_TOWER)
+        compose.onNodeWithTag(SessionCardTags.CARD).assertExists()
+        compose.onNodeWithText("Next: Royal Festival Hall, 230 m").assertExists()
+        // The page has the walk's map: the card does not draw its own.
+        compose.onNodeWithTag(SessionCardTags.MAP).assertDoesNotExist()
+        snapshot("walk_live")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Royal Festival Hall"))
+        snapshot("walk_places")
+    }
+
+    @Test
+    fun `a walk begun continues from where it stands, or begins again after asking`() {
+        var started: Boolean? = null
+        showWay(
+            WayId.LONDON_PALACE_TOWER,
+            state = WaysSamples.state(outings = listOf(WaysSamples.londonYesterday), live = null),
+            actions = WayActions(walk = WalkActions(start = { started = it })),
+        )
+        compose.onNodeWithText("Past Houses of Parliament").assertIsDisplayed()
+        compose.onNodeWithText("Next: Westminster Bridge, 200 m", substring = true).assertExists()
+        snapshot("walk_under_way")
+        compose.onNodeWithText("Continue from Houses of Parliament").performClick()
+        assertThat(started).isFalse()
+        compose.onNodeWithTag(WaysTags.WALK_AGAIN).performClick()
+        compose.onNodeWithText("Start again from the beginning?").assertIsDisplayed()
+        snapshot("walk_again")
+        compose.onNode(hasText("Start again") and !hasTestTag(WaysTags.WALK_AGAIN)).performClick()
+        assertThat(started).isTrue()
+    }
+
+    @Test
+    fun `a walk not begun says its length, its places and its steps, and keeps its voice`() {
+        var started: Boolean? = null
+        var voice: SessionVoice? = null
+        showWay(
+            WayId.MILAN_DUOMO_NAVIGLI,
+            state = WaysSamples.state(walks = listOf(WaysSamples.london), live = null),
+            actions = WayActions(walk = WalkActions(start = { started = it }, voice = { voice = it })),
+        )
+        compose.onNodeWithText("9.32 km · 14 places").assertIsDisplayed()
+        compose.onNodeWithText("About 13,300 steps, in one outing or a few.").assertExists()
+        snapshot("walk_preview")
+        compose.onNodeWithTag(WaysTags.WALK_START).performClick()
+        assertThat(started).isFalse()
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasTestTag(WaysTags.WALK_VOICE))
+        compose.onNodeWithTag("${WaysTags.WALK_VOICE}-${SessionVoice.ALWAYS.name}").performClick()
+        assertThat(voice).isEqualTo(SessionVoice.ALWAYS)
+    }
+
+    @Test
+    fun `a walk walked to its end says when, and can be walked again`() {
+        showWay(WayId.MILAN_DUOMO_NAVIGLI, journeyId = WaysSamples.milan.id)
+        compose.onNodeWithText("The walk is done: Naviglio Grande.").assertIsDisplayed()
+        compose.onNodeWithText("Walked on Sep 12: 9.32 km.").assertExists()
+        compose.onNodeWithText("Walk it again").assertExists()
+        snapshot("walk_finished")
+    }
+
+    @Test
+    fun `one outing at a time, a walk included`() {
+        showWay(
+            WayId.MILAN_DUOMO_NAVIGLI,
+            state = WaysSamples.state(walks = emptyList(), live = WaysSamples.live(WaysSamples.brisk)),
+        )
+        compose.onNodeWithText("An outing is under way", substring = true).assertExists()
+        compose.onNodeWithTag(WaysTags.WALK_START).assertIsNotEnabled()
+    }
+
+    @Test
+    fun `a walk in the dark`() {
+        showWay(WayId.LONDON_PALACE_TOWER, dark = true)
+        snapshot("walk_dark")
+    }
+
+    @Test
+    fun `a city's parks and canals in the dark`() {
+        showWay(WayId.MILAN_DUOMO_NAVIGLI, state = WaysSamples.state(walks = emptyList(), live = null), dark = true)
+        snapshot("walk_milan_dark")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
+    fun `at twice the text size on a small phone, a walk still reads`() {
+        showWay(WayId.LONDON_PALACE_TOWER)
+        compose.walkPage(hasTestTag(WaysTags.PAGE), "walk_large_text", maxScreens = 8)
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w841dp-h701dp-xhdpi")
+    fun `on an open foldable a walk is a column in the middle`() {
+        showWay(WayId.MILAN_DUOMO_NAVIGLI, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.walkPage(hasTestTag(WaysTags.PAGE), "walk_foldable", maxScreens = 6)
     }
 }

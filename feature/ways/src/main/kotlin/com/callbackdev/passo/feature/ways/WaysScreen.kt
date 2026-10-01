@@ -54,6 +54,7 @@ import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.designsystem.ways.wayNameRes
 import com.callbackdev.passo.core.designsystem.ways.wayRouteRes
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
+import com.callbackdev.passo.core.domain.ways.WalkPlaces
 import com.callbackdev.passo.core.domain.ways.Way
 import com.callbackdev.passo.core.domain.ways.WayForecast
 import com.callbackdev.passo.core.domain.ways.Ways
@@ -69,8 +70,9 @@ fun WaysRoute(onBack: () -> Unit, onOpenWay: (WayId, Long?) -> Unit, viewModel: 
 
 /**
  * The Ways page (PLANNING.md §11 Phase 11): what a way is, in one sentence; the way under way,
- * with its map; the four ways, each with what it would take at the reader's pace; and the ways
- * finished or left. Each opens its own page.
+ * with its map; the four ways, each with what it would take at the reader's pace; the cities,
+ * each walk with where it stands; and the ways finished or left, the cities walked. Each opens
+ * its own page.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -128,6 +130,25 @@ private fun WaysList(state: WaysUiState, onOpenWay: (WayId, Long?) -> Unit, modi
                 Ways.all.forEachIndexed { index, way ->
                     if (index > 0) GroupDivider()
                     WayRow(way, state.pace, format) { onOpenWay(way.id, null) }
+                }
+            }
+        }
+        item(key = "cities-header") {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Header(stringResource(R.string.ways_group_cities))
+                Text(
+                    text = stringResource(R.string.ways_cities_intro),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 20.dp),
+                )
+            }
+        }
+        item(key = "cities") {
+            SettingsGroup(modifier = Modifier.testTag(WaysTags.CITIES)) {
+                state.walks.forEachIndexed { index, walk ->
+                    if (index > 0) GroupDivider()
+                    WalkRow(walk, state, format) { onOpenWay(walk.way.id, null) }
                 }
             }
         }
@@ -260,14 +281,87 @@ private fun WayRow(way: Way, pace: Double?, format: MeasureFormatter, onClick: (
     }
 }
 
-/** A way finished or left: its name, and when, or where it was left. */
+/**
+ * A city walk: its small map (with the part walked, once begun), its city and route, its
+ * length and places, and where it stands: under way, or when it was last walked to its end.
+ */
+@Composable
+private fun WalkRow(walk: WalkView, state: WaysUiState, format: MeasureFormatter, onClick: () -> Unit) {
+    val way = walk.way
+    val current = walk.current?.progress
+    val walked = walk.live?.session?.let { WalkPlaces.along(it) } ?: current?.walkedMeters
+    val status = when {
+        walked != null -> stringResource(
+            R.string.ways_row_walk_under_way,
+            wayProgressText(way, walked, format),
+        )
+
+        walk.lastFinished != null -> stringResource(
+            R.string.ways_row_walk_walked,
+            dayText(walk.lastFinished.journey.endedEpochDay ?: state.today.toEpochDay(), state.today),
+        )
+
+        else -> null
+    }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick, role = Role.Button)
+            .padding(horizontal = ScreenMargin, vertical = 14.dp)
+            .testTag(WaysTags.way(way.id)),
+    ) {
+        WayMapView(
+            way = way,
+            walkedMeters = walked,
+            reached = walked?.let { at -> way.stops.count { it.distanceMeters <= at } } ?: 0,
+            contentDescription = "",
+            detailed = false,
+            ratio = 1f,
+            modifier = Modifier.size(THUMBNAIL),
+        )
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(stringResource(wayNameRes(way.id)), style = MaterialTheme.typography.bodyLarge)
+            Text(
+                stringResource(wayRouteRes(way.id)),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = stringResource(
+                    R.string.ways_row_facts,
+                    format.distance(way.lengthMeters.toDouble()).text(),
+                    wayStages(way),
+                ),
+                style = MaterialTheme.typography.bodySmall.copy(fontFeatureSettings = "tnum"),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            status?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall.copy(fontFeatureSettings = "tnum"),
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
+        Icon(PassoIcons.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+/** A way finished or left, or a city walked to its end: its name, and when, or where it was left. */
 @Composable
 private fun PastRow(view: JourneyView, state: WaysUiState, format: MeasureFormatter, onClick: () -> Unit) {
     val journey = view.journey
     val start = dayText(journey.startEpochDay, state.today)
     val end = dayText(journey.endedEpochDay ?: state.today.toEpochDay(), state.today)
     val line = if (journey.state == WayJourneyState.FINISHED) {
-        stringResource(R.string.ways_row_walked, start, end)
+        // A city walked in a day is walked "on" it, not "from" it "to" it.
+        if (start == end) {
+            stringResource(R.string.ways_row_walk_walked, end)
+        } else {
+            stringResource(R.string.ways_row_walked, start, end)
+        }
     } else {
         stringResource(R.string.ways_row_left, end, wayProgressText(view.progress, format))
     }
@@ -332,6 +426,10 @@ object WaysTags {
     const val ACTIVE = "ways_active"
     const val CATALOGUE = "ways_catalogue"
     const val YOURS = "ways_yours"
+    const val CITIES = "ways_cities"
+    const val WALK_START = "walk_start"
+    const val WALK_AGAIN = "walk_again"
+    const val WALK_VOICE = "walk_voice"
     const val CREDIT = "ways_credit"
     const val PAGE = "way_page"
     const val START = "way_start"

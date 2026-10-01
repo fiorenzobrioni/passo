@@ -23,7 +23,8 @@ import java.io.File
 
 /**
  * The README's pictures of the Ways (docs/screenshots), from the sample days of the tests: the
- * Francigena under way since March, past Monteriggioni. Run with `-PupdateScreenshots`;
+ * Francigena under way since March, past Monteriggioni; London walked today, past the London
+ * Eye. Run with `-PupdateScreenshots`;
  * skipped otherwise.
  */
 @RunWith(AndroidJUnit4::class)
@@ -66,6 +67,17 @@ class ReadmeScreenshots {
         }
         compose.onNodeWithTag(WaysTags.START).performClick()
         save("way-start")
+    }
+
+    /** London during a walk: the map with the reader's point past the London Eye, the outing's card. */
+    @Test
+    fun walk() {
+        compose.setContent {
+            PassoTheme {
+                WayScreen(WaysSamples.state(), WayId.LONDON_PALACE_TOWER, null, onBack = {}, actions = WayActions())
+            }
+        }
+        save("walk")
     }
 
     private fun save(name: String) {
