@@ -25,7 +25,8 @@ moves with the distance their steps measure.
    place is snapped to the route and must lie within 150 m of it, in order. Milan is 9.3 km with
    14 places, London 10.7 km with 17 (fewer than the twenty first planned: every place on the
    route, and nothing added to fill a count). Rome, Paris and Madrid followed (2 Oct 2026): 9.6 km
-   with 15 places, 10.4 km with 14, 9.6 km with 14.
+   with 15 places, 10.4 km with 14, 9.6 km with 14; then Lima's historic centre (10.1 km, 15) and
+   Cusco (9.4 km, 12), whose map has parks and no water.
 3. **The city behind the line is OpenStreetMap too**: the water (the Thames, the Darsena) as
    areas, the canals (the Navigli) as lines drawn as wide as they are (`riverWidthMeters`, with
    `WayProjection.pixelsPerMeter`), the largest parks as areas, never a street grid. Parks are a
@@ -71,8 +72,9 @@ moves with the distance their steps measure.
 - No new permission, no new dependency, no new wake: an outing on a walk is an ordinary outing
   (ADR 0009). The APK grows by a few tens of kilobytes of encoded lines.
 - Rome, Paris and Madrid were content only, as foreseen: a `Walk` in `tools/ways_content.py`
-  each, its route fetched and committed, its places' sentences checked in two languages. The five
-  cities are the set (owner); a city's second walk would be the same, with the second level of
-  the page (decision 1) still to build.
+  each, its route fetched and committed, its places' sentences checked in two languages; so
+  were Lima and Cusco. The set has no limit (owner). A city's second walk would be the same, with
+  the second level of the page (decision 1) still to build; a coastal walk (Lima's Costa Verde)
+  also needs a sea built from OpenStreetMap's coastline, which the script does not do yet.
 - To be checked on a device (owner): Milan in one outing and London over two, the voice through
   headphones and with the screen off, once on a treadmill.

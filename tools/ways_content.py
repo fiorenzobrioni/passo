@@ -10,7 +10,8 @@ the line or out of order.
 
 Every note is one sentence, made to be read in a notification and heard, with nothing that
 goes stale (no opening hours, no prices). Each was checked when written (1 Oct 2026; the fifth
-way and Rome, Paris and Madrid on 2 Oct 2026); the source is the line after it.
+way and Rome, Paris and Madrid on 2 Oct 2026, Lima and Cusco after them); the source is the
+line after it.
 """
 
 from dataclasses import dataclass, field
@@ -794,7 +795,145 @@ MADRID = Walk(
     ],
 )
 
-WALKS = [MILAN, ROME, PARIS, LONDON, MADRID]
+LIMA = Walk(
+    id="LIMA_SAN_MARTIN_RESERVA",
+    city="lima",
+    city_en="Lima",
+    city_it="Lima",
+    route_en="The historic centre, from Plaza San Martín to the Parque de la Reserva",
+    route_it="Il centro storico, da Plaza San Martín al Parque de la Reserva",
+    outing_en="A walk in Lima",
+    outing_it="Passeggiata a Lima",
+    country="PE",
+    water=["way/367932671", "way/402037791", "way/402037790", "way/402037789"],
+    parks=["way/39413088", "relation/12175742", "way/44364384", "way/117755695", "way/172243636"],
+    stops=[
+        Stop("lima_plaza_san_martin", "Plaza San Martín", "Plaza San Martín", -12.0517, -77.0346,
+             note_en="Opened on 27 July 1921 for the centenary of independence, it honours the liberator José de San Martín.",
+             note_it="Inaugurata il 27 luglio 1921 per il centenario dell'indipendenza, onora il liberatore José de San Martín."),
+        # Source: Wikipedia, Plaza San Martín (Lima); Wikipedia (es), Plaza San Martín (Lima).
+        Stop("lima_jiron_union", "Jirón de la Unión", "Jirón de la Unión", -12.0490, -77.0332,
+             note_en="The street joins Lima's two great squares, in a historic centre that is a UNESCO World Heritage Site.",
+             note_it="La via unisce le due grandi piazze di Lima, in un centro storico patrimonio dell'umanità UNESCO."),
+        # Source: Wikipedia (es), Jirón de la Unión; Wikipedia, Historic Centre of Lima.
+        Stop("lima_plaza_de_armas", "Plaza de Armas", "Plaza de Armas", -12.0461, -77.0303,
+             note_en="Francisco Pizarro founded Lima on this square on 18 January 1535, as the City of the Kings.",
+             note_it="Francisco Pizarro fondò Lima su questa piazza il 18 gennaio 1535, come Città dei Re."),
+        # Source: Wikipedia, Plaza Mayor, Lima; Wikipedia (es), Plaza Mayor de Lima.
+        Stop("lima_cathedral", "Cathedral of Lima", "Cattedrale di Lima", -12.0466, -77.0296,
+             note_en="Pizarro laid its first stone in 1535; the cathedral took its present form between 1602 and 1797.",
+             note_it="Pizarro ne posò la prima pietra nel 1535; la cattedrale prese la forma di oggi tra il 1602 e il 1797."),
+        # Source: Wikipedia, Cathedral of Lima; Wikipedia (es), Catedral de Lima.
+        Stop("lima_government_palace", "Government Palace", "Palazzo del Governo", -12.0453, -77.0302,
+             note_en="The president's palace stands on the plot Pizarro kept for his own house when he founded the city.",
+             note_it="Il palazzo del presidente sorge sul terreno che Pizarro tenne per la sua casa quando fondò la città."),
+        # Source: Wikipedia, Government Palace (Peru); Wikipedia (es), Palacio de Gobierno del Perú.
+        Stop("lima_casa_aliaga", "Casa de Aliaga", "Casa de Aliaga", -12.0445, -77.0303,
+             note_en="Built for Jerónimo de Aliaga in 1536, it has been home to the same family for seventeen generations.",
+             note_it="Costruita per Jerónimo de Aliaga nel 1536, è la casa della stessa famiglia da diciassette generazioni."),
+        # Source: Wikipedia, Casa de Aliaga; Wikipedia (es), Casa de Aliaga.
+        Stop("lima_santo_domingo", "Santo Domingo", "Santo Domingo", -12.0439, -77.0318,
+             note_en="The University of San Marcos, founded in 1551, grew out of the lessons first given in this convent.",
+             note_it="L'Università di San Marcos, fondata nel 1551, nacque dalle lezioni tenute in questo convento."),
+        # Source: Wikipedia, National University of San Marcos.
+        Stop("lima_puente_de_piedra", "Puente de Piedra", "Puente de Piedra", -12.0429, -77.0297,
+             note_en="Built in 1610, after a flood of the Rímac had carried away the bridge before it.",
+             note_it="Costruito nel 1610, dopo che una piena del Rímac aveva portato via il ponte precedente."),
+        # Source: Wikipedia (es), Puente de Piedra (Lima).
+        Stop("lima_alameda_descalzos", "Alameda de los Descalzos", "Alameda de los Descalzos", -12.0357, -77.0258,
+             note_en="Laid out in 1611, the avenue copies the Alameda de Hércules of Seville.",
+             note_it="Tracciato nel 1611, il viale riprende l'Alameda de Hércules di Siviglia."),
+        # Source: Wikipedia, Alameda de los Descalzos; Wikipedia (es), Alameda de los Descalzos.
+        Stop("lima_muralla", "Parque de la Muralla", "Parque de la Muralla", -12.0446, -77.0263,
+             note_en="The park keeps a stretch of the walls built against pirates in the 1680s, which never saw a battle.",
+             note_it="Il parco conserva un tratto delle mura costruite contro i pirati negli anni Ottanta del Seicento, che non videro mai una battaglia."),
+        # Source: Wikipedia, Walls of Lima; Wikipedia (es), Parque de La Muralla.
+        Stop("lima_san_francisco", "San Francisco", "San Francisco", -12.0456, -77.0272,
+             note_en="Its catacombs were the city's cemetery in colonial times; the convent is a UNESCO World Heritage Site.",
+             note_it="Le sue catacombe erano il cimitero della città in epoca coloniale; il convento è patrimonio dell'umanità UNESCO."),
+        # Source: Wikipedia, Basilica and Convent of San Francisco, Lima; Wikipedia, Historic Centre of Lima.
+        Stop("lima_barrio_chino", "Chinatown", "Quartiere cinese", -12.0513, -77.0253,
+             note_en="Lima's Chinatown made the chifas famous, as Peru calls its Chinese restaurants.",
+             note_it="Il quartiere cinese di Lima ha reso famosi i chifa, come in Perù si chiamano i ristoranti cinesi."),
+        # Source: Wikipedia, Barrio Chino (Lima); Wikipedia (es), Barrio chino de Lima.
+        Stop("lima_palace_of_justice", "Palace of Justice", "Palazzo di Giustizia", -12.0576, -77.0350,
+             note_en="Opened in 1939, it was modelled on the Palace of Justice in Brussels.",
+             note_it="Inaugurato nel 1939, fu ispirato al Palazzo di Giustizia di Bruxelles."),
+        # Source: Wikipedia, Palace of Justice, Lima; Wikipedia (es), Palacio de Justicia del Perú.
+        Stop("lima_mali", "Lima Art Museum", "Museo d'Arte di Lima", -12.0608, -77.0368,
+             note_en="The museum is in the Palacio de la Exposición, built for Lima's International Exhibition of 1872.",
+             note_it="Il museo è nel Palacio de la Exposición, costruito per l'Esposizione internazionale di Lima del 1872."),
+        # Source: Wikipedia, Museo de Arte de Lima; Wikipedia (es), Museo de Arte de Lima.
+        Stop("lima_parque_de_la_reserva", "Parque de la Reserva", "Parque de la Reserva", -12.0705, -77.0337,
+             note_en="Named for the reservists who defended Lima in the War of the Pacific, at San Juan and Miraflores.",
+             note_it="Prende il nome dai riservisti che difesero Lima nella guerra del Pacifico, a San Juan e Miraflores."),
+        # Source: Wikipedia (es), Parque de la Reserva.
+    ],
+)
+
+CUSCO = Walk(
+    id="CUSCO_ARMAS_QORIKANCHA",
+    city="cusco",
+    city_en="Cusco",
+    city_it="Cusco",
+    route_en="From the Plaza de Armas up to Sacsayhuamán, and down to the Qorikancha",
+    route_it="Dalla Plaza de Armas su a Sacsayhuamán, e giù fino al Qorikancha",
+    outing_en="A walk in Cusco",
+    outing_it="Passeggiata a Cusco",
+    country="PE",
+    # No water: the rivers of the old centre run in channels, mostly covered, and the Huatanay
+    # begins south of the map.
+    parks=["way/83130621"],
+    stops=[
+        Stop("cusco_plaza_de_armas", "Plaza de Armas", "Plaza de Armas", -13.5168, -71.9789,
+             note_en="This was the heart of the Inca capital; the City of Cusco has been a UNESCO World Heritage Site since 1983.",
+             note_it="Qui batteva il cuore della capitale inca; la città di Cusco è patrimonio dell'umanità UNESCO dal 1983."),
+        # Source: Wikipedia, Cusco; Wikipedia (es), Plaza Regocijo (the Inca square).
+        Stop("cusco_compania", "La Compañía", "La Compañía", -13.5175, -71.9781,
+             note_en="The Jesuits built their church on Amarucancha, the palace of the Inca Huayna Capac.",
+             note_it="I gesuiti costruirono la loro chiesa sull'Amarucancha, il palazzo dell'inca Huayna Cápac."),
+        # Source: Wikipedia (es), Iglesia de la Compañía de Jesús (Cusco).
+        Stop("cusco_cathedral", "Cathedral of Cusco", "Cattedrale di Cusco", -13.5162, -71.9781,
+             note_en="In its Last Supper, attributed to Marcos Zapata, a guinea pig is on the table.",
+             note_it="Nella sua Ultima Cena, attribuita a Marcos Zapata, in tavola c'è un porcellino d'India."),
+        # Source: Wikipedia, Marcos Zapata.
+        Stop("cusco_twelve_angled_stone", "Twelve-angled stone", "Pietra dei dodici angoli", -13.5157, -71.9762,
+             note_en="In Hatun Rumiyoc street, the stone of twelve angles is set in the wall of an Inca palace.",
+             note_it="In calle Hatun Rumiyoc, la pietra dei dodici angoli è incastonata nel muro di un palazzo inca."),
+        # Source: Wikipedia, Twelve-angled stone; Wikipedia (es), Piedra de los doce ángulos.
+        Stop("cusco_san_blas", "San Blas", "San Blas", -13.5152, -71.9742,
+             note_en="The church of San Blas keeps a pulpit carved in cedar, a marvel of Churrigueresque woodwork.",
+             note_it="La chiesa di San Blas custodisce un pulpito intagliato nel cedro, una meraviglia di intaglio churrigueresco."),
+        # Source: Wikipedia (es), Iglesia de San Blas (Cusco).
+        Stop("cusco_sacsayhuaman", "Sacsayhuamán", "Sacsayhuamán", -13.5085, -71.9820,
+             note_en="Its largest stone weighs over a hundred tonnes; the Inti Raymi, the Inca feast of the sun, is held nearby every 24 June.",
+             note_it="La sua pietra più grande pesa oltre cento tonnellate; qui vicino si celebra ogni 24 giugno l'Inti Raymi, la festa inca del sole."),
+        # Source: Wikipedia, Sacsayhuamán.
+        Stop("cusco_cristo_blanco", "Cristo Blanco", "Cristo Blanco", -13.5098, -71.9779,
+             note_en="The white Christ, eight metres tall, was a gift to the city from its Palestinian Christians, in 1945.",
+             note_it="Il Cristo bianco, alto otto metri, fu un regalo alla città dei cristiani palestinesi, nel 1945."),
+        # Source: Wikipedia (es), Cristo Blanco.
+        Stop("cusco_qenqo", "Q'enqo", "Q'enqo", -13.5091, -71.9704,
+             note_en="An Inca huaca, a sacred place carved into the rock, with a shrine hollowed out beneath it.",
+             note_it="Una huaca inca, un luogo sacro scolpito nella roccia, con un santuario scavato al di sotto."),
+        # Source: Wikipedia, Kenko.
+        Stop("cusco_san_cristobal", "San Cristóbal", "San Cristóbal", -13.5134, -71.9802,
+             note_en="Paullu Inca, brother of Atahualpa, founded this church; his remains were found beneath it in 2007.",
+             note_it="Paullu Inca, fratello di Atahualpa, fondò questa chiesa; i suoi resti vi furono trovati sotto nel 2007."),
+        # Source: Wikipedia (es), Iglesia de San Cristóbal (Cusco).
+        Stop("cusco_plaza_regocijo", "Plaza Regocijo", "Plaza Regocijo", -13.5170, -71.9802,
+             note_en="Its Quechua name, Kusipata, means the place of joy; it was part of the great Inca square.",
+             note_it="Il suo nome quechua, Kusipata, significa luogo della gioia; faceva parte della grande piazza inca."),
+        # Source: Wikipedia (es), Plaza Regocijo.
+        Stop("cusco_san_pedro", "San Pedro Market", "Mercato di San Pedro", -13.5212, -71.9825),
+        Stop("cusco_qorikancha", "Qorikancha", "Qorikancha", -13.5203, -71.9752,
+             note_en="The Incas' Temple of the Sun, once lined with gold; the Dominican convent was built on its walls.",
+             note_it="Il Tempio del Sole degli Inca, un tempo rivestito d'oro; il convento domenicano fu costruito sulle sue mura."),
+        # Source: Wikipedia, Coricancha; Wikipedia (es), Coricancha.
+    ],
+)
+
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, LIMA, CUSCO]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
@@ -803,4 +942,5 @@ LOCATORS = {
     "IBERIA": (35.8, -9.7, 44.0, 3.6),
     "GB": (49.8, -8.4, 59.0, 2.2),
     "FR": (41.3, -5.2, 51.1, 9.6),
+    "PE": (-18.6, -81.6, 0.2, -68.4),
 }

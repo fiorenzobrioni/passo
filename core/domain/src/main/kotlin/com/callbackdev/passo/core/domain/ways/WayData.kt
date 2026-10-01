@@ -23,6 +23,8 @@ internal object WayData {
         WayId.PARIS_VOSGES_EIFFEL -> parisVosgesEiffel()
         WayId.LONDON_PALACE_TOWER -> londonPalaceTower()
         WayId.MADRID_DEBOD_RETIRO -> madridDebodRetiro()
+        WayId.LIMA_SAN_MARTIN_RESERVA -> limaSanMartinReserva()
+        WayId.CUSCO_ARMAS_QORIKANCHA -> cuscoArmasQorikancha()
     }
 
     private fun viaDegliDei() = WaySource(
@@ -1612,6 +1614,133 @@ internal object WayData {
             "ieuuFhttUtA@JXtEVAXdHb@sAj[{XcCg@[M{@O{UDu@CSS]OGa@cApDLJd@^VtALfC@@P",
             "spuuFbftUnBJQxI{DMiEoHr@aArFX",
             "_~suFhooUcAzGu@JB|CX@\\bGbOyBE_QWc@gLP",
+        ),
+        riverWidthMeters = 20.0,
+    )
+
+    private fun limaSanMartinReserva() = WaySource(
+        id = WayId.LIMA_SAN_MARTIN_RESERVA,
+        lengthMeters = 10067,
+        stops = listOf(
+            WayStop("lima_plaza_san_martin", 0, -12.05186, -77.03467, stage = true),
+            WayStop("lima_jiron_union", 446, -12.04898, -77.03319, stage = true),
+            WayStop("lima_plaza_de_armas", 981, -12.04611, -77.03030, stage = true),
+            WayStop("lima_cathedral", 1134, -12.04624, -77.02988, stage = true),
+            WayStop("lima_government_palace", 1292, -12.04531, -77.03029, stage = true),
+            WayStop("lima_casa_aliaga", 1436, -12.04454, -77.03024, stage = true),
+            WayStop("lima_santo_domingo", 1704, -12.04417, -77.03141, stage = true),
+            WayStop("lima_puente_de_piedra", 2044, -12.04291, -77.02965, stage = true),
+            WayStop("lima_alameda_descalzos", 3221, -12.03570, -77.02581, stage = true),
+            WayStop("lima_muralla", 4729, -12.04458, -77.02630, stage = true),
+            WayStop("lima_san_francisco", 5065, -12.04574, -77.02729, stage = true),
+            WayStop("lima_barrio_chino", 5969, -12.05124, -77.02527, stage = true),
+            WayStop("lima_palace_of_justice", 7817, -12.05761, -77.03538, stage = true),
+            WayStop("lima_mali", 8581, -12.06084, -77.03680, stage = true),
+            WayStop("lima_parque_de_la_reserva", 10067, -12.07051, -77.03370, stage = true),
+        ),
+        frame = GeoBox(-12.07329, -77.04035, -12.03291, -77.02093),
+        line = "b{phAtyduM?MPWMDQOAOKCQe@x@kAqAs@gBAQSQIUKPWgBmAmC{GgE_KR_@k@S^i@oDyBiFkJeGoNIMSQMWHMQOoAwAf@}@oA" +
+            "a@Uk@\\m@{@{@e@mAM@OCW[FMO@SUfAn@_BDKMEJOkAs@cBuAdCmDQKYPJYm@dAyAuEyCcH{A~DgFGT[pBpA{CqBqAyCFU[lAcDeEo@W" +
+            "{@HY]aFi@_GyDWoEcJe@oKB]_@cPk@aRoAa@_BnAgDkEdA_C_DGCGFMQaD_BoETe@q@uFmCyHtFlCyHN]e@HDKHU[tAn@iBvAeBuC`An" +
+            "@{Ap@cA{AAy@_An@qBeCpAd@cBx@iCaD?OQCMOzDm@uE`Da@wDbE]{Ev@C_A@KMh@Jo@?BCDBGIv@}@?VYFEKRCWVBYjHxCuJ`Af@uAP" +
+            "V_@JTY@RUCl@q@IFMCJOS?U?GGM?O?FGQ?S?~BiCR?WAh@k@F?GATWG?IAh@k@I?MCHKDRUAJMFRWNCQJHOAVYDNSpAv@kBv@oAiBRL[" +
+            "\\q@}@KT[FDMJOURJYhCqFoHpKrEwNZq@{@TJ[|E}IeMnBj@cCzAh@qBv@_ByB{DbI{KdErB}FkAlCqDhEjB}FWp@{@rDzA}EfDzAuEu" +
+            "@jDcENDQERW?zAcBE@GEFKFHMSnB{Bb@Vq@CLOtHtE_LiAdEeFId@i@dE~BcGDMOFDI?OQDBI?EEVJ]@DGDDInCdBaERFW@DEvAGcBDI" +
+            "KTCY?CEd@Ci@LOWf@Ck@ACE@BEn@As@JLUb@Ai@@DENAQ?NOpDOgENlCyCBLOLR[R@UPHWd@Qm@pAK{Aj@Do@HMSVSa@hAc@{Ap@k@gA" +
+            "^i@y@dA@mA@Z_@{C`BkED~AgBB?C@`@e@Aa@c@vESoFDRUNLWRBWVK]dA~@gBTZe@~AGkBDrA{AnDOcEh@Js@pAIyAAWWhMeAaOJ?O@N" +
+            "QhGa@iHCQUFKOxC[kDGuA_B~AmB_DVK]KkBsBJW]`@wAgBJMSf@Ek@I}@cAf@i@aAPLWJu@y@FNS",
+        land = listOf(
+            "x{vhAr}iuM?gyJ{pJ??fyJ",
+        ),
+        lakes = listOf(
+            "rumhAr}iuM~@eGLkC\\cAXeCt@_CBqCQaGtAmJBsAIiA{CwHc@aEUcAU{EHkBXg@f@c@zIoGvAe@fAq@v@qBTmD@}GSyFAyCZoGx" +
+                "AeEp@oCfH{QdAiE~CwHdFsN\\{ADyA[iL|@cOsA_@e@x[a@rDqArE{GzQiA|EPh@oAbCuBhFqBvFc@fCaAnBYvAMhAChBB~IW~Cb" +
+                "@tJGh@WhAy@|@}HrDe@\\uA`Bi@Xy@rAGf@CbALf@HdCf@nFrAxE`BvDFfAWbCkAfHA~@VjGE^q@xB@jAu@~CUpCu@lDMfB",
+            "p~nhA``auMn@wBpC`DhAlB`AzBbA|D`@nCJnBAzCeB~[sA_@TuFRiBKsDf@yDT}D?_CM}Be@yBoAyDaB_DyBoC",
+            "r|mhAnr`uMBiBbHrArE`@hDj@xAXlDvA~DnCo@vBwC{BgD_BcIiBwE{@aFo@",
+            "bhlhAjc~tMj@pCPpCT`@Z`Db@fBb@|@`@XZjAjAfKZ|ErA`JnAlDxApBlJlFjFbA|MjBChBoDq@yEo@{F_@_DyAgDoBuAy@cAeAo" +
+                "CkF}@kDSaA{AaT_@cBqF}Qu@yE",
+        ),
+        rivers = emptyList(),
+        borders = emptyList(),
+        locatorFrame = GeoBox(-18.60000, -81.60000, 0.20000, -68.40000),
+        locatorLand = listOf(
+            "bucQluahNbpFhvB{aBd{Vkln@}rHumOg|ZraJip`@|nVj_c@fzWrmF",
+            "_af@~jn`L~zvqB??jcyJemf@v~C_oVjkXsobAb|vAmvo@jelAcy|@hiRw~eAd|bCgox@nrdAugQbv~@ar{@dkuBo`Sv~~@gnw@b|" +
+                "pAwiNlbk@ojYjpb@maw@phjBiccBtzrAe{r@pdmAinnAzbn@wgQrfUcac@`q@mtOnoNswJu{Uodw@quMgc[`wFqpjAvku@{l^tjI" +
+                "yzx@lrf@cza@fnMihXfs^o}TxkLqaHtqPaplAjeLoqX~nP}wn@pc~@w{r@laEmec@p_M{_qCnxvAkikChxq@}_mAlwi@s`l@lqPo" +
+                "bW|n@onh@pz^e~d@|}OidhAdhfAyjpArih@{aWhsDszeBxthAyhVnoUirdBfexDceMliOwiUnoFibLidBahK{cMjnHgqRw|Be|Jo" +
+                "~NsjHoeW}C}d^l}J{e{@nzj@keZ{pJk~dAvpk@kybA{lI}`uAklkAcl\\ofQq{l@grx@qp`@wcbAgp_@ike@k_pBarl@_nj@haQg" +
+                "nw@hzBnhNl_I`hu@ypAtkW|yGp{DjkKihCh`Gisf@crCx|cA~hu@wwNrh_@{vk@fzl@cjHvb]grN~dQgrNh~Dw~Tuqd@awZ_|@sx" +
+                "TzNyed@d`Mkso@}pEanz@`vRgjSc|JgwW{cw@sgr@gfRbzE{x`@icF~~Rgci@l`Rgpf@em^oe^iuc@{fg@owP",
+        ),
+        locatorLine = "b{phAtyduMpsBaE",
+        parks = listOf(
+            "xashAjdeuM|AI?Gf@AJO[eFQ[Fm@K_AMMS@iD~@EKwBj@BLwAn@?V[@e@~@I?mAnABL_@@s@\\g@j@Qh@?ZO@@b@I?Bl@H?Hn@@r" +
+                "@JJ~Qq@KyE",
+            "jhthAvtduMY}@_@gF\\QFUTGDDlF]r@FbBh@hA|@l@dA`@zBxBK\\J^~@TpDY\\cARKKUPmOp@ISSyCO]C}@UW_@@",
+            "rnthAhdeuMnEuE|BEzBQJJTQ~@MLFN~AWTDf@MPePrACI",
+            "hnohAzjcuMOZa@NQIKQWANuWD@d@fJr@XTTDX?t@QPFn@YzE",
+            "`mmhA|}buMMYLMN?jThK@JUZgTiK",
+            "tgqhA|kduMyA}@?QhEqH^Ut@NDJgBvCTP}BtDLHIP",
+        ),
+        riverWidthMeters = 20.0,
+    )
+
+    private fun cuscoArmasQorikancha() = WaySource(
+        id = WayId.CUSCO_ARMAS_QORIKANCHA,
+        lengthMeters = 9380,
+        stops = listOf(
+            WayStop("cusco_plaza_de_armas", 0, -13.51680, -71.97891, stage = true),
+            WayStop("cusco_compania", 130, -13.51732, -71.97822, stage = true),
+            WayStop("cusco_cathedral", 356, -13.51620, -71.97814, stage = true),
+            WayStop("cusco_twelve_angled_stone", 682, -13.51591, -71.97608, stage = true),
+            WayStop("cusco_san_blas", 957, -13.51522, -71.97418, stage = true),
+            WayStop("cusco_sacsayhuaman", 2750, -13.50852, -71.98200, stage = true),
+            WayStop("cusco_cristo_blanco", 3421, -13.50970, -71.97777, stage = true),
+            WayStop("cusco_qenqo", 4993, -13.50909, -71.97040, stage = true),
+            WayStop("cusco_san_cristobal", 7060, -13.51356, -71.97988, stage = true),
+            WayStop("cusco_plaza_regocijo", 7589, -13.51700, -71.98020, stage = true),
+            WayStop("cusco_san_pedro", 8260, -13.52105, -71.98225, stage = true),
+            WayStop("cusco_qorikancha", 9380, -13.52020, -71.97497, stage = true),
+        ),
+        frame = GeoBox(-13.52302, -71.98398, -13.50658, -71.96790),
+        line = "~~nqAdkivL?FCIDEG@GG?GICKKPMYNyAcBf@Wq@PZc@Q[e@g@Vq@IFMS]g@wB|AgDYYg@RU_@]Sg@RO]Xb@o@`Aw@}Ak@_AuA" +
+            "d@]u@@@ABCEeAuCsDyB_FuGWi@u@o@cAyA}@gAgBQ[c@b@e@y@VE[NOYGIO@CCAAC@ACEEG@CEEGICBEEEGA@CACCABCIIOFIMUQ_@I@" +
+            "KCAE}@p@wAm@j@eAWQ_@}@z@_Bg@b@w@WTe@G?Go@r@mAa@k@y@L[a@wAs@qBm@]{@MEOqAm@iB_BoC{DgDxBcFOR]Mb@g@ANOBhF}FC" +
+            "h@o@IZ_@K\\a@WXe@ARUITYo@tCiD]r@aA_@l@{@i@`@}@?PQENSK?KEJOAJKDFIEZ]Uz@eAKn@u@Id@i@INU?VYWP_@MPWWf@s@UJ[[" +
+            "H_@k@Dq@IDKAJM?LOOPWOVa@g@Fm@i@Am@SCU@LMJFOxAPgBPJWB^c@XK]PpA{AKxBcCBHK@`@e@Ar@w@@s@w@Aa@c@CIKJyBeCQqAyA" +
+            "YJ_@C_@c@QKWyAQeBKGOAMMRBWh@@m@f@Gm@NW_@NQY?MM@KMHEKj@Es@ZI]TK[Vg@s@LQYVQ_@?WWHOWHe@i@Jo@s@T{@eAD[]EGK@K" +
+            "KDKOJ?KDOQ?QSh@a@{@^m@{@\\s@aAn@uCkDHUY@SSVYe@J]c@H[_@Bi@m@CiF}F@OOLc@i@NS[tE{CcHXWe@JW]@SS@_HyHCWYCGIs@" +
+            "cA{Aw@_A}AU]g@IUY@]a@EEG?EGOKUk@Uw@[K_@g@Gm@aASkA}@WgA{D}AiFs@W_Aw@K}@Q@USBUq@R{@UBWFPSFFMZTe@Pn@y@Lh@o@" +
+            "NHSRz@eAVH[@@CHDKJMUVQ_@RGY?^a@DPUEQU?_@a@SFYWP_@KLUIEKAACWI[S{@eAOISMi@o@Qo@y@[Ue@GGMGQSTCWp@S{@RCUPAUv" +
+            "@J}@r@V_AzD|AiF|@ViA`ARiAf@Fm@ZJ_@j@Tw@NJU?DGDDGA\\a@HTYT\\g@v@~@}Ar@bA{ABFIBVYA~GyHARSKV]YVe@m@`@}@~AnC" +
+            "}DpAl@gBLDOl@\\}@vAr@oBMZa@`@j@{@D?GpB|BwDyA`BqCfBxAuCoAl@cBhArCsDEDIzAvD_FaCt@{CjAhDiEi@Vs@UFY_AQkA~@Pi" +
+            "ATG[h@Ws@v@I_APCSROYTSa@PR]pDcDiG@@AEDId@d@y@pBpBoDDEG@HKZd@q@Vd@q@BCGDHKMFOh@Bm@@LOJDOF?IBACFIOd@Hi@RIY" +
+            "HNS~BmAeDd@Kk@jCnFoHj@dAyAr@jAeBfCvEsGvGwDqJr@c@cAFIMqE{DwHwBoCkEiEoE}HjCeCsEeB}BoDKOUmAcCgDfBiAmCfBwAsC" +
+            "FGK@GI?EEWu@aAS}@cAAUYBa@c@@CEbA]qA",
+        land = listOf(
+            "x}pqA`fkvL?{yCsuC??zyC",
+        ),
+        lakes = emptyList(),
+        rivers = emptyList(),
+        borders = emptyList(),
+        locatorFrame = GeoBox(-18.60000, -81.60000, 0.20000, -68.40000),
+        locatorLand = listOf(
+            "bucQluahNbpFhvB{aBd{Vkln@}rHumOg|ZraJip`@|nVj_c@fzWrmF",
+            "_af@~jn`L~zvqB??jcyJemf@v~C_oVjkXsobAb|vAmvo@jelAcy|@hiRw~eAd|bCgox@nrdAugQbv~@ar{@dkuBo`Sv~~@gnw@b|" +
+                "pAwiNlbk@ojYjpb@maw@phjBiccBtzrAe{r@pdmAinnAzbn@wgQrfUcac@`q@mtOnoNswJu{Uodw@quMgc[`wFqpjAvku@{l^tjI" +
+                "yzx@lrf@cza@fnMihXfs^o}TxkLqaHtqPaplAjeLoqX~nP}wn@pc~@w{r@laEmec@p_M{_qCnxvAkikChxq@}_mAlwi@s`l@lqPo" +
+                "bW|n@onh@pz^e~d@|}OidhAdhfAyjpArih@{aWhsDszeBxthAyhVnoUirdBfexDceMliOwiUnoFibLidBahK{cMjnHgqRw|Be|Jo" +
+                "~NsjHoeW}C}d^l}J{e{@nzj@keZ{pJk~dAvpk@kybA{lI}`uAklkAcl\\ofQq{l@grx@qp`@wcbAgp_@ike@k_pBarl@_nj@haQg" +
+                "nw@hzBnhNl_I`hu@ypAtkW|yGp{DjkKihCh`Gisf@crCx|cA~hu@wwNrh_@{vk@fzl@cjHvb]grN~dQgrNh~Dw~Tuqd@awZ_|@sx" +
+                "TzNyed@d`Mkso@}pEanz@`vRgjSc|JgwW{cw@sgr@gfRbzE{x`@icF~~Rgci@l`Rgpf@em^oe^iuc@{fg@owP",
+        ),
+        locatorLine = "~~nqAdkivLfTsW",
+        parks = listOf(
+            "j|mqAtpivLArCi@n@wDbGQtF}@zAqCrBwA|B}@l@sCz@Y@KOCGD[xBeBVq@Ow@cBu@iBYmBCg@FyBt@_@EYMB}@Ry@EkA]y@}G{H" +
+                "a@EaCGc@]IO?eJbAsAx@Ij@eANaA^STb@KnGRn@h@`@`FZ^Ct@g@e@S_@]I[?i@l@wA|C_Gn@yAhAoBt@k@~@a@v@I@H|@A@IdAN" +
+                "xC~@tAZp@@vAYo@|Cg@`Ag@r@YjBk@vBYXKT_Ad@?dAVPlAg@lBEfBi@bCUP|B",
         ),
         riverWidthMeters = 20.0,
     )

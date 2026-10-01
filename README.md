@@ -90,7 +90,7 @@ Italian). The phone's status bar is not in the pictures. The command that redraw
 - 🎯 **Outings**: a walk or run with a goal, with vibrations or a voice at the milestones you choose.
 - 🏆 **Insights**: your streak, your best day, week and month, and the averages.
 - 🗺️ **Ways**: five pilgrim ways (Via degli Dei, Camino Portugués, Via di Francesco, Camino de Santiago, Via Francigena) walked from home, stage by stage, with a stamp for each. No location: only your distance.
-- 🏛️ **City walks**: Milan, Rome, Paris, London and Madrid, walked where you are in one outing or a few. Each place is told as your steps reach it, with a short vibration and, if you like, a line about it in your headphones.
+- 🏛️ **City walks**: Milan, Rome, Paris, London, Madrid, Lima and Cusco, walked where you are in one outing or a few. Each place is told as your steps reach it, with a short vibration and, if you like, a line about it in your headphones.
 - 📏 **Measure your step**: walk a distance you know and Passo works out your step length. No GPS.
 - 🏠 **Two widgets**: At a glance and In words, resizable, in six colours and any opacity.
 - 🔔 **Notifications**: goal reached, an evening reminder, a weekly summary. Each one optional.

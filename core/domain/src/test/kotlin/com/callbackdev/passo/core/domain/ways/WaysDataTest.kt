@@ -26,11 +26,13 @@ class WaysDataTest {
                 WayId.PARIS_VOSGES_EIFFEL,
                 WayId.LONDON_PALACE_TOWER,
                 WayId.MADRID_DEBOD_RETIRO,
+                WayId.LIMA_SAN_MARTIN_RESERVA,
+                WayId.CUSCO_ARMAS_QORIKANCHA,
             )
             .inOrder()
-        // The owner's five, and no more planned (PLANNING.md §11 Phase 11, later).
+        // One walk a city for now (PLANNING.md §11 Phase 11, later).
         assertThat(Ways.walks.map { it.id.city })
-            .containsExactly("milan", "rome", "paris", "london", "madrid")
+            .containsExactly("milan", "rome", "paris", "london", "madrid", "lima", "cusco")
             .inOrder()
     }
 
