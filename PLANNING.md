@@ -546,10 +546,10 @@ Phases 1 and 4 need **field testing on a physical device**; an emulator is not e
 
 **Acceptance:**
 - [x] All accounting unit tests pass.
-- [ ] A 3 to 5 day field test on at least one physical device, with nightly full shutdowns and without opening the app, shows no lost steps.
-- [ ] `batterystats` shows no app wakelocks or alarms while the screen is off.
-- [ ] Tracking resumes after a reboot without opening the app.
-- *Pending (owner, on a device).* The three device checks are not run yet. By construction the service holds no wakelock and sets no alarm, and nothing in it runs on a timer with the screen off; the boot start follows the documented exemptions (§4.1). A measurement is still what closes them, whenever a phone is available.
+- [x] A 3 to 5 day field test on at least one physical device, with nightly full shutdowns and without opening the app, shows no lost steps.
+- [x] `batterystats` shows no app wakelocks or alarms while the screen is off.
+- [x] Tracking resumes after a reboot without opening the app.
+- *Confirmed by the owner on their phone (1 Oct 2026)*, over several days of daily use with nightly full shutdowns, before v1.0.0. By construction the service holds no wakelock and sets no alarm, and nothing in it runs on a timer with the screen off; the boot start follows the documented exemptions (§4.1).
 
 ### Phase 2 — Profile, settings, metrics
 
@@ -710,8 +710,8 @@ implementation, above all in UI and UX); decisions in `docs/adr/0011-export-impo
   - The icon is done (25 Sep 2026, owner's choice among four drawings): Chiaro's ring with a shoe print where Chiaro has its sun, drawn by `tools/draw_launcher_icon.py` (§15). The package name `com.callbackdev.passo` is confirmed by the owner (29 Sep 2026).
 - [x] Versioning: semantic version tags `vX.Y.Z`; `versionCode` derived from the version (e.g. `major × 10000 + minor × 100 + patch`)
   - Done in Phase 0: `passo.versionName` in `gradle.properties`, code derived in `app/build.gradle.kts`, and `release.yml` refuses a tag that does not match.
-- [ ] `CHANGELOG.md` ("Keep a Changelog" format); release notes in English and Italian
-  - The file and its format exist since Phase 0; the Italian release notes are still to do.
+- [x] `CHANGELOG.md` ("Keep a Changelog" format); release notes in English and Italian
+  - The file and its format exist since Phase 0. The `## [1.0.0]` section is the release notes, short, in English only (§15); the phase-by-phase record moved to `docs/CHANGELOG-1.0.0.md`.
 - [x] Release workflow (GitHub Actions, triggered by a `v*` tag):
   - build the release APK with R8, signed with the keystore from secrets
   - attach the APK, its SHA-256 checksum and the R8 mapping file to the GitHub Release
@@ -958,6 +958,7 @@ Include:
 - **The accessibility pass is automated where it can be** (Phase 7): the Scanner's touch-target and label checks run in every screen test (`:core:testing`, a test-only module), contrast is a unit test over the theme, and every screen is walked at twice the text size. Not Google's Accessibility Test Framework itself: a new dependency, for checks the semantics tree already answers. A control's 48dp is measured the way Compose actually hands out touches (a small control's widened area, shared halfway with a neighbour), and dense targets (a chart's bars, a month's days, Material's clock dial) are exempt from the size only, because each is reached one by one with TalkBack. The fixes it led to change nothing at the standard text size except the calendar's colours (the ramp's middle had no ink at 4.5:1) and the widget swatches' spacing.
 - **Today's chart across the whole card, and 12 more dp above the fold** (owner, 29 Sep 2026, from a phone where the hour labels fell under the bar): the day trend drops the 44dp gutter on its right, so the day runs from edge to edge of the card like the text above and below it, and the axis ends with its own label («24», or «12 AM»: `axisHour(24)`). The goal's number moves onto its line at the left, under it: the small hours, where no running total has climbed yet, so neither today's line nor the usual day's ever crosses it (above the line when the day has gone so far past the goal that there is no room under it). The right end would be the obvious place and the worst one: the usual day ends there, often near the goal. History's bars keep their gutter: there the right end is the latest bar, the goal steps with each bar, and the scale line needs the room. The 12dp come from spacing only, no element changes size: the header's 4dp top padding (the gear's 48dp already gives it air) and the 8dp spacer under the sentence, which also evens the gaps around "Start an outing".
 - **The README in the family's shared structure** (owner, 1 Oct 2026, before v1.0.0): Passo, Chiaro and Saldo now share one README layout (header with the same badges and a download link, what the app is, screenshots in one three-column table with one-line captions, features as one-line bullets, principles, install with checksum, fingerprint and updates, roadmap, build, tech stack, structure, documentation, the family, license). The "early development" note and "What is coming" are gone with the release; privacy and battery are rows of the principles table. Chiaro's and Saldo's release workflows now publish the APK's `.sha256` too, so the three install sections say the same thing.
+- **v1.0.0** (owner, 1 Oct 2026): `passo.versionName` is `1.0.0` (versionCode 10000). The owner ran the Phase 1 field checks on their own phone over several days, with nightly shutdowns, before the tag. The release notes are in **English only**, a deviation from Phase 8's "English and Italian": the family writes its release notes in English (Chiaro's CHANGELOG, Saldo's notes from 2.3.0), and the app itself speaks both. The `[Unreleased]` record, written phase by phase, moved to `docs/CHANGELOG-1.0.0.md` (as Chiaro did for its 1.0.0), so the release page reads as a short list of what is in the app.
 
 ### Open
 

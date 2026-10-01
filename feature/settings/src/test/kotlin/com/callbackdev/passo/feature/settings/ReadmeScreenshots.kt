@@ -70,7 +70,7 @@ class ReadmeScreenshots {
         val state = SettingsUiState(
             settings = UserSettings(dailyGoalSteps = 10_000, units = UnitPreference.METRIC),
             profile = Profile(heightMeters = 1.78, weightKg = 74.0),
-            version = "0.1.0",
+            version = "1.0.0",
         )
         compose.setContent { PassoTheme { SettingsScreen(state, onBack = {}, actions = SettingsActions()) } }
         compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasText("Wallpaper colors"))
@@ -95,7 +95,7 @@ class ReadmeScreenshots {
                 weeklySummary = true,
             ),
             profile = Profile(heightMeters = 1.78, weightKg = 74.0),
-            version = "0.1.0",
+            version = "1.0.0",
         )
         compose.setContent { PassoTheme { SettingsScreen(state, onBack = {}, actions = SettingsActions()) } }
         compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(SettingsTags.WEEKLY_SUMMARY))
@@ -128,7 +128,7 @@ class ReadmeScreenshots {
         val state = SettingsUiState(
             settings = UserSettings(dailyGoalSteps = 10_000, units = UnitPreference.METRIC),
             profile = Profile(heightMeters = 1.78, weightKg = 74.0),
-            version = "0.1.0",
+            version = "1.0.0",
         )
         val data = DataUiState(
             contents = DataContents(days = 412, outings = 38),
@@ -147,7 +147,7 @@ class ReadmeScreenshots {
         val state = SettingsUiState(
             settings = UserSettings(dailyGoalSteps = 10_000, units = UnitPreference.METRIC),
             profile = Profile(),
-            version = "0.1.0",
+            version = "1.0.0",
         )
         val first = LocalDate.of(2025, 8, 9).toEpochDay()
         val last = LocalDate.of(2026, 9, 25).toEpochDay()
@@ -155,7 +155,7 @@ class ReadmeScreenshots {
             exportedAtMillis = LocalDate.of(2026, 9, 25).atTime(21, 40).atZone(ZoneId.systemDefault())
                 .toInstant().toEpochMilli(),
             zone = "Europe/Rome",
-            appVersion = "0.1.0",
+            appVersion = "1.0.0",
             profile = Profile(),
             settings = UserSettings(),
             days = (first..last).map { BackupDay(DailySummary(it, 9_000, 0.0, 0.0, 0, 0, 10_000, true), emptyList()) },
