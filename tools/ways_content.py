@@ -9,8 +9,9 @@ way and measures its distance from there, and fails if a stop is more than MAX_S
 the line or out of order.
 
 Every note is one sentence, made to be read in a notification and heard, with nothing that
-goes stale (no opening hours, no prices). Each was checked when written (1 Oct 2026); the
-source is the line after it.
+goes stale (no opening hours, no prices). Each was checked when written (1 Oct 2026; the fifth
+way and Rome, Paris and Madrid on 2 Oct 2026, Lima and Cusco after them); the source is the
+line after it.
 """
 
 from dataclasses import dataclass, field
@@ -36,7 +37,7 @@ class Way:
     name_it: str
     route_en: str
     route_it: str
-    country: str  # the locator map's country: IT or ES
+    country: str  # the locator map's country: IT, or IBERIA for Spain and Portugal
     stops: list = field(default_factory=list)
     # Where the relation stops short of the way's traditional end, the last stretch is joined
     # straight (a few hundred metres to a couple of kilometres inside a city).
@@ -82,6 +83,62 @@ VIA_DEGLI_DEI = Way(
         Stop("firenze", "Florence", "Firenze", 43.7696, 11.2558,
              note_en="The way ends in Piazza della Signoria, in front of Palazzo Vecchio.",
              note_it="Il cammino finisce in Piazza della Signoria, davanti a Palazzo Vecchio."),
+    ],
+)
+
+CAMINO_PORTUGUES = Way(
+    id="CAMINO_PORTUGUES",
+    # The Portuguese Way's main relation runs from south of Porto; the line is its shortest path
+    # from Porto's cathedral, where most pilgrims set out, to Santiago (owner, 2 Oct 2026).
+    relations=[12786090],
+    name_en="Camino Portugués",
+    name_it="Cammino Portoghese",
+    route_en="Porto to Santiago de Compostela, by Tui and Pontevedra",
+    route_it="Da Porto a Santiago de Compostela, passando per Tui e Pontevedra",
+    country="IBERIA",
+    stops=[
+        Stop("porto", "Porto", "Porto", 41.1428, -8.6112,
+             note_en="Porto's old centre, from the cathedral down to the Douro, is a UNESCO World Heritage Site.",
+             note_it="Il centro storico di Porto, dalla cattedrale fino al Douro, è patrimonio dell'umanità UNESCO."),
+        # Source: Wikipedia, Porto (the UNESCO site, 1996).
+        Stop("vilarinho", "Vilarinho", "Vilarinho", 41.3386, -8.6819),
+        Stop("barcelos", "Barcelos", "Barcelos", 41.5315, -8.6192,
+             note_en="In Barcelos, the legend goes, a roast cock stood up and crowed to save a pilgrim condemned to hang.",
+             note_it="A Barcelos, dice la leggenda, un gallo arrosto si alzò e cantò per salvare un pellegrino condannato all'impiccagione."),
+        # Source: Wikipedia, Rooster of Barcelos; Wikipedia (pt), Galo de Barcelos.
+        Stop("ponte_de_lima", "Ponte de Lima", "Ponte de Lima", 41.7675, -8.5831,
+             note_en="Ponte de Lima, granted its charter in 1125, is the oldest chartered town in Portugal.",
+             note_it="Ponte de Lima, che ebbe il suo statuto nel 1125, è il più antico borgo del Portogallo con uno statuto."),
+        # Source: Wikipedia, Ponte de Lima; Wikipedia (pt), Ponte de Lima.
+        Stop("rubiaes", "Rubiães", "Rubiães", 41.8978, -8.6249),
+        Stop("valenca", "Valença", "Valença", 42.0273, -8.6404, stage=False,
+             note_en="Valença's walled fortress looks across the Minho at Tui: over the bridge, the way enters Spain.",
+             note_it="La fortezza murata di Valença guarda Tui oltre il Minho: passato il ponte, il cammino entra in Spagna."),
+        # Source: Wikipedia, Valença, Portugal; Wikipedia (es), Valença (Portugal).
+        Stop("tui", "Tui", "Tui", 42.0459, -8.6444,
+             note_en="Tui's cathedral, begun at the end of the 11th century, crowns a town that was long a frontier fortress.",
+             note_it="La cattedrale di Tui, iniziata alla fine dell'XI secolo, domina una città che fu a lungo una fortezza di confine."),
+        # Source: Wikipedia, Tui Cathedral; Wikipedia, Tui, Pontevedra.
+        Stop("o_porrino", "O Porriño", "O Porriño", 42.1641, -8.6222),
+        Stop("redondela", "Redondela", "Redondela", 42.2834, -8.6097,
+             note_en="In 1702, in the strait of Rande below Redondela, an English and Dutch fleet attacked the Spanish treasure fleet.",
+             note_it="Nel 1702, nello stretto di Rande sotto Redondela, una flotta inglese e olandese attaccò la flotta spagnola del tesoro."),
+        # Source: Wikipedia, Battle of Vigo Bay; Wikipedia (es), Batalla de Rande.
+        Stop("pontevedra", "Pontevedra", "Pontevedra", 42.4310, -8.6444,
+             note_en="Pontevedra's chapel of the Pilgrim Virgin is built on the plan of a scallop shell, the pilgrims' sign.",
+             note_it="A Pontevedra la cappella della Vergine Pellegrina ha la pianta di una conchiglia, il segno dei pellegrini."),
+        # Source: Wikipedia, Pontevedra; Wikipedia (es), Iglesia de la Virgen Peregrina.
+        Stop("caldas_de_reis", "Caldas de Reis", "Caldas de Reis", 42.6041, -8.6422,
+             note_en="Caldas de Reis grew around hot springs that the Romans already used.",
+             note_it="Caldas de Reis è cresciuta intorno a sorgenti calde che usavano già i Romani."),
+        # Source: Wikipedia, Caldas de Reis; Wikipedia (es), Caldas de Reyes.
+        Stop("padron", "Padrón", "Padrón", 42.7390, -8.6600,
+             note_en="Here, the legend says, the boat bearing Saint James's body was moored to a stone, the pedrón.",
+             note_it="Qui, dice la leggenda, la barca col corpo di san Giacomo fu legata a una pietra, il pedrón."),
+        # Source: Wikipedia, Padrón.
+        Stop("santiago", "Santiago de Compostela", "Santiago de Compostela", 42.8806, -8.5446,
+             note_en="The way ends in the Praza do Obradoiro, before the cathedral of Santiago.",
+             note_it="Il cammino finisce in Praza do Obradoiro, davanti alla cattedrale di Santiago."),
     ],
 )
 
@@ -154,7 +211,7 @@ CAMINO_FRANCES = Way(
     name_it="Cammino di Santiago",
     route_en="The French Way, Saint-Jean-Pied-de-Port to Santiago de Compostela",
     route_it="Il Cammino Francese, da Saint-Jean-Pied-de-Port a Santiago de Compostela",
-    country="ES",
+    country="IBERIA",
     stops=[
         Stop("saint_jean", "Saint-Jean-Pied-de-Port", "Saint-Jean-Pied-de-Port", 43.1631, -1.2376,
              note_en="Many pilgrims set out from here, at the foot of the Pyrenees.",
@@ -333,7 +390,7 @@ VIA_FRANCIGENA = Way(
     ],
 )
 
-WAYS = [VIA_DEGLI_DEI, VIA_DI_FRANCESCO, CAMINO_FRANCES, VIA_FRANCIGENA]
+WAYS = [VIA_DEGLI_DEI, CAMINO_PORTUGUES, VIA_DI_FRANCESCO, CAMINO_FRANCES, VIA_FRANCIGENA]
 
 
 @dataclass(frozen=True)
@@ -344,7 +401,9 @@ class Walk:
     places, in order, and saved in tools/walks/ by the script's `fetch`: the places are the
     route's waypoints, so each lies on the line. Behind it, the city's water and largest parks,
     from OpenStreetMap objects named here by id ("relation/28934"); canals are lines drawn
-    [canal_width] metres wide.
+    [canal_width] metres wide. With [streets] (the default), the map also has the city's main
+    streets, faint under the route, so the area can be recognised: fetched by tiles over what the
+    page shows, and only the streets kept.
     """
 
     id: str
@@ -361,6 +420,10 @@ class Walk:
     canals: list = field(default_factory=list)
     parks: list = field(default_factory=list)
     canal_width: float = 20.0
+    streets: bool = True
+    # Street classes drawn as minor streets beside the usual ones, for a city mapped mostly in
+    # those (Cusco's old centre is residential lanes).
+    more_streets: tuple = ()
 
 
 MILAN = Walk(
@@ -428,6 +491,155 @@ MILAN = Walk(
              note_en="Begun in 1177, the canal brought the Duomo's marble into the city.",
              note_it="Iniziato nel 1177, il canale portava in città il marmo del Duomo."),
         # Source: Wikipedia, Naviglio Grande.
+    ],
+)
+
+ROME = Walk(
+    id="ROME_COLOSSEUM_VATICAN",
+    city="rome",
+    city_en="Rome",
+    city_it="Roma",
+    route_en="From the Colosseum to St Peter's, by the Pantheon",
+    route_it="Dal Colosseo a San Pietro, passando per il Pantheon",
+    outing_en="A walk in Rome",
+    outing_it="Passeggiata a Roma",
+    country="IT",
+    water=["relation/5071", "way/22797948", "way/22747533"],
+    parks=["relation/2985896", "relation/11384819", "relation/10646138", "way/113038199"],
+    stops=[
+        Stop("rome_colosseum", "The Colosseum", "Il Colosseo", 41.8909, 12.4919,
+             note_en="Opened in AD 80, the Colosseum is the largest amphitheatre of the ancient world.",
+             note_it="Inaugurato nell'80 d.C., il Colosseo è il più grande anfiteatro del mondo antico."),
+        # Source: Wikipedia, Colosseum; Wikipedia (it), Colosseo.
+        Stop("rome_arch_constantine", "Arch of Constantine", "Arco di Costantino", 41.8898, 12.4906,
+             note_en="Raised in 315 for Constantine's victory at the Milvian Bridge, it reuses reliefs from older monuments.",
+             note_it="Eretto nel 315 per la vittoria di Costantino a Ponte Milvio, riusa rilievi di monumenti più antichi."),
+        # Source: Wikipedia, Arch of Constantine; Wikipedia (it), Arco di Costantino.
+        Stop("rome_circus_maximus", "Circus Maximus", "Circo Massimo", 41.8862, 12.4853,
+             note_en="The chariots raced here before crowds of some 150,000; the track is now a long meadow.",
+             note_it="Qui correvano le bighe davanti a circa 150.000 spettatori; oggi la pista è un lungo prato."),
+        # Source: Wikipedia, Circus Maximus.
+        Stop("rome_mouth_of_truth", "Mouth of Truth", "Bocca della Verità", 41.8882, 12.4815,
+             note_en="The old marble mask in the porch of Santa Maria in Cosmedin is said to bite the hand of a liar.",
+             note_it="Il mascherone di marmo nel portico di Santa Maria in Cosmedin, si dice, morde la mano di chi mente."),
+        # Source: Wikipedia, Bocca della Verità; Wikipedia (it), Bocca della Verità.
+        Stop("rome_campidoglio", "Capitoline Hill", "Campidoglio", 41.8933, 12.4828,
+             note_en="Michelangelo designed this square on the Capitoline Hill; its Palazzo Senatorio is still Rome's city hall.",
+             note_it="Michelangelo progettò questa piazza sul Campidoglio; il suo Palazzo Senatorio è ancora il municipio di Roma."),
+        # Source: Wikipedia, Piazza del Campidoglio; Wikipedia (it), Palazzo Senatorio.
+        Stop("rome_vittoriano", "The Vittoriano", "Il Vittoriano", 41.8960, 12.4826,
+             note_en="The white monument to Victor Emmanuel II, first king of united Italy, holds the Tomb of the Unknown Soldier.",
+             note_it="Il monumento bianco a Vittorio Emanuele II, primo re dell'Italia unita, custodisce la tomba del Milite Ignoto."),
+        # Source: Wikipedia, Victor Emmanuel II Monument; Wikipedia (it), Altare della Patria.
+        Stop("rome_trevi", "Trevi Fountain", "Fontana di Trevi", 41.9010, 12.4833,
+             note_en="Finished in 1762, the fountain is fed by the Aqua Virgo, an aqueduct the Romans opened in 19 BC.",
+             note_it="Finita nel 1762, la fontana è alimentata dall'Acqua Vergine, un acquedotto aperto dai Romani nel 19 a.C."),
+        # Source: Wikipedia, Trevi Fountain; Wikipedia (it), Fontana di Trevi.
+        Stop("rome_spanish_steps", "Spanish Steps", "Scalinata di Trinità dei Monti", 41.9057, 12.4822,
+             note_en="Opened for the Jubilee of 1725, the steps climb from Piazza di Spagna to the church of Trinità dei Monti.",
+             note_it="Inaugurata per il Giubileo del 1725, la scalinata sale da Piazza di Spagna alla chiesa di Trinità dei Monti."),
+        # Source: Wikipedia, Spanish Steps; Wikipedia (it), Scalinata di Trinità dei Monti
+        # (they count the steps differently, 135 or 136, so the count is left out).
+        Stop("rome_piazza_del_popolo", "Piazza del Popolo", "Piazza del Popolo", 41.9108, 12.4764,
+             note_en="For centuries travellers from the north entered Rome here; the obelisk came from Egypt under Augustus.",
+             note_it="Per secoli chi veniva dal nord entrava a Roma da qui; l'obelisco arrivò dall'Egitto con Augusto."),
+        # Source: Wikipedia, Piazza del Popolo; Wikipedia (it), Obelisco Flaminio.
+        Stop("rome_ara_pacis", "Ara Pacis", "Ara Pacis", 41.9062, 12.4755,
+             note_en="Augustus's Altar of Peace was consecrated in 9 BC; it stands in a pavilion by Richard Meier, opened in 2006.",
+             note_it="L'Altare della Pace di Augusto fu consacrato nel 9 a.C.; lo protegge un padiglione di Richard Meier, aperto nel 2006."),
+        # Source: Wikipedia, Ara Pacis; Wikipedia (it), Ara Pacis.
+        Stop("rome_pantheon", "The Pantheon", "Il Pantheon", 41.8992, 12.4768,
+             note_en="Nearly two thousand years on, its dome is still the largest of unreinforced concrete in the world.",
+             note_it="Dopo quasi duemila anni, la sua cupola è ancora la più grande del mondo in calcestruzzo non armato."),
+        # Source: Wikipedia, Pantheon, Rome; Wikipedia (it), Pantheon (Roma).
+        Stop("rome_navona", "Piazza Navona", "Piazza Navona", 41.8989, 12.4731,
+             note_en="The square keeps the shape of Domitian's stadium; Bernini's Fountain of the Four Rivers stands in its middle.",
+             note_it="La piazza ha la forma dello stadio di Domiziano; al centro c'è la Fontana dei Quattro Fiumi del Bernini."),
+        # Source: Wikipedia, Piazza Navona; Wikipedia (it), Piazza Navona.
+        Stop("rome_campo_de_fiori", "Campo de' Fiori", "Campo de' Fiori", 41.8956, 12.4722,
+             note_en="The philosopher Giordano Bruno was burned here in 1600; his statue stands in the middle of the square.",
+             note_it="Il filosofo Giordano Bruno fu arso qui nel 1600; la sua statua è al centro della piazza."),
+        # Source: Wikipedia, Campo de' Fiori; Wikipedia (it), Monumento a Giordano Bruno.
+        Stop("rome_castel_sant_angelo", "Castel Sant'Angelo", "Castel Sant'Angelo", 41.9025, 12.4665,
+             note_en="Built as Hadrian's tomb, it became a fortress of the popes, joined to the Vatican by a raised passage.",
+             note_it="Nato come tomba di Adriano, divenne una fortezza dei papi, unita al Vaticano da un passaggio sopraelevato."),
+        # Source: Wikipedia, Castel Sant'Angelo; Wikipedia (it), Passetto di Borgo.
+        Stop("rome_st_peters", "St Peter's Square", "Piazza San Pietro", 41.9022, 12.4574,
+             note_en="Bernini's colonnade, four columns deep, reaches round the square like two open arms.",
+             note_it="Il colonnato del Bernini, profondo quattro colonne, cinge la piazza come due braccia aperte."),
+        # Source: Wikipedia, St. Peter's Square; Wikipedia (it), Piazza San Pietro.
+    ],
+)
+
+PARIS = Walk(
+    id="PARIS_VOSGES_EIFFEL",
+    city="paris",
+    city_en="Paris",
+    city_it="Parigi",
+    route_en="From Place des Vosges to the Eiffel Tower, by the Louvre",
+    route_it="Da Place des Vosges alla Tour Eiffel, passando per il Louvre",
+    outing_en="A walk in Paris",
+    outing_it="Passeggiata a Parigi",
+    country="FR",
+    water=["relation/2191006", "relation/10837211"],
+    parks=["way/53820452", "way/4208595", "way/128206209"],
+    stops=[
+        Stop("paris_vosges", "Place des Vosges", "Place des Vosges", 48.8556, 2.3655,
+             note_en="The oldest planned square in Paris, inaugurated in 1612; Victor Hugo lived at number 6.",
+             note_it="La più antica piazza progettata di Parigi, inaugurata nel 1612; Victor Hugo abitò al numero 6."),
+        # Source: Wikipedia, Place des Vosges; Wikipedia (fr), Place des Vosges.
+        Stop("paris_hotel_de_ville", "Hôtel de Ville", "Hôtel de Ville", 48.8566, 2.3514,
+             note_en="Paris has governed itself from this spot since 1357; the building was rebuilt after it burned in 1871.",
+             note_it="Parigi si governa da questo luogo dal 1357; il palazzo fu ricostruito dopo l'incendio del 1871."),
+        # Source: Wikipedia, Hôtel de Ville, Paris; Wikipedia (fr), Hôtel de ville de Paris.
+        Stop("paris_notre_dame", "Notre-Dame", "Notre-Dame", 48.8533, 2.3488,
+             note_en="Road distances from Paris are measured from point zero, a bronze star in the square before Notre-Dame.",
+             note_it="Le distanze stradali da Parigi si misurano dal punto zero, una stella di bronzo sul sagrato di Notre-Dame."),
+        # Source: Wikipedia (fr), Point zéro des routes de France.
+        Stop("paris_sainte_chapelle", "Sainte-Chapelle", "Sainte-Chapelle", 48.8556, 2.3456,
+             note_en="Louis IX built the chapel in the 1240s for the Crown of Thorns; its walls are almost all stained glass.",
+             note_it="Luigi IX costruì la cappella negli anni Quaranta del Duecento per la Corona di Spine; le sue pareti sono quasi tutte vetrate."),
+        # Source: Wikipedia, Sainte-Chapelle; Wikipedia (fr), Sainte-Chapelle.
+        Stop("paris_pont_neuf", "Pont Neuf", "Pont Neuf", 48.8566, 2.3410,
+             note_en="Despite its name, the New Bridge, finished in 1607, is the oldest bridge still standing on the Seine in Paris.",
+             note_it="Nonostante il nome, il Ponte Nuovo, finito nel 1607, è il più antico ponte di Parigi ancora in piedi sulla Senna."),
+        # Source: Wikipedia, Pont Neuf; Wikipedia (fr), Pont Neuf.
+        Stop("paris_pont_des_arts", "Pont des Arts", "Pont des Arts", 48.8583, 2.3375,
+             note_en="Built under Napoleon, it was the first iron bridge in Paris; it joins the Louvre to the Institut de France.",
+             note_it="Costruito sotto Napoleone, fu il primo ponte di ferro di Parigi; unisce il Louvre all'Institut de France."),
+        # Source: Wikipedia, Pont des Arts; Wikipedia (fr), Pont des Arts.
+        Stop("paris_louvre", "The Louvre", "Il Louvre", 48.8613, 2.3346,
+             note_en="A royal palace that became a museum in 1793; I. M. Pei's glass pyramid in its courtyard was finished in 1989.",
+             note_it="Un palazzo reale diventato museo nel 1793; la piramide di vetro di I. M. Pei nel suo cortile fu finita nel 1989."),
+        # Source: Wikipedia, Louvre; Wikipedia (fr), Musée du Louvre.
+        Stop("paris_tuileries", "Tuileries Garden", "Giardino delle Tuileries", 48.8634, 2.3270,
+             note_en="The palace burned in 1871, but its garden remains, as André Le Nôtre redesigned it in 1664.",
+             note_it="Il palazzo bruciò nel 1871, ma il suo giardino è rimasto, come lo ridisegnò André Le Nôtre nel 1664."),
+        # Source: Wikipedia, Tuileries Garden; Wikipedia (fr), Jardin des Tuileries.
+        Stop("paris_concorde", "Place de la Concorde", "Place de la Concorde", 48.8656, 2.3212,
+             note_en="Louis XVI was guillotined here in 1793; the obelisk, more than 3,000 years old, came from Luxor.",
+             note_it="Qui, nel 1793, fu ghigliottinato Luigi XVI; l'obelisco, vecchio di oltre 3.000 anni, viene da Luxor."),
+        # Source: Wikipedia, Place de la Concorde; Wikipedia (fr), Place de la Concorde.
+        Stop("paris_grand_palais", "Grand Palais", "Grand Palais", 48.8645, 2.3135,
+             note_en="It was built, with the Petit Palais across the avenue, for the Universal Exhibition of 1900.",
+             note_it="Fu costruito, con il Petit Palais dall'altra parte del viale, per l'Esposizione universale del 1900."),
+        # Source: Wikipedia, Grand Palais; Wikipedia (fr), Grand Palais (Paris).
+        Stop("paris_champs_elysees", "Champs-Élysées", "Champs-Élysées", 48.8698, 2.3077,
+             note_en="The avenue climbs almost two kilometres to the Arc de Triomphe; its name means the Elysian Fields.",
+             note_it="Il viale sale per quasi due chilometri fino all'Arco di Trionfo; il suo nome significa Campi Elisi."),
+        # Source: Wikipedia, Champs-Élysées.
+        Stop("paris_arc_de_triomphe", "Arc de Triomphe", "Arco di Trionfo", 48.8732, 2.2963,
+             note_en="Napoleon ordered the arch in 1806; the Unknown Soldier of the First World War has lain beneath it since 1921.",
+             note_it="Napoleone ordinò l'arco nel 1806; sotto riposa dal 1921 il Milite Ignoto della Prima guerra mondiale."),
+        # Source: Wikipedia, Arc de Triomphe; Wikipedia (fr), Arc de triomphe de l'Étoile.
+        Stop("paris_trocadero", "Trocadéro", "Trocadéro", 48.8616, 2.2886,
+             note_en="Here, at the Palais de Chaillot, the Universal Declaration of Human Rights was adopted on 10 December 1948.",
+             note_it="Qui, al Palais de Chaillot, il 10 dicembre 1948 fu adottata la Dichiarazione universale dei diritti umani."),
+        # Source: Wikipedia, Palais de Chaillot; Wikipedia (fr), Palais de Chaillot.
+        Stop("paris_eiffel", "Eiffel Tower", "Tour Eiffel", 48.8582, 2.2945,
+             note_en="Built for the Universal Exhibition of 1889, the tower was meant to stand for only twenty years.",
+             note_it="Costruita per l'Esposizione universale del 1889, la torre doveva restare in piedi solo vent'anni."),
+        # Source: Wikipedia, Eiffel Tower; Wikipedia (fr), Tour Eiffel.
     ],
 )
 
@@ -516,11 +728,226 @@ LONDON = Walk(
     ],
 )
 
-WALKS = [MILAN, LONDON]
+
+MADRID = Walk(
+    id="MADRID_DEBOD_RETIRO",
+    city="madrid",
+    city_en="Madrid",
+    city_it="Madrid",
+    route_en="From the Temple of Debod to the Retiro, by the Prado",
+    route_it="Dal Tempio di Debod al Retiro, passando per il Prado",
+    outing_en="A walk in Madrid",
+    outing_it="Passeggiata a Madrid",
+    country="IBERIA",
+    water=["relation/3615910", "way/4088758"],
+    parks=["relation/13616929", "relation/535694", "relation/1505193", "relation/2061818", "way/15244804"],
+    stops=[
+        Stop("madrid_debod", "Temple of Debod", "Tempio di Debod", 40.4240, -3.7176,
+             note_en="An Egyptian temple of the 2nd century BC, given to Spain for its help in saving the monuments of Nubia.",
+             note_it="Un tempio egizio del II secolo a.C., donato alla Spagna per l'aiuto nel salvare i monumenti della Nubia."),
+        # Source: Wikipedia, Temple of Debod; Wikipedia (es), Templo de Debod.
+        Stop("madrid_plaza_de_espana", "Plaza de España", "Plaza de España", 40.4233, -3.7123,
+             note_en="Don Quixote and Sancho Panza ride in bronze at the foot of the monument to Cervantes.",
+             note_it="Don Chisciotte e Sancho Panza cavalcano in bronzo ai piedi del monumento a Cervantes."),
+        # Source: Wikipedia, Plaza de España, Madrid; Wikipedia (es), Monumento a Cervantes (Madrid).
+        Stop("madrid_palacio_real", "Royal Palace", "Palazzo Reale", 40.4172, -3.7143,
+             note_en="With 3,418 rooms, it is the largest royal palace in Western Europe, used by the king for state ceremonies.",
+             note_it="Con 3.418 stanze, è il palazzo reale più grande dell'Europa occidentale, usato dal re per le cerimonie di Stato."),
+        # Source: Wikipedia, Royal Palace of Madrid; Wikipedia (es), Palacio Real de Madrid.
+        Stop("madrid_almudena", "Almudena Cathedral", "Cattedrale dell'Almudena", 40.4155, -3.7141,
+             note_en="Begun in 1883, the cathedral was consecrated by Pope John Paul II in 1993.",
+             note_it="Iniziata nel 1883, la cattedrale fu consacrata da papa Giovanni Paolo II nel 1993."),
+        # Source: Wikipedia, Almudena Cathedral.
+        Stop("madrid_plaza_mayor", "Plaza Mayor", "Plaza Mayor", 40.4154, -3.7074,
+             note_en="The square was finished in 1619, under Philip III, whose statue on horseback stands in the middle.",
+             note_it="La piazza fu finita nel 1619, sotto Filippo III, la cui statua a cavallo sta al centro."),
+        # Source: Wikipedia, Plaza Mayor, Madrid; Wikipedia (es), Plaza Mayor de Madrid.
+        Stop("madrid_puerta_del_sol", "Puerta del Sol", "Puerta del Sol", 40.4169, -3.7036,
+             note_en="On New Year's Eve, Spain eats twelve grapes to the twelve strokes of the clock on this square.",
+             note_it="La notte di Capodanno la Spagna mangia dodici acini d'uva ai dodici rintocchi dell'orologio di questa piazza."),
+        # Source: Wikipedia, Puerta del Sol; Wikipedia (es), Puerta del Sol.
+        Stop("madrid_metropolis", "Metrópolis Building", "Edificio Metrópolis", 40.4188, -3.6977,
+             note_en="Finished in 1911 and crowned by a winged Victory, it stands where the Gran Vía begins.",
+             note_it="Finito nel 1911 e coronato da una Vittoria alata, sta dove comincia la Gran Vía."),
+        # Source: Wikipedia, Metrópolis Building; Wikipedia (es), Edificio Metrópolis.
+        Stop("madrid_cibeles", "Cibeles Fountain", "Fontana di Cibele", 40.4193, -3.6930,
+             note_en="Real Madrid's fans celebrate their club's titles at this fountain of the goddess Cybele, finished in 1782.",
+             note_it="I tifosi del Real Madrid festeggiano i titoli a questa fontana della dea Cibele, finita nel 1782."),
+        # Source: Wikipedia, Plaza de Cibeles; Wikipedia (es), Fuente de Cibeles.
+        Stop("madrid_prado", "Prado Museum", "Museo del Prado", 40.4138, -3.6925,
+             note_en="Opened in 1819, the Prado keeps Velázquez's Las Meninas and Goya's Black Paintings.",
+             note_it="Aperto nel 1819, il Prado custodisce Las Meninas di Velázquez e le pitture nere di Goya."),
+        # Source: Wikipedia, Museo del Prado; Wikipedia (es), Museo del Prado.
+        Stop("madrid_reina_sofia", "Reina Sofía Museum", "Museo Reina Sofía", 40.4080, -3.6944,
+             note_en="Picasso's Guernica, painted in 1937 after the bombing of the Basque town, has hung here since 1992.",
+             note_it="Il Guernica di Picasso, dipinto nel 1937 dopo il bombardamento della città basca, è esposto qui dal 1992."),
+        # Source: Wikipedia, Guernica (Picasso); Wikipedia (es), Museo Nacional Centro de Arte Reina Sofía.
+        Stop("madrid_angel_caido", "Fountain of the Fallen Angel", "Fontana dell'Angelo Caduto", 40.4084, -3.6826,
+             note_en="Ricardo Bellver's statue shows Lucifer at the moment of his fall from heaven.",
+             note_it="La statua di Ricardo Bellver mostra Lucifero nel momento della sua caduta dal cielo."),
+        # Source: Wikipedia, Fuente del Ángel Caído; Wikipedia (es), Fuente del Ángel Caído.
+        Stop("madrid_palacio_de_cristal", "Crystal Palace", "Palazzo di Cristallo", 40.4136, -3.6822,
+             note_en="All iron and glass, it was built for the Philippines Exposition of 1887.",
+             note_it="Tutto ferro e vetro, fu costruito per l'Esposizione delle Filippine del 1887."),
+        # Source: Wikipedia, Palacio de Cristal.
+        Stop("madrid_retiro_pond", "Retiro Pond", "Laghetto del Retiro", 40.4170, -3.6848,
+             note_en="The Retiro was the kings' park until 1868; its great pond faces the monument to Alfonso XII.",
+             note_it="Il Retiro fu il parco dei re fino al 1868; il suo grande laghetto guarda il monumento ad Alfonso XII."),
+        # Source: Wikipedia, Buen Retiro Park.
+        Stop("madrid_puerta_de_alcala", "Puerta de Alcalá", "Puerta de Alcalá", 40.4200, -3.6887,
+             note_en="Charles III had Sabatini build this gate; finished in 1778, it is older than the Arc de Triomphe in Paris.",
+             note_it="Carlo III la fece costruire dal Sabatini; finita nel 1778, è più antica dell'Arco di Trionfo di Parigi."),
+        # Source: Wikipedia, Puerta de Alcalá; Wikipedia (es), Puerta de Alcalá.
+    ],
+)
+
+LIMA = Walk(
+    id="LIMA_SAN_MARTIN_RESERVA",
+    city="lima",
+    city_en="Lima",
+    city_it="Lima",
+    route_en="The historic centre, from Plaza San Martín to the Parque de la Reserva",
+    route_it="Il centro storico, da Plaza San Martín al Parque de la Reserva",
+    outing_en="A walk in Lima",
+    outing_it="Passeggiata a Lima",
+    country="PE",
+    water=["way/367932671", "way/402037791", "way/402037790", "way/402037789"],
+    parks=["way/39413088", "relation/12175742", "way/44364384", "way/117755695", "way/172243636"],
+    stops=[
+        Stop("lima_plaza_san_martin", "Plaza San Martín", "Plaza San Martín", -12.0517, -77.0346,
+             note_en="Opened on 27 July 1921 for the centenary of independence, it honours the liberator José de San Martín.",
+             note_it="Inaugurata il 27 luglio 1921 per il centenario dell'indipendenza, onora il liberatore José de San Martín."),
+        # Source: Wikipedia, Plaza San Martín (Lima); Wikipedia (es), Plaza San Martín (Lima).
+        Stop("lima_jiron_union", "Jirón de la Unión", "Jirón de la Unión", -12.0490, -77.0332,
+             note_en="The street joins Lima's two great squares, in a historic centre that is a UNESCO World Heritage Site.",
+             note_it="La via unisce le due grandi piazze di Lima, in un centro storico patrimonio dell'umanità UNESCO."),
+        # Source: Wikipedia (es), Jirón de la Unión; Wikipedia, Historic Centre of Lima.
+        Stop("lima_plaza_de_armas", "Plaza de Armas", "Plaza de Armas", -12.0461, -77.0303,
+             note_en="Francisco Pizarro founded Lima on this square on 18 January 1535, as the City of the Kings.",
+             note_it="Francisco Pizarro fondò Lima su questa piazza il 18 gennaio 1535, come Città dei Re."),
+        # Source: Wikipedia, Plaza Mayor, Lima; Wikipedia (es), Plaza Mayor de Lima.
+        Stop("lima_cathedral", "Cathedral of Lima", "Cattedrale di Lima", -12.0466, -77.0296,
+             note_en="Pizarro laid its first stone in 1535; the cathedral took its present form between 1602 and 1797.",
+             note_it="Pizarro ne posò la prima pietra nel 1535; la cattedrale prese la forma di oggi tra il 1602 e il 1797."),
+        # Source: Wikipedia, Cathedral of Lima; Wikipedia (es), Catedral de Lima.
+        Stop("lima_government_palace", "Government Palace", "Palazzo del Governo", -12.0453, -77.0302,
+             note_en="The president's palace stands on the plot Pizarro kept for his own house when he founded the city.",
+             note_it="Il palazzo del presidente sorge sul terreno che Pizarro tenne per la sua casa quando fondò la città."),
+        # Source: Wikipedia, Government Palace (Peru); Wikipedia (es), Palacio de Gobierno del Perú.
+        Stop("lima_casa_aliaga", "Casa de Aliaga", "Casa de Aliaga", -12.0445, -77.0303,
+             note_en="Built for Jerónimo de Aliaga in 1536, it has been home to the same family for seventeen generations.",
+             note_it="Costruita per Jerónimo de Aliaga nel 1536, è la casa della stessa famiglia da diciassette generazioni."),
+        # Source: Wikipedia, Casa de Aliaga; Wikipedia (es), Casa de Aliaga.
+        Stop("lima_santo_domingo", "Santo Domingo", "Santo Domingo", -12.0439, -77.0318,
+             note_en="The University of San Marcos, founded in 1551, grew out of the lessons first given in this convent.",
+             note_it="L'Università di San Marcos, fondata nel 1551, nacque dalle lezioni tenute in questo convento."),
+        # Source: Wikipedia, National University of San Marcos.
+        Stop("lima_puente_de_piedra", "Puente de Piedra", "Puente de Piedra", -12.0429, -77.0297,
+             note_en="Built in 1610, after a flood of the Rímac had carried away the bridge before it.",
+             note_it="Costruito nel 1610, dopo che una piena del Rímac aveva portato via il ponte precedente."),
+        # Source: Wikipedia (es), Puente de Piedra (Lima).
+        Stop("lima_alameda_descalzos", "Alameda de los Descalzos", "Alameda de los Descalzos", -12.0357, -77.0258,
+             note_en="Laid out in 1611, the avenue copies the Alameda de Hércules of Seville.",
+             note_it="Tracciato nel 1611, il viale riprende l'Alameda de Hércules di Siviglia."),
+        # Source: Wikipedia, Alameda de los Descalzos; Wikipedia (es), Alameda de los Descalzos.
+        Stop("lima_muralla", "Parque de la Muralla", "Parque de la Muralla", -12.0446, -77.0263,
+             note_en="The park keeps a stretch of the walls built against pirates in the 1680s, which never saw a battle.",
+             note_it="Il parco conserva un tratto delle mura costruite contro i pirati negli anni Ottanta del Seicento, che non videro mai una battaglia."),
+        # Source: Wikipedia, Walls of Lima; Wikipedia (es), Parque de La Muralla.
+        Stop("lima_san_francisco", "San Francisco", "San Francisco", -12.0456, -77.0272,
+             note_en="Its catacombs were the city's cemetery in colonial times; the convent is a UNESCO World Heritage Site.",
+             note_it="Le sue catacombe erano il cimitero della città in epoca coloniale; il convento è patrimonio dell'umanità UNESCO."),
+        # Source: Wikipedia, Basilica and Convent of San Francisco, Lima; Wikipedia, Historic Centre of Lima.
+        Stop("lima_barrio_chino", "Chinatown", "Quartiere cinese", -12.0513, -77.0253,
+             note_en="Lima's Chinatown made the chifas famous, as Peru calls its Chinese restaurants.",
+             note_it="Il quartiere cinese di Lima ha reso famosi i chifa, come in Perù si chiamano i ristoranti cinesi."),
+        # Source: Wikipedia, Barrio Chino (Lima); Wikipedia (es), Barrio chino de Lima.
+        Stop("lima_palace_of_justice", "Palace of Justice", "Palazzo di Giustizia", -12.0576, -77.0350,
+             note_en="Opened in 1939, it was modelled on the Palace of Justice in Brussels.",
+             note_it="Inaugurato nel 1939, fu ispirato al Palazzo di Giustizia di Bruxelles."),
+        # Source: Wikipedia, Palace of Justice, Lima; Wikipedia (es), Palacio de Justicia del Perú.
+        Stop("lima_mali", "Lima Art Museum", "Museo d'Arte di Lima", -12.0608, -77.0368,
+             note_en="The museum is in the Palacio de la Exposición, built for Lima's International Exhibition of 1872.",
+             note_it="Il museo è nel Palacio de la Exposición, costruito per l'Esposizione internazionale di Lima del 1872."),
+        # Source: Wikipedia, Museo de Arte de Lima; Wikipedia (es), Museo de Arte de Lima.
+        Stop("lima_parque_de_la_reserva", "Parque de la Reserva", "Parque de la Reserva", -12.0705, -77.0337,
+             note_en="Named for the reservists who defended Lima in the War of the Pacific, at San Juan and Miraflores.",
+             note_it="Prende il nome dai riservisti che difesero Lima nella guerra del Pacifico, a San Juan e Miraflores."),
+        # Source: Wikipedia (es), Parque de la Reserva.
+    ],
+)
+
+CUSCO = Walk(
+    id="CUSCO_ARMAS_QORIKANCHA",
+    city="cusco",
+    city_en="Cusco",
+    city_it="Cusco",
+    route_en="From the Plaza de Armas up to Sacsayhuamán, and down to the Qorikancha",
+    route_it="Dalla Plaza de Armas su a Sacsayhuamán, e giù fino al Qorikancha",
+    outing_en="A walk in Cusco",
+    outing_it="Passeggiata a Cusco",
+    country="PE",
+    # No water: the rivers of the old centre run in channels, mostly covered, and the Huatanay
+    # begins south of the map.
+    parks=["way/83130621"],
+    more_streets=("residential", "unclassified"),
+    stops=[
+        Stop("cusco_plaza_de_armas", "Plaza de Armas", "Plaza de Armas", -13.5168, -71.9789,
+             note_en="This was the heart of the Inca capital; the City of Cusco has been a UNESCO World Heritage Site since 1983.",
+             note_it="Qui batteva il cuore della capitale inca; la città di Cusco è patrimonio dell'umanità UNESCO dal 1983."),
+        # Source: Wikipedia, Cusco; Wikipedia (es), Plaza Regocijo (the Inca square).
+        Stop("cusco_compania", "La Compañía", "La Compañía", -13.5175, -71.9781,
+             note_en="The Jesuits built their church on Amarucancha, the palace of the Inca Huayna Capac.",
+             note_it="I gesuiti costruirono la loro chiesa sull'Amarucancha, il palazzo dell'inca Huayna Cápac."),
+        # Source: Wikipedia (es), Iglesia de la Compañía de Jesús (Cusco).
+        Stop("cusco_cathedral", "Cathedral of Cusco", "Cattedrale di Cusco", -13.5162, -71.9781,
+             note_en="In its Last Supper, attributed to Marcos Zapata, a guinea pig is on the table.",
+             note_it="Nella sua Ultima Cena, attribuita a Marcos Zapata, in tavola c'è un porcellino d'India."),
+        # Source: Wikipedia, Marcos Zapata.
+        Stop("cusco_twelve_angled_stone", "Twelve-angled stone", "Pietra dei dodici angoli", -13.5157, -71.9762,
+             note_en="In Hatun Rumiyoc street, the stone of twelve angles is set in the wall of an Inca palace.",
+             note_it="In calle Hatun Rumiyoc, la pietra dei dodici angoli è incastonata nel muro di un palazzo inca."),
+        # Source: Wikipedia, Twelve-angled stone; Wikipedia (es), Piedra de los doce ángulos.
+        Stop("cusco_san_blas", "San Blas", "San Blas", -13.5152, -71.9742,
+             note_en="The church of San Blas keeps a pulpit carved in cedar, a marvel of Churrigueresque woodwork.",
+             note_it="La chiesa di San Blas custodisce un pulpito intagliato nel cedro, una meraviglia di intaglio churrigueresco."),
+        # Source: Wikipedia (es), Iglesia de San Blas (Cusco).
+        Stop("cusco_sacsayhuaman", "Sacsayhuamán", "Sacsayhuamán", -13.5085, -71.9820,
+             note_en="Its largest stone weighs over a hundred tonnes; the Inti Raymi, the Inca feast of the sun, is held nearby every 24 June.",
+             note_it="La sua pietra più grande pesa oltre cento tonnellate; qui vicino si celebra ogni 24 giugno l'Inti Raymi, la festa inca del sole."),
+        # Source: Wikipedia, Sacsayhuamán.
+        Stop("cusco_cristo_blanco", "Cristo Blanco", "Cristo Blanco", -13.5098, -71.9779,
+             note_en="The white Christ, eight metres tall, was a gift to the city from its Palestinian Christians, in 1945.",
+             note_it="Il Cristo bianco, alto otto metri, fu un regalo alla città dei cristiani palestinesi, nel 1945."),
+        # Source: Wikipedia (es), Cristo Blanco.
+        Stop("cusco_qenqo", "Q'enqo", "Q'enqo", -13.5091, -71.9704,
+             note_en="An Inca huaca, a sacred place carved into the rock, with a shrine hollowed out beneath it.",
+             note_it="Una huaca inca, un luogo sacro scolpito nella roccia, con un santuario scavato al di sotto."),
+        # Source: Wikipedia, Kenko.
+        Stop("cusco_san_cristobal", "San Cristóbal", "San Cristóbal", -13.5134, -71.9802,
+             note_en="Paullu Inca, brother of Atahualpa, founded this church; his remains were found beneath it in 2007.",
+             note_it="Paullu Inca, fratello di Atahualpa, fondò questa chiesa; i suoi resti vi furono trovati sotto nel 2007."),
+        # Source: Wikipedia (es), Iglesia de San Cristóbal (Cusco).
+        Stop("cusco_plaza_regocijo", "Plaza Regocijo", "Plaza Regocijo", -13.5170, -71.9802,
+             note_en="Its Quechua name, Kusipata, means the place of joy; it was part of the great Inca square.",
+             note_it="Il suo nome quechua, Kusipata, significa luogo della gioia; faceva parte della grande piazza inca."),
+        # Source: Wikipedia (es), Plaza Regocijo.
+        Stop("cusco_san_pedro", "San Pedro Market", "Mercato di San Pedro", -13.5212, -71.9825),
+        Stop("cusco_qorikancha", "Qorikancha", "Qorikancha", -13.5203, -71.9752,
+             note_en="The Incas' Temple of the Sun, once lined with gold; the Dominican convent was built on its walls.",
+             note_it="Il Tempio del Sole degli Inca, un tempo rivestito d'oro; il convento domenicano fu costruito sulle sue mura."),
+        # Source: Wikipedia, Coricancha; Wikipedia (es), Coricancha.
+    ],
+)
+
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, LIMA, CUSCO]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
     "IT": (36.3, 6.3, 47.4, 18.8),
-    "ES": (35.8, -9.7, 44.0, 3.6),
+    # Spain and Portugal, one peninsula: the two Caminos to Santiago.
+    "IBERIA": (35.8, -9.7, 44.0, 3.6),
     "GB": (49.8, -8.4, 59.0, 2.2),
+    "FR": (41.3, -5.2, 51.1, 9.6),
+    "PE": (-18.6, -81.6, 0.2, -68.4),
 }

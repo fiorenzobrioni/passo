@@ -28,9 +28,12 @@ library is used, so any Python 3.10+ runs it.
 """
 
 import heapq
+import http.client
 import json
 import math
 import sys
+import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -52,6 +55,16 @@ OSM = "https://api.openstreetmap.org/api/0.6/{}/{}/full"
 # BRouter's walking profile: footways, parks and pedestrian streets first.
 BROUTER = "https://brouter.de/brouter?lonlats={}&profile=hiking-mountain&alternativeidx=0&format=geojson"
 WALK_MAX_SNAP_METRES = 150  # a walk is routed through its places: one farther off is a mistake
+# A city's streets come from the OpenStreetMap API's map call, which answers a small box at a
+# time (50,000 nodes at most): the walk's ground is fetched in tiles of this size, in degrees.
+OSM_MAP = "https://api.openstreetmap.org/api/0.6/map?bbox={:.4f},{:.4f},{:.4f},{:.4f}"
+STREET_TILE = (0.007, 0.010)  # latitude, longitude
+# The streets drawn, in two weights: the arteries, and the streets that give a centre its shape.
+MAIN_STREETS = {"trunk", "primary", "secondary"}
+MINOR_STREETS = {"tertiary", "pedestrian"}
+MIN_STREET_METRES = 150
+MAP_MIN_ASPECT, MAP_MAX_ASPECT = 0.62, 1.2  # WayMapView's own bounds for a map box's shape
+STREET_MARGIN = 1.3  # around what the page shows: the inset, and the box a little wider
 NE = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/{}.geojson"
 NE_LAYERS = [
     "ne_10m_land",
@@ -101,6 +114,102 @@ def fetch():
         for ref in walk.water + walk.canals + walk.parks:
             kind, number = ref.split("/")
             download(OSM.format(kind, number), CACHE / f"osm-{kind}-{number}.xml")
+        if walk.streets:
+            for tile, name in street_tiles(walk):
+                fetch_streets(tile, CACHE / name, MAIN_STREETS | MINOR_STREETS | set(walk.more_streets))
+
+
+def fetch_streets(tile, target, classes):
+    """One tile's streets, kept as they are drawn (each way's class and points), not as the
+    map call answers (every building too: a hundred times the size). A tile too dense for the
+    call is fetched in four."""
+    if target.exists():
+        return
+    south, west, north, east = tile
+    url = OSM_MAP.format(west, south, east, north)
+    print(f"  {url}")
+    request = urllib.request.Request(url, headers={"User-Agent": "passo-build-ways (github.com/fiorenzobrioni/passo)"})
+    try:
+        root = ElementTree.fromstring(read_retrying(request))
+    except urllib.error.HTTPError as error:
+        if error.code != 400:
+            raise
+        middle = ((south + north) / 2, (west + east) / 2)
+        quarters = [
+            (south, west, middle[0], middle[1]), (south, middle[1], middle[0], east),
+            (middle[0], west, north, middle[1]), (middle[0], middle[1], north, east),
+        ]
+        ways = {}
+        for i, quarter in enumerate(quarters):
+            part = target.with_suffix(f".{i}.json")
+            fetch_streets(quarter, part, classes)
+            ways.update(json.loads(part.read_text()))
+            part.unlink()
+        target.write_text(json.dumps(ways))
+        return
+    nodes = {n.get("id"): (float(n.get("lat")), float(n.get("lon"))) for n in root.iter("node")}
+    ways = {}
+    for w in root.iter("way"):
+        tags = {t.get("k"): t.get("v") for t in w.iter("tag")}
+        kind = tags.get("highway")
+        # A pedestrian area (a square) is a shape, not a street.
+        if kind not in classes or tags.get("area") == "yes":
+            continue
+        points = [nodes[nd.get("ref")] for nd in w.iter("nd") if nd.get("ref") in nodes]
+        if len(points) >= 2:
+            ways[w.get("id")] = [kind, [[round(a, 7), round(b, 7)] for a, b in points]]
+    target.write_text(json.dumps(ways))
+
+
+def read_retrying(request, attempts=4):
+    """A shared server drops a connection now and then: try again, a little later each time.
+    An HTTP error is an answer, not a drop, and is passed on."""
+    for attempt in range(attempts):
+        try:
+            with urllib.request.urlopen(request, timeout=300) as response:
+                return response.read()
+        except urllib.error.HTTPError:
+            raise
+        except (OSError, http.client.HTTPException):
+            if attempt == attempts - 1:
+                raise
+            time.sleep(10 * 2 ** attempt)
+
+
+def street_box(walk):
+    """What a walk's page can show of its map: the frame stretched to the box's shape (held
+    between MAP_MIN_ASPECT and MAP_MAX_ASPECT, as WayMapView does), with room for its inset.
+    Only this is fetched and drawn: the ground behind is cut much wider."""
+    frame, ground, local = frame_of(walk_line(walk))
+    south, west, north, east = frame
+    width = (east - west) * local.kx
+    height = (north - south) * local.ky
+    aspect = min(max(height / width, MAP_MIN_ASPECT), MAP_MAX_ASPECT)
+    half_width = STREET_MARGIN * max(width, height / aspect) / 2
+    half_height = STREET_MARGIN * max(height, width * aspect) / 2
+    middle = ((south + north) / 2, (west + east) / 2)
+    return (
+        max(ground[0], middle[0] - half_height / local.ky),
+        max(ground[1], middle[1] - half_width / local.kx),
+        min(ground[2], middle[0] + half_height / local.ky),
+        min(ground[3], middle[1] + half_width / local.kx),
+    )
+
+
+def street_tiles(walk):
+    """The walk's street box cut into tiles the map call accepts, with their cache names."""
+    south, west, north, east = street_box(walk)
+    rows = math.ceil((north - south) / STREET_TILE[0])
+    columns = math.ceil((east - west) / STREET_TILE[1])
+    for row in range(rows):
+        for column in range(columns):
+            tile = (
+                south + row * STREET_TILE[0],
+                west + column * STREET_TILE[1],
+                min(north, south + (row + 1) * STREET_TILE[0]),
+                min(east, west + (column + 1) * STREET_TILE[1]),
+            )
+            yield tile, f"streets-{walk.id.lower()}-{row}-{column}.json"
 
 
 def download(url, target):
@@ -706,13 +815,15 @@ def build_walk(walk):
     water = city_polygons(walk.water, ground, tolerance, local)
     canals = city_lines(walk.canals, ground, tolerance, local)
     parks = city_polygons(walk.parks, ground, tolerance, local)
+    main_streets, minor_streets = city_streets(walk, tolerance, local) if walk.streets else ([], [])
     locator_box = LOCATORS[walk.country]
     locator_local = Local((locator_box[0] + locator_box[2]) / 2)
     locator_land = polygons("ne_50m_land", locator_box, LOCATOR_TOLERANCE_METRES, locator_local)
     locator_line = simplify(path, LOCATOR_TOLERANCE_METRES, locator_local)
     print(
         f"{walk.id}: {length / 1000:.2f} km, {len(path)} points -> {len(line)}, {len(stops)} places, "
-        f"water {sum(map(len, water))}, canals {sum(map(len, canals))}, parks {sum(map(len, parks))}",
+        f"water {sum(map(len, water))}, canals {sum(map(len, canals))}, parks {sum(map(len, parks))}, "
+        f"streets {sum(map(len, main_streets))} + {sum(map(len, minor_streets))}",
     )
     places, notes = {}, {}
     for stop, distance, _ in stops:
@@ -740,10 +851,73 @@ def build_walk(walk):
         locatorLand = {kotlin_paths(locator_land, 8)},
         locatorLine = {kotlin_string(encode(locator_line, (1e5, 1e5)), 8, len('locatorLine = '))},
         parks = {kotlin_paths(parks, 8)},
-        riverWidthMeters = {walk.canal_width},
+        riverWidthMeters = {walk.canal_width},{streets_block(main_streets, minor_streets)}
     )
 """
     return block, places, notes
+
+
+def city_streets(walk, tolerance, local):
+    """The walk's main and minor streets, from its tiles: each OpenStreetMap way once, joined
+    end to end where they meet, cut to the street box and simplified like the rest of the map."""
+    ways = {}
+    for _, name in street_tiles(walk):
+        ways.update(json.loads((CACHE / name).read_text()))
+    main, minor = [], []
+    for kind, points in ways.values():
+        (main if kind in MAIN_STREETS else minor).append([tuple(p) for p in points])
+    box = street_box(walk)
+    out = []
+    for lines in (main, minor):
+        pieces = []
+        for line in join_lines(lines):
+            for piece in clip_line(line, box):
+                # A stray piece (a crossing, a bit of a square) reads as noise, not as a street.
+                if cumulative(piece)[-1] < MIN_STREET_METRES:
+                    continue
+                simple = simplify(piece, tolerance, local)
+                if len(simple) >= 2:
+                    pieces.append(simple)
+        out.append(pieces)
+    return out
+
+
+def join_lines(lines):
+    """Lines that share an end, joined into one: fewer, longer paths to encode and to draw."""
+    lines = [list(line) for line in lines]
+    by_end = {}
+    for i, line in enumerate(lines):
+        by_end.setdefault(line[0], set()).add(i)
+        by_end.setdefault(line[-1], set()).add(i)
+    alive = set(range(len(lines)))
+    out = []
+    while alive:
+        i = alive.pop()
+        line = lines[i]
+        for end in (-1, 0):
+            while True:
+                point = line[end]
+                others = [j for j in by_end.get(point, ()) if j in alive]
+                if not others:
+                    break
+                j = others[0]
+                alive.discard(j)
+                other = lines[j]
+                if end == -1:
+                    line = line + (other[1:] if other[0] == point else other[-2::-1])
+                else:
+                    line = (other[:-1] if other[-1] == point else other[:0:-1]) + line
+        out.append(line)
+    return out
+
+
+def streets_block(main, minor):
+    if not main and not minor:
+        return ""
+    return (
+        f"\n        mainStreets = {kotlin_paths(main, 8)},"
+        f"\n        streets = {kotlin_paths(minor, 8)},"
+    )
 
 
 def camel(constant):

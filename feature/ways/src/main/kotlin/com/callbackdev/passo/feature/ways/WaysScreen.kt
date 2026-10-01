@@ -70,7 +70,7 @@ fun WaysRoute(onBack: () -> Unit, onOpenWay: (WayId, Long?) -> Unit, viewModel: 
 
 /**
  * The Ways page (PLANNING.md §11 Phase 11): what a way is, in one sentence; the way under way,
- * with its map; the four ways, each with what it would take at the reader's pace; the cities,
+ * with its map; the five ways, each with what it would take at the reader's pace; the cities,
  * each walk with where it stands; and the ways finished or left, the cities walked. Each opens
  * its own page.
  */
@@ -229,7 +229,7 @@ internal fun WayProgressBar(view: JourneyView, format: MeasureFormatter, modifie
     }
 }
 
-/** One of the four: its small map, its name and route, its length, and its time at the reader's pace. */
+/** One of the five: its small map, its name and route, its length, and its time at the reader's pace. */
 @Composable
 private fun WayRow(way: Way, pace: Double?, format: MeasureFormatter, onClick: () -> Unit) {
     Row(

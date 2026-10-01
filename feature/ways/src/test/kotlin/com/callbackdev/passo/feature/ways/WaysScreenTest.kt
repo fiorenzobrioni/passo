@@ -1,12 +1,13 @@
 package com.callbackdev.passo.feature.ways
 
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -78,7 +79,7 @@ class WaysScreenTest {
     }
 
     @Test
-    fun `each of the four opens its page, and a finished way is kept`() {
+    fun `each way opens its page, and a finished way is kept`() {
         var opened: Pair<WayId, Long?>? = null
         showList(onOpen = { way, journey -> opened = way to journey })
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.way(WayId.CAMINO_FRANCES)))
@@ -89,6 +90,26 @@ class WaysScreenTest {
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.CREDIT))
         compose.onNodeWithText("OpenStreetMap contributors", substring = true).assertExists()
         snapshot("ways_catalogue")
+    }
+
+    @Test
+    fun `the Camino Portugués, the fifth way, is listed by its length`() {
+        var opened: Pair<WayId, Long?>? = null
+        showList(onOpen = { way, journey -> opened = way to journey })
+        compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.way(WayId.CAMINO_PORTUGUES)))
+        compose.onNodeWithText("Porto to Santiago de Compostela", substring = true).assertExists()
+        compose.onNodeWithTag(WaysTags.way(WayId.CAMINO_PORTUGUES)).performClick()
+        assertThat(opened).isEqualTo(WayId.CAMINO_PORTUGUES to null)
+    }
+
+    @Test
+    fun `the Camino Portugués from Porto, drawn over Portugal and Galicia`() {
+        showWay(WayId.CAMINO_PORTUGUES, state = WaysSamples.state(active = null))
+        compose.onNodeWithText("Camino Portugués").assertIsDisplayed()
+        snapshot("way_portugues")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Barcelos"))
+        compose.onNodeWithText("a roast cock stood up", substring = true).assertExists()
+        snapshot("way_portugues_stages")
     }
 
     @Test
@@ -177,11 +198,77 @@ class WaysScreenTest {
         showList(onOpen = { way, journey -> opened = way to journey })
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.CITIES))
         compose.onNodeWithText("Under way:", substring = true).assertExists()
-        // In its city's row, and in Your ways.
-        compose.onAllNodesWithText("Walked on Sep 12").assertCountEquals(2)
+        // In its city's row, and in Your ways, further down past the cities.
+        compose.onNodeWithTag(WaysTags.way(WayId.MILAN_DUOMO_NAVIGLI))
+            .assert(hasText("Walked on Sep 12", substring = true))
         snapshot("ways_cities")
         compose.onNodeWithTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)).performClick()
         assertThat(opened).isEqualTo(WayId.LONDON_PALACE_TOWER to null)
+        compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.YOURS))
+        compose.onAllNodes(hasText("Walked on Sep 12", substring = true) and hasAnyAncestor(hasTestTag(WaysTags.YOURS)))
+            .assertCountEquals(1)
+    }
+
+    @Test
+    fun `every city has its walk`() {
+        var opened: Pair<WayId, Long?>? = null
+        showList(onOpen = { way, journey -> opened = way to journey })
+        for (walk in listOf(
+            WayId.MILAN_DUOMO_NAVIGLI,
+            WayId.ROME_COLOSSEUM_VATICAN,
+            WayId.PARIS_VOSGES_EIFFEL,
+            WayId.LONDON_PALACE_TOWER,
+            WayId.MADRID_DEBOD_RETIRO,
+            WayId.LIMA_SAN_MARTIN_RESERVA,
+            WayId.CUSCO_ARMAS_QORIKANCHA,
+        )) {
+            compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.way(walk)))
+            compose.onNodeWithTag(WaysTags.way(walk)).assertExists()
+        }
+        snapshot("ways_cities_all")
+        compose.onNodeWithTag(WaysTags.way(WayId.CUSCO_ARMAS_QORIKANCHA)).performClick()
+        assertThat(opened).isEqualTo(WayId.CUSCO_ARMAS_QORIKANCHA to null)
+    }
+
+    @Test
+    fun `Rome's walk, with the Tiber and its parks`() {
+        showWay(WayId.ROME_COLOSSEUM_VATICAN, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("From the Colosseum to St Peter’s", substring = true).assertExists()
+        snapshot("walk_rome")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Piazza Navona"))
+        compose.onNodeWithText("Domitian’s stadium", substring = true).assertExists()
+        snapshot("walk_rome_places")
+    }
+
+    @Test
+    fun `Paris's walk, with the Seine, in the dark`() {
+        showWay(WayId.PARIS_VOSGES_EIFFEL, state = WaysSamples.state(walks = emptyList(), live = null), dark = true)
+        compose.onNodeWithText("From Place des Vosges to the Eiffel Tower", substring = true).assertExists()
+        snapshot("walk_paris_dark")
+    }
+
+    @Test
+    fun `Madrid's walk, with the Retiro`() {
+        showWay(WayId.MADRID_DEBOD_RETIRO, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("From the Temple of Debod to the Retiro", substring = true).assertExists()
+        snapshot("walk_madrid")
+    }
+
+    @Test
+    fun `Lima's historic centre, across the Rímac`() {
+        showWay(WayId.LIMA_SAN_MARTIN_RESERVA, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("The historic centre, from Plaza San Martín", substring = true).assertExists()
+        snapshot("walk_lima")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Puente de Piedra"))
+        compose.onNodeWithText("Built in 1610", substring = true).assertExists()
+        snapshot("walk_lima_places")
+    }
+
+    @Test
+    fun `Cusco's walk, up to Sacsayhuamán, in the dark`() {
+        showWay(WayId.CUSCO_ARMAS_QORIKANCHA, state = WaysSamples.state(walks = emptyList(), live = null), dark = true)
+        compose.onNodeWithText("up to Sacsayhuamán", substring = true).assertExists()
+        snapshot("walk_cusco_dark")
     }
 
     @Test

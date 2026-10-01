@@ -15,7 +15,7 @@ moves with the distance their steps measure.
 
 1. **A walk is a `WayId` of kind `WALK`**, with its city's key. The ways and the walks share the
    data script, the data shape (`WaySource`, `Way`, `WayMap`), the journey table, the map, the
-   stamps and the place strings; `Ways.all` stays the four ways and `Ways.walks` lists the walks.
+   stamps and the place strings; `Ways.all` stays the ways and `Ways.walks` lists the walks.
    A second walk in a city is data, not a feature: the page shows one row a walk until a city has
    two (not yet).
 2. **The routes are drawn once, with BRouter, and committed.** `tools/build_ways.py fetch` asks
@@ -24,13 +24,26 @@ moves with the distance their steps measure.
    committed file, so a later change in the map or the router never moves a walk silently. Each
    place is snapped to the route and must lie within 150 m of it, in order. Milan is 9.3 km with
    14 places, London 10.7 km with 17 (fewer than the twenty first planned: every place on the
-   route, and nothing added to fill a count).
+   route, and nothing added to fill a count). Rome, Paris and Madrid followed (2 Oct 2026): 9.6 km
+   with 15 places, 10.4 km with 14, 9.6 km with 14; then Lima's historic centre (10.1 km, 15) and
+   Cusco (9.4 km, 12), whose map has parks and no water.
 3. **The city behind the line is OpenStreetMap too**: the water (the Thames, the Darsena) as
    areas, the canals (the Navigli) as lines drawn as wide as they are (`riverWidthMeters`, with
-   `WayProjection.pixelsPerMeter`), the largest parks as areas, never a street grid. Parks are a
-   new colour role, `PassoColors.park`, a sage quieter than the goal's green. A city's map has
-   land where a country's has sea, and no locator: the line fills its frame and the title names
-   the city.
+   `WayProjection.pixelsPerMeter`), the largest parks as areas. Parks are a new colour role,
+   `PassoColors.park`, a sage quieter than the goal's green. A city's map has land where a
+   country's has sea, and no locator: the line fills its frame and the title names the city.
+   *Revised (owner, 2 Oct 2026):* "never a street grid" became the main streets, after a trial on
+   Milan the owner judged "recognisable now". The arteries (trunk, primary, secondary) and the
+   streets that give a centre its shape (tertiary, pedestrian), no others, no names: a lighter
+   line on the land in either theme (Material's lowest container in light, its bright surface in
+   dark, no new colour role), above parks and water areas so bridges show, under canals and the
+   route, and only on the walk's own page (a thumbnail or the outing's card keeps its line
+   alone). The script fetches them with the OpenStreetMap API's map call, tile by tile over what
+   the page can show (Overpass is not reachable from the build machines), keeps only the streets
+   in its cache, joins them end to end, drops pieces under 150 m (crossings and bits of squares
+   read as noise) and simplifies them like the rest of the map: a few tens of kilobytes a city. A city
+   mapped mostly in smaller classes adds them as minor streets (Cusco's old centre is residential
+   lanes: `more_streets` in the content).
 4. **A walk is walked in outings.** An outing on a walk (`session.walk`, `session.walkFromMeters`,
    schema v5 by auto-migration) has the distance left as its goal, no quarter signals, and the
    walk's places as its signals. The places are told from the outing's stored totals (where it
@@ -69,7 +82,10 @@ moves with the distance their steps measure.
 
 - No new permission, no new dependency, no new wake: an outing on a walk is an ordinary outing
   (ADR 0009). The APK grows by a few tens of kilobytes of encoded lines.
-- Rome, Paris and Madrid are content: a `Walk` in `tools/ways_content.py`, its route fetched and
-  committed, its places' sentences checked in two languages.
+- Rome, Paris and Madrid were content only, as foreseen: a `Walk` in `tools/ways_content.py`
+  each, its route fetched and committed, its places' sentences checked in two languages; so
+  were Lima and Cusco. The set has no limit (owner). A city's second walk would be the same, with
+  the second level of the page (decision 1) still to build; a coastal walk (Lima's Costa Verde)
+  also needs a sea built from OpenStreetMap's coastline, which the script does not do yet.
 - To be checked on a device (owner): Milan in one outing and London over two, the voice through
   headphones and with the screen off, once on a treadmill.

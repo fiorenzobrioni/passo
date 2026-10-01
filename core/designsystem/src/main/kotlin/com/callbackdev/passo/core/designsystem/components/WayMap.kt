@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -80,6 +81,8 @@ fun WayMapView(
         water = PassoTheme.colors.water,
         land = scheme.surfaceContainerHigh,
         park = PassoTheme.colors.park,
+        // A street is a lighter line on the land: white on the light grey, a step up in the dark.
+        street = if (scheme.surface.luminance() > 0.5f) scheme.surfaceContainerLowest else scheme.surfaceBright,
         river = lerp(PassoTheme.colors.water, scheme.onSurfaceVariant, RIVER_INK),
         border = scheme.outline.copy(alpha = BORDER_ALPHA),
         way = scheme.onSurfaceVariant.copy(alpha = WAY_ALPHA),
@@ -126,6 +129,15 @@ fun WayMapView(
                     .coerceAtLeast(RIVER_WIDTH.toPx())
                 val riverInk = if (map.riverWidthMeters > 0) colors.water else colors.river
                 val rivers = map.rivers.map { it.toPath(projection, close = false) }
+                // Streets only on the walk's own page: on a thumbnail they would be noise.
+                val mainStreets = if (detailed) {
+                    map.mainStreets.map {
+                        it.toPath(projection, close = false)
+                    }
+                } else {
+                    emptyList()
+                }
+                val streets = if (detailed) map.streets.map { it.toPath(projection, close = false) } else emptyList()
                 val borders = map.borders.map { it.toPath(projection, close = false) }
                 val whole = map.line.toPath(projection, upTo = null)
                 val walked = walkedMeters?.let { map.line.toPath(projection, upTo = it) }
@@ -137,13 +149,6 @@ fun WayMapView(
                     val p = map.line.pointAt(it)
                     Offset(projection.x(p.longitude), projection.y(p.latitude))
                 }
-                // A city's walk fills its frame: no corner is free for the country, and the page
-                // names the city anyway.
-                val locator = if (detailed && way.kind == WayKind.WAY) {
-                    locatorBox(size, stops.first(), whole, map.locatorFrame)
-                } else {
-                    null
-                }
                 val labels = if (detailed) {
                     listOfNotNull(
                         names.first() to stops.first(),
@@ -153,12 +158,24 @@ fun WayMapView(
                 } else {
                     emptyList()
                 }
+                // A city's walk fills its frame: no corner is free for the country, and the page
+                // names the city anyway. The ends' names are kept clear of it (a touched stop's
+                // is not, or the locator would jump at every touch).
+                val locator = if (detailed && way.kind == WayKind.WAY) {
+                    locatorBox(size, stops.first(), whole, map.locatorFrame, labels.take(2).map { labelRect(it, size) })
+                } else {
+                    null
+                }
                 onDrawBehind {
                     // A country's map is cut out of the sea; a city has no sea around it.
                     drawRect(if (way.kind == WayKind.WALK) colors.land else colors.water)
                     land.forEach { drawPath(it, colors.land) }
                     parks.forEach { drawPath(it, colors.park) }
                     lakes.forEach { drawPath(it, colors.water) }
+                    // Over a river the streets are its bridges; a canal, drawn as a line, stays on
+                    // top of the streets along its banks.
+                    streets.forEach { drawPath(it, colors.street, style = line(STREET_WIDTH)) }
+                    mainStreets.forEach { drawPath(it, colors.street, style = line(MAIN_STREET_WIDTH)) }
                     rivers.forEach { drawPath(it, riverInk, style = line(riverWidth)) }
                     val dash = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx()))
                     borders.forEach { drawPath(it, colors.border, style = Stroke(1.dp.toPx(), pathEffect = dash)) }
@@ -218,6 +235,7 @@ private class WayMapColors(
     val water: Color,
     val land: Color,
     val park: Color,
+    val street: Color,
     val river: Color,
     val border: Color,
     val way: Color,
@@ -262,10 +280,11 @@ private fun WayLine.toPath(projection: WayProjection, upTo: Double?): Path = Pat
 }
 
 /**
- * The locator's box: in the corner the way's line leaves most free, away from the start (whose
- * name is drawn there), a third of the map's width at most.
+ * The locator's box: in the corner the way's line leaves most free, away from the start and
+ * clear of the ends' names ([names], where [labelRect] puts them), a third of the map's width at
+ * most.
  */
-private fun Density.locatorBox(size: Size, start: Offset, whole: Path, frame: GeoBox): Rect {
+private fun Density.locatorBox(size: Size, start: Offset, whole: Path, frame: GeoBox, names: List<Rect>): Rect {
     val width = (size.width * LOCATOR_SHARE).coerceAtMost(LOCATOR_MAX.toPx())
     val height = width * frame.aspect.toFloat()
     val margin = 8.dp.toPx()
@@ -278,7 +297,8 @@ private fun Density.locatorBox(size: Size, start: Offset, whole: Path, frame: Ge
     val bounds = whole.getBounds()
     return corners.minBy { corner ->
         val overlap = corner.intersect(bounds).let { if (it.isEmpty) 0f else it.width * it.height }
-        overlap + if (corner.inflate(LABEL_ROOM.toPx()).contains(start)) size.width * size.height else 0f
+        val covered = corner.inflate(LABEL_ROOM.toPx()).contains(start) || names.any { it.overlaps(corner) }
+        overlap + if (covered) size.width * size.height else 0f
     }
 }
 
@@ -303,20 +323,24 @@ private fun DrawScope.drawLocator(box: Rect, land: List<GeoPath>, line: GeoPath,
     drawRoundRect(colors.border, box.topLeft, box.size, radius, style = Stroke(1.dp.toPx()))
 }
 
-/** A name beside its point, on a small pill of the page's colour, kept inside the map. */
-private fun DrawScope.drawLabel(label: Label, colors: WayMapColors) {
+/** Where a name's pill goes: beside its point, on the right if it fits, kept inside the map. */
+private fun Density.labelRect(label: Label, size: Size): Rect {
     val gap = 8.dp.toPx()
-    val padX = 5.dp.toPx()
-    val padY = 2.dp.toPx()
     val text = label.text.size
-    val width = text.width + 2 * padX
-    val height = text.height + 2 * padY
+    val width = text.width + 2 * LABEL_PAD_X.toPx()
+    val height = text.height + 2 * LABEL_PAD_Y.toPx()
     val right = label.at.x + gap + width <= size.width - gap
     val x = (if (right) label.at.x + gap else label.at.x - gap - width)
         .coerceIn(gap, (size.width - width - gap).coerceAtLeast(gap))
     val y = (label.at.y - height / 2f).coerceIn(gap, (size.height - height - gap).coerceAtLeast(gap))
-    drawRoundRect(colors.halo.copy(alpha = PILL_ALPHA), Offset(x, y), Size(width, height), CornerRadius(height / 2))
-    drawText(label.text, colors.ink, Offset(x + padX, y + padY))
+    return Rect(Offset(x, y), Size(width, height))
+}
+
+/** A name beside its point, on a small pill of the page's colour. */
+private fun DrawScope.drawLabel(label: Label, colors: WayMapColors) {
+    val box = labelRect(label, size)
+    drawRoundRect(colors.halo.copy(alpha = PILL_ALPHA), box.topLeft, box.size, CornerRadius(box.height / 2))
+    drawText(label.text, colors.ink, Offset(box.left + LABEL_PAD_X.toPx(), box.top + LABEL_PAD_Y.toPx()))
 }
 
 private const val MIN_ASPECT = 0.62
@@ -343,4 +367,8 @@ private val HERE_HALO = 14.dp
 private val SMALL_HERE_RADIUS = 3.5.dp
 private val SMALL_HERE_HALO = 7.dp
 private val LABEL_ROOM = 40.dp
+private val STREET_WIDTH = 1.5.dp
+private val MAIN_STREET_WIDTH = 2.5.dp
+private val LABEL_PAD_X = 5.dp
+private val LABEL_PAD_Y = 2.dp
 private val TOUCH_RADIUS = 28.dp

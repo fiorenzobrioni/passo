@@ -14,11 +14,17 @@ enum class WayKind {
  */
 enum class WayId(val kind: WayKind, val city: String? = null) {
     VIA_DEGLI_DEI(WayKind.WAY),
+    CAMINO_PORTUGUES(WayKind.WAY),
     VIA_DI_FRANCESCO(WayKind.WAY),
     CAMINO_FRANCES(WayKind.WAY),
     VIA_FRANCIGENA(WayKind.WAY),
     MILAN_DUOMO_NAVIGLI(WayKind.WALK, city = "milan"),
+    ROME_COLOSSEUM_VATICAN(WayKind.WALK, city = "rome"),
+    PARIS_VOSGES_EIFFEL(WayKind.WALK, city = "paris"),
     LONDON_PALACE_TOWER(WayKind.WALK, city = "london"),
+    MADRID_DEBOD_RETIRO(WayKind.WALK, city = "madrid"),
+    LIMA_SAN_MARTIN_RESERVA(WayKind.WALK, city = "lima"),
+    CUSCO_ARMAS_QORIKANCHA(WayKind.WALK, city = "cusco"),
 }
 
 /** Where a way the reader started stands. Stored by name. */

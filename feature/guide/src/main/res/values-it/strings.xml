@@ -88,7 +88,7 @@
 
     <!-- Widget e riquadro -->
     <string name="guide_ways_title">Cammini</string>
-    <string name="guide_ways_p1">Un cammino è un vero itinerario dei pellegrini (la Via degli Dei, la Via di Francesco, il Cammino di Santiago, la parte italiana della Via Francigena) percorso da dove sei. La distanza dei tuoi giorni ti porta avanti. Da Insights.</string>
+    <string name="guide_ways_p1">Un cammino è un vero itinerario dei pellegrini (la Via degli Dei, il Cammino Portoghese da Porto, la Via di Francesco, il Cammino di Santiago, la parte italiana della Via Francigena) percorso da dove sei. La distanza dei tuoi giorni ti porta avanti. Da Insights.</string>
     <string name="guide_ways_distance_title">La tua distanza, non la tua posizione</string>
     <string name="guide_ways_distance_body">Passo non sa mai dove sei. Il tuo punto sul cammino è la distanza stimata di ogni giorno da quando l’hai iniziato, la stessa di Cronologia: misurare il passo la rende più vera, e applicare un nuovo profilo ai giorni passati la sposta. Un cammino finito resta finito.</string>
     <string name="guide_ways_start_title">Una partenza nel passato</string>
@@ -96,7 +96,7 @@
     <string name="guide_ways_stages_title">Tappe e timbri</string>
     <string name="guide_ways_stages_body">Ogni tappa raggiunta è un timbro nella credenziale, con il suo giorno, e una notifica se lasci acceso il canale Cammini. Un luogo dice la sua frase quando lo raggiungi, o quando è il prossimo.</string>
     <string name="guide_ways_walks_title">Passeggiate in città</string>
-    <string name="guide_ways_walks_body">Una passeggiata a Milano o a Londra, dal Duomo ai Navigli o da Buckingham Palace al Tower Bridge, percorsa dove sei in una o più uscite. Ogni luogo ti viene detto quando i tuoi passi lo raggiungono: una breve vibrazione, e il suo nome con una frase che lo racconta se la voce è accesa. Fermati quando vuoi: la prossima uscita riprende da lì. Dalla pagina dei Cammini o da Uscite. Nella pagina della passeggiata, «Ascoltala» ti fa sentire il prossimo luogo come lo sentirai camminando.</string>
+    <string name="guide_ways_walks_body">Una passeggiata a Milano, Roma, Parigi, Londra, Madrid, Lima o Cusco, dal Duomo ai Navigli o dal Colosseo a San Pietro, percorsa dove sei in una o più uscite. Ogni luogo ti viene detto quando i tuoi passi lo raggiungono: una breve vibrazione, e il suo nome con una frase che lo racconta se la voce è accesa. Fermati quando vuoi: la prossima uscita riprende da lì. Dalla pagina dei Cammini o da Uscite. Nella pagina della passeggiata, «Ascoltala» ti fa sentire il prossimo luogo come lo sentirai camminando.</string>
     <string name="guide_ways_credit">I cammini e le passeggiate sono tracciati da OpenStreetMap, © OpenStreetMap contributors (ODbL), le passeggiate instradate con BRouter; terre e acque dei cammini da Natural Earth.</string>
     <string name="guide_widgets_title">Nella schermata Home</string>
     <string name="guide_widgets_two_title">Due widget</string>
