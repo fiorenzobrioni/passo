@@ -840,6 +840,45 @@ agree on the distance for any period.
 | The way left | Kept as left with its stamps; another can start |
 | A change of time zone | Days are local days, as everywhere else |
 
+#### Phase 11, part two — City walks («Passeggiate in città»)
+
+Asked for by the owner (1 Oct 2026), after the Ways' first part, whose data script and map it
+reuses. A walk through a city, in one outing or a few: an outing whose goal is the route, whose
+signals are the places, and whose voice, if the outing speaks, says each place as the reader
+reaches it. **Imaginary, and said so:** the reader walks where they are (the neighbourhood, a
+park, a treadmill), and the route moves with the outing's estimated distance, never with a
+location. Nothing new for the battery: it is an ordinary outing (ADR 0009).
+
+**The cities:** Milan, Rome, Paris, London, Madrid (owner). **Milan and London first**; the
+others one a release, each when its content is checked.
+
+**A city can have more than one walk** (owner's question): the unit is the *walk*, grouped by
+city, from the first line of code, so London's second walk is data, not a feature. On screen a
+city with one walk is one row; the second level (the city's walks) appears only when a city has
+two. The first release has one walk a city.
+
+- [ ] The walks' data, by the same script as the ways (`tools/build_ways.py`): each walk drawn once in a router built on OpenStreetMap data (BRouter), its GPX saved into `tools/` by hand, simplified by the script; its places (a key, the name's resource, latitude and longitude, the distance along the walk, measured by the script); behind it the city's water and largest parks from OpenStreetMap (the Thames, the Tiber, the Seine, the Navigli and the Darsena, the Manzanares), never a street grid. ODbL, credited as for the ways. Between 8 and 12 km a walk, about twenty places.
+- [ ] Indicative walks, decided with the owner when each is drawn: Milan (the Duomo, the Galleria, La Scala, Brera, the Castello Sforzesco, Parco Sempione, the Arco della Pace, Sant'Ambrogio, the Columns of San Lorenzo, the Darsena and the Navigli); London (Westminster, the Elizabeth Tower, Trafalgar Square, the South Bank, the London Eye, Tate Modern, the Millennium Bridge, St Paul's, Borough Market, Tower Bridge, the Tower of London).
+- [ ] The places' sentences: written for Passo, never copied (not from Wikipedia either), each checked against two sources and noted in the script; in English and Italian; one sentence of at most about twenty words, made to be heard; nothing that goes stale (no opening hours, prices or "now showing").
+- [ ] Domain (`:core:domain/ways`): `CityWalkProgress` (the distance done on a walk, summed from the outings walked on it since it was started; the place reached; the next one and how far), the places crossed by a batch (each named once; the voice says the names in order and the last one's sentence).
+- [ ] Storage: the Ways' table with a kind (way or walk), and on `session` a nullable walk key and the distance the outing started from; the backup carries both. A walk's progress is computed from its outings, never kept apart.
+- [ ] The outing: a new goal kind, a walk, its goal the distance left; the 25, 50 and 75% signals off (the places are the signals: one short pulse and the voice); the notification's line is the next place («Next: the Duomo, 600 m»); the goal is the walk's end. Stopped halfway, the walk waits: "Continue from Piazza Navona" starts the next outing where the last one ended; starting again from the beginning asks first.
+- [ ] Screens: the Ways page in two parts, «Cammini» and «Città»; a city's walk with its map (the water, the parks, the route, the places, the point), its places with the day each was reached, Start or Continue. During the outing, its card on Today and the Outings page carries the small map (drawn only while the screen is on). A finished walk stays in "Your ways" with its places and its day.
+- [ ] Your year on foot (Phase 12) names the cities walked that year.
+- [ ] Strings in English and Italian; tests (`CityWalkProgressTest`: a walk over three outings, several places in one batch, the end, a restart); UI tests; a README screenshot (London's map during a walk); CHANGELOG.
+- [ ] On a device (owner): Milan walked in one outing and London over two, with the voice through headphones and with the screen off; on a treadmill once.
+
+**Edge cases:**
+
+| Case | Expected behavior |
+|---|---|
+| A walk over several outings | Each outing starts where the last ended; the places already reached are not told again |
+| Two places crossed by one batch | Both named, in order; the last one's sentence |
+| The walk's end | The outing's goal: the goal's long vibration and "Keep going" |
+| An outing ended by stillness halfway | The walk waits at that distance; "Resume" or "Continue" later |
+| Restart from the beginning | Asks; the earlier outings stay in History, the walk counts from zero |
+| The voice off | The pulse, and the place in the notification |
+
 ### Phase 12 — Your year on foot («Il tuo anno a piedi»)
 
 A year told as a story: full-screen pages, one thing each, made from the days already stored.
@@ -1097,6 +1136,8 @@ Include:
 
 - **The Ways: OpenStreetMap lines, four ways, the Francigena's Italian part** (owner, 1 Oct 2026): each way's line is its OpenStreetMap relation, simplified, under ODbL (credited in About and the guide; the derived file published in the repo under ODbL, beside the GPL code), chosen over a schematic of stage towns because the true line is what makes the map worth opening. The four: Via degli Dei, Via di Francesco, Camino Francés, and the Via Francigena from the Great St Bernard Pass to Rome (about 1,000 km): from Canterbury, 2,000 km is too long for everyday walkers.
 - **The interval walk: ADR 0013 accepted** (owner, 1 Oct 2026): option A (the wake-up counter at 30 s, at 2 s in the 40 s of motion before each change; no wake lock, no timer), minutes in motion, a phone without a wake-up counter told in the editor rather than the kind hidden, the fast pace at brisk 100 by default. Option B stays the documented next step if the field test finds the counter's own delay too long.
+
+- **City walks, as Phase 11's second part** (owner, 1 Oct 2026): an outing through a city, whose signals are its places and whose voice says them, imaginary and said so. Milan, Rome, Paris, London and Madrid; Milan and London first, the others one a release. Bound to outings rather than to the days, because a city is walked in one outing or a few, where a way takes months. The unit is the walk, grouped by city, so that a large city's second walk (London's, likely) is data and not a feature; a city shows its second level only once it has two walks. The real cost is the content (about twenty checked places a walk, in two languages), which is why the cities come one at a time.
 
 ### Open
 
