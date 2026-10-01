@@ -883,6 +883,18 @@ two. The first release has one walk a city.
 | Restart from the beginning | Asks; the earlier outings stay in History, the walk counts from zero |
 | The voice off | The pulse, and the place in the notification |
 
+#### Phase 11, later — The fifth way, and the other cities
+
+Asked for by the owner (2 Oct 2026), after the city walks; not scheduled yet. The set stops at
+**five ways and five cities**: more could come one day, but none is planned.
+
+- [ ] **The Camino Portugués from Porto** (about 240 km, the second most walked way to
+  Santiago), as the fifth way: its OpenStreetMap relation and its stages in
+  `tools/ways_content.py`, the locator of Portugal and Spain, its places' sentences checked as
+  the others were. The data shape, the map and the credential need nothing new.
+- [ ] **Rome, Paris and Madrid**, one a release, each when its walk is drawn and its places'
+  sentences checked, after Milan and London.
+
 ### Phase 12 — Your year on foot («Il tuo anno a piedi»)
 
 A year told as a story: full-screen pages, one thing each, made from the days already stored.
@@ -1148,6 +1160,8 @@ Include:
 - **The Ways, first part** (Phase 11, 1 Oct 2026; `docs/adr/0014-ways.md`): the lines come from the relations through the Waymarked Trails API, chained by the shortest path over the main ways, simplified by `tools/build_ways.py`, which also writes the place strings; the content lives in `tools/ways_content.py`. A way keeps no distance: it is the days' own, computed on read. A finished way stays finished when its days are measured shorter later. A start is never before the first day counted. A stage is told by `WayNotifier`, which watches the written days only while a way is under way. The backup carries the ways as an added field, without a new format version. The map is `WayMapView` (Canvas) over Natural Earth; `PassoColors` gains `water`, because the dresses put their blue in different roles (Paper's secondary, Vivid's primary) and a sea in amber did not read as one. The ODbL credit is on the Ways page, in the guide, in Settings → Credits, in the README and in `licenses/`.
 
 - **The Camino named as readers know it** (owner, 1 Oct 2026): «Cammino di Santiago» / «Camino de Santiago», with its variant, the French Way (the classic one and the most walked), in the route line. Its stored id stays `CAMINO_FRANCES`.
+
+- **Five ways and five cities, then stop** (owner, 2 Oct 2026): the Camino Portugués from Porto becomes the fifth way, in a later step of Phase 11; the cities stay Milan, London, Rome, Paris and Madrid. More could be added one day, but none is planned.
 
 ### Open
 

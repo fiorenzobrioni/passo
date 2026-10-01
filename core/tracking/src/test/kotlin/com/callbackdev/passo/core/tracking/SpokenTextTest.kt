@@ -6,6 +6,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.domain.sessions.PaceVerdict
 import com.callbackdev.passo.core.domain.sessions.SessionAmount
 import com.callbackdev.passo.core.domain.sessions.SessionAnnouncement
+import com.callbackdev.passo.core.domain.sessions.SessionPlans
+import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
@@ -13,6 +15,7 @@ import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionTotals
 import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.UnitPreference
+import com.callbackdev.passo.core.model.WayId
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -134,5 +137,51 @@ class SpokenTextTest {
         val still = walk.copy(totals = walk.totals.copy(steps = 764))
         assertThat(say(SessionAnnouncement.endedStill(still), still))
             .isEqualTo("Uscita chiusa dopo una lunga sosta, a 764 passi. Puoi riprenderla dalla notifica.")
+    }
+
+    private val milan = Ways.of(WayId.MILAN_DUOMO_NAVIGLI)
+
+    private fun milanWalk(from: Int, walked: Double) = checkNotNull(
+        SessionPlans.startWalk(milan, from, SessionVoice.HEADPHONES, nowMillis = 0, localEpochDay = 0),
+    ).copy(totals = SessionTotals(steps = 2_140, distanceMeters = walked))
+
+    @Test
+    @Config(qualifiers = "en-rUS")
+    fun `a city walk names its places, says the one reached and the one ahead`() {
+        val start = milanWalk(from = 0, walked = 0.0)
+        assertThat(say(checkNotNull(SessionAnnouncement.walkStarted(start)), start)).isEqualTo(
+            "A walk in Milan: off you go. Here: The Duomo. " +
+                "Milan began its cathedral in 1386, and building went on for nearly six centuries.",
+        )
+        val continued = milanWalk(from = 3_216, walked = 0.0)
+        assertThat(say(checkNotNull(SessionAnnouncement.walkStarted(continued)), continued)).isEqualTo(
+            "A walk in Milan: on we go. From here: Sforza Castle. Next: Sempione Park, in 430 metres.",
+        )
+        val atScala = milanWalk(from = 0, walked = 500.0)
+        val reached = SessionAnnouncement.placesReached(atScala, milan.stops.subList(1, 3))
+        assertThat(say(reached, atScala)).isEqualTo(
+            "Behind you: Galleria Vittorio Emanuele II. Here: La Scala. " +
+                "La Scala opened in 1778; Verdi’s Otello and Puccini’s Turandot had their first nights here. " +
+                "Next: Via Montenapoleone, in 640 metres.",
+        )
+        val end = milanWalk(from = 0, walked = 9_326.0)
+        assertThat(say(SessionAnnouncement.goal(end), end)).isEqualTo("The walk is done, in 2,140 steps. Well done.")
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT")
+    fun `in Italian, a city walk`() {
+        val start = milanWalk(from = 0, walked = 0.0)
+        assertThat(say(checkNotNull(SessionAnnouncement.walkStarted(start)), start)).isEqualTo(
+            "Passeggiata a Milano: si parte. Qui: Il Duomo. " +
+                "Milano iniziò il suo Duomo nel 1386, e il cantiere durò quasi sei secoli.",
+        )
+        val atScala = milanWalk(from = 0, walked = 500.0)
+        val reached = SessionAnnouncement.placesReached(atScala, milan.stops.subList(2, 3))
+        assertThat(say(reached, atScala)).isEqualTo(
+            "Qui: Teatro alla Scala. " +
+                "La Scala aprì nel 1778; qui debuttarono l’Otello di Verdi e la Turandot di Puccini. " +
+                "Più avanti: Via Montenapoleone, tra 640 metri.",
+        )
     }
 }

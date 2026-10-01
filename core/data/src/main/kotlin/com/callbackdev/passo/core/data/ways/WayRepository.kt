@@ -10,6 +10,7 @@ import com.callbackdev.passo.core.model.DailySummary
 import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.model.WayJourney
 import com.callbackdev.passo.core.model.WayJourneyState
+import com.callbackdev.passo.core.model.WayKind
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -28,10 +29,10 @@ constructor(private val dao: WayDao, private val tracking: TrackingRepository) {
     /** Every journey, the latest started first. */
     val journeys: Flow<List<WayJourney>> = dao.observeJourneys().map { rows -> rows.mapNotNull { it.toModel() } }
 
-    /** The journey under way, if there is one. */
-    val active: Flow<WayJourney?> = dao.observeActive().map { it?.toModel() }
+    /** The way under way, if there is one (a city walk is not a way: it is walked in outings). */
+    val active: Flow<WayJourney?> = journeys.map { all -> all.firstOrNull { it.isActiveWay() } }
 
-    suspend fun activeNow(): WayJourney? = dao.active()?.toModel()
+    suspend fun activeNow(): WayJourney? = dao.journeys().mapNotNull { it.toModel() }.firstOrNull { it.isActiveWay() }
 
     /**
      * Starts [way] from [startDay]. A start in the past places the reader at once, and the
@@ -55,7 +56,27 @@ constructor(private val dao: WayDao, private val tracking: TrackingRepository) {
                 endedEpochDay = null,
                 toldMeters = walked.walkedMeters.toInt(),
             ),
+            among = WAYS,
         )
+    }
+
+    /**
+     * The city walk [walk]'s journey to walk on now: the one under way, or a new one begun
+     * [today]. With [again], the one under way is put down first: the walk from its start, its
+     * earlier outings kept in History (Phase 11's second part).
+     */
+    suspend fun walkJourney(walk: WayId, again: Boolean, today: LocalDate, nowMillis: Long): WayJourney {
+        require(walk.kind == WayKind.WALK)
+        return checkNotNull(dao.walkJourney(walk.name, again, today.toEpochDay(), nowMillis).toModel())
+    }
+
+    /**
+     * The city walk [walk] was walked to its last place on [day]: its journey is over, kept as
+     * finished; the next outing on it begins a new one, from the start.
+     */
+    suspend fun finishWalk(walk: WayId, day: Long) {
+        require(walk.kind == WayKind.WALK)
+        dao.activeAmong(listOf(walk.name)).forEach { dao.end(it.id, WayJourneyState.FINISHED.name, day) }
     }
 
     /** The reader puts the way down where it stands on [day]. */
@@ -78,6 +99,11 @@ constructor(private val dao: WayDao, private val tracking: TrackingRepository) {
     fun observeDaysFrom(fromDay: Long): Flow<Map<Long, Double>> =
         tracking.observeSummaries(fromDay, Long.MAX_VALUE).map { it.distances() }
 }
+
+private fun WayJourney.isActiveWay() = state == WayJourneyState.ACTIVE && way.kind == WayKind.WAY
+
+/** The ways' names: among them, one is under way at a time. */
+private val WAYS = WayId.entries.filter { it.kind == WayKind.WAY }.map { it.name }
 
 /** Each day's estimated distance in metres, by epoch day: what moves a way. */
 fun List<DailySummary>.distances(): Map<Long, Double> = associate { it.localEpochDay to it.distanceMeters }

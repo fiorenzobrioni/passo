@@ -15,6 +15,7 @@ import com.callbackdev.passo.core.domain.metrics.sanitized
 import com.callbackdev.passo.core.model.AppFont
 import com.callbackdev.passo.core.model.AppPalette
 import com.callbackdev.passo.core.model.Profile
+import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.Sex
 import com.callbackdev.passo.core.model.StepLengthMode
 import com.callbackdev.passo.core.model.ThemeMode
@@ -175,6 +176,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
             minWalkMinutes = prefs[Keys.MIN_WALK_MINUTES] ?: defaults.minWalkMinutes,
             typicalDayLine = prefs[Keys.TYPICAL_DAY_LINE] ?: defaults.typicalDayLine,
             startOutingButton = prefs[Keys.START_OUTING_BUTTON] ?: defaults.startOutingButton,
+            walkVoice = prefs[Keys.WALK_VOICE].toEnumOrNull<SessionVoice>() ?: defaults.walkVoice,
             onboardingCompleted = prefs[Keys.ONBOARDING_COMPLETED] ?: defaults.onboardingCompleted,
         ).sanitized()
     }
@@ -218,6 +220,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
             new.startOutingButton,
             defaults.startOutingButton,
         )
+        prefs.write(Keys.WALK_VOICE, old.walkVoice.name, new.walkVoice.name, defaults.walkVoice.name)
         prefs.write(
             Keys.ONBOARDING_COMPLETED,
             old.onboardingCompleted,
@@ -257,6 +260,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
         val MIN_WALK_MINUTES = intPreferencesKey("min_walk_minutes")
         val TYPICAL_DAY_LINE = booleanPreferencesKey("typical_day_line")
         val START_OUTING_BUTTON = booleanPreferencesKey("today_start_outing_button")
+        val WALK_VOICE = stringPreferencesKey("walk_voice")
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
 
         val TRACKER_INSTALLATION = longPreferencesKey("tracker_installation")

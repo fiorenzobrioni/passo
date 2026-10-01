@@ -1,6 +1,7 @@
 package com.callbackdev.passo.core.domain.ways
 
 import com.callbackdev.passo.core.model.WayId
+import com.callbackdev.passo.core.model.WayKind
 
 /**
  * A stop on a way: a stage (a stamp in the credential, a notification when reached) or, when
@@ -29,14 +30,18 @@ internal class WaySource(
     val locatorFrame: GeoBox,
     val locatorLand: List<String>,
     val locatorLine: String,
+    val parks: List<String> = emptyList(),
+    val riverWidthMeters: Double = 0.0,
 )
 
 /**
- * One of the four ways (PLANNING.md §11 Phase 11): its length as mapped on OpenStreetMap, its
- * stops in order (the first at 0, the last at [lengthMeters]), and the map to draw it on.
+ * A way or a city walk (PLANNING.md §11 Phase 11): its length as mapped on OpenStreetMap (or
+ * as routed through its places), its stops in order (the first at 0, the last at
+ * [lengthMeters]), and the map to draw it on.
  */
 class Way internal constructor(private val source: WaySource) {
     val id: WayId get() = source.id
+    val kind: WayKind get() = source.id.kind
     val lengthMeters: Int get() = source.lengthMeters
     val stops: List<WayStop> get() = source.stops
 
@@ -56,6 +61,8 @@ class Way internal constructor(private val source: WaySource) {
             locatorFrame = source.locatorFrame,
             locatorLand = source.locatorLand.map(Polyline::decodePath),
             locatorLine = Polyline.decodePath(source.locatorLine),
+            parks = source.parks.map(Polyline::decodePath),
+            riverWidthMeters = source.riverWidthMeters,
         )
     }
 }
@@ -63,7 +70,9 @@ class Way internal constructor(private val source: WaySource) {
 /**
  * What a way's map draws: the [frame] the line fits in; the ground behind it (land, lakes,
  * rivers and borders, cut to a square around the frame, so that a box of another shape still
- * finds ground to its edges); and the locator, the whole country with the way on it.
+ * finds ground to its edges); and the locator, the whole country with the way on it. A city's
+ * map has its water as [lakes], its canals as [rivers] drawn [riverWidthMeters] wide (a
+ * country's rivers are hairlines, at 0), and its largest [parks].
  */
 class WayMap(
     val frame: GeoBox,
@@ -75,11 +84,19 @@ class WayMap(
     val locatorFrame: GeoBox,
     val locatorLand: List<GeoPath>,
     val locatorLine: GeoPath,
+    val parks: List<GeoPath> = emptyList(),
+    val riverWidthMeters: Double = 0.0,
 )
 
-/** The four ways, shortest first, as the Ways page lists them. */
+/** The four ways, shortest first, as the Ways page lists them; and the city walks. */
 object Ways {
-    val all: List<Way> by lazy { WayId.entries.map { Way(WayData.source(it)) } }
+    private val everything: List<Way> by lazy { WayId.entries.map { Way(WayData.source(it)) } }
 
-    fun of(id: WayId): Way = all.first { it.id == id }
+    /** The ways, walked over months. */
+    val all: List<Way> by lazy { everything.filter { it.kind == WayKind.WAY } }
+
+    /** The city walks, walked in outings, grouped by city in the order they are listed. */
+    val walks: List<Way> by lazy { everything.filter { it.kind == WayKind.WALK } }
+
+    fun of(id: WayId): Way = everything.first { it.id == id }
 }

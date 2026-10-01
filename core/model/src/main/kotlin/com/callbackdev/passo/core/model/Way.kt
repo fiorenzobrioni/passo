@@ -1,14 +1,24 @@
 package com.callbackdev.passo.core.model
 
+/** A way, walked over months with the days' distance, or a walk through a city, in outings. */
+enum class WayKind {
+    WAY,
+    WALK,
+}
+
 /**
- * The four ways (PLANNING.md §11 Phase 11), in the order the Ways page lists them: the
- * shortest first. Stored by name: the order may change, a name may not.
+ * The ways and the city walks (PLANNING.md §11 Phase 11), in the order the Ways page lists them:
+ * the ways shortest first, then the walks. Stored by name: the order may change, a name may not.
+ *
+ * @property city for a walk, its city's key: the walks of one city are listed together.
  */
-enum class WayId {
-    VIA_DEGLI_DEI,
-    VIA_DI_FRANCESCO,
-    CAMINO_FRANCES,
-    VIA_FRANCIGENA,
+enum class WayId(val kind: WayKind, val city: String? = null) {
+    VIA_DEGLI_DEI(WayKind.WAY),
+    VIA_DI_FRANCESCO(WayKind.WAY),
+    CAMINO_FRANCES(WayKind.WAY),
+    VIA_FRANCIGENA(WayKind.WAY),
+    MILAN_DUOMO_NAVIGLI(WayKind.WALK, city = "milan"),
+    LONDON_PALACE_TOWER(WayKind.WALK, city = "london"),
 }
 
 /** Where a way the reader started stands. Stored by name. */

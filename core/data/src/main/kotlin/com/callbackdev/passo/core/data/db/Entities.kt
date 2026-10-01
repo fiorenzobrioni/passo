@@ -106,6 +106,8 @@ data class SessionEntity(
     val reachedAtMillis: Long?,
     val toldMilestones: Int,
     @ColumnInfo(defaultValue = "OFF") val voice: String = "OFF",
+    @ColumnInfo(defaultValue = "NULL") val walk: String? = null,
+    @ColumnInfo(defaultValue = "0") val walkFromMeters: Int = 0,
 )
 
 /**

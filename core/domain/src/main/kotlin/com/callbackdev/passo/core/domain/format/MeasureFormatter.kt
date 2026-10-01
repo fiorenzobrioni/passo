@@ -56,6 +56,21 @@ class MeasureFormatter(private val locale: Locale, val units: UnitSystem) {
         UnitSystem.IMPERIAL -> Measure(decimal(UnitConversions.metersToYards(meters), 0, 0), MeasureUnit.YARD)
     }
 
+    /**
+     * How far a place ahead is: under a kilometre (half a mile), in tens of metres (yards),
+     * «600 m»; beyond, as [distance]. A rough figure, as a passer-by would give it.
+     */
+    fun aheadDistance(meters: Double): Measure = when {
+        units == UnitSystem.METRIC && meters < METERS_PER_KM -> Measure(integer(tens(meters)), MeasureUnit.METER)
+
+        units == UnitSystem.IMPERIAL && meters < UnitConversions.METERS_PER_MILE / 2 ->
+            Measure(integer(tens(UnitConversions.metersToYards(meters))), MeasureUnit.YARD)
+
+        else -> distance(meters)
+    }
+
+    private fun tens(value: Double): Long = (Math.round(value / TENS) * TENS).toLong().coerceAtLeast(TENS.toLong())
+
     /** Kilocalories, whole: the estimate is not better than that. */
     fun energy(kcal: Double): Measure = Measure(decimal(kcal, 0, 0), MeasureUnit.KILOCALORIE)
 
@@ -102,5 +117,6 @@ class MeasureFormatter(private val locale: Locale, val units: UnitSystem) {
     private companion object {
         const val METERS_PER_KM = 1_000.0
         const val CM_PER_METER = 100.0
+        const val TENS = 10.0
     }
 }

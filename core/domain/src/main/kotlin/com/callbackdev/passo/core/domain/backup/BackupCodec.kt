@@ -60,7 +60,8 @@ sealed interface BackupRead {
  * - Lengths are metres, weights kilograms, energy kilocalories, whatever units the app shows.
  * - Enum values are their names; a name this version does not know reads as the default, or
  *   leaves out the plan, outing or way it belongs to.
- * - `ways` (added with the Ways, 1.1.0) lists the ways started: a file without it has none.
+ * - `ways` (added with the Ways, 1.1.0) lists the ways and city walks started: a file without
+ *   it has none. An outing's `walk` and `walkFromMeters` say the city walk it walked, if any.
  *
  * Reading is lenient where a value can be dropped without lying (an unknown setting, a minute
  * with a negative count) and strict where it cannot (the format, the version, broken JSON).
@@ -133,6 +134,7 @@ private fun Backup.toFile() = BackupFile(
         minWalkMinutes = settings.minWalkMinutes,
         typicalDayLine = settings.typicalDayLine,
         startOutingButton = settings.startOutingButton,
+        walkVoice = settings.walkVoice.name,
     ),
     days = days.sortedBy { it.summary.localEpochDay }.map { day ->
         val summary = day.summary
@@ -188,6 +190,8 @@ private fun Backup.toFile() = BackupFile(
             pausedAtMillis = session.pausedAtMillis,
             reachedAtMillis = session.reachedAtMillis,
             toldMilestones = session.toldMilestones.percents(),
+            walk = session.walk?.name,
+            walkFromMeters = session.walkFromMeters,
         )
     },
     diagnostics = diagnostics.map { DiagnosticDto(it.wallMillis, it.type.name, it.detail) },
@@ -235,6 +239,7 @@ private fun BackupFile.toBackup(): Backup {
             minWalkMinutes = settings.minWalkMinutes ?: defaults.minWalkMinutes,
             typicalDayLine = settings.typicalDayLine ?: defaults.typicalDayLine,
             startOutingButton = settings.startOutingButton ?: defaults.startOutingButton,
+            walkVoice = settings.walkVoice.toEnumOrNull<SessionVoice>() ?: defaults.walkVoice,
         ),
         days = days.mapNotNull { it.toDay() }
             // One entry per day: a file edited by hand may repeat one, and the fuller one is kept.
@@ -340,6 +345,8 @@ private fun OutingDto.toSession(): Session? {
         pausedAtMillis = pausedAtMillis,
         reachedAtMillis = reachedAtMillis,
         toldMilestones = toldMilestones.toMilestones(),
+        walk = walk.toEnumOrNull<WayId>(),
+        walkFromMeters = walkFromMeters.coerceAtLeast(0),
     )
 }
 

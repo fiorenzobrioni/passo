@@ -154,4 +154,24 @@
         <item quantity="one">%1$s: %2$s walked in %3$d day.</item>
         <item quantity="other">%1$s: %2$s walked in %3$d days.</item>
     </plurals>
+    <!-- City walks (Phase 11). «A walk in Milan: off you go. Here: The Duomo. Milan began…» -->
+    <string name="spoken_walk_started">%1$s: off you go. Here: %2$s.</string>
+    <!-- «A walk in Milan: on we go. From here: Sforza Castle.» -->
+    <string name="spoken_walk_continued">%1$s: on we go. From here: %2$s.</string>
+    <!-- A place reached: «Here: Sforza Castle.», then its sentence. -->
+    <string name="spoken_walk_here">Here: %1$s.</string>
+    <!-- Places passed in the same moment as the one reached: «Behind you: Brera, La Scala.» -->
+    <string name="spoken_walk_behind">Behind you: %1$s.</string>
+    <!-- «Next: the Duomo, in 600 metres.» -->
+    <string name="spoken_walk_next">Next: %1$s, in %2$s.</string>
+    <!-- At the walk's last place, instead of the goal's sentence: «The walk is done, in 12,400 steps.» -->
+    <string name="spoken_walk_end">The walk is done, in %1$s.</string>
+    <plurals name="spoken_metres">
+        <item quantity="one">%1$s metre</item>
+        <item quantity="other">%1$s metres</item>
+    </plurals>
+    <plurals name="spoken_yards">
+        <item quantity="one">%1$s yard</item>
+        <item quantity="other">%1$s yards</item>
+    </plurals>
 </resources>

@@ -2,11 +2,13 @@ package com.callbackdev.passo.core.domain.sessions
 
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.MIN_REST_OF_DAY_STEPS
+import com.callbackdev.passo.core.domain.ways.Way
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionPlan
+import com.callbackdev.passo.core.model.SessionVoice
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
@@ -165,6 +167,33 @@ object SessionPlans {
             startedAtMillis = nowMillis,
         )
     }
+
+    /**
+     * An outing on a city walk (Phase 11), from [fromMeters] along it to its end: its goal the
+     * distance left, its signals the walk's places rather than shares of the goal (the goal, at
+     * the walk's end, is still told). Null when nothing is left of the walk.
+     */
+    fun startWalk(walk: Way, fromMeters: Int, voice: SessionVoice, nowMillis: Long, localEpochDay: Long): Session? {
+        val left = walk.lengthMeters - fromMeters
+        if (left < MIN_WALK_LEFT_METERS) return null
+        return Session(
+            planId = null,
+            name = null,
+            goalKind = SessionGoalKind.DISTANCE,
+            goalValue = left,
+            intensity = SessionIntensity.FREE,
+            milestones = emptySet(),
+            vibrate = true,
+            voice = voice,
+            localEpochDay = localEpochDay,
+            startedAtMillis = nowMillis,
+            walk = walk.id,
+            walkFromMeters = fromMeters.coerceIn(0, walk.lengthMeters),
+        )
+    }
+
+    /** Under this, a walk is done: its last place is a few steps away. */
+    const val MIN_WALK_LEFT_METERS = 50
 
     private fun snap(value: Int, range: IntRange, step: Int): Int {
         val snapped = ((value.toDouble() / step).roundToInt() * step)

@@ -150,6 +150,10 @@ data class SessionTotals(
  * @property lastEventAtMillis the last moment it was measured to: a step, the start or a resume.
  * @property reachedAtMillis when the goal was met, if it was.
  * @property toldMilestones the signals already given, so none is given twice.
+ * @property walk the city walk it walks (Phase 11), if any: its goal is then the distance left
+ *   of the walk, and its signals are the walk's places, reached at [walkFromMeters] plus the
+ *   distance walked.
+ * @property walkFromMeters where on the walk it started: 0, or where the last outing on it ended.
  */
 data class Session(
     val id: Long = 0,
@@ -173,6 +177,8 @@ data class Session(
     val pausedAtMillis: Long? = null,
     val reachedAtMillis: Long? = null,
     val toldMilestones: Set<SessionMilestone> = emptySet(),
+    val walk: WayId? = null,
+    val walkFromMeters: Int = 0,
 ) {
     val reached: Boolean get() = reachedAtMillis != null
     val live: Boolean get() = state != SessionState.FINISHED

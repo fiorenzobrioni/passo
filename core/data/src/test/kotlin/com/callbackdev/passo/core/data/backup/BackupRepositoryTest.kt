@@ -268,7 +268,8 @@ class BackupRepositoryTest {
         val francigena = new.database.wayDao().journeys().single { it.way == WayId.VIA_FRANCIGENA.name }
         assertThat(francigena.state).isEqualTo(WayJourneyState.LEFT.name)
         assertThat(francigena.toldMeters).isEqualTo(1_200)
-        assertThat(new.database.wayDao().active()?.way).isEqualTo(WayId.VIA_DEGLI_DEI.name)
+        assertThat(new.database.wayDao().activeAmong(listOf(WayId.VIA_DEGLI_DEI.name)).single().way)
+            .isEqualTo(WayId.VIA_DEGLI_DEI.name)
         // The same file again brings nothing.
         assertThat(new.backups.import(read(file), withPreferences = false).addedWays).isEqualTo(0)
     }

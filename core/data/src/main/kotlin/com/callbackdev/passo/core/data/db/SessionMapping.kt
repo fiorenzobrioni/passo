@@ -9,6 +9,7 @@ import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionTotals
 import com.callbackdev.passo.core.model.SessionVoice
+import com.callbackdev.passo.core.model.WayId
 
 /** Null for a row a newer build wrote with a kind this one does not know: it is left out. */
 internal fun SessionPlanEntity.toModel(): SessionPlan? {
@@ -71,6 +72,9 @@ internal fun SessionEntity.toModel(): Session? {
         pausedAtMillis = pausedAtMillis,
         reachedAtMillis = reachedAtMillis,
         toldMilestones = toldMilestones.toMilestones(),
+        // A walk a newer build knows and this one does not: the outing stays, without its walk.
+        walk = walk.toEnumOrNull<WayId>(),
+        walkFromMeters = walkFromMeters,
     )
 }
 
@@ -100,6 +104,8 @@ internal fun Session.toEntity() = SessionEntity(
     reachedAtMillis = reachedAtMillis,
     toldMilestones = toldMilestones.toBits(),
     voice = voice.name,
+    walk = walk?.name,
+    walkFromMeters = walkFromMeters,
 )
 
 private fun Set<SessionMilestone>.toBits(): Int = fold(0) { bits, milestone -> bits or (1 shl milestone.ordinal) }

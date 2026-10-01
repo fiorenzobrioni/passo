@@ -1,12 +1,15 @@
 package com.callbackdev.passo.core.domain.sessions
 
 import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionState
+import com.callbackdev.passo.core.model.SessionVoice
+import com.callbackdev.passo.core.model.WayId
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
@@ -325,5 +328,43 @@ class SessionTrackerTest {
         assertThat(tracker.session.live).isTrue()
         val signals = tracker.onSteps(start + SessionConstants.MAX_SESSION_MILLIS + 1_000, 100)
         assertThat((signals.single() as SessionSignal.Finished).session.end).isEqualTo(SessionEnd.CLOSED)
+    }
+
+    private fun walkTracker(from: Int = 0): SessionTracker {
+        val walk = Ways.of(WayId.MILAN_DUOMO_NAVIGLI)
+        val session = checkNotNull(SessionPlans.startWalk(walk, from, SessionVoice.OFF, start, 20_000))
+        return SessionTracker(session, lengths, weightKg = 70.0)
+    }
+
+    @Test
+    fun `a walk tells its places as the distance reaches them, never the one it starts at`() {
+        val tracker = walkTracker()
+        // 0.7 m a step at a walking cadence: 600 steps are 420 m, past the Galleria (about 210 m).
+        val signals = tracker.walk(start, 600 * 550L)
+        val places = signals.filterIsInstance<SessionSignal.Places>().flatMap { it.places }.map { it.key }
+        assertThat(places).contains("milan_galleria")
+        assertThat(places).doesNotContain("milan_duomo")
+        assertThat(places).containsNoDuplicates()
+        assertThat(signals.filterIsInstance<SessionSignal.Milestone>()).isEmpty()
+    }
+
+    @Test
+    fun `a walk continued from the middle goes on from there, and its end is the goal`() {
+        val walk = Ways.of(WayId.MILAN_DUOMO_NAVIGLI)
+        val from = walk.stops.single { it.key == "milan_darsena" }.distanceMeters
+        val tracker = walkTracker(from)
+        assertThat(tracker.session.goalValue).isEqualTo(walk.lengthMeters - from)
+        val signals = tracker.walk(start, 2_000 * 550L)
+        val places = signals.filterIsInstance<SessionSignal.Places>().flatMap { it.places }.map { it.key }
+        assertThat(places).containsExactly("milan_naviglio_grande")
+        assertThat(signals.filterIsInstance<SessionSignal.Milestone>().map { it.milestone })
+            .containsExactly(SessionMilestone.GOAL)
+        assertThat(signals.filterIsInstance<SessionSignal.Finished>().single().session.end).isEqualTo(SessionEnd.GOAL)
+    }
+
+    @Test
+    fun `a walk with nothing left does not start`() {
+        val walk = Ways.of(WayId.LONDON_PALACE_TOWER)
+        assertThat(SessionPlans.startWalk(walk, walk.lengthMeters - 10, SessionVoice.OFF, start, 20_000)).isNull()
     }
 }

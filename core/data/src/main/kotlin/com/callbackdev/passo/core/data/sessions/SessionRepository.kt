@@ -69,6 +69,11 @@ constructor(
 
     suspend fun session(id: Long): Session? = dao.session(id)?.toModel()
 
+    /** The outings walked on city walks, oldest first (Phase 11). */
+    val walkSessions: Flow<List<Session>> = dao.observeWalkSessions().map { rows -> rows.mapNotNull { it.toModel() } }
+
+    suspend fun walkSessionsNow(): List<Session> = dao.walkSessions().mapNotNull { it.toModel() }
+
     /** The outings started on one local day, earliest first. */
     fun observeSessionsOn(localEpochDay: Long): Flow<List<Session>> =
         dao.observeSessionsOn(localEpochDay).map { rows -> rows.mapNotNull { it.toModel() } }

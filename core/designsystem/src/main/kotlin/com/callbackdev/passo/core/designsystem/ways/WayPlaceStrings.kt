@@ -12,6 +12,8 @@ fun wayNameRes(id: WayId): Int = when (id) {
     WayId.VIA_DI_FRANCESCO -> R.string.way_name_via_di_francesco
     WayId.CAMINO_FRANCES -> R.string.way_name_camino_frances
     WayId.VIA_FRANCIGENA -> R.string.way_name_via_francigena
+    WayId.MILAN_DUOMO_NAVIGLI -> R.string.way_name_milan_duomo_navigli
+    WayId.LONDON_PALACE_TOWER -> R.string.way_name_london_palace_tower
 }
 
 /** Where a way runs, in one line. */
@@ -21,6 +23,16 @@ fun wayRouteRes(id: WayId): Int = when (id) {
     WayId.VIA_DI_FRANCESCO -> R.string.way_route_via_di_francesco
     WayId.CAMINO_FRANCES -> R.string.way_route_camino_frances
     WayId.VIA_FRANCIGENA -> R.string.way_route_via_francigena
+    WayId.MILAN_DUOMO_NAVIGLI -> R.string.way_route_milan_duomo_navigli
+    WayId.LONDON_PALACE_TOWER -> R.string.way_route_london_palace_tower
+}
+
+/** A walk's outing, as History and Today name it; null for a way, which is not an outing. */
+@StringRes
+fun walkOutingRes(id: WayId): Int? = when (id) {
+    WayId.MILAN_DUOMO_NAVIGLI -> R.string.way_outing_milan_duomo_navigli
+    WayId.LONDON_PALACE_TOWER -> R.string.way_outing_london_palace_tower
+    else -> null
 }
 
 /** A stop's name, from its key in the ways' data. */
@@ -69,12 +81,43 @@ fun placeNameRes(key: String): Int = when (key) {
     "la_verna" -> R.string.way_place_la_verna
     "leon" -> R.string.way_place_leon
     "logrono" -> R.string.way_place_logrono
+    "london_abbey" -> R.string.way_place_london_abbey
+    "london_buckingham" -> R.string.way_place_london_buckingham
+    "london_downing" -> R.string.way_place_london_downing
+    "london_eye" -> R.string.way_place_london_eye
+    "london_festival_hall" -> R.string.way_place_london_festival_hall
+    "london_globe" -> R.string.way_place_london_globe
+    "london_horse_guards" -> R.string.way_place_london_horse_guards
+    "london_millennium_bridge" -> R.string.way_place_london_millennium_bridge
+    "london_monument" -> R.string.way_place_london_monument
+    "london_parliament" -> R.string.way_place_london_parliament
+    "london_st_james_park" -> R.string.way_place_london_st_james_park
+    "london_st_pauls" -> R.string.way_place_london_st_pauls
+    "london_tate" -> R.string.way_place_london_tate
+    "london_tower" -> R.string.way_place_london_tower
+    "london_tower_bridge" -> R.string.way_place_london_tower_bridge
+    "london_trafalgar" -> R.string.way_place_london_trafalgar
+    "london_westminster_bridge" -> R.string.way_place_london_westminster_bridge
     "los_arcos" -> R.string.way_place_los_arcos
     "lucca" -> R.string.way_place_lucca
     "madonna_dei_fornelli" -> R.string.way_place_madonna_dei_fornelli
     "mansilla" -> R.string.way_place_mansilla
     "massa" -> R.string.way_place_massa
     "medesano" -> R.string.way_place_medesano
+    "milan_arco_della_pace" -> R.string.way_place_milan_arco_della_pace
+    "milan_brera" -> R.string.way_place_milan_brera
+    "milan_castello" -> R.string.way_place_milan_castello
+    "milan_darsena" -> R.string.way_place_milan_darsena
+    "milan_duomo" -> R.string.way_place_milan_duomo
+    "milan_galleria" -> R.string.way_place_milan_galleria
+    "milan_grazie" -> R.string.way_place_milan_grazie
+    "milan_montenapoleone" -> R.string.way_place_milan_montenapoleone
+    "milan_naviglio_grande" -> R.string.way_place_milan_naviglio_grande
+    "milan_porta_ticinese" -> R.string.way_place_milan_porta_ticinese
+    "milan_san_lorenzo" -> R.string.way_place_milan_san_lorenzo
+    "milan_sant_ambrogio" -> R.string.way_place_milan_sant_ambrogio
+    "milan_scala" -> R.string.way_place_milan_scala
+    "milan_sempione" -> R.string.way_place_milan_sempione
     "monte_sacro" -> R.string.way_place_monte_sacro
     "montefiascone" -> R.string.way_place_montefiascone
     "montelibretti" -> R.string.way_place_montelibretti
@@ -159,8 +202,38 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "ivrea" -> R.string.way_note_ivrea
     "la_verna" -> R.string.way_note_la_verna
     "leon" -> R.string.way_note_leon
+    "london_abbey" -> R.string.way_note_london_abbey
+    "london_buckingham" -> R.string.way_note_london_buckingham
+    "london_downing" -> R.string.way_note_london_downing
+    "london_eye" -> R.string.way_note_london_eye
+    "london_festival_hall" -> R.string.way_note_london_festival_hall
+    "london_globe" -> R.string.way_note_london_globe
+    "london_horse_guards" -> R.string.way_note_london_horse_guards
+    "london_millennium_bridge" -> R.string.way_note_london_millennium_bridge
+    "london_monument" -> R.string.way_note_london_monument
+    "london_parliament" -> R.string.way_note_london_parliament
+    "london_st_james_park" -> R.string.way_note_london_st_james_park
+    "london_st_pauls" -> R.string.way_note_london_st_pauls
+    "london_tate" -> R.string.way_note_london_tate
+    "london_tower" -> R.string.way_note_london_tower
+    "london_tower_bridge" -> R.string.way_note_london_tower_bridge
+    "london_trafalgar" -> R.string.way_note_london_trafalgar
+    "london_westminster_bridge" -> R.string.way_note_london_westminster_bridge
     "lucca" -> R.string.way_note_lucca
     "madonna_dei_fornelli" -> R.string.way_note_madonna_dei_fornelli
+    "milan_arco_della_pace" -> R.string.way_note_milan_arco_della_pace
+    "milan_brera" -> R.string.way_note_milan_brera
+    "milan_castello" -> R.string.way_note_milan_castello
+    "milan_darsena" -> R.string.way_note_milan_darsena
+    "milan_duomo" -> R.string.way_note_milan_duomo
+    "milan_galleria" -> R.string.way_note_milan_galleria
+    "milan_grazie" -> R.string.way_note_milan_grazie
+    "milan_montenapoleone" -> R.string.way_note_milan_montenapoleone
+    "milan_naviglio_grande" -> R.string.way_note_milan_naviglio_grande
+    "milan_san_lorenzo" -> R.string.way_note_milan_san_lorenzo
+    "milan_sant_ambrogio" -> R.string.way_note_milan_sant_ambrogio
+    "milan_scala" -> R.string.way_note_milan_scala
+    "milan_sempione" -> R.string.way_note_milan_sempione
     "monteriggioni" -> R.string.way_note_monteriggioni
     "o_cebreiro" -> R.string.way_note_o_cebreiro
     "orio_litta" -> R.string.way_note_orio_litta

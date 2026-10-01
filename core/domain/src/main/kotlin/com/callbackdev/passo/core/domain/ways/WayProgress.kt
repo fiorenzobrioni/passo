@@ -1,5 +1,6 @@
 package com.callbackdev.passo.core.domain.ways
 
+import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.WayJourney
 import com.callbackdev.passo.core.model.WayJourneyState
 import java.time.LocalDate
@@ -171,4 +172,17 @@ object WayStarts {
         val earliest = firstCounted ?: today
         return day.coerceIn(minOf(earliest, today), today)
     }
+}
+
+/**
+ * A city walk's distance by day (Phase 11): the outings walked on it since the journey began,
+ * each day's added up. [WayProgress.of] reads it as it reads a way's days, so the places reached
+ * and their days come out the same way; an outing goes on from where the last one ended
+ * (`Session.walkFromMeters`), so these add up to where the reader stands on the walk.
+ */
+object WalkDays {
+    fun of(journey: WayJourney, outings: List<Session>): Map<Long, Double> = outings
+        .filter { it.walk == journey.way && it.startedAtMillis >= journey.startedAtMillis }
+        .groupBy { it.localEpochDay }
+        .mapValues { (_, day) -> day.sumOf { it.totals.distanceMeters } }
 }

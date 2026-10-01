@@ -335,8 +335,192 @@ VIA_FRANCIGENA = Way(
 
 WAYS = [VIA_DEGLI_DEI, VIA_DI_FRANCESCO, CAMINO_FRANCES, VIA_FRANCIGENA]
 
+
+@dataclass(frozen=True)
+class Walk:
+    """A walk through a city (Phase 11's second part), walked as an outing.
+
+    Its line is routed once by BRouter (a walking router on OpenStreetMap data) through its
+    places, in order, and saved in tools/walks/ by the script's `fetch`: the places are the
+    route's waypoints, so each lies on the line. Behind it, the city's water and largest parks,
+    from OpenStreetMap objects named here by id ("relation/28934"); canals are lines drawn
+    [canal_width] metres wide.
+    """
+
+    id: str
+    city: str  # the city's key: walks of one city are listed together
+    city_en: str
+    city_it: str
+    route_en: str
+    route_it: str
+    outing_en: str  # the outing's name in History and on Today
+    outing_it: str
+    country: str  # the locator map's country
+    stops: list = field(default_factory=list)
+    water: list = field(default_factory=list)
+    canals: list = field(default_factory=list)
+    parks: list = field(default_factory=list)
+    canal_width: float = 20.0
+
+
+MILAN = Walk(
+    id="MILAN_DUOMO_NAVIGLI",
+    city="milan",
+    city_en="Milan",
+    city_it="Milano",
+    route_en="From the Duomo to the Navigli, by the Castello",
+    route_it="Dal Duomo ai Navigli, passando per il Castello",
+    outing_en="A walk in Milan",
+    outing_it="Passeggiata a Milano",
+    country="IT",
+    water=["way/345030396"],
+    canals=["relation/3340142", "relation/3350738"],
+    parks=["relation/10172760", "way/5110320", "way/260829251"],
+    stops=[
+        Stop("milan_duomo", "The Duomo", "Il Duomo", 45.4640, 9.1905,
+             note_en="Milan began its cathedral in 1386, and building went on for nearly six centuries.",
+             note_it="Milano iniziò il suo Duomo nel 1386, e il cantiere durò quasi sei secoli."),
+        # Source: Wikipedia, Milan Cathedral.
+        Stop("milan_galleria", "Galleria Vittorio Emanuele II", "Galleria Vittorio Emanuele II", 45.4656, 9.1900,
+             note_en="Opened in 1867, it is one of the oldest covered shopping arcades in the world.",
+             note_it="Inaugurata nel 1867, è una delle più antiche gallerie commerciali coperte del mondo."),
+        # Source: Wikipedia, Galleria Vittorio Emanuele II.
+        Stop("milan_scala", "La Scala", "Teatro alla Scala", 45.4676, 9.1891,
+             note_en="La Scala opened in 1778; Verdi's Otello and Puccini's Turandot had their first nights here.",
+             note_it="La Scala aprì nel 1778; qui debuttarono l'Otello di Verdi e la Turandot di Puccini."),
+        # Source: Wikipedia, La Scala.
+        Stop("milan_montenapoleone", "Via Montenapoleone", "Via Montenapoleone", 45.4678, 9.1958,
+             note_en="The heart of the Quadrilatero della moda, the streets of Milan's fashion houses.",
+             note_it="Il cuore del Quadrilatero della moda, le vie delle grandi case milanesi."),
+        Stop("milan_brera", "Brera", "Brera", 45.4722, 9.1884,
+             note_en="The Pinacoteca di Brera keeps Raphael's Marriage of the Virgin and Mantegna's Dead Christ.",
+             note_it="La Pinacoteca di Brera custodisce lo Sposalizio della Vergine di Raffaello e il Cristo morto del Mantegna."),
+        # Source: Wikipedia, Pinacoteca di Brera.
+        Stop("milan_castello", "Sforza Castle", "Castello Sforzesco", 45.4703, 9.1781,
+             note_en="The Sforza castle keeps Michelangelo's last sculpture, the Rondanini Pietà.",
+             note_it="Il castello degli Sforza custodisce l'ultima scultura di Michelangelo, la Pietà Rondanini."),
+        # Source: Wikipedia, Rondanini Pietà.
+        Stop("milan_sempione", "Sempione Park", "Parco Sempione", 45.4730, 9.1770,
+             note_en="The park was laid out in the 1890s on the castle's old parade ground.",
+             note_it="Il parco fu disegnato negli anni Novanta dell'Ottocento sulla vecchia piazza d'armi del castello."),
+        # Source: Wikipedia, Sempione Park.
+        Stop("milan_arco_della_pace", "Arch of Peace", "Arco della Pace", 45.4757, 9.1724,
+             note_en="Begun for Napoleon in 1807, the arch was finished in 1838 and dedicated to peace.",
+             note_it="Iniziato per Napoleone nel 1807, l'arco fu finito nel 1838 e dedicato alla pace."),
+        # Source: Wikipedia, Arco della Pace.
+        Stop("milan_grazie", "Santa Maria delle Grazie", "Santa Maria delle Grazie", 45.4659, 9.1709,
+             note_en="Leonardo painted the Last Supper on the wall of its refectory.",
+             note_it="Leonardo dipinse il Cenacolo sulla parete del suo refettorio."),
+        # Source: Wikipedia, The Last Supper (Leonardo).
+        Stop("milan_sant_ambrogio", "Sant'Ambrogio", "Sant'Ambrogio", 45.4624, 9.1758,
+             note_en="Saint Ambrose founded this basilica in the 4th century, and he is buried in it.",
+             note_it="Sant'Ambrogio fondò questa basilica nel IV secolo, e qui è sepolto."),
+        # Source: Wikipedia, Basilica of Sant'Ambrogio.
+        Stop("milan_san_lorenzo", "Columns of San Lorenzo", "Colonne di San Lorenzo", 45.4582, 9.1810,
+             note_en="Sixteen Roman columns, brought here in the 4th century from an older building.",
+             note_it="Sedici colonne romane, portate qui nel IV secolo da un edificio più antico."),
+        # Source: Wikipedia, Colonne di San Lorenzo.
+        Stop("milan_porta_ticinese", "Porta Ticinese", "Porta Ticinese", 45.4538, 9.1808),
+        Stop("milan_darsena", "The Darsena", "La Darsena", 45.4530, 9.1770,
+             note_en="The Darsena was Milan's port, where the Navigli canals met.",
+             note_it="La Darsena era il porto di Milano, dove si incontravano i Navigli."),
+        Stop("milan_naviglio_grande", "Naviglio Grande", "Naviglio Grande", 45.4513, 9.1730,
+             note_en="Begun in 1177, the canal brought the Duomo's marble into the city.",
+             note_it="Iniziato nel 1177, il canale portava in città il marmo del Duomo."),
+        # Source: Wikipedia, Naviglio Grande.
+    ],
+)
+
+LONDON = Walk(
+    id="LONDON_PALACE_TOWER",
+    city="london",
+    city_en="London",
+    city_it="Londra",
+    route_en="From Buckingham Palace to Tower Bridge, along the Thames",
+    route_it="Da Buckingham Palace al Tower Bridge, lungo il Tamigi",
+    outing_en="A walk in London",
+    outing_it="Passeggiata a Londra",
+    country="GB",
+    water=["relation/28934", "relation/70347", "relation/276130"],
+    parks=["way/374960368", "way/863554956", "way/4373996", "way/4254099", "way/367694522", "way/142680571",
+           "way/372975520"],
+    stops=[
+        Stop("london_buckingham", "Buckingham Palace", "Buckingham Palace", 51.5008, -0.1430,
+             note_en="The monarch's London home since Queen Victoria moved in, in 1837.",
+             note_it="La casa londinese del sovrano da quando vi si trasferì la regina Vittoria, nel 1837."),
+        # Source: Wikipedia, Buckingham Palace.
+        Stop("london_st_james_park", "St James's Park", "St James's Park", 51.5031, -0.1332,
+             note_en="Pelicans have lived here since a Russian ambassador gave them to Charles II in 1664.",
+             note_it="Qui vivono pellicani da quando un ambasciatore russo li regalò a Carlo II, nel 1664."),
+        # Source: Wikipedia, St James's Park.
+        Stop("london_horse_guards", "Horse Guards Parade", "Horse Guards Parade", 51.5047, -0.1283,
+             note_en="Every June the King's birthday parade, Trooping the Colour, is held here.",
+             note_it="Ogni giugno qui si tiene la parata per il compleanno del re, il Trooping the Colour."),
+        # Source: Wikipedia, Trooping the Colour.
+        Stop("london_trafalgar", "Trafalgar Square", "Trafalgar Square", 51.5085, -0.1284,
+             note_en="Nelson's Column, about 52 metres tall, remembers the battle of Trafalgar of 1805.",
+             note_it="La colonna di Nelson, alta circa 52 metri, ricorda la battaglia di Trafalgar del 1805."),
+        # Source: Wikipedia, Nelson's Column.
+        Stop("london_downing", "Downing Street", "Downing Street", 51.5034, -0.12645,
+             note_en="Number 10 has been the Prime Minister's house since Robert Walpole moved in, in 1735.",
+             note_it="Il numero 10 è la casa del primo ministro da quando vi entrò Robert Walpole, nel 1735."),
+        # Source: Wikipedia, 10 Downing Street.
+        Stop("london_abbey", "Westminster Abbey", "Abbazia di Westminster", 51.49936, -0.12905,
+             note_en="Almost every English and British monarch since 1066 has been crowned here.",
+             note_it="Quasi tutti i sovrani inglesi e britannici dal 1066 sono stati incoronati qui."),
+        # Source: Wikipedia, Westminster Abbey.
+        Stop("london_parliament", "Houses of Parliament", "Palazzo di Westminster", 51.50055, -0.12585,
+             note_en="Big Ben is the great bell inside the clock tower, named Elizabeth Tower in 2012.",
+             note_it="Big Ben è la grande campana dentro la torre dell'orologio, chiamata Elizabeth Tower dal 2012."),
+        # Source: Wikipedia, Big Ben.
+        Stop("london_westminster_bridge", "Westminster Bridge", "Westminster Bridge", 51.50085, -0.12178,
+             note_en="Wordsworth wrote a sonnet on this bridge in 1802: earth has not anything to show more fair.",
+             note_it="Wordsworth scrisse un sonetto su questo ponte nel 1802: la terra non ha nulla di più bello."),
+        # Source: Wikipedia, Composed upon Westminster Bridge, September 3, 1802.
+        Stop("london_eye", "London Eye", "London Eye", 51.5033, -0.1196,
+             note_en="The wheel, 135 metres tall, opened in 2000.",
+             note_it="La ruota, alta 135 metri, fu inaugurata nel 2000."),
+        # Source: Wikipedia, London Eye.
+        Stop("london_festival_hall", "Royal Festival Hall", "Royal Festival Hall", 51.5058, -0.1168,
+             note_en="It was built for the Festival of Britain, in 1951.",
+             note_it="Fu costruita per il Festival of Britain, nel 1951."),
+        # Source: Wikipedia, Royal Festival Hall.
+        Stop("london_tate", "Tate Modern", "Tate Modern", 51.5074, -0.0993,
+             note_en="A power station until 1981, it opened as a gallery of modern art in 2000.",
+             note_it="Centrale elettrica fino al 1981, aprì come museo d'arte moderna nel 2000."),
+        # Source: Wikipedia, Tate Modern.
+        Stop("london_globe", "Shakespeare's Globe", "Globe di Shakespeare", 51.5081, -0.0972,
+             note_en="A rebuilding of Shakespeare's theatre, opened in 1997 near the site of the first.",
+             note_it="Una ricostruzione del teatro di Shakespeare, aperta nel 1997 vicino a dove sorgeva il primo."),
+        # Source: Wikipedia, Shakespeare's Globe.
+        Stop("london_millennium_bridge", "Millennium Bridge", "Millennium Bridge", 51.5099, -0.0985,
+             note_en="Opened in June 2000, it swayed under the walkers' feet and was closed two days later.",
+             note_it="Aperto nel giugno 2000, oscillava sotto i passi della gente e fu chiuso due giorni dopo."),
+        # Source: Wikipedia, Millennium Bridge, London.
+        Stop("london_st_pauls", "St Paul's Cathedral", "Cattedrale di St Paul", 51.5138, -0.0985,
+             note_en="Christopher Wren built the cathedral after the Great Fire of 1666.",
+             note_it="Christopher Wren costruì la cattedrale dopo il grande incendio del 1666."),
+        # Source: Wikipedia, St Paul's Cathedral.
+        Stop("london_monument", "The Monument", "The Monument", 51.5101, -0.0859,
+             note_en="Its 61 metres are its distance from the bakery in Pudding Lane where the Great Fire began.",
+             note_it="I suoi 61 metri sono la distanza dal forno di Pudding Lane dove iniziò il grande incendio."),
+        # Source: Wikipedia, Monument to the Great Fire of London.
+        Stop("london_tower", "Tower of London", "Torre di Londra", 51.5082, -0.0762,
+             note_en="Founded by William the Conqueror, it keeps the Crown Jewels.",
+             note_it="Fondata da Guglielmo il Conquistatore, custodisce i gioielli della Corona."),
+        # Source: Wikipedia, Tower of London.
+        Stop("london_tower_bridge", "Tower Bridge", "Tower Bridge", 51.5055, -0.0754,
+             note_en="Its two halves still lift to let tall ships through, as they have since 1894.",
+             note_it="Le sue due metà si alzano ancora per far passare le navi alte, come dal 1894."),
+        # Source: Wikipedia, Tower Bridge.
+    ],
+)
+
+WALKS = [MILAN, LONDON]
+
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
     "IT": (36.3, 6.3, 47.4, 18.8),
     "ES": (35.8, -9.7, 44.0, 3.6),
+    "GB": (49.8, -8.4, 59.0, 2.2),
 }

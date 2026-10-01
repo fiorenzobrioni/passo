@@ -25,6 +25,7 @@ import com.callbackdev.passo.core.data.tracking.LiveSteps
 import com.callbackdev.passo.core.data.tracking.LiveToday
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.data.tracking.withPending
+import com.callbackdev.passo.core.data.ways.WayRepository
 import com.callbackdev.passo.core.data.widget.WidgetUpdates
 import com.callbackdev.passo.core.domain.goals.GoalReached
 import com.callbackdev.passo.core.domain.metrics.MetricsCalculator
@@ -37,6 +38,8 @@ import com.callbackdev.passo.core.domain.today.DayMinute
 import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.today.minuteOfDay
 import com.callbackdev.passo.core.domain.tracking.StepLedger
+import com.callbackdev.passo.core.domain.ways.WalkDays
+import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.domain.widget.WidgetEvent
 import com.callbackdev.passo.core.model.DiagnosticsEvent
 import com.callbackdev.passo.core.model.DiagnosticsType
@@ -49,6 +52,8 @@ import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.UnitPreference
+import com.callbackdev.passo.core.model.WayId
+import com.callbackdev.passo.core.model.WayKind
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CompletableDeferred
@@ -96,6 +101,8 @@ import javax.inject.Inject
  * [SESSION_LATENCY_US] latency, so its signals reach a phone in a pocket on time
  * (docs/adr/0009-sessions.md); paused, over, or with no outing, the registration is the usual
  * one. Commands (start, pause, resume, stop, keep going) arrive as intents ([SessionControl]).
+ * An outing on a city walk (Phase 11) is one more: its places are told as its distance passes
+ * them, by the same samples, with no timer of its own.
  */
 @AndroidEntryPoint
 class StepTrackingService : Service() {
@@ -114,6 +121,8 @@ class StepTrackingService : Service() {
     @Inject lateinit var sessions: SessionRepository
 
     @Inject lateinit var liveSession: LiveSession
+
+    @Inject lateinit var ways: WayRepository
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val persistMutex = Mutex()
@@ -680,6 +689,19 @@ class StepTrackingService : Service() {
                     if (signal.milestone != SessionMilestone.GOAL) notifyNow()
                 }
 
+                is SessionSignal.Places -> {
+                    val current = tracker ?: continue
+                    val session = current.session
+                    val allowed = sessionNotifications.signalsAllowed()
+                    // At the walk's last place the goal's long pulse says it: one signal, not two.
+                    val atEnd = signals.any { it is SessionSignal.Milestone && it.milestone == SessionMilestone.GOAL }
+                    if (session.vibrate && allowed && !atEnd) SessionHaptics.playPlace(this)
+                    if (session.voice != SessionVoice.OFF && allowed) {
+                        speak(SessionAnnouncement.placesReached(session, signal.places), session)
+                    }
+                    if (!atEnd) notifyNow()
+                }
+
                 is SessionSignal.Finished -> onSessionFinished(signal)
             }
         }
@@ -698,6 +720,10 @@ class StepTrackingService : Service() {
             persistMutex.withLock {
                 try {
                     if (finished.kept) sessions.save(session) else sessions.delete(session.id)
+                    // A city walk walked to its last place is done: the next outing on it
+                    // begins it again.
+                    val walk = session.walk
+                    if (walk != null && session.end == SessionEnd.GOAL) ways.finishWalk(walk, today())
                 } catch (e: Exception) {
                     Log.e(TAG, "Writing the end of an outing failed", e)
                 }
@@ -762,6 +788,12 @@ class StepTrackingService : Service() {
                 SessionControl.ACTION_START -> startSession(command.getLongExtra(SessionControl.EXTRA_PLAN_ID, 0L))
 
                 SessionControl.ACTION_START_REST_OF_DAY -> startSession(null)
+
+                SessionControl.ACTION_START_WALK -> {
+                    val name = command.getStringExtra(SessionControl.EXTRA_WALK)
+                    val walk = WayId.entries.firstOrNull { it.name == name && it.kind == WayKind.WALK }
+                    if (walk != null) startWalk(walk, command.getBooleanExtra(SessionControl.EXTRA_AGAIN, false))
+                }
 
                 SessionControl.ACTION_PAUSE -> changeSession { tracker -> tracker.pause(System.currentTimeMillis()) }
 
@@ -852,6 +884,45 @@ class StepTrackingService : Service() {
         SessionShortcuts.update(this, sessions.plansByUse(), current.settings.units)
     }
 
+    /**
+     * Starts an outing on the city walk [walk]: from where the walk's journey stands (the sum of
+     * its outings), or, [again] or with nothing left of it, from its first place on a new one.
+     * One outing at a time, as [startSession].
+     */
+    private suspend fun startWalk(walk: WayId, again: Boolean) {
+        val current = preferencesSource.current()
+        if (!current.settings.trackingEnabled) return
+        if (tracker?.session?.live == true) {
+            notifyNow()
+            return
+        }
+        tracker = null
+        sessionNotifications.cancelEnd()
+        flushSensor()
+        persist()
+        val now = System.currentTimeMillis()
+        val day = today()
+        val way = Ways.of(walk)
+        val journey = ways.walkJourney(walk, again, LocalDate.ofEpochDay(day), now)
+        var from = WalkDays.of(journey, sessions.walkSessionsNow()).values.sum().toInt()
+        if (way.lengthMeters - from < SessionPlans.MIN_WALK_LEFT_METERS) {
+            // Walked to its end by outings that stopped a few steps short: done, and begun anew.
+            ways.finishWalk(walk, day)
+            ways.walkJourney(walk, again = false, LocalDate.ofEpochDay(day), now)
+            from = 0
+        }
+        val session = SessionPlans.startWalk(way, from, current.settings.walkVoice, now, day) ?: return
+        val saved = persistMutex.withLock { sessions.insert(session) }
+        tracker = newTracker(saved, current.profile)
+        if (saved.voice != SessionVoice.OFF && sessionNotifications.signalsAllowed()) {
+            SessionAnnouncement.walkStarted(saved)?.let { speak(it, saved) }
+        }
+        applyRegistration()
+        notifyNow()
+        publishSession()
+        widgets.notify(WidgetEvent.TRACKING_STATE)
+    }
+
     /** One sentence of [session]'s, through the route its voice allows (headphones, ringer). */
     private fun speak(announcement: SessionAnnouncement, session: Session) {
         val units = preferences?.settings?.units ?: UnitPreference.SYSTEM
@@ -888,6 +959,7 @@ class StepTrackingService : Service() {
         val SESSION_ACTIONS = setOf(
             SessionControl.ACTION_START,
             SessionControl.ACTION_START_REST_OF_DAY,
+            SessionControl.ACTION_START_WALK,
             SessionControl.ACTION_PAUSE,
             SessionControl.ACTION_RESUME,
             SessionControl.ACTION_STOP,

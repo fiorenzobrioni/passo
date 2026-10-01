@@ -12,6 +12,7 @@ import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.UserSettings
 import com.callbackdev.passo.core.model.WayJourney
 import com.callbackdev.passo.core.model.WayJourneyState
+import com.callbackdev.passo.core.model.WayKind
 
 /**
  * What an import writes: the minutes that change (their full new count), the summaries that
@@ -184,14 +185,16 @@ object BackupMerge {
     }
 
     /**
-     * The file's ways this phone does not have: one started at the same millisecond is the
-     * same way. One way is under way at a time: the file's comes in under way only if this
-     * phone has none (the latest started, should the file hold more), and otherwise as put
-     * down on [fileDay], the day the file was written, where it stood then.
+     * The file's ways and walks this phone does not have: one started at the same millisecond
+     * is the same. One way is under way at a time, and one journey a city walk: the file's comes
+     * in under way only where this phone has none (the latest started, should the file hold
+     * more), and otherwise as put down on [fileDay], the day the file was written, where it
+     * stood then.
      */
     fun journeys(local: List<WayJourney>, incoming: List<WayJourney>, fileDay: Long): List<WayJourney> {
         val known = local.mapTo(HashSet()) { it.startedAtMillis }
-        var activeTaken = local.any { it.state == WayJourneyState.ACTIVE }
+        // What is under way: one slot for the ways, one for each walk.
+        val taken = local.filter { it.state == WayJourneyState.ACTIVE }.mapTo(HashSet()) { it.activeSlot() }
         return incoming
             .filter { known.add(it.startedAtMillis) }
             .sortedByDescending { it.startedAtMillis }
@@ -199,7 +202,7 @@ object BackupMerge {
                 when {
                     journey.state != WayJourneyState.ACTIVE -> journey
 
-                    !activeTaken -> journey.also { activeTaken = true }
+                    taken.add(journey.activeSlot()) -> journey
 
                     else -> journey.copy(
                         state = WayJourneyState.LEFT,
@@ -210,6 +213,8 @@ object BackupMerge {
             .sortedBy { it.startedAtMillis }
             .map { it.copy(id = 0) }
     }
+
+    private fun WayJourney.activeSlot(): String = if (way.kind == WayKind.WAY) WAY_SLOT else way.name
 
     /**
      * The file's settings in place of this phone's, except what only this phone decides: whether
@@ -226,3 +231,5 @@ object BackupMerge {
         vibrate == other.vibrate &&
         voice == other.voice
 }
+
+private const val WAY_SLOT = "way"

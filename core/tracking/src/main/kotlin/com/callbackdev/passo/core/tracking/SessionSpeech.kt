@@ -17,12 +17,15 @@ import android.util.Log
 import com.callbackdev.passo.core.designsystem.format.intensityPhrase
 import com.callbackdev.passo.core.designsystem.format.measureFormatter
 import com.callbackdev.passo.core.designsystem.format.sessionName
+import com.callbackdev.passo.core.designsystem.ways.placeNameRes
+import com.callbackdev.passo.core.designsystem.ways.placeNoteRes
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.sessions.PaceSummary
 import com.callbackdev.passo.core.domain.sessions.PaceVerdict
 import com.callbackdev.passo.core.domain.sessions.SessionAmount
 import com.callbackdev.passo.core.domain.sessions.SessionAnnouncement
 import com.callbackdev.passo.core.domain.sessions.SpeechRoute
+import com.callbackdev.passo.core.domain.ways.NextPlace
 import com.callbackdev.passo.core.model.MeasureUnit
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionGoalKind
@@ -306,11 +309,41 @@ internal fun Context.spoken(announcement: SessionAnnouncement, session: Session,
             res.spokenAmount(SessionAmount(SessionGoalKind.STEPS, announcement.steps.toDouble()), format),
         )
 
+        is SessionAnnouncement.WalkStarted -> {
+            val here = res.getString(placeNameRes(announcement.here.key))
+            if (announcement.continued) {
+                listOfNotNull(
+                    res.getString(R.string.spoken_walk_continued, res.sessionName(session), here),
+                    announcement.next?.let { res.spokenNext(it, format) },
+                ).joinToString(" ")
+            } else {
+                listOfNotNull(
+                    res.getString(R.string.spoken_walk_started, res.sessionName(session), here),
+                    placeNoteRes(announcement.here.key)?.let(res::getString),
+                ).joinToString(" ")
+            }
+        }
+
+        is SessionAnnouncement.PlacesReached -> {
+            val names = announcement.places.map { res.getString(placeNameRes(it.key)) }
+            val reached = announcement.places.last()
+            listOfNotNull(
+                names.dropLast(1).takeIf { it.isNotEmpty() }
+                    ?.let { res.getString(R.string.spoken_walk_behind, it.joinToString(", ")) },
+                res.getString(R.string.spoken_walk_here, names.last()),
+                placeNoteRes(reached.key)?.let(res::getString),
+                announcement.next?.let { res.spokenNext(it, format) },
+            ).joinToString(" ")
+        }
+
         is SessionAnnouncement.GoalReached -> {
             val steps = res.spokenAmount(SessionAmount(SessionGoalKind.STEPS, announcement.steps.toDouble()), format)
-            val goal = when (announcement.goal.kind) {
+            val goal = when {
+                // A walk's goal is its last place, which was just said: what it took.
+                session.walk != null -> res.getString(R.string.spoken_walk_end, steps)
+
                 // The goal was the steps: said once.
-                SessionGoalKind.STEPS, SessionGoalKind.REST_OF_DAY -> res.getString(R.string.spoken_goal_steps, steps)
+                announcement.goal.kind in STEP_GOALS -> res.getString(R.string.spoken_goal_steps, steps)
 
                 else -> res.getString(R.string.spoken_goal, res.spokenAmount(announcement.goal, format), steps)
             }
@@ -357,6 +390,20 @@ private fun Resources.spokenMilestone(announcement: SessionAnnouncement.Mileston
     return listOfNotNull(share, pace).joinToString(" ")
 }
 
+/** «Next: the Duomo, in 600 metres.» */
+private fun Resources.spokenNext(next: NextPlace, format: MeasureFormatter): String {
+    val measure = format.aheadDistance(next.inMeters.toDouble())
+    val unit = when (measure.unit) {
+        MeasureUnit.METER -> R.plurals.spoken_metres
+        MeasureUnit.YARD -> R.plurals.spoken_yards
+        MeasureUnit.MILE -> R.plurals.spoken_miles
+        else -> R.plurals.spoken_kilometres
+    }
+    // Tens of metres or yards are always many, and so is a distance with decimals.
+    val distance = getQuantityString(unit, MANY, measure.number)
+    return getString(R.string.spoken_walk_next, getString(placeNameRes(next.stop.key)), distance)
+}
+
 /** An amount in words: «20 minutes», «2,400 steps», «1.50 kilometres». */
 private fun Resources.spokenAmount(amount: SessionAmount, format: MeasureFormatter): String = when (amount.kind) {
     SessionGoalKind.STEPS, SessionGoalKind.REST_OF_DAY -> {
@@ -379,3 +426,8 @@ private fun Resources.spokenAmount(amount: SessionAmount, format: MeasureFormatt
         getQuantityString(unit, 2, measure.number)
     }
 }
+
+private val STEP_GOALS = setOf(SessionGoalKind.STEPS, SessionGoalKind.REST_OF_DAY)
+
+/** A plural's quantity that reads as many in English and Italian alike. */
+private const val MANY = 2

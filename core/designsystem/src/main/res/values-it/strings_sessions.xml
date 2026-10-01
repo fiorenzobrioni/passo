@@ -76,4 +76,8 @@
     <string name="session_card_when">%1$s · %2$s</string>
     <string name="session_brief">%1$s: %2$s</string>
     <string name="session_brief_paused">%1$s: in pausa</string>
+    <!-- A city walk under way (Phase 11): «Next: the Duomo, 600 m». -->
+    <string name="walk_next">Più avanti: %1$s, a %2$s</string>
+    <!-- A city walk walked to its last place: «The walk is done: Tower Bridge.» -->
+    <string name="walk_done">Passeggiata conclusa: %1$s.</string>
 </resources>

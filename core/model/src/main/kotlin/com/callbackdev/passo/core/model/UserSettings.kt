@@ -15,6 +15,9 @@ import java.time.LocalTime
  *   are below this share of the goal: 100 is "until the goal is met".
  * @property startOutingButton Today shows the button to the Outings page under the day. Off, the
  *   page is still one row away in Settings, and an outing started elsewhere still shows its card.
+ * @property walkVoice whether a city walk says its places (Phase 11): through headphones by
+ *   default, since a walk's places are what it is for, and a voice through the phone's speaker
+ *   in a street is the reader's choice to make.
  * @property onboardingCompleted the first-run flow has been through to its end, or skipped.
  */
 data class UserSettings(
@@ -35,6 +38,7 @@ data class UserSettings(
     val minWalkMinutes: Int = DEFAULT_MIN_WALK_MINUTES,
     val typicalDayLine: Boolean = true,
     val startOutingButton: Boolean = true,
+    val walkVoice: SessionVoice = SessionVoice.HEADPHONES,
     val onboardingCompleted: Boolean = false,
 ) {
     companion object {

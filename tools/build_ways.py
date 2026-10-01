@@ -2,7 +2,8 @@
 """Builds the Ways' data (PLANNING.md §11 Phase 11): each way's line, its stops, and the map
 behind it, from OpenStreetMap and Natural Earth.
 
-    python3 tools/build_ways.py fetch   # downloads the sources into tools/ways-cache/ (not committed)
+    python3 tools/build_ways.py fetch   # downloads what is missing into tools/ways-cache/ (not
+                                        # committed), and routes the walks into tools/walks/
     python3 tools/build_ways.py         # writes the app's files from that cache
 
 The content (which relations, which stops, what is said of them) is tools/ways_content.py.
@@ -33,16 +34,24 @@ import sys
 import urllib.request
 from pathlib import Path
 
-from ways_content import LOCATORS, WAYS
+import xml.etree.ElementTree as ElementTree
+
+from ways_content import LOCATORS, WALKS, WAYS
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE = Path(__file__).resolve().parent / "ways-cache"
+# The walks' routes, as BRouter drew them: committed, so a build needs no router (ODbL data).
+ROUTES = Path(__file__).resolve().parent / "walks"
 DOMAIN_OUT = ROOT / "core/domain/src/main/kotlin/com/callbackdev/passo/core/domain/ways/WayData.kt"
 STRINGS_EN = ROOT / "core/designsystem/src/main/res/values/strings_ways_places.xml"
 STRINGS_IT = ROOT / "core/designsystem/src/main/res/values-it/strings_ways_places.xml"
 STRINGS_KT = ROOT / "core/designsystem/src/main/kotlin/com/callbackdev/passo/core/designsystem/ways/WayPlaceStrings.kt"
 
 WMT = "https://hiking.waymarkedtrails.org/api/v1/details/relation/{}"
+OSM = "https://api.openstreetmap.org/api/0.6/{}/{}/full"
+# BRouter's walking profile: footways, parks and pedestrian streets first.
+BROUTER = "https://brouter.de/brouter?lonlats={}&profile=hiking-mountain&alternativeidx=0&format=geojson"
+WALK_MAX_SNAP_METRES = 150  # a walk is routed through its places: one farther off is a mistake
 NE = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/{}.geojson"
 NE_LAYERS = [
     "ne_10m_land",
@@ -71,9 +80,34 @@ def fetch():
             download(WMT.format(relation), CACHE / f"relation-{relation}.json")
     for layer in NE_LAYERS:
         download(NE.format(layer), CACHE / f"{layer}.geojson")
+    ROUTES.mkdir(exist_ok=True)
+    for walk in WALKS:
+        lonlats = "|".join(f"{stop.lon:.6f},{stop.lat:.6f}" for stop in walk.stops)
+        route = ROUTES / f"{walk.id.lower()}.geojson"
+        if not route.exists():
+            raw = CACHE / f"brouter-{walk.id.lower()}.geojson"
+            download(BROUTER.format(lonlats), raw)
+            # Only the line is kept: BRouter's turn-by-turn table would triple the file.
+            geometry = json.loads(raw.read_text())["features"][0]["geometry"]
+            geometry["coordinates"] = [[round(c[0], 6), round(c[1], 6)] for c in geometry["coordinates"]]
+            route.write_text(json.dumps({
+                "type": "FeatureCollection",
+                "features": [{
+                    "type": "Feature",
+                    "properties": {"source": "BRouter, profile hiking-mountain; © OpenStreetMap contributors, ODbL"},
+                    "geometry": geometry,
+                }],
+            }, separators=(",", ":")) + "\n")
+        for ref in walk.water + walk.canals + walk.parks:
+            kind, number = ref.split("/")
+            download(OSM.format(kind, number), CACHE / f"osm-{kind}-{number}.xml")
 
 
 def download(url, target):
+    # Only what is missing: the sources are big, and the servers are shared. Delete a file to
+    # fetch it again.
+    if target.exists():
+        return
     print(f"  {url}")
     request = urllib.request.Request(url, headers={"User-Agent": "passo-build-ways (github.com/fiorenzobrioni/passo)"})
     with urllib.request.urlopen(request, timeout=300) as response:
@@ -547,8 +581,169 @@ def build():
         locatorLine = {kotlin_string(encode(locator_line, (1e5, 1e5)), 8, len('locatorLine = '))},
     )
 """)
+    for walk in WALKS:
+        block, walk_places, walk_notes = build_walk(walk)
+        blocks.append(block)
+        for key, name in walk_places.items():
+            if places.get(key, name) != name:
+                sys.exit(f"{key} has two different names")
+            places[key] = name
+        notes.update(walk_notes)
     write_domain(blocks)
     write_strings(places, notes)
+
+
+# --- The walks --------------------------------------------------------------------------------
+
+def walk_line(walk):
+    data = json.loads((ROUTES / f"{walk.id.lower()}.geojson").read_text())
+    coordinates = data["features"][0]["geometry"]["coordinates"]
+    path = []
+    for lon, lat, *_ in coordinates:
+        if not path or path[-1] != (lat, lon):
+            path.append((lat, lon))
+    return path
+
+
+def osm_shapes(ref):
+    """An OpenStreetMap way or relation as polygons (closed rings) and lines."""
+    kind, number = ref.split("/")
+    root = ElementTree.parse(CACHE / f"osm-{kind}-{number}.xml").getroot()
+    nodes = {n.get("id"): (float(n.get("lat")), float(n.get("lon"))) for n in root.iter("node")}
+    ways = {w.get("id"): [nodes[nd.get("ref")] for nd in w.iter("nd") if nd.get("ref") in nodes] for w in root.iter("way")}
+    if kind == "way":
+        points = ways[number]
+        return ([points], []) if points[0] == points[-1] else ([], [points])
+    relation = next(r for r in root.iter("relation") if r.get("id") == number)
+    tags = {t.get("k"): t.get("v") for t in relation.iter("tag")}
+    members = [m for m in relation.iter("member") if m.get("type") == "way" and m.get("ref") in ways]
+    if tags.get("type") != "multipolygon":
+        return [], [ways[m.get("ref")] for m in members]
+    return join_rings([ways[m.get("ref")] for m in members if m.get("role") in ("outer", "")]), []
+
+
+def join_rings(pieces):
+    """Joins a multipolygon's outer ways end to end into closed rings."""
+    pieces = [list(p) for p in pieces if len(p) > 1]
+    rings = []
+    while pieces:
+        ring = pieces.pop(0)
+        while ring[0] != ring[-1]:
+            for i, piece in enumerate(pieces):
+                if piece[0] == ring[-1]:
+                    ring += piece[1:]
+                elif piece[-1] == ring[-1]:
+                    ring += piece[-2::-1]
+                elif piece[-1] == ring[0]:
+                    ring = piece[:-1] + ring
+                elif piece[0] == ring[0]:
+                    ring = piece[:0:-1] + ring
+                else:
+                    continue
+                pieces.pop(i)
+                break
+            else:
+                break  # an open ring, where the mapping is cut: closed straight, as a fill does
+        rings.append(ring)
+    return rings
+
+
+def city_polygons(refs, box, tolerance, local):
+    out = []
+    for ref in refs:
+        rings, _ = osm_shapes(ref)
+        for ring in rings:
+            if len(ring) < 3 or not intersects(bbox_of(ring), box):
+                continue
+            clipped = clip_polygon(ring, box)
+            simple = simplify(clipped, tolerance, local, closed=True) if len(clipped) >= 3 else []
+            if len(simple) >= 3:
+                out.append(simple)
+    return out
+
+
+def city_lines(refs, box, tolerance, local):
+    out = []
+    for ref in refs:
+        _, lines = osm_shapes(ref)
+        for line in lines:
+            if len(line) < 2 or not intersects(bbox_of(line), box):
+                continue
+            for piece in clip_line(line, box):
+                simple = simplify(piece, tolerance, local)
+                if len(simple) >= 2:
+                    out.append(simple)
+    return out
+
+
+def build_walk(walk):
+    path = walk_line(walk)
+    along = cumulative(path)
+    length = along[-1]
+    stops = []
+    for index, stop in enumerate(walk.stops):
+        start = stops[-1][1] if stops else 0.0
+        candidates = [i for i in range(len(path)) if along[i] >= start]
+        if index == len(walk.stops) - 1:
+            i = len(path) - 1
+        elif index == 0:
+            i = 0
+        else:
+            i = min(candidates, key=lambda j: haversine(path[j], (stop.lat, stop.lon)))
+        off = haversine(path[i], (stop.lat, stop.lon))
+        if off > WALK_MAX_SNAP_METRES:
+            sys.exit(f"{walk.id}: {stop.key} is {off:.0f} m from the route")
+        if stops and along[i] <= stops[-1][1]:
+            sys.exit(f"{walk.id}: {stop.key} comes before {stops[-1][0].key} on the route")
+        stops.append((stop, along[i], path[i]))
+    frame, ground, local = frame_of(path)
+    diagonal = math.hypot((frame[3] - frame[1]) * local.kx, (frame[2] - frame[0]) * local.ky)
+    line = simplified_indices(path, diagonal * LINE_TOLERANCE, local)
+    rows = [(path[i][0], path[i][1], along[i]) for i in line]
+    tolerance = diagonal * MAP_TOLERANCE
+    south, west, north, east = ground
+    land = [[(south, west), (south, east), (north, east), (north, west)]]
+    water = city_polygons(walk.water, ground, tolerance, local)
+    canals = city_lines(walk.canals, ground, tolerance, local)
+    parks = city_polygons(walk.parks, ground, tolerance, local)
+    locator_box = LOCATORS[walk.country]
+    locator_local = Local((locator_box[0] + locator_box[2]) / 2)
+    locator_land = polygons("ne_50m_land", locator_box, LOCATOR_TOLERANCE_METRES, locator_local)
+    locator_line = simplify(path, LOCATOR_TOLERANCE_METRES, locator_local)
+    print(
+        f"{walk.id}: {length / 1000:.2f} km, {len(path)} points -> {len(line)}, {len(stops)} places, "
+        f"water {sum(map(len, water))}, canals {sum(map(len, canals))}, parks {sum(map(len, parks))}",
+    )
+    places, notes = {}, {}
+    for stop, distance, _ in stops:
+        print(f"    {stop.key:28s} {distance / 1000:6.2f} km")
+        places[stop.key] = (stop.en, stop.it)
+        if stop.note_en:
+            notes[stop.key] = (stop.note_en, stop.note_it)
+    stop_lines = "".join(
+        f'            WayStop("{stop.key}", {round(distance)}, {point[0]:.5f}, {point[1]:.5f}, stage = true),\n'
+        for stop, distance, point in stops
+    )
+    block = f"""
+    private fun {camel(walk.id)}() = WaySource(
+        id = WayId.{walk.id},
+        lengthMeters = {round(length)},
+        stops = listOf(
+{stop_lines}        ),
+        frame = {box_literal(frame)},
+        line = {kotlin_string(encode(rows, (1e5, 1e5, 1)), 8, len('line = '))},
+        land = {kotlin_paths(land, 8)},
+        lakes = {kotlin_paths(water, 8)},
+        rivers = {kotlin_paths(canals, 8)},
+        borders = emptyList(),
+        locatorFrame = {box_literal(locator_box)},
+        locatorLand = {kotlin_paths(locator_land, 8)},
+        locatorLine = {kotlin_string(encode(locator_line, (1e5, 1e5)), 8, len('locatorLine = '))},
+        parks = {kotlin_paths(parks, 8)},
+        riverWidthMeters = {walk.canal_width},
+    )
+"""
+    return block, places, notes
 
 
 def camel(constant):
@@ -560,13 +755,14 @@ GENERATED = "Generated by tools/build_ways.py from tools/ways_content.py: do not
 
 
 def write_domain(blocks):
-    cases = "".join(f"        WayId.{way.id} -> {camel(way.id)}()\n" for way in WAYS)
+    cases = "".join(f"        WayId.{way.id} -> {camel(way.id)}()\n" for way in WAYS + WALKS)
     DOMAIN_OUT.parent.mkdir(parents=True, exist_ok=True)
     DOMAIN_OUT.write_text(f"""// {GENERATED}
 //
-// The ways' lines: © OpenStreetMap contributors, under the Open Database License 1.0
-// (https://opendatacommons.org/licenses/odbl/1-0/); this derived data is available under the
-// same licence. Land, lakes, rivers and borders: Natural Earth, public domain.
+// The ways' and the walks' lines, and the cities' water and parks: © OpenStreetMap
+// contributors, under the Open Database License 1.0 (https://opendatacommons.org/licenses/odbl/1-0/);
+// this derived data is available under the same licence. The walks were routed by BRouter. The
+// ways' land, lakes, rivers and borders, and every locator: Natural Earth, public domain.
 //
 // Every path is an encoded polyline (latitude and longitude at 1e-5 degrees; the line also
 // carries the metres along the way at each point), decoded by [Polyline].
@@ -602,6 +798,13 @@ def write_strings(places, notes):
             routes = (way.route_en, way.route_it)
             lines.append(f'    <string name="way_name_{way.id.lower()}">{xml_text(names[index])}</string>')
             lines.append(f'    <string name="way_route_{way.id.lower()}">{xml_text(routes[index])}</string>')
+        for walk in WALKS:
+            cities = (walk.city_en, walk.city_it)
+            routes = (walk.route_en, walk.route_it)
+            outings = (walk.outing_en, walk.outing_it)
+            lines.append(f'    <string name="way_name_{walk.id.lower()}">{xml_text(cities[index])}</string>')
+            lines.append(f'    <string name="way_route_{walk.id.lower()}">{xml_text(routes[index])}</string>')
+            lines.append(f'    <string name="way_outing_{walk.id.lower()}">{xml_text(outings[index])}</string>')
         for key, name in sorted(places.items()):
             lines.append(f'    <string name="way_place_{key}">{xml_text(name[index])}</string>')
         for key, note in sorted(notes.items()):
@@ -610,8 +813,9 @@ def write_strings(places, notes):
         path.write_text("\n".join(lines) + "\n")
     names = "".join(f'    "{key}" -> R.string.way_place_{key}\n' for key in sorted(places))
     note_cases = "".join(f'    "{key}" -> R.string.way_note_{key}\n' for key in sorted(notes))
-    way_names = "".join(f"    WayId.{way.id} -> R.string.way_name_{way.id.lower()}\n" for way in WAYS)
-    way_routes = "".join(f"    WayId.{way.id} -> R.string.way_route_{way.id.lower()}\n" for way in WAYS)
+    way_names = "".join(f"    WayId.{way.id} -> R.string.way_name_{way.id.lower()}\n" for way in WAYS + WALKS)
+    way_routes = "".join(f"    WayId.{way.id} -> R.string.way_route_{way.id.lower()}\n" for way in WAYS + WALKS)
+    walk_outings = "".join(f"    WayId.{walk.id} -> R.string.way_outing_{walk.id.lower()}\n" for walk in WALKS)
     STRINGS_KT.parent.mkdir(parents=True, exist_ok=True)
     STRINGS_KT.write_text(f"""// {GENERATED}
 package com.callbackdev.passo.core.designsystem.ways
@@ -629,6 +833,12 @@ fun wayNameRes(id: WayId): Int = when (id) {{
 @StringRes
 fun wayRouteRes(id: WayId): Int = when (id) {{
 {way_routes}}}
+
+/** A walk's outing, as History and Today name it; null for a way, which is not an outing. */
+@StringRes
+fun walkOutingRes(id: WayId): Int? = when (id) {{
+{walk_outings}    else -> null
+}}
 
 /** A stop's name, from its key in the ways' data. */
 @StringRes

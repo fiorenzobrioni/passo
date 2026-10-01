@@ -10,6 +10,8 @@ import com.callbackdev.passo.core.domain.sessions.SessionConstants.MAX_SESSION_M
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.MIN_CADENCE_SPAN_MILLIS
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.MIN_KEPT_STEPS
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.PAUSE_END_MILLIS
+import com.callbackdev.passo.core.domain.ways.WayStop
+import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionMilestone
@@ -24,6 +26,12 @@ sealed interface SessionSignal {
      * the highest is told (three vibrations and then two would say nothing clear).
      */
     data class Milestone(val milestone: SessionMilestone) : SessionSignal
+
+    /**
+     * A city walk's places, reached by these steps (Phase 11), in the order they come: each told
+     * once, as the walk's distance passes it. Several at once are all named, the last one said.
+     */
+    data class Places(val places: List<WayStop>) : SessionSignal
 
     /**
      * The outing is over. [kept] is false for one too short to be worth keeping
@@ -207,6 +215,7 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
             it !in next.toldMilestones && before < it.fraction && after >= it.fraction
         }
         val signals = mutableListOf<SessionSignal>()
+        placesPassed(moved, next)?.let { signals += it }
         if (crossed.isNotEmpty()) {
             next = next.copy(toldMilestones = next.toldMilestones + crossed)
             signals += SessionSignal.Milestone(crossed.maxBy { it.percent })
@@ -217,6 +226,20 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
             signals += finish(atMillis, SessionEnd.GOAL, reopenableFrom = atMillis)
         }
         return signals
+    }
+
+    /**
+     * The walk's places between where [before] and [after] stand on it: never the one it started
+     * at, which is where the reader already is. Measured from the totals, which are stored with
+     * every batch, so a restarted process tells nothing twice.
+     */
+    private fun placesPassed(before: Session, after: Session): SessionSignal.Places? {
+        val walk = after.walk ?: return null
+        val from = after.walkFromMeters.toDouble()
+        val was = from + before.totals.distanceMeters
+        val now = from + after.totals.distanceMeters
+        val places = Ways.of(walk).stops.filter { it.distanceMeters > was && it.distanceMeters <= now }
+        return places.takeIf { it.isNotEmpty() }?.let { SessionSignal.Places(it) }
     }
 
     private fun countOvertime(atMillis: Long, steps: Int) {

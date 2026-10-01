@@ -1,5 +1,9 @@
 package com.callbackdev.passo.core.domain.ways
 
+import com.callbackdev.passo.core.model.Session
+import com.callbackdev.passo.core.model.SessionGoalKind
+import com.callbackdev.passo.core.model.SessionIntensity
+import com.callbackdev.passo.core.model.SessionTotals
 import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.model.WayJourney
 import com.callbackdev.passo.core.model.WayJourneyState
@@ -164,5 +168,35 @@ class WayProgressTest {
         assertThat(left).isGreaterThan(0f)
         assertThat(left + right).isWithin(0.01f).of(400f)
         assertThat((right - left) / 400f).isWithin(0.01f).of(0.713f)
+    }
+
+    @Test
+    fun `a walk's days are its outings since the journey began`() {
+        val walk = WayJourney(3, WayId.MILAN_DUOMO_NAVIGLI, start, 5_000, WayJourneyState.ACTIVE, null, 0)
+        fun outing(day: Long, at: Long, meters: Double, on: WayId? = WayId.MILAN_DUOMO_NAVIGLI) = Session(
+            planId = null,
+            name = null,
+            goalKind = SessionGoalKind.DISTANCE,
+            goalValue = 9_000,
+            intensity = SessionIntensity.FREE,
+            milestones = emptySet(),
+            vibrate = true,
+            localEpochDay = day,
+            startedAtMillis = at,
+            totals = SessionTotals(distanceMeters = meters),
+            walk = on,
+        )
+        val days = WalkDays.of(
+            walk,
+            listOf(
+                outing(start - 3, 1_000, 2_000.0), // before the journey: an earlier walk of it
+                outing(start, 6_000, 3_000.0),
+                outing(start, 7_000, 1_500.0),
+                outing(start + 2, 9_000, 2_500.0),
+                outing(start + 2, 9_500, 800.0, on = WayId.LONDON_PALACE_TOWER),
+                outing(start + 2, 9_900, 600.0, on = null),
+            ),
+        )
+        assertThat(days).containsExactly(start, 4_500.0, start + 2, 2_500.0)
     }
 }

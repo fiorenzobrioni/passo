@@ -53,6 +53,7 @@ internal data class SettingsDto(
     val minWalkMinutes: Int? = null,
     val typicalDayLine: Boolean? = null,
     val startOutingButton: Boolean? = null,
+    val walkVoice: String? = null,
 )
 
 /** One day: its summary as it stood, and its minutes as `[epochMinute, steps]`. */
@@ -109,6 +110,8 @@ internal data class OutingDto(
     val pausedAtMillis: Long? = null,
     val reachedAtMillis: Long? = null,
     val toldMilestones: List<Int> = emptyList(),
+    val walk: String? = null,
+    val walkFromMeters: Int = 0,
 )
 
 @Serializable

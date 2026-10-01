@@ -165,4 +165,22 @@
         <item quantity="many">%1$s: %2$s percorsi in %3$d giorni.</item>
         <item quantity="other">%1$s: %2$s percorsi in %3$d giorni.</item>
     </plurals>
+    <!-- City walks (Phase 11). «Passeggiata a Milano: si parte. Qui: Il Duomo. Milano…» -->
+    <string name="spoken_walk_started">%1$s: si parte. Qui: %2$s.</string>
+    <!-- «Passeggiata a Milano: si riparte. Da qui: Castello Sforzesco.» -->
+    <string name="spoken_walk_continued">%1$s: si riparte. Da qui: %2$s.</string>
+    <string name="spoken_walk_here">Qui: %1$s.</string>
+    <string name="spoken_walk_behind">Alle spalle: %1$s.</string>
+    <string name="spoken_walk_next">Più avanti: %1$s, tra %2$s.</string>
+    <string name="spoken_walk_end">Passeggiata conclusa, in %1$s.</string>
+    <plurals name="spoken_metres">
+        <item quantity="one">%1$s metro</item>
+        <item quantity="many">%1$s metri</item>
+        <item quantity="other">%1$s metri</item>
+    </plurals>
+    <plurals name="spoken_yards">
+        <item quantity="one">%1$s iarda</item>
+        <item quantity="many">%1$s iarde</item>
+        <item quantity="other">%1$s iarde</item>
+    </plurals>
 </resources>

@@ -16,12 +16,9 @@ abstract class WayDao {
     @Query("SELECT * FROM way_journey ORDER BY startedAtMillis DESC, id DESC")
     abstract suspend fun journeys(): List<WayJourneyEntity>
 
-    /** The journey under way, if there is one; there is never more than one. */
-    @Query("SELECT * FROM way_journey WHERE state = 'ACTIVE' ORDER BY startedAtMillis DESC LIMIT 1")
-    abstract fun observeActive(): Flow<WayJourneyEntity?>
-
-    @Query("SELECT * FROM way_journey WHERE state = 'ACTIVE' ORDER BY startedAtMillis DESC LIMIT 1")
-    abstract suspend fun active(): WayJourneyEntity?
+    /** The journeys under way among [ways]: one way at a time, one journey a walk. */
+    @Query("SELECT * FROM way_journey WHERE state = 'ACTIVE' AND way IN (:ways) ORDER BY startedAtMillis DESC")
+    abstract suspend fun activeAmong(ways: List<String>): List<WayJourneyEntity>
 
     @Insert
     abstract suspend fun insert(journey: WayJourneyEntity): Long
@@ -44,10 +41,30 @@ abstract class WayDao {
     abstract suspend fun markTold(id: Long, meters: Int): Int
 
     /**
-     * A new journey, unless one is already under way: one at a time. Returns its id, or null
-     * when another one is under way.
+     * A new journey, unless one is already under way among [among] (every way, for a way: one
+     * at a time). Returns its id, or null when another one is under way.
      */
     @Transaction
-    open suspend fun startIfNoneActive(journey: WayJourneyEntity): Long? =
-        if (active() != null) null else insert(journey)
+    open suspend fun startIfNoneActive(journey: WayJourneyEntity, among: List<String>): Long? =
+        if (activeAmong(among).isNotEmpty()) null else insert(journey)
+
+    /**
+     * The walk [walk]'s journey under way, begun now if there is none; with [again], the one
+     * under way is put down on [day] first and a new one begun: the walk from its start.
+     */
+    @Transaction
+    open suspend fun walkJourney(walk: String, again: Boolean, day: Long, nowMillis: Long): WayJourneyEntity {
+        val current = activeAmong(listOf(walk)).firstOrNull()
+        if (current != null && !again) return current
+        if (current != null) end(current.id, "LEFT", day)
+        val fresh = WayJourneyEntity(
+            way = walk,
+            startEpochDay = day,
+            startedAtMillis = nowMillis,
+            state = "ACTIVE",
+            endedEpochDay = null,
+            toldMeters = 0,
+        )
+        return fresh.copy(id = insert(fresh))
+    }
 }

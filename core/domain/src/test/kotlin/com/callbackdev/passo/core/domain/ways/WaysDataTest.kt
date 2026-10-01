@@ -8,9 +8,26 @@ import kotlin.math.abs
 /** The generated data (`tools/build_ways.py`) decodes, and holds what the screens rely on. */
 class WaysDataTest {
     @Test
-    fun `the four ways, shortest first`() {
-        assertThat(Ways.all.map { it.id }).containsExactlyElementsIn(WayId.entries).inOrder()
+    fun `the four ways, shortest first, and the city walks apart`() {
+        assertThat(Ways.all.map { it.id })
+            .containsExactly(WayId.VIA_DEGLI_DEI, WayId.VIA_DI_FRANCESCO, WayId.CAMINO_FRANCES, WayId.VIA_FRANCIGENA)
+            .inOrder()
         assertThat(Ways.all.map { it.lengthMeters }).isInOrder()
+        assertThat(Ways.walks.map { it.id })
+            .containsExactly(WayId.MILAN_DUOMO_NAVIGLI, WayId.LONDON_PALACE_TOWER)
+            .inOrder()
+        assertThat(Ways.walks.map { it.id.city }).containsExactly("milan", "london").inOrder()
+    }
+
+    @Test
+    fun `a city walk is an afternoon's walk, every place on it`() {
+        for (walk in Ways.walks) {
+            assertThat(walk.lengthMeters).isIn(8_000..12_000)
+            assertThat(walk.stops.size).isAtLeast(12)
+            assertThat(walk.stops.all { it.stage }).isTrue()
+            assertThat(walk.map.riverWidthMeters).isGreaterThan(0.0)
+            assertThat(walk.map.parks).isNotEmpty()
+        }
     }
 
     @Test
@@ -24,7 +41,7 @@ class WaysDataTest {
 
     @Test
     fun `stops run from the start to the end, in order, ending on stages`() {
-        for (way in Ways.all) {
+        for (way in Ways.all + Ways.walks) {
             val stops = way.stops
             assertThat(stops.first().distanceMeters).isEqualTo(0)
             assertThat(stops.last().distanceMeters).isEqualTo(way.lengthMeters)
@@ -37,7 +54,7 @@ class WaysDataTest {
 
     @Test
     fun `the line decodes to the way's length, and each stop lies on it`() {
-        for (way in Ways.all) {
+        for (way in Ways.all + Ways.walks) {
             val line = way.map.line
             assertThat(line.meters.first()).isEqualTo(0.0)
             assertThat(abs(line.lengthMeters - way.lengthMeters)).isLessThan(1.0)

@@ -132,6 +132,64 @@ class WayRepositoryTest {
         }
     }
 
+    @Test
+    fun `a city walk is not a way, never blocks one, and keeps one journey of its own`() = runTest {
+        assertThat(repository.start(WayId.VIA_DEGLI_DEI, today, today, 1_000)).isNotNull()
+        val milan = repository.walkJourney(WayId.MILAN_DUOMO_NAVIGLI, again = false, today = today, nowMillis = 2_000)
+        assertThat(
+            repository.walkJourney(WayId.MILAN_DUOMO_NAVIGLI, again = false, today = today, nowMillis = 3_000).id,
+        )
+            .isEqualTo(milan.id)
+        val london = repository.walkJourney(WayId.LONDON_PALACE_TOWER, again = false, today = today, nowMillis = 4_000)
+        assertThat(london.id).isNotEqualTo(milan.id)
+        assertThat(repository.active.first()?.way).isEqualTo(WayId.VIA_DEGLI_DEI)
+        assertThat(repository.activeNow()?.way).isEqualTo(WayId.VIA_DEGLI_DEI)
+    }
+
+    @Test
+    fun `a walk begun again puts the one under way down first`() = runTest {
+        val first = repository.walkJourney(WayId.MILAN_DUOMO_NAVIGLI, again = false, today = today, nowMillis = 2_000)
+        val again = repository.walkJourney(WayId.MILAN_DUOMO_NAVIGLI, again = true, today = today, nowMillis = 5_000)
+        assertThat(again.id).isNotEqualTo(first.id)
+        assertThat(again.startedAtMillis).isEqualTo(5_000)
+        val journeys = repository.journeys.first()
+        assertThat(journeys.single { it.id == first.id }.state).isEqualTo(WayJourneyState.LEFT)
+        assertThat(journeys.single { it.id == again.id }.state).isEqualTo(WayJourneyState.ACTIVE)
+    }
+
+    @Test
+    fun `a walk walked to its end stays finished, and the next outing begins it anew`() = runTest {
+        val first = repository.walkJourney(WayId.LONDON_PALACE_TOWER, again = false, today = today, nowMillis = 2_000)
+        repository.finishWalk(WayId.LONDON_PALACE_TOWER, today.toEpochDay())
+        val next = repository.walkJourney(WayId.LONDON_PALACE_TOWER, again = false, today = today, nowMillis = 6_000)
+        assertThat(next.id).isNotEqualTo(first.id)
+        val journeys = repository.journeys.first()
+        assertThat(journeys.single { it.id == first.id }.state).isEqualTo(WayJourneyState.FINISHED)
+        assertThat(journeys.single { it.id == first.id }.endedEpochDay).isEqualTo(today.toEpochDay())
+    }
+
+    @Test
+    fun `version 4 migrates to 5 with every outing walking no walk`() {
+        migrations.createDatabase(MIGRATION_DB, 4).use { db ->
+            db.execSQL(
+                "INSERT INTO session (planId, name, goalKind, goalValue, restOfDay, intensity, milestones, vibrate, " +
+                    "localEpochDay, startedAtMillis, state, endedAtMillis, endReason, steps, movingMillis, " +
+                    "zoneMillis, distanceMeters, activeKcal, lastStepAtMillis, lastEventAtMillis, pausedAtMillis, " +
+                    "reachedAtMillis, toldMilestones, voice) VALUES (NULL, NULL, 'TIME', 20, 0, 'BRISK', 2, 1, " +
+                    "20000, 1000, 'FINISHED', 2000, 'GOAL', 2400, 1200000, 1200000, 1700.0, 90.0, 2000, 2000, " +
+                    "NULL, 2000, 3, 'OFF')",
+            )
+        }
+        migrations.runMigrationsAndValidate(MIGRATION_DB, 5, true).use { db ->
+            db.query("SELECT walk, walkFromMeters, steps FROM session").use { cursor ->
+                assertThat(cursor.moveToFirst()).isTrue()
+                assertThat(cursor.isNull(0)).isTrue()
+                assertThat(cursor.getInt(1)).isEqualTo(0)
+                assertThat(cursor.getInt(2)).isEqualTo(2_400)
+            }
+        }
+    }
+
     private companion object {
         const val MIGRATION_DB = "migration-ways.db"
     }
