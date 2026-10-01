@@ -164,6 +164,12 @@ class SpokenTextTest {
                 "La Scala opened in 1778; Verdi’s Otello and Puccini’s Turandot had their first nights here. " +
                 "Next: Via Montenapoleone, in 640 metres.",
         )
+        // The page's "Hear it": the next place, as it will be told.
+        assertThat(context.spokenWalkSample(milan, 0, UnitPreference.METRIC)).isEqualTo(
+            "Here: Galleria Vittorio Emanuele II. " +
+                "Opened in 1867, it is one of the oldest covered shopping arcades in the world. " +
+                "Next: La Scala, in 290 metres.",
+        )
         val end = milanWalk(from = 0, walked = 9_326.0)
         assertThat(say(SessionAnnouncement.goal(end), end)).isEqualTo("The walk is done, in 2,140 steps. Well done.")
     }

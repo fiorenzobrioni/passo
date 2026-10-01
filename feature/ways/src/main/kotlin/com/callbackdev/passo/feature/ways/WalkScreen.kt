@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -19,6 +21,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -49,6 +52,7 @@ import com.callbackdev.passo.core.designsystem.ways.wayRouteRes
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.WayJourneyState
+import com.callbackdev.passo.core.tracking.VoiceAvailability
 import kotlin.math.roundToInt
 
 /** What a walk's page can ask for, as functions: the screen is a plain composable a test can draw. */
@@ -56,6 +60,10 @@ class WalkActions(
     val start: (again: Boolean) -> Unit = {},
     val voice: (SessionVoice) -> Unit = {},
     val card: SessionCardActions = SessionCardActions(),
+    val delete: (Long) -> Unit = {},
+    val prepareVoice: () -> Unit = {},
+    val tryVoice: () -> Unit = {},
+    val openVoiceSettings: () -> Unit = {},
 )
 
 /**
@@ -86,6 +94,8 @@ internal fun WalkPage(
     val view = opened?.takeIf { it.journey.state == WayJourneyState.FINISHED } ?: walk.current
     val progress = view?.progress
     var again by rememberSaveable { mutableStateOf(false) }
+    // With the voice on, the engine is asked once whether it can speak: the page says so first.
+    LaunchedEffect(state.walkVoice) { if (state.walkVoice != SessionVoice.OFF) actions.prepareVoice() }
     LazyColumn(
         modifier = modifier.testTag(WaysTags.PAGE),
         contentPadding = pageGutter(sideInsets = false).contentPadding(bottom = 32.dp),
@@ -131,7 +141,7 @@ internal fun WalkPage(
             }
         }
         if (live == null && view?.journey?.state != WayJourneyState.FINISHED) {
-            item(key = "voice") { VoiceChoice(state.walkVoice, actions.voice) }
+            item(key = "voice") { VoiceChoice(state.walkVoice, state.voiceAvailability, actions) }
             item(key = "how") {
                 Text(
                     text = stringResource(R.string.walk_how),
@@ -157,6 +167,10 @@ internal fun WalkPage(
         }
         item(key = "places-header") { Header(stringResource(R.string.walk_group_places)) }
         item(key = "places") { Stages(state, way, progress, format) }
+        // Opened from Your ways, a walk walked to its end can go from there.
+        if (opened != null && opened == view) {
+            item(key = "delete") { DeleteJourney(walk = true, onDelete = { actions.delete(opened.journey.id) }) }
+        }
         item(key = "footer") { Footer() }
     }
     if (again) {
@@ -340,52 +354,116 @@ private fun blockedNote(state: WaysUiState): Boolean {
     return true
 }
 
-/** Whether the places are said aloud, and where: the walks' own choice, kept for the next one. */
+/**
+ * Whether the places are said aloud, and where: the walks' own choice, kept for the next one.
+ * Under it, as in the outing editor, what the phone can do about it: the next place to hear
+ * now, the voice to change, or the one to install.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun VoiceChoice(voice: SessionVoice, onVoice: (SessionVoice) -> Unit) {
-    SettingsGroup(modifier = Modifier.padding(top = 4.dp)) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.padding(horizontal = ScreenMargin, vertical = 14.dp),
-        ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    PassoIcons.Voice,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(24.dp),
-                )
-                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(stringResource(R.string.walk_voice), style = MaterialTheme.typography.bodyLarge)
-                    Text(
-                        text = stringResource(
-                            when (voice) {
-                                SessionVoice.OFF -> R.string.walk_voice_off_note
-                                SessionVoice.HEADPHONES -> R.string.walk_voice_headphones_note
-                                SessionVoice.ALWAYS -> R.string.walk_voice_always_note
-                            },
-                        ),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+private fun VoiceChoice(voice: SessionVoice, availability: VoiceAvailability, actions: WalkActions) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
+        SettingsGroup {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.padding(horizontal = ScreenMargin, vertical = 14.dp),
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        PassoIcons.Voice,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(24.dp),
                     )
+                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(stringResource(R.string.walk_voice), style = MaterialTheme.typography.bodyLarge)
+                        Text(
+                            text = stringResource(
+                                when (voice) {
+                                    SessionVoice.OFF -> R.string.walk_voice_off_note
+                                    SessionVoice.HEADPHONES -> R.string.walk_voice_headphones_note
+                                    SessionVoice.ALWAYS -> R.string.walk_voice_always_note
+                                },
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
+                val choices = listOf(
+                    SessionVoice.OFF to R.string.walk_voice_off,
+                    SessionVoice.HEADPHONES to R.string.walk_voice_headphones,
+                    SessionVoice.ALWAYS to R.string.walk_voice_always,
+                )
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().testTag(WaysTags.WALK_VOICE)) {
+                    choices.forEachIndexed { index, (choice, label) ->
+                        SegmentedButton(
+                            selected = voice == choice,
+                            onClick = { actions.voice(choice) },
+                            shape = SegmentedButtonDefaults.itemShape(index, choices.size),
+                            // No check mark, as in the outing editor: three words on a narrow phone.
+                            icon = {},
+                            label = { SegmentLabel(stringResource(label)) },
+                            modifier = Modifier.testTag("${WaysTags.WALK_VOICE}-${choice.name}"),
+                        )
+                    }
                 }
             }
-            val choices = listOf(
-                SessionVoice.OFF to R.string.walk_voice_off,
-                SessionVoice.HEADPHONES to R.string.walk_voice_headphones,
-                SessionVoice.ALWAYS to R.string.walk_voice_always,
-            )
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().testTag(WaysTags.WALK_VOICE)) {
-                choices.forEachIndexed { index, (choice, label) ->
-                    SegmentedButton(
-                        selected = voice == choice,
-                        onClick = { onVoice(choice) },
-                        shape = SegmentedButtonDefaults.itemShape(index, choices.size),
-                        // No check mark, as in the outing editor: three words on a narrow phone.
-                        icon = {},
-                        label = { SegmentLabel(stringResource(label)) },
-                        modifier = Modifier.testTag("${WaysTags.WALK_VOICE}-${choice.name}"),
+        }
+        if (voice != SessionVoice.OFF) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.padding(horizontal = ScreenMargin + 4.dp),
+            ) {
+                when (availability) {
+                    VoiceAvailability.READY, VoiceAvailability.UNKNOWN -> {
+                        Text(
+                            stringResource(R.string.walk_voice_offline),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            AssistChip(
+                                onClick = actions.tryVoice,
+                                enabled = availability == VoiceAvailability.READY,
+                                label = { Text(stringResource(R.string.walk_voice_try)) },
+                                leadingIcon = {
+                                    Icon(
+                                        PassoIcons.Voice,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(AssistChipDefaults.IconSize),
+                                    )
+                                },
+                                modifier = Modifier.testTag(WaysTags.WALK_TRY_VOICE),
+                            )
+                            // Which voice is the system's choice, made by ear with its samples.
+                            TextButton(onClick = actions.openVoiceSettings) {
+                                Text(stringResource(R.string.walk_voice_change))
+                            }
+                        }
+                    }
+
+                    VoiceAvailability.NO_OFFLINE_VOICE -> {
+                        Text(
+                            stringResource(R.string.walk_voice_missing),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        TextButton(onClick = actions.openVoiceSettings) {
+                            Text(stringResource(R.string.walk_voice_install))
+                        }
+                    }
+
+                    VoiceAvailability.NO_ENGINE -> Text(
+                        stringResource(R.string.walk_voice_no_engine),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }

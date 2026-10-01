@@ -178,6 +178,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
             startOutingButton = prefs[Keys.START_OUTING_BUTTON] ?: defaults.startOutingButton,
             walkVoice = prefs[Keys.WALK_VOICE].toEnumOrNull<SessionVoice>() ?: defaults.walkVoice,
             onboardingCompleted = prefs[Keys.ONBOARDING_COMPLETED] ?: defaults.onboardingCompleted,
+            firstDayNoteRead = prefs[Keys.FIRST_DAY_NOTE_READ] ?: defaults.firstDayNoteRead,
         ).sanitized()
     }
 
@@ -227,6 +228,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
             new.onboardingCompleted,
             defaults.onboardingCompleted,
         )
+        prefs.write(Keys.FIRST_DAY_NOTE_READ, old.firstDayNoteRead, new.firstDayNoteRead, defaults.firstDayNoteRead)
     }
 
     /** Writes only a field that changed; back at its default, the key goes. */
@@ -262,6 +264,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
         val START_OUTING_BUTTON = booleanPreferencesKey("today_start_outing_button")
         val WALK_VOICE = stringPreferencesKey("walk_voice")
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+        val FIRST_DAY_NOTE_READ = booleanPreferencesKey("first_day_note_read")
 
         val TRACKER_INSTALLATION = longPreferencesKey("tracker_installation")
         val GOAL_NOTICE_DAY = longPreferencesKey("goal_notice_epoch_day")

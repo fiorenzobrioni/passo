@@ -21,7 +21,16 @@ All notable changes to Passo are documented here. The format follows
   Tower Bridge, walked where you are in one outing or a few. Each place is told as your steps
   reach it, with a short vibration and, if you like, its name and a line about it in your
   headphones; the notification says the next one. Stop when you like and continue later from
-  where you were. On the Ways page, and from Outings.
+  where you were. On the Ways page, and from Outings. "Hear it" plays a place as you will
+  hear it, and "Change voice" opens the phone's voices.
+- **Your ways can be tidied**: a way finished or left, or a walk walked to its end, can be
+  deleted, after a warning that it is for good. A way left before you walked any of it is not
+  kept.
+
+### Changed
+
+- **The first-day note** on Today goes as soon as you open the guide from it, instead of
+  staying until the end of the day.
 
 ## [1.0.0] - 2026-10-01
 

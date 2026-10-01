@@ -19,6 +19,8 @@ import java.time.LocalTime
  *   default, since a walk's places are what it is for, and a voice through the phone's speaker
  *   in a street is the reader's choice to make.
  * @property onboardingCompleted the first-run flow has been through to its end, or skipped.
+ * @property firstDayNoteRead the reader opened the guide from Today's first-day note: the note,
+ *   which is there for that, goes before the day ends.
  */
 data class UserSettings(
     val dailyGoalSteps: Int = DEFAULT_DAILY_GOAL_STEPS,
@@ -40,6 +42,7 @@ data class UserSettings(
     val startOutingButton: Boolean = true,
     val walkVoice: SessionVoice = SessionVoice.HEADPHONES,
     val onboardingCompleted: Boolean = false,
+    val firstDayNoteRead: Boolean = false,
 ) {
     companion object {
         /**

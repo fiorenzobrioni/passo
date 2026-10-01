@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -86,6 +87,7 @@ import com.callbackdev.passo.core.domain.ways.WayStop
 import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.model.WayJourneyState
+import com.callbackdev.passo.core.tracking.SessionSpeech
 import java.time.LocalDate
 
 /** One way's page, or one city walk's, with its state from [WaysViewModel]. */
@@ -112,6 +114,11 @@ fun WayRoute(way: WayId, journeyId: Long?, onBack: () -> Unit, viewModel: WaysVi
         actions = WayActions(
             start = { choice, chosen -> viewModel.start(way, choice, chosen) },
             leave = viewModel::leave,
+            // The page was the journey's: with it gone, back to the list.
+            delete = { id ->
+                viewModel.delete(id)
+                onBack()
+            },
             walk = WalkActions(
                 start = { again ->
                     val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
@@ -124,6 +131,13 @@ fun WayRoute(way: WayId, journeyId: Long?, onBack: () -> Unit, viewModel: WaysVi
                     }
                 },
                 voice = viewModel::setWalkVoice,
+                prepareVoice = viewModel::prepareVoice,
+                tryVoice = { viewModel.tryWalkVoice(way) },
+                openVoiceSettings = { runCatching { context.startActivity(SessionSpeech.settingsIntent()) } },
+                delete = { id ->
+                    viewModel.delete(id)
+                    onBack()
+                },
                 card = SessionCardActions(
                     onPause = viewModel::pauseWalk,
                     onResume = viewModel::resumeWalk,
@@ -139,8 +153,40 @@ fun WayRoute(way: WayId, journeyId: Long?, onBack: () -> Unit, viewModel: WaysVi
 class WayActions(
     val start: (WayStartChoice, LocalDate?) -> Unit = { _, _ -> },
     val leave: (Long) -> Unit = {},
+    val delete: (Long) -> Unit = {},
     val walk: WalkActions = WalkActions(),
 )
+
+/**
+ * Deletes a journey finished or left from Your ways, after asking: for good, and it says so.
+ * Only the journey goes; the days and the outings that moved it are History's.
+ */
+@Composable
+internal fun DeleteJourney(walk: Boolean, onDelete: () -> Unit) {
+    var asking by rememberSaveable { mutableStateOf(false) }
+    OutlinedButton(
+        onClick = { asking = true },
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenMargin).testTag(WaysTags.DELETE),
+    ) { Text(stringResource(R.string.way_delete)) }
+    if (asking) {
+        AlertDialog(
+            onDismissRequest = { asking = false },
+            title = { Text(stringResource(if (walk) R.string.walk_delete_title else R.string.way_delete_title)) },
+            text = { Text(stringResource(if (walk) R.string.walk_delete_body else R.string.way_delete_body)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        asking = false
+                        onDelete()
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                ) { Text(stringResource(R.string.way_delete_confirm)) }
+            },
+            dismissButton = { TextButton(onClick = { asking = false }) { Text(stringResource(R.string.way_cancel)) } },
+        )
+    }
+}
 
 /**
  * One way (PLANNING.md §11 Phase 11). Its map first, then one sentence of where the reader
@@ -257,6 +303,9 @@ private fun WayPage(state: WaysUiState, way: Way, view: JourneyView?, actions: W
                 ) { Text(stringResource(R.string.way_leave)) }
             }
         }
+        if (view != null && view.journey.state != WayJourneyState.ACTIVE) {
+            item(key = "delete") { DeleteJourney(walk = false, onDelete = { actions.delete(view.journey.id) }) }
+        }
         item(key = "footer") { Footer() }
     }
     if (starting) {
@@ -274,7 +323,20 @@ private fun WayPage(state: WaysUiState, way: Way, view: JourneyView?, actions: W
         AlertDialog(
             onDismissRequest = { leaving = false },
             title = { Text(stringResource(R.string.way_leave_title)) },
-            text = { Text(stringResource(R.string.way_leave_body)) },
+            // Nothing walked, nothing kept: the page says so before the way goes.
+            text = {
+                Text(
+                    stringResource(
+                        if (view.progress.walkedMeters <
+                            1.0
+                        ) {
+                            R.string.way_leave_body_empty
+                        } else {
+                            R.string.way_leave_body
+                        },
+                    ),
+                )
+            },
             confirmButton = {
                 TextButton(onClick = {
                     leaving = false

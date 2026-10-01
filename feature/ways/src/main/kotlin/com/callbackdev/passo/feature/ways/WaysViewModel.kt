@@ -22,13 +22,17 @@ import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.UnitPreference
+import com.callbackdev.passo.core.model.UserSettings
 import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.model.WayJourney
 import com.callbackdev.passo.core.model.WayJourneyState
 import com.callbackdev.passo.core.model.WayKind
 import com.callbackdev.passo.core.tracking.SessionControl
+import com.callbackdev.passo.core.tracking.SessionSpeech
 import com.callbackdev.passo.core.tracking.StepTracking
 import com.callbackdev.passo.core.tracking.TrackingReadiness
+import com.callbackdev.passo.core.tracking.VoiceAvailability
+import com.callbackdev.passo.core.tracking.spokenWalkSample
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -61,6 +65,7 @@ import javax.inject.Inject
  * @property walkVoice whether a walk's places are said aloud, and where.
  * @property canWalk whether an outing can start now: counting on, with its permission.
  * @property stepMeters the reader's walking step, for a walk's steps before it is walked.
+ * @property voiceAvailability whether the phone can speak the places, once asked.
  */
 @Immutable
 data class WaysUiState(
@@ -76,6 +81,7 @@ data class WaysUiState(
     val walkVoice: SessionVoice = SessionVoice.HEADPHONES,
     val canWalk: WalkReadiness = WalkReadiness.READY,
     val stepMeters: Double = DEFAULT_STEP_METERS,
+    val voiceAvailability: VoiceAvailability = VoiceAvailability.UNKNOWN,
 ) {
     fun journey(id: Long): JourneyView? = active?.takeIf { it.journey.id == id }
         ?: past.firstOrNull { it.journey.id == id }
@@ -156,9 +162,13 @@ constructor(
             merged to current
         }
 
-    private val walkSettings = combine(settings.settings, settings.profile, readiness) { current, profile, ready ->
-        Triple(current, StepLengths.of(profile).walkingMeters, ready)
-    }
+    // Bound only once a walk's page asks (its voice on), for "Hear it" and what the phone can say.
+    private val speech = SessionSpeech(context)
+
+    private val walkSettings =
+        combine(settings.settings, settings.profile, readiness, speech.availability) { current, profile, ready, voice ->
+            WalkSettings(current, StepLengths.of(profile).walkingMeters, ready, voice)
+        }
 
     private val day: Flow<LocalDate> = flow {
         while (true) {
@@ -173,7 +183,7 @@ constructor(
         tracking.observeAllSummaries(),
         walkSettings,
         walkOutings,
-    ) { today, journeys, summaries, (current, stepMeters, ready), (outings, liveOuting) ->
+    ) { today, journeys, summaries, (current, stepMeters, ready, voice), (outings, liveOuting) ->
         val distances = summaries.distances()
         val views = journeys.map { journey ->
             val way = Ways.of(journey.way)
@@ -225,6 +235,7 @@ constructor(
                 else -> WalkReadiness.READY
             },
             stepMeters = stepMeters,
+            voiceAvailability = voice,
         )
     }.flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), null)
@@ -275,20 +286,60 @@ constructor(
     }
 
     fun setWalkVoice(voice: SessionVoice) {
+        if (voice != SessionVoice.OFF) speech.prepare()
         viewModelScope.launch { settings.updateSettings { it.copy(walkVoice = voice) } }
+    }
+
+    /** A walk's page with its voice on: the engine is bound, to say whether it can speak. */
+    fun prepareVoice() = speech.prepare()
+
+    /** The next place of [walk] as it would be told on reaching it: the reader's own walk. */
+    fun tryWalkVoice(walk: WayId) {
+        val current = state.value ?: return
+        val view = current.walk(walk) ?: return
+        speech.preview(context.spokenWalkSample(view.way, view.fromMeters.toInt(), current.units))
+    }
+
+    override fun onCleared() {
+        speech.release()
     }
 
     fun refreshReadiness() {
         readiness.value = StepTracking.readiness(context)
     }
 
-    /** Puts the way [journeyId] down, today, where the reader stands. */
+    /**
+     * Puts the way [journeyId] down, today, where the reader stands; with nothing of it walked,
+     * there is nothing to keep, and it goes.
+     */
     fun leave(journeyId: Long) {
-        viewModelScope.launch { ways.leave(journeyId, LocalDate.now(ZoneId.systemDefault())) }
+        val walked = state.value?.journey(journeyId)?.progress?.walkedMeters
+        viewModelScope.launch {
+            if (walked != null && walked < NOTHING_WALKED_METERS) {
+                ways.delete(journeyId)
+            } else {
+                ways.leave(journeyId, LocalDate.now(ZoneId.systemDefault()))
+            }
+        }
     }
+
+    /** Deletes the journey [journeyId] from Your ways, for good (the page asked first). */
+    fun delete(journeyId: Long) {
+        viewModelScope.launch { ways.delete(journeyId) }
+    }
+
+    private data class WalkSettings(
+        val settings: UserSettings,
+        val stepMeters: Double,
+        val readiness: TrackingReadiness,
+        val voice: VoiceAvailability,
+    )
 
     private companion object {
         const val MILLIS_PER_MINUTE = 60_000L
         const val STOP_TIMEOUT_MILLIS = 5_000L
+
+        /** Under a metre: nothing walked, a way started by mistake or a moment ago. */
+        const val NOTHING_WALKED_METERS = 1.0
     }
 }

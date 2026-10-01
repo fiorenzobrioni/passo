@@ -20,6 +20,7 @@ import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.testing.assertAccessible
 import com.callbackdev.passo.core.testing.walkPage
 import com.callbackdev.passo.core.testing.writeScreenshot
+import com.callbackdev.passo.core.tracking.VoiceAvailability
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -277,5 +278,68 @@ class WaysScreenTest {
     fun `on an open foldable a walk is a column in the middle`() {
         showWay(WayId.MILAN_DUOMO_NAVIGLI, state = WaysSamples.state(walks = emptyList(), live = null))
         compose.walkPage(hasTestTag(WaysTags.PAGE), "walk_foldable", maxScreens = 6)
+    }
+
+    @Test
+    fun `a way finished or left can be deleted from Your ways, after a warning`() {
+        var deleted: Long? = null
+        showWay(WayId.VIA_DEGLI_DEI, journeyId = WaysSamples.dei.id, actions = WayActions(delete = { deleted = it }))
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasTestTag(WaysTags.DELETE))
+        compose.onNodeWithTag(WaysTags.DELETE).performClick()
+        compose.onNodeWithText("Delete this way?").assertIsDisplayed()
+        compose.onNodeWithText("for good", substring = true).assertExists()
+        snapshot("way_delete")
+        compose.onNodeWithText("Delete").performClick()
+        assertThat(deleted).isEqualTo(WaysSamples.dei.id)
+    }
+
+    @Test
+    fun `the way under way has no delete, only leave`() {
+        showWay(WayId.VIA_FRANCIGENA)
+        compose.onNodeWithTag(WaysTags.DELETE).assertDoesNotExist()
+    }
+
+    @Test
+    fun `a walk walked to its end can be deleted, its outings kept`() {
+        var deleted: Long? = null
+        showWay(
+            WayId.MILAN_DUOMO_NAVIGLI,
+            journeyId = WaysSamples.milan.id,
+            actions = WayActions(walk = WalkActions(delete = { deleted = it })),
+        )
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasTestTag(WaysTags.DELETE))
+        compose.onNodeWithTag(WaysTags.DELETE).performClick()
+        compose.onNodeWithText("Its outings stay in History", substring = true).assertExists()
+        compose.onNodeWithText("Delete").performClick()
+        assertThat(deleted).isEqualTo(WaysSamples.milan.id)
+    }
+
+    @Test
+    fun `a walk's voice can be heard before it starts, and changed`() {
+        var heard = false
+        showWay(
+            WayId.MILAN_DUOMO_NAVIGLI,
+            state = WaysSamples.state(
+                walks = emptyList(),
+                live = null,
+            ).copy(voiceAvailability = VoiceAvailability.READY),
+            actions = WayActions(walk = WalkActions(tryVoice = { heard = true })),
+        )
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasTestTag(WaysTags.WALK_TRY_VOICE))
+        compose.onNodeWithText("Change voice").assertExists()
+        snapshot("walk_voice")
+        compose.onNodeWithTag(WaysTags.WALK_TRY_VOICE).performClick()
+        assertThat(heard).isTrue()
+    }
+
+    @Test
+    fun `with no offline voice, a walk's page says so`() {
+        showWay(
+            WayId.MILAN_DUOMO_NAVIGLI,
+            state = WaysSamples.state(walks = emptyList(), live = null)
+                .copy(voiceAvailability = VoiceAvailability.NO_OFFLINE_VOICE),
+        )
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Install a voice"))
+        compose.onNodeWithTag(WaysTags.WALK_TRY_VOICE).assertDoesNotExist()
     }
 }

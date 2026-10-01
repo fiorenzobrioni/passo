@@ -48,12 +48,21 @@ moves with the distance their steps measure.
    walks beside the way under way: they never block each other.
 6. **The voice is the walks' own setting** (`UserSettings.walkVoice`, headphones by default, like
    a new outing's), chosen on the walk's page and kept for the next one; a walk is not a plan.
+   Under it, as in the outing editor, "Hear it" says the next place as it will be told
+   (`spokenWalkSample`), "Change voice" opens the system's voices, and a phone with no offline
+   voice is told so. One sample, not a touch on every place: the places' sentences are on the
+   page to read, and a list that speaks when touched would surprise more than it helps.
 7. **Where it shows.** The Ways page has the ways, then the cities (each walk with where it
    stands), then Your ways; the walk's page, its map and, during an outing, the outing's card;
    Today's and the Outings page's card carry the walk's small map instead of the bar (drawn only
    while the card is on screen); the Outings page has a door to the cities; History names the
    outing by its walk («A walk in London»).
-8. **The backup carries both fields** on an outing and the setting, as added fields with no new
+8. **Your ways can be tidied** (owner, 2 Oct 2026): a way finished or left, or a walk walked to
+   its end, can be deleted from its page, after a dialog that says it is for good; only the
+   journey goes, the days and the outings stay in History. A way left before any of it was
+   walked is not kept at all (it would only be an empty row). An import adds and never takes
+   away, so a backup written before the delete brings the journey back.
+9. **The backup carries both fields** on an outing and the setting, as added fields with no new
    format version. One journey under way per walk on import, as one per way slot.
 
 ## Consequences

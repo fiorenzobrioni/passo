@@ -91,11 +91,11 @@
     <string name="guide_ways_distance_title">Your distance, not your position</string>
     <string name="guide_ways_distance_body">Passo never knows where you are. Your place on the way is the estimated distance of every day since you started it, the same as in History: measuring your step makes it truer, and applying a new profile to past days moves it too. A way you finished stays finished.</string>
     <string name="guide_ways_start_title">A start in the past</string>
-    <string name="guide_ways_start_body">A way can start today, on 1 January, or on any day since your first with Passo: it places you at once, with the stamps of the stages behind you. One way at a time.</string>
+    <string name="guide_ways_start_body">A way can start today, on 1 January, or on any day since your first with Passo: it places you at once, with the stamps of the stages behind you. One way at a time. A way finished or left stays in Your ways until you delete it; one left before you walked any of it is not kept.</string>
     <string name="guide_ways_stages_title">Stages and stamps</string>
     <string name="guide_ways_stages_body">Each stage reached is a stamp in the credential, with its day, and a notification if you leave the Ways channel on. A place says its line once you reach it, or when it is the next one.</string>
     <string name="guide_ways_walks_title">City walks</string>
-    <string name="guide_ways_walks_body">A walk through Milan or London, from the Duomo to the Navigli or from Buckingham Palace to Tower Bridge, walked where you are in one outing or a few. Each place is told as your steps reach it: a short vibration, and its name and a line about it if the voice is on. Stop when you like: the next outing goes on from there. From the Ways page or Outings.</string>
+    <string name="guide_ways_walks_body">A walk through Milan or London, from the Duomo to the Navigli or from Buckingham Palace to Tower Bridge, walked where you are in one outing or a few. Each place is told as your steps reach it: a short vibration, and its name and a line about it if the voice is on. Stop when you like: the next outing goes on from there. From the Ways page or Outings. On a walk’s page, “Hear it” plays the next place as you will hear it.</string>
     <string name="guide_ways_credit">The ways and the walks are drawn from OpenStreetMap, © OpenStreetMap contributors (ODbL), the walks routed with BRouter; the ways’ land and water from Natural Earth.</string>
     <string name="guide_widgets_title">On the home screen</string>
     <string name="guide_widgets_two_title">Two widgets</string>

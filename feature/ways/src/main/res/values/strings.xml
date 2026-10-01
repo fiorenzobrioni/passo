@@ -45,6 +45,13 @@
     <string name="way_leave_title">Leave this way?</string>
     <string name="way_leave_body">It stays in Your ways, with its stamps, stopped where you are now. You can then start another way, or this one again from its beginning.</string>
     <string name="way_leave_confirm">Leave</string>
+    <string name="way_leave_body_empty">You have not walked any of it yet: it will not be kept in Your ways. You can then start another way, or this one again.</string>
+    <string name="way_delete">Delete from Your ways</string>
+    <string name="way_delete_title">Delete this way?</string>
+    <string name="way_delete_body">It leaves Your ways for good, with its stamps. Your days and their distance stay as they are in History.</string>
+    <string name="walk_delete_title">Delete this walk?</string>
+    <string name="walk_delete_body">It leaves Your ways for good, with its stamps. Its outings stay in History.</string>
+    <string name="way_delete_confirm">Delete</string>
     <string name="way_cancel">Cancel</string>
 
     <!-- Starting a way -->
@@ -82,6 +89,12 @@
     <string name="walk_voice_off_note">A short vibration at each place, nothing said.</string>
     <string name="walk_voice_headphones_note">At each place its name and a line about it, through headphones only.</string>
     <string name="walk_voice_always_note">Through headphones, or out loud from the phone when it is not on silent.</string>
+    <string name="walk_voice_offline">A voice installed on this phone: Passo sends nothing.</string>
+    <string name="walk_voice_try">Hear it</string>
+    <string name="walk_voice_change">Change voice</string>
+    <string name="walk_voice_missing">This phone has no offline voice in this language. Install one in the system’s text-to-speech settings: until then each place is a vibration only.</string>
+    <string name="walk_voice_install">Install a voice</string>
+    <string name="walk_voice_no_engine">This phone has no text-to-speech engine: each place is a vibration only.</string>
     <string name="walk_group_places">Places</string>
     <string name="walk_credential_caption">A stamp for each place reached, with its day.</string>
     <string name="walk_walked_on">Walked on %1$s: %2$s.</string>

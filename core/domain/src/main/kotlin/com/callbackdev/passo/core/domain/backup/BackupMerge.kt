@@ -218,10 +218,13 @@ object BackupMerge {
 
     /**
      * The file's settings in place of this phone's, except what only this phone decides: whether
-     * it is counting now, and whether its first run is done.
+     * it is counting now, whether its first run is done, and whether its first-day note was read.
      */
-    fun settings(current: UserSettings, incoming: UserSettings): UserSettings =
-        incoming.copy(trackingEnabled = current.trackingEnabled, onboardingCompleted = current.onboardingCompleted)
+    fun settings(current: UserSettings, incoming: UserSettings): UserSettings = incoming.copy(
+        trackingEnabled = current.trackingEnabled,
+        onboardingCompleted = current.onboardingCompleted,
+        firstDayNoteRead = current.firstDayNoteRead,
+    )
 
     private fun SessionPlan.sameAs(other: SessionPlan) = name == other.name &&
         goalKind == other.goalKind &&

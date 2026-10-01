@@ -47,6 +47,13 @@
     <string name="way_leave_title">Lasciare questo cammino?</string>
     <string name="way_leave_body">Resta nei tuoi cammini, con i suoi timbri, fermo dove sei ora. Potrai poi iniziarne un altro, o ricominciare questo dalla partenza.</string>
     <string name="way_leave_confirm">Lascia</string>
+    <string name="way_leave_body_empty">Non ne hai ancora percorso nulla: non resterà nei tuoi cammini. Potrai poi iniziarne un altro, o di nuovo questo.</string>
+    <string name="way_delete">Elimina dai tuoi cammini</string>
+    <string name="way_delete_title">Eliminare questo cammino?</string>
+    <string name="way_delete_body">Esce dai tuoi cammini per sempre, con i suoi timbri. I tuoi giorni e la loro distanza restano come sono in Cronologia.</string>
+    <string name="walk_delete_title">Eliminare questa passeggiata?</string>
+    <string name="walk_delete_body">Esce dai tuoi cammini per sempre, con i suoi timbri. Le sue uscite restano in Cronologia.</string>
+    <string name="way_delete_confirm">Elimina</string>
     <string name="way_cancel">Annulla</string>
 
     <!-- Iniziare un cammino -->
@@ -84,6 +91,12 @@
     <string name="walk_voice_off_note">Una breve vibrazione a ogni luogo, senza parole.</string>
     <string name="walk_voice_headphones_note">A ogni luogo il suo nome e una frase che lo racconta, solo nelle cuffie.</string>
     <string name="walk_voice_always_note">Nelle cuffie, oppure ad alta voce dal telefono quando non è in silenzioso.</string>
+    <string name="walk_voice_offline">Una voce installata sul telefono: Passo non invia nulla.</string>
+    <string name="walk_voice_try">Ascoltala</string>
+    <string name="walk_voice_change">Cambia voce</string>
+    <string name="walk_voice_missing">Questo telefono non ha una voce offline in questa lingua. Installala nelle impostazioni di sintesi vocale del sistema: fino ad allora ogni luogo è solo una vibrazione.</string>
+    <string name="walk_voice_install">Installa una voce</string>
+    <string name="walk_voice_no_engine">Questo telefono non ha un motore di sintesi vocale: ogni luogo è solo una vibrazione.</string>
     <string name="walk_group_places">Luoghi</string>
     <string name="walk_credential_caption">Un timbro per ogni luogo raggiunto, con il suo giorno.</string>
     <string name="walk_walked_on">Percorsa il %1$s: %2$s.</string>

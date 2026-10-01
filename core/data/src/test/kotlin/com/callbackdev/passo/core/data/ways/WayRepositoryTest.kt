@@ -169,6 +169,14 @@ class WayRepositoryTest {
     }
 
     @Test
+    fun `a journey deleted is gone, and another way can start`() = runTest {
+        val id = checkNotNull(repository.start(WayId.VIA_DEGLI_DEI, today, today, nowMillis = 1_000))
+        repository.delete(id)
+        assertThat(repository.journeys.first()).isEmpty()
+        assertThat(repository.start(WayId.VIA_DI_FRANCESCO, today, today, nowMillis = 2_000)).isNotNull()
+    }
+
+    @Test
     fun `version 4 migrates to 5 with every outing walking no walk`() {
         migrations.createDatabase(MIGRATION_DB, 4).use { db ->
             db.execSQL(

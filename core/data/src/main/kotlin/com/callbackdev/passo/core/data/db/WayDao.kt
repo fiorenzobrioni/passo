@@ -33,6 +33,10 @@ abstract class WayDao {
     )
     abstract suspend fun end(id: Long, state: String, endedEpochDay: Long): Int
 
+    /** Deletes the journey [id]: its days and outings are the days' and the outings', and stay. */
+    @Query("DELETE FROM way_journey WHERE id = :id")
+    abstract suspend fun delete(id: Long): Int
+
     /**
      * Only forwards: a stage told is never told again, whoever writes last. Returns 1 when this
      * call moved it, 0 when it was already there: the one that moved it is the one that tells.

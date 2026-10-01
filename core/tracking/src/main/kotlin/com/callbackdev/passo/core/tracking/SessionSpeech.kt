@@ -26,6 +26,8 @@ import com.callbackdev.passo.core.domain.sessions.SessionAmount
 import com.callbackdev.passo.core.domain.sessions.SessionAnnouncement
 import com.callbackdev.passo.core.domain.sessions.SpeechRoute
 import com.callbackdev.passo.core.domain.ways.NextPlace
+import com.callbackdev.passo.core.domain.ways.WalkPlaces
+import com.callbackdev.passo.core.domain.ways.Way
 import com.callbackdev.passo.core.model.MeasureUnit
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionGoalKind
@@ -324,17 +326,7 @@ internal fun Context.spoken(announcement: SessionAnnouncement, session: Session,
             }
         }
 
-        is SessionAnnouncement.PlacesReached -> {
-            val names = announcement.places.map { res.getString(placeNameRes(it.key)) }
-            val reached = announcement.places.last()
-            listOfNotNull(
-                names.dropLast(1).takeIf { it.isNotEmpty() }
-                    ?.let { res.getString(R.string.spoken_walk_behind, it.joinToString(", ")) },
-                res.getString(R.string.spoken_walk_here, names.last()),
-                placeNoteRes(reached.key)?.let(res::getString),
-                announcement.next?.let { res.spokenNext(it, format) },
-            ).joinToString(" ")
-        }
+        is SessionAnnouncement.PlacesReached -> res.spokenPlaces(announcement, format)
 
         is SessionAnnouncement.GoalReached -> {
             val steps = res.spokenAmount(SessionAmount(SessionGoalKind.STEPS, announcement.steps.toDouble()), format)
@@ -388,6 +380,30 @@ private fun Resources.spokenMilestone(announcement: SessionAnnouncement.Mileston
         else -> null
     }
     return listOfNotNull(share, pace).joinToString(" ")
+}
+
+/**
+ * A sample of what a city walk says on the way, for its page's "Hear it": the first place
+ * ahead of [fromMeters] as it would be told on reaching it, with the one after.
+ */
+fun Context.spokenWalkSample(walk: Way, fromMeters: Int, units: UnitPreference): String {
+    val stop = WalkPlaces.after(walk, fromMeters)?.stop ?: walk.stops.last()
+    val sample = SessionAnnouncement.PlacesReached(listOf(stop), WalkPlaces.after(walk, stop.distanceMeters))
+    return resources.spokenPlaces(sample, measureFormatter(units))
+}
+
+/** «Behind you: Brera. Here: La Scala. La Scala opened in 1778… Next: …, in 640 metres.» */
+private fun Resources.spokenPlaces(announcement: SessionAnnouncement.PlacesReached, format: MeasureFormatter): String {
+    val names = announcement.places.map { getString(placeNameRes(it.key)) }
+    val reached = announcement.places.last()
+    return listOfNotNull(
+        names.dropLast(1).takeIf {
+            it.isNotEmpty()
+        }?.let { getString(R.string.spoken_walk_behind, it.joinToString(", ")) },
+        getString(R.string.spoken_walk_here, names.last()),
+        placeNoteRes(reached.key)?.let(::getString),
+        announcement.next?.let { spokenNext(it, format) },
+    ).joinToString(" ")
 }
 
 /** «Next: the Duomo, in 600 metres.» */

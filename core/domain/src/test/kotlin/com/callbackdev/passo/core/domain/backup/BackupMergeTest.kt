@@ -188,7 +188,12 @@ class BackupMergeTest {
 
     @Test
     fun `the file's settings come in, but not whether this phone counts or has been set up`() {
-        val current = UserSettings(trackingEnabled = false, onboardingCompleted = true, dailyGoalSteps = 6_000)
+        val current = UserSettings(
+            trackingEnabled = false,
+            onboardingCompleted = true,
+            firstDayNoteRead = true,
+            dailyGoalSteps = 6_000,
+        )
         val incoming = UserSettings(trackingEnabled = true, onboardingCompleted = false, dailyGoalSteps = 11_000)
 
         val merged = BackupMerge.settings(current, incoming)
@@ -196,5 +201,6 @@ class BackupMergeTest {
         assertThat(merged.dailyGoalSteps).isEqualTo(11_000)
         assertThat(merged.trackingEnabled).isFalse()
         assertThat(merged.onboardingCompleted).isTrue()
+        assertThat(merged.firstDayNoteRead).isTrue()
     }
 }

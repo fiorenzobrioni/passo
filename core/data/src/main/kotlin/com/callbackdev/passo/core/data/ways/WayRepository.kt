@@ -79,6 +79,15 @@ constructor(private val dao: WayDao, private val tracking: TrackingRepository) {
         dao.activeAmong(listOf(walk.name)).forEach { dao.end(it.id, WayJourneyState.FINISHED.name, day) }
     }
 
+    /**
+     * The reader deletes the journey [id] from Your ways, for good: its stamps go with it. The
+     * days and the outings that moved it are History's and stay; a backup written before can
+     * bring it back, since an import adds and never takes away.
+     */
+    suspend fun delete(id: Long) {
+        dao.delete(id)
+    }
+
     /** The reader puts the way down where it stands on [day]. */
     suspend fun leave(id: Long, day: LocalDate) {
         dao.end(id, WayJourneyState.LEFT.name, day.toEpochDay())

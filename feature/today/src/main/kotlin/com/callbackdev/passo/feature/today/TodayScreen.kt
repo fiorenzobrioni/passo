@@ -159,7 +159,11 @@ fun TodayRoute(
         onCelebrated = viewModel::celebrated,
         bottomPadding = bottomPadding,
         onOpenSessions = onOpenSessions,
-        onOpenGuide = onOpenGuide,
+        // Opened from the first-day note, its only door here: the note goes once it is read.
+        onOpenGuide = {
+            viewModel.firstDayNoteRead()
+            onOpenGuide()
+        },
         sessionActions = { id ->
             SessionCardActions(
                 onPause = viewModel::pauseSession,
