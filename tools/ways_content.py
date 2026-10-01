@@ -401,8 +401,9 @@ class Walk:
     places, in order, and saved in tools/walks/ by the script's `fetch`: the places are the
     route's waypoints, so each lies on the line. Behind it, the city's water and largest parks,
     from OpenStreetMap objects named here by id ("relation/28934"); canals are lines drawn
-    [canal_width] metres wide. With [streets], the map also has the city's main streets, faint
-    under the route, so the area can be recognised (downloaded by tiles in `fetch`).
+    [canal_width] metres wide. With [streets] (the default), the map also has the city's main
+    streets, faint under the route, so the area can be recognised: fetched by tiles over what the
+    page shows, and only the streets kept.
     """
 
     id: str
@@ -419,7 +420,10 @@ class Walk:
     canals: list = field(default_factory=list)
     parks: list = field(default_factory=list)
     canal_width: float = 20.0
-    streets: bool = False
+    streets: bool = True
+    # Street classes drawn as minor streets beside the usual ones, for a city mapped mostly in
+    # those (Cusco's old centre is residential lanes).
+    more_streets: tuple = ()
 
 
 MILAN = Walk(
@@ -435,7 +439,6 @@ MILAN = Walk(
     water=["way/345030396"],
     canals=["relation/3340142", "relation/3350738"],
     parks=["relation/10172760", "way/5110320", "way/260829251"],
-    streets=True,
     stops=[
         Stop("milan_duomo", "The Duomo", "Il Duomo", 45.4640, 9.1905,
              note_en="Milan began its cathedral in 1386, and building went on for nearly six centuries.",
@@ -887,6 +890,7 @@ CUSCO = Walk(
     # No water: the rivers of the old centre run in channels, mostly covered, and the Huatanay
     # begins south of the map.
     parks=["way/83130621"],
+    more_streets=("residential", "unclassified"),
     stops=[
         Stop("cusco_plaza_de_armas", "Plaza de Armas", "Plaza de Armas", -13.5168, -71.9789,
              note_en="This was the heart of the Inca capital; the City of Cusco has been a UNESCO World Heritage Site since 1983.",

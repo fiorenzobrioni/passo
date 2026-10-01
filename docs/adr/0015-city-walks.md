@@ -29,10 +29,21 @@ moves with the distance their steps measure.
    Cusco (9.4 km, 12), whose map has parks and no water.
 3. **The city behind the line is OpenStreetMap too**: the water (the Thames, the Darsena) as
    areas, the canals (the Navigli) as lines drawn as wide as they are (`riverWidthMeters`, with
-   `WayProjection.pixelsPerMeter`), the largest parks as areas, never a street grid. Parks are a
-   new colour role, `PassoColors.park`, a sage quieter than the goal's green. A city's map has
-   land where a country's has sea, and no locator: the line fills its frame and the title names
-   the city.
+   `WayProjection.pixelsPerMeter`), the largest parks as areas. Parks are a new colour role,
+   `PassoColors.park`, a sage quieter than the goal's green. A city's map has land where a
+   country's has sea, and no locator: the line fills its frame and the title names the city.
+   *Revised (owner, 2 Oct 2026):* "never a street grid" became the main streets, after a trial on
+   Milan the owner judged "recognisable now". The arteries (trunk, primary, secondary) and the
+   streets that give a centre its shape (tertiary, pedestrian), no others, no names: a lighter
+   line on the land in either theme (Material's lowest container in light, its bright surface in
+   dark, no new colour role), above parks and water areas so bridges show, under canals and the
+   route, and only on the walk's own page (a thumbnail or the outing's card keeps its line
+   alone). The script fetches them with the OpenStreetMap API's map call, tile by tile over what
+   the page can show (Overpass is not reachable from the build machines), keeps only the streets
+   in its cache, joins them end to end, drops pieces under 150 m (crossings and bits of squares
+   read as noise) and simplifies them like the rest of the map: a few tens of kilobytes a city. A city
+   mapped mostly in smaller classes adds them as minor streets (Cusco's old centre is residential
+   lanes: `more_streets` in the content).
 4. **A walk is walked in outings.** An outing on a walk (`session.walk`, `session.walkFromMeters`,
    schema v5 by auto-migration) has the distance left as its goal, no quarter signals, and the
    walk's places as its signals. The places are told from the outing's stored totals (where it

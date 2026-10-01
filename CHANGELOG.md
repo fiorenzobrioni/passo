@@ -21,11 +21,13 @@ All notable changes to Passo are documented here. The format follows
 - **City walks**: Milan, from the Duomo to the Navigli; Rome, from the Colosseum to St Peter's;
   Paris, from Place des Vosges to the Eiffel Tower; London, from Buckingham Palace to Tower
   Bridge; Madrid, from the Temple of Debod to the Puerta de Alcalá; Lima, through its historic
-  centre; and Cusco, up to Sacsayhuamán and down to the Qorikancha. Walked where you are in one
-  outing or a few. Each place is told as your steps reach it, with a short vibration and, if you
-  like, its name and a line about it in your headphones; the notification says the next one.
-  Stop when you like and continue later from where you were. On the Ways page, and from Outings.
-  "Hear it" plays a place as you will hear it, and "Change voice" opens the phone's voices.
+  centre; and Cusco, up to Sacsayhuamán and down to the Qorikancha. Each map has the city's
+  water, parks and main streets, so the area is recognisable at a glance. Walked where you are
+  in one outing or a few. Each place is told as your steps reach it, with a short vibration and,
+  if you like, its name and a line about it in your headphones; the notification says the next
+  one. Stop when you like and continue later from where you were. On the Ways page, and from
+  Outings. "Hear it" plays a place as you will hear it, and "Change voice" opens the phone's
+  voices.
 - **Your ways can be tidied**: a way finished or left, or a walk walked to its end, can be
   deleted, after a warning that it is for good. A way left before you walked any of it is not
   kept.
