@@ -88,7 +88,7 @@
 
     <!-- Widget e riquadro -->
     <string name="guide_ways_title">Cammini</string>
-    <string name="guide_ways_p1">Un cammino è un vero itinerario dei pellegrini (la Via degli Dei, la Via di Francesco, il Cammino Francese, la parte italiana della Via Francigena) percorso da dove sei. La distanza dei tuoi giorni ti porta avanti. Da Insights.</string>
+    <string name="guide_ways_p1">Un cammino è un vero itinerario dei pellegrini (la Via degli Dei, la Via di Francesco, il Cammino di Santiago, la parte italiana della Via Francigena) percorso da dove sei. La distanza dei tuoi giorni ti porta avanti. Da Insights.</string>
     <string name="guide_ways_distance_title">La tua distanza, non la tua posizione</string>
     <string name="guide_ways_distance_body">Passo non sa mai dove sei. Il tuo punto sul cammino è la distanza stimata di ogni giorno da quando l’hai iniziato, la stessa di Cronologia: misurare il passo la rende più vera, e applicare un nuovo profilo ai giorni passati la sposta. Un cammino finito resta finito.</string>
     <string name="guide_ways_start_title">Una partenza nel passato</string>

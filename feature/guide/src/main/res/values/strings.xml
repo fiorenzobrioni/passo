@@ -87,7 +87,7 @@
 
     <!-- Widgets and the tile -->
     <string name="guide_ways_title">Ways</string>
-    <string name="guide_ways_p1">A way is a real pilgrim route (the Via degli Dei, the Via di Francesco, the Camino Francés, the Italian part of the Via Francigena) walked from wherever you are. The distance of your days carries you along it. From Insights.</string>
+    <string name="guide_ways_p1">A way is a real pilgrim route (the Via degli Dei, the Via di Francesco, the Camino de Santiago, the Italian part of the Via Francigena) walked from wherever you are. The distance of your days carries you along it. From Insights.</string>
     <string name="guide_ways_distance_title">Your distance, not your position</string>
     <string name="guide_ways_distance_body">Passo never knows where you are. Your place on the way is the estimated distance of every day since you started it, the same as in History: measuring your step makes it truer, and applying a new profile to past days moves it too. A way you finished stays finished.</string>
     <string name="guide_ways_start_title">A start in the past</string>

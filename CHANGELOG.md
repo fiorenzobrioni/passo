@@ -13,7 +13,7 @@ All notable changes to Passo are documented here. The format follows
 ### Added
 
 - **Ways**: four pilgrim ways walked from wherever you are. The Via degli Dei, the Via di
-  Francesco, the Camino Francés and the Italian part of the Via Francigena, drawn from
+  Francesco, the Camino de Santiago (the French Way) and the Italian part of the Via Francigena, drawn from
   OpenStreetMap. The distance of your days carries you along, stage by stage, with a stamp in a
   credential for each and a notification when you reach one. Start today or in the past, and
   find yourself already on the way. No location: only your distance. From Insights.

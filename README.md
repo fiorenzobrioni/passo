@@ -86,7 +86,7 @@ Italian). The phone's status bar is not in the pictures. The command that redraw
 - 🚶 **Walks, found for you**: stretches of walking recognised in the steps already counted.
 - 🎯 **Outings**: a walk or run with a goal, with vibrations or a voice at the milestones you choose.
 - 🏆 **Insights**: your streak, your best day, week and month, and the averages.
-- 🗺️ **Ways**: four pilgrim ways (Via degli Dei, Via di Francesco, Camino Francés, Via Francigena) walked from home, stage by stage, with a stamp for each. No location: only your distance.
+- 🗺️ **Ways**: four pilgrim ways (Via degli Dei, Via di Francesco, Camino de Santiago, Via Francigena) walked from home, stage by stage, with a stamp for each. No location: only your distance.
 - 📏 **Measure your step**: walk a distance you know and Passo works out your step length. No GPS.
 - 🏠 **Two widgets**: At a glance and In words, resizable, in six colours and any opacity.
 - 🔔 **Notifications**: goal reached, an evening reminder, a weekly summary. Each one optional.

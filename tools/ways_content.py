@@ -148,10 +148,12 @@ VIA_DI_FRANCESCO = Way(
 CAMINO_FRANCES = Way(
     id="CAMINO_FRANCES",
     relations=[2163573],
-    name_en="Camino Francés",
-    name_it="Cammino Francese",
-    route_en="Saint-Jean-Pied-de-Port to Santiago de Compostela",
-    route_it="Da Saint-Jean-Pied-de-Port a Santiago de Compostela",
+    # Named as readers know it; the variant, the French Way (the classic one, and the most
+    # walked), is said in the route line (owner, 1 Oct 2026).
+    name_en="Camino de Santiago",
+    name_it="Cammino di Santiago",
+    route_en="The French Way, Saint-Jean-Pied-de-Port to Santiago de Compostela",
+    route_it="Il Cammino Francese, da Saint-Jean-Pied-de-Port a Santiago de Compostela",
     country="ES",
     stops=[
         Stop("saint_jean", "Saint-Jean-Pied-de-Port", "Saint-Jean-Pied-de-Port", 43.1631, -1.2376,

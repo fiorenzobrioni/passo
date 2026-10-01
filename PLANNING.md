@@ -809,7 +809,7 @@ half a year, at an ordinary 5 km a day. The Francigena is its Italian part only 
 |---|---|---|---|
 | Via degli Dei | Bologna, Florence | 123 km, 9 stages | 4 weeks |
 | Via di Francesco | La Verna, Assisi, Rome | 434 km, 22 stages | 3 months |
-| Camino Francés | Saint-Jean-Pied-de-Port, Santiago de Compostela | 768 km, 34 stages | 5 months |
+| Camino de Santiago, the French Way | Saint-Jean-Pied-de-Port, Santiago de Compostela | 768 km, 34 stages | 5 months |
 | Via Francigena, the Italian part | Great St Bernard Pass, Rome | 1,020 km, 46 stages | 7 months |
 
 - [x] The ways' data, written by a script (`tools/build_ways.py`, re-run, never hand-edited, like the launcher icon): for each way its stages (a key, the name's resource, latitude and longitude, the official distance from the start), the line drawn, simplified to a few hundred points, and the outline of the countries behind it (Natural Earth, public domain, simplified). Output: Kotlin in `:core:domain/ways`. The line is the way's OpenStreetMap relation, simplified (owner, §15): the script reads an export saved by hand into `tools/`, never the network at build time; the data is under ODbL, credited in About and in the guide («© OpenStreetMap contributors»), and the derived file says so in its header.
@@ -892,7 +892,7 @@ pick. Name: «Il tuo anno a piedi» / "Your year on foot".
 - [ ] **When.** By hand at any time: Insights has a "Your year" row for the year so far and for every past year with 30 or more days counted, and History's year view opens its own year. In season, from 1 December to 31 January, it is the first card of Insights, and Today shows one card, once, that the reader closes (owner, 1 Oct 2026). No notification.
 - [ ] Domain (`:core:domain/year`, pure, tested): `YearInReview`, the pages and what each says, from the day summaries, the minutes (for the hour), the outings and the ways. A page with nothing to say is left out (no outings, no outings page). A year counted in part says so («Since 1 October») and compares averages per day counted, never totals.
 - [ ] The pages, in order:
-  1. The year in steps and in distance (estimated), and that distance as a way (the Ways' data: «more than the Camino Francés», or «half of the Via Francigena»).
+  1. The year in steps and in distance (estimated), and that distance as a way (the Ways' data: «more than the Camino de Santiago», or «half of the Via Francigena»).
   2. The months: twelve bars (`BarChart`), the best one named.
   3. The best day: its date and weekday, its steps, and the outing or the walk that made it.
   4. The rhythm: the weekday and the hour the reader walks most (from the minutes). This is where the weekly rhythm lives, once a year (§15).
@@ -1146,6 +1146,8 @@ Include:
 - **Your year: one card on Today in December** (owner, 1 Oct 2026): shown once, closed by the reader, on top of the first card in Insights; no notification.
 
 - **The Ways, first part** (Phase 11, 1 Oct 2026; `docs/adr/0014-ways.md`): the lines come from the relations through the Waymarked Trails API, chained by the shortest path over the main ways, simplified by `tools/build_ways.py`, which also writes the place strings; the content lives in `tools/ways_content.py`. A way keeps no distance: it is the days' own, computed on read. A finished way stays finished when its days are measured shorter later. A start is never before the first day counted. A stage is told by `WayNotifier`, which watches the written days only while a way is under way. The backup carries the ways as an added field, without a new format version. The map is `WayMapView` (Canvas) over Natural Earth; `PassoColors` gains `water`, because the dresses put their blue in different roles (Paper's secondary, Vivid's primary) and a sea in amber did not read as one. The ODbL credit is on the Ways page, in the guide, in Settings → Credits, in the README and in `licenses/`.
+
+- **The Camino named as readers know it** (owner, 1 Oct 2026): «Cammino di Santiago» / «Camino de Santiago», with its variant, the French Way (the classic one and the most walked), in the route line. Its stored id stays `CAMINO_FRANCES`.
 
 ### Open
 

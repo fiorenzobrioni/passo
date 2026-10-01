@@ -105,5 +105,5 @@
     <!-- The way under way (PLANNING.md §11 Phase 11) -->
     <string name="insights_group_way">Your way</string>
     <string name="insights_ways_door_title">Walk a pilgrim way</string>
-    <string name="insights_ways_door_body">Four ways, from the Via degli Dei to the Camino Francés, walked with the steps you take anyway.</string>
+    <string name="insights_ways_door_body">Four ways, from the Via degli Dei to the Camino de Santiago, walked with the steps you take anyway.</string>
 </resources>

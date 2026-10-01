@@ -6,8 +6,8 @@
     <string name="way_route_via_degli_dei">Bologna to Florence, over the Apennines</string>
     <string name="way_name_via_di_francesco">Via di Francesco</string>
     <string name="way_route_via_di_francesco">La Verna to Rome, by way of Assisi</string>
-    <string name="way_name_camino_frances">Camino Francés</string>
-    <string name="way_route_camino_frances">Saint-Jean-Pied-de-Port to Santiago de Compostela</string>
+    <string name="way_name_camino_frances">Camino de Santiago</string>
+    <string name="way_route_camino_frances">The French Way, Saint-Jean-Pied-de-Port to Santiago de Compostela</string>
     <string name="way_name_via_francigena">Via Francigena</string>
     <string name="way_route_via_francigena">The Great St Bernard Pass to Rome</string>
     <string name="way_place_acquapendente">Acquapendente</string>

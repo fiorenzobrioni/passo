@@ -6,8 +6,8 @@
     <string name="way_route_via_degli_dei">Da Bologna a Firenze, attraverso l’Appennino</string>
     <string name="way_name_via_di_francesco">Via di Francesco</string>
     <string name="way_route_via_di_francesco">Da La Verna a Roma, passando per Assisi</string>
-    <string name="way_name_camino_frances">Cammino Francese</string>
-    <string name="way_route_camino_frances">Da Saint-Jean-Pied-de-Port a Santiago de Compostela</string>
+    <string name="way_name_camino_frances">Cammino di Santiago</string>
+    <string name="way_route_camino_frances">Il Cammino Francese, da Saint-Jean-Pied-de-Port a Santiago de Compostela</string>
     <string name="way_name_via_francigena">Via Francigena</string>
     <string name="way_route_via_francigena">Dal Gran San Bernardo a Roma</string>
     <string name="way_place_acquapendente">Acquapendente</string>

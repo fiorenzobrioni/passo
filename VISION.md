@@ -162,7 +162,7 @@ Added to v1.0 at the owner's request (Phase 10, `docs/adr/0009-sessions.md`). An
 
 Asked for by the owner after the v1.0.0 release (1 Oct 2026); the phases are in PLANNING §11, in an order the owner chooses.
 
-- **The Ways** («I Cammini», Phase 11): the "virtual journeys" idea, as four pilgrim ways (Via degli Dei, Via di Francesco, Camino Francés, and the Italian part of the Via Francigena). The estimated distance walked since a chosen day moves a point along the way, drawn without any location; each stage reached is a stamp in a credential.
+- **The Ways** («I Cammini», Phase 11): the "virtual journeys" idea, as four pilgrim ways (Via degli Dei, Via di Francesco, the Camino de Santiago (the French Way), and the Italian part of the Via Francigena). The estimated distance walked since a chosen day moves a point along the way, drawn without any location; each stage reached is a stamp in a credential.
 - **City walks** («Passeggiate in città», Phase 11, second part): an outing through a city (Milan and London first, then Rome, Paris, Madrid), its places told as the reader reaches them, by a vibration and, if the outing speaks, the voice. Imaginary and said so: the route moves with the steps, never with a location.
 - **Your year on foot** («Il tuo anno a piedi», Phase 12): a year told in full-screen pages, from the days already stored, reachable by hand at any time and offered in December; a page can be shared as an image, through an app the reader picks.
 - **The interval walk** («Camminata a intervalli», Phase 13): the Japanese Interval Walking Training as an outing, in minutes, with each change of interval felt in the pocket (`docs/adr/0013-interval-walks.md`).
