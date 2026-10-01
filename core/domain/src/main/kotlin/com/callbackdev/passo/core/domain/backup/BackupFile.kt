@@ -21,6 +21,7 @@ internal data class BackupFile(
     val plans: List<PlanDto> = emptyList(),
     val outings: List<OutingDto> = emptyList(),
     val diagnostics: List<DiagnosticDto> = emptyList(),
+    val ways: List<WayDto> = emptyList(),
 )
 
 @Serializable
@@ -112,3 +113,14 @@ internal data class OutingDto(
 
 @Serializable
 internal data class DiagnosticDto(val atMillis: Long = 0, val type: String = "", val detail: String = "")
+
+/** A way started (Phase 11): which, from which day, where it stands. An added field: no new version. */
+@Serializable
+internal data class WayDto(
+    val way: String = "",
+    val startDate: String = "",
+    val startedAtMillis: Long = 0,
+    val state: String = "",
+    val endedDate: String? = null,
+    val toldMeters: Int = 0,
+)

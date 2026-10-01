@@ -17,6 +17,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import com.callbackdev.passo.R
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.domain.calibration.CalibratedStep
+import com.callbackdev.passo.core.model.WayId
 import kotlinx.serialization.Serializable
 
 /*
@@ -62,6 +63,14 @@ data class CalibrationKey(val step: CalibratedStep) : NavKey
 /** The editor of one outing; a new one when [planId] is null. */
 @Serializable
 data class PlanEditorKey(val planId: Long?) : NavKey
+
+/** The Ways, from Insights and from a stage's notification (PLANNING.md §11 Phase 11). */
+@Serializable
+data object WaysKey : NavKey
+
+/** One way: the journey [journeyId], or with none the way itself (under way, or ready to start). */
+@Serializable
+data class WayKey(val way: WayId, val journeyId: Long?) : NavKey
 
 /** The root of [this] tab's stack. */
 val ShellTab.root: NavKey

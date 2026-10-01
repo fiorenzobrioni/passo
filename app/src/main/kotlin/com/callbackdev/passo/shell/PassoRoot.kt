@@ -27,6 +27,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,6 +57,8 @@ import com.callbackdev.passo.feature.sessions.SessionsRoute
 import com.callbackdev.passo.feature.settings.SettingsRoute
 import com.callbackdev.passo.feature.settings.calibration.CalibrationRoute
 import com.callbackdev.passo.feature.today.TodayRoute
+import com.callbackdev.passo.feature.ways.WayRoute
+import com.callbackdev.passo.feature.ways.WaysRoute
 
 /**
  * The shell (PLANNING.md §11 Phase 3). Three questions before a page: can this phone count at
@@ -65,14 +68,20 @@ import com.callbackdev.passo.feature.today.TodayRoute
  *
  * @param onboardingCompleted null until the settings are read: a bare surface for that frame,
  *   because flashing the wrong screen at the reader is worse than one blank frame.
+ * @param openWays a stage's notification was touched: the Ways page opens, once ([onWaysOpened]).
  */
 @Composable
-fun PassoRoot(readiness: TrackingReadiness, onboardingCompleted: Boolean?) {
+fun PassoRoot(
+    readiness: TrackingReadiness,
+    onboardingCompleted: Boolean?,
+    openWays: Boolean = false,
+    onWaysOpened: () -> Unit = {},
+) {
     when {
         readiness == TrackingReadiness.NO_SENSOR -> NoSensorScreen()
         onboardingCompleted == null -> Surface(Modifier.fillMaxSize()) { }
         !onboardingCompleted -> OnboardingRoute()
-        else -> MainPages()
+        else -> MainPages(openWays, onWaysOpened)
     }
 }
 
@@ -88,8 +97,14 @@ fun PassoRoot(readiness: TrackingReadiness, onboardingCompleted: Boolean?) {
  * the bar itself, so they are laid out to the pixel where the old `Scaffold` put them.
  */
 @Composable
-private fun MainPages() {
+private fun MainPages(openWays: Boolean, onWaysOpened: () -> Unit) {
     val nav = rememberPassoNavigationState()
+    LaunchedEffect(openWays) {
+        if (openWays) {
+            nav.navigate(WaysKey)
+            onWaysOpened()
+        }
+    }
     val reduced = reducedMotion()
     val density = LocalDensity.current
     // A record in Insights opens its day, week or month in History, once.
@@ -123,6 +138,7 @@ private fun MainPages() {
                     historyTarget = HistoryTarget(scale, date)
                     nav.switchTab(ShellTab.HISTORY)
                 },
+                onOpenWays = { open(WaysKey) },
                 bottomPadding = barHeight,
             )
         }
@@ -140,6 +156,8 @@ private fun MainPages() {
             SessionsRoute(onBack = nav::goBack, onEdit = { open(PlanEditorKey(it)) })
         }
         entry<PlanEditorKey> { key -> PlanEditorRoute(planId = key.planId, onDone = nav::goBack) }
+        entry<WaysKey> { WaysRoute(onBack = nav::goBack, onOpenWay = { way, journey -> open(WayKey(way, journey)) }) }
+        entry<WayKey> { key -> WayRoute(way = key.way, journeyId = key.journeyId, onBack = nav::goBack) }
     }
 
     Surface(modifier = Modifier.fillMaxSize()) {

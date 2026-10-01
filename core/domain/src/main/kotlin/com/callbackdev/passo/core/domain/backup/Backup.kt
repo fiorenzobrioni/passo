@@ -7,6 +7,7 @@ import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.UserSettings
+import com.callbackdev.passo.core.model.WayJourney
 
 /** One recorded day as a backup carries it: its summary as it stood, and every minute of it. */
 data class BackupDay(val summary: DailySummary, val minutes: List<MinuteSteps>)
@@ -14,9 +15,9 @@ data class BackupDay(val summary: DailySummary, val minutes: List<MinuteSteps>)
 /**
  * Everything Passo knows that a new phone could not rebuild (PLANNING.md §11 Phase 7, ADR 0011):
  * the step history to the minute, each day's summary as it was frozen, the outings and their
- * plans, the profile and the settings the reader chose. Not the tracker state, which belongs to
- * one sensor in one boot session (ADR 0007), and not what only this phone decides (whether it
- * is counting, whether the first run is done).
+ * plans, the ways started (Phase 11), the profile and the settings the reader chose. Not the
+ * tracker state, which belongs to one sensor in one boot session (ADR 0007), and not what only
+ * this phone decides (whether it is counting, whether the first run is done).
  *
  * The diagnostics log travels out, so a field problem can be read from the file, and never
  * back in: it is the log of the phone that wrote it.
@@ -34,6 +35,7 @@ data class Backup(
     val plans: List<SessionPlan>,
     val sessions: List<Session>,
     val diagnostics: List<DiagnosticsEvent> = emptyList(),
+    val journeys: List<WayJourney> = emptyList(),
 ) {
     /** The first and last day with steps, null for a backup without any. */
     val firstDay: Long? get() = days.minOfOrNull { it.summary.localEpochDay }

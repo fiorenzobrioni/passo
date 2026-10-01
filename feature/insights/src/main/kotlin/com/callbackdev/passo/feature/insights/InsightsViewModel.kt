@@ -8,8 +8,12 @@ import com.callbackdev.passo.core.data.settings.SettingsRepository
 import com.callbackdev.passo.core.data.tracking.LiveSteps
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.data.tracking.byDayWithLive
+import com.callbackdev.passo.core.data.ways.WayRepository
+import com.callbackdev.passo.core.data.ways.distances
 import com.callbackdev.passo.core.domain.insights.Insights
 import com.callbackdev.passo.core.domain.settings.firstDayOfWeek
+import com.callbackdev.passo.core.domain.ways.WayProgress
+import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.UnitPreference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +36,7 @@ import javax.inject.Inject
  *
  * @property lastDays the last seven days, oldest first, for the streak's row of marks.
  * @property goalSteps today's goal: what today needs to join a streak.
+ * @property way the way under way, where the reader stands on it (Phase 11); null with none.
  */
 @Immutable
 data class InsightsUiState(
@@ -41,6 +46,7 @@ data class InsightsUiState(
     val goalSteps: Int,
     val units: UnitPreference,
     val firstDayOfWeek: DayOfWeek,
+    val way: WayProgress? = null,
 )
 
 /** One day of the streak's row: [counted] false before counting began. */
@@ -58,6 +64,7 @@ constructor(
     tracking: TrackingRepository,
     settingsRepository: SettingsRepository,
     liveSteps: LiveSteps,
+    ways: WayRepository,
 ) : ViewModel() {
     private val day: Flow<LocalDate> = flow {
         while (true) {
@@ -71,7 +78,8 @@ constructor(
         tracking.observeAllSummaries(),
         liveSteps.today,
         settingsRepository.settings,
-    ) { today, summaries, live, settings ->
+        ways.active,
+    ) { today, summaries, live, settings, journey ->
         val days = summaries.byDayWithLive(
             live?.takeIf {
                 it.localEpochDay == today.toEpochDay()
@@ -96,6 +104,7 @@ constructor(
             goalSteps = days[today.toEpochDay()]?.goalSteps ?: settings.dailyGoalSteps,
             units = settings.units,
             firstDayOfWeek = weekStart,
+            way = journey?.let { WayProgress.of(Ways.of(it.way), it, summaries.distances(), today.toEpochDay()) },
         )
     }.flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), null)

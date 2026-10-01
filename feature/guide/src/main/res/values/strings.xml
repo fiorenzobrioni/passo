@@ -86,6 +86,15 @@
     <string name="guide_insights_streak_body">A day still under way never breaks a streak: until midnight it can still reach its goal. The moment it does, it joins the streak.</string>
 
     <!-- Widgets and the tile -->
+    <string name="guide_ways_title">Ways</string>
+    <string name="guide_ways_p1">A way is a real pilgrim route (the Via degli Dei, the Via di Francesco, the Camino Francés, the Italian part of the Via Francigena) walked from wherever you are. The distance of your days carries you along it. From Insights.</string>
+    <string name="guide_ways_distance_title">Your distance, not your position</string>
+    <string name="guide_ways_distance_body">Passo never knows where you are. Your place on the way is the estimated distance of every day since you started it, the same as in History: measuring your step makes it truer, and applying a new profile to past days moves it too. A way you finished stays finished.</string>
+    <string name="guide_ways_start_title">A start in the past</string>
+    <string name="guide_ways_start_body">A way can start today, on 1 January, or on any day since your first with Passo: it places you at once, with the stamps of the stages behind you. One way at a time.</string>
+    <string name="guide_ways_stages_title">Stages and stamps</string>
+    <string name="guide_ways_stages_body">Each stage reached is a stamp in the credential, with its day, and a notification if you leave the Ways channel on. A place says its line once you reach it, or when it is the next one.</string>
+    <string name="guide_ways_credit">The ways are drawn from OpenStreetMap, © OpenStreetMap contributors (ODbL); land and water from Natural Earth.</string>
     <string name="guide_widgets_title">On the home screen</string>
     <string name="guide_widgets_two_title">Two widgets</string>
     <string name="guide_widgets_two_body">“At a glance” carries the ring and the day’s sentence; “In words” says the same day in type alone. Both fit any size, from a single cell up, and each has its own card, color and opacity.</string>

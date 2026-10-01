@@ -143,4 +143,15 @@
     <string name="spoken_ended_still">Outing ended after a long stop, at %1$s. You can resume it from the notification.</string>
     <!-- «17 of 20 minutes at your pace.» -->
     <string name="spoken_zone">%1$d of %2$s at your pace.</string>
+
+    <!-- The ways (PLANNING.md §11 Phase 11) -->
+    <string name="ways_channel_name">Ways</string>
+    <string name="ways_channel_description">A stage reached on the way you are walking, and its end.</string>
+    <string name="way_stage_title">Stage reached: %1$s</string>
+    <string name="way_stage_text">%1$s: %2$s of %3$s. Next stage, %4$s, in %5$s.</string>
+    <string name="way_finished_title">Arrived: %1$s</string>
+    <plurals name="way_finished_text">
+        <item quantity="one">%1$s: %2$s walked in %3$d day.</item>
+        <item quantity="other">%1$s: %2$s walked in %3$d days.</item>
+    </plurals>
 </resources>

@@ -10,6 +10,8 @@ import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.UserSettings
+import com.callbackdev.passo.core.model.WayJourney
+import com.callbackdev.passo.core.model.WayJourneyState
 
 /**
  * What an import writes: the minutes that change (their full new count), the summaries that
@@ -179,6 +181,34 @@ object BackupMerge {
                 }
                 closed.copy(id = 0, planId = session.planId?.let { planIds[it] })
             }
+    }
+
+    /**
+     * The file's ways this phone does not have: one started at the same millisecond is the
+     * same way. One way is under way at a time: the file's comes in under way only if this
+     * phone has none (the latest started, should the file hold more), and otherwise as put
+     * down on [fileDay], the day the file was written, where it stood then.
+     */
+    fun journeys(local: List<WayJourney>, incoming: List<WayJourney>, fileDay: Long): List<WayJourney> {
+        val known = local.mapTo(HashSet()) { it.startedAtMillis }
+        var activeTaken = local.any { it.state == WayJourneyState.ACTIVE }
+        return incoming
+            .filter { known.add(it.startedAtMillis) }
+            .sortedByDescending { it.startedAtMillis }
+            .map { journey ->
+                when {
+                    journey.state != WayJourneyState.ACTIVE -> journey
+
+                    !activeTaken -> journey.also { activeTaken = true }
+
+                    else -> journey.copy(
+                        state = WayJourneyState.LEFT,
+                        endedEpochDay = maxOf(fileDay, journey.startEpochDay),
+                    )
+                }
+            }
+            .sortedBy { it.startedAtMillis }
+            .map { it.copy(id = 0) }
     }
 
     /**

@@ -21,6 +21,9 @@ import com.callbackdev.passo.core.model.StepLengthMode
 import com.callbackdev.passo.core.model.ThemeMode
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.UserSettings
+import com.callbackdev.passo.core.model.WayId
+import com.callbackdev.passo.core.model.WayJourney
+import com.callbackdev.passo.core.model.WayJourneyState
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -56,7 +59,8 @@ sealed interface BackupRead {
  *   recorded on, which is kept as recorded even where a time-zone change put it elsewhere.
  * - Lengths are metres, weights kilograms, energy kilocalories, whatever units the app shows.
  * - Enum values are their names; a name this version does not know reads as the default, or
- *   leaves out the plan or outing it belongs to.
+ *   leaves out the plan, outing or way it belongs to.
+ * - `ways` (added with the Ways, 1.1.0) lists the ways started: a file without it has none.
  *
  * Reading is lenient where a value can be dropped without lying (an unknown setting, a minute
  * with a negative count) and strict where it cannot (the format, the version, broken JSON).
@@ -187,6 +191,16 @@ private fun Backup.toFile() = BackupFile(
         )
     },
     diagnostics = diagnostics.map { DiagnosticDto(it.wallMillis, it.type.name, it.detail) },
+    ways = journeys.sortedBy { it.startedAtMillis }.map { journey ->
+        WayDto(
+            way = journey.way.name,
+            startDate = LocalDate.ofEpochDay(journey.startEpochDay).toString(),
+            startedAtMillis = journey.startedAtMillis,
+            state = journey.state.name,
+            endedDate = journey.endedEpochDay?.let { LocalDate.ofEpochDay(it).toString() },
+            toldMeters = journey.toldMeters,
+        )
+    },
 )
 
 private fun BackupFile.toBackup(): Backup {
@@ -232,6 +246,24 @@ private fun BackupFile.toBackup(): Backup {
         diagnostics = diagnostics.mapNotNull { row ->
             row.type.toEnumOrNull<DiagnosticsType>()?.let { DiagnosticsEvent(row.atMillis, it, row.detail) }
         },
+        journeys = ways.mapNotNull { it.toJourney() },
+    )
+}
+
+private fun WayDto.toJourney(): WayJourney? {
+    val id = way.toEnumOrNull<WayId>() ?: return null
+    val start = startDate.toEpochDayOrNull() ?: return null
+    val state = state.toEnumOrNull<WayJourneyState>() ?: WayJourneyState.LEFT
+    val ended = endedDate?.toEpochDayOrNull()
+    return WayJourney(
+        id = 0,
+        way = id,
+        startEpochDay = start,
+        startedAtMillis = startedAtMillis,
+        // A way over without its last day would keep moving: it stops where it started.
+        state = state,
+        endedEpochDay = if (state == WayJourneyState.ACTIVE) null else ended ?: start,
+        toldMeters = toldMeters.coerceAtLeast(0),
     )
 }
 

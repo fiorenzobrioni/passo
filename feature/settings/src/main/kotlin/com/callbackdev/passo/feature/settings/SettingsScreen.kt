@@ -509,6 +509,14 @@ private fun SettingsList(
                     stringResource(R.string.settings_credit_sources),
                     stringResource(R.string.settings_credit_sources_note),
                 )
+                GroupDivider()
+                // The ways' lines are ODbL data: the licence asks for this credit (Phase 11).
+                ValueRow(
+                    label = stringResource(R.string.settings_credit_maps),
+                    value = stringResource(R.string.settings_credit_maps_note),
+                    trailing = true,
+                    onClick = { openUrl(context, "https://www.openstreetmap.org/copyright") },
+                )
             }
         }
     }

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The Ways page (PLANNING.md §11 Phase 11) -->
+    <string name="ways_title">Ways</string>
+    <string name="ways_back">Back</string>
+    <string name="ways_intro">Walk a pilgrim way from wherever you are: the distance you walk each day carries you along it, stage by stage. No location, only your steps.</string>
+    <string name="ways_group_ways">The ways</string>
+    <string name="ways_group_yours">Your ways</string>
+    <string name="ways_under_way">Under way</string>
+    <string name="ways_row_facts">%1$s · %2$s</string>
+    <string name="ways_row_pace">%1$s at your pace</string>
+    <string name="ways_row_walked">Walked from %1$s to %2$s</string>
+    <string name="ways_row_left">Left on %1$s, %2$s</string>
+    <string name="ways_footer">Distances are estimates, from your steps and your step length: measuring your step makes them truer. A day counts as Passo recorded it, so History, Insights and your way always agree.</string>
+    <string name="ways_credit">Ways drawn from OpenStreetMap, © OpenStreetMap contributors (ODbL). Land and water: Natural Earth.</string>
+
+    <!-- One way's page -->
+    <string name="way_start">Start this way</string>
+    <string name="way_busy">You are walking the %1$s: one way at a time. Leave it to start this one.</string>
+    <string name="way_pace">At your usual pace, %1$s.</string>
+    <string name="way_no_pace">How long it would take shows after a week of walking with Passo.</string>
+    <string name="way_since">Since %1$s</string>
+    <plurals name="way_day">
+        <item quantity="one">day %1$d</item>
+        <item quantity="other">day %1$d</item>
+    </plurals>
+    <string name="way_forecast">At your usual pace you would arrive around %1$s.</string>
+    <string name="way_forecast_caption">An estimate, from your last four weeks.</string>
+    <plurals name="way_finished_detail">
+        <item quantity="one">%1$s in %2$d day, from %3$s to %4$s.</item>
+        <item quantity="other">%1$s in %2$d days, from %3$s to %4$s.</item>
+    </plurals>
+    <string name="way_left_detail">%1$s, from %2$s to %3$s.</string>
+    <string name="way_group_credential">Credential</string>
+    <string name="way_credential_caption">A stamp for each stage reached, with its day.</string>
+    <string name="way_group_stages">Stages</string>
+    <string name="way_stop_mark">%1$s from the start</string>
+    <string name="way_stop_reached">Reached on %1$s</string>
+    <string name="way_stop_ahead">In %1$s</string>
+    <string name="way_stop_start">The start</string>
+    <string name="way_stop_place">On the way</string>
+    <string name="way_stamp_reached">%1$s, reached on %2$s</string>
+    <string name="way_stamp_ahead">%1$s, still ahead</string>
+    <string name="way_leave">Leave this way</string>
+    <string name="way_leave_title">Leave this way?</string>
+    <string name="way_leave_body">It stays in Your ways, with its stamps, stopped where you are now. You can then start another way, or this one again from its beginning.</string>
+    <string name="way_leave_confirm">Leave</string>
+    <string name="way_cancel">Cancel</string>
+
+    <!-- Starting a way -->
+    <string name="way_start_title">From which day?</string>
+    <string name="way_start_body">Your days from then on carry you along the way. A day in the past places you at once.</string>
+    <string name="way_start_today">From today</string>
+    <string name="way_start_year">From 1 January</string>
+    <string name="way_start_first">From your first day with Passo</string>
+    <string name="way_start_chosen">From a day you choose</string>
+    <string name="way_start_chosen_day">From %1$s</string>
+    <string name="way_start_at_start">You set out from %1$s.</string>
+    <string name="way_start_past">You would already be past %1$s, %2$s along.</string>
+    <string name="way_start_arrived">You would already be in %1$s, at its end.</string>
+    <string name="way_start_confirm">Start</string>
+    <string name="way_start_pick">Choose</string>
+</resources>

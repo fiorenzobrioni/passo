@@ -106,4 +106,9 @@
     <string name="insights_total_goal_days">Giorni all’obiettivo</string>
     <string name="insights_total_goal_days_meaning">Il %1$s dei giorni contati</string>
     <string name="insights_metric_spoken">%1$s: %2$s. %3$s</string>
+
+    <!-- Il cammino in corso (PLANNING.md §11 Fase 11) -->
+    <string name="insights_group_way">Il tuo cammino</string>
+    <string name="insights_ways_door_title">Percorri un cammino</string>
+    <string name="insights_ways_door_body">Quattro cammini, dalla Via degli Dei al Cammino Francese, percorsi con i passi che fai comunque.</string>
 </resources>

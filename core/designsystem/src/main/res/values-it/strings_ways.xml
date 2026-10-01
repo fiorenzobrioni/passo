@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- I cammini (PLANNING.md §11 Fase 11): quello che dicono sia la pagina dei Cammini sia Insights. -->
+<resources>
+    <string name="way_headline_start">Partenza: %1$s</string>
+    <string name="way_headline_past">Oltre %1$s</string>
+    <string name="way_headline_arrived">Arrivo a %1$s</string>
+    <string name="way_headline_left">Lasciato oltre %1$s</string>
+    <string name="way_to_end">Mancano %1$s a %2$s</string>
+    <string name="way_next_stage">Prossima tappa: %1$s, tra %2$s</string>
+    <string name="way_progress">%1$s su %2$s</string>
+    <plurals name="way_stages">
+        <item quantity="one">%1$d tappa</item>
+        <item quantity="many">%1$d tappe</item>
+        <item quantity="other">%1$d tappe</item>
+    </plurals>
+    <plurals name="way_duration_days">
+        <item quantity="one">circa %1$d giorno</item>
+        <item quantity="many">circa %1$d giorni</item>
+        <item quantity="other">circa %1$d giorni</item>
+    </plurals>
+    <plurals name="way_duration_weeks">
+        <item quantity="one">circa %1$d settimana</item>
+        <item quantity="many">circa %1$d settimane</item>
+        <item quantity="other">circa %1$d settimane</item>
+    </plurals>
+    <plurals name="way_duration_months">
+        <item quantity="one">circa %1$d mese</item>
+        <item quantity="many">circa %1$d mesi</item>
+        <item quantity="other">circa %1$d mesi</item>
+    </plurals>
+    <plurals name="way_duration_years">
+        <item quantity="one">circa %1$d anno</item>
+        <item quantity="many">circa %1$d anni</item>
+        <item quantity="other">circa %1$d anni</item>
+    </plurals>
+    <string name="way_map_spoken">Mappa: %1$s, %2$s.</string>
+    <string name="way_map_spoken_walked">Mappa: %1$s. %2$s percorsi su %3$s, oltre %4$s.</string>
+</resources>

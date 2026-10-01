@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- La pagina dei Cammini (PLANNING.md §11 Fase 11) -->
+    <string name="ways_title">Cammini</string>
+    <string name="ways_back">Indietro</string>
+    <string name="ways_intro">Percorri un cammino dei pellegrini da dove sei: la distanza che cammini ogni giorno ti porta avanti, tappa dopo tappa. Nessuna posizione, solo i tuoi passi.</string>
+    <string name="ways_group_ways">I cammini</string>
+    <string name="ways_group_yours">I tuoi cammini</string>
+    <string name="ways_under_way">In corso</string>
+    <string name="ways_row_facts">%1$s · %2$s</string>
+    <string name="ways_row_pace">%1$s al tuo ritmo</string>
+    <string name="ways_row_walked">Percorso dal %1$s al %2$s</string>
+    <string name="ways_row_left">Lasciato il %1$s, %2$s</string>
+    <string name="ways_footer">Le distanze sono stime, dai tuoi passi e dalla tua falcata: misurare il passo le rende più vere. Un giorno conta come Passo l’ha registrato, così Cronologia, Insights e il tuo cammino sono sempre d’accordo.</string>
+    <string name="ways_credit">Cammini tracciati da OpenStreetMap, © OpenStreetMap contributors (ODbL). Terre e acque: Natural Earth.</string>
+
+    <!-- La pagina di un cammino -->
+    <string name="way_start">Inizia questo cammino</string>
+    <string name="way_busy">Stai percorrendo %1$s: un cammino alla volta. Lascialo per iniziare questo.</string>
+    <string name="way_pace">Al tuo ritmo abituale, %1$s.</string>
+    <string name="way_no_pace">Quanto ci vorrebbe lo saprai dopo una settimana di cammino con Passo.</string>
+    <string name="way_since">Dal %1$s</string>
+    <plurals name="way_day">
+        <item quantity="one">giorno %1$d</item>
+        <item quantity="many">giorno %1$d</item>
+        <item quantity="other">giorno %1$d</item>
+    </plurals>
+    <string name="way_forecast">Al tuo ritmo abituale arriveresti verso il %1$s.</string>
+    <string name="way_forecast_caption">Una stima, dalle tue ultime quattro settimane.</string>
+    <plurals name="way_finished_detail">
+        <item quantity="one">%1$s in %2$d giorno, dal %3$s al %4$s.</item>
+        <item quantity="many">%1$s in %2$d giorni, dal %3$s al %4$s.</item>
+        <item quantity="other">%1$s in %2$d giorni, dal %3$s al %4$s.</item>
+    </plurals>
+    <string name="way_left_detail">%1$s, dal %2$s al %3$s.</string>
+    <string name="way_group_credential">Credenziale</string>
+    <string name="way_credential_caption">Un timbro per ogni tappa raggiunta, con il suo giorno.</string>
+    <string name="way_group_stages">Tappe</string>
+    <string name="way_stop_mark">%1$s dalla partenza</string>
+    <string name="way_stop_reached">Raggiunta il %1$s</string>
+    <string name="way_stop_ahead">Tra %1$s</string>
+    <string name="way_stop_start">La partenza</string>
+    <string name="way_stop_place">Lungo il cammino</string>
+    <string name="way_stamp_reached">%1$s, raggiunta il %2$s</string>
+    <string name="way_stamp_ahead">%1$s, ancora davanti</string>
+    <string name="way_leave">Lascia questo cammino</string>
+    <string name="way_leave_title">Lasciare questo cammino?</string>
+    <string name="way_leave_body">Resta nei tuoi cammini, con i suoi timbri, fermo dove sei ora. Potrai poi iniziarne un altro, o ricominciare questo dalla partenza.</string>
+    <string name="way_leave_confirm">Lascia</string>
+    <string name="way_cancel">Annulla</string>
+
+    <!-- Iniziare un cammino -->
+    <string name="way_start_title">Da quale giorno?</string>
+    <string name="way_start_body">I tuoi giorni da allora ti portano avanti sul cammino. Un giorno nel passato ti mette subito in strada.</string>
+    <string name="way_start_today">Da oggi</string>
+    <string name="way_start_year">Dal 1° gennaio</string>
+    <string name="way_start_first">Dal tuo primo giorno con Passo</string>
+    <string name="way_start_chosen">Da un giorno a tua scelta</string>
+    <string name="way_start_chosen_day">Dal %1$s</string>
+    <string name="way_start_at_start">Parti da %1$s.</string>
+    <string name="way_start_past">Saresti già oltre %1$s, a %2$s dalla partenza.</string>
+    <string name="way_start_arrived">Saresti già a %1$s, alla fine del cammino.</string>
+    <string name="way_start_confirm">Inizia</string>
+    <string name="way_start_pick">Scegli</string>
+</resources>

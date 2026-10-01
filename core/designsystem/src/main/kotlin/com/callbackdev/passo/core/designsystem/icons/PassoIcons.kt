@@ -502,6 +502,25 @@ object PassoIcons {
         }
     }
 
+    /** A folded map with a way across it: the Ways (Phase 11). */
+    val Way: ImageVector by lazy {
+        icon("way") {
+            moveTo(3f, 6f)
+            lineTo(9f, 4f)
+            lineTo(15f, 6f)
+            lineTo(21f, 4f)
+            lineTo(21f, 18f)
+            lineTo(15f, 20f)
+            lineTo(9f, 18f)
+            lineTo(3f, 20f)
+            close()
+            moveTo(9f, 4f)
+            lineTo(9f, 18f)
+            moveTo(15f, 6f)
+            lineTo(15f, 20f)
+        }
+    }
+
     /** An arrow rising out of a tray: a file written for the reader to keep (the export). */
     val Export: ImageVector by lazy {
         icon("export") {
