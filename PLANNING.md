@@ -52,6 +52,8 @@ passo/
 │   ├── settings/           # Settings, your data (export, import), the step calibration
 │   ├── onboarding/
 │   ├── sessions/           # the Outings page and the outing editor (Phase 10)
+│   ├── ways/               # the Ways (Phase 11, planned)
+│   ├── year/               # Your year on foot (Phase 12, planned)
 │   └── guide/              # the guide, in Chiaro's shape
 ├── widget/                 # Glance widget(s), receiver, update coordinator
 ├── docs/                   # ADRs, formulas, battery test notes
@@ -779,6 +781,133 @@ Added to v1.0 at the owner's request (25 Sep 2026), after Phase 6 and before Pha
 | The rest of a day already met | Cannot start (under 100 steps left) |
 | A plan edited or deleted later | Past outings keep the goal they were walked with |
 
+### After v1.0
+
+Three phases asked for by the owner after the v1.0.0 release (1 Oct 2026). They are written
+now so that the order can be chosen; the owner decides which comes first, and each becomes a
+minor release (`1.x.0`). None needs a new permission or a new dependency, and none touches the
+everyday tracking path. What was weighed and dropped is in §15 (route maps with GPS, the peak
+cadence, the weekly rhythm).
+
+### Phase 11 — The Ways («I Cammini»)
+
+VISION.md's "virtual journeys", in the shape of the pilgrim ways: the reader picks one of four
+ways and the day to count from, and the estimated distance walked since then moves a point
+along it. Each stage reached is a stamp in a credential, with the day it was reached. **A map
+with no location:** the way is drawn, and the reader's place on it is their distance, never
+where they are. Everything is computed on read from the days already stored; nothing new runs
+while the screen is off. Name: «Cammini» / "Ways". The ADR is written at the phase's start.
+
+**The four ways** (lengths and stage counts are approximate here; the official stage tables
+decide them in the phase). A spread of lengths, so that one is finished in weeks and one takes
+a year, at an ordinary 5 km a day:
+
+| Way | From, to | About | At 5 km a day |
+|---|---|---|---|
+| Via degli Dei | Bologna, Florence | 130 km, 6 stages | 4 weeks |
+| Via di Francesco | La Verna, Assisi, Rome | 500 km | 3 to 4 months |
+| Camino Francés | Saint-Jean-Pied-de-Port, Santiago de Compostela | 780 km, about 33 stages | 5 months |
+| Via Francigena | Canterbury, Rome | 2,000 km | a year and more |
+
+- [ ] The ways' data, written by a script (`tools/build_ways.py`, re-run, never hand-edited, like the launcher icon): for each way its stages (a key, the name's resource, latitude and longitude, the official distance from the start), the line drawn, simplified to a few hundred points, and the outline of the countries behind it (Natural Earth, public domain, simplified). Output: Kotlin in `:core:domain/ways`. The source of the line is an open question (§15).
+- [ ] Domain (`:core:domain/ways`, pure, tested): `WayProgress` (from the day totals since the start: the distance walked, the stage reached, the place between two stages, the day each stage was reached, the day it was finished), `WayProjection` (equirectangular around the way's middle latitude, fitted to a box), `WayForecast` (the arrival at the reader's average of the last 28 days, said as an estimate, only with 7 or more days walked), `WayAnnouncement` (the stage just reached, told once).
+- [ ] The distance is the days' own: each finished day's frozen `distanceMeters`, today's live one. A way never keeps a total of its own, so it cannot disagree with History; "Apply profile to past data" and an import move it, on read, and the guide says so.
+- [ ] Storage: a `way_journey` table (id, way key, start day, state `ACTIVE` / `FINISHED` / `LEFT`, finish day, last stage told), by an auto-migration to the next schema version, with its migration test. The stamps' days are computed, not stored. The backup carries the table (a new backup format version; an older file imports as before).
+- [ ] The service: a stage reached rides on the step samples, as the goal reached does (today's distance crossing the next stage's mark); one notification, the furthest stage when a batch crosses several, on a new `ways` channel, on for a way the reader started, and theirs to silence. Never a timer.
+- [ ] `:feature:ways`, the Ways page: the four, with their length, stages and the time they would take at the reader's pace. Starting one: from today, from 1 January, from the first day Passo counted, or a chosen day. A start in the past places the reader at once (the "you would already be in Siena" moment), with the stamps of the stages behind and no notification for them.
+- [ ] The way under way: the map (Canvas: the outline, the whole line faint, the part walked in the accent, the reader's point, the stages as dots, a stage's name on touch), its sentence («Past Siena: 231 km to Rome»), the forecast, the stages with their days (the map's accessible equivalent), the credential (one stamp per stage reached, drawn in code: the place, the day, a tilt fixed for each stage; a generic stamp, never an official one). Leaving a way asks first; a finished or left way keeps its credential in "Your ways".
+- [ ] Insights: a card for the way under way (the small map and the sentence); with none, the door to the Ways page.
+- [ ] The places: every stage's name in English and Italian (Florence / Firenze); about ten notable places for each way, with one checked sentence each in both languages, its source noted in the script.
+- [ ] The guide: a chapter (a way moves with the estimated distance; measuring the step makes it truer; what moves it back).
+- [ ] Strings in English and Italian; UI tests with `assertAccessible()` and `walkPage()`; README screenshots (the map, the credential), CHANGELOG.
+- [ ] On a device (owner): a backdated start, a stage notification on a walk, the four ways drawn in both themes and on an open foldable.
+
+**Acceptance:** starting a way from 1 January places the reader at once with every stamp
+behind; a stage reached on a walk is told once, during the walk; History, Insights and the way
+agree on the distance for any period.
+
+**Edge cases** (`WayProgressTest`, `WayAnnouncementTest`):
+
+| Case | Expected behavior |
+|---|---|
+| A start in the past | Placed at once; the stamps behind carry their days; no notification for them |
+| A start before the first day counted | Allowed; the days without data add nothing |
+| A day without steps | The point does not move |
+| A batch, or a backdated start, crossing several stages | One notification, the furthest stage |
+| The last stage reached | Finished that day; the distance beyond is not carried to another way |
+| The profile applied to past data, an import | Recomputed on read; stamps may change day |
+| The way left | Kept as left with its stamps; another can start |
+| A change of time zone | Days are local days, as everywhere else |
+
+### Phase 12 — Your year on foot («Il tuo anno a piedi»)
+
+A year told as a story: full-screen pages, one thing each, made from the days already stored.
+Private: computed on the phone, shared only if the reader shares a page, through an app they
+pick. Name: «Il tuo anno a piedi» / "Your year on foot".
+
+- [ ] **When.** By hand at any time: Insights has a "Your year" row for the year so far and for every past year with 30 or more days counted, and History's year view opens its own year. In season, from 1 December to 31 January, it is the first card of Insights, and Today shows one card, once, that the reader closes. No notification.
+- [ ] Domain (`:core:domain/year`, pure, tested): `YearInReview`, the pages and what each says, from the day summaries, the minutes (for the hour), the outings and the ways. A page with nothing to say is left out (no outings, no outings page). A year counted in part says so («Since 1 October») and compares averages per day counted, never totals.
+- [ ] The pages, in order:
+  1. The year in steps and in distance (estimated), and that distance as a way (the Ways' data: «more than the Camino Francés», or «half of the Via Francigena»).
+  2. The months: twelve bars (`BarChart`), the best one named.
+  3. The best day: its date and weekday, its steps, and the outing or the walk that made it.
+  4. The rhythm: the weekday and the hour the reader walks most (from the minutes). This is where the weekly rhythm lives, once a year (§15).
+  5. The goal: the days it was met, the longest streak of the year, the calendar (`CalendarHeatmap`).
+  6. The outings: how many, the time in motion, the longest; the intervals, once Phase 13 exists.
+  7. The way: the distance walked on it this year, the stamps earned.
+  8. Against the year before, when both have 30 days or more counted.
+  9. The close: one sentence chosen from what happened (ADR 0010's rule: variety from the facts, never a phrase at random).
+- [ ] `:feature:year`: a full-screen pager (Compose foundation, no new dependency): touch to go on, swipe back, the progress marks at the top, a fade under reduced motion. TalkBack reads each page as one sentence; at twice the text size a page scrolls.
+- [ ] Share or save a page: drawn into an image (Compose's `GraphicsLayer` to a bitmap, 1080 by 1920, the reader's theme and palette, Passo's name small at the foot), handed to the share sheet through a `FileProvider` in the cache (androidx.core, already in), or saved through the Storage Access Framework. The image holds no name, no place, and nothing the page does not show.
+- [ ] Strings in English and Italian (plurals for every count); UI tests (`assertAccessible()`, `walkPage()`); a README screenshot; CHANGELOG.
+- [ ] On a device (owner): the share sheet with two or three apps, the image in both themes.
+
+**Acceptance:** a year with data opens by hand from Insights and from History; every number on
+a page matches History for the same period; a page shared as an image reads alone.
+
+**Edge cases** (`YearInReviewTest`): a year counted in part; a leap year; ties for the best day
+or month (the earlier one); a year with no outings and no way (pages left out); fewer than 30
+days counted (not offered); the year before with too few days (no comparison); the current year
+before December (offered by hand as «so far»).
+
+### Phase 13 — Interval walk («Camminata a intervalli»)
+
+The Japanese Interval Walking Training (Nemoto et al., *Mayo Clinic Proceedings*, 2007):
+sets of 3 minutes of slow walking followed by 3 minutes of fast walking, five sets or more, as an
+outing. **In minutes** (owner's request), faithful to the protocol. The live part is the hard
+one: a change of interval must be felt on time with the phone in a pocket and the screen off,
+and Passo has no timer then. The analysis and the options are in
+`docs/adr/0013-interval-walks.md` (**proposed**: the owner decides the sensor policy before any
+code is written, since it amends ADR 0009 and §9.7).
+
+- [ ] The plan: a new goal kind, intervals: slow minutes and fast minutes (1 to 5, 3 by default), sets (3 to 10, 5 by default), the fast pace (brisk 100 by default, vigorous 130, running 140). It starts slow, as the protocol does. The goal is the end of the last set. The 25, 50 and 75% signals are off for this kind: the changes are the signals. A fourth preset, «Camminata giapponese» / "Japanese walking", 5 × (3 + 3).
+- [ ] The clock: the minutes are minutes in motion, as every outing's (ADR 0013, to be confirmed): a stop at a traffic light does not eat a fast interval.
+- [ ] Domain (`:core:domain/sessions`): `IntervalSchedule` (where each change falls), the tracker's splits (each interval's steps, time in motion and time at its pace), the change found inside a batch from the steps' own timestamps; several changes in one batch tell the latest only.
+- [ ] The signals: two new vibrations, "faster" and "slower", unlike the five there are now (1, 2, 3 short; the goal's long one; the stillness's two long ones), chosen with the owner in the editor's "Try them". The voice, if the outing speaks: «Veloce, 3 minuti», «Lento», «Ultima serie veloce», and at the goal how many fast intervals were at pace.
+- [ ] The sensor during an interval outing: the policy ADR 0013 settles. With the screen on, the ticker the screen already allows (§9.4) shows the countdown to the next change.
+- [ ] The notification: on Android 16 the `ProgressStyle` bar in segments, slow and fast in two colours, with a point at each change, and the title saying the interval («Veloce · 1:40»); below, the expanded text says the same.
+- [ ] The result: each fast interval's cadence against its pace, and the sentence («4 fast intervals of 5 at pace»); the card, History and Today's list show it. Storage: a `session_interval` table (outing, index, slow or fast, steps, time in motion, time at pace), by an auto-migration; the backup carries it.
+- [ ] A phone without a wake-up step counter: the editor says that the changes come on time only with the screen on (ADR 0013).
+- [ ] The diagnostics log: one row per change told, with how late it was against the step that crossed it, so the field test measures the delay instead of guessing it.
+- [ ] Strings in English and Italian; tests (`IntervalScheduleTest`, the tracker's, the editor's UI); CHANGELOG; the guide's outings chapter.
+- [ ] On a device (owner): a 30-minute interval outing with the screen off: each change felt, its delay read from the log, the battery check of §9 (numbers in `docs/battery/`).
+
+**Acceptance:** with the screen off and the phone in a pocket, every change is felt within the
+delay ADR 0013 promises, on the owner's phone; the battery cost of a 30-minute interval outing
+is measured and within the ADR's estimate.
+
+**Edge cases** (`IntervalScheduleTest`, `SessionTrackerTest`):
+
+| Case | Expected behavior |
+|---|---|
+| A stop during a fast interval | The interval waits: minutes in motion |
+| One batch crossing two changes (a long stillness of the reports) | Only the latest is told; both splits are right |
+| Paused, resumed | The interval goes on where it was |
+| 15 min without a step | Ends as every outing, with "Resume" |
+| The last change | Is the goal: the goal's long vibration, not "slower" |
+| A fast interval below its pace | Counted, said as below pace, never hidden |
+| The screen turned on mid-interval | The countdown appears at the right value |
+
 ---
 
 ## 12. Testing strategy
@@ -961,6 +1090,16 @@ Include:
 - **v1.0.0** (owner, 1 Oct 2026): `passo.versionName` is `1.0.0` (versionCode 10000). The owner ran the Phase 1 field checks on their own phone over several days, with nightly shutdowns, before the tag. The release notes are in **English only**, a deviation from Phase 8's "English and Italian": the family writes its release notes in English (Chiaro's CHANGELOG, Saldo's notes from 2.3.0), and the app itself speaks both. The `[Unreleased]` record, written phase by phase, moved to `docs/CHANGELOG-1.0.0.md` (as Chiaro did for its 1.0.0), so the release page reads as a short list of what is in the app.
 - **The release page is the CHANGELOG section alone** (owner, 1 Oct 2026, after v1.0.0): `release.yml` no longer appends GitHub's generated list of pull requests, as Saldo's never did, so the three apps' release pages read the same. A tag without its CHANGELOG section now fails the release instead of publishing an empty page.
 
+- **Route maps with GPS stay out** (owner, 1 Oct 2026, after weighing it): recording an outing's route, drawing it and exporting it as GPX would need `ACCESS_FINE_LOCATION` in the manifest, even if off by default. That turns "Passo cannot" into "Passo promises not to", against principles 1 and 3, the non-goals and the build's own gate; the database is in Android's backup allowlist, so routes would travel there; GPS is the most expensive sensor, far beyond ADR 0009's exception; and OpenTracks already does it, offline and without `INTERNET`. The Ways (Phase 11) give the map without the location.
+- **After v1.0: three phases, in the owner's order** (owner, 1 Oct 2026): the Ways (Phase 11, four ways made well), Your year on foot (Phase 12, reachable by hand at any time, not only in December), the interval walk (Phase 13, in minutes, faithful to the protocol; its sensor policy in `docs/adr/0013-interval-walks.md`, proposed).
+- **The peak cadence and the weekly rhythm dropped as features** (owner, 1 Oct 2026: noise): the first is a number that needs a lesson before it means anything, against "one sentence before any number"; the second is a chart for the curious, opened once. The weekday and hour the reader walks most survive as one page of Your year, once a year, where they are a story and not a screen to keep.
+
 ### Open
+
+- **The Ways (Phase 11): the line's source.** (a) The stage towns and a few places between them, coordinates being facts, over Natural Earth's outlines (public domain): no licence to carry, a line that reads as a schematic at a short way's scale. (b) The ways' OpenStreetMap relations, simplified: the true line, under ODbL (attribution in About and the guide, the derived file published under ODbL in the repo, beside the GPL code). Recommended: (b) if the owner accepts the attribution, (a) otherwise.
+- **The Ways: which four.** Proposed: Via degli Dei, Via di Francesco, Camino Francés, Via Francigena from Canterbury. Alternatives: the Francigena's Italian part only (Great St Bernard Pass to Rome, about 1,000 km), the Cammino di San Benedetto (Norcia to Montecassino) for the middle one, the Kumano Kodo for one outside Europe.
+- **The Ways on a widget?** Not in Phase 11; a natural line for «In words» later.
+- **Your year: the Today card in December** (one card, once, closed by the reader), or Insights alone.
+- **The interval walk (ADR 0013, proposed):** the sensor policy (A, adaptive latency, proposed; B if the field test asks for it), the clock (minutes in motion, proposed, or the wall clock), a phone without a wake-up counter (say it in the editor, proposed, or hide the kind), the fast pace's default (brisk 100, proposed: the protocol's population is middle-aged and older, and the pace is a proxy for its "70% of peak aerobic capacity", which the editor says).
 
 - Should a 7-day mini chart be offered in the 4x2 widget as an alternative to today's hourly bars (widget configuration)? Now a natural option on «At a glance»'s settings screen, once Phase 5 has the week.

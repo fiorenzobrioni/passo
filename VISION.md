@@ -158,10 +158,17 @@ Added to v1.0 at the owner's request (Phase 10, `docs/adr/0009-sessions.md`). An
 - Wear OS in v1.
 - Ads, analytics, crash-reporting SDKs that need network access.
 
+### Planned after 1.0
+
+Asked for by the owner after the v1.0.0 release (1 Oct 2026); the phases are in PLANNING §11, in an order the owner chooses.
+
+- **The Ways** («I Cammini», Phase 11): the "virtual journeys" idea, as four pilgrim ways (Via degli Dei, Via di Francesco, Camino Francés, Via Francigena). The estimated distance walked since a chosen day moves a point along the way, drawn without any location; each stage reached is a stamp in a credential.
+- **Your year on foot** («Il tuo anno a piedi», Phase 12): a year told in full-screen pages, from the days already stored, reachable by hand at any time and offered in December; a page can be shared as an image, through an app the reader picks.
+- **The interval walk** («Camminata a intervalli», Phase 13): the Japanese Interval Walking Training as an outing, in minutes, with each change of interval felt in the pocket (`docs/adr/0013-interval-walks.md`, proposed).
+
 ### Possible post-1.0 ideas (not committed)
 
 - Optional, opt-in, write-only export to Health Connect. It would never be required and never used as a data source.
-- "Virtual journeys": lifetime distance compared with well-known routes, for example Milan to Rome.
 - Achievements and badges based on step milestones.
 - Manual corrections for a day's total.
 - A Wear OS tile.
