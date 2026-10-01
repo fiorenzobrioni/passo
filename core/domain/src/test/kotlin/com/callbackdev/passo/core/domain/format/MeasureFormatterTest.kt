@@ -30,6 +30,15 @@ class MeasureFormatterTest {
     }
 
     @Test
+    fun `a place ahead is told in tens of metres or yards, then as a distance`() {
+        assertThat(english.aheadDistance(604.0)).isEqualTo(Measure("600", MeasureUnit.METER))
+        assertThat(english.aheadDistance(2.0)).isEqualTo(Measure("10", MeasureUnit.METER))
+        assertThat(english.aheadDistance(1_250.0)).isEqualTo(Measure("1.25", MeasureUnit.KILOMETER))
+        assertThat(imperial.aheadDistance(500.0)).isEqualTo(Measure("550", MeasureUnit.YARD))
+        assertThat(imperial.aheadDistance(1_609.344)).isEqualTo(Measure("1.00", MeasureUnit.MILE))
+    }
+
+    @Test
     fun `a distance is rounded down, never shown as covered before it is`() {
         assertThat(english.distance(4_999.0)).isEqualTo(Measure("4.99", MeasureUnit.KILOMETER))
     }

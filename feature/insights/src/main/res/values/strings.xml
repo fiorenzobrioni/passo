@@ -101,4 +101,9 @@
     <string name="insights_total_goal_days">Days at your goal</string>
     <string name="insights_total_goal_days_meaning">%1$s of the days counted</string>
     <string name="insights_metric_spoken">%1$s: %2$s. %3$s</string>
+
+    <!-- The way under way (PLANNING.md §11 Phase 11) -->
+    <string name="insights_group_way">Your way</string>
+    <string name="insights_ways_door_title">Walk a way or a city</string>
+    <string name="insights_ways_door_body">Four pilgrim ways, from the Via degli Dei to the Camino de Santiago, and walks through Milan and London, with the steps you take anyway.</string>
 </resources>

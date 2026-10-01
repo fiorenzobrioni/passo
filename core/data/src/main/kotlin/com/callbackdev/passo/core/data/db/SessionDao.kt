@@ -69,6 +69,13 @@ abstract class SessionDao {
     @Query("SELECT COUNT(*) FROM session")
     abstract fun observeSessionCount(): Flow<Int>
 
+    /** The outings walked on city walks, oldest first: what moves a walk (Phase 11). */
+    @Query("SELECT * FROM session WHERE walk IS NOT NULL ORDER BY startedAtMillis")
+    abstract fun observeWalkSessions(): Flow<List<SessionEntity>>
+
+    @Query("SELECT * FROM session WHERE walk IS NOT NULL ORDER BY startedAtMillis")
+    abstract suspend fun walkSessions(): List<SessionEntity>
+
     /**
      * The outings and plans an import brings (`BackupMerge`), in one transaction: the plans
      * first, after the phone's own, then the outings with their plan ids made this phone's.

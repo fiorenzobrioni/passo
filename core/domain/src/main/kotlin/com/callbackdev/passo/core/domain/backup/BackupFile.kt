@@ -21,6 +21,7 @@ internal data class BackupFile(
     val plans: List<PlanDto> = emptyList(),
     val outings: List<OutingDto> = emptyList(),
     val diagnostics: List<DiagnosticDto> = emptyList(),
+    val ways: List<WayDto> = emptyList(),
 )
 
 @Serializable
@@ -52,6 +53,7 @@ internal data class SettingsDto(
     val minWalkMinutes: Int? = null,
     val typicalDayLine: Boolean? = null,
     val startOutingButton: Boolean? = null,
+    val walkVoice: String? = null,
 )
 
 /** One day: its summary as it stood, and its minutes as `[epochMinute, steps]`. */
@@ -108,7 +110,20 @@ internal data class OutingDto(
     val pausedAtMillis: Long? = null,
     val reachedAtMillis: Long? = null,
     val toldMilestones: List<Int> = emptyList(),
+    val walk: String? = null,
+    val walkFromMeters: Int = 0,
 )
 
 @Serializable
 internal data class DiagnosticDto(val atMillis: Long = 0, val type: String = "", val detail: String = "")
+
+/** A way started (Phase 11): which, from which day, where it stands. An added field: no new version. */
+@Serializable
+internal data class WayDto(
+    val way: String = "",
+    val startDate: String = "",
+    val startedAtMillis: Long = 0,
+    val state: String = "",
+    val endedDate: String? = null,
+    val toldMeters: Int = 0,
+)

@@ -25,6 +25,7 @@ import com.callbackdev.passo.core.tracking.SessionControl
 import com.callbackdev.passo.core.tracking.StepTracking
 import com.callbackdev.passo.core.tracking.TrackingControl
 import com.callbackdev.passo.core.tracking.TrackingReadiness
+import com.callbackdev.passo.core.tracking.WayIntents
 import com.callbackdev.passo.shell.PassoRoot
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
@@ -36,7 +37,8 @@ import javax.inject.Inject
  * pages to [PassoRoot], and on every return (re)starts tracking unless the reader paused it:
  * opening the app is the documented way back after a force stop (PLANNING.md §4.2). A paused
  * widget's tap lands here too, asking to resume ([TrackingControl.EXTRA_RESUME]), and a launcher
- * shortcut, asking to start an outing ([SessionControl.EXTRA_START_PLAN]).
+ * shortcut, asking to start an outing ([SessionControl.EXTRA_START_PLAN]), and a stage's
+ * notification, asking for the Ways ([WayIntents.EXTRA_OPEN_WAYS]).
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -48,6 +50,8 @@ class MainActivity : ComponentActivity() {
 
     private var readiness by mutableStateOf(TrackingReadiness.READY)
 
+    private var openWays by mutableStateOf(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -55,6 +59,7 @@ class MainActivity : ComponentActivity() {
         if (savedInstanceState == null) {
             resumeIfAsked(intent)
             startOutingIfAsked(intent)
+            openWaysIfAsked(intent)
         }
         setContent {
             val settings by settingsRepository.settings.collectAsStateWithLifecycle(initialValue = null)
@@ -78,7 +83,12 @@ class MainActivity : ComponentActivity() {
                 palette = settings?.palette ?: AppPalette.VIVID,
                 font = settings?.font ?: AppFont.GOOGLE_SANS,
             ) {
-                PassoRoot(readiness = readiness, onboardingCompleted = settings?.onboardingCompleted)
+                PassoRoot(
+                    readiness = readiness,
+                    onboardingCompleted = settings?.onboardingCompleted,
+                    openWays = openWays,
+                    onWaysOpened = { openWays = false },
+                )
             }
         }
     }
@@ -87,6 +97,7 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         resumeIfAsked(intent)
         startOutingIfAsked(intent)
+        openWaysIfAsked(intent)
     }
 
     override fun onResume() {
@@ -113,6 +124,13 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             if (settingsRepository.settings.first().trackingEnabled) SessionControl.start(this@MainActivity, planId)
         }
+    }
+
+    /** A stage's notification: the Ways page, once per touch. */
+    private fun openWaysIfAsked(intent: Intent?) {
+        if (intent?.getBooleanExtra(WayIntents.EXTRA_OPEN_WAYS, false) != true) return
+        intent.removeExtra(WayIntents.EXTRA_OPEN_WAYS)
+        openWays = true
     }
 
     /** The widget's "tap to resume" (PLANNING.md §7): once per tap, not again on a rotation. */

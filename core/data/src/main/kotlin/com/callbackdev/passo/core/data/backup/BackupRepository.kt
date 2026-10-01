@@ -2,6 +2,7 @@ package com.callbackdev.passo.core.data.backup
 
 import com.callbackdev.passo.core.data.db.SessionDao
 import com.callbackdev.passo.core.data.db.TrackingDao
+import com.callbackdev.passo.core.data.db.WayDao
 import com.callbackdev.passo.core.data.db.toEntity
 import com.callbackdev.passo.core.data.db.toModel
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
@@ -16,6 +17,8 @@ import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.UnitSystem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -38,6 +41,7 @@ data class ImportReport(
     val addedOutings: Int,
     val addedPlans: Int,
     val preferences: Boolean,
+    val addedWays: Int = 0,
 )
 
 /**
@@ -52,6 +56,7 @@ class BackupRepository
 constructor(
     private val trackingDao: TrackingDao,
     private val sessionDao: SessionDao,
+    private val wayDao: WayDao,
     private val preferences: UserPreferencesDataSource,
     private val tracking: TrackingRepository,
 ) {
@@ -91,6 +96,7 @@ constructor(
             plans = sessionDao.plans().mapNotNull { it.toModel() },
             sessions = sessionDao.allSessions().mapNotNull { it.toModel() },
             diagnostics = tracking.diagnostics(),
+            journeys = wayDao.journeys().mapNotNull { it.toModel() },
         )
     }
 
@@ -122,6 +128,11 @@ constructor(
             }
             if (latest != null && latest.id in newIds) preferences.setSessionSummarySeen(latest.id)
         }
+        // The file's day as the phone that wrote it saw it; an unreadable zone reads as this one's.
+        val zone = runCatching { ZoneId.of(backup.zone) }.getOrDefault(ZoneId.systemDefault())
+        val fileDay = LocalDate.ofInstant(Instant.ofEpochMilli(backup.exportedAtMillis), zone).toEpochDay()
+        val ways = BackupMerge.journeys(wayDao.journeys().mapNotNull { it.toModel() }, backup.journeys, fileDay)
+        wayDao.insertAll(ways.map { it.toEntity() })
         return ImportReport(
             addedDays = days.addedDays,
             mergedDays = days.mergedDays,
@@ -129,6 +140,7 @@ constructor(
             addedOutings = newIds.size,
             addedPlans = plans.toAdd.size,
             preferences = withPreferences,
+            addedWays = ways.size,
         )
     }
 

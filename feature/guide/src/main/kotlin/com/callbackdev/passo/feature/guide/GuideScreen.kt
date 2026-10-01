@@ -164,6 +164,14 @@ private fun GuideContent(state: GuideUiState, modifier: Modifier) {
         Paragraph(stringResource(R.string.guide_insights_p1))
         Feature(R.string.guide_insights_streak_title, R.string.guide_insights_streak_body)
 
+        Chapter(PassoIcons.Way, stringResource(R.string.guide_ways_title))
+        Paragraph(stringResource(R.string.guide_ways_p1))
+        Feature(R.string.guide_ways_distance_title, R.string.guide_ways_distance_body)
+        Feature(R.string.guide_ways_start_title, R.string.guide_ways_start_body)
+        Feature(R.string.guide_ways_stages_title, R.string.guide_ways_stages_body)
+        Feature(R.string.guide_ways_walks_title, R.string.guide_ways_walks_body)
+        Caption(stringResource(R.string.guide_ways_credit))
+
         Chapter(PassoIcons.Widgets, stringResource(R.string.guide_widgets_title))
         Feature(R.string.guide_widgets_two_title, R.string.guide_widgets_two_body)
         Feature(R.string.guide_widgets_wait_title, R.string.guide_widgets_wait_body)

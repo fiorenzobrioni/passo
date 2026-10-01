@@ -16,8 +16,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.history.PeriodScale
 import com.callbackdev.passo.core.domain.insights.Insights
+import com.callbackdev.passo.core.domain.ways.WayProgress
+import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.DailySummary
 import com.callbackdev.passo.core.model.UnitPreference
+import com.callbackdev.passo.core.model.WayId
+import com.callbackdev.passo.core.model.WayJourney
+import com.callbackdev.passo.core.model.WayJourneyState
 import com.callbackdev.passo.core.testing.assertAccessible
 import com.callbackdev.passo.core.testing.walkPage
 import com.google.common.truth.Truth.assertThat
@@ -47,10 +52,11 @@ class InsightsScreenTest {
         state: InsightsUiState?,
         dark: Boolean = false,
         onOpen: (PeriodScale, LocalDate) -> Unit = { _, _ -> },
+        onOpenWays: () -> Unit = {},
     ) {
         compose.setContent {
             PassoTheme(darkTheme = dark) {
-                InsightsScreen(state = state, onOpenSettings = {}, onOpenPeriod = onOpen)
+                InsightsScreen(state = state, onOpenSettings = {}, onOpenPeriod = onOpen, onOpenWays = onOpenWays)
             }
         }
         compose.waitForIdle()
@@ -83,6 +89,44 @@ class InsightsScreenTest {
         compose.onNode(hasContentDescription("Estimate, each day with its own step length", substring = true))
             .assertExists()
         snapshot("insights_totals")
+    }
+
+    @Test
+    fun `with no way under way, the door to the Ways closes the page`() {
+        var opened = false
+        show(state(), onOpenWays = { opened = true })
+        compose.onNodeWithTag(InsightsTags.LIST).performScrollToNode(hasTestTag(InsightsTags.WAYS_DOOR))
+        compose.onNodeWithText("Walk a way or a city").performClick()
+        assertThat(opened).isTrue()
+        compose.onNodeWithTag(InsightsTags.WAY).assertDoesNotExist()
+        snapshot("insights_ways_door")
+    }
+
+    @Test
+    fun `the way under way follows the streak`() {
+        val days = sample()
+        val journey = WayJourney(
+            id = 1,
+            way = WayId.VIA_DI_FRANCESCO,
+            startEpochDay = today.minusDays(40).toEpochDay(),
+            startedAtMillis = 0,
+            state = WayJourneyState.ACTIVE,
+            endedEpochDay = null,
+            toldMeters = 0,
+        )
+        val progress = WayProgress.of(
+            Ways.of(journey.way),
+            journey,
+            days.mapValues { it.value.distanceMeters },
+            today.toEpochDay(),
+        )
+        var opened = false
+        show(state(days).copy(way = progress), onOpenWays = { opened = true })
+        compose.onNodeWithTag(InsightsTags.LIST).performScrollToNode(hasTestTag(InsightsTags.WAY))
+        compose.onNodeWithText("Past", substring = true).assertExists()
+        snapshot("insights_way")
+        compose.onNodeWithTag(InsightsTags.WAY).performClick()
+        compose.onNodeWithTag(InsightsTags.WAYS_DOOR).assertDoesNotExist()
     }
 
     @Test

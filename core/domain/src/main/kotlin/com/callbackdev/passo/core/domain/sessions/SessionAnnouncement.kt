@@ -1,5 +1,9 @@
 package com.callbackdev.passo.core.domain.sessions
 
+import com.callbackdev.passo.core.domain.ways.NextPlace
+import com.callbackdev.passo.core.domain.ways.WalkPlaces
+import com.callbackdev.passo.core.domain.ways.WayStop
+import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
@@ -54,6 +58,18 @@ sealed interface SessionAnnouncement {
      */
     data class EndedStill(val steps: Int) : SessionAnnouncement
 
+    /**
+     * A city walk began (Phase 11): at its first place, said with its sentence, or, continued,
+     * from [here], with the place ahead. The walk's name is the outing's.
+     */
+    data class WalkStarted(val here: WayStop, val continued: Boolean, val next: NextPlace?) : SessionAnnouncement
+
+    /**
+     * A walk's [places] reached, in order: the ones passed in the same batch named, the last
+     * one said with its sentence, then the place ahead ([next], none at the walk's end).
+     */
+    data class PlacesReached(val places: List<WayStop>, val next: NextPlace?) : SessionAnnouncement
+
     companion object {
         fun started(session: Session): Started = Started(session.goal(), session.intensity, session.restOfDay)
 
@@ -73,6 +89,19 @@ sealed interface SessionAnnouncement {
         }
 
         fun endedStill(session: Session): EndedStill = EndedStill(session.totals.steps)
+
+        /** What [session], an outing on a city walk, says as it starts; null on no walk. */
+        fun walkStarted(session: Session): WalkStarted? {
+            val walk = session.walk?.let(Ways::of) ?: return null
+            return WalkStarted(
+                here = WalkPlaces.at(walk, session.walkFromMeters),
+                continued = session.walkFromMeters > 0,
+                next = WalkPlaces.after(walk, session.walkFromMeters),
+            )
+        }
+
+        fun placesReached(session: Session, places: List<WayStop>): PlacesReached =
+            PlacesReached(places, WalkPlaces.next(session))
 
         fun goal(session: Session, dayGoalReached: Boolean = false): GoalReached = GoalReached(
             goal = session.goal(),

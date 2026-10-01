@@ -6,6 +6,8 @@ import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.callbackdev.passo.core.domain.sessions.SessionPlans
+import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
@@ -13,7 +15,9 @@ import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionTotals
+import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.UnitPreference
+import com.callbackdev.passo.core.model.WayId
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -63,6 +67,18 @@ class SessionNotificationsTest {
         assertThat(notification.actions.map { it.title.toString() }).containsExactly("Pause", "Stop").inOrder()
         assertThat(notification.category).isEqualTo(Notification.CATEGORY_WORKOUT)
         assertThat(NotificationCompat.getOngoing(notification)).isTrue()
+    }
+
+    @Test
+    fun `on a city walk it is named by its city and tells the place ahead`() {
+        val walk = checkNotNull(
+            SessionPlans.startWalk(Ways.of(WayId.LONDON_PALACE_TOWER), 0, SessionVoice.HEADPHONES, 0, 20_000),
+        ).copy(totals = session.totals.copy(distanceMeters = 1_300.0))
+        val notification = ongoing(walk, cadence = null)
+
+        assertThat(NotificationCompat.getContentTitle(notification).toString()).isEqualTo("A walk in London")
+        assertThat(NotificationCompat.getContentText(notification).toString())
+            .startsWith("Next: Trafalgar Square, 540 m")
     }
 
     @Test
@@ -142,5 +158,7 @@ class SessionNotificationsTest {
         assertThat(SessionHaptics.pattern(SessionMilestone.GOAL).toList()).containsExactly(0L, 900L).inOrder()
         // The end by stillness: two long pulses, like none of the above.
         assertThat(SessionHaptics.endedStillPattern().toList()).containsExactly(0L, 500L, 300L, 500L).inOrder()
+        // A walk's place: one short pulse (a walk has no quarters).
+        assertThat(SessionHaptics.placePattern().toList()).containsExactly(0L, 180L).inOrder()
     }
 }

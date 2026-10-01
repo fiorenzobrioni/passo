@@ -106,4 +106,21 @@ data class SessionEntity(
     val reachedAtMillis: Long?,
     val toldMilestones: Int,
     @ColumnInfo(defaultValue = "OFF") val voice: String = "OFF",
+    @ColumnInfo(defaultValue = "NULL") val walk: String? = null,
+    @ColumnInfo(defaultValue = "0") val walkFromMeters: Int = 0,
+)
+
+/**
+ * A way the reader started (PLANNING.md §11 Phase 11). Enums by name. No distance: what was
+ * walked is the days' own estimates from [startEpochDay], read with them.
+ */
+@Entity(tableName = "way_journey", indices = [Index("state")])
+data class WayJourneyEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val way: String,
+    val startEpochDay: Long,
+    val startedAtMillis: Long,
+    val state: String,
+    val endedEpochDay: Long?,
+    val toldMeters: Int,
 )

@@ -141,6 +141,11 @@ constructor(
         }
     }
 
+    /** The guide opened from the first-day note: the note has done its work. */
+    fun firstDayNoteRead() {
+        viewModelScope.launch { settingsRepository.updateSettings { it.copy(firstDayNoteRead = true) } }
+    }
+
     fun celebrated(date: LocalDate) {
         celebratedOn.value = date
     }
@@ -204,7 +209,9 @@ constructor(
             status = status,
             units = prefs.settings.units,
             walkingStepLength = StepLengths.of(prefs.profile).walkingMeters,
-            firstDay = prefs.firstRecordedDay == null || prefs.firstRecordedDay >= epochDay,
+            // Until the day ends, or until the reader opens the guide from it: what it is for.
+            firstDay = (prefs.firstRecordedDay == null || prefs.firstRecordedDay >= epochDay) &&
+                !prefs.settings.firstDayNoteRead,
             celebrate = overview.goalReachedAt != null && prefs.celebratedOn != date,
             walks = walks,
             session = outings.card,

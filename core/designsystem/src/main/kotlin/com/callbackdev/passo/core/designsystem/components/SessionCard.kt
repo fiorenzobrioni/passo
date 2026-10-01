@@ -56,6 +56,8 @@ import com.callbackdev.passo.core.designsystem.theme.reducedMotion
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.sessions.fraction
 import com.callbackdev.passo.core.domain.sessions.progress
+import com.callbackdev.passo.core.domain.ways.WalkPlaces
+import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionIntensity
@@ -82,7 +84,11 @@ class SessionCardActions(
  * - Over: when it was and for how long, what it came to, the time at its pace; Close, and "Keep
  *   going" for a while after a goal ([canKeepGoing]), "Resume" after an end by a long stillness.
  *
+ * On a city walk (Phase 11) the bar is the walk's small map, the reader's point on it: drawn
+ * only while the card is on screen, like every chart here.
+ *
  * @param cadence the last half minute's pace, for an outing under way.
+ * @param showMap false where the walk's own map is already on the page.
  */
 @Composable
 fun SessionCard(
@@ -92,6 +98,7 @@ fun SessionCard(
     format: MeasureFormatter,
     actions: SessionCardActions,
     modifier: Modifier = Modifier,
+    showMap: Boolean = true,
 ) {
     val res = LocalResources.current
     val reached = session.reached
@@ -147,18 +154,30 @@ fun SessionCard(
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.testTag(SessionCardTags.SENTENCE),
             )
-            SessionTrack(
-                session = session,
-                color = accent,
-                modifier = Modifier.clearAndSetSemantics {
-                    contentDescription = res.getString(
-                        R.string.session_card_progress_description,
-                        res.sessionProgress(session, format),
-                        sentence,
-                    )
-                    progressBarRangeInfo = ProgressBarRangeInfo(session.progress().toFloat().coerceIn(0f, 1f), 0f..1f)
-                },
-            )
+            val described = Modifier.clearAndSetSemantics {
+                contentDescription = res.getString(
+                    R.string.session_card_progress_description,
+                    res.sessionProgress(session, format),
+                    sentence,
+                )
+                progressBarRangeInfo = ProgressBarRangeInfo(session.progress().toFloat().coerceIn(0f, 1f), 0f..1f)
+            }
+            val walk = session.walk?.let(Ways::of)
+            val along = WalkPlaces.along(session)
+            if (walk != null && along != null && showMap) {
+                WayMapView(
+                    way = walk,
+                    walkedMeters = along,
+                    reached = walk.stops.count { it.distanceMeters <= along },
+                    contentDescription = "",
+                    detailed = false,
+                    // Wider than the walk's own frame: a card on Today, not a page.
+                    ratio = CARD_MAP_RATIO,
+                    modifier = Modifier.fillMaxWidth().testTag(SessionCardTags.MAP).then(described),
+                )
+            } else {
+                SessionTrack(session = session, color = accent, modifier = described)
+            }
             val lines = buildList {
                 if (session.state == SessionState.ACTIVE) {
                     add(
@@ -298,6 +317,7 @@ fun SessionTrack(session: Session, color: Color, modifier: Modifier = Modifier) 
 }
 
 private const val MILLIS_PER_MINUTE = 60_000L
+private const val CARD_MAP_RATIO = 1.6f
 
 /** Hooks for the UI tests. */
 object SessionCardTags {
@@ -308,4 +328,5 @@ object SessionCardTags {
     const val STOP = "session_card_stop"
     const val KEEP_GOING = "session_card_keep_going"
     const val CLOSE = "session_card_close"
+    const val MAP = "session_card_map"
 }

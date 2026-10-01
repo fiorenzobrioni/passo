@@ -41,3 +41,7 @@ out/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# The Ways' sources, downloaded by tools/build_ways.py fetch
+tools/ways-cache/
+tools/__pycache__/

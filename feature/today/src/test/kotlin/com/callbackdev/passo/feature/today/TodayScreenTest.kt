@@ -22,9 +22,11 @@ import com.callbackdev.passo.core.data.sessions.LiveSessionState
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
 import com.callbackdev.passo.core.designsystem.components.SessionCardTags
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
+import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.today.DayMinute
 import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.today.TypicalDayCalculator
+import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
@@ -33,7 +35,9 @@ import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionTotals
+import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.UnitPreference
+import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.testing.assertAccessible
 import com.callbackdev.passo.core.testing.walkPage
 import com.google.common.truth.Truth.assertThat
@@ -178,6 +182,27 @@ class TodayScreenTest {
         compose.onNodeWithTag(SessionCardTags.PAUSE).performClick()
         assertThat(paused).isTrue()
         snapshot("today_outing")
+    }
+
+    @Test
+    fun `a walk through a city carries its small map, and the place ahead`() {
+        val walk = checkNotNull(
+            SessionPlans.startWalk(
+                Ways.of(WayId.MILAN_DUOMO_NAVIGLI),
+                fromMeters = 3_216,
+                voice = SessionVoice.HEADPHONES,
+                nowMillis = 0,
+                localEpochDay = date.toEpochDay(),
+            ),
+        ).copy(id = 5, totals = outing.totals.copy(distanceMeters = 200.0))
+        val live = LiveSessionState(walk, cadence = 104, canKeepGoing = false, alertsWhileScreenOff = true)
+        show(state().copy(session = live))
+
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(SessionCardTags.CARD))
+        compose.onNodeWithText("A walk in Milan").assertExists()
+        compose.onNodeWithText("Next: Sempione Park, 230 m").assertExists()
+        compose.onNodeWithTag(SessionCardTags.MAP).assertExists()
+        snapshot("today_walk")
     }
 
     @Test

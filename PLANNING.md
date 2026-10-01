@@ -52,6 +52,8 @@ passo/
 │   ├── settings/           # Settings, your data (export, import), the step calibration
 │   ├── onboarding/
 │   ├── sessions/           # the Outings page and the outing editor (Phase 10)
+│   ├── ways/               # the Ways and the city walks (Phase 11)
+│   ├── year/               # Your year on foot (Phase 12, planned)
 │   └── guide/              # the guide, in Chiaro's shape
 ├── widget/                 # Glance widget(s), receiver, update coordinator
 ├── docs/                   # ADRs, formulas, battery test notes
@@ -337,6 +339,8 @@ data class DiagnosticsEventEntity(
 - Today's `DailySummary` is recomputed from today's minute rows at every flush.
 - Past days are **frozen**, so changing the profile doesn't silently rewrite history. Settings offers **"Apply profile to past data"**, which recomputes every summary from the minute rows.
 - Use Room auto-migrations with exported schemas (`room.schemaLocation`) committed to the repo.
+- **Schema v4 (Phase 11):** `way_journey`, a way the reader started (the way, its start day and instant, its state `ACTIVE` / `FINISHED` / `LEFT`, the day it ended, how far its stages were told). No distance: what was walked is the days' own estimates from the start, read with them (`docs/adr/0014-ways.md`).
+- **Schema v5 (Phase 11, part two):** `session.walk` (the city walk an outing walks, by name; null for every other outing) and `session.walkFromMeters` (where along the walk it began). A walk's journey is a `way_journey` row like a way's; its progress is its outings', read with them (`docs/adr/0015-city-walks.md`).
 - **No tables for walks or the typical day.** Both are computed on read from `minute_steps` (§6.1, §6.2). Add a cache table only if profiling shows a need.
 - **Schema v2 (Phase 10), an auto-migration adding two tables and touching nothing else:**
   - `session_plan`: the reader's outings (name or null, goal kind and value, intensity, milestones as a bit set, vibrate, position, last started).
@@ -457,6 +461,7 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
 - **Channel `sessions`** (default importance, no sound, no vibration of its own): an outing's goal reached, with "Keep going" for 15 minutes; an outing ended by a long stillness, with "Resume" for as long. The milestones on the way are Passo's own vibration patterns, played only while this channel is on.
 - **Channel `goals`** (default importance, opt-in): goal reached once per day, the evening reminder (with "Walk now": an outing for the rest of the day), the weekly summary.
   - Goal reached rides on the service's samples. The reminder is an inexact `setAndAllowWhileIdle` with a wakeup, the summary an inexact `RTC` alarm without one; both armed again at every start of the process, every change of what they depend on, every clock or zone change, and every firing. No exact alarm permission (Phase 6, §15).
+- **Channel `ways`** (default importance, Phase 11): a stage reached on the way under way, and its end. Told by the days being written (`WayNotifier`), never by a timer; touching it opens the Ways page.
 - If `POST_NOTIFICATIONS` is denied, the foreground service still runs; its notification only shows in the system's task manager. Explain this in onboarding; don't block on it.
 - **QS tile (`TileService`):** reads today's steps from `onStartListening()` to `onStopListening()`, following the live count meanwhile. It costs nothing when the panel is closed.
 
@@ -779,6 +784,193 @@ Added to v1.0 at the owner's request (25 Sep 2026), after Phase 6 and before Pha
 | The rest of a day already met | Cannot start (under 100 steps left) |
 | A plan edited or deleted later | Past outings keep the goal they were walked with |
 
+### After v1.0
+
+Three phases asked for by the owner after the v1.0.0 release (1 Oct 2026). They are written
+now so that the order can be chosen; the owner decides which comes first, and each becomes a
+minor release (`1.x.0`). None needs a new permission or a new dependency, and none touches the
+everyday tracking path. What was weighed and dropped is in §15 (route maps with GPS, the peak
+cadence, the weekly rhythm).
+
+### Phase 11 — The Ways («I Cammini»)
+
+VISION.md's "virtual journeys", in the shape of the pilgrim ways: the reader picks one of four
+ways and the day to count from, and the estimated distance walked since then moves a point
+along it. Each stage reached is a stamp in a credential, with the day it was reached. **A map
+with no location:** the way is drawn, and the reader's place on it is their distance, never
+where they are. Everything is computed on read from the days already stored; nothing new runs
+while the screen is off. Name: «Cammini» / "Ways". Decisions in `docs/adr/0014-ways.md`.
+
+**The four ways**, as mapped on OpenStreetMap (a way's length is its line's, which is what the
+point moves along). A spread of lengths, so that one is finished in weeks and one takes
+half a year, at an ordinary 5 km a day. The Francigena is its Italian part only (owner, 1 Oct
+2026: from Canterbury, 2,000 km, is too long for everyday walkers):
+
+| Way | From, to | About | At 5 km a day |
+|---|---|---|---|
+| Via degli Dei | Bologna, Florence | 123 km, 9 stages | 4 weeks |
+| Via di Francesco | La Verna, Assisi, Rome | 434 km, 22 stages | 3 months |
+| Camino de Santiago, the French Way | Saint-Jean-Pied-de-Port, Santiago de Compostela | 768 km, 34 stages | 5 months |
+| Via Francigena, the Italian part | Great St Bernard Pass, Rome | 1,020 km, 46 stages | 7 months |
+
+- [x] The ways' data, written by a script (`tools/build_ways.py`, re-run, never hand-edited, like the launcher icon): for each way its stages (a key, the name's resource, latitude and longitude, the official distance from the start), the line drawn, simplified to a few hundred points, and the outline of the countries behind it (Natural Earth, public domain, simplified). Output: Kotlin in `:core:domain/ways`. The line is the way's OpenStreetMap relation, simplified (owner, §15): the script reads an export saved by hand into `tools/`, never the network at build time; the data is under ODbL, credited in About and in the guide («© OpenStreetMap contributors»), and the derived file says so in its header.
+- [x] Domain (`:core:domain/ways`, pure, tested): `WayProgress` (from the day totals since the start: the distance walked, the stage reached, the place between two stages, the day each stage was reached, the day it was finished), `WayProjection` (equirectangular around the way's middle latitude, fitted to a box), `WayForecast` (the arrival at the reader's average of the last 28 days, said as an estimate, only with 7 or more days walked), `WayAnnouncement` (the stage just reached, told once).
+- [x] The distance is the days' own: each finished day's frozen `distanceMeters`, today's live one. A way never keeps a total of its own, so it cannot disagree with History; "Apply profile to past data" and an import move it, on read, and the guide says so.
+- [x] Storage: a `way_journey` table (id, way key, start day, state `ACTIVE` / `FINISHED` / `LEFT`, finish day, how far the stages were told), schema v4 by auto-migration, with its migration test. The stamps' days are computed, not stored. The backup carries the journeys.
+  - *Deviation:* as an added field (`ways`), with no new format version: the codec's rule is that added fields do not raise it (an older reader skips them). An import adds the file's ways by their start instant; one under way comes in under way only if this phone walks none, otherwise as left on the day the file was written.
+- [x] The service: a stage reached rides on the step samples, as the goal reached does (today's distance crossing the next stage's mark); one notification, the furthest stage when a batch crosses several, on a new `ways` channel, on for a way the reader started, and theirs to silence. Never a timer.
+  - `WayNotifier`, started with the process like the goal alarms, watches the days the service writes, only while a way is under way; the stage is claimed in the database before it is told. Touching it opens the Ways page.
+- [x] `:feature:ways`, the Ways page: the four, with their length, stages and the time they would take at the reader's pace. Starting one: from today, from 1 January, from the first day Passo counted, or a chosen day. A start in the past places the reader at once (the "you would already be in Siena" moment), with the stamps of the stages behind and no notification for them.
+- [x] The way under way: the map (Canvas: the outline, the whole line faint, the part walked in the accent, the reader's point, the stages as dots, a stage's name on touch), its sentence («Past Siena: 231 km to Rome»), the forecast, the stages with their days (the map's accessible equivalent), the credential (one stamp per stage reached, drawn in code: the place, the day, a tilt fixed for each stage; a generic stamp, never an official one). Leaving a way asks first; a finished or left way keeps its credential in "Your ways".
+- [x] Insights: a card for the way under way (the small map and the sentence); with none, the door to the Ways page.
+- [x] The places: every stage's name in English and Italian (Florence / Firenze); about ten notable places for each way, with one checked sentence each in both languages, its source noted in the script.
+- [x] The guide: a chapter (a way moves with the estimated distance; measuring the step makes it truer; what moves it back).
+- [x] Strings in English and Italian; UI tests with `assertAccessible()` and `walkPage()`; README screenshots (the map, the credential), CHANGELOG.
+- [ ] On a device (owner): a backdated start, a stage notification on a walk, the four ways drawn in both themes and on an open foldable.
+
+**Acceptance:** starting a way from 1 January places the reader at once with every stamp
+behind; a stage reached on a walk is told once, during the walk; History, Insights and the way
+agree on the distance for any period.
+
+**Edge cases** (`WayProgressTest`, `WayAnnouncementTest`):
+
+| Case | Expected behavior |
+|---|---|
+| A start in the past | Placed at once; the stamps behind carry their days; no notification for them |
+| A start before the first day counted | Moved to the first day counted (a day without data would add nothing, and the date would read as one walked with Passo) |
+| A day without steps | The point does not move |
+| A batch, or a backdated start, crossing several stages | One notification, the furthest stage |
+| The last stage reached | Finished that day; the distance beyond is not carried to another way |
+| The profile applied to past data, an import | Recomputed on read; stamps may change day; a way finished stays finished, its last stops reached on the day it ended |
+| The way left | Kept as left with its stamps; another can start |
+| A change of time zone | Days are local days, as everywhere else |
+
+#### Phase 11, part two — City walks («Passeggiate in città»)
+
+Asked for by the owner (1 Oct 2026), after the Ways' first part, whose data script and map it
+reuses. A walk through a city, in one outing or a few: an outing whose goal is the route, whose
+signals are the places, and whose voice, if the outing speaks, says each place as the reader
+reaches it. **Imaginary, and said so:** the reader walks where they are (the neighbourhood, a
+park, a treadmill), and the route moves with the outing's estimated distance, never with a
+location. Nothing new for the battery: it is an ordinary outing (ADR 0009).
+
+**The cities:** Milan, Rome, Paris, London, Madrid (owner). **Milan and London first**; the
+others one a release, each when its content is checked.
+
+**A city can have more than one walk** (owner's question): the unit is the *walk*, grouped by
+city, from the first line of code, so London's second walk is data, not a feature. On screen a
+city with one walk is one row; the second level (the city's walks) appears only when a city has
+two. The first release has one walk a city.
+
+- [x] The walks' data, by the same script as the ways (`tools/build_ways.py`): each walk drawn once in a router built on OpenStreetMap data (BRouter), its GPX saved into `tools/` by hand, simplified by the script; its places (a key, the name's resource, latitude and longitude, the distance along the walk, measured by the script); behind it the city's water and largest parks from OpenStreetMap (the Thames, the Tiber, the Seine, the Navigli and the Darsena, the Manzanares), never a street grid. ODbL, credited as for the ways. Between 8 and 12 km a walk, about twenty places.
+- [x] Indicative walks, decided with the owner when each is drawn: Milan (the Duomo, the Galleria, La Scala, Brera, the Castello Sforzesco, Parco Sempione, the Arco della Pace, Sant'Ambrogio, the Columns of San Lorenzo, the Darsena and the Navigli); London (Westminster, the Elizabeth Tower, Trafalgar Square, the South Bank, the London Eye, Tate Modern, the Millennium Bridge, St Paul's, Borough Market, Tower Bridge, the Tower of London).
+- [x] The places' sentences: written for Passo, never copied (not from Wikipedia either), each checked against two sources and noted in the script; in English and Italian; one sentence of at most about twenty words, made to be heard; nothing that goes stale (no opening hours, prices or "now showing").
+- [x] Domain (`:core:domain/ways`): `CityWalkProgress` (the distance done on a walk, summed from the outings walked on it since it was started; the place reached; the next one and how far), the places crossed by a batch (each named once; the voice says the names in order and the last one's sentence).
+- [x] Storage: the Ways' table with a kind (way or walk), and on `session` a nullable walk key and the distance the outing started from; the backup carries both. A walk's progress is computed from its outings, never kept apart.
+- [x] The outing: a new goal kind, a walk, its goal the distance left; the 25, 50 and 75% signals off (the places are the signals: one short pulse and the voice); the notification's line is the next place («Next: the Duomo, 600 m»); the goal is the walk's end. Stopped halfway, the walk waits: "Continue from Piazza Navona" starts the next outing where the last one ended; starting again from the beginning asks first.
+- [x] Screens: the Ways page in two parts, «Cammini» and «Città»; a city's walk with its map (the water, the parks, the route, the places, the point), its places with the day each was reached, Start or Continue. During the outing, its card on Today and the Outings page carries the small map (drawn only while the screen is on). A finished walk stays in "Your ways" with its places and its day.
+- [ ] Your year on foot (Phase 12) names the cities walked that year.
+- [x] Strings in English and Italian; tests (`CityWalkProgressTest`: a walk over three outings, several places in one batch, the end, a restart); UI tests; a README screenshot (London's map during a walk); CHANGELOG.
+- [ ] On a device (owner): Milan walked in one outing and London over two, with the voice through headphones and with the screen off; on a treadmill once.
+
+Built as `docs/adr/0015-city-walks.md` records: a walk is a `WayId` of kind `WALK`; the routes
+come from BRouter and are committed in `tools/walks/`; progress is `WalkDays` over the walk's
+outings, computed on read (no `CityWalkProgress` class: `WayProgress` does it, with the outings'
+days in place of the days'); the outing is a distance goal with the walk's places as its signals
+(`SessionSignal.Places`), schema v5.
+
+**Edge cases:**
+
+| Case | Expected behavior |
+|---|---|
+| A walk over several outings | Each outing starts where the last ended; the places already reached are not told again |
+| Two places crossed by one batch | Both named, in order; the last one's sentence |
+| The walk's end | The outing's goal: the goal's long vibration and "Keep going" |
+| An outing ended by stillness halfway | The walk waits at that distance; "Resume" or "Continue" later |
+| Restart from the beginning | Asks; the earlier outings stay in History, the walk counts from zero |
+| The voice off | The pulse, and the place in the notification |
+
+#### Phase 11, later — The fifth way, and the other cities
+
+Asked for by the owner (2 Oct 2026), after the city walks; not scheduled yet. The set stops at
+**five ways and five cities**: more could come one day, but none is planned.
+
+- [ ] **The Camino Portugués from Porto** (about 240 km, the second most walked way to
+  Santiago), as the fifth way: its OpenStreetMap relation and its stages in
+  `tools/ways_content.py`, the locator of Portugal and Spain, its places' sentences checked as
+  the others were. The data shape, the map and the credential need nothing new.
+- [ ] **Rome, Paris and Madrid**, one a release, each when its walk is drawn and its places'
+  sentences checked, after Milan and London.
+
+### Phase 12 — Your year on foot («Il tuo anno a piedi»)
+
+A year told as a story: full-screen pages, one thing each, made from the days already stored.
+Private: computed on the phone, shared only if the reader shares a page, through an app they
+pick. Name: «Il tuo anno a piedi» / "Your year on foot".
+
+- [ ] **When.** By hand at any time: Insights has a "Your year" row for the year so far and for every past year with 30 or more days counted, and History's year view opens its own year. In season, from 1 December to 31 January, it is the first card of Insights, and Today shows one card, once, that the reader closes (owner, 1 Oct 2026). No notification.
+- [ ] Domain (`:core:domain/year`, pure, tested): `YearInReview`, the pages and what each says, from the day summaries, the minutes (for the hour), the outings and the ways. A page with nothing to say is left out (no outings, no outings page). A year counted in part says so («Since 1 October») and compares averages per day counted, never totals.
+- [ ] The pages, in order:
+  1. The year in steps and in distance (estimated), and that distance as a way (the Ways' data: «more than the Camino de Santiago», or «half of the Via Francigena»).
+  2. The months: twelve bars (`BarChart`), the best one named.
+  3. The best day: its date and weekday, its steps, and the outing or the walk that made it.
+  4. The rhythm: the weekday and the hour the reader walks most (from the minutes). This is where the weekly rhythm lives, once a year (§15).
+  5. The goal: the days it was met, the longest streak of the year, the calendar (`CalendarHeatmap`).
+  6. The outings: how many, the time in motion, the longest; the intervals, once Phase 13 exists.
+  7. The way: the distance walked on it this year, the stamps earned.
+  8. Against the year before, when both have 30 days or more counted.
+  9. The close: one sentence chosen from what happened (ADR 0010's rule: variety from the facts, never a phrase at random).
+- [ ] `:feature:year`: a full-screen pager (Compose foundation, no new dependency): touch to go on, swipe back, the progress marks at the top, a fade under reduced motion. TalkBack reads each page as one sentence; at twice the text size a page scrolls.
+- [ ] Share or save a page: drawn into an image (Compose's `GraphicsLayer` to a bitmap, 1080 by 1920, the reader's theme and palette, Passo's name small at the foot), handed to the share sheet through a `FileProvider` in the cache (androidx.core, already in), or saved through the Storage Access Framework. The image holds no name, no place, and nothing the page does not show.
+- [ ] Strings in English and Italian (plurals for every count); UI tests (`assertAccessible()`, `walkPage()`); a README screenshot; CHANGELOG.
+- [ ] On a device (owner): the share sheet with two or three apps, the image in both themes.
+
+**Acceptance:** a year with data opens by hand from Insights and from History; every number on
+a page matches History for the same period; a page shared as an image reads alone.
+
+**Edge cases** (`YearInReviewTest`): a year counted in part; a leap year; ties for the best day
+or month (the earlier one); a year with no outings and no way (pages left out); fewer than 30
+days counted (not offered); the year before with too few days (no comparison); the current year
+before December (offered by hand as «so far»).
+
+### Phase 13 — Interval walk («Camminata a intervalli»)
+
+The Japanese Interval Walking Training (Nemoto et al., *Mayo Clinic Proceedings*, 2007):
+sets of 3 minutes of slow walking followed by 3 minutes of fast walking, five sets or more, as an
+outing. **In minutes** (owner's request), faithful to the protocol. The live part is the hard
+one: a change of interval must be felt on time with the phone in a pocket and the screen off,
+and Passo has no timer then. The analysis and the options are in
+`docs/adr/0013-interval-walks.md` (accepted 1 Oct 2026: option A, adaptive latency; it amends
+ADR 0009 and §9.7 in the change that builds it).
+
+- [ ] The plan: a new goal kind, intervals: slow minutes and fast minutes (1 to 5, 3 by default), sets (3 to 10, 5 by default), the fast pace (brisk 100 by default, vigorous 130, running 140). It starts slow, as the protocol does. The goal is the end of the last set. The 25, 50 and 75% signals are off for this kind: the changes are the signals. A fourth preset, «Camminata giapponese» / "Japanese walking", 5 × (3 + 3).
+- [ ] The clock: the minutes are minutes in motion, as every outing's (ADR 0013): a stop at a traffic light does not eat a fast interval.
+- [ ] Domain (`:core:domain/sessions`): `IntervalSchedule` (where each change falls), the tracker's splits (each interval's steps, time in motion and time at its pace), the change found inside a batch from the steps' own timestamps; several changes in one batch tell the latest only.
+- [ ] The signals: two new vibrations, "faster" and "slower", unlike the five there are now (1, 2, 3 short; the goal's long one; the stillness's two long ones), chosen with the owner in the editor's "Try them". The voice, if the outing speaks: «Veloce, 3 minuti», «Lento», «Ultima serie veloce», and at the goal how many fast intervals were at pace.
+- [ ] The sensor during an interval outing (ADR 0013, option A): the wake-up counter at 30 s, and at 2 s from 40 s of motion before each change; a change told at the report that reaches it, or at the one whose predicted change falls before the next report; back to 30 s after. ADR 0009, §9.7, VISION.md's battery criterion and CLAUDE.md's invariant amended in the same change. With the screen on, the ticker the screen already allows (§9.4) shows the countdown to the next change.
+- [ ] The notification: on Android 16 the `ProgressStyle` bar in segments, slow and fast in two colours, with a point at each change, and the title saying the interval («Veloce · 1:40»); below, the expanded text says the same.
+- [ ] The result: each fast interval's cadence against its pace, and the sentence («4 fast intervals of 5 at pace»); the card, History and Today's list show it. Storage: a `session_interval` table (outing, index, slow or fast, steps, time in motion, time at pace), by an auto-migration; the backup carries it.
+- [ ] A phone without a wake-up step counter: the kind stays, and the editor says that the changes come on time only with the screen on (ADR 0013).
+- [ ] The diagnostics log: one row per change told, with how late it was against the step that crossed it, so the field test measures the delay instead of guessing it.
+- [ ] Strings in English and Italian; tests (`IntervalScheduleTest`, the tracker's, the editor's UI); CHANGELOG; the guide's outings chapter.
+- [ ] On a device (owner): a 30-minute interval outing with the screen off: each change felt, its delay read from the log, the battery check of §9 (numbers in `docs/battery/`).
+
+**Acceptance:** with the screen off and the phone in a pocket, every change is felt within the
+delay ADR 0013 promises, on the owner's phone; the battery cost of a 30-minute interval outing
+is measured and within the ADR's estimate.
+
+**Edge cases** (`IntervalScheduleTest`, `SessionTrackerTest`):
+
+| Case | Expected behavior |
+|---|---|
+| A stop during a fast interval | The interval waits: minutes in motion |
+| One batch crossing two changes (a long stillness of the reports) | Only the latest is told; both splits are right |
+| Paused, resumed | The interval goes on where it was |
+| 15 min without a step | Ends as every outing, with "Resume" |
+| The last change | Is the goal: the goal's long vibration, not "slower" |
+| A fast interval below its pace | Counted, said as below pace, never hidden |
+| The screen turned on mid-interval | The countdown appears at the right value |
+
 ---
 
 ## 12. Testing strategy
@@ -961,6 +1153,27 @@ Include:
 - **v1.0.0** (owner, 1 Oct 2026): `passo.versionName` is `1.0.0` (versionCode 10000). The owner ran the Phase 1 field checks on their own phone over several days, with nightly shutdowns, before the tag. The release notes are in **English only**, a deviation from Phase 8's "English and Italian": the family writes its release notes in English (Chiaro's CHANGELOG, Saldo's notes from 2.3.0), and the app itself speaks both. The `[Unreleased]` record, written phase by phase, moved to `docs/CHANGELOG-1.0.0.md` (as Chiaro did for its 1.0.0), so the release page reads as a short list of what is in the app.
 - **The release page is the CHANGELOG section alone** (owner, 1 Oct 2026, after v1.0.0): `release.yml` no longer appends GitHub's generated list of pull requests, as Saldo's never did, so the three apps' release pages read the same. A tag without its CHANGELOG section now fails the release instead of publishing an empty page.
 
+- **Route maps with GPS stay out** (owner, 1 Oct 2026, after weighing it): recording an outing's route, drawing it and exporting it as GPX would need `ACCESS_FINE_LOCATION` in the manifest, even if off by default. That turns "Passo cannot" into "Passo promises not to", against principles 1 and 3, the non-goals and the build's own gate; the database is in Android's backup allowlist, so routes would travel there; GPS is the most expensive sensor, far beyond ADR 0009's exception; and OpenTracks already does it, offline and without `INTERNET`. The Ways (Phase 11) give the map without the location.
+- **After v1.0: three phases, in the owner's order** (owner, 1 Oct 2026): the Ways (Phase 11, four ways made well), Your year on foot (Phase 12, reachable by hand at any time, not only in December), the interval walk (Phase 13, in minutes, faithful to the protocol; its sensor policy in `docs/adr/0013-interval-walks.md`).
+- **The peak cadence and the weekly rhythm dropped as features** (owner, 1 Oct 2026: noise): the first is a number that needs a lesson before it means anything, against "one sentence before any number"; the second is a chart for the curious, opened once. The weekday and hour the reader walks most survive as one page of Your year, once a year, where they are a story and not a screen to keep.
+
+- **The Ways: OpenStreetMap lines, four ways, the Francigena's Italian part** (owner, 1 Oct 2026): each way's line is its OpenStreetMap relation, simplified, under ODbL (credited in About and the guide; the derived file published in the repo under ODbL, beside the GPL code), chosen over a schematic of stage towns because the true line is what makes the map worth opening. The four: Via degli Dei, Via di Francesco, Camino Francés, and the Via Francigena from the Great St Bernard Pass to Rome (about 1,000 km): from Canterbury, 2,000 km is too long for everyday walkers.
+- **The interval walk: ADR 0013 accepted** (owner, 1 Oct 2026): option A (the wake-up counter at 30 s, at 2 s in the 40 s of motion before each change; no wake lock, no timer), minutes in motion, a phone without a wake-up counter told in the editor rather than the kind hidden, the fast pace at brisk 100 by default. Option B stays the documented next step if the field test finds the counter's own delay too long.
+
+- **City walks, as Phase 11's second part** (owner, 1 Oct 2026): an outing through a city, whose signals are its places and whose voice says them, imaginary and said so. Milan, Rome, Paris, London and Madrid; Milan and London first, the others one a release. Bound to outings rather than to the days, because a city is walked in one outing or a few, where a way takes months. The unit is the walk, grouped by city, so that a large city's second walk (London's, likely) is data and not a feature; a city shows its second level only once it has two walks. The real cost is the content (about twenty checked places a walk, in two languages), which is why the cities come one at a time.
+
+- **Your year: one card on Today in December** (owner, 1 Oct 2026): shown once, closed by the reader, on top of the first card in Insights; no notification.
+
+- **The Ways, first part** (Phase 11, 1 Oct 2026; `docs/adr/0014-ways.md`): the lines come from the relations through the Waymarked Trails API, chained by the shortest path over the main ways, simplified by `tools/build_ways.py`, which also writes the place strings; the content lives in `tools/ways_content.py`. A way keeps no distance: it is the days' own, computed on read. A finished way stays finished when its days are measured shorter later. A start is never before the first day counted. A stage is told by `WayNotifier`, which watches the written days only while a way is under way. The backup carries the ways as an added field, without a new format version. The map is `WayMapView` (Canvas) over Natural Earth; `PassoColors` gains `water`, because the dresses put their blue in different roles (Paper's secondary, Vivid's primary) and a sea in amber did not read as one. The ODbL credit is on the Ways page, in the guide, in Settings → Credits, in the README and in `licenses/`.
+- **City walks, built** (Phase 11 part two, 2 Oct 2026; `docs/adr/0015-city-walks.md`): a walk is a `WayId` of kind `WALK`, sharing the ways' script, data shape, journey table, map and stamps. Routes drawn once with BRouter over OpenStreetMap and committed in `tools/walks/` (the build never asks a router); the cities' water, canals and parks from the OpenStreetMap API. Milan 9.3 km with 14 places, London 10.7 km with 17: fewer than the planned twenty, because every place is on the route and none was added to fill a count. An outing on a walk is a distance goal (the distance left) with no quarter signals; its places are told from its stored totals, so a restart tells nothing twice (schema v5: `session.walk`, `session.walkFromMeters`). Progress is the walk's outings since its journey began, computed on read (`WalkDays`); the tracking service finishes the journey at the goal. The voice is a setting of the walks' own (`walkVoice`, headphones by default), since a walk is not a plan. Parks are a new colour role (`PassoColors.park`); a city's map has land around it and no locator. The README gains London during a walk.
+- **Three refinements after trying the walks** (owner, 2 Oct 2026): Today's first-day note goes as soon as the reader opens the guide from it (`UserSettings.firstDayNoteRead`, kept by this phone on import), and otherwise at the end of the day as before. A way finished or left, or a walk walked to its end, can be deleted from Your ways after a warning that it is for good (the days and outings stay; an older backup can bring it back, since an import never takes away); a way left before any of it was walked is not kept. A walk's page offers "Hear it" (the next place, as it will be told) and "Change voice", as the outing editor does; one sample rather than a touch on every place, whose sentences are already there to read (ADR 0015).
+
+- **The Camino named as readers know it** (owner, 1 Oct 2026): «Cammino di Santiago» / «Camino de Santiago», with its variant, the French Way (the classic one and the most walked), in the route line. Its stored id stays `CAMINO_FRANCES`.
+
+- **Five ways and five cities, then stop** (owner, 2 Oct 2026): the Camino Portugués from Porto becomes the fifth way, in a later step of Phase 11; the cities stay Milan, London, Rome, Paris and Madrid. More could be added one day, but none is planned.
+
 ### Open
+
+- **The Ways on a widget?** Not in Phase 11; a natural line for «In words» later.
 
 - Should a 7-day mini chart be offered in the 4x2 widget as an alternative to today's hourly bars (widget configuration)? Now a natural option on «At a glance»'s settings screen, once Phase 5 has the week.

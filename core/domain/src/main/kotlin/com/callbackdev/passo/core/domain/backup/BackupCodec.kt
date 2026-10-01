@@ -21,6 +21,9 @@ import com.callbackdev.passo.core.model.StepLengthMode
 import com.callbackdev.passo.core.model.ThemeMode
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.UserSettings
+import com.callbackdev.passo.core.model.WayId
+import com.callbackdev.passo.core.model.WayJourney
+import com.callbackdev.passo.core.model.WayJourneyState
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -56,7 +59,9 @@ sealed interface BackupRead {
  *   recorded on, which is kept as recorded even where a time-zone change put it elsewhere.
  * - Lengths are metres, weights kilograms, energy kilocalories, whatever units the app shows.
  * - Enum values are their names; a name this version does not know reads as the default, or
- *   leaves out the plan or outing it belongs to.
+ *   leaves out the plan, outing or way it belongs to.
+ * - `ways` (added with the Ways, 1.1.0) lists the ways and city walks started: a file without
+ *   it has none. An outing's `walk` and `walkFromMeters` say the city walk it walked, if any.
  *
  * Reading is lenient where a value can be dropped without lying (an unknown setting, a minute
  * with a negative count) and strict where it cannot (the format, the version, broken JSON).
@@ -129,6 +134,7 @@ private fun Backup.toFile() = BackupFile(
         minWalkMinutes = settings.minWalkMinutes,
         typicalDayLine = settings.typicalDayLine,
         startOutingButton = settings.startOutingButton,
+        walkVoice = settings.walkVoice.name,
     ),
     days = days.sortedBy { it.summary.localEpochDay }.map { day ->
         val summary = day.summary
@@ -184,9 +190,21 @@ private fun Backup.toFile() = BackupFile(
             pausedAtMillis = session.pausedAtMillis,
             reachedAtMillis = session.reachedAtMillis,
             toldMilestones = session.toldMilestones.percents(),
+            walk = session.walk?.name,
+            walkFromMeters = session.walkFromMeters,
         )
     },
     diagnostics = diagnostics.map { DiagnosticDto(it.wallMillis, it.type.name, it.detail) },
+    ways = journeys.sortedBy { it.startedAtMillis }.map { journey ->
+        WayDto(
+            way = journey.way.name,
+            startDate = LocalDate.ofEpochDay(journey.startEpochDay).toString(),
+            startedAtMillis = journey.startedAtMillis,
+            state = journey.state.name,
+            endedDate = journey.endedEpochDay?.let { LocalDate.ofEpochDay(it).toString() },
+            toldMeters = journey.toldMeters,
+        )
+    },
 )
 
 private fun BackupFile.toBackup(): Backup {
@@ -221,6 +239,7 @@ private fun BackupFile.toBackup(): Backup {
             minWalkMinutes = settings.minWalkMinutes ?: defaults.minWalkMinutes,
             typicalDayLine = settings.typicalDayLine ?: defaults.typicalDayLine,
             startOutingButton = settings.startOutingButton ?: defaults.startOutingButton,
+            walkVoice = settings.walkVoice.toEnumOrNull<SessionVoice>() ?: defaults.walkVoice,
         ),
         days = days.mapNotNull { it.toDay() }
             // One entry per day: a file edited by hand may repeat one, and the fuller one is kept.
@@ -232,6 +251,24 @@ private fun BackupFile.toBackup(): Backup {
         diagnostics = diagnostics.mapNotNull { row ->
             row.type.toEnumOrNull<DiagnosticsType>()?.let { DiagnosticsEvent(row.atMillis, it, row.detail) }
         },
+        journeys = ways.mapNotNull { it.toJourney() },
+    )
+}
+
+private fun WayDto.toJourney(): WayJourney? {
+    val id = way.toEnumOrNull<WayId>() ?: return null
+    val start = startDate.toEpochDayOrNull() ?: return null
+    val state = state.toEnumOrNull<WayJourneyState>() ?: WayJourneyState.LEFT
+    val ended = endedDate?.toEpochDayOrNull()
+    return WayJourney(
+        id = 0,
+        way = id,
+        startEpochDay = start,
+        startedAtMillis = startedAtMillis,
+        // A way over without its last day would keep moving: it stops where it started.
+        state = state,
+        endedEpochDay = if (state == WayJourneyState.ACTIVE) null else ended ?: start,
+        toldMeters = toldMeters.coerceAtLeast(0),
     )
 }
 
@@ -308,6 +345,8 @@ private fun OutingDto.toSession(): Session? {
         pausedAtMillis = pausedAtMillis,
         reachedAtMillis = reachedAtMillis,
         toldMilestones = toldMilestones.toMilestones(),
+        walk = walk.toEnumOrNull<WayId>(),
+        walkFromMeters = walkFromMeters.coerceAtLeast(0),
     )
 }
 

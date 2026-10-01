@@ -81,4 +81,7 @@
     <string name="editor_voice_install">Installa una voce</string>
     <string name="editor_voice_no_engine">Questo telefono non ha un motore di sintesi vocale: i segnali sono solo vibrazioni.</string>
     <string name="editor_voice_change">Cambia voce</string>
+    <!-- The door to the city walks, on the Ways page (Phase 11). -->
+    <string name="sessions_cities_title">Passeggia in una città</string>
+    <string name="sessions_cities_body">Milano o Londra, da dove sei: ogni luogo ti viene detto quando i tuoi passi lo raggiungono.</string>
 </resources>

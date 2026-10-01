@@ -85,4 +85,7 @@
     <string name="editor_voice_install">Install a voice</string>
     <string name="editor_voice_no_engine">This phone has no text-to-speech engine: the signals are vibrations only.</string>
     <string name="editor_voice_change">Change voice</string>
+    <!-- The door to the city walks, on the Ways page (Phase 11). -->
+    <string name="sessions_cities_title">Walk through a city</string>
+    <string name="sessions_cities_body">Milan or London, from wherever you are: each place told as your steps reach it.</string>
 </resources>

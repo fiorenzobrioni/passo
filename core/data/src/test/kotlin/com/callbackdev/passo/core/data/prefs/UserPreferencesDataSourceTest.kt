@@ -8,6 +8,7 @@ import com.callbackdev.passo.core.data.TestDataStore
 import com.callbackdev.passo.core.model.AppFont
 import com.callbackdev.passo.core.model.AppPalette
 import com.callbackdev.passo.core.model.Profile
+import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.Sex
 import com.callbackdev.passo.core.model.StepLengthMode
 import com.callbackdev.passo.core.model.ThemeMode
@@ -82,7 +83,9 @@ class UserPreferencesDataSourceTest {
             minWalkMinutes = 15,
             typicalDayLine = false,
             startOutingButton = false,
+            walkVoice = SessionVoice.ALWAYS,
             onboardingCompleted = true,
+            firstDayNoteRead = true,
         )
 
         assertThat(source.updateSettings { settings }).isEqualTo(settings)

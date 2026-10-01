@@ -11,6 +11,7 @@ import androidx.room.Room
 import com.callbackdev.passo.core.data.db.PassoDatabase
 import com.callbackdev.passo.core.data.db.SessionDao
 import com.callbackdev.passo.core.data.db.TrackingDao
+import com.callbackdev.passo.core.data.db.WayDao
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
 import com.callbackdev.passo.core.data.time.TodaySource
 import dagger.Module
@@ -33,6 +34,9 @@ object DataModule {
 
     @Provides
     fun sessionDao(database: PassoDatabase): SessionDao = database.sessionDao()
+
+    @Provides
+    fun wayDao(database: PassoDatabase): WayDao = database.wayDao()
 
     /**
      * One instance per process, as DataStore requires. A corrupt file is replaced by an empty

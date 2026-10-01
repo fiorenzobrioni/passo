@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.data.TestDataStore
 import com.callbackdev.passo.core.data.db.PassoDatabase
+import com.callbackdev.passo.core.data.db.WayJourneyEntity
 import com.callbackdev.passo.core.data.db.toEntity
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
@@ -24,6 +25,8 @@ import com.callbackdev.passo.core.model.StepLengthMode
 import com.callbackdev.passo.core.model.ThemeMode
 import com.callbackdev.passo.core.model.TrackerState
 import com.callbackdev.passo.core.model.UnitSystem
+import com.callbackdev.passo.core.model.WayId
+import com.callbackdev.passo.core.model.WayJourneyState
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
@@ -57,7 +60,13 @@ class BackupRepositoryTest {
         val store = TestDataStore(File(folder.root, name).apply { mkdirs() })
         val preferences = UserPreferencesDataSource(store.dataStore)
         val tracking = TrackingRepository(database.trackingDao(), preferences) { today }
-        val backups = BackupRepository(database.trackingDao(), database.sessionDao(), preferences, tracking)
+        val backups = BackupRepository(
+            database.trackingDao(),
+            database.sessionDao(),
+            database.wayDao(),
+            preferences,
+            tracking,
+        )
 
         suspend fun walk(vararg minutes: MinuteSteps) {
             tracking.persist(
@@ -228,5 +237,40 @@ class BackupRepositoryTest {
         assertThat(rows(old.backups.csv(CsvTable.DAYS, UnitSystem.METRIC, ZoneOffset.UTC))).isEqualTo(3)
         assertThat(rows(old.backups.csv(CsvTable.MINUTES, UnitSystem.METRIC, ZoneOffset.UTC))).isEqualTo(6)
         assertThat(rows(old.backups.csv(CsvTable.OUTINGS, UnitSystem.METRIC, ZoneOffset.UTC))).isEqualTo(1)
+    }
+
+    @Test
+    fun `a way travels with the file, and comes in put down when this phone walks another`() = runTest {
+        history()
+        old.database.wayDao().insert(
+            WayJourneyEntity(
+                way = WayId.VIA_FRANCIGENA.name,
+                startEpochDay = day,
+                startedAtMillis = 5_000,
+                state = WayJourneyState.ACTIVE.name,
+                endedEpochDay = null,
+                toldMeters = 1_200,
+            ),
+        )
+        new.database.wayDao().insert(
+            WayJourneyEntity(
+                way = WayId.VIA_DEGLI_DEI.name,
+                startEpochDay = day + 1,
+                startedAtMillis = 9_000,
+                state = WayJourneyState.ACTIVE.name,
+                endedEpochDay = null,
+                toldMeters = 0,
+            ),
+        )
+        val file = exported()
+        val report = new.backups.import(read(file), withPreferences = false)
+        assertThat(report.addedWays).isEqualTo(1)
+        val francigena = new.database.wayDao().journeys().single { it.way == WayId.VIA_FRANCIGENA.name }
+        assertThat(francigena.state).isEqualTo(WayJourneyState.LEFT.name)
+        assertThat(francigena.toldMeters).isEqualTo(1_200)
+        assertThat(new.database.wayDao().activeAmong(listOf(WayId.VIA_DEGLI_DEI.name)).single().way)
+            .isEqualTo(WayId.VIA_DEGLI_DEI.name)
+        // The same file again brings nothing.
+        assertThat(new.backups.import(read(file), withPreferences = false).addedWays).isEqualTo(0)
     }
 }

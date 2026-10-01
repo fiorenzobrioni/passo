@@ -9,7 +9,7 @@ import com.callbackdev.passo.core.model.SessionMilestone
 /**
  * The outing's signals as vibrations (PLANNING.md §11 Phase 10), for a phone in a pocket or on
  * an arm: a count of short pulses for the quarters (one, two, three), one long one for the goal,
- * two long ones for an end brought by a long stillness. Read without looking, and learned from
+ * two long ones for an end brought by a long stillness; on a city walk, one short pulse a place. Read without looking, and learned from
  * the editor's "Try it".
  *
  * They are notification vibrations for Android: the phone's silent mode and its notification
@@ -18,6 +18,9 @@ import com.callbackdev.passo.core.model.SessionMilestone
 object SessionHaptics {
     /** Plays [milestone]'s pattern. */
     fun play(context: Context, milestone: SessionMilestone) = vibrate(context, pattern(milestone))
+
+    /** A city walk's place reached: one short pulse (a walk has no quarters to confuse it with). */
+    fun playPlace(context: Context) = vibrate(context, placePattern())
 
     /** Plays the end by stillness: the outing is over, and can still be taken back. */
     fun playEndedStill(context: Context) = vibrate(context, endedStillPattern())
@@ -45,6 +48,9 @@ object SessionHaptics {
         SessionMilestone.THREE_QUARTERS -> pulses(3)
         SessionMilestone.GOAL -> longArrayOf(0, LONG_MS)
     }
+
+    /** A walk's place, off and on as [pattern]'s are. */
+    fun placePattern(): LongArray = pulses(1)
 
     /** The end by stillness, off and on as [pattern]'s are. */
     fun endedStillPattern(): LongArray = longArrayOf(0, STILL_MS, STILL_GAP_MS, STILL_MS)

@@ -17,15 +17,30 @@ import androidx.compose.ui.graphics.Color
  * - **attention**: an ink for "this is not live right now" (a widget whose counting is paused or
  *   stopped): Chiaro's freshness ink, which says "this data is old" in the same amber, 7:1 or
  *   better on either surface. The same class of statement, so it does not learn a new color.
+ * - **water**: the sea and the lakes of a way's map (Phase 11), the one ground Material has no
+ *   role for: the dresses put their blue in different roles (Paper's secondary, Vivid's primary),
+ *   and a sea in amber would not read as one. A pale sky in light, a deep one in dark, Chiaro's
+ *   hue; a ground for marks, never for text.
+ * - **park**: a city's parks on a walk's map (Phase 11): a pale sage in light, a deep one in
+ *   dark, quieter than the goal's green so the walked line stays the strongest mark on it.
  */
 @Immutable
-data class PassoColors(val goal: Color, val goalContainer: Color, val effortRamp: List<Color>, val attention: Color)
+data class PassoColors(
+    val goal: Color,
+    val goalContainer: Color,
+    val effortRamp: List<Color>,
+    val attention: Color,
+    val water: Color,
+    val park: Color,
+)
 
 internal val PaperLightColors = PassoColors(
     goal = Color(0xFF005D2D),
     goalContainer = Color(0xFFD1EDD9),
     effortRamp = listOf(Color(0xFFFDE8B0), Color(0xFFFAC66A), Color(0xFFF29A2E), Color(0xFFD9661A), Color(0xFFA8400F)),
     attention = Color(0xFF7A5200),
+    water = Color(0xFFCFE3F2),
+    park = Color(0xFFDCE8D3),
 )
 
 internal val PaperDarkColors = PassoColors(
@@ -33,6 +48,8 @@ internal val PaperDarkColors = PassoColors(
     goalContainer = Color(0xFF003F23),
     effortRamp = listOf(Color(0xFF4A2A08), Color(0xFF7A4210), Color(0xFFB8621A), Color(0xFFE8872A), Color(0xFFFFB55C)),
     attention = Color(0xFFFFBC27),
+    water = Color(0xFF0F2A3B),
+    park = Color(0xFF1C2B20),
 )
 
 internal val VividLightColors = PassoColors(
@@ -40,6 +57,8 @@ internal val VividLightColors = PassoColors(
     goalContainer = Color(0xFFBFF2CE),
     effortRamp = listOf(Color(0xFFFFE8AA), Color(0xFFFFC559), Color(0xFFF89700), Color(0xFFDE6300), Color(0xFFAC3D00)),
     attention = Color(0xFF7A5200),
+    water = Color(0xFFCFE1F5),
+    park = Color(0xFFDAEAD4),
 )
 
 internal val VividDarkColors = PassoColors(
@@ -47,6 +66,8 @@ internal val VividDarkColors = PassoColors(
     goalContainer = Color(0xFF003F23),
     effortRamp = listOf(Color(0xFF4D2900), Color(0xFF7E4000), Color(0xFFBD5F00), Color(0xFFEF8300), Color(0xFFFFB55C)),
     attention = Color(0xFFFFBC27),
+    water = Color(0xFF0E2638),
+    park = Color(0xFF1B2C21),
 )
 
 val LocalPassoColors = staticCompositionLocalOf { VividLightColors }

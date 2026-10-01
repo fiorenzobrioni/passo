@@ -77,17 +77,19 @@ import java.time.LocalDate
 fun InsightsRoute(
     onOpenSettings: () -> Unit,
     onOpenPeriod: (PeriodScale, LocalDate) -> Unit,
+    onOpenWays: () -> Unit,
     bottomPadding: Dp,
     viewModel: InsightsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    InsightsScreen(state, onOpenSettings, onOpenPeriod, bottomPadding = bottomPadding)
+    InsightsScreen(state, onOpenSettings, onOpenPeriod, onOpenWays = onOpenWays, bottomPadding = bottomPadding)
 }
 
 /**
  * Insights (PLANNING.md §11 Phase 5): one sentence first, then the streak with the last seven
  * days, the records (each opens its day, week or month in History), the averages and what it
  * all adds up to. Every goal is the one of its own day, so nothing here moves when the goal does.
+ * The way under way follows the streak (Phase 11); with none, the door to the Ways closes the page.
  */
 @Composable
 fun InsightsScreen(
@@ -95,6 +97,7 @@ fun InsightsScreen(
     onOpenSettings: () -> Unit,
     onOpenPeriod: (PeriodScale, LocalDate) -> Unit,
     modifier: Modifier = Modifier,
+    onOpenWays: () -> Unit = {},
     bottomPadding: Dp = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
 ) {
     Surface(modifier = modifier.fillMaxSize()) {
@@ -112,13 +115,18 @@ fun InsightsScreen(
                     Icon(PassoIcons.Settings, contentDescription = stringResource(R.string.insights_settings))
                 }
             }
-            if (state != null) InsightsList(state, onOpenPeriod, bottomPadding)
+            if (state != null) InsightsList(state, onOpenPeriod, onOpenWays, bottomPadding)
         }
     }
 }
 
 @Composable
-private fun InsightsList(state: InsightsUiState, onOpenPeriod: (PeriodScale, LocalDate) -> Unit, bottomPadding: Dp) {
+private fun InsightsList(
+    state: InsightsUiState,
+    onOpenPeriod: (PeriodScale, LocalDate) -> Unit,
+    onOpenWays: () -> Unit,
+    bottomPadding: Dp,
+) {
     val format = rememberMeasureFormatter(state.units)
     val insights = state.insights
     LazyColumn(
@@ -128,6 +136,10 @@ private fun InsightsList(state: InsightsUiState, onOpenPeriod: (PeriodScale, Loc
         item(key = "headline") { Headline(state, format) }
         val firstDay = insights.firstDay ?: return@LazyColumn
         item(key = "streak") { StreakCard(state) }
+        state.way?.let { way ->
+            item(key = "way-header") { GroupHeader(stringResource(R.string.insights_group_way)) }
+            item(key = "way") { WayCard(way, format, onOpenWays) }
+        }
 
         item(key = "records-header") { GroupHeader(stringResource(R.string.insights_group_records)) }
         item(key = "records") { Records(state, format, onOpenPeriod) }
@@ -139,6 +151,9 @@ private fun InsightsList(state: InsightsUiState, onOpenPeriod: (PeriodScale, Loc
             GroupHeader(stringResource(R.string.insights_group_totals, shortDateWithYear(firstDay)))
         }
         item(key = "totals") { Totals(state, format) }
+        if (state.way == null) {
+            item(key = "ways-door") { WaysDoor(onOpenWays) }
+        }
     }
 }
 
@@ -599,4 +614,6 @@ object InsightsTags {
     const val RECORDS = "insights_records"
     const val AVERAGES = "insights_averages"
     const val TOTALS = "insights_totals"
+    const val WAY = "insights_way"
+    const val WAYS_DOOR = "insights_ways_door"
 }

@@ -2,6 +2,8 @@ package com.callbackdev.passo.core.designsystem.format
 
 import android.content.res.Resources
 import com.callbackdev.passo.core.designsystem.R
+import com.callbackdev.passo.core.designsystem.ways.placeNameRes
+import com.callbackdev.passo.core.designsystem.ways.walkOutingRes
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.metrics.MetricsConstants
 import com.callbackdev.passo.core.domain.sessions.SessionAmount
@@ -10,6 +12,9 @@ import com.callbackdev.passo.core.domain.sessions.cadenceFloor
 import com.callbackdev.passo.core.domain.sessions.done
 import com.callbackdev.passo.core.domain.sessions.goal
 import com.callbackdev.passo.core.domain.sessions.progress
+import com.callbackdev.passo.core.domain.ways.NextPlace
+import com.callbackdev.passo.core.domain.ways.WalkPlaces
+import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
@@ -42,7 +47,16 @@ fun Resources.sessionName(name: String?, intensity: SessionIntensity, restOfDay:
 fun Resources.sessionName(plan: SessionPlan): String =
     sessionName(plan.name, plan.intensity, plan.goalKind == SessionGoalKind.REST_OF_DAY)
 
-fun Resources.sessionName(session: Session): String = sessionName(session.name, session.intensity, session.restOfDay)
+/** An outing on a city walk is named by its walk («A walk in Milan»), any other as above. */
+fun Resources.sessionName(session: Session): String = session.walk?.let(::walkOutingRes)?.let(::getString)
+    ?: sessionName(session.name, session.intensity, session.restOfDay)
+
+/** «Next: the Duomo, 600 m»: the place ahead on a walk. */
+fun Resources.walkNext(next: NextPlace, format: MeasureFormatter): String = getString(
+    R.string.walk_next,
+    getString(placeNameRes(next.stop.key)),
+    format(format.aheadDistance(next.inMeters.toDouble())),
+)
 
 fun Resources.intensityLabel(intensity: SessionIntensity): String = getString(
     when (intensity) {
@@ -110,9 +124,20 @@ fun Resources.intensityPhrase(intensity: SessionIntensity, amount: String): Stri
 fun Resources.sessionProgress(session: Session, format: MeasureFormatter): String =
     getString(R.string.session_progress, sessionNumber(session.done(), format), sessionAmount(session.goal(), format))
 
-/** The one sentence an outing is told with. */
-fun Resources.sessionHeadline(session: Session, format: MeasureFormatter): String =
-    when (val headline = SessionHeadline.of(session)) {
+/**
+ * The one sentence an outing is told with. On a city walk, while it goes, the place ahead: what
+ * the reader walks towards says more than the metres left.
+ */
+fun Resources.sessionHeadline(session: Session, format: MeasureFormatter): String {
+    val headline = SessionHeadline.of(session)
+    val going = headline is SessionHeadline.Starting || headline is SessionHeadline.Going ||
+        headline is SessionHeadline.PastHalf || headline is SessionHeadline.AlmostThere
+    if (going) WalkPlaces.next(session)?.let { return walkNext(it, format) }
+    val walk = session.walk
+    if (headline is SessionHeadline.Reached && walk != null) {
+        return getString(R.string.walk_done, getString(placeNameRes(Ways.of(walk).stops.last().key)))
+    }
+    return when (headline) {
         is SessionHeadline.Starting -> getString(
             R.string.session_headline_starting,
             sessionAmount(headline.goal, format),
@@ -137,6 +162,7 @@ fun Resources.sessionHeadline(session: Session, format: MeasureFormatter): Strin
             format.percent(headline.progress.coerceAtMost(1.0)),
         )
     }
+}
 
 private fun Resources.amountPlural(id: Int, amount: SessionAmount, format: MeasureFormatter): String {
     // A distance reads as many whatever its value: «mancano 1,20 km».

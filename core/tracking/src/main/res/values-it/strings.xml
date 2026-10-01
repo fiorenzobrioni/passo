@@ -153,4 +153,34 @@
     <string name="spoken_well_done">Ben fatto.</string>
     <string name="spoken_ended_still">Uscita chiusa dopo una lunga sosta, a %1$s. Puoi riprenderla dalla notifica.</string>
     <string name="spoken_zone">%1$d su %2$s al tuo ritmo.</string>
+
+    <!-- I cammini (PLANNING.md §11 Fase 11) -->
+    <string name="ways_channel_name">Cammini</string>
+    <string name="ways_channel_description">Una tappa raggiunta sul cammino che stai percorrendo, e il suo arrivo.</string>
+    <string name="way_stage_title">Tappa raggiunta: %1$s</string>
+    <string name="way_stage_text">%1$s: %2$s su %3$s. Prossima tappa, %4$s, tra %5$s.</string>
+    <string name="way_finished_title">Arrivo: %1$s</string>
+    <plurals name="way_finished_text">
+        <item quantity="one">%1$s: %2$s percorsi in %3$d giorno.</item>
+        <item quantity="many">%1$s: %2$s percorsi in %3$d giorni.</item>
+        <item quantity="other">%1$s: %2$s percorsi in %3$d giorni.</item>
+    </plurals>
+    <!-- City walks (Phase 11). «Passeggiata a Milano: si parte. Qui: Il Duomo. Milano…» -->
+    <string name="spoken_walk_started">%1$s: si parte. Qui: %2$s.</string>
+    <!-- «Passeggiata a Milano: si riparte. Da qui: Castello Sforzesco.» -->
+    <string name="spoken_walk_continued">%1$s: si riparte. Da qui: %2$s.</string>
+    <string name="spoken_walk_here">Qui: %1$s.</string>
+    <string name="spoken_walk_behind">Alle spalle: %1$s.</string>
+    <string name="spoken_walk_next">Più avanti: %1$s, tra %2$s.</string>
+    <string name="spoken_walk_end">Passeggiata conclusa, in %1$s.</string>
+    <plurals name="spoken_metres">
+        <item quantity="one">%1$s metro</item>
+        <item quantity="many">%1$s metri</item>
+        <item quantity="other">%1$s metri</item>
+    </plurals>
+    <plurals name="spoken_yards">
+        <item quantity="one">%1$s iarda</item>
+        <item quantity="many">%1$s iarde</item>
+        <item quantity="other">%1$s iarde</item>
+    </plurals>
 </resources>

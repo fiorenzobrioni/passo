@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The ways (PLANNING.md §11 Phase 11): what the Ways page and Insights both say. -->
+<resources>
+    <string name="way_headline_start">Starting point: %1$s</string>
+    <string name="way_headline_past">Past %1$s</string>
+    <string name="way_headline_arrived">Arrived in %1$s</string>
+    <string name="way_headline_left">Left past %1$s</string>
+    <string name="way_to_end">%1$s to %2$s</string>
+    <string name="way_next_stage">Next stage: %1$s, in %2$s</string>
+    <string name="way_progress">%1$s of %2$s</string>
+    <plurals name="way_stages">
+        <item quantity="one">%1$d stage</item>
+        <item quantity="other">%1$d stages</item>
+    </plurals>
+    <plurals name="way_places">
+        <item quantity="one">%1$d place</item>
+        <item quantity="other">%1$d places</item>
+    </plurals>
+    <plurals name="way_duration_days">
+        <item quantity="one">about %1$d day</item>
+        <item quantity="other">about %1$d days</item>
+    </plurals>
+    <plurals name="way_duration_weeks">
+        <item quantity="one">about %1$d week</item>
+        <item quantity="other">about %1$d weeks</item>
+    </plurals>
+    <plurals name="way_duration_months">
+        <item quantity="one">about %1$d month</item>
+        <item quantity="other">about %1$d months</item>
+    </plurals>
+    <plurals name="way_duration_years">
+        <item quantity="one">about %1$d year</item>
+        <item quantity="other">about %1$d years</item>
+    </plurals>
+    <string name="way_map_spoken">Map: %1$s, %2$s.</string>
+    <string name="way_map_spoken_walked">Map: %1$s. %2$s walked of %3$s, past %4$s.</string>
+</resources>

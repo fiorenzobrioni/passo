@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -55,6 +56,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.callbackdev.passo.core.designsystem.components.SessionCard
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
+import com.callbackdev.passo.core.designsystem.components.SettingsGroup
 import com.callbackdev.passo.core.designsystem.components.StatusCard
 import com.callbackdev.passo.core.designsystem.components.StatusTone
 import com.callbackdev.passo.core.designsystem.components.sessionIcon
@@ -78,7 +80,12 @@ import com.callbackdev.passo.core.tracking.SessionSignalsAccess
 
 /** The Outings page with its state, and the notification permission it may ask for. */
 @Composable
-fun SessionsRoute(onBack: () -> Unit, onEdit: (Long?) -> Unit, viewModel: SessionsViewModel = hiltViewModel()) {
+fun SessionsRoute(
+    onBack: () -> Unit,
+    onEdit: (Long?) -> Unit,
+    onOpenWays: () -> Unit = {},
+    viewModel: SessionsViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     var block by remember { mutableStateOf(SessionSignalsAccess.block(context)) }
@@ -121,6 +128,7 @@ fun SessionsRoute(onBack: () -> Unit, onEdit: (Long?) -> Unit, viewModel: Sessio
             openSignalSettings = {
                 runCatching { context.startActivity(SessionSignalsAccess.settingsIntent(context, block)) }
             },
+            openWays = onOpenWays,
         ),
     )
 }
@@ -131,6 +139,7 @@ class SessionsActions(
     val card: SessionCardActions = SessionCardActions(),
     val resumeTracking: () -> Unit = {},
     val openSignalSettings: () -> Unit = {},
+    val openWays: () -> Unit = {},
 )
 
 /**
@@ -301,6 +310,7 @@ private fun SessionsList(
                 Text(stringResource(R.string.sessions_new))
             }
         }
+        item(key = "cities") { CitiesDoor(actions.openWays) }
         item(key = "footer") {
             Column(
                 verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -456,4 +466,34 @@ object SessionsTags {
     const val START = "sessions_start"
     const val NEW = "sessions_new"
     const val BLOCKED = "sessions_blocked"
+    const val CITIES = "sessions_cities"
+}
+
+/**
+ * The door to the city walks (Phase 11): an outing whose goal is a walk through a city, its
+ * places told on the way. They live on the Ways page, with the ways.
+ */
+@Composable
+private fun CitiesDoor(onOpen: () -> Unit) {
+    SettingsGroup(modifier = Modifier.padding(top = 4.dp).testTag(SessionsTags.CITIES)) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onOpen, role = Role.Button)
+                .padding(horizontal = ScreenMargin, vertical = 14.dp),
+        ) {
+            Icon(PassoIcons.Way, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(stringResource(R.string.sessions_cities_title), style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    stringResource(R.string.sessions_cities_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Icon(PassoIcons.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
 }
