@@ -1,0 +1,122 @@
+# Passo 1.0.0: the development record
+
+Passo reached 1.0.0 with no release before it. This is the entry-by-entry record of what was
+built on the way, phase by phase (PLANNING.md §11); the release notes of 1.0.0 are the short
+section in [CHANGELOG.md](../CHANGELOG.md).
+
+### Added
+
+- The project skeleton (PLANNING.md Phase 0): the module layout, the convention plugins, the
+  Material 3 theme with dynamic color, English and Italian through the system per-app
+  language picker, and a launchable app with nothing in it yet.
+- A build that refuses any network, location, exact-alarm or body-sensor permission, checked
+  on every push.
+- Step counting in the background (Phase 1): the phone's hardware step counter, read by a
+  foreground service that starts again by itself after a reboot or an app update, and saves
+  the count before a shutdown. Steps are kept per minute, on the phone only, and survive
+  reboots, sensor resets, midnight, time-zone and clock changes.
+- A notification with today's steps, and a first screen that asks for the "Physical activity"
+  permission (or explains a phone without a step counter).
+- Distance, active calories, active minutes, brisk minutes and cadence for every day (Phase 2),
+  estimated from the steps and an optional profile (height, weight, step length), with the
+  sources of every formula in the code. Metric and imperial units, and numbers written the way
+  your language writes them.
+- A daily goal that is kept with each day. Changing your weight, step length or goal updates
+  today only: days already over keep the numbers they had, unless you ask to apply the new
+  profile to the past.
+- The Today screen (Phase 3): a ring that shows the day's steps against the goal and where a
+  usual day of the same weekday stands at this hour, one sentence that says how the day is
+  going and what is left, a chart of the day you can read with a finger, and distance,
+  calories, active and brisk minutes and cadence, each with what it means. It counts live while
+  it is open.
+- A short first run (welcome, profile, goal, permissions, and a battery tip on the phones that
+  need one), and Settings: profile, goal, units, the usual-day line, theme, palette and
+  typeface (Google Sans, Inter or the system's, as in Chiaro), language, pausing the count.
+- Two home-screen widgets (Phase 4), in the same dress as Chiaro's so the two apps' cards sit
+  side by side: «At a glance» (today's ring, with a notch where a usual day stands by now, the
+  count, the goal, the day's sentence, and on a wide tall card today's steps hour by hour) and
+  «In words» (the day in type alone: the count large, the sentence, the goal, distance and
+  calories, and on a tall card the day in figures). Both resize from one cell up and lay
+  themselves out for every size.
+- Each widget has its own settings, from a long press on the home screen: light, dark, the
+  phone's own or one of six colours, any opacity, what it shows, and which side the ring is on,
+  with the card itself as a live preview at every size.
+- A widget whose count is not moving says so: paused (a tap resumes it), stopped by the system
+  (a tap restarts it) or without the permission (a tap opens the app to allow it).
+- The widgets repaint when the screen comes on, at most once a minute while it stays on, and
+  never while it is off. If today's steps cannot be read, a widget says so instead of loading
+  forever.
+- Passo now looks like Chiaro: the same colors, typefaces, shapes and motion.
+- The app icon: Chiaro's ring in green, with a footprint where Chiaro has its sun, so the two
+  sit side by side on a home screen as one family. Themed icons (Android 13+) get the same
+  drawing.
+- History (Phase 5): a day, a week, a month or a year at a time, swiped or stepped through
+  from the first day Passo counted to today. A day shows its steps hour by hour with the walks
+  marked on the chart, its measures and its walks; a week, a month and a year show their bars
+  against each day's own goal, how many days met it and how the period compares with the one
+  before; a month adds a calendar of how close each day came to its goal. Touch a bar or a day
+  to read it and open it.
+- Walks, found on their own in the steps already counted (Phase 5): stretches of steady walking
+  or running, with their time, length, steps, distance, cadence and calories, on Today and in
+  History. No extra sensor and no background work; they can be turned off, and the shortest
+  one counted is 5, 10 or 15 minutes.
+- Insights (Phase 5): the streak of days at your goal with the last seven days, your best day,
+  week and month and longest streak (each opens in History), averages over the last 7 and 30
+  complete days, and what it all adds up to since the first day.
+- A bottom bar for Today, History and Insights, and the first day of the week in Settings.
+- The counting notification, expanded, shows the day (Phase 6): how far the goal is, or when it
+  was reached, the share of the goal with the active minutes, the estimated distance and
+  calories, and a bar towards the goal. Updated only while the screen is on, as before.
+- Settings says how the counting notification shows and opens Android's page for it, where it
+  can be minimized (no icon in the status bar) or turned off. Passo keeps counting either way.
+- Goal notifications (Phase 6), each off until you turn it on in Settings: the goal reached,
+  once a day and never twice (not after a restart, not after a time-zone change), with the
+  time and the streak it extends; an evening reminder at the time you pick, only if the day is
+  below the share of the goal you choose (until it is met, below 75%, below half), saying the
+  steps left and the brisk walk they take; and a weekly summary on the first day of the week,
+  with the week's steps, its days at the goal, its best day and how it compares with the week
+  before. If Android is blocking them, Settings says so and opens the page that fixes it.
+- A Quick Settings tile (Phase 6) with today's steps and the share of the goal, or why the
+  count is not moving; it reads only while the panel is open, and a tap opens Today (or
+  resumes a paused count). Settings adds it with one tap.
+- Outings (Phase 10): a walk or a run with a goal, started on purpose. One goal (steps, a
+  distance, minutes in motion, or the rest of the day) and an optional pace (brisk, vigorous,
+  running), measured from the steps. On the way it vibrates at the shares you choose (one, two,
+  three short pulses) and once, long, at the goal, so a phone in a pocket is read without
+  looking; the counting notification becomes the outing's, with Pause and Stop (a Live Update
+  on Android 16). Keep your outings on their own page, start one from Today, from the
+  launcher's long press or from the evening reminder's "Walk now"; see it in the widgets and the
+  Quick Settings tile while it lasts, and in the day's walks afterwards, with how much of its
+  goal was done. An outing that ends by itself after a long stop tells you so when you walk on
+  (two long pulses, and the voice if it speaks), and "Resume" takes it back for a quarter of an
+  hour, with the steps since.
+- A voice for outings, if you want it: the start, each signal with what is left and your
+  pace, and the goal, spoken through your headphones (or out loud too, when the phone is not
+  on silent). It uses a voice installed on the phone, never one from the internet, and lowers
+  your music for a moment rather than stopping it. Off unless you turn it on for an outing;
+  the editor lets you hear it first.
+- Your data, in files you keep (Phase 7): a backup of everything (every minute, every day as
+  it was recorded, the outings, the profile and the settings) to one file, and tables of days,
+  minutes or outings for a spreadsheet. A backup imported on this or another phone is shown
+  first, then joined with what the phone already has: nothing is deleted, nothing is counted
+  twice, and on a new phone the history comes back exactly. No storage permission: you pick
+  where the file goes.
+- Measure your step: walk a distance you know (a track, a pitch) with the phone in your
+  pocket, and Passo works out your walking or running step from the steps it counted, says
+  what it changes, and keeps it if you want. No GPS.
+- Foldables (Phase 7): open, every page is a column in the middle of the screen instead of
+  stretching across it; folded, nothing changes. On a phone turned on its side, the display
+  cutout and a side navigation bar no longer cover anything.
+
+### Changed
+
+- Android's own backup and phone-to-phone transfer now carry exactly the step history, the
+  profile and the settings, and nothing else. Passo still has no internet permission and sends
+  nothing itself; after a restore it starts counting again from zero steps, so the new phone's
+  earlier steps are never added in one go.
+- Larger text reads better (Phase 7): at up to twice the size, tiles go one above the other
+  instead of breaking a word, chart labels have room and never overlap, the History scale's
+  words stay whole, and a date or a time is no longer cut.
+- The goal calendar's day numbers are easier to read: every level of the calendar now has
+  enough contrast, and the days not counted are no longer faint. The widget's colour choices
+  are easier to tap.

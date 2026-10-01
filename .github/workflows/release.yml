@@ -69,7 +69,7 @@ jobs:
           ORG_GRADLE_PROJECT_PASSO_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       # Named after the tag: the mapping must stay paired with the exact APK it deobfuscates,
-      # and the checksum lets a reader verify the download (README, "Installing and verifying").
+      # and the checksum lets a reader verify the download (README, "Install").
       - name: Rename artifacts after the tag, write the checksum
         run: |
           cp app/build/outputs/apk/release/app-release.apk "passo-${GITHUB_REF_NAME}.apk"
