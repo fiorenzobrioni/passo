@@ -422,8 +422,13 @@ class Walk:
     canal_width: float = 20.0
     streets: bool = True
     # Street classes drawn as minor streets beside the usual ones, for a city mapped mostly in
-    # those (Cusco's old centre is residential lanes).
+    # those (Cusco's old centre is residential lanes; so are Milan's and Rome's centres, where
+    # tertiary streets are few).
     more_streets: tuple = ()
+    # The shortest of those drawn, in metres (joined end to end): a dense grid of lanes kept
+    # to its longer streets, so the map is as full as the other cities' and the arteries still
+    # read. None: the same as every street.
+    more_streets_min_metres: float | None = None
 
 
 MILAN = Walk(
@@ -439,6 +444,8 @@ MILAN = Walk(
     water=["way/345030396"],
     canals=["relation/3340142", "relation/3350738"],
     parks=["relation/10172760", "way/5110320", "way/260829251"],
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=400,
     stops=[
         Stop("milan_duomo", "The Duomo", "Il Duomo", 45.4640, 9.1905,
              note_en="Milan began its cathedral in 1386, and building went on for nearly six centuries.",
@@ -506,6 +513,8 @@ ROME = Walk(
     country="IT",
     water=["relation/5071", "way/22797948", "way/22747533"],
     parks=["relation/2985896", "relation/11384819", "relation/10646138", "way/113038199"],
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=400,
     stops=[
         Stop("rome_colosseum", "The Colosseum", "Il Colosseo", 41.8909, 12.4919,
              note_en="Opened in AD 80, the Colosseum is the largest amphitheatre of the ancient world.",
