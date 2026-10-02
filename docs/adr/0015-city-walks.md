@@ -43,7 +43,12 @@ moves with the distance their steps measure.
    in its cache, joins them end to end, drops pieces under 150 m (crossings and bits of squares
    read as noise) and simplifies them like the rest of the map: a few tens of kilobytes a city. A city
    mapped mostly in smaller classes adds them as minor streets (Cusco's old centre is residential
-   lanes: `more_streets` in the content).
+   lanes: `more_streets` in the content). Milan's and Rome's centres are mapped the same way
+   (Milan's has almost no tertiary street), so their maps came out half as full as London's or
+   Paris's (owner, 2 Oct 2026); they add the residential lanes too, but only those at least
+   400 m long once joined (`more_streets_min_metres`): every lane would make them busier than
+   any other city and drown the arteries. The cache keeps those classes for every city, so
+   choosing them needs no new fetch.
 4. **A walk is walked in outings.** An outing on a walk (`session.walk`, `session.walkFromMeters`,
    schema v5 by auto-migration) has the distance left as its goal, no quarter signals, and the
    walk's places as its signals. The places are told from the outing's stored totals (where it

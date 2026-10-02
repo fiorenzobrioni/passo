@@ -62,6 +62,9 @@ STREET_TILE = (0.007, 0.010)  # latitude, longitude
 # The streets drawn, in two weights: the arteries, and the streets that give a centre its shape.
 MAIN_STREETS = {"trunk", "primary", "secondary"}
 MINOR_STREETS = {"tertiary", "pedestrian"}
+# The smaller classes a walk can add to its minor streets (Walk.more_streets), for a centre
+# mapped mostly in those. The cache keeps them for every walk, so choosing them needs no fetch.
+LANES = {"residential", "unclassified", "living_street"}
 MIN_STREET_METRES = 150
 MAP_MIN_ASPECT, MAP_MAX_ASPECT = 0.62, 1.2  # WayMapView's own bounds for a map box's shape
 STREET_MARGIN = 1.3  # around what the page shows: the inset, and the box a little wider
@@ -116,7 +119,7 @@ def fetch():
             download(OSM.format(kind, number), CACHE / f"osm-{kind}-{number}.xml")
         if walk.streets:
             for tile, name in street_tiles(walk):
-                fetch_streets(tile, CACHE / name, MAIN_STREETS | MINOR_STREETS | set(walk.more_streets))
+                fetch_streets(tile, CACHE / name, MAIN_STREETS | MINOR_STREETS | LANES)
 
 
 def fetch_streets(tile, target, classes):
@@ -209,7 +212,8 @@ def street_tiles(walk):
                 min(north, south + (row + 1) * STREET_TILE[0]),
                 min(east, west + (column + 1) * STREET_TILE[1]),
             )
-            yield tile, f"streets-{walk.id.lower()}-{row}-{column}.json"
+            # "roads": a cache from before LANES were kept would silently lack them.
+            yield tile, f"roads-{walk.id.lower()}-{row}-{column}.json"
 
 
 def download(url, target):
@@ -863,21 +867,29 @@ def city_streets(walk, tolerance, local):
     ways = {}
     for _, name in street_tiles(walk):
         ways.update(json.loads((CACHE / name).read_text()))
-    main, minor = [], []
+    main, minor, lanes = [], [], []
     for kind, points in ways.values():
-        (main if kind in MAIN_STREETS else minor).append([tuple(p) for p in points])
+        if kind in MAIN_STREETS:
+            main.append([tuple(p) for p in points])
+        elif kind in MINOR_STREETS:
+            minor.append([tuple(p) for p in points])
+        elif kind in walk.more_streets:
+            # Without a minimum of their own, they are joined with the minor streets.
+            (lanes if walk.more_streets_min_metres else minor).append([tuple(p) for p in points])
     box = street_box(walk)
+    lane_min = walk.more_streets_min_metres or MIN_STREET_METRES
     out = []
-    for lines in (main, minor):
+    for groups in ([(main, MIN_STREET_METRES)], [(minor, MIN_STREET_METRES), (lanes, lane_min)]):
         pieces = []
-        for line in join_lines(lines):
-            for piece in clip_line(line, box):
-                # A stray piece (a crossing, a bit of a square) reads as noise, not as a street.
-                if cumulative(piece)[-1] < MIN_STREET_METRES:
-                    continue
-                simple = simplify(piece, tolerance, local)
-                if len(simple) >= 2:
-                    pieces.append(simple)
+        for lines, shortest in groups:
+            for line in join_lines(lines):
+                for piece in clip_line(line, box):
+                    # A stray piece (a crossing, a bit of a square) reads as noise, not as a street.
+                    if cumulative(piece)[-1] < shortest:
+                        continue
+                    simple = simplify(piece, tolerance, local)
+                    if len(simple) >= 2:
+                        pieces.append(simple)
         out.append(pieces)
     return out
 
