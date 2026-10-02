@@ -18,6 +18,9 @@ fun wayNameRes(id: WayId): Int = when (id) {
     WayId.PARIS_VOSGES_EIFFEL -> R.string.way_name_paris_vosges_eiffel
     WayId.LONDON_PALACE_TOWER -> R.string.way_name_london_palace_tower
     WayId.MADRID_DEBOD_RETIRO -> R.string.way_name_madrid_debod_retiro
+    WayId.PORTO_SE_PILAR -> R.string.way_name_porto_se_pilar
+    WayId.AMSTERDAM_CENTRAAL_WESTERKERK -> R.string.way_name_amsterdam_centraal_westerkerk
+    WayId.PRAGUE_CASTLE_WENCESLAS -> R.string.way_name_prague_castle_wenceslas
     WayId.LIMA_SAN_MARTIN_RESERVA -> R.string.way_name_lima_san_martin_reserva
     WayId.CUSCO_ARMAS_QORIKANCHA -> R.string.way_name_cusco_armas_qorikancha
 }
@@ -35,6 +38,9 @@ fun wayRouteRes(id: WayId): Int = when (id) {
     WayId.PARIS_VOSGES_EIFFEL -> R.string.way_route_paris_vosges_eiffel
     WayId.LONDON_PALACE_TOWER -> R.string.way_route_london_palace_tower
     WayId.MADRID_DEBOD_RETIRO -> R.string.way_route_madrid_debod_retiro
+    WayId.PORTO_SE_PILAR -> R.string.way_route_porto_se_pilar
+    WayId.AMSTERDAM_CENTRAAL_WESTERKERK -> R.string.way_route_amsterdam_centraal_westerkerk
+    WayId.PRAGUE_CASTLE_WENCESLAS -> R.string.way_route_prague_castle_wenceslas
     WayId.LIMA_SAN_MARTIN_RESERVA -> R.string.way_route_lima_san_martin_reserva
     WayId.CUSCO_ARMAS_QORIKANCHA -> R.string.way_route_cusco_armas_qorikancha
 }
@@ -47,6 +53,9 @@ fun walkOutingRes(id: WayId): Int? = when (id) {
     WayId.PARIS_VOSGES_EIFFEL -> R.string.way_outing_paris_vosges_eiffel
     WayId.LONDON_PALACE_TOWER -> R.string.way_outing_london_palace_tower
     WayId.MADRID_DEBOD_RETIRO -> R.string.way_outing_madrid_debod_retiro
+    WayId.PORTO_SE_PILAR -> R.string.way_outing_porto_se_pilar
+    WayId.AMSTERDAM_CENTRAAL_WESTERKERK -> R.string.way_outing_amsterdam_centraal_westerkerk
+    WayId.PRAGUE_CASTLE_WENCESLAS -> R.string.way_outing_prague_castle_wenceslas
     WayId.LIMA_SAN_MARTIN_RESERVA -> R.string.way_outing_lima_san_martin_reserva
     WayId.CUSCO_ARMAS_QORIKANCHA -> R.string.way_outing_cusco_armas_qorikancha
     else -> null
@@ -57,6 +66,15 @@ fun walkOutingRes(id: WayId): Int? = when (id) {
 fun placeNameRes(key: String): Int = when (key) {
     "acquapendente" -> R.string.way_place_acquapendente
     "altopascio" -> R.string.way_place_altopascio
+    "amsterdam_begijnhof" -> R.string.way_place_amsterdam_begijnhof
+    "amsterdam_bloemenmarkt" -> R.string.way_place_amsterdam_bloemenmarkt
+    "amsterdam_centraal" -> R.string.way_place_amsterdam_centraal
+    "amsterdam_dam" -> R.string.way_place_amsterdam_dam
+    "amsterdam_magere_brug" -> R.string.way_place_amsterdam_magere_brug
+    "amsterdam_oude_kerk" -> R.string.way_place_amsterdam_oude_kerk
+    "amsterdam_rembrandthuis" -> R.string.way_place_amsterdam_rembrandthuis
+    "amsterdam_waag" -> R.string.way_place_amsterdam_waag
+    "amsterdam_westerkerk" -> R.string.way_place_amsterdam_westerkerk
     "aosta" -> R.string.way_place_aosta
     "arrone" -> R.string.way_place_arrone
     "arzua" -> R.string.way_place_arzua
@@ -224,7 +242,26 @@ fun placeNameRes(key: String): Int = when (key) {
     "ponticelli" -> R.string.way_place_ponticelli
     "pontremoli" -> R.string.way_place_pontremoli
     "porto" -> R.string.way_place_porto
+    "porto_aliados" -> R.string.way_place_porto_aliados
+    "porto_bolhao" -> R.string.way_place_porto_bolhao
+    "porto_bolsa" -> R.string.way_place_porto_bolsa
+    "porto_clerigos" -> R.string.way_place_porto_clerigos
+    "porto_gaia" -> R.string.way_place_porto_gaia
+    "porto_ponte_luis" -> R.string.way_place_porto_ponte_luis
+    "porto_ribeira" -> R.string.way_place_porto_ribeira
+    "porto_sao_bento" -> R.string.way_place_porto_sao_bento
+    "porto_se" -> R.string.way_place_porto_se
+    "porto_serra_do_pilar" -> R.string.way_place_porto_serra_do_pilar
     "portomarin" -> R.string.way_place_portomarin
+    "prague_castle" -> R.string.way_place_prague_castle
+    "prague_charles_bridge" -> R.string.way_place_prague_charles_bridge
+    "prague_klementinum" -> R.string.way_place_prague_klementinum
+    "prague_old_new_synagogue" -> R.string.way_place_prague_old_new_synagogue
+    "prague_orloj" -> R.string.way_place_prague_orloj
+    "prague_powder_tower" -> R.string.way_place_prague_powder_tower
+    "prague_st_nicholas" -> R.string.way_place_prague_st_nicholas
+    "prague_st_vitus" -> R.string.way_place_prague_st_vitus
+    "prague_wenceslas" -> R.string.way_place_prague_wenceslas
     "puente_la_reina" -> R.string.way_place_puente_la_reina
     "rabanal" -> R.string.way_place_rabanal
     "radicofani" -> R.string.way_place_radicofani
@@ -287,6 +324,15 @@ fun placeNameRes(key: String): Int = when (key) {
 /** The one sentence said of a stop, if it has one. */
 @StringRes
 fun placeNoteRes(key: String): Int? = when (key) {
+    "amsterdam_begijnhof" -> R.string.way_note_amsterdam_begijnhof
+    "amsterdam_bloemenmarkt" -> R.string.way_note_amsterdam_bloemenmarkt
+    "amsterdam_centraal" -> R.string.way_note_amsterdam_centraal
+    "amsterdam_dam" -> R.string.way_note_amsterdam_dam
+    "amsterdam_magere_brug" -> R.string.way_note_amsterdam_magere_brug
+    "amsterdam_oude_kerk" -> R.string.way_note_amsterdam_oude_kerk
+    "amsterdam_rembrandthuis" -> R.string.way_note_amsterdam_rembrandthuis
+    "amsterdam_waag" -> R.string.way_note_amsterdam_waag
+    "amsterdam_westerkerk" -> R.string.way_note_amsterdam_westerkerk
     "aosta" -> R.string.way_note_aosta
     "assisi" -> R.string.way_note_assisi
     "astorga" -> R.string.way_note_astorga
@@ -403,6 +449,24 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "ponte_de_lima" -> R.string.way_note_ponte_de_lima
     "pontevedra" -> R.string.way_note_pontevedra
     "porto" -> R.string.way_note_porto
+    "porto_aliados" -> R.string.way_note_porto_aliados
+    "porto_bolhao" -> R.string.way_note_porto_bolhao
+    "porto_bolsa" -> R.string.way_note_porto_bolsa
+    "porto_clerigos" -> R.string.way_note_porto_clerigos
+    "porto_gaia" -> R.string.way_note_porto_gaia
+    "porto_ponte_luis" -> R.string.way_note_porto_ponte_luis
+    "porto_sao_bento" -> R.string.way_note_porto_sao_bento
+    "porto_se" -> R.string.way_note_porto_se
+    "porto_serra_do_pilar" -> R.string.way_note_porto_serra_do_pilar
+    "prague_castle" -> R.string.way_note_prague_castle
+    "prague_charles_bridge" -> R.string.way_note_prague_charles_bridge
+    "prague_klementinum" -> R.string.way_note_prague_klementinum
+    "prague_old_new_synagogue" -> R.string.way_note_prague_old_new_synagogue
+    "prague_orloj" -> R.string.way_note_prague_orloj
+    "prague_powder_tower" -> R.string.way_note_prague_powder_tower
+    "prague_st_nicholas" -> R.string.way_note_prague_st_nicholas
+    "prague_st_vitus" -> R.string.way_note_prague_st_vitus
+    "prague_wenceslas" -> R.string.way_note_prague_wenceslas
     "puente_la_reina" -> R.string.way_note_puente_la_reina
     "radicofani" -> R.string.way_note_radicofani
     "redondela" -> R.string.way_note_redondela

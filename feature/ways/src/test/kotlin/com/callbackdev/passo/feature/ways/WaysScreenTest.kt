@@ -219,6 +219,9 @@ class WaysScreenTest {
             WayId.PARIS_VOSGES_EIFFEL,
             WayId.LONDON_PALACE_TOWER,
             WayId.MADRID_DEBOD_RETIRO,
+            WayId.PORTO_SE_PILAR,
+            WayId.AMSTERDAM_CENTRAAL_WESTERKERK,
+            WayId.PRAGUE_CASTLE_WENCESLAS,
             WayId.LIMA_SAN_MARTIN_RESERVA,
             WayId.CUSCO_ARMAS_QORIKANCHA,
         )) {
@@ -252,6 +255,32 @@ class WaysScreenTest {
         showWay(WayId.MADRID_DEBOD_RETIRO, state = WaysSamples.state(walks = emptyList(), live = null))
         compose.onNodeWithText("From the Temple of Debod to the Retiro", substring = true).assertExists()
         snapshot("walk_madrid")
+    }
+
+    @Test
+    fun `Porto's short walk, across the Douro`() {
+        showWay(WayId.PORTO_SE_PILAR, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("From the cathedral to the Serra do Pilar", substring = true).assertExists()
+        // A short walk says so by its numbers alone: no badge.
+        compose.onNodeWithText("About 7,", substring = true).assertExists()
+        snapshot("walk_porto")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Dom Luís I Bridge"))
+        compose.onNodeWithText("once Gustave Eiffel’s partner", substring = true).assertExists()
+        snapshot("walk_porto_places")
+    }
+
+    @Test
+    fun `Amsterdam's short walk, along the canals`() {
+        showWay(WayId.AMSTERDAM_CENTRAAL_WESTERKERK, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("From Centraal Station to the Westerkerk", substring = true).assertExists()
+        snapshot("walk_amsterdam")
+    }
+
+    @Test
+    fun `Prague's short walk, over Charles Bridge, in the dark`() {
+        showWay(WayId.PRAGUE_CASTLE_WENCESLAS, state = WaysSamples.state(walks = emptyList(), live = null), dark = true)
+        compose.onNodeWithText("From the Castle to Wenceslas Square", substring = true).assertExists()
+        snapshot("walk_prague_dark")
     }
 
     @Test

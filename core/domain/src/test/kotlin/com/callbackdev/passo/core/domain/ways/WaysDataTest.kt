@@ -26,21 +26,28 @@ class WaysDataTest {
                 WayId.PARIS_VOSGES_EIFFEL,
                 WayId.LONDON_PALACE_TOWER,
                 WayId.MADRID_DEBOD_RETIRO,
+                WayId.PORTO_SE_PILAR,
+                WayId.AMSTERDAM_CENTRAAL_WESTERKERK,
+                WayId.PRAGUE_CASTLE_WENCESLAS,
                 WayId.LIMA_SAN_MARTIN_RESERVA,
                 WayId.CUSCO_ARMAS_QORIKANCHA,
             )
             .inOrder()
         // One walk a city for now (PLANNING.md §11 Phase 11, later).
         assertThat(Ways.walks.map { it.id.city })
-            .containsExactly("milan", "rome", "paris", "london", "madrid", "lima", "cusco")
+            .containsExactly(
+                "milan", "rome", "paris", "london", "madrid", "porto", "amsterdam", "prague", "lima", "cusco",
+            )
             .inOrder()
     }
 
     @Test
-    fun `a city walk is an afternoon's walk, every place on it`() {
+    fun `a city walk is short or long, every place on it`() {
+        // Two lengths (ADR 0015 decision 10): about 5 km, an hour in one outing, or about 10 km.
         for (walk in Ways.walks) {
-            assertThat(walk.lengthMeters).isIn(8_000..12_000)
-            assertThat(walk.stops.size).isAtLeast(12)
+            val short = walk.lengthMeters < 7_000
+            assertThat(walk.lengthMeters).isIn(if (short) 4_000..6_000 else 8_000..12_000)
+            assertThat(walk.stops.size).isAtLeast(if (short) 7 else 12)
             assertThat(walk.stops.all { it.stage }).isTrue()
             assertThat(walk.map.riverWidthMeters).isGreaterThan(0.0)
             assertThat(walk.map.parks).isNotEmpty()
@@ -55,6 +62,9 @@ class WaysDataTest {
         assertThat(km(WayId.VIA_DI_FRANCESCO)).isIn(400..560)
         assertThat(km(WayId.CAMINO_FRANCES)).isIn(740..800)
         assertThat(km(WayId.VIA_FRANCIGENA)).isIn(950..1_050)
+        // The short walks.
+        assertThat(Ways.walks.filter { it.lengthMeters < 7_000 }.map { it.id })
+            .containsExactly(WayId.PORTO_SE_PILAR, WayId.AMSTERDAM_CENTRAAL_WESTERKERK, WayId.PRAGUE_CASTLE_WENCESLAS)
     }
 
     @Test

@@ -429,6 +429,10 @@ class Walk:
     # to its longer streets, so the map is as full as the other cities' and the arteries still
     # read. None: the same as every street.
     more_streets_min_metres: float | None = None
+    # Water read from the street tiles (every closed way tagged as water in them) beside the
+    # areas listed in [water]: for a city whose canals are hundreds of areas cut at every
+    # bridge (Amsterdam's), too many to list by id. Only where the streets are fetched.
+    water_from_tiles: bool = False
 
 
 MILAN = Walk(
@@ -810,6 +814,192 @@ MADRID = Walk(
     ],
 )
 
+PORTO = Walk(
+    id="PORTO_SE_PILAR",
+    city="porto",
+    city_en="Porto",
+    city_it="Porto",
+    route_en="From the cathedral to the Serra do Pilar, across the Douro",
+    route_it="Dalla cattedrale alla Serra do Pilar, oltre il Douro",
+    outing_en="A walk in Porto",
+    outing_it="Passeggiata a Porto",
+    country="IBERIA",
+    water=["relation/3688750"],
+    parks=["way/244599647", "way/215304932", "way/98836111", "relation/3251867"],
+    stops=[
+        # A short walk (about 5 km, ADR 0015 decision 10). It begins where the Camino Portugués
+        # begins, at the cathedral, and ends on the Gaia bank, looking back at the old town.
+        Stop("porto_se", "Porto Cathedral", "Cattedrale di Porto", 41.1428, -8.6112,
+             note_en="Begun in the 12th century, the cathedral is where the Camino Portugués, one of the Ways, sets out for Santiago.",
+             note_it="Iniziata nel XII secolo, la cattedrale è il punto di partenza del Cammino Portoghese, uno dei Cammini, verso Santiago."),
+        # Source: Wikipedia, Porto Cathedral (the second half of the 12th century);
+        # Wikipedia (pt), Sé do Porto (the first half): the century alone. The Way: this app.
+        Stop("porto_sao_bento", "São Bento Station", "Stazione di São Bento", 41.1455, -8.6105,
+             note_en="In its hall, Jorge Colaço's azulejos, put up from 1905, show scenes from the history of Portugal.",
+             note_it="Nell'atrio, gli azulejos di Jorge Colaço, posati dal 1905, raccontano scene della storia del Portogallo."),
+        # Source: Wikipedia, São Bento railway station; Wikipedia (pt), Estação Ferroviária de
+        # Porto-São Bento. They disagree on the count of tiles and on the last year: neither said.
+        Stop("porto_bolhao", "Bolhão Market", "Mercato del Bolhão", 41.1493, -8.6070,
+             note_en="Built in 1914 in reinforced concrete and iron, the market reopened in 2022 after four years of restoration.",
+             note_it="Costruito nel 1914 in cemento armato e ferro, il mercato ha riaperto nel 2022 dopo quattro anni di restauro."),
+        # Source: Wikipedia (pt), Mercado do Bolhão; European Commission, Inforegio (13 Jan 2026).
+        Stop("porto_aliados", "Avenida dos Aliados", "Avenida dos Aliados", 41.1473, -8.6111,
+             note_en="Laid out from 1916 in place of a whole neighbourhood, the avenue is named after the Allies of the First World War.",
+             note_it="Tracciato dal 1916 al posto di un intero quartiere, il viale porta il nome degli Alleati della Prima guerra mondiale."),
+        # Source: Wikipedia (pt), Avenida dos Aliados; Porto's tourist guides (the Laranjal
+        # neighbourhood pulled down for it).
+        Stop("porto_clerigos", "Clérigos Tower", "Torre dos Clérigos", 41.1457, -8.6146,
+             note_en="Nicolau Nasoni's bell tower, finished in 1763, rises 75 metres over the city.",
+             note_it="Il campanile di Nicolau Nasoni, finito nel 1763, si alza per 75 metri sulla città."),
+        # Source: Wikipedia, Clérigos Church; Wikipedia (pt), Igreja e Torre dos Clérigos. They
+        # disagree on the steps (240, 225): not said.
+        Stop("porto_bolsa", "Palácio da Bolsa", "Palácio da Bolsa", 41.1413, -8.6160,
+             note_en="Porto's merchants began their exchange in 1842; its Arab Room, in the Moorish style, was built from 1862 to 1880.",
+             note_it="I mercanti di Porto iniziarono la loro Borsa nel 1842; il suo Salone Arabo, in stile moresco, fu realizzato tra il 1862 e il 1880."),
+        # Source: Wikipedia, Palácio da Bolsa; Wikipedia (pt), Palácio da Bolsa.
+        Stop("porto_ribeira", "Ribeira", "Ribeira", 41.1407, -8.6130),
+        # No sentence: no second source was found to check one against.
+        Stop("porto_ponte_luis", "Dom Luís I Bridge", "Ponte Dom Luís I", 41.1399, -8.6094,
+             note_en="Built from 1881 to 1886 by Théophile Seyrig, once Gustave Eiffel's partner, its iron arch spans 172 metres.",
+             note_it="Costruito dal 1881 al 1886 da Théophile Seyrig, già socio di Gustave Eiffel, il suo arco di ferro misura 172 metri."),
+        # Source: Wikipedia, Dom Luís I Bridge; Wikipedia (pt), Ponte de D. Luís (Porto). The
+        # walk crosses by the lower deck, at the river.
+        Stop("porto_gaia", "The port wine cellars", "Le cantine del Porto", 41.1376, -8.6125,
+             note_en="Port wine ages in the cellars of Vila Nova de Gaia, where rabelo boats once brought it down the Douro.",
+             note_it="Il vino Porto invecchia nelle cantine di Vila Nova de Gaia, dove un tempo lo portavano giù per il Douro le barche rabelo."),
+        # Source: Wikipedia, Port wine; Wikipedia (pt), Vinho do Porto.
+        Stop("porto_serra_do_pilar", "Serra do Pilar Monastery", "Monastero della Serra do Pilar", 41.1384, -8.6081,
+             note_en="Its church and its cloister are both round, and of the same diameter: a convent unique of its kind.",
+             note_it="La chiesa e il chiostro sono entrambi circolari, dello stesso diametro: un convento unico nel suo genere."),
+        # Source: Wikipedia, Monastery of Serra do Pilar; Wikipedia (pt), Mosteiro da Serra do
+        # Pilar.
+    ],
+)
+
+AMSTERDAM = Walk(
+    id="AMSTERDAM_CENTRAAL_WESTERKERK",
+    city="amsterdam",
+    city_en="Amsterdam",
+    city_it="Amsterdam",
+    route_en="From Centraal Station to the Westerkerk, along the canals",
+    route_it="Dalla Stazione Centrale alla Westerkerk, lungo i canali",
+    outing_en="A walk in Amsterdam",
+    outing_it="Passeggiata ad Amsterdam",
+    country="NL",
+    # The IJ and the docks are large areas listed here; the canals are read from the tiles.
+    water=["relation/554702", "relation/8878552", "relation/8730108", "relation/12113080", "relation/14235038"],
+    water_from_tiles=True,
+    parks=["way/25965389", "relation/17080648", "way/31527079", "relation/20165014", "way/26446429"],
+    stops=[
+        # A short walk (about 5 km, ADR 0015 decision 10).
+        Stop("amsterdam_centraal", "Centraal Station", "Stazione Centrale", 52.3789, 4.9006,
+             note_en="Pierre Cuypers, who also designed the Rijksmuseum, built the station, opened in 1889, on three artificial islands and 8,687 wooden piles.",
+             note_it="Pierre Cuypers, che progettò anche il Rijksmuseum, costruì la stazione, aperta nel 1889, su tre isole artificiali e 8.687 pali di legno."),
+        # Source: Wikipedia, Amsterdam Centraal station; Wikipedia (nl), Station Amsterdam Centraal.
+        Stop("amsterdam_oude_kerk", "Oude Kerk", "Oude Kerk", 52.3744, 4.8981,
+             note_en="Amsterdam's oldest building, consecrated in 1306; Rembrandt's wife, Saskia, was buried here in 1642.",
+             note_it="L'edificio più antico di Amsterdam, consacrato nel 1306; qui fu sepolta nel 1642 Saskia, la moglie di Rembrandt."),
+        # Source: Wikipedia, Oude Kerk (Amsterdam); Wikipedia (nl), Oude Kerk (Amsterdam).
+        Stop("amsterdam_waag", "De Waag", "De Waag", 52.3727, 4.9004,
+             note_en="A city gate turned weigh house in 1617; the surgeons' guild upstairs commissioned Rembrandt's Anatomy Lesson of Dr Tulp.",
+             note_it="Una porta della città diventata pesa pubblica nel 1617; la corporazione dei chirurghi, al piano di sopra, commissionò a Rembrandt la Lezione di anatomia del dottor Tulp."),
+        # Source: Wikipedia, Waag (Amsterdam); Wikipedia (nl), Waag (Amsterdam).
+        Stop("amsterdam_rembrandthuis", "Rembrandt House", "Casa di Rembrandt", 52.3694, 4.9012,
+             note_en="Rembrandt bought the house in 1639 and lived here until 1658, when it was auctioned after his bankruptcy.",
+             note_it="Rembrandt comprò la casa nel 1639 e vi abitò fino al 1658, quando fu messa all'asta dopo il suo fallimento."),
+        # Source: Wikipedia, Rembrandt House Museum; Wikipedia (nl), Rembrandthuis.
+        Stop("amsterdam_magere_brug", "Magere Brug", "Magere Brug", 52.3636, 4.9024,
+             note_en="The Skinny Bridge was first built in 1691, of wood and narrower than the stone bridge planned; it was opened by hand until 1994.",
+             note_it="Il Ponte Magro fu costruito la prima volta nel 1691, di legno e più stretto del ponte di pietra previsto; fu aperto a mano fino al 1994."),
+        # Source: Wikipedia, Magere Brug; Wikipedia (nl), Magere Brug. They disagree on the
+        # lights (1,200, 1,800): not said.
+        Stop("amsterdam_bloemenmarkt", "The flower market", "Il mercato dei fiori", 52.3669, 4.8908,
+             note_en="The flower market has stood on the Singel since 1862, where flowers were once sold from boats on the canal.",
+             note_it="Il mercato dei fiori è sul Singel dal 1862; un tempo i fiori si vendevano dalle barche ormeggiate nel canale."),
+        # Source: Wikipedia, Bloemenmarkt; Wikipedia (nl), Bloemenmarkt.
+        Stop("amsterdam_begijnhof", "Begijnhof", "Begijnhof", 52.3694, 4.8900,
+             note_en="First named as a courtyard in 1389, it was home to beguines until the last of them died in 1971.",
+             note_it="Citato come cortile per la prima volta nel 1389, ospitò le beghine fino alla morte dell'ultima, nel 1971."),
+        # Source: Wikipedia, Begijnhof, Amsterdam; Wikipedia (nl), Begijnhof (Amsterdam). They
+        # disagree on the wooden house's age (about 1420, about 1528): not said.
+        Stop("amsterdam_dam", "The Royal Palace", "Il Palazzo Reale", 52.3731, 4.8931,
+             note_en="Built as the city hall on 13,659 wooden piles, it became a royal palace for Louis Bonaparte in 1808.",
+             note_it="Costruito come municipio su 13.659 pali di legno, divenne nel 1808 il palazzo reale di Luigi Bonaparte."),
+        # Source: Wikipedia, Royal Palace of Amsterdam; Wikipedia (nl), Koninklijk Paleis
+        # Amsterdam. On the Dam.
+        Stop("amsterdam_westerkerk", "Westerkerk", "Westerkerk", 52.3746, 4.8840,
+             note_en="Its 87-metre tower is the tallest church tower in Amsterdam; Rembrandt was buried here in 1669, in a grave now lost.",
+             note_it="La sua torre di 87 metri è il campanile più alto di Amsterdam; qui fu sepolto Rembrandt nel 1669, in una tomba oggi perduta."),
+        # Source: Wikipedia, Westerkerk; Wikipedia (nl), Westerkerk (Amsterdam).
+    ],
+)
+
+PRAGUE = Walk(
+    id="PRAGUE_CASTLE_WENCESLAS",
+    city="prague",
+    city_en="Prague",
+    city_it="Praga",
+    route_en="From the Castle to Wenceslas Square, over Charles Bridge",
+    route_it="Dal Castello a Piazza San Venceslao, passando per Ponte Carlo",
+    outing_en="A walk in Prague",
+    outing_it="Passeggiata a Praga",
+    country="CZ",
+    water=["relation/19221"],
+    # The Old Town's lanes are mapped as residential streets, as Milan's and Rome's centres
+    # are: without the longer ones, its map was the emptiest of all.
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=400,
+    parks=[
+        "way/903579699", "relation/12271961", "relation/10507680", "relation/14239612", "relation/14239610",
+        "relation/14239611", "relation/14239613", "way/27581161", "relation/7078342", "way/26328480",
+        "relation/13480459", "way/24984378",
+    ],
+    stops=[
+        # A short walk (about 5 km, ADR 0015 decision 10), downhill from the Castle.
+        Stop("prague_castle", "Prague Castle", "Castello di Praga", 50.0896, 14.3977,
+             note_en="By the Guinness records the largest ancient castle in the world, it has been the president's seat since 1918.",
+             note_it="Secondo il Guinness il più grande castello antico del mondo, è la sede del presidente dal 1918."),
+        # Source: Wikipedia, Prague Castle; Wikipedia (cs), Pražský hrad.
+        Stop("prague_st_vitus", "St Vitus Cathedral", "Cattedrale di San Vito", 50.0909, 14.4006,
+             note_en="Begun in 1344 and finished only in 1929, the cathedral keeps the Bohemian crown jewels behind a door with seven locks.",
+             note_it="Iniziata nel 1344 e finita solo nel 1929, la cattedrale custodisce i gioielli della corona boema dietro una porta con sette serrature."),
+        # Source: Wikipedia, St. Vitus Cathedral; Wikipedia (cs), Katedrála svatého Víta,
+        # Václava a Vojtěcha.
+        Stop("prague_st_nicholas", "St Nicholas Church", "Chiesa di San Nicola", 50.0880, 14.4032,
+             note_en="Mozart played its organ, of over 4,000 pipes, in 1787; under communism its tower was a secret police post watching the embassies.",
+             note_it="Mozart suonò il suo organo, di oltre 4.000 canne, nel 1787; durante il comunismo il campanile fu un posto di osservazione della polizia segreta sulle ambasciate."),
+        # Source: Wikipedia, St. Nicholas Church (Malá Strana); Wikipedia (cs), Kostel svatého
+        # Mikuláše (Malá Strana).
+        Stop("prague_charles_bridge", "Charles Bridge", "Ponte Carlo", 50.0865, 14.4114,
+             note_en="Charles IV laid its first stone in 1357; 30 statues, most of them Baroque, line its 516 metres.",
+             note_it="Carlo IV ne posò la prima pietra nel 1357; 30 statue, quasi tutte barocche, ne accompagnano i 516 metri."),
+        # Source: Wikipedia, Charles Bridge; Wikipedia (cs), Karlův most.
+        Stop("prague_klementinum", "Klementinum", "Klementinum", 50.0867, 14.4161,
+             note_en="A Jesuit college from 1556, where the weather has been recorded since 1775, without a break to this day.",
+             note_it="Collegio dei gesuiti dal 1556, qui il tempo si registra dal 1775, senza interruzioni fino a oggi."),
+        # Source: Wikipedia, Clementinum; Wikipedia (cs), Klementinum.
+        Stop("prague_orloj", "The Astronomical Clock", "L'orologio astronomico", 50.0870, 14.4207,
+             note_en="Made in 1410, it is the oldest astronomical clock still working; each hour of the day the twelve apostles appear above its dial.",
+             note_it="Costruito nel 1410, è il più antico orologio astronomico ancora in funzione; ogni ora del giorno i dodici apostoli compaiono sopra il quadrante."),
+        # Source: Wikipedia, Prague astronomical clock; Wikipedia (cs), Staroměstský orloj.
+        Stop("prague_old_new_synagogue", "Old-New Synagogue", "Sinagoga Vecchia-Nuova", 50.0900, 14.4186,
+             note_en="Built in the 13th century, it is among Europe's oldest synagogues still in use; legend puts the Golem in its attic.",
+             note_it="Costruita nel XIII secolo, è tra le più antiche sinagoghe d'Europa ancora in uso; la leggenda vuole il Golem nella sua soffitta."),
+        # Source: Wikipedia, Old New Synagogue (1270); Wikipedia (cs), Staronová synagoga (the
+        # second half of the 13th century): the century alone.
+        Stop("prague_powder_tower", "Powder Tower", "Torre delle Polveri", 50.0872, 14.4278,
+             note_en="Begun in 1475 as a gate to the Old Town, the 65-metre tower is where the Royal Route to the Castle begins.",
+             note_it="Iniziata nel 1475 come porta della Città Vecchia, la torre di 65 metri segna l'inizio della Via Reale verso il Castello."),
+        # Source: Wikipedia, Powder Tower, Prague; Wikipedia (cs), Prašná brána. They disagree
+        # on whether it ever held gunpowder: not said.
+        Stop("prague_wenceslas", "Wenceslas Square", "Piazza San Venceslao", 50.0798, 14.4297,
+             note_en="Founded as the Horse Market in 1348, the square filled with the crowds of the Velvet Revolution in November 1989.",
+             note_it="Nata come Mercato dei Cavalli nel 1348, la piazza si riempì delle folle della Rivoluzione di velluto nel novembre 1989."),
+        # Source: Wikipedia, Wenceslas Square; Wikipedia (cs), Václavské náměstí. They disagree
+        # on the statue's year (1912, 1913): not said.
+    ],
+)
+
 LIMA = Walk(
     id="LIMA_SAN_MARTIN_RESERVA",
     city="lima",
@@ -949,7 +1139,7 @@ CUSCO = Walk(
     ],
 )
 
-WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, LIMA, CUSCO]
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
@@ -959,4 +1149,6 @@ LOCATORS = {
     "GB": (49.8, -8.4, 59.0, 2.2),
     "FR": (41.3, -5.2, 51.1, 9.6),
     "PE": (-18.6, -81.6, 0.2, -68.4),
+    "NL": (50.7, 3.3, 53.6, 7.3),
+    "CZ": (48.5, 12.0, 51.1, 18.9),
 }

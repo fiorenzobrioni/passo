@@ -23,6 +23,9 @@ enum class WayId(val kind: WayKind, val city: String? = null) {
     PARIS_VOSGES_EIFFEL(WayKind.WALK, city = "paris"),
     LONDON_PALACE_TOWER(WayKind.WALK, city = "london"),
     MADRID_DEBOD_RETIRO(WayKind.WALK, city = "madrid"),
+    PORTO_SE_PILAR(WayKind.WALK, city = "porto"),
+    AMSTERDAM_CENTRAAL_WESTERKERK(WayKind.WALK, city = "amsterdam"),
+    PRAGUE_CASTLE_WENCESLAS(WayKind.WALK, city = "prague"),
     LIMA_SAN_MARTIN_RESERVA(WayKind.WALK, city = "lima"),
     CUSCO_ARMAS_QORIKANCHA(WayKind.WALK, city = "cusco"),
 }
