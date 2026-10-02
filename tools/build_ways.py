@@ -119,14 +119,16 @@ def fetch():
             download(OSM.format(kind, number), CACHE / f"osm-{kind}-{number}.xml")
         if walk.streets:
             for tile, name in street_tiles(walk):
-                fetch_streets(tile, CACHE / name, MAIN_STREETS | MINOR_STREETS | LANES)
+                water = CACHE / water_tile_name(name) if walk.water_from_tiles else None
+                fetch_streets(tile, CACHE / name, MAIN_STREETS | MINOR_STREETS | LANES, water)
 
 
-def fetch_streets(tile, target, classes):
+def fetch_streets(tile, target, classes, water_target=None):
     """One tile's streets, kept as they are drawn (each way's class and points), not as the
     map call answers (every building too: a hundred times the size). A tile too dense for the
-    call is fetched in four."""
-    if target.exists():
+    call is fetched in four. With [water_target], the tile's water areas (each closed way
+    tagged as water) are kept there too."""
+    if target.exists() and (water_target is None or water_target.exists()):
         return
     south, west, north, east = tile
     url = OSM_MAP.format(west, south, east, north)
@@ -142,13 +144,19 @@ def fetch_streets(tile, target, classes):
             (south, west, middle[0], middle[1]), (south, middle[1], middle[0], east),
             (middle[0], west, north, middle[1]), (middle[0], middle[1], north, east),
         ]
-        ways = {}
+        ways, waters = {}, {}
         for i, quarter in enumerate(quarters):
             part = target.with_suffix(f".{i}.json")
-            fetch_streets(quarter, part, classes)
+            water_part = water_target.with_suffix(f".{i}.json") if water_target else None
+            fetch_streets(quarter, part, classes, water_part)
             ways.update(json.loads(part.read_text()))
             part.unlink()
+            if water_part:
+                waters.update(json.loads(water_part.read_text()))
+                water_part.unlink()
         target.write_text(json.dumps(ways))
+        if water_target:
+            water_target.write_text(json.dumps(waters))
         return
     nodes = {n.get("id"): (float(n.get("lat")), float(n.get("lon"))) for n in root.iter("node")}
     ways = {}
@@ -162,6 +170,15 @@ def fetch_streets(tile, target, classes):
         if len(points) >= 2:
             ways[w.get("id")] = [kind, [[round(a, 7), round(b, 7)] for a, b in points]]
     target.write_text(json.dumps(ways))
+    if water_target:
+        waters = {}
+        for w in root.iter("way"):
+            tags = {t.get("k"): t.get("v") for t in w.iter("tag")}
+            refs = [nd.get("ref") for nd in w.iter("nd")]
+            # A way is returned whole, with all its nodes, so a closed one is a whole ring.
+            if tags.get("natural") == "water" and len(refs) > 3 and refs[0] == refs[-1] and all(r in nodes for r in refs):
+                waters[w.get("id")] = [[round(nodes[r][0], 7), round(nodes[r][1], 7)] for r in refs]
+        water_target.write_text(json.dumps(waters))
 
 
 def read_retrying(request, attempts=4):
@@ -214,6 +231,11 @@ def street_tiles(walk):
             )
             # "roads": a cache from before LANES were kept would silently lack them.
             yield tile, f"roads-{walk.id.lower()}-{row}-{column}.json"
+
+
+def water_tile_name(name):
+    """Where a street tile's water areas are kept, for a walk that reads its water there."""
+    return name.replace("roads-", "water-", 1)
 
 
 def download(url, target):
@@ -775,6 +797,24 @@ def city_polygons(refs, box, tolerance, local):
     return out
 
 
+def tile_water(walk, box, tolerance, local):
+    """The water areas of the walk's street tiles: each closed way once, cut to the box and
+    simplified like the rest of the map (a pond smaller than the tolerance falls away)."""
+    rings = {}
+    for _, name in street_tiles(walk):
+        rings.update(json.loads((CACHE / water_tile_name(name)).read_text()))
+    out = []
+    for points in rings.values():
+        ring = [tuple(p) for p in points]
+        if not intersects(bbox_of(ring), box):
+            continue
+        clipped = clip_polygon(ring, box)
+        simple = simplify(clipped, tolerance, local, closed=True) if len(clipped) >= 3 else []
+        if len(simple) >= 3:
+            out.append(simple)
+    return out
+
+
 def city_lines(refs, box, tolerance, local):
     out = []
     for ref in refs:
@@ -817,6 +857,8 @@ def build_walk(walk):
     south, west, north, east = ground
     land = [[(south, west), (south, east), (north, east), (north, west)]]
     water = city_polygons(walk.water, ground, tolerance, local)
+    if walk.water_from_tiles:
+        water += tile_water(walk, ground, tolerance, local)
     canals = city_lines(walk.canals, ground, tolerance, local)
     parks = city_polygons(walk.parks, ground, tolerance, local)
     main_streets, minor_streets = city_streets(walk, tolerance, local) if walk.streets else ([], [])

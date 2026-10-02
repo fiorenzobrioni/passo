@@ -26,7 +26,8 @@ moves with the distance their steps measure.
    14 places, London 10.7 km with 17 (fewer than the twenty first planned: every place on the
    route, and nothing added to fill a count). Rome, Paris and Madrid followed (2 Oct 2026): 9.6 km
    with 15 places, 10.4 km with 14, 9.6 km with 14; then Lima's historic centre (10.1 km, 15) and
-   Cusco (9.4 km, 12), whose map has parks and no water.
+   Cusco (9.4 km, 12), whose map has parks and no water; then the first short walks (decision
+   10): Porto (5.3 km, 10), Amsterdam (5.2 km, 9) and Prague (5.2 km, 9).
 3. **The city behind the line is OpenStreetMap too**: the water (the Thames, the Darsena) as
    areas, the canals (the Navigli) as lines drawn as wide as they are (`riverWidthMeters`, with
    `WayProjection.pixelsPerMeter`), the largest parks as areas. Parks are a new colour role,
@@ -48,7 +49,11 @@ moves with the distance their steps measure.
    Paris's (owner, 2 Oct 2026); they add the residential lanes too, but only those at least
    400 m long once joined (`more_streets_min_metres`): every lane would make them busier than
    any other city and drown the arteries. The cache keeps those classes for every city, so
-   choosing them needs no new fetch.
+   choosing them needs no new fetch. Prague's Old Town is mapped the same way and adds them too.
+   Amsterdam's canals are hundreds of water areas, cut at every bridge: too many to list by id,
+   so its walk reads the water areas of the street tiles it already fetches (`water_from_tiles`),
+   beside the IJ and the docks listed as usual; it adds no lanes, which along its canals are
+   the quays and would draw every canal twice.
 4. **A walk is walked in outings.** An outing on a walk (`session.walk`, `session.walkFromMeters`,
    schema v5 by auto-migration) has the distance left as its goal, no quarter signals, and the
    walk's places as its signals. The places are told from the outing's stored totals (where it
@@ -82,6 +87,19 @@ moves with the distance their steps measure.
    away, so a backup written before the delete brings the journey back.
 9. **The backup carries both fields** on an outing and the setting, as added fields with no new
    format version. One journey under way per walk on import, as one per way slot.
+10. **Two lengths: about 5 km and about 10 km** (owner, 2 Oct 2026). The first walks were all
+    between 8 and 12 km: about 13,000 steps, past the default goal of 8,000, so a reader new to
+    walking met only walks of two outings. A short walk is 4 to 6 km, about 7,000 steps at 5 km,
+    walked in an hour or so and stamped the same day; a long one is 8 to 12 km. The city chooses:
+    the length is its centre's own, and a compact centre is never padded to 10 km with places
+    added to fill it. Places come every 500 to 800 m or so, about 8 on a short walk and about 14
+    on a long one. Nothing on screen tells the two apart: each row already says its length and
+    its places, and the walk's page its steps; a badge or a filter would be a feature to explain
+    for a difference the numbers already show. No third length of 20 km: about four and a half
+    hours at 4.5 km/h, past an outing's four-hour limit, it would always be walked in parts, a
+    way in miniature on a map too wide for its places; it waits for a walk that asks for it.
+    Ten cities is the ceiling of one flat list: past it, the cities need grouping, or the
+    city's second level first.
 
 ## Consequences
 
@@ -89,7 +107,8 @@ moves with the distance their steps measure.
   (ADR 0009). The APK grows by a few tens of kilobytes of encoded lines.
 - Rome, Paris and Madrid were content only, as foreseen: a `Walk` in `tools/ways_content.py`
   each, its route fetched and committed, its places' sentences checked in two languages; so
-  were Lima and Cusco. The set has no limit (owner). A city's second walk would be the same, with
+  were Lima and Cusco, and Porto, Amsterdam and Prague (with the script's one addition,
+  Amsterdam's water from the tiles). The set has no limit (owner). A city's second walk would be the same, with
   the second level of the page (decision 1) still to build; a coastal walk (Lima's Costa Verde)
   also needs a sea built from OpenStreetMap's coastline, which the script does not do yet.
 - To be checked on a device (owner): Milan in one outing and London over two, the voice through

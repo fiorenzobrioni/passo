@@ -21,7 +21,10 @@ All notable changes to Passo are documented here. The format follows
 - **City walks**: Milan, from the Duomo to the Navigli; Rome, from the Colosseum to St Peter's;
   Paris, from Place des Vosges to the Eiffel Tower; London, from Buckingham Palace to Tower
   Bridge; Madrid, from the Temple of Debod to the Puerta de Alcalá; Lima, through its historic
-  centre; and Cusco, up to Sacsayhuamán and down to the Qorikancha. Each map has the city's
+  centre; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And three short ones, about
+  5 km, an hour or so: Porto, from the cathedral across the Douro to the Serra do Pilar;
+  Amsterdam, from Centraal Station along the canals to the Westerkerk; and Prague, from the
+  Castle over Charles Bridge to Wenceslas Square. Each map has the city's
   water, parks and main streets, so the area is recognisable at a glance. Walked where you are
   in one outing or a few. Each place is told as your steps reach it, with a short vibration and,
   if you like, its name and a line about it in your headphones; the notification says the next

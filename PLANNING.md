@@ -864,7 +864,7 @@ city, from the first line of code, so London's second walk is data, not a featur
 city with one walk is one row; the second level (the city's walks) appears only when a city has
 two. The first release has one walk a city.
 
-- [x] The walks' data, by the same script as the ways (`tools/build_ways.py`): each walk drawn once in a router built on OpenStreetMap data (BRouter), its GPX saved into `tools/` by hand, simplified by the script; its places (a key, the name's resource, latitude and longitude, the distance along the walk, measured by the script); behind it the city's water and largest parks from OpenStreetMap (the Thames, the Tiber, the Seine, the Navigli and the Darsena, the Manzanares), never a street grid (revised by the owner on 2 Oct 2026: the main streets, faint, ADR 0015 decision 3). ODbL, credited as for the ways. Between 8 and 12 km a walk, about twenty places.
+- [x] The walks' data, by the same script as the ways (`tools/build_ways.py`): each walk drawn once in a router built on OpenStreetMap data (BRouter), its GPX saved into `tools/` by hand, simplified by the script; its places (a key, the name's resource, latitude and longitude, the distance along the walk, measured by the script); behind it the city's water and largest parks from OpenStreetMap (the Thames, the Tiber, the Seine, the Navigli and the Darsena, the Manzanares), never a street grid (revised by the owner on 2 Oct 2026: the main streets, faint, ADR 0015 decision 3). ODbL, credited as for the ways. Between 8 and 12 km a walk, about twenty places (revised by the owner on 2 Oct 2026: two lengths, about 5 km and about 10 km, the city's to choose; ADR 0015 decision 10).
 - [x] Indicative walks, decided with the owner when each is drawn: Milan (the Duomo, the Galleria, La Scala, Brera, the Castello Sforzesco, Parco Sempione, the Arco della Pace, Sant'Ambrogio, the Columns of San Lorenzo, the Darsena and the Navigli); London (Westminster, the Elizabeth Tower, Trafalgar Square, the South Bank, the London Eye, Tate Modern, the Millennium Bridge, St Paul's, Borough Market, Tower Bridge, the Tower of London).
 - [x] The places' sentences: written for Passo, never copied (not from Wikipedia either), each checked against two sources and noted in the script; in English and Italian; one sentence of at most about twenty words, made to be heard; nothing that goes stale (no opening hours, prices or "now showing").
 - [x] Domain (`:core:domain/ways`): `CityWalkProgress` (the distance done on a walk, summed from the outings walked on it since it was started; the place reached; the next one and how far), the places crossed by a batch (each named once; the voice says the names in order and the last one's sentence).
@@ -912,8 +912,14 @@ a city for now.
   historic centre (the owner's other places, Miraflores, Barranco and the Costa Verde, are 10 km
   south: a second walk one day, with the city's second level and the sea the script cannot draw
   yet); Cusco's climbs from the Plaza de Armas to Sacsayhuamán and comes down to the Qorikancha.
-- [ ] On a device (owner): the Camino Portugués drawn in both themes; Rome, Paris, Madrid, Lima
-  and Cusco each walked once, with the voice.
+- [x] **Porto, Amsterdam and Prague, the first short walks** (owner, 2 Oct 2026, from a
+  proposal): three European countries not yet on the page, each about 5 km, after the rule of
+  two lengths (ADR 0015 decision 10). Porto's begins at the cathedral, where the Camino
+  Portugués begins, and crosses the Douro to the Serra do Pilar; Amsterdam's goes from
+  Centraal Station along the canals to the Westerkerk; Prague's comes down from the Castle over
+  Charles Bridge to Wenceslas Square. Ten cities: the ceiling of one flat list.
+- [ ] On a device (owner): the Camino Portugués drawn in both themes; Rome, Paris, Madrid, Lima,
+  Cusco, Porto, Amsterdam and Prague each walked once, with the voice.
 
 Built as the content of the first two parts, with nothing new in the code: the fifth way is the
 Caminho Português's main relation (12786090), whose line the script takes from Porto's
@@ -930,7 +936,17 @@ the cities in the owner's order: Milan, Rome, Paris, London, Madrid, then Lima a
 Alameda de los Descalzos and back, three places more than proposed so that it reaches 8 km;
 Cusco (9.4 km, 12 places) has no water, since its rivers run in channels and the Huatanay begins
 south of the map, and one place without a sentence (the San Pedro market: no source to check one
-against). Both share a locator of Peru.
+against). Both share a locator of Peru. Porto (5.3 km, 10 places), Amsterdam (5.2 km, 9) and
+Prague (5.2 km, 9) are the same content in the shorter length; the Ways page lists them after
+Madrid, so Europe stays together. Their sentences were checked in two Wikipedias each (English
+and Portuguese, Dutch or Czech), and where those disagree the number goes (the steps of the
+Clérigos tower, the tiles of São Bento, whether the Powder Tower ever held powder); the Ribeira
+has none, with no second source found. Porto's first sentence names the Camino Portugués,
+which in Passo starts from that cathedral. Amsterdam's canals are hundreds of water areas cut
+at every bridge, so the script reads them from the street tiles it already fetches
+(`water_from_tiles`); Prague's Old Town adds its longer lanes, as Milan's and Rome's centres
+do. The other walks' data is kept as committed: a fresh fetch moved the Via di Francesco by a
+metre and a few of Paris's streets (OpenStreetMap edits since), not part of this change.
 
 ### Phase 12 — Your year on foot («Il tuo anno a piedi»)
 
@@ -1206,6 +1222,8 @@ Include:
 - **The main streets on a city's map** (owner, 2 Oct 2026, after a trial on Milan: "Milan is recognisable now"): ADR 0015's "never a street grid" is revised to the arteries and the streets that shape a centre, faint under the route, on the walk's own page only; every city has them. Details and the reasons in ADR 0015, decision 3.
 - **Milan's and Rome's maps as full as the others'** (owner, 2 Oct 2026: "less detailed than the other cities"): not a stale build (a fresh fetch rebuilt them byte for byte) but OpenStreetMap's tagging: their centres are mapped mostly as residential streets, which no city drew, with few tertiary ones (Milan's centre has almost none). Both now add the residential, unclassified and living-street lanes at least 400 m long, which brings the drawn street length on the page from 19 (Milan) and 32 (Rome) to about 46 and 55, against London's 37, Lima's 44 and Paris's 47 (km of street per km of the box's side); all lanes would have made them the busiest maps. Cusco's map is unchanged. ADR 0015, decision 3.
 - **The locator keeps clear of the ends' names** (Phase 11, later, 2 Oct 2026): on the Camino Portugués, a line running north up the middle of its map, every corner was equally free and the locator took the first, over Santiago's name. `WayMapView` now places a name's pill by one rule (`labelRect`) and the locator avoids the start's and the end's pills as it avoids the line; a touched stop's name is left out, or the locator would jump at every touch. The other four ways' maps are unchanged.
+- **Two lengths of city walk: about 5 km and about 10 km** (owner, 2 Oct 2026, from a proposal): a short walk, 4 to 6 km, is about 7,000 steps at 5 km, within the default goal of 8,000, an hour or so walked in one outing, its stamp the same day; a long one, 8 to 12 km, stays as before. The length is the centre's own, chosen by the city (a compact centre is not padded to 10 km with places added to fill it), and the places come every 500 to 800 m or so (about 8 on a short walk, about 14 on a long one). Nothing new on screen: each row already gives the length and the places, and the walk's page the steps; no badge, filter or second list. No 20 km length: about four and a half hours at 4.5 km/h, past an outing's four-hour limit (`MAX_SESSION_MILLIS`), so a way in miniature rather than a walk in a city, on a map too wide for its places; decided when a walk asks for it, not before. Ten cities is a ceiling for one flat list: more would need grouping or the city's second level first. ADR 0015, decision 10.
+- **Porto, Amsterdam and Prague, the first short walks** (owner, 2 Oct 2026, from a proposal): three countries not yet on the Ways page, each a centre about 5 km across, so none is padded. Porto ties the cities to the ways (its walk begins where the Camino Portugués begins); Amsterdam is flat and compact, its canals on the map; Prague comes downhill from the Castle. One addition to the script, so that Amsterdam's canals can be drawn: a walk may read its water from the street tiles (`water_from_tiles`), since its hundreds of areas cut at every bridge cannot be listed by id. Phase 11, later.
 
 ### Open
 
