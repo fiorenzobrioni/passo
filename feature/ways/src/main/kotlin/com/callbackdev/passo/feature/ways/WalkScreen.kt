@@ -15,6 +15,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
@@ -61,6 +62,7 @@ class WalkActions(
     val voice: (SessionVoice) -> Unit = {},
     val card: SessionCardActions = SessionCardActions(),
     val delete: (Long) -> Unit = {},
+    val leave: (Long) -> Unit = {},
     val prepareVoice: () -> Unit = {},
     val tryVoice: () -> Unit = {},
     val openVoiceSettings: () -> Unit = {},
@@ -72,7 +74,8 @@ class WalkActions(
  *
  * - **Not begun**: its length, its places and its steps at the reader's step; Start.
  * - **Under way, no outing**: where the last outing left it, the place ahead; Continue from
- *   there, or Start again (which asks: the walk so far is put down).
+ *   there, or Start again (which asks: the walk so far is put down); and, after the places,
+ *   Leave it, which asks too: the walk goes back to its start, its outings kept in History.
  * - **An outing on it**: the outing's own card, without its map (the page has the walk's).
  * - **Walked to its end** (opened from Your ways, or the walk's last journey): when, and Walk
  *   it again.
@@ -94,6 +97,7 @@ internal fun WalkPage(
     val view = opened?.takeIf { it.journey.state == WayJourneyState.FINISHED } ?: walk.current
     val progress = view?.progress
     var again by rememberSaveable { mutableStateOf(false) }
+    var leaving by rememberSaveable { mutableStateOf(false) }
     // With the voice on, the engine is asked once whether it can speak: the page says so first.
     LaunchedEffect(state.walkVoice) { if (state.walkVoice != SessionVoice.OFF) actions.prepareVoice() }
     LazyColumn(
@@ -167,6 +171,15 @@ internal fun WalkPage(
         }
         item(key = "places-header") { Header(stringResource(R.string.walk_group_places)) }
         item(key = "places") { Stages(state, way, progress, format) }
+        // Begun, and not being walked right now: it can be put down, as a way can, after asking.
+        if (live == null && view != null && view.journey.state == WayJourneyState.ACTIVE && !view.progress.finished) {
+            item(key = "leave") {
+                OutlinedButton(
+                    onClick = { leaving = true },
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenMargin).testTag(WaysTags.LEAVE),
+                ) { Text(stringResource(R.string.walk_leave)) }
+            }
+        }
         // Opened from Your ways, a walk walked to its end can go from there.
         if (opened != null && opened == view) {
             item(key = "delete") { DeleteJourney(walk = true, onDelete = { actions.delete(opened.journey.id) }) }
@@ -187,6 +200,20 @@ internal fun WalkPage(
                 }) { Text(stringResource(R.string.walk_again)) }
             },
             dismissButton = { TextButton(onClick = { again = false }) { Text(stringResource(R.string.way_cancel)) } },
+        )
+    }
+    if (leaving && view != null) {
+        AlertDialog(
+            onDismissRequest = { leaving = false },
+            title = { Text(stringResource(R.string.walk_leave_title)) },
+            text = { Text(stringResource(R.string.walk_leave_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    leaving = false
+                    actions.leave(view.journey.id)
+                }) { Text(stringResource(R.string.way_leave_confirm)) }
+            },
+            dismissButton = { TextButton(onClick = { leaving = false }) { Text(stringResource(R.string.way_cancel)) } },
         )
     }
 }

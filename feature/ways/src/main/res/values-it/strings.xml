@@ -81,6 +81,9 @@
     <string name="walk_again">Ricomincia</string>
     <string name="walk_again_title">Ricominciare dall’inizio?</string>
     <string name="walk_again_body">La passeggiata riparte da %1$s. Le uscite fatte finora restano in Cronologia.</string>
+    <string name="walk_leave">Lascia questa passeggiata</string>
+    <string name="walk_leave_title">Lasciare questa passeggiata?</string>
+    <string name="walk_leave_body">La passeggiata torna alla partenza, e i suoi timbri con lei. Le uscite fatte restano in Cronologia, e potrai ricominciarla un altro giorno.</string>
     <string name="walk_busy">C’è un’uscita in corso: terminala per iniziare questa passeggiata.</string>
     <string name="walk_paused">Il conteggio è in pausa: riattivalo nelle Impostazioni per camminare.</string>
     <string name="walk_permission">Passo ha bisogno del permesso per l’attività fisica per contare questa passeggiata.</string>

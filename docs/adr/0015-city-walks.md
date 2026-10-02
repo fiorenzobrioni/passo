@@ -100,6 +100,15 @@ moves with the distance their steps measure.
     way in miniature on a map too wide for its places; it waits for a walk that asks for it.
     Ten cities is the ceiling of one flat list: past it, the cities need grouping, or the
     city's second level first.
+11. **A walk begun can be left** (owner, 2 Oct 2026: a walk once started had no way out but
+    walking it to its end, or Start again, which begins another outing at once). «Leave this
+    walk» sits where a way's Leave does, after the places, only on a walk begun, not at its
+    end and with no outing on it (during one, End comes first); it asks first. The journey is
+    put down as Start again puts it down (left, or deleted when under a metre of it was
+    walked), so the walk shows as not begun, and the outings stay in History, as the dialog
+    says. A walk left is not kept in Your ways, unlike a way left (decision 5's rule stands):
+    a way is months, and a credential half stamped is worth keeping; a walk is an afternoon,
+    and its outings already keep the record.
 
 ## Consequences
 

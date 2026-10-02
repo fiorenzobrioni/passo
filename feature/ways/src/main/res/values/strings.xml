@@ -79,6 +79,9 @@
     <string name="walk_again">Start again</string>
     <string name="walk_again_title">Start again from the beginning?</string>
     <string name="walk_again_body">The walk begins again from %1$s. Your outings so far stay in History.</string>
+    <string name="walk_leave">Leave this walk</string>
+    <string name="walk_leave_title">Leave this walk?</string>
+    <string name="walk_leave_body">The walk goes back to its start, and its stamps go with it. Your outings on it stay in History, and you can begin it again another day.</string>
     <string name="walk_busy">An outing is under way: end it to start this walk.</string>
     <string name="walk_paused">Counting is paused: turn it on in Settings to walk.</string>
     <string name="walk_permission">Passo needs the physical activity permission to count this walk.</string>

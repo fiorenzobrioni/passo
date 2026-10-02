@@ -333,6 +333,30 @@ class WaysScreenTest {
     }
 
     @Test
+    fun `a walk begun can be left, after asking, and goes back to its start, its outings kept`() {
+        var left: Long? = null
+        showWay(
+            WayId.LONDON_PALACE_TOWER,
+            state = WaysSamples.state(outings = listOf(WaysSamples.londonYesterday), live = null),
+            actions = WayActions(walk = WalkActions(leave = { left = it })),
+        )
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasTestTag(WaysTags.LEAVE))
+        compose.onNodeWithTag(WaysTags.LEAVE).performClick()
+        compose.onNodeWithText("Leave this walk?").assertIsDisplayed()
+        compose.onNodeWithText("stay in History", substring = true).assertExists()
+        snapshot("walk_leave")
+        compose.onNodeWithText("Leave").performClick()
+        assertThat(left).isEqualTo(WaysSamples.london.id)
+    }
+
+    @Test
+    fun `during an outing a walk cannot be left, the outing ends first`() {
+        showWay(WayId.LONDON_PALACE_TOWER)
+        compose.onNodeWithTag(SessionCardTags.CARD).assertExists()
+        compose.onNodeWithTag(WaysTags.LEAVE).assertDoesNotExist()
+    }
+
+    @Test
     fun `a walk not begun says its length, its places and its steps, and keeps its voice`() {
         var started: Boolean? = null
         var voice: SessionVoice? = null
@@ -343,6 +367,8 @@ class WaysScreenTest {
         )
         compose.onNodeWithText("9.32 km · 14 places").assertIsDisplayed()
         compose.onNodeWithText("About 13,300 steps, in one outing or a few.").assertExists()
+        // Nothing begun, nothing to leave.
+        compose.onNodeWithTag(WaysTags.LEAVE).assertDoesNotExist()
         snapshot("walk_preview")
         compose.onNodeWithTag(WaysTags.WALK_START).performClick()
         assertThat(started).isFalse()

@@ -138,6 +138,8 @@ fun WayRoute(way: WayId, journeyId: Long?, onBack: () -> Unit, viewModel: WaysVi
                     viewModel.delete(id)
                     onBack()
                 },
+                // The page stays: with its journey put down, it shows the walk ready to begin.
+                leave = viewModel::leave,
                 card = SessionCardActions(
                     onPause = viewModel::pauseWalk,
                     onResume = viewModel::resumeWalk,

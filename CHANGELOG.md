@@ -33,7 +33,8 @@ All notable changes to Passo are documented here. The format follows
   voices.
 - **Your ways can be tidied**: a way finished or left, or a walk walked to its end, can be
   deleted, after a warning that it is for good. A way left before you walked any of it is not
-  kept.
+  kept. A city walk begun can be left too, between outings: it goes back to its start, and
+  its outings stay in History.
 
 ### Changed
 
