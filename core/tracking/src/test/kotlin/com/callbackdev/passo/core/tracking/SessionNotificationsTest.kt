@@ -161,4 +161,56 @@ class SessionNotificationsTest {
         // A walk's place: one short pulse (a walk has no quarters).
         assertThat(SessionHaptics.placePattern().toList()).containsExactly(0L, 180L).inOrder()
     }
+
+    @Test
+    fun `faster and slower are unlike every other signal`() {
+        val faster = SessionHaptics.intervalPattern(fast = true).toList()
+        val slower = SessionHaptics.intervalPattern(fast = false).toList()
+        assertThat(faster).containsExactly(0L, 70L, 80L, 70L, 80L, 70L, 80L, 70L).inOrder()
+        assertThat(slower).containsExactly(0L, 450L, 250L, 120L).inOrder()
+        val others = SessionMilestone.entries.map { SessionHaptics.pattern(it).toList() } +
+            listOf(SessionHaptics.endedStillPattern().toList(), SessionHaptics.placePattern().toList())
+        assertThat(others).containsNoneOf(faster, slower)
+    }
+
+    @Test
+    fun `an interval walk says its interval and its countdown, over a bar of its intervals`() {
+        val start = checkNotNull(SessionPlans.start(SessionPlans.JAPANESE_WALKING, 0, 20_000, 0, 8_000))
+        // Four minutes and twenty seconds in: the first fast interval, 1:40 left.
+        val going = start.copy(
+            id = 4,
+            totals = SessionTotals(steps = 460, movingMillis = 260_000),
+            lastStepAtMillis = 300_000,
+        )
+        val notification = notifications.build(
+            NotificationContent(
+                6_000,
+                session = SessionNotice(going, 112, UnitPreference.METRIC, nowMillis = 300_000),
+            ),
+        )
+
+        assertThat(NotificationCompat.getContentTitle(notification).toString()).isEqualTo("Fast · 1:40")
+        assertThat(NotificationCompat.getSubText(notification).toString()).isEqualTo("Set 1 of 5")
+        val expanded = notification.extras.getCharSequence(Notification.EXTRA_BIG_TEXT).toString()
+        assertThat(expanded).contains("Japanese walking")
+        assertThat(expanded).contains("Fast: 1:40 left.")
+        assertThat(expanded).contains("112 steps/min: on pace")
+    }
+
+    @Test
+    fun `in a slow interval the cadence is told in words, not against the fast pace`() {
+        val start = checkNotNull(SessionPlans.start(SessionPlans.JAPANESE_WALKING, 0, 20_000, 0, 8_000))
+        val slow = start.copy(
+            id = 4,
+            totals = SessionTotals(steps = 100, movingMillis = 60_000),
+            lastStepAtMillis = 70_000,
+        )
+        val notification = notifications.build(
+            NotificationContent(6_000, session = SessionNotice(slow, 88, UnitPreference.METRIC, nowMillis = 70_000)),
+        )
+        val expanded = notification.extras.getCharSequence(Notification.EXTRA_BIG_TEXT).toString()
+        assertThat(NotificationCompat.getContentTitle(notification).toString()).isEqualTo("Slow · 2:00")
+        assertThat(expanded).contains("88 steps/min, relaxed")
+        assertThat(expanded).doesNotContain("below your pace")
+    }
 }

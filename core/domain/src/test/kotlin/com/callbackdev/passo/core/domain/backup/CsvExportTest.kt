@@ -59,11 +59,12 @@ class CsvExportTest {
         val rows = lines(CsvExport.outings(listOf(formula, live, named), UnitSystem.METRIC, ZoneOffset.UTC))
 
         assertThat(rows[0]).isEqualTo(
-            "date,start,end,name,goal,goal_value,goal_unit,pace,outcome,steps,minutes_in_motion,distance_km,active_kcal",
+            "date,start,end,name,goal,goal_value,goal_unit,pace,outcome,steps,minutes_in_motion," +
+                "distance_km,active_kcal,intervals,fast_at_pace",
         )
         assertThat(
             rows[1],
-        ).isEqualTo("$date,09:00,09:25,\"Walk, \"\"quick\"\"\",time,25,min,brisk,reached,2600,25.0,1.950,88.0")
+        ).isEqualTo("$date,09:00,09:25,\"Walk, \"\"quick\"\"\",time,25,min,brisk,reached,2600,25.0,1.950,88.0,,")
         assertThat(rows[2]).contains(",'=HYPERLINK(1),")
         assertThat(rows[3]).contains(",under_way,")
         assertThat(rows[3]).startsWith("$date,20:00,,,")

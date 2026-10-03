@@ -26,6 +26,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
+import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
@@ -253,6 +254,88 @@ class PlanEditorScreenTest {
     fun `on an open foldable the editor is a column in the middle`() {
         compose.setContent { PassoTheme { PlanEditorScreen(state(), onBack = {}, actions = PlanEditorActions()) } }
         compose.walkPage(hasTestTag(EditorTags.LIST), "editor_foldable")
+    }
+
+    // --- The interval walk (Phase 13) -------------------------------------------------------
+
+    @Test
+    fun `intervals say what the Japanese walk is, and pick its sets`() {
+        var editor by mutableStateOf(state())
+        val actions = PlanEditorActions(
+            intervals = { on ->
+                if (on) editor = editor.copy(draft = SessionPlans.withIntervals(editor.draft, editor.draft.intervals))
+            },
+            sets = { change ->
+                editor = editor.copy(draft = SessionPlans.withIntervals(editor.draft, change(editor.draft.intervals)))
+            },
+        )
+        compose.setContent { PassoTheme { PlanEditorScreen(editor, onBack = {}, actions = actions) } }
+
+        compose.onNodeWithTag("${EditorTags.KIND}-true").performClick()
+        compose.onNodeWithText("The Japanese interval walk").assertIsDisplayed()
+        compose.onNodeWithText("Slow and fast walking in turns", substring = true).assertIsDisplayed()
+        snapshot("editor_intervals")
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.SETS))
+        compose.onNodeWithTag("${EditorTags.SETS}-more").performClick()
+        compose.onNodeWithTag("${EditorTags.FAST}-less").performClick()
+        assertThat(editor.draft.intervals).isEqualTo(IntervalSets(slowMinutes = 3, fastMinutes = 2, sets = 6))
+        assertThat(editor.draft.goalValue).isEqualTo(30)
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.PROTOCOL))
+        compose.onNodeWithText("30 min in all", substring = true).assertIsDisplayed()
+        compose.onNodeWithTag(EditorTags.PROTOCOL).performClick()
+        assertThat(editor.draft.intervals).isEqualTo(IntervalSets())
+        // The fast pace is never free, and the shares of the goal are not offered.
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag("${EditorTags.PACE}-BRISK"))
+        compose.onNodeWithTag("${EditorTags.PACE}-FREE").assertDoesNotExist()
+        compose.onNodeWithTag("${EditorTags.MILESTONE}-50").assertDoesNotExist()
+    }
+
+    @Test
+    fun `faster and slower can be felt first`() {
+        val felt = mutableListOf<Boolean>()
+        val japanese = state(SessionPlans.JAPANESE_WALKING.copy(id = 4), isNew = false)
+        compose.setContent {
+            PassoTheme {
+                PlanEditorScreen(japanese, onBack = {}, actions = PlanEditorActions(tryInterval = { felt += it }))
+            }
+        }
+
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag("${EditorTags.TRY_INTERVAL}-false"))
+        compose.onNodeWithText("Faster").performClick()
+        compose.onNodeWithText("Slower").performClick()
+        assertThat(felt).containsExactly(true, false).inOrder()
+        compose.onNodeWithTag("${EditorTags.TRY}-50").assertDoesNotExist()
+        snapshot("editor_intervals_signals")
+    }
+
+    @Test
+    fun `on a phone that cannot be woken by its counter, it says the changes need the screen on`() {
+        val japanese = state(SessionPlans.JAPANESE_WALKING.copy(id = 4), isNew = false)
+            .copy(changesWhileScreenOff = false)
+        compose.setContent {
+            PassoTheme(darkTheme = true) { PlanEditorScreen(japanese, onBack = {}, actions = PlanEditorActions()) }
+        }
+
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.SCREEN_ON))
+        compose.onNodeWithText("On time only with the screen on").assertIsDisplayed()
+        snapshot("editor_intervals_screen_on_dark")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
+    fun `at twice the text size, the interval editor still reads`() {
+        val japanese = state(SessionPlans.JAPANESE_WALKING.copy(id = 4), isNew = false)
+        compose.setContent { PassoTheme { PlanEditorScreen(japanese, onBack = {}, actions = PlanEditorActions()) } }
+        compose.walkPage(hasTestTag(EditorTags.LIST), "editor_intervals_large_text", maxScreens = 20)
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT-w360dp-h740dp-xxhdpi")
+    fun `in Italian, the interval editor fits a small phone`() {
+        val japanese = state(SessionPlans.JAPANESE_WALKING.copy(id = 4), isNew = false)
+        compose.setContent { PassoTheme { PlanEditorScreen(japanese, onBack = {}, actions = PlanEditorActions()) } }
+        compose.onNodeWithText("La camminata giapponese a intervalli").assertIsDisplayed()
+        compose.walkPage(hasTestTag(EditorTags.LIST), "editor_intervals_it", maxScreens = 12)
     }
 
     private fun snapshot(name: String) {

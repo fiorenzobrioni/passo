@@ -51,15 +51,19 @@
 
     <!-- Uscite -->
     <string name="guide_outings_title">Uscite</string>
-    <string name="guide_outings_p1">Un’uscita è una camminata o una corsa che avvii apposta, con un solo obiettivo: un numero di passi, una distanza, dei minuti in movimento, o quello che manca all’obiettivo di oggi. Un ritmo da tenere lo scegli tu, se vuoi.</string>
+    <string name="guide_outings_p1">Un’uscita è una camminata o una corsa che avvii apposta, con un solo obiettivo: un numero di passi, una distanza, dei minuti in movimento, o quello che manca all’obiettivo di oggi. Un ritmo da tenere lo scegli tu, se vuoi. Oppure può essere una camminata a intervalli, qui sotto.</string>
     <string name="guide_outings_signals_title">Segnali che si leggono in tasca</string>
     <string name="guide_outings_signals_body">Lungo la strada il telefono vibra alle quote che scegli, contando: un impulso breve a un quarto, due a metà, tre a tre quarti e uno lungo all’obiettivo. Seguono la modalità silenziosa del telefono. Se vuoi, una voce nelle cuffie dice lo stesso, con quello che manca e come va il ritmo, con una voce installata sul telefono.</string>
     <string name="guide_outings_motion_title">Il tempo in movimento</string>
     <string name="guide_outings_motion_body">I minuti di un’uscita si misurano dai tuoi passi, non con un orologio: un’attesa al semaforo non conta.</string>
     <string name="guide_outings_end_title">Finisce da sola</string>
     <string name="guide_outings_end_body">All’obiettivo, dove «Continua» le dà ancora un quarto d’ora; dopo 15 minuti senza un passo, che ti dice con due impulsi lunghi (e con la voce, se parla) quando riparti, con «Riprendi» per un quarto d’ora; o dopo un’ora in pausa. Poi prende il posto della camminata che è stata, in Oggi e nello Storico, con quanta parte dell’obiettivo è stata fatta.</string>
+    <string name="guide_intervals_title">La camminata giapponese a intervalli</string>
+    <string name="guide_intervals_body">Camminata lenta e veloce a turno, come l’ha proposta uno studio dell’Università di Shinshu, in Giappone (Nemoto e colleghi, 2007): 3 minuti a passo tranquillo, poi 3 minuti abbastanza svelti che parlare costa fatica, cinque serie o più, circa mezz’ora. Nello studio, chi ha camminato così quattro giorni a settimana o più per cinque mesi ha guadagnato più forma fisica e forza nelle gambe, e ha abbassato di più la pressione, di chi camminava a passo costante.</string>
+    <string name="guide_intervals_how_title">Come la cammina Passo con te</string>
+    <string name="guide_intervals_how_body">Creane una in Uscite (la «Camminata giapponese» è pronta da avviare), scegliendo i minuti lenti e veloci, le serie e il ritmo veloce. Comincia piano. Ogni cambio è segnalato da una vibrazione tutta sua, quattro tocchi rapidi per più veloce, un impulso lungo e uno breve per più lento, e dalla voce se l’uscita parla; la fine dell’ultimo intervallo veloce è l’obiettivo. I minuti sono minuti in movimento, così un semaforo non si mangia un intervallo veloce. Alla fine vedi la cadenza di ogni intervallo veloce rispetto al suo ritmo, e quanti erano al ritmo. A schermo spento un cambio si sente in pochi secondi; su un telefono il cui contapassi non può risvegliarlo, solo a schermo acceso.</string>
     <string name="guide_outings_battery_title">L’unica volta che Passo sveglia il telefono</string>
-    <string name="guide_outings_battery_body">Perché i segnali arrivino in tempo, mentre un’uscita conta il contapassi si fa sentire circa ogni mezzo minuto mentre cammini, e per niente mentre stai fermo. Prima e dopo, non cambia nulla.</string>
+    <string name="guide_outings_battery_body">Perché i segnali arrivino in tempo, mentre un’uscita conta il contapassi si fa sentire circa ogni mezzo minuto mentre cammini, e per niente mentre stai fermo. In una camminata a intervalli si fa sentire ogni due secondi negli ultimi 40 secondi prima di ogni cambio, poi torna al mezzo minuto: una decina di momenti così in mezz’ora. Prima e dopo un’uscita, non cambia nulla.</string>
     <string name="guide_outings_start_title">Da dove partono</string>
     <string name="guide_outings_start_body">Da Oggi o dalle impostazioni, dalla pressione lunga sull’icona di Passo, che propone quelle avviate per ultime, e dal «Cammina ora» del promemoria serale.</string>
 

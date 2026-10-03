@@ -298,11 +298,22 @@ internal fun Context.spoken(announcement: SessionAnnouncement, session: Session,
     val res = resources
     val format = measureFormatter(units)
     return when (announcement) {
-        is SessionAnnouncement.Started -> res.getString(
+        is SessionAnnouncement.Started -> announcement.intervals?.let { sets ->
+            res.getQuantityString(
+                R.plurals.spoken_intervals_started,
+                sets.sets,
+                res.sessionName(session),
+                sets.sets,
+                res.getQuantityString(R.plurals.spoken_minutes, sets.slowMinutes, sets.slowMinutes),
+                res.getQuantityString(R.plurals.spoken_minutes, sets.fastMinutes, sets.fastMinutes),
+            )
+        } ?: res.getString(
             R.string.spoken_started,
             res.sessionName(session),
             res.intensityPhrase(announcement.intensity, res.spokenAmount(announcement.goal, format)),
         )
+
+        is SessionAnnouncement.IntervalChanged -> res.spokenInterval(announcement)
 
         is SessionAnnouncement.Milestone -> res.spokenMilestone(announcement, format)
 
@@ -349,12 +360,33 @@ internal fun Context.spoken(announcement: SessionAnnouncement, session: Session,
                     kept.zoneMinutes,
                     res.getQuantityString(R.plurals.spoken_minutes, kept.movingMinutes, kept.movingMinutes),
                 )
+
+                is PaceSummary.Intervals -> res.getQuantityString(
+                    R.plurals.spoken_intervals_at_pace,
+                    kept.atPace,
+                    kept.atPace,
+                    kept.fast,
+                )
             }
             val day = res.getString(R.string.spoken_day_goal).takeIf { announcement.dayGoalReached }
             listOfNotNull(goal, pace, day, res.getString(R.string.spoken_well_done)).joinToString(" ")
         }
     }
 }
+
+/** «Fast, 3 minutes.», «Slow.», «Last fast interval, 3 minutes.» */
+private fun Resources.spokenInterval(announcement: SessionAnnouncement.IntervalChanged): String {
+    if (!announcement.fast) return getString(R.string.spoken_interval_slow)
+    val minutes = getQuantityString(R.plurals.spoken_minutes, announcement.minutes, announcement.minutes)
+    return getString(
+        if (announcement.lastSet) R.string.spoken_interval_last_fast else R.string.spoken_interval_fast,
+        minutes,
+    )
+}
+
+/** A sample of an interval outing's change, for the editor's "Try it": its first fast interval. */
+fun Context.spokenIntervalSample(fastMinutes: Int): String =
+    resources.spokenInterval(SessionAnnouncement.IntervalChanged(fast = true, minutes = fastMinutes, lastSet = false))
 
 /** A sample of what an outing says on the way, for the editor's "Try it": its halfway. */
 fun Context.spokenSample(announcement: SessionAnnouncement.Milestone, units: UnitPreference): String =
@@ -427,7 +459,7 @@ private fun Resources.spokenAmount(amount: SessionAmount, format: MeasureFormatt
         getQuantityString(R.plurals.spoken_steps, steps, format.steps(steps))
     }
 
-    SessionGoalKind.TIME -> {
+    SessionGoalKind.TIME, SessionGoalKind.INTERVALS -> {
         val minutes = amount.value.roundToInt()
         getQuantityString(R.plurals.spoken_minutes, minutes, minutes)
     }

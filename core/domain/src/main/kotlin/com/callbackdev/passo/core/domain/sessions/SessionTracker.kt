@@ -1,6 +1,7 @@
 package com.callbackdev.passo.core.domain.sessions
 
 import com.callbackdev.passo.core.domain.metrics.MetricsCalculator
+import com.callbackdev.passo.core.domain.metrics.MetricsConstants
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.CADENCE_WINDOW_MILLIS
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.IDLE_END_MILLIS
@@ -34,6 +35,19 @@ sealed interface SessionSignal {
     data class Places(val places: List<WayStop>) : SessionSignal
 
     /**
+     * An interval outing changed interval (Phase 13): [position] is the one that begins. When one
+     * batch crosses several changes (a long stillness of the reports), only the latest is told;
+     * the splits are right either way. Never the end of the last interval: that is the goal.
+     *
+     * @property changedAtMillis when the change fell, from the steps' own timestamps; for an
+     *   [early] one, when it is predicted to fall.
+     * @property early told at the report before the one that would cross it, the change being
+     *   due before the next report (docs/adr/0013-interval-walks.md).
+     */
+    data class IntervalChange(val position: IntervalPosition, val changedAtMillis: Long, val early: Boolean = false) :
+        SessionSignal
+
+    /**
      * The outing is over. [kept] is false for one too short to be worth keeping
      * ([SessionConstants.MIN_KEPT_STEPS]), which the caller deletes rather than records.
      */
@@ -56,6 +70,10 @@ sealed interface SessionSignal {
  *   [PAUSE_END_MILLIS], or [MAX_SESSION_MILLIS] open; noticed at the next step or [check]. An
  *   end by stillness can be taken back like the goal's, for [KEEP_GOING_MILLIS] from the moment
  *   it was noticed: a chat with a friend is a stop, not the end of the walk.
+ * - **An interval outing** (Phase 13) cuts the same time in motion into its intervals
+ *   ([IntervalSchedule]): each batch is laid on the splits, cut where it crosses a change, and
+ *   the latest change it crossed is told; one due before the next report, while walking, is told
+ *   at this one ([SessionConstants.EARLY_CHANGE_MILLIS]).
  *
  * Not thread-safe: the service drives it from one thread.
  */
@@ -71,6 +89,21 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
     private var reopenableSince: Long? = null
     private var overtime = SessionTotals()
     private var overtimeLastEvent: Long? = null
+
+    // The last interval whose start was told: the one under way when the tracker was made (its
+    // start was told then, or by the process before this one), then each change as it is told.
+    private var toldInterval: Int = IntervalSchedule.of(initial)?.indexAt(initial.totals.movingMillis) ?: 0
+
+    /**
+     * The time in motion to the next moment of an interval outing worth telling on time (a change
+     * or the goal), while it counts; null for any other outing, or when nothing is left to tell.
+     * What sets the step counter's report latency (docs/adr/0013-interval-walks.md).
+     */
+    fun untilIntervalSignal(): Long? {
+        val current = session
+        if (current.state != SessionState.ACTIVE) return null
+        return IntervalSchedule.of(current)?.untilSignal(current.totals.movingMillis)
+    }
 
     /** Accounts [steps] taken at [atMillis]; returns what to tell, in order. */
     fun onSteps(atMillis: Long, steps: Int): List<SessionSignal> {
@@ -210,6 +243,16 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
     private fun advance(moved: Session, added: SessionTotals, atMillis: Long): List<SessionSignal> {
         val before = moved.progress()
         var next = moved.copy(totals = moved.totals + added)
+        val schedule = IntervalSchedule.of(moved)
+        if (schedule != null) {
+            val splits = schedule.lay(moved.splits, moved.totals.movingMillis, added)
+            // The time at pace of an interval outing is the fast minutes' only: the slow ones
+            // have no pace to keep, and the minutes after its goal no interval.
+            next = next.copy(
+                splits = splits,
+                totals = next.totals.copy(zoneMillis = splits.filter { it.fast }.sumOf { it.zoneMillis }),
+            )
+        }
         val after = next.progress()
         val crossed = (next.milestones + SessionMilestone.GOAL).filter {
             it !in next.toldMilestones && before < it.fraction && after >= it.fraction
@@ -220,12 +263,44 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
             next = next.copy(toldMilestones = next.toldMilestones + crossed)
             signals += SessionSignal.Milestone(crossed.maxBy { it.percent })
         }
+        if (schedule != null && SessionMilestone.GOAL !in crossed) {
+            intervalChange(schedule, moved.totals.movingMillis, next, atMillis)?.let { signals += it }
+        }
         session = next
         if (SessionMilestone.GOAL in crossed && !next.reached) {
             session = next.copy(reachedAtMillis = atMillis)
             signals += finish(atMillis, SessionEnd.GOAL, reopenableFrom = atMillis)
         }
         return signals
+    }
+
+    /**
+     * The change [next] crossed since [fromMillis] of time in motion, the latest if several, or
+     * the one due before the next report while the reader walks; null when there is none to tell.
+     */
+    private fun intervalChange(
+        schedule: IntervalSchedule,
+        fromMillis: Long,
+        next: Session,
+        atMillis: Long,
+    ): SessionSignal.IntervalChange? {
+        val moving = next.totals.movingMillis
+        val crossed = schedule.changesBetween(fromMillis, moving).filter { it > toldInterval }
+        if (crossed.isNotEmpty()) {
+            val latest = crossed.last()
+            toldInterval = latest
+            // The batch's time in motion ends at its last step: the change fell that much earlier.
+            val fellAt = atMillis - (moving - schedule.startOf(latest))
+            return SessionSignal.IntervalChange(schedule.at(moving), fellAt)
+        }
+        if (next.state != SessionState.ACTIVE) return null
+        val until = schedule.untilChange(moving) ?: return null
+        val coming = schedule.indexAt(moving) + 1
+        if (until > SessionConstants.EARLY_CHANGE_MILLIS || coming <= toldInterval) return null
+        val walking = (cadenceAt(atMillis) ?: 0) >= MetricsConstants.ACTIVE_MINUTE_THRESHOLD
+        if (!walking) return null
+        toldInterval = coming
+        return SessionSignal.IntervalChange(schedule.at(schedule.startOf(coming)), atMillis + until, early = true)
     }
 
     /**

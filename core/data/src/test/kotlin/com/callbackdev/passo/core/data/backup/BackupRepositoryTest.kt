@@ -178,10 +178,10 @@ class BackupRepositoryTest {
         assertThat(newSettings.copy(onboardingCompleted = true)).isEqualTo(old.preferences.current().settings)
         // The new phone's own first run is its own.
         assertThat(newSettings.onboardingCompleted).isFalse()
-        val outing = new.database.sessionDao().allSessions().single()
+        val outing = new.database.sessionDao().allSessions().single().session
         val plan = new.database.sessionDao().plans().single()
         assertThat(outing.copy(id = 0, planId = null))
-            .isEqualTo(old.database.sessionDao().allSessions().single().copy(id = 0, planId = null))
+            .isEqualTo(old.database.sessionDao().allSessions().single().session.copy(id = 0, planId = null))
         assertThat(outing.planId).isEqualTo(plan.id)
         assertThat(report).isEqualTo(ImportReport(3, 0, 0, addedOutings = 1, addedPlans = 1, preferences = true))
         // Another phone's counter is never brought over (ADR 0007).

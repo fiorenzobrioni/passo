@@ -54,7 +54,9 @@ calories are estimates, and Passo says so.
     <td align="center"><img src="docs/screenshots/way-start.png" width="250" alt="Starting a way: from today, from 1 January (you would already be past Vetralla), or from your first day with Passo"><br><sub><b>A start in the past</b> places you at once</sub></td>
   </tr>
   <tr>
-    <td align="center" colspan="3"><img src="docs/screenshots/walk.png" width="250" alt="A walk in London under way: the map from Buckingham Palace along the Thames with the part walked, past the London Eye, and the outing's card: next, the Royal Festival Hall, 230 m"><br><sub><b>City walks</b>: London place by place, walked where you are</sub></td>
+    <td align="center"><img src="docs/screenshots/walk.png" width="250" alt="A walk in London under way: the map from Buckingham Palace along the Thames with the part walked, past the London Eye, and the outing's card: next, the Royal Festival Hall, 230 m"><br><sub><b>City walks</b>: London place by place, walked where you are</sub></td>
+    <td align="center"><img src="docs/screenshots/intervals.png" width="250" alt="Editing the Japanese interval walk: what it is, then 3 slow minutes, 3 fast minutes and 5 sets, with the outing's shape in slow and fast blocks"><br><sub><b>Japanese interval walk</b>: slow and fast in turns</sub></td>
+    <td align="center"><img src="docs/screenshots/intervals-done.png" width="250" alt="An interval walk just over: goal reached, each fast interval's cadence against the pace line, 4 fast intervals of 5 at pace"><br><sub><b>Each fast interval</b>, against its pace</sub></td>
   </tr>
   <tr>
     <td align="center"><img src="docs/screenshots/widgets.png" width="250" alt="The two widgets on a home screen: At a glance with its ring, In words, a terracotta pair side by side, and the day hour by hour"><br><sub><b>Two widgets</b>: At a glance and In words</sub></td>
@@ -88,6 +90,7 @@ Italian). The phone's status bar is not in the pictures. The command that redraw
 - 📅 **History**: a day, week, month or year at a time, and a calendar of how close each day came.
 - 🚶 **Walks, found for you**: stretches of walking recognised in the steps already counted.
 - 🎯 **Outings**: a walk or run with a goal, with vibrations or a voice at the milestones you choose.
+- ⏱️ **Japanese interval walk**: 3 slow minutes and 3 fast ones, five sets or more, each change told with a vibration of its own so the phone stays in your pocket; at the end, how many fast intervals were at pace.
 - 🏆 **Insights**: your streak, your best day, week and month, and the averages.
 - 🗺️ **Ways**: five pilgrim ways (Via degli Dei, Camino Portugués, Via di Francesco, Camino de Santiago, Via Francigena) walked from home, stage by stage, with a stamp for each. No location: only your distance.
 - 🏛️ **City walks**: Milan, Rome, Paris, London, Madrid, Porto, Amsterdam, Prague, Lima and Cusco, walked where you are in one outing or a few, about 5 km or about 10. Each place is told as your steps reach it, with a short vibration and, if you like, a line about it in your headphones.

@@ -84,4 +84,31 @@
     <!-- The door to the city walks, on the Ways page (Phase 11). -->
     <string name="sessions_cities_title">Passeggia in una città</string>
     <string name="sessions_cities_body">Dieci città, da Milano a Cusco, percorse da dove sei: ogni luogo ti viene detto quando i tuoi passi lo raggiungono.</string>
+
+    <string name="editor_kind">Tipo</string>
+    <string name="editor_kind_goal">Un obiettivo</string>
+    <string name="editor_kind_intervals">Intervalli</string>
+    <string name="editor_intervals_about_title">La camminata giapponese a intervalli</string>
+    <string name="editor_intervals_about">Camminata lenta e veloce a turno: 3 minuti tranquilli, poi 3 abbastanza svelti da sentire la fatica, cinque volte o più. Uno studio dell’Università di Shinshu, in Giappone, ha trovato che migliora la forma fisica e abbassa la pressione più di una camminata a passo costante.</string>
+    <string name="editor_intervals_how">Passo segnala ogni cambio con una vibrazione, così il telefono può restare in tasca. I minuti sono minuti in movimento: una sosta non si mangia un intervallo.</string>
+    <string name="editor_intervals">Intervalli</string>
+    <string name="editor_intervals_slow">Minuti lenti</string>
+    <string name="editor_intervals_slow_note">Tranquilli, per riprendere fiato</string>
+    <string name="editor_intervals_fast">Minuti veloci</string>
+    <string name="editor_intervals_fast_note">Al ritmo scelto qui sotto</string>
+    <string name="editor_intervals_sets">Serie</string>
+    <string name="editor_intervals_sets_note">Un intervallo lento e uno veloce ciascuna</string>
+    <string name="editor_intervals_fewer">Meno %1$s</string>
+    <string name="editor_intervals_more">Più %1$s</string>
+    <string name="editor_intervals_total">%1$s in tutto, cominciando piano. La fine dell’ultimo intervallo veloce è l’obiettivo.</string>
+    <string name="editor_intervals_protocol">Come nello studio</string>
+    <string name="editor_fast_pace">Ritmo veloce</string>
+    <string name="editor_intervals_signals_note">I cambi sono i segnali: “più veloce” all’inizio di ogni intervallo veloce, “più lento” alla fine, e quello lungo all’obiettivo.</string>
+    <string name="editor_intervals_vibrate_note">Quattro tocchi rapidi per più veloce, un impulso lungo e uno breve per più lento, uno lungo all’obiettivo, due lunghi se si chiude dopo una lunga sosta. Seguono la modalità silenziosa del telefono.</string>
+    <string name="editor_try_faster">Più veloce</string>
+    <string name="editor_try_slower">Più lento</string>
+    <string name="editor_intervals_voice_note">Solo nelle cuffie: la partenza, ogni cambio (“Veloce, 3 minuti”, “Lento”) e all’obiettivo quanti intervalli veloci erano al ritmo.</string>
+    <string name="editor_intervals_screen_on_title">Puntuali solo a schermo acceso</string>
+    <string name="editor_intervals_screen_on">Il contapassi di questo telefono non può risvegliarlo: a schermo spento un cambio può arrivare con minuti di ritardo. Per una camminata a intervalli tieni lo schermo acceso, o cammina sul tapis roulant.</string>
+    <string name="sessions_signals_intervals">Un segnale a ogni cambio</string>
 </resources>

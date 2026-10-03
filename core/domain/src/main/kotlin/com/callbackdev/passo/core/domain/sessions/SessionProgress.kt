@@ -19,15 +19,18 @@ fun Session.progress(): Double {
     return when (goalKind) {
         SessionGoalKind.STEPS, SessionGoalKind.REST_OF_DAY -> totals.steps / target
         SessionGoalKind.DISTANCE -> totals.distanceMeters / target
-        SessionGoalKind.TIME -> totals.movingMillis / (target * MILLIS_PER_MINUTE)
+        SessionGoalKind.TIME, SessionGoalKind.INTERVALS -> totals.movingMillis / (target * MILLIS_PER_MINUTE)
     }
 }
 
 /** How much is done, in the goal's own quantity. */
 fun Session.done(): SessionAmount = when (goalKind) {
     SessionGoalKind.STEPS, SessionGoalKind.REST_OF_DAY -> SessionAmount(goalKind, totals.steps.toDouble())
+
     SessionGoalKind.DISTANCE -> SessionAmount(goalKind, totals.distanceMeters)
-    SessionGoalKind.TIME -> SessionAmount(goalKind, (totals.movingMillis / MILLIS_PER_MINUTE).toDouble())
+
+    SessionGoalKind.TIME, SessionGoalKind.INTERVALS ->
+        SessionAmount(goalKind, (totals.movingMillis / MILLIS_PER_MINUTE).toDouble())
 }
 
 /** How much is left to the goal, never below zero; whole minutes, rounded up. */
@@ -37,7 +40,7 @@ fun Session.remaining(): SessionAmount = when (goalKind) {
 
     SessionGoalKind.DISTANCE -> SessionAmount(goalKind, (goalValue - totals.distanceMeters).coerceAtLeast(0.0))
 
-    SessionGoalKind.TIME -> {
+    SessionGoalKind.TIME, SessionGoalKind.INTERVALS -> {
         val left = (goalValue * MILLIS_PER_MINUTE - totals.movingMillis).coerceAtLeast(0)
         SessionAmount(goalKind, ceil(left.toDouble() / MILLIS_PER_MINUTE))
     }
@@ -58,6 +61,12 @@ sealed interface SessionHeadline {
     /** Just started: nothing to measure yet. */
     data class Starting(val goal: SessionAmount) : SessionHeadline
 
+    /**
+     * An interval outing under way (Phase 13): the interval it is in, with what is left of it.
+     * Its own sentence from start to end: the interval says more than the minutes of the whole.
+     */
+    data class Interval(val position: IntervalPosition) : SessionHeadline
+
     /** Under way, [left] to go. */
     data class Going(val left: SessionAmount) : SessionHeadline
 
@@ -76,12 +85,15 @@ sealed interface SessionHeadline {
     data class Ended(val progress: Double, val end: SessionEnd) : SessionHeadline
 
     companion object {
-        fun of(session: Session): SessionHeadline {
+        /** [nowMillis] places an interval outing's countdown; any other outing has none. */
+        fun of(session: Session, nowMillis: Long = session.lastStepAtMillis): SessionHeadline {
             val progress = session.progress()
+            val interval = session.intervalAt(nowMillis)
             return when {
                 session.reached -> Reached(session.goal())
                 session.state == SessionState.FINISHED -> Ended(progress, session.end ?: SessionEnd.STOPPED)
                 session.state == SessionState.PAUSED -> Paused
+                interval != null -> Interval(interval)
                 progress < STARTING_SHARE -> Starting(session.goal())
                 progress < HALF -> Going(session.remaining())
                 progress < ALMOST -> PastHalf(session.remaining())

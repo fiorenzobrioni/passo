@@ -87,4 +87,40 @@
     <string name="walk_next">Next: %1$s, %2$s</string>
     <!-- A city walk walked to its last place: «The walk is done: Tower Bridge.» -->
     <string name="walk_done">The walk is done: %1$s.</string>
+
+    <!-- The interval walk (Phase 13). An interval plan without a name of its own: the protocol's
+         sets (3 slow and 3 fast minutes) are the Japanese walk, any other cut an interval walk. -->
+    <string name="session_name_japanese">Japanese walking</string>
+    <string name="session_name_intervals">Interval walk</string>
+    <!-- What an interval outing is: «5 sets: 3 min slow, 3 min brisk». -->
+    <plurals name="session_intervals_brisk">
+        <item quantity="one">%1$d set: %2$s slow, %3$s brisk</item>
+        <item quantity="other">%1$d sets: %2$s slow, %3$s brisk</item>
+    </plurals>
+    <plurals name="session_intervals_vigorous">
+        <item quantity="one">%1$d set: %2$s slow, %3$s vigorous</item>
+        <item quantity="other">%1$d sets: %2$s slow, %3$s vigorous</item>
+    </plurals>
+    <plurals name="session_intervals_run">
+        <item quantity="one">%1$d set: %2$s slow, %3$s running</item>
+        <item quantity="other">%1$d sets: %2$s slow, %3$s running</item>
+    </plurals>
+    <string name="session_interval_fast">Fast</string>
+    <string name="session_interval_slow">Slow</string>
+    <!-- Where an interval outing stands: «Set 2 of 5»; in a line after a name, «set 2 of 5». -->
+    <string name="session_interval_set">Set %1$d of %2$d</string>
+    <string name="session_interval_set_inline">set %1$d of %2$d</string>
+    <!-- The sentence while an interval outing goes, with the countdown of the interval: «Fast: 1:40 left.» -->
+    <string name="session_headline_fast">Fast: %1$s left.</string>
+    <string name="session_headline_last_fast">Last fast interval: %1$s left.</string>
+    <string name="session_headline_slow">Slow: %1$s left.</string>
+    <!-- How the fast intervals went: «4 fast intervals of 5 at pace»; the quantity is the first number. -->
+    <plurals name="session_intervals_at_pace">
+        <item quantity="one">%1$d fast interval of %2$d at pace</item>
+        <item quantity="other">%1$d fast intervals of %2$d at pace</item>
+    </plurals>
+    <!-- The chart of the fast intervals, for a screen reader: «Fast intervals, steps a minute: 112, 108, 92. Pace from 100.» -->
+    <string name="session_intervals_chart_description">Fast intervals, steps a minute: %1$s. Pace from %2$d.</string>
+    <!-- Under the chart: the line is the pace. -->
+    <string name="session_intervals_chart_legend">Each fast interval’s cadence; the line is the pace from %1$d.</string>
 </resources>

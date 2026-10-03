@@ -20,7 +20,39 @@ enum class SessionGoalKind {
      * the start, so the outing keeps the number it began with.
      */
     REST_OF_DAY,
+
+    /**
+     * Sets of slow and fast minutes in motion, slow first (the Japanese interval walk, Phase 13):
+     * the goal is the end of the last set, and [SessionPlan.intervals] says how they are cut. Its
+     * value is the minutes of all the sets together, so it is measured as [TIME] is.
+     */
+    INTERVALS,
 }
+
+/**
+ * How an interval outing is cut (Phase 13, docs/adr/0013-interval-walks.md): [sets] of
+ * [slowMinutes] of slow walking followed by [fastMinutes] of fast walking, in minutes in motion.
+ * The fast pace is the outing's intensity; the slow minutes have none to keep. The default is
+ * the protocol's (Nemoto et al., 2007): five sets of three and three.
+ */
+data class IntervalSets(val slowMinutes: Int = 3, val fastMinutes: Int = 3, val sets: Int = 5) {
+    /** Every minute of it: the outing's goal. */
+    val totalMinutes: Int get() = sets * (slowMinutes + fastMinutes)
+}
+
+/**
+ * One interval of an interval outing, as it was walked (Phase 13): the [index]th from 0, slow
+ * when even and fast when odd.
+ *
+ * @property zoneMillis the part of [movingMillis] at or above the fast pace.
+ */
+data class IntervalSplit(
+    val index: Int,
+    val fast: Boolean,
+    val steps: Int = 0,
+    val movingMillis: Long = 0,
+    val zoneMillis: Long = 0,
+)
 
 /**
  * How the outing is walked: none, or a cadence to stay at or above (the CADENCE-adults bands,
@@ -72,6 +104,8 @@ enum class SessionVoice {
  *   is always told.
  * @property vibrate each signal also vibrates, in its own pattern, for a phone in a pocket.
  * @property voice each signal is also spoken, and where.
+ * @property intervals the sets, for [SessionGoalKind.INTERVALS]; kept with any other kind, so a
+ *   reader who switches away and back finds their own.
  */
 data class SessionPlan(
     val id: Long = 0,
@@ -82,6 +116,7 @@ data class SessionPlan(
     val milestones: Set<SessionMilestone> = SessionMilestone.DEFAULT,
     val vibrate: Boolean = true,
     val voice: SessionVoice = SessionVoice.OFF,
+    val intervals: IntervalSets = IntervalSets(),
     val position: Int = 0,
     val lastUsedAtMillis: Long? = null,
 )
@@ -154,6 +189,9 @@ data class SessionTotals(
  *   of the walk, and its signals are the walk's places, reached at [walkFromMeters] plus the
  *   distance walked.
  * @property walkFromMeters where on the walk it started: 0, or where the last outing on it ended.
+ * @property intervals the sets of an interval outing (Phase 13); null for any other.
+ * @property splits an interval outing's intervals as walked so far, in order: the one under way
+ *   last.
  */
 data class Session(
     val id: Long = 0,
@@ -179,6 +217,8 @@ data class Session(
     val toldMilestones: Set<SessionMilestone> = emptySet(),
     val walk: WayId? = null,
     val walkFromMeters: Int = 0,
+    val intervals: IntervalSets? = null,
+    val splits: List<IntervalSplit> = emptyList(),
 ) {
     val reached: Boolean get() = reachedAtMillis != null
     val live: Boolean get() = state != SessionState.FINISHED

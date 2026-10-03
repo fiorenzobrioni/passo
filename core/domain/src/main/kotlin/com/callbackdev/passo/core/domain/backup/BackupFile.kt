@@ -82,6 +82,7 @@ internal data class PlanDto(
     val voice: String = "",
     val position: Int = 0,
     val lastUsedAtMillis: Long? = null,
+    val intervals: IntervalsDto? = null,
 )
 
 @Serializable
@@ -112,6 +113,22 @@ internal data class OutingDto(
     val toldMilestones: List<Int> = emptyList(),
     val walk: String? = null,
     val walkFromMeters: Int = 0,
+    val intervals: IntervalsDto? = null,
+    val splits: List<SplitDto> = emptyList(),
+)
+
+/** An interval outing's sets (Phase 13): an added field, no new version. */
+@Serializable
+internal data class IntervalsDto(val slowMinutes: Int = 3, val fastMinutes: Int = 3, val sets: Int = 5)
+
+/** One interval as it was walked: its index from 0 (slow when even), its steps and times. */
+@Serializable
+internal data class SplitDto(
+    val index: Int = 0,
+    val fast: Boolean = false,
+    val steps: Int = 0,
+    val movingMillis: Long = 0,
+    val zoneMillis: Long = 0,
 )
 
 @Serializable

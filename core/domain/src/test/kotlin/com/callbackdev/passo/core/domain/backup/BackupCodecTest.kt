@@ -5,9 +5,13 @@ import com.callbackdev.passo.core.domain.backup.BackupFixtures.backup
 import com.callbackdev.passo.core.domain.backup.BackupFixtures.day
 import com.callbackdev.passo.core.domain.backup.BackupFixtures.minutes
 import com.callbackdev.passo.core.domain.backup.BackupFixtures.session
+import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.model.AppPalette
 import com.callbackdev.passo.core.model.DiagnosticsEvent
 import com.callbackdev.passo.core.model.DiagnosticsType
+import com.callbackdev.passo.core.model.IntervalSets
+import com.callbackdev.passo.core.model.IntervalSplit
+import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.Sex
 import com.callbackdev.passo.core.model.StepLengthMode
 import com.callbackdev.passo.core.model.UnitPreference
@@ -51,6 +55,24 @@ class BackupCodecTest {
         val read = BackupCodec.decode(BackupCodec.encode(full))
 
         assertThat(read).isEqualTo(BackupRead.Ok(full))
+    }
+
+    @Test
+    fun `an interval outing and its plan read back with their sets and splits`() {
+        val plan = SessionPlans.JAPANESE_WALKING.copy(id = 9, intervals = IntervalSets(2, 3, 6), goalValue = 30)
+        val outing = session(1_790_000_000_000, planId = 9).copy(
+            goalKind = SessionGoalKind.INTERVALS,
+            goalValue = 30,
+            milestones = emptySet(),
+            intervals = IntervalSets(2, 3, 6),
+            splits = listOf(
+                IntervalSplit(0, fast = false, steps = 180, movingMillis = 120_000, zoneMillis = 0),
+                IntervalSplit(1, fast = true, steps = 330, movingMillis = 180_000, zoneMillis = 170_000),
+            ),
+        )
+        val withIntervals = full.copy(plans = full.plans + plan, sessions = full.sessions + outing)
+
+        assertThat(BackupCodec.decode(BackupCodec.encode(withIntervals))).isEqualTo(BackupRead.Ok(withIntervals))
     }
 
     @Test

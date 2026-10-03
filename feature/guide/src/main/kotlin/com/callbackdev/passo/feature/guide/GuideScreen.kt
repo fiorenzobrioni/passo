@@ -149,6 +149,8 @@ private fun GuideContent(state: GuideUiState, modifier: Modifier) {
         Feature(R.string.guide_outings_signals_title, R.string.guide_outings_signals_body)
         Feature(R.string.guide_outings_motion_title, R.string.guide_outings_motion_body)
         Feature(R.string.guide_outings_end_title, R.string.guide_outings_end_body)
+        Feature(R.string.guide_intervals_title, R.string.guide_intervals_body)
+        Feature(R.string.guide_intervals_how_title, R.string.guide_intervals_how_body)
         Feature(R.string.guide_outings_battery_title, R.string.guide_outings_battery_body)
         Feature(R.string.guide_outings_start_title, R.string.guide_outings_start_body)
 

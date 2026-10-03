@@ -479,7 +479,7 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
    - `adb shell dumpsys sensorservice` (confirm batching is active)
    - Doze simulation: `adb shell dumpsys deviceidle force-idle`
    - Battery Historian for the longer field tests
-7. **The one exception (Phase 10, `docs/adr/0009-sessions.md`):** while an outing the reader started is counting, the wake-up step counter (if the phone has one besides the usual one) reports within 30 s, so its signals reach a phone in a pocket on time: about two brief wakes a minute while walking, none while still, no wake lock or timer of the app's own. Paused, over or with no outing, the registration is the usual one. An outing ends by itself (goal, 15 min still, 1 h paused, 4 h), noticed at a step or a screen-on, never by a timer.
+7. **The one exception (Phase 10, `docs/adr/0009-sessions.md`):** while an outing the reader started is counting, the wake-up step counter (if the phone has one besides the usual one) reports within 30 s, and 2 s in the 40 s before a change of an interval outing (Phase 13, `docs/adr/0013-interval-walks.md`), so its signals reach a phone in a pocket on time: about two brief wakes a minute while walking, a few more in each of an interval outing's last 40 s before a change, none while still, no wake lock or timer of the app's own. Paused, over or with no outing, the registration is the usual one. An outing ends by itself (goal, 15 min still, 1 h paused, 4 h), noticed at a step or a screen-on, never by a timer.
 8. OEM task killers: onboarding shows a battery tip, with a button to the app's own settings page, only when `Build.MANUFACTURER` is on a known list (`OemTips`). Samsung is not on it (§15).
 
 ---
@@ -989,17 +989,54 @@ and Passo has no timer then. The analysis and the options are in
 `docs/adr/0013-interval-walks.md` (accepted 1 Oct 2026: option A, adaptive latency; it amends
 ADR 0009 and §9.7 in the change that builds it).
 
-- [ ] The plan: a new goal kind, intervals: slow minutes and fast minutes (1 to 5, 3 by default), sets (3 to 10, 5 by default), the fast pace (brisk 100 by default, vigorous 130, running 140). It starts slow, as the protocol does. The goal is the end of the last set. The 25, 50 and 75% signals are off for this kind: the changes are the signals. A fourth preset, «Camminata giapponese» / "Japanese walking", 5 × (3 + 3).
-- [ ] The clock: the minutes are minutes in motion, as every outing's (ADR 0013): a stop at a traffic light does not eat a fast interval.
-- [ ] Domain (`:core:domain/sessions`): `IntervalSchedule` (where each change falls), the tracker's splits (each interval's steps, time in motion and time at its pace), the change found inside a batch from the steps' own timestamps; several changes in one batch tell the latest only.
-- [ ] The signals: two new vibrations, "faster" and "slower", unlike the five there are now (1, 2, 3 short; the goal's long one; the stillness's two long ones), chosen with the owner in the editor's "Try them". The voice, if the outing speaks: «Veloce, 3 minuti», «Lento», «Ultima serie veloce», and at the goal how many fast intervals were at pace.
-- [ ] The sensor during an interval outing (ADR 0013, option A): the wake-up counter at 30 s, and at 2 s from 40 s of motion before each change; a change told at the report that reaches it, or at the one whose predicted change falls before the next report; back to 30 s after. ADR 0009, §9.7, VISION.md's battery criterion and CLAUDE.md's invariant amended in the same change. With the screen on, the ticker the screen already allows (§9.4) shows the countdown to the next change.
-- [ ] The notification: on Android 16 the `ProgressStyle` bar in segments, slow and fast in two colours, with a point at each change, and the title saying the interval («Veloce · 1:40»); below, the expanded text says the same.
-- [ ] The result: each fast interval's cadence against its pace, and the sentence («4 fast intervals of 5 at pace»); the card, History and Today's list show it. Storage: a `session_interval` table (outing, index, slow or fast, steps, time in motion, time at pace), by an auto-migration; the backup carries it.
-- [ ] A phone without a wake-up step counter: the kind stays, and the editor says that the changes come on time only with the screen on (ADR 0013).
-- [ ] The diagnostics log: one row per change told, with how late it was against the step that crossed it, so the field test measures the delay instead of guessing it.
-- [ ] Strings in English and Italian; tests (`IntervalScheduleTest`, the tracker's, the editor's UI); CHANGELOG; the guide's outings chapter.
+- [x] The plan: a new goal kind, intervals: slow minutes and fast minutes (1 to 5, 3 by default), sets (3 to 10, 5 by default), the fast pace (brisk 100 by default, vigorous 130, running 140). It starts slow, as the protocol does. The goal is the end of the last set. The 25, 50 and 75% signals are off for this kind: the changes are the signals. A fourth preset, «Camminata giapponese» / "Japanese walking", 5 × (3 + 3).
+- [x] The clock: the minutes are minutes in motion, as every outing's (ADR 0013): a stop at a traffic light does not eat a fast interval.
+- [x] Domain (`:core:domain/sessions`): `IntervalSchedule` (where each change falls), the tracker's splits (each interval's steps, time in motion and time at its pace), the change found inside a batch from the steps' own timestamps; several changes in one batch tell the latest only.
+- [x] The signals: two new vibrations, "faster" and "slower", unlike the five there are now (1, 2, 3 short; the goal's long one; the stillness's two long ones), chosen with the owner in the editor's "Try them". The voice, if the outing speaks: «Veloce, 3 minuti», «Lento», «Ultima serie veloce», and at the goal how many fast intervals were at pace.
+- [x] The sensor during an interval outing (ADR 0013, option A): the wake-up counter at 30 s, and at 2 s from 40 s of motion before each change; a change told at the report that reaches it, or at the one whose predicted change falls before the next report; back to 30 s after. ADR 0009, §9.7, VISION.md's battery criterion and CLAUDE.md's invariant amended in the same change. With the screen on, the ticker the screen already allows (§9.4) shows the countdown to the next change.
+- [x] The notification: on Android 16 the `ProgressStyle` bar in segments, slow and fast in two colours, with a point at each change, and the title saying the interval («Veloce · 1:40»); below, the expanded text says the same.
+- [x] The result: each fast interval's cadence against its pace, and the sentence («4 fast intervals of 5 at pace»); the card, History and Today's list show it. Storage: a `session_interval` table (outing, index, slow or fast, steps, time in motion, time at pace), by an auto-migration; the backup carries it.
+- [x] A phone without a wake-up step counter: the kind stays, and the editor says that the changes come on time only with the screen on (ADR 0013).
+- [x] The diagnostics log: one row per change told, with how late it was against the step that crossed it, so the field test measures the delay instead of guessing it.
+- [x] Strings in English and Italian; tests (`IntervalScheduleTest`, the tracker's, the editor's UI); CHANGELOG; the guide's outings chapter.
 - [ ] On a device (owner): a 30-minute interval outing with the screen off: each change felt, its delay read from the log, the battery check of §9 (numbers in `docs/battery/`).
+
+Built as planned, with these choices made on the way (none changes the ADR):
+
+- *The editor:* a "Kind" choice at the top, «One goal» or «Intervals», rather than a fifth
+  segment in the goal row (five labels do not fit a small phone, nor twice the text size).
+  Intervals open with two short paragraphs on what the Japanese walk is and how Passo walks it
+  (the owner's request, 3 Oct 2026); then the slow minutes, the fast ones and the sets, each with
+  a step down and up (three sliders would crowd the page), the outing's shape as blocks, its
+  length, and "As the study did it" back to 5 × (3 + 3). The fast pace is never free; the shares
+  of the goal are not offered. A plan keeps its sets with any kind (`slowMinutes`, `fastMinutes`,
+  `sets`, defaults 3, 3, 5), so switching away and back loses nothing; its value is the minutes
+  of all the sets.
+- *The preset* is named in the reader's language like the others: «Camminata giapponese» /
+  "Japanese walking" for the protocol's three and three minutes, «Camminata a intervalli» /
+  "Interval walk" for any other cut. Installations seeded before it get it once, after their
+  own plans (`interval_preset_seeded`), unless they already made an interval plan.
+- *The vibrations* are proposed, for the owner to confirm in "Try them" on a device: "faster" is
+  four quick taps (70 ms on, 80 ms off), "slower" a long pulse and a short one (450, 250, 120 ms).
+  Neither is a count, a single long pulse or two long ones.
+- *The voice:* «Veloce, 3 minuti», «Lento», «Ultima serie veloce, 3 minuti»; the start says the
+  sets and «Si comincia piano»; the goal says how many fast intervals were at pace.
+- *At pace* means the fast interval's own cadence (its steps over its time in motion) at or above
+  the pace; only fast intervals walked for at least half their length are judged, so the last one
+  of an outing stopped seconds into it says nothing either way. The outing's time at pace is its
+  fast minutes' only.
+- *The countdown* on a screen carries on from the last step for at most 5 s
+  (`COUNTDOWN_GLIDE_MILLIS`): the counter hands over steps in clusters, and a countdown that waited
+  for each would stutter; a longer stop holds it. It never shows the next interval before its
+  change is told.
+- *Several changes in one batch:* the tracker cuts the splits at every change and keeps the
+  latest; the service tells it once the batch of samples is all in (a job dispatched after it),
+  so a burst of samples crossing two changes is felt once.
+- *The result* is on the outing's card (a bar per fast interval, its cadence, the pace's line),
+  in the outing lists of Today and History («4 fast intervals of 5 at pace»), in the CSV
+  (`intervals`, `fast_at_pace`) and in the backup file (`intervals`, `splits`: added fields, no new
+  version). Storage: schema v6, the sets on `session_plan` and `session`, the splits in
+  `session_interval`, by an auto-migration.
 
 **Acceptance:** with the screen off and the phone in a pocket, every change is felt within the
 delay ADR 0013 promises, on the owner's phone; the battery cost of a 30-minute interval outing
@@ -1205,6 +1242,7 @@ Include:
 
 - **The Ways: OpenStreetMap lines, four ways, the Francigena's Italian part** (owner, 1 Oct 2026): each way's line is its OpenStreetMap relation, simplified, under ODbL (credited in About and the guide; the derived file published in the repo under ODbL, beside the GPL code), chosen over a schematic of stage towns because the true line is what makes the map worth opening. The four: Via degli Dei, Via di Francesco, Camino Francés, and the Via Francigena from the Great St Bernard Pass to Rome (about 1,000 km): from Canterbury, 2,000 km is too long for everyday walkers.
 - **The interval walk: ADR 0013 accepted** (owner, 1 Oct 2026): option A (the wake-up counter at 30 s, at 2 s in the 40 s of motion before each change; no wake lock, no timer), minutes in motion, a phone without a wake-up counter told in the editor rather than the kind hidden, the fast pace at brisk 100 by default. Option B stays the documented next step if the field test finds the counter's own delay too long.
+- **The interval walk, built** (Phase 13, 3 Oct 2026): as ADR 0013's option A, with the choices recorded under Phase 13 (the editor's "Kind", the preset's name and its one-time seeding, the proposed "faster" and "slower", a fast interval judged by its own cadence, the countdown's 5 s glide, the latest change told once a batch is in). §9.7, ADR 0009 decision 5, VISION.md's battery criterion and CLAUDE.md's invariant now name the 2 s in the 40 s before a change. The field test (owner, on a device) decides between A and B.
 
 - **City walks, as Phase 11's second part** (owner, 1 Oct 2026): an outing through a city, whose signals are its places and whose voice says them, imaginary and said so. Milan, Rome, Paris, London and Madrid; Milan and London first, the others one a release. Bound to outings rather than to the days, because a city is walked in one outing or a few, where a way takes months. The unit is the walk, grouped by city, so that a large city's second walk (London's, likely) is data and not a feature; a city shows its second level only once it has two walks. The real cost is the content (about twenty checked places a walk, in two languages), which is why the cities come one at a time.
 

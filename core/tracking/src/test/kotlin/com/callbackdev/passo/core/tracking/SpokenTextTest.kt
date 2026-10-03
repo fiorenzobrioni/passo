@@ -8,6 +8,7 @@ import com.callbackdev.passo.core.domain.sessions.SessionAmount
 import com.callbackdev.passo.core.domain.sessions.SessionAnnouncement
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.ways.Ways
+import com.callbackdev.passo.core.model.IntervalSplit
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
@@ -188,6 +189,56 @@ class SpokenTextTest {
             "Qui: Teatro alla Scala. " +
                 "La Scala aprì nel 1778; qui debuttarono l’Otello di Verdi e la Turandot di Puccini. " +
                 "Più avanti: Via Montenapoleone, tra 640 metri.",
+        )
+    }
+
+    // --- The interval walk (Phase 13) ----------------------------------------------------------
+
+    private val intervals = checkNotNull(SessionPlans.start(SessionPlans.JAPANESE_WALKING, 0, 0, 0, 8_000)).copy(
+        voice = SessionVoice.HEADPHONES,
+        totals = SessionTotals(steps = 3_150, movingMillis = 30 * 60_000L),
+        splits = (0 until 10).map { index ->
+            val fast = index % 2 == 1
+            // The third fast interval below the brisk 100.
+            val cadence = if (index == 5) {
+                94
+            } else if (fast) {
+                112
+            } else {
+                90
+            }
+            IntervalSplit(index, fast, steps = cadence * 3, movingMillis = 3 * 60_000L)
+        },
+    )
+
+    @Test
+    @Config(qualifiers = "en-rUS")
+    fun `an interval walk says its sets, its changes short, and its fast intervals at the goal`() {
+        assertThat(say(SessionAnnouncement.started(intervals), intervals)).isEqualTo(
+            "Japanese walking: off you go. 5 sets of 3 minutes slow and 3 minutes fast. Start slow.",
+        )
+        val fast = SessionAnnouncement.IntervalChanged(fast = true, minutes = 3, lastSet = false)
+        assertThat(say(fast, intervals)).isEqualTo("Fast, 3 minutes.")
+        assertThat(say(fast.copy(lastSet = true), intervals)).isEqualTo("Last fast interval, 3 minutes.")
+        assertThat(say(fast.copy(fast = false), intervals)).isEqualTo("Slow.")
+        assertThat(say(SessionAnnouncement.goal(intervals), intervals)).isEqualTo(
+            "Goal reached: 30 minutes, 3,150 steps. 4 fast intervals of 5 at pace. Well done.",
+        )
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT")
+    fun `in Italian, an interval walk`() {
+        assertThat(say(SessionAnnouncement.started(intervals), intervals)).isEqualTo(
+            "Camminata giapponese: si parte. 5 serie di 3 minuti a passo lento e 3 minuti a passo veloce. " +
+                "Si comincia piano.",
+        )
+        val fast = SessionAnnouncement.IntervalChanged(fast = true, minutes = 3, lastSet = false)
+        assertThat(say(fast, intervals)).isEqualTo("Veloce, 3 minuti.")
+        assertThat(say(fast.copy(lastSet = true), intervals)).isEqualTo("Ultima serie veloce, 3 minuti.")
+        assertThat(say(fast.copy(fast = false), intervals)).isEqualTo("Lento.")
+        assertThat(say(SessionAnnouncement.goal(intervals), intervals)).isEqualTo(
+            "Obiettivo raggiunto: 30 minuti, 3.150 passi. 4 intervalli veloci su 5 al ritmo. Ben fatto.",
         )
     }
 }

@@ -10,6 +10,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.IconCompat
+import com.callbackdev.passo.core.designsystem.format.countdown
+import com.callbackdev.passo.core.designsystem.format.intervalWord
 import com.callbackdev.passo.core.designsystem.format.measureFormatter
 import com.callbackdev.passo.core.designsystem.format.sessionCadence
 import com.callbackdev.passo.core.designsystem.format.sessionEstimates
@@ -20,10 +22,13 @@ import com.callbackdev.passo.core.designsystem.format.sessionProgress
 import com.callbackdev.passo.core.designsystem.format.sessionSteps
 import com.callbackdev.passo.core.designsystem.format.sessionZone
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
+import com.callbackdev.passo.core.domain.sessions.IntervalSchedule
 import com.callbackdev.passo.core.domain.sessions.fraction
+import com.callbackdev.passo.core.domain.sessions.intervalAt
 import com.callbackdev.passo.core.domain.sessions.progress
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
+import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.UnitPreference
 import kotlin.math.roundToInt
@@ -32,8 +37,14 @@ import kotlin.math.roundToInt
  * An outing under way, as the counting notification shows it while it lasts.
  *
  * @property cadence the last half minute's pace; null before there is one, or paused.
+ * @property nowMillis when it is drawn: an interval outing's countdown is counted to it.
  */
-internal data class SessionNotice(val session: Session, val cadence: Int?, val units: UnitPreference)
+internal data class SessionNotice(
+    val session: Session,
+    val cadence: Int?,
+    val units: UnitPreference,
+    val nowMillis: Long = session.lastStepAtMillis,
+)
 
 /**
  * The outings' notifications (PLANNING.md §11 Phase 10).
@@ -82,17 +93,23 @@ internal class SessionNotifications(private val context: Context) {
         }
         val where = res.sessionProgress(session, format)
         val detail = detailLines(notice, format)
+        // An interval outing under way says its interval first, with what is left of it: «Fast ·
+        // 1:40». The countdown moves once a second while the screen is on, and is not needed off.
+        val interval = session.intervalAt(notice.nowMillis)?.takeIf { session.state == SessionState.ACTIVE }
+        val title = interval?.let {
+            context.getString(R.string.session_interval_title, res.intervalWord(it.fast), countdown(it.leftMillis))
+        } ?: res.sessionName(session)
         builder
-            .setContentTitle(res.sessionName(session))
-            .setContentText(sentence)
+            .setContentTitle(title)
+            .setContentText(if (interval != null) res.sessionName(session) else sentence)
             .setSubText(where)
             .setCategory(NotificationCompat.CATEGORY_WORKOUT)
             .setRequestPromotedOngoing(true)
             .setShortCriticalText(
-                if (session.state == SessionState.PAUSED) {
-                    context.getString(R.string.session_chip_paused)
-                } else {
-                    format.percent(progress.coerceAtMost(1.0))
+                when {
+                    session.state == SessionState.PAUSED -> context.getString(R.string.session_chip_paused)
+                    interval != null -> res.intervalWord(interval.fast)
+                    else -> format.percent(progress.coerceAtMost(1.0))
                 },
             )
         if (session.state == SessionState.PAUSED) {
@@ -114,11 +131,28 @@ internal class SessionNotifications(private val context: Context) {
             SessionControl.pendingIntent(context, SessionControl.ACTION_STOP, REQUEST_STOP),
         )
         val scaled = (progress.coerceIn(0.0, 1.0) * PROGRESS_MAX).roundToInt()
+        val schedule = IntervalSchedule.of(session)
+        val text = if (interval != null) {
+            listOf(res.sessionName(session), sentence, detail).joinToString("\n")
+        } else {
+            listOf(sentence, detail).joinToString("\n")
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
-            // The system draws the milestones on the bar, and the walker riding it.
-            builder.setContentText(listOf(sentence, detail).joinToString("\n"))
-            builder.setStyle(
-                NotificationCompat.ProgressStyle()
+            // The system draws the milestones on the bar, and the walker riding it; an interval
+            // outing's bar is its intervals, slow and fast in two colours, a point at each change.
+            builder.setContentText(text)
+            val style = NotificationCompat.ProgressStyle()
+            if (schedule != null) {
+                style
+                    .setProgressSegments(intervalSegments(schedule))
+                    .setProgressPoints(
+                        (1 until schedule.count).map {
+                            NotificationCompat.ProgressStyle.Point(scaledAt(schedule.startOf(it), schedule))
+                        },
+                    )
+                    .setProgress(scaledAt(session.totals.movingMillis, schedule))
+            } else {
+                style
                     .setProgressSegments(listOf(NotificationCompat.ProgressStyle.Segment(PROGRESS_MAX)))
                     .setProgressPoints(
                         session.milestones.sortedBy { it.percent }.map {
@@ -126,30 +160,45 @@ internal class SessionNotifications(private val context: Context) {
                         },
                     )
                     .setProgress(scaled)
-                    .setProgressTrackerIcon(IconCompat.createWithResource(context, R.drawable.ic_progress_walker)),
+            }
+            builder.setStyle(
+                style.setProgressTrackerIcon(IconCompat.createWithResource(context, R.drawable.ic_progress_walker)),
             )
         } else {
             builder
-                .setStyle(
-                    NotificationCompat.BigTextStyle()
-                        .setBigContentTitle(res.sessionName(session))
-                        .bigText(listOf(sentence, detail).joinToString("\n")),
-                )
+                .setStyle(NotificationCompat.BigTextStyle().setBigContentTitle(title).bigText(text))
                 .setProgress(PROGRESS_MAX, scaled, false)
         }
         return builder
     }
 
+    /** Each interval a segment of its length, the slow ones grey, the fast ones the accent. */
+    private fun intervalSegments(schedule: IntervalSchedule): List<NotificationCompat.ProgressStyle.Segment> {
+        val slow = ContextCompat.getColor(context, R.color.session_interval_slow)
+        var laid = 0
+        return (0 until schedule.count).map { index ->
+            // Laid by their ends, so the lengths add up to the bar's whole whatever the rounding.
+            val end = scaledAt(schedule.endOf(index), schedule)
+            NotificationCompat.ProgressStyle.Segment(end - laid).also { segment ->
+                if (!schedule.isFast(index)) segment.setColor(slow)
+                laid = end
+            }
+        }
+    }
+
+    private fun scaledAt(movingMillis: Long, schedule: IntervalSchedule): Int =
+        (movingMillis.coerceIn(0, schedule.totalMillis).toDouble() / schedule.totalMillis * PROGRESS_MAX).roundToInt()
+
     /** «108 steps/min: on pace · 1,240 steps», then the estimates. */
     private fun detailLines(notice: SessionNotice, format: MeasureFormatter): String {
         val res = context.resources
         val session = notice.session
-        val pace = if (session.state ==
-            SessionState.PAUSED
-        ) {
-            null
-        } else {
-            res.sessionCadence(notice.cadence, session.intensity, format)
+        // A slow interval has no pace to keep: its cadence is said in words.
+        val slow = session.intervalAt(notice.nowMillis)?.fast == false
+        val pace = when {
+            session.state == SessionState.PAUSED -> null
+            slow -> res.sessionCadence(notice.cadence, SessionIntensity.FREE, format)
+            else -> res.sessionCadence(notice.cadence, session.intensity, format)
         }
         val first = listOfNotNull(pace, res.sessionSteps(session, format)).joinToString(" · ")
         return listOf(first, res.sessionEstimates(session, format)).joinToString("\n")

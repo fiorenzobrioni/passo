@@ -16,6 +16,9 @@ import androidx.room.RoomDatabase
  * - v4: the ways the reader started (`way_journey`, Phase 11); one new table, nothing else touched.
  * - v5: the city walk an outing walks, and where on it it began (`walk`, `walkFromMeters` on
  *   `session`, Phase 11's second part): every outing before it walks none, from 0.
+ * - v6: the interval walk (Phase 13): the sets of a plan and of an outing (`slowMinutes`,
+ *   `fastMinutes`, `sets`, columns with defaults: a plan the protocol's 3, 3 and 5, an outing
+ *   none), and each interval as walked (`session_interval`, a new table).
  */
 @Database(
     entities = [
@@ -26,14 +29,16 @@ import androidx.room.RoomDatabase
         SessionPlanEntity::class,
         SessionEntity::class,
         WayJourneyEntity::class,
+        SessionIntervalEntity::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
         AutoMigration(from = 3, to = 4),
         AutoMigration(from = 4, to = 5),
+        AutoMigration(from = 5, to = 6),
     ],
 )
 abstract class PassoDatabase : RoomDatabase() {

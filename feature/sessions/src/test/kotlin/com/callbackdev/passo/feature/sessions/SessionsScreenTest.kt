@@ -16,13 +16,17 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.data.sessions.LiveSessionState
+import com.callbackdev.passo.core.designsystem.components.SessionCardTags
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
+import com.callbackdev.passo.core.model.IntervalSplit
 import com.callbackdev.passo.core.model.Session
+import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionPlan
+import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionTotals
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.testing.assertAccessible
@@ -103,6 +107,10 @@ class SessionsScreenTest {
         compose.onNodeWithText("20 min at a brisk pace").assertIsDisplayed()
         compose.onNodeWithText("About 2,000 steps · 1.46 km, estimated").assertIsDisplayed()
         compose.onAllNodesWithText("Signals at 50% and at the goal, with vibration").assertCountEquals(3)
+        compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag("${SessionsTags.PLAN}-4"))
+        compose.onNodeWithText("Japanese walking").assertIsDisplayed()
+        compose.onNodeWithText("5 sets: 3 min slow, 3 min brisk").assertIsDisplayed()
+        compose.onNodeWithText("A signal at each change, with vibration").assertIsDisplayed()
         compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag("${SessionsTags.PLAN}-3"))
         compose.onNodeWithText("Finish the day").assertIsDisplayed()
         compose.onNodeWithText("2,400 steps left today · 1.75 km, estimated").assertIsDisplayed()
@@ -141,6 +149,69 @@ class SessionsScreenTest {
         compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag("${SessionsTags.START}-1"))
         compose.onNodeWithTag("${SessionsTags.START}-1").assertIsNotEnabled()
         snapshot("sessions_live_dark")
+    }
+
+    private val japanese = checkNotNull(SessionPlans.start(plans[3], 0, 0, 0, 8_000)).copy(id = 10, planId = 4)
+
+    @Test
+    fun `an interval walk under way says its interval, its set and its countdown`() {
+        // Four minutes and twenty seconds in, the last step long ago: the countdown is held.
+        val going = japanese.copy(totals = SessionTotals(steps = 470, movingMillis = 260_000), lastStepAtMillis = 0)
+        show(state(live = LiveSessionState(going, cadence = 114, canKeepGoing = false, alertsWhileScreenOff = true)))
+
+        compose.onNodeWithText("Japanese walking").assertIsDisplayed()
+        compose.onNodeWithText("Set 1 of 5").assertIsDisplayed()
+        compose.onNodeWithText("Fast: 1:35 left.").assertIsDisplayed()
+        compose.onNodeWithText("114 steps/min: on pace · 470 steps").assertIsDisplayed()
+        snapshot("sessions_intervals_live")
+    }
+
+    @Test
+    fun `an interval walk over shows each fast interval against its pace`() {
+        val splits = (0 until 10).map { index ->
+            val fast = index % 2 == 1
+            val cadence = when {
+                index == 5 -> 94
+                fast -> 108 + index
+                else -> 88
+            }
+            IntervalSplit(
+                index,
+                fast,
+                steps = cadence * 3,
+                movingMillis = 180_000,
+                zoneMillis = if (fast &&
+                    cadence >= 100
+                ) {
+                    170_000
+                } else {
+                    0
+                },
+            )
+        }
+        val done = japanese.copy(
+            state = SessionState.FINISHED,
+            end = SessionEnd.GOAL,
+            endedAtMillis = 31 * 60_000L,
+            reachedAtMillis = 31 * 60_000L,
+            totals = SessionTotals(
+                steps = splits.sumOf { it.steps },
+                movingMillis = 30 * 60_000L,
+                zoneMillis = splits.filter { it.fast }.sumOf { it.zoneMillis },
+                distanceMeters = 2_200.0,
+                activeKcal = 96.0,
+            ),
+            lastStepAtMillis = 30 * 60_000L,
+            splits = splits,
+        )
+        show(
+            state(live = LiveSessionState(done, cadence = null, canKeepGoing = true, alertsWhileScreenOff = true)),
+            dark = true,
+        )
+
+        compose.onNodeWithText("4 fast intervals of 5 at pace", substring = true).assertIsDisplayed()
+        compose.onNodeWithTag(SessionCardTags.INTERVAL_BARS).assertIsDisplayed()
+        snapshot("sessions_intervals_done_dark")
     }
 
     @Test

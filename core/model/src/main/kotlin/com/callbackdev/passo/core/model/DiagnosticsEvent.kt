@@ -36,4 +36,11 @@ enum class DiagnosticsType {
      * sample is a baseline.
      */
     RESTORED,
+
+    /**
+     * A change of an interval outing told (Phase 13): the detail says which interval it began,
+     * and how late it was told against the step that crossed it (negative when told ahead of it),
+     * so a field test reads the delay instead of guessing it (docs/adr/0013-interval-walks.md).
+     */
+    INTERVAL_CHANGE,
 }

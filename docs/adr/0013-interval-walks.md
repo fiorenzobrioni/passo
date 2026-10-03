@@ -5,6 +5,8 @@
 - Date: 2026-10-01
 - Amends, in the change that builds Phase 13: `docs/adr/0009-sessions.md` (decision 5) and
   PLANNING.md §9.7, for an interval outing only
+- Built: 3 Oct 2026 (Phase 13), as option A; the delay and the battery are still to be measured
+  on the owner's phone (below)
 
 ## Context
 

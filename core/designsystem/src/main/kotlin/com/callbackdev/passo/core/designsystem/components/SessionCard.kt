@@ -22,12 +22,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
@@ -38,7 +40,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import com.callbackdev.passo.core.designsystem.R
 import com.callbackdev.passo.core.designsystem.format.clockTime
@@ -54,14 +58,20 @@ import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.designsystem.theme.reducedMotion
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
+import com.callbackdev.passo.core.domain.sessions.IntervalSchedule
+import com.callbackdev.passo.core.domain.sessions.cadence
+import com.callbackdev.passo.core.domain.sessions.cadenceFloor
 import com.callbackdev.passo.core.domain.sessions.fraction
+import com.callbackdev.passo.core.domain.sessions.intervalAt
 import com.callbackdev.passo.core.domain.sessions.progress
 import com.callbackdev.passo.core.domain.ways.WalkPlaces
 import com.callbackdev.passo.core.domain.ways.Ways
+import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionState
+import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.ZoneId
 
@@ -107,7 +117,18 @@ fun SessionCard(
     val container = if (reached) PassoTheme.colors.goalContainer else MaterialTheme.colorScheme.primaryContainer
     val mark = if (reached) PassoTheme.colors.goal else MaterialTheme.colorScheme.onPrimaryContainer
     val name = res.sessionName(session)
-    val sentence = res.sessionHeadline(session, format)
+    // An interval outing under way counts down its interval while the card is on screen: a
+    // ticker of the screen's own, which stops with it (PLANNING.md §9.4).
+    val ticking = session.intervals != null && session.state == SessionState.ACTIVE
+    val now by produceState(System.currentTimeMillis(), ticking, session) {
+        value = System.currentTimeMillis()
+        while (ticking) {
+            delay(COUNTDOWN_TICK_MILLIS - System.currentTimeMillis() % COUNTDOWN_TICK_MILLIS)
+            value = System.currentTimeMillis()
+        }
+    }
+    val sentence = res.sessionHeadline(session, format, now)
+    val interval = session.intervalAt(now)
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         shape = GroupShape,
@@ -175,14 +196,18 @@ fun SessionCard(
                     ratio = CARD_MAP_RATIO,
                     modifier = Modifier.fillMaxWidth().testTag(SessionCardTags.MAP).then(described),
                 )
+            } else if (session.intervals != null) {
+                IntervalTrack(session = session, color = accent, nowMillis = now, modifier = described)
             } else {
                 SessionTrack(session = session, color = accent, modifier = described)
             }
             val lines = buildList {
                 if (session.state == SessionState.ACTIVE) {
+                    // A slow interval has no pace to keep: its cadence is said in words.
+                    val pace = if (interval?.fast == false) SessionIntensity.FREE else session.intensity
                     add(
                         listOf(
-                            res.sessionCadence(cadence, session.intensity, format),
+                            res.sessionCadence(cadence, pace, format),
                             res.sessionSteps(session, format),
                         ).joinToString(" · "),
                     )
@@ -196,6 +221,7 @@ fun SessionCard(
                 }
                 add(res.sessionEstimates(session, format))
             }
+            if (finished && session.intervals != null) IntervalBars(session, accent)
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 lines.forEach {
                     Text(
@@ -316,8 +342,141 @@ fun SessionTrack(session: Session, color: Color, modifier: Modifier = Modifier) 
     }
 }
 
+/**
+ * An interval outing's way as a bar (Phase 13): each interval a block, the fast ones full height
+ * and the slow ones thinner, cut apart at every change; the part walked in the accent. The shape
+ * says which comes next before any word does.
+ */
+@Composable
+fun IntervalTrack(session: Session, color: Color, nowMillis: Long, modifier: Modifier = Modifier) {
+    val schedule = IntervalSchedule.of(session) ?: return
+    val moving = session.intervalAt(nowMillis)?.let { schedule.startOf(it.index) + it.elapsedMillis }
+        ?: session.totals.movingMillis
+    val target = (moving.toFloat() / schedule.totalMillis).coerceIn(0f, 1f)
+    val reduced = reducedMotion()
+    val shown by animateFloatAsState(target, animationSpec = tween(if (reduced) 0 else 500), label = "intervals")
+    IntervalBlocks(schedule.sets, shown, color, modifier.testTag(SessionCardTags.INTERVALS))
+}
+
+/**
+ * The shape of an interval outing: its intervals as blocks, fast full height and slow thinner,
+ * [progress] of it (a share of the whole) in [color]. A [plan] not yet walked is drawn whole, the
+ * fast blocks in [color] and the slow ones in a lighter tint of it.
+ */
+@Composable
+fun IntervalBlocks(
+    sets: IntervalSets,
+    progress: Float,
+    color: Color,
+    modifier: Modifier = Modifier,
+    plan: Boolean = false,
+) {
+    val schedule = IntervalSchedule(sets)
+    val rest = MaterialTheme.colorScheme.surfaceContainerHighest
+    Canvas(modifier = modifier.fillMaxWidth().height(14.dp)) {
+        val gap = 3.dp.toPx()
+        val total = schedule.totalMillis.toFloat()
+        val walkedTo = size.width * progress
+        for (index in 0 until schedule.count) {
+            val start = size.width * schedule.startOf(index) / total + if (index > 0) gap / 2 else 0f
+            val end = size.width * schedule.endOf(index) / total - if (index < schedule.count - 1) gap / 2 else 0f
+            if (end <= start) continue
+            val height = if (schedule.isFast(index)) size.height else size.height * SLOW_HEIGHT
+            val top = (size.height - height) / 2
+            val radius = CornerRadius(height / 2)
+            val ground = when {
+                !plan -> rest
+                schedule.isFast(index) -> color
+                else -> color.copy(alpha = PLAN_SLOW_ALPHA)
+            }
+            drawRoundRect(ground, Offset(start, top), Size(end - start, height), radius)
+            val walked = minOf(end, walkedTo) - start
+            if (walked > 0) drawRoundRect(color, Offset(start, top), Size(walked, height), radius)
+        }
+    }
+}
+
+/**
+ * How each fast interval went (Phase 13): one bar a fast interval, its height its cadence, the
+ * line across them the pace it was to be walked at. A bar at the pace or above is in the accent;
+ * below it, in a quieter ink, counted and shown, never hidden.
+ */
+@Composable
+fun IntervalBars(session: Session, color: Color, modifier: Modifier = Modifier) {
+    val res = LocalResources.current
+    val floor = session.intensity.cadenceFloor ?: return
+    val cadences = session.splits.filter { it.fast }.mapNotNull { it.cadence() }
+    if (cadences.isEmpty()) return
+    val below = MaterialTheme.colorScheme.outline
+    val line = MaterialTheme.colorScheme.onSurfaceVariant
+    val ink = MaterialTheme.colorScheme.onSurfaceVariant
+    val card = MaterialTheme.colorScheme.surfaceContainerLow
+    val labels = MaterialTheme.typography.labelSmall.copy(fontFeatureSettings = "tnum")
+    val measurer = rememberTextMeasurer()
+    val description = res.getString(
+        R.string.session_intervals_chart_description,
+        cadences.joinToString(", "),
+        floor,
+    )
+    Column(
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = modifier.testTag(SessionCardTags.INTERVAL_BARS).clearAndSetSemantics {
+            contentDescription = description
+        },
+    ) {
+        Canvas(modifier = Modifier.fillMaxWidth().height(72.dp)) {
+            val low = (minOf(cadences.min(), floor) - CHART_MARGIN).coerceAtLeast(0)
+            val high = maxOf(cadences.max(), floor) + CHART_MARGIN
+            val labelHeight = 14.dp.toPx()
+            val chart = size.height - labelHeight
+            fun y(cadence: Int) = labelHeight + chart * (1f - (cadence - low).toFloat() / (high - low))
+            val slot = size.width / cadences.size
+            val bar = minOf(slot * 0.5f, 28.dp.toPx())
+            // The pace first, under the bars and their numbers: a number is never crossed out.
+            val at = y(floor)
+            drawLine(
+                line,
+                Offset(0f, at),
+                Offset(size.width, at),
+                strokeWidth = 1.dp.toPx(),
+                pathEffect = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx())),
+            )
+            cadences.forEachIndexed { index, cadence ->
+                val left = slot * index + (slot - bar) / 2
+                val top = y(cadence)
+                drawRoundRect(
+                    color = if (cadence >= floor) color else below,
+                    topLeft = Offset(left, top),
+                    size = Size(bar, size.height - top),
+                    cornerRadius = CornerRadius(4.dp.toPx()),
+                )
+                val text = measurer.measure(cadence.toString(), labels.copy(color = ink))
+                val corner = Offset(left + (bar - text.size.width) / 2, top - text.size.height)
+                // On the card's own ground, so the pace's line never runs through a number.
+                drawRect(card, corner, Size(text.size.width.toFloat(), text.size.height.toFloat()))
+                drawText(text, topLeft = corner)
+            }
+        }
+        Text(
+            text = res.getString(R.string.session_intervals_chart_legend, floor),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
 private const val MILLIS_PER_MINUTE = 60_000L
 private const val CARD_MAP_RATIO = 1.6f
+private const val COUNTDOWN_TICK_MILLIS = 1_000L
+
+/** A plan's slow blocks: the accent, lighter, so fast and slow read apart before any walking. */
+private const val PLAN_SLOW_ALPHA = 0.35f
+
+/** A slow interval's block, against a fast one's full height. */
+private const val SLOW_HEIGHT = 0.5f
+
+/** Steps a minute of room above and below the bars, so the lowest still shows. */
+private const val CHART_MARGIN = 12
 
 /** Hooks for the UI tests. */
 object SessionCardTags {
@@ -329,4 +488,6 @@ object SessionCardTags {
     const val KEEP_GOING = "session_card_keep_going"
     const val CLOSE = "session_card_close"
     const val MAP = "session_card_map"
+    const val INTERVALS = "session_card_intervals"
+    const val INTERVAL_BARS = "session_card_interval_bars"
 }

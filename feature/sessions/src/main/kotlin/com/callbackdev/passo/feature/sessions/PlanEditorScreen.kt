@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
@@ -55,14 +56,23 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.callbackdev.passo.core.designsystem.components.GroupDivider
 import com.callbackdev.passo.core.designsystem.components.GroupHeader
+import com.callbackdev.passo.core.designsystem.components.IntervalBlocks
 import com.callbackdev.passo.core.designsystem.components.SegmentLabel
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
+import com.callbackdev.passo.core.designsystem.components.StatusCard
+import com.callbackdev.passo.core.designsystem.components.StatusTone
 import com.callbackdev.passo.core.designsystem.components.SwitchRow
 import com.callbackdev.passo.core.designsystem.components.ValueStepper
 import com.callbackdev.passo.core.designsystem.format.format
@@ -78,8 +88,10 @@ import com.callbackdev.passo.core.designsystem.theme.padding
 import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.sessions.SessionAmount
+import com.callbackdev.passo.core.domain.sessions.SessionConstants
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.sessions.typicalCadence
+import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
@@ -101,6 +113,9 @@ fun PlanEditorRoute(planId: Long?, onDone: () -> Unit, viewModel: PlanEditorView
         actions = PlanEditorActions(
             rename = viewModel::rename,
             goalKind = viewModel::goalKind,
+            intervals = viewModel::intervals,
+            sets = viewModel::sets,
+            tryInterval = viewModel::tryInterval,
             goalValue = viewModel::goalValue,
             nudge = viewModel::nudge,
             intensity = viewModel::intensity,
@@ -121,6 +136,9 @@ fun PlanEditorRoute(planId: Long?, onDone: () -> Unit, viewModel: PlanEditorView
 class PlanEditorActions(
     val rename: (String) -> Unit = {},
     val goalKind: (SessionGoalKind) -> Unit = {},
+    val intervals: (Boolean) -> Unit = {},
+    val sets: ((IntervalSets) -> IntervalSets) -> Unit = {},
+    val tryInterval: (Boolean) -> Unit = {},
     val goalValue: (Double) -> Unit = {},
     val nudge: (Boolean) -> Unit = {},
     val intensity: (SessionIntensity) -> Unit = {},
@@ -266,33 +284,62 @@ private fun EditorList(state: PlanEditorState, actions: PlanEditorActions, modif
             )
         }
 
-        item(key = "goal-header") { GroupHeader(stringResource(R.string.editor_goal)) }
-        item(key = "goal-kind") {
-            val kinds = listOf(
-                SessionGoalKind.TIME to R.string.editor_goal_time,
-                SessionGoalKind.STEPS to R.string.editor_goal_steps,
-                SessionGoalKind.DISTANCE to R.string.editor_goal_distance,
-                SessionGoalKind.REST_OF_DAY to R.string.editor_goal_day,
-            )
+        val intervals = plan.goalKind == SessionGoalKind.INTERVALS
+        item(key = "kind-header") { GroupHeader(stringResource(R.string.editor_kind)) }
+        item(key = "kind") {
+            val kinds = listOf(false to R.string.editor_kind_goal, true to R.string.editor_kind_intervals)
             SingleChoiceSegmentedButtonRow(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenMargin).testTag(EditorTags.GOAL_KIND),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenMargin).testTag(EditorTags.KIND),
             ) {
-                kinds.forEachIndexed { index, (kind, label) ->
+                kinds.forEachIndexed { index, (choice, label) ->
                     SegmentedButton(
-                        selected = plan.goalKind == kind,
-                        onClick = { actions.goalKind(kind) },
+                        selected = intervals == choice,
+                        onClick = { actions.intervals(choice) },
                         shape = SegmentedButtonDefaults.itemShape(index, kinds.size),
                         label = { SegmentLabel(stringResource(label)) },
+                        modifier = Modifier.testTag("${EditorTags.KIND}-$choice"),
                     )
                 }
             }
         }
-        item(key = "goal-value") { GoalValue(state, format, actions) }
+        if (intervals) {
+            item(key = "intervals-about") { IntervalsAbout() }
+            item(key = "intervals-header") { GroupHeader(stringResource(R.string.editor_intervals)) }
+            item(key = "intervals-sets") { IntervalSetsEditor(plan.intervals, format, actions) }
+        } else {
+            item(key = "goal-header") { GroupHeader(stringResource(R.string.editor_goal)) }
+        }
+        if (!intervals) {
+            item(key = "goal-kind") {
+                val kinds = listOf(
+                    SessionGoalKind.TIME to R.string.editor_goal_time,
+                    SessionGoalKind.STEPS to R.string.editor_goal_steps,
+                    SessionGoalKind.DISTANCE to R.string.editor_goal_distance,
+                    SessionGoalKind.REST_OF_DAY to R.string.editor_goal_day,
+                )
+                SingleChoiceSegmentedButtonRow(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenMargin).testTag(EditorTags.GOAL_KIND),
+                ) {
+                    kinds.forEachIndexed { index, (kind, label) ->
+                        SegmentedButton(
+                            selected = plan.goalKind == kind,
+                            onClick = { actions.goalKind(kind) },
+                            shape = SegmentedButtonDefaults.itemShape(index, kinds.size),
+                            label = { SegmentLabel(stringResource(label)) },
+                        )
+                    }
+                }
+            }
+        }
+        if (!intervals) item(key = "goal-value") { GoalValue(state, format, actions) }
 
-        item(key = "pace-header") { GroupHeader(stringResource(R.string.editor_pace)) }
+        item(key = "pace-header") {
+            GroupHeader(stringResource(if (intervals) R.string.editor_fast_pace else R.string.editor_pace))
+        }
         item(key = "pace") {
             SettingsGroup(modifier = Modifier.selectableGroup()) {
-                SessionIntensity.entries.forEach { intensity ->
+                // A fast interval has a pace to keep, or it says nothing.
+                SessionIntensity.entries.filter { !intervals || it != SessionIntensity.FREE }.forEach { intensity ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -330,46 +377,23 @@ private fun EditorList(state: PlanEditorState, actions: PlanEditorActions, modif
                 modifier = Modifier.padding(horizontal = ScreenMargin),
             ) {
                 Text(
-                    stringResource(R.string.editor_signals_note),
+                    stringResource(
+                        if (intervals) R.string.editor_intervals_signals_note else R.string.editor_signals_note,
+                    ),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 4.dp),
                 )
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    SessionMilestone.CHOOSABLE.forEach { milestone ->
-                        val on = milestone in plan.milestones
-                        FilterChip(
-                            selected = on,
-                            onClick = { actions.milestone(milestone, !on) },
-                            label = { Text(format.percent(milestone.percent / 100.0)) },
-                            leadingIcon = if (on) {
-                                { Icon(PassoIcons.Check, contentDescription = null, modifier = Modifier.size(18.dp)) }
-                            } else {
-                                null
-                            },
-                            modifier = Modifier.testTag("${EditorTags.MILESTONE}-${milestone.percent}"),
-                        )
-                    }
-                    // The goal is always told: said, not offered as a choice (a disabled chip
-                    // would read as a signal this outing cannot have).
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        modifier = Modifier.height(48.dp).padding(horizontal = 8.dp),
-                    ) {
-                        Icon(
-                            PassoIcons.Flag,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(18.dp),
-                        )
-                        Text(
-                            stringResource(R.string.editor_signal_goal),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    }
+                if (intervals && !state.changesWhileScreenOff) {
+                    StatusCard(
+                        icon = PassoIcons.Warning,
+                        title = stringResource(R.string.editor_intervals_screen_on_title),
+                        body = stringResource(R.string.editor_intervals_screen_on),
+                        tone = StatusTone.PROBLEM,
+                        modifier = Modifier.testTag(EditorTags.SCREEN_ON),
+                    )
                 }
+                if (!intervals) MilestoneChips(plan.milestones, format, actions)
             }
         }
         if (state.canVibrate) {
@@ -378,18 +402,71 @@ private fun EditorList(state: PlanEditorState, actions: PlanEditorActions, modif
                     SettingsGroup {
                         SwitchRow(
                             label = stringResource(R.string.editor_vibrate),
-                            note = stringResource(R.string.editor_vibrate_note),
+                            note = stringResource(
+                                if (intervals) R.string.editor_intervals_vibrate_note else R.string.editor_vibrate_note,
+                            ),
                             checked = plan.vibrate,
                             onChange = actions.vibrate,
                             icon = PassoIcons.Vibrate,
                             modifier = Modifier.testTag(EditorTags.VIBRATE),
                         )
                     }
-                    if (plan.vibrate) TryVibrations(format, actions.tryVibration, actions.tryEndedStill)
+                    if (plan.vibrate) {
+                        TryVibrations(
+                            format = format,
+                            intervals = intervals,
+                            onTry = actions.tryVibration,
+                            onTryInterval = actions.tryInterval,
+                            onTryEndedStill = actions.tryEndedStill,
+                        )
+                    }
                 }
             }
         }
         item(key = "voice") { VoiceChoice(state, actions) }
+    }
+}
+
+/** The shares of the goal the reader picks, and the goal, always told. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun MilestoneChips(milestones: Set<SessionMilestone>, format: MeasureFormatter, actions: PlanEditorActions) {
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        SessionMilestone.CHOOSABLE.forEach { milestone ->
+            val on = milestone in milestones
+            FilterChip(
+                selected = on,
+                onClick = { actions.milestone(milestone, !on) },
+                label = { Text(format.percent(milestone.percent / 100.0)) },
+                leadingIcon = if (on) {
+                    {
+                        Icon(PassoIcons.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                    }
+                } else {
+                    null
+                },
+                modifier = Modifier.testTag("${EditorTags.MILESTONE}-${milestone.percent}"),
+            )
+        }
+        // The goal is always told: said, not offered as a choice (a disabled chip
+        // would read as a signal this outing cannot have).
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.height(48.dp).padding(horizontal = 8.dp),
+        ) {
+            Icon(
+                PassoIcons.Flag,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(18.dp),
+            )
+            Text(
+                stringResource(R.string.editor_signal_goal),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+            )
+        }
     }
 }
 
@@ -461,7 +538,7 @@ private fun Estimate(state: PlanEditorState, format: MeasureFormatter) {
     val distance = res.format(format.distance(estimate.distanceMeters))
     val minutes = res.format(format.minutes(estimate.minutes))
     val (first, second) = when (plan.goalKind) {
-        SessionGoalKind.TIME -> steps to distance
+        SessionGoalKind.TIME, SessionGoalKind.INTERVALS -> steps to distance
         SessionGoalKind.DISTANCE -> steps to minutes
         SessionGoalKind.STEPS, SessionGoalKind.REST_OF_DAY -> distance to minutes
     }
@@ -522,7 +599,13 @@ private fun VoiceChoice(state: PlanEditorState, actions: PlanEditorActions) {
                             text = stringResource(
                                 when (voice) {
                                     SessionVoice.OFF -> R.string.editor_voice_off_note
-                                    SessionVoice.HEADPHONES -> R.string.editor_voice_headphones_note
+
+                                    SessionVoice.HEADPHONES -> if (state.draft.goalKind == SessionGoalKind.INTERVALS) {
+                                        R.string.editor_intervals_voice_note
+                                    } else {
+                                        R.string.editor_voice_headphones_note
+                                    }
+
                                     SessionVoice.ALWAYS -> R.string.editor_voice_always_note
                                 },
                             ),
@@ -618,7 +701,13 @@ private fun VoiceChoice(state: PlanEditorState, actions: PlanEditorActions) {
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun TryVibrations(format: MeasureFormatter, onTry: (SessionMilestone) -> Unit, onTryEndedStill: () -> Unit) {
+private fun TryVibrations(
+    format: MeasureFormatter,
+    intervals: Boolean,
+    onTry: (SessionMilestone) -> Unit,
+    onTryInterval: (Boolean) -> Unit,
+    onTryEndedStill: () -> Unit,
+) {
     Column(
         modifier = Modifier.padding(horizontal = ScreenMargin + 4.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -629,7 +718,25 @@ private fun TryVibrations(format: MeasureFormatter, onTry: (SessionMilestone) ->
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            SessionMilestone.entries.forEach { milestone ->
+            if (intervals) {
+                val changes = listOf(true to R.string.editor_try_faster, false to R.string.editor_try_slower)
+                changes.forEach { (fast, label) ->
+                    AssistChip(
+                        onClick = { onTryInterval(fast) },
+                        label = { Text(stringResource(label)) },
+                        leadingIcon = {
+                            Icon(
+                                PassoIcons.Vibrate,
+                                contentDescription = null,
+                                modifier = Modifier.size(AssistChipDefaults.IconSize),
+                            )
+                        },
+                        modifier = Modifier.testTag("${EditorTags.TRY_INTERVAL}-$fast"),
+                    )
+                }
+            }
+            // An interval walk's only share is its goal.
+            SessionMilestone.entries.filter { !intervals || it == SessionMilestone.GOAL }.forEach { milestone ->
                 AssistChip(
                     onClick = { onTry(milestone) },
                     label = {
@@ -667,6 +774,160 @@ private fun TryVibrations(format: MeasureFormatter, onTry: (SessionMilestone) ->
     }
 }
 
+/**
+ * What the Japanese interval walk is and how Passo walks it, where it is chosen: two short
+ * paragraphs, the study's in a sentence (the guide has the rest).
+ */
+@Composable
+private fun IntervalsAbout() {
+    Surface(
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        shape = GroupShape,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = ScreenMargin, vertical = 8.dp)
+            .testTag(EditorTags.INTERVALS_ABOUT),
+    ) {
+        Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            Icon(
+                PassoIcons.Outing,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                modifier = Modifier.size(24.dp),
+            )
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Text(
+                    stringResource(R.string.editor_intervals_about_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    modifier = Modifier.semantics { heading() },
+                )
+                Text(
+                    stringResource(R.string.editor_intervals_about),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+                Text(
+                    stringResource(R.string.editor_intervals_how),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                )
+            }
+        }
+    }
+}
+
+/**
+ * The sets, picked with a step down and a step up each (three sliders would crowd the page): the
+ * slow minutes, the fast ones, how many sets. Under them the shape of the outing as it will be
+ * walked, its length, and the way back to the protocol's 5 × (3 + 3).
+ */
+@Composable
+private fun IntervalSetsEditor(sets: IntervalSets, format: MeasureFormatter, actions: PlanEditorActions) {
+    val res = LocalResources.current
+    val minutes = SessionConstants.INTERVAL_MINUTES_RANGE
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        SettingsGroup {
+            CountRow(
+                label = stringResource(R.string.editor_intervals_slow),
+                note = stringResource(R.string.editor_intervals_slow_note),
+                value = res.format(format.minutes(sets.slowMinutes)),
+                canLess = sets.slowMinutes > minutes.first,
+                canMore = sets.slowMinutes < minutes.last,
+                onLess = { actions.sets { it.copy(slowMinutes = it.slowMinutes - 1) } },
+                onMore = { actions.sets { it.copy(slowMinutes = it.slowMinutes + 1) } },
+                tag = EditorTags.SLOW,
+            )
+            GroupDivider()
+            CountRow(
+                label = stringResource(R.string.editor_intervals_fast),
+                note = stringResource(R.string.editor_intervals_fast_note),
+                value = res.format(format.minutes(sets.fastMinutes)),
+                canLess = sets.fastMinutes > minutes.first,
+                canMore = sets.fastMinutes < minutes.last,
+                onLess = { actions.sets { it.copy(fastMinutes = it.fastMinutes - 1) } },
+                onMore = { actions.sets { it.copy(fastMinutes = it.fastMinutes + 1) } },
+                tag = EditorTags.FAST,
+            )
+            GroupDivider()
+            CountRow(
+                label = stringResource(R.string.editor_intervals_sets),
+                note = stringResource(R.string.editor_intervals_sets_note),
+                value = format.integer(sets.sets.toLong()),
+                canLess = sets.sets > SessionConstants.INTERVAL_SETS_RANGE.first,
+                canMore = sets.sets < SessionConstants.INTERVAL_SETS_RANGE.last,
+                onLess = { actions.sets { it.copy(sets = it.sets - 1) } },
+                onMore = { actions.sets { it.copy(sets = it.sets + 1) } },
+                tag = EditorTags.SETS,
+            )
+        }
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(horizontal = ScreenMargin + 4.dp),
+        ) {
+            IntervalBlocks(
+                sets = sets,
+                progress = 0f,
+                color = MaterialTheme.colorScheme.primary,
+                plan = true,
+                modifier = Modifier.clearAndSetSemantics {}.testTag(EditorTags.BLOCKS),
+            )
+            Text(
+                stringResource(R.string.editor_intervals_total, res.format(format.minutes(sets.totalMinutes))),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (sets != IntervalSets()) {
+                TextButton(
+                    onClick = { actions.sets { IntervalSets() } },
+                    modifier = Modifier.testTag(EditorTags.PROTOCOL),
+                ) { Text(stringResource(R.string.editor_intervals_protocol)) }
+            }
+        }
+    }
+}
+
+/** A count picked with a step down and a step up: the label and its note, then − value +. */
+@Composable
+private fun CountRow(
+    label: String,
+    note: String,
+    value: String,
+    canLess: Boolean,
+    canMore: Boolean,
+    onLess: () -> Unit,
+    onMore: () -> Unit,
+    tag: String,
+) {
+    val locale = LocalResources.current.configuration.locales[0]
+    val name = label.lowercase(locale)
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = ScreenMargin, end = 8.dp, top = 8.dp, bottom = 8.dp)
+            .testTag(tag),
+    ) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(label, style = MaterialTheme.typography.bodyLarge)
+            Text(note, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        IconButton(onClick = onLess, enabled = canLess, modifier = Modifier.testTag("$tag-less")) {
+            Icon(PassoIcons.Minus, contentDescription = stringResource(R.string.editor_intervals_fewer, name))
+        }
+        Text(
+            text = value,
+            style = MaterialTheme.typography.titleMedium.copy(fontFeatureSettings = "tnum"),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.widthIn(min = 48.dp).semantics { stateDescription = "$label: $value" },
+        )
+        IconButton(onClick = onMore, enabled = canMore, modifier = Modifier.testTag("$tag-more")) {
+            Icon(PassoIcons.Plus, contentDescription = stringResource(R.string.editor_intervals_more, name))
+        }
+    }
+}
+
 /** Hooks for the UI tests. */
 object EditorTags {
     const val LIST = "editor_list"
@@ -685,4 +946,13 @@ object EditorTags {
     const val SAVE = "editor_save"
     const val DELETE = "editor_delete"
     const val CONFIRM_DELETE = "editor_confirm_delete"
+    const val KIND = "editor_kind"
+    const val INTERVALS_ABOUT = "editor_intervals_about"
+    const val SLOW = "editor_slow"
+    const val FAST = "editor_fast"
+    const val SETS = "editor_sets"
+    const val BLOCKS = "editor_blocks"
+    const val PROTOCOL = "editor_protocol"
+    const val TRY_INTERVAL = "editor_try_interval"
+    const val SCREEN_ON = "editor_screen_on"
 }

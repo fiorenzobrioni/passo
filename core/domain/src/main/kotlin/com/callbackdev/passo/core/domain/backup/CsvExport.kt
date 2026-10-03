@@ -1,6 +1,7 @@
 package com.callbackdev.passo.core.domain.backup
 
 import com.callbackdev.passo.core.domain.format.UnitConversions
+import com.callbackdev.passo.core.domain.sessions.intervalResult
 import com.callbackdev.passo.core.model.DailySummary
 import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.Session
@@ -96,6 +97,8 @@ object CsvExport {
             "minutes_in_motion",
             distanceHeader(units),
             "active_kcal",
+            "intervals",
+            "fast_at_pace",
         ),
         rows = sessions.sortedBy { it.startedAtMillis }.map { session ->
             val (goalValue, goalUnit) = goal(session, units)
@@ -113,6 +116,10 @@ object CsvExport {
                 decimal(session.totals.movingMillis / MILLIS_PER_MINUTE, 1),
                 distance(session.totals.distanceMeters, units),
                 decimal(session.totals.activeKcal, 1),
+                // An interval outing's sets (Phase 13): «5x3+3», five sets of three slow minutes
+                // and three fast; and its fast intervals at pace, «4/5». Empty for any other.
+                session.intervals?.let { "${it.sets}x${it.slowMinutes}+${it.fastMinutes}" }.orEmpty(),
+                session.intervalResult()?.let { "${it.atPace}/${it.judged}" }.orEmpty(),
             )
         },
     )
@@ -138,7 +145,7 @@ object CsvExport {
 
     private fun goal(session: Session, units: UnitSystem): Pair<String, String> = when (session.goalKind) {
         SessionGoalKind.DISTANCE -> distance(session.goalValue.toDouble(), units) to distanceUnit(units)
-        SessionGoalKind.TIME -> session.goalValue.toString() to "min"
+        SessionGoalKind.TIME, SessionGoalKind.INTERVALS -> session.goalValue.toString() to "min"
         SessionGoalKind.STEPS, SessionGoalKind.REST_OF_DAY -> session.goalValue.toString() to "steps"
     }
 

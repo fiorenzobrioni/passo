@@ -7,6 +7,7 @@ import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
+import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.UserSettings
@@ -232,7 +233,8 @@ object BackupMerge {
         intensity == other.intensity &&
         milestones == other.milestones &&
         vibrate == other.vibrate &&
-        voice == other.voice
+        voice == other.voice &&
+        (goalKind != SessionGoalKind.INTERVALS || intervals == other.intervals)
 }
 
 private const val WAY_SLOT = "way"

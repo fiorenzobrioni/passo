@@ -6,6 +6,7 @@ import com.callbackdev.passo.core.data.db.toModel
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.model.Session
+import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionPlan
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -84,7 +85,7 @@ constructor(
     suspend fun insert(session: Session): Session = session.copy(id = dao.insertSession(session.toEntity()))
 
     /** Writes an outing's state outside a step batch: a pause, a resume, its end. */
-    suspend fun save(session: Session) = dao.upsertSession(session.toEntity())
+    suspend fun save(session: Session) = dao.upsertSession(session)
 
     /** Forgets an outing too short to keep. */
     suspend fun delete(id: Long) = dao.deleteSession(id)
@@ -95,9 +96,20 @@ constructor(
     suspend fun setSummarySeen(sessionId: Long) = preferences.setSessionSummarySeen(sessionId)
 
     private suspend fun seedPresets() = seedLock.withLock {
-        if (preferences.sessionPlansSeeded()) return@withLock
-        // A database restored from a backup already has the reader's plans.
-        if (dao.plans().isEmpty()) dao.insertPlans(SessionPlans.PRESETS.map { it.toEntity() })
-        preferences.markSessionPlansSeeded()
+        if (!preferences.sessionPlansSeeded()) {
+            // A database restored from a backup already has the reader's plans.
+            if (dao.plans().isEmpty()) dao.insertPlans(SessionPlans.PRESETS.map { it.toEntity() })
+            preferences.markSessionPlansSeeded()
+            preferences.markIntervalPresetSeeded()
+        }
+        // Plans seeded before the interval walk (Phase 13) get it once, after theirs; a reader
+        // who already made an interval plan, or deleted this one, is not given it again.
+        if (!preferences.intervalPresetSeeded()) {
+            val plans = dao.plans().mapNotNull { it.toModel() }
+            if (plans.none { it.goalKind == SessionGoalKind.INTERVALS }) {
+                dao.appendPlan(SessionPlans.JAPANESE_WALKING.toEntity())
+            }
+            preferences.markIntervalPresetSeeded()
+        }
     }
 }

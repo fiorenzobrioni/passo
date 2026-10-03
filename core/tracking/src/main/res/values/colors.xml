@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- An interval outing's slow segments on Android 16's progress bar (Phase 13): a neutral
+         grey that reads on both the light and the dark shade; the fast ones take the
+         notification's own accent. -->
+    <color name="session_interval_slow">#FF8A8F98</color>
+</resources>

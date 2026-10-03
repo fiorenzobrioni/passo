@@ -2,6 +2,7 @@ package com.callbackdev.passo.core.domain.sessions
 
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.ways.Ways
+import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
@@ -366,5 +367,102 @@ class SessionTrackerTest {
     fun `a walk with nothing left does not start`() {
         val walk = Ways.of(WayId.LONDON_PALACE_TOWER)
         assertThat(SessionPlans.startWalk(walk, walk.lengthMeters - 10, SessionVoice.OFF, start, 20_000)).isNull()
+    }
+
+    // --- Interval outings (Phase 13) ---------------------------------------------------------
+
+    /** Three sets of one slow minute and one fast: six minutes. */
+    private fun intervalTracker(): SessionTracker {
+        val plan = SessionPlans.withIntervals(SessionPlans.JAPANESE_WALKING, IntervalSets(1, 1, 3))
+        val session = checkNotNull(SessionPlans.start(plan, start, 20_000, 0, 8_000))
+        return SessionTracker(session, lengths, weightKg = 70.0)
+    }
+
+    private fun List<SessionSignal>.changes() = filterIsInstance<SessionSignal.IntervalChange>()
+
+    @Test
+    fun `each change is told once, in order, and the last one is the goal`() {
+        val tracker = intervalTracker()
+        val signals = tracker.walk(start, 7 * 60_000L)
+        assertThat(signals.changes().map { it.position.index }).containsExactly(1, 2, 3, 4, 5).inOrder()
+        assertThat(signals.changes().map { it.position.fast }).containsExactly(true, false, true, false, true).inOrder()
+        assertThat(signals.filterIsInstance<SessionSignal.Milestone>().map { it.milestone })
+            .containsExactly(SessionMilestone.GOAL)
+        val finished = signals.filterIsInstance<SessionSignal.Finished>().single().session
+        assertThat(finished.end).isEqualTo(SessionEnd.GOAL)
+        assertThat(finished.splits.map { it.index }).containsExactly(0, 1, 2, 3, 4, 5).inOrder()
+        assertThat(finished.splits.sumOf { it.steps }).isEqualTo(finished.totals.steps)
+        // Walked steadily, every change falls a minute of motion after the last.
+        signals.changes().forEach { change ->
+            val due = start + change.position.index * 60_000L
+            assertThat(change.changedAtMillis).isIn(com.google.common.collect.Range.closed(due - 1_000, due + 1_000))
+        }
+    }
+
+    @Test
+    fun `a change due before the next report is told at this one, while walking`() {
+        val tracker = intervalTracker()
+        val signals = tracker.walk(start, 60_000L - 1_000)
+        val change = signals.changes().single()
+        assertThat(change.early).isTrue()
+        assertThat(change.position.index).isEqualTo(1)
+        // And not again when the steps reach it.
+        assertThat(tracker.walk(start + 60_000L - 1_000, 5_000).changes()).isEmpty()
+    }
+
+    @Test
+    fun `a stop during a fast interval does not eat it`() {
+        val tracker = intervalTracker()
+        tracker.walk(start, 70_000)
+        val before = tracker.session.totals.movingMillis
+        // Two minutes at a traffic light, then on.
+        tracker.onSteps(start + 190_000, 1)
+        assertThat(tracker.session.totals.movingMillis - before).isEqualTo(SessionConstants.MAX_MILLIS_PER_STEP)
+        assertThat(tracker.session.splits.last().index).isEqualTo(1)
+        assertThat(tracker.untilIntervalSignal()).isGreaterThan(40_000L)
+    }
+
+    @Test
+    fun `one batch across two changes tells the latest only, and both splits are right`() {
+        val tracker = intervalTracker()
+        tracker.walk(start, 30_000)
+        // A long stillness of the reports: 2 minutes of steps in one event, crossing 1:00 and 2:00.
+        val signals = tracker.onSteps(start + 150_000, 240)
+        assertThat(signals.changes().map { it.position.index }).containsExactly(2)
+        val splits = tracker.session.splits
+        assertThat(splits.map { it.index }).containsExactly(0, 1, 2).inOrder()
+        assertThat(splits[1].movingMillis).isEqualTo(60_000L)
+        assertThat(splits.sumOf { it.steps }).isEqualTo(tracker.session.totals.steps)
+    }
+
+    @Test
+    fun `paused and resumed, the interval goes on where it was`() {
+        val tracker = intervalTracker()
+        tracker.walk(start, 80_000)
+        val position = checkNotNull(tracker.session.intervalAt(start + 80_000))
+        tracker.pause(start + 80_000)
+        tracker.onSteps(start + 100_000, 30)
+        tracker.resume(start + 200_000)
+        assertThat(tracker.session.intervalAt(start + 200_000)?.index).isEqualTo(position.index)
+        val signals = tracker.walk(start + 200_000, 60_000)
+        assertThat(signals.changes().map { it.position.index }).containsExactly(2)
+    }
+
+    @Test
+    fun `a tracker made again from what was written tells nothing twice`() {
+        val tracker = intervalTracker()
+        tracker.walk(start, 65_000)
+        val again = SessionTracker(tracker.session, lengths, weightKg = 70.0)
+        assertThat(again.walk(start + 65_000, 20_000).changes()).isEmpty()
+        assertThat(again.walk(start + 85_000, 40_000).changes().map { it.position.index }).containsExactly(2)
+    }
+
+    @Test
+    fun `an interval outing's time at pace is its fast minutes' only`() {
+        val tracker = intervalTracker()
+        tracker.walk(start, 3 * 60_000L)
+        val session = tracker.session
+        assertThat(session.totals.zoneMillis).isEqualTo(session.splits.filter { it.fast }.sumOf { it.zoneMillis })
+        assertThat(session.totals.zoneMillis).isLessThan(session.totals.movingMillis)
     }
 }
