@@ -95,7 +95,11 @@ lock for the whole outing (the processor awake 30 minutes for ten moments).
 with no FIFO (`wakeUpVariant=false`, `fifoMax=0`): there, with the screen off, A cannot tell a
 change on time, and the editor says so. The service's log line now also says which step
 detectors a phone has (`stepDetector`, `stepDetectorWakeUp`), so B's premise is read from an
-export before it is built.
+export before it is built. Read the same day from the owner's export: `stepDetector=true
+stepDetectorWakeUp=false`. That phone has no wake-up step sensor at all, so B is not possible
+there either; what is left is to measure A as it is (how late a change comes when the phone
+wakes for its own reasons), and only then to weigh C, which would be Passo's first wake lock
+and is the owner's decision.
 
 If the field test shows the owner's counter near its 10 s maximum, B is the step after A, not
 C: it keeps the "no wake lock, no timer" rule and confines the step detector to 40 s windows
