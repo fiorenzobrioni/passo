@@ -31,6 +31,14 @@ All notable changes to Passo are documented here. The format follows
   one. Stop when you like and continue later from where you were. On the Ways page, and from
   Outings. "Hear it" plays a place as you will hear it, and "Change voice" opens the phone's
   voices.
+- **The Japanese interval walk**: slow and fast walking in turns, 3 minutes each, five sets or
+  more, as a study at Shinshu University proposed it. Ready to start as "Japanese walking", or
+  made to measure in Outings (the slow and fast minutes, the sets, the fast pace), with a short
+  explanation of what it is where you choose it, and more in the guide. Each change is told with
+  a vibration of its own, "faster" and "slower", and with the voice if you like, on time with
+  the phone in your pocket. The minutes are minutes in motion: a traffic light does not eat a
+  fast interval. On the screen and in the notification, the interval you are in and what is left
+  of it; at the end, each fast interval's cadence against its pace, and how many were at pace.
 - **Your ways can be tidied**: a way finished or left, or a walk walked to its end, can be
   deleted, after a warning that it is for good. A way left before you walked any of it is not
   kept. A city walk begun can be left too, between outings: it goes back to its start, and

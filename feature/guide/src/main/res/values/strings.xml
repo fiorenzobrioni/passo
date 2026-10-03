@@ -50,15 +50,19 @@
 
     <!-- Outings -->
     <string name="guide_outings_title">Outings</string>
-    <string name="guide_outings_p1">An outing is a walk or a run you start on purpose, with one goal: a number of steps, a distance, minutes in motion, or what is left of today’s goal. A pace to keep is up to you.</string>
+    <string name="guide_outings_p1">An outing is a walk or a run you start on purpose, with one goal: a number of steps, a distance, minutes in motion, or what is left of today’s goal. A pace to keep is up to you. Or it can be an interval walk, below.</string>
     <string name="guide_outings_signals_title">Signals you read in a pocket</string>
     <string name="guide_outings_signals_body">On the way the phone vibrates at the shares you choose, in a count: one short pulse at a quarter, two at half, three at three quarters, and one long one at the goal. They follow the phone’s silent mode. If you want, a voice in your headphones says the same, with what is left and how your pace is going, in a voice installed on the phone.</string>
     <string name="guide_outings_motion_title">Time in motion</string>
     <string name="guide_outings_motion_body">An outing’s minutes are measured from your steps, not by a clock: a wait at a traffic light does not count against it.</string>
     <string name="guide_outings_end_title">It ends by itself</string>
     <string name="guide_outings_end_body">At its goal, where “Keep going” gives it a quarter of an hour more; after 15 minutes without a step, which it says with two long pulses (and the voice, if it speaks) when you walk on, with “Resume” for a quarter of an hour; or after an hour paused. Then it takes the place of the walk it was, on Today and in History, with how much of its goal was done.</string>
+    <string name="guide_intervals_title">The Japanese interval walk</string>
+    <string name="guide_intervals_body">Slow and fast walking in turns, as a study at Shinshu University in Japan proposed it (Nemoto and colleagues, 2007): 3 minutes at an easy pace, then 3 minutes fast enough that talking takes an effort, five sets or more, about half an hour. In the study, people who walked this way four days a week or more for five months gained more fitness and leg strength, and lowered their blood pressure more, than those who walked at one steady pace.</string>
+    <string name="guide_intervals_how_title">How Passo walks it with you</string>
+    <string name="guide_intervals_how_body">Make one in Outings (“Japanese walking” is ready to start), choosing the slow and fast minutes, the sets and the fast pace. It starts slow. Each change is told with a vibration of its own, four quick taps for faster, a long and a short pulse for slower, and with the voice if the outing speaks; the end of the last fast interval is the goal. The minutes are minutes in motion, so a traffic light does not eat a fast interval. At the end you see each fast interval’s cadence against its pace, and how many were at pace. With the screen off a change is felt within a few seconds; on a phone whose step counter cannot wake it, only with the screen on.</string>
     <string name="guide_outings_battery_title">The one time Passo wakes the phone</string>
-    <string name="guide_outings_battery_body">For the signals to arrive on time, while an outing is counting the step counter reports about every half minute as you walk, and not at all while you stand still. Before it and after it, nothing changes.</string>
+    <string name="guide_outings_battery_body">For the signals to arrive on time, while an outing is counting the step counter reports about every half minute as you walk, and not at all while you stand still. In an interval walk it reports every two seconds in the last 40 seconds before each change, then goes back to half a minute: about ten such moments in half an hour. Before an outing and after it, nothing changes.</string>
     <string name="guide_outings_start_title">Where they start</string>
     <string name="guide_outings_start_body">From Today or the settings, from a long press on Passo’s icon, which offers the ones you started last, and from the evening reminder’s “Walk now”.</string>
 

@@ -3,6 +3,7 @@ package com.callbackdev.passo.core.domain.sessions
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.MIN_REST_OF_DAY_STEPS
 import com.callbackdev.passo.core.domain.ways.Way
+import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
@@ -21,9 +22,22 @@ data class SessionEstimate(val steps: Int, val distanceMeters: Double, val minut
 
 object SessionPlans {
     /**
-     * The three outings a first visit finds, ready to start and to change: a brisk walk of twenty
-     * minutes (the WHO's weekly 150 is about 20 a day), a half-hour run, and the rest of the day.
-     * Unnamed, so they are called in the reader's language.
+     * The Japanese interval walk as the protocol has it (Nemoto et al., 2007): five sets of three
+     * slow minutes and three fast ones, at a brisk pace, the changes its only signals (Phase 13).
+     */
+    val JAPANESE_WALKING: SessionPlan = SessionPlan(
+        goalKind = SessionGoalKind.INTERVALS,
+        goalValue = IntervalSets().totalMinutes,
+        intensity = SessionIntensity.BRISK,
+        milestones = emptySet(),
+        intervals = IntervalSets(),
+        position = 3,
+    )
+
+    /**
+     * The four outings a first visit finds, ready to start and to change: a brisk walk of twenty
+     * minutes (the WHO's weekly 150 is about 20 a day), a half-hour run, the rest of the day, and
+     * the Japanese interval walk (Phase 13). Unnamed, so they are called in the reader's language.
      */
     val PRESETS: List<SessionPlan> = listOf(
         SessionPlan(goalKind = SessionGoalKind.TIME, goalValue = 20, intensity = SessionIntensity.BRISK, position = 0),
@@ -34,6 +48,7 @@ object SessionPlans {
             intensity = SessionIntensity.BRISK,
             position = 2,
         ),
+        JAPANESE_WALKING,
     )
 
     /** A new outing in the editor: a brisk walk, the kind most people start with. */
@@ -44,7 +59,7 @@ object SessionPlans {
      * The outing the evening reminder's "Walk now" starts when the reader keeps none for the rest
      * of the day: the steps left, at a brisk pace, with the default signals.
      */
-    val REST_OF_DAY: SessionPlan = PRESETS.last()
+    val REST_OF_DAY: SessionPlan = PRESETS[2]
 
     /** A value the editor accepts for [kind], on its steps and inside its range. */
     fun clampValue(kind: SessionGoalKind, value: Int): Int = when (kind) {
@@ -52,6 +67,7 @@ object SessionPlans {
         SessionGoalKind.DISTANCE -> snap(value, SessionConstants.DISTANCE_RANGE, SessionConstants.DISTANCE_STEP)
         SessionGoalKind.TIME -> snap(value, SessionConstants.TIME_RANGE, SessionConstants.TIME_STEP)
         SessionGoalKind.REST_OF_DAY -> 0
+        SessionGoalKind.INTERVALS -> value.coerceIn(INTERVALS_RANGE)
     }
 
     /** The editor's step for [kind]: 500 steps, half a kilometre or a quarter mile, 5 minutes. */
@@ -63,7 +79,7 @@ object SessionPlans {
 
         SessionGoalKind.TIME -> SessionConstants.TIME_STEP.toDouble()
 
-        SessionGoalKind.REST_OF_DAY -> 1.0
+        SessionGoalKind.REST_OF_DAY, SessionGoalKind.INTERVALS -> 1.0
     }
 
     /** [value] on the editor's steps for [kind] (quarter miles for [imperial] distances), in range. */
@@ -88,6 +104,41 @@ object SessionPlans {
         SessionGoalKind.DISTANCE -> SessionConstants.DISTANCE_RANGE
         SessionGoalKind.TIME -> SessionConstants.TIME_RANGE
         SessionGoalKind.REST_OF_DAY -> 0..0
+        SessionGoalKind.INTERVALS -> INTERVALS_RANGE
+    }
+
+    /** Every interval outing the editor can make, in minutes: the least sets of the shortest to the most of the longest. */
+    private val INTERVALS_RANGE: IntRange =
+        IntervalSets(
+            SessionConstants.INTERVAL_MINUTES_RANGE.first,
+            SessionConstants.INTERVAL_MINUTES_RANGE.first,
+            SessionConstants.INTERVAL_SETS_RANGE.first,
+        ).totalMinutes..IntervalSets(
+            SessionConstants.INTERVAL_MINUTES_RANGE.last,
+            SessionConstants.INTERVAL_MINUTES_RANGE.last,
+            SessionConstants.INTERVAL_SETS_RANGE.last,
+        ).totalMinutes
+
+    /** [sets] inside the editor's ranges. */
+    fun clampIntervals(sets: IntervalSets): IntervalSets = IntervalSets(
+        slowMinutes = sets.slowMinutes.coerceIn(SessionConstants.INTERVAL_MINUTES_RANGE),
+        fastMinutes = sets.fastMinutes.coerceIn(SessionConstants.INTERVAL_MINUTES_RANGE),
+        sets = sets.sets.coerceIn(SessionConstants.INTERVAL_SETS_RANGE),
+    )
+
+    /**
+     * [plan] made an interval outing with [sets] (clamped): the goal follows the sets, the fast
+     * pace is never free (a fast interval with no pace to keep says nothing), and the shares of
+     * the goal are not signals, since the changes are.
+     */
+    fun withIntervals(plan: SessionPlan, sets: IntervalSets): SessionPlan {
+        val clamped = clampIntervals(sets)
+        return plan.copy(
+            goalKind = SessionGoalKind.INTERVALS,
+            goalValue = clamped.totalMinutes,
+            intervals = clamped,
+            intensity = if (plan.intensity == SessionIntensity.FREE) SessionIntensity.BRISK else plan.intensity,
+        )
     }
 
     /**
@@ -102,6 +153,7 @@ object SessionPlans {
      */
     fun convert(from: SessionPlan, kind: SessionGoalKind, lengths: StepLengths, restOfDaySteps: Int): Int {
         if (kind == from.goalKind) return from.goalValue
+        if (kind == SessionGoalKind.INTERVALS) return from.intervals.totalMinutes
         val estimate = estimate(from, lengths, restOfDaySteps)
         return clampValue(
             kind,
@@ -109,13 +161,14 @@ object SessionPlans {
                 SessionGoalKind.STEPS -> estimate.steps
                 SessionGoalKind.DISTANCE -> estimate.distanceMeters.roundToInt()
                 SessionGoalKind.TIME -> estimate.minutes
-                SessionGoalKind.REST_OF_DAY -> 0
+                SessionGoalKind.REST_OF_DAY, SessionGoalKind.INTERVALS -> 0
             },
         )
     }
 
     /** What [plan] adds up to, walked at its intensity's cadence with [lengths]. */
     fun estimate(plan: SessionPlan, lengths: StepLengths, restOfDaySteps: Int): SessionEstimate {
+        if (plan.goalKind == SessionGoalKind.INTERVALS) return estimateIntervals(plan, lengths)
         val cadence = plan.intensity.typicalCadence
         val stepLength = lengths.forCadence(cadence)
         val steps = when (plan.goalKind) {
@@ -123,12 +176,27 @@ object SessionPlans {
             SessionGoalKind.DISTANCE -> ceil(plan.goalValue / stepLength).toInt()
             SessionGoalKind.TIME -> plan.goalValue * cadence
             SessionGoalKind.REST_OF_DAY -> restOfDaySteps.coerceAtLeast(0)
+            SessionGoalKind.INTERVALS -> 0
         }
         val minutes = when (plan.goalKind) {
             SessionGoalKind.TIME -> plan.goalValue
             else -> ceil(steps.toDouble() / cadence).toInt()
         }
         return SessionEstimate(steps = steps, distanceMeters = steps * stepLength, minutes = minutes)
+    }
+
+    /** The slow minutes at an easy stroll, the fast ones at their pace, each with its step. */
+    private fun estimateIntervals(plan: SessionPlan, lengths: StepLengths): SessionEstimate {
+        val sets = clampIntervals(plan.intervals)
+        val slow = SessionConstants.SLOW_INTERVAL_CADENCE
+        val fast = plan.intensity.typicalCadence
+        val slowSteps = sets.sets * sets.slowMinutes * slow
+        val fastSteps = sets.sets * sets.fastMinutes * fast
+        return SessionEstimate(
+            steps = slowSteps + fastSteps,
+            distanceMeters = slowSteps * lengths.forCadence(slow) + fastSteps * lengths.forCadence(fast),
+            minutes = sets.totalMinutes,
+        )
     }
 
     /**
@@ -153,6 +221,22 @@ object SessionPlans {
         val kind = if (restOfDay) SessionGoalKind.STEPS else plan.goalKind
         val value = if (restOfDay) restOfDay(todaySteps, dailyGoalSteps) else inRange(kind, plan.goalValue)
         if (restOfDay && value < MIN_REST_OF_DAY_STEPS) return null
+        if (kind == SessionGoalKind.INTERVALS) {
+            val intervals = withIntervals(plan, plan.intervals)
+            return Session(
+                planId = plan.id.takeIf { it != 0L },
+                name = plan.name?.takeIf { it.isNotBlank() },
+                goalKind = kind,
+                goalValue = intervals.goalValue,
+                intensity = intervals.intensity,
+                milestones = emptySet(),
+                vibrate = plan.vibrate,
+                voice = plan.voice,
+                localEpochDay = localEpochDay,
+                startedAtMillis = nowMillis,
+                intervals = intervals.intervals,
+            )
+        }
         return Session(
             planId = plan.id.takeIf { it != 0L },
             name = plan.name?.takeIf { it.isNotBlank() },

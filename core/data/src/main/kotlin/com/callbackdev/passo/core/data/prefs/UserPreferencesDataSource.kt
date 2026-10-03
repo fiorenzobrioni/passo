@@ -127,6 +127,15 @@ constructor(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it[Keys.SESSION_PLANS_SEEDED] = true }
     }
 
+    /** Whether the Japanese walking preset (Phase 13) was offered, once, to plans seeded before it. */
+    suspend fun intervalPresetSeeded(): Boolean = dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .first()[Keys.INTERVAL_PRESET_SEEDED] ?: false
+
+    suspend fun markIntervalPresetSeeded() {
+        dataStore.edit { it[Keys.INTERVAL_PRESET_SEEDED] = true }
+    }
+
     /** The last outing whose summary Today has shown and the reader put away. */
     val sessionSummarySeen: Flow<Long?> = dataStore.data
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
@@ -269,6 +278,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
         val TRACKER_INSTALLATION = longPreferencesKey("tracker_installation")
         val GOAL_NOTICE_DAY = longPreferencesKey("goal_notice_epoch_day")
         val SESSION_PLANS_SEEDED = booleanPreferencesKey("session_plans_seeded")
+        val INTERVAL_PRESET_SEEDED = booleanPreferencesKey("interval_preset_seeded")
         val SESSION_SUMMARY_SEEN = longPreferencesKey("session_summary_seen")
     }
 

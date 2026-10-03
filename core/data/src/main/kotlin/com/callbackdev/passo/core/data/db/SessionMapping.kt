@@ -1,5 +1,7 @@
 package com.callbackdev.passo.core.data.db
 
+import com.callbackdev.passo.core.model.IntervalSets
+import com.callbackdev.passo.core.model.IntervalSplit
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
@@ -25,6 +27,7 @@ internal fun SessionPlanEntity.toModel(): SessionPlan? {
         voice = voice.toEnumOrNull<SessionVoice>() ?: SessionVoice.OFF,
         position = position,
         lastUsedAtMillis = lastUsedAtMillis,
+        intervals = IntervalSets(slowMinutes, fastMinutes, sets),
     )
 }
 
@@ -39,10 +42,21 @@ internal fun SessionPlan.toEntity() = SessionPlanEntity(
     position = position,
     lastUsedAtMillis = lastUsedAtMillis,
     voice = voice.name,
+    slowMinutes = intervals.slowMinutes,
+    fastMinutes = intervals.fastMinutes,
+    sets = intervals.sets,
 )
 
-internal fun SessionEntity.toModel(): Session? {
+internal fun SessionRow.toModel(): Session? = session.toModel(intervals)
+
+/**
+ * Null for a row a newer build wrote with a kind this one does not know, or an interval outing
+ * without its sets: it is left out.
+ */
+internal fun SessionEntity.toModel(intervals: List<SessionIntervalEntity> = emptyList()): Session? {
     val kind = goalKind.toEnumOrNull<SessionGoalKind>() ?: return null
+    val sets = IntervalSets(slowMinutes, fastMinutes, sets).takeIf { kind == SessionGoalKind.INTERVALS }
+    if (sets != null && (sets.sets <= 0 || sets.slowMinutes <= 0 || sets.fastMinutes <= 0)) return null
     return Session(
         id = id,
         planId = planId,
@@ -75,6 +89,14 @@ internal fun SessionEntity.toModel(): Session? {
         // A walk a newer build knows and this one does not: the outing stays, without its walk.
         walk = walk.toEnumOrNull<WayId>(),
         walkFromMeters = walkFromMeters,
+        intervals = sets,
+        splits = if (sets == null) {
+            emptyList()
+        } else {
+            intervals.sortedBy { it.intervalIndex }.map {
+                IntervalSplit(it.intervalIndex, it.fast, it.steps, it.movingMillis, it.zoneMillis)
+            }
+        },
     )
 }
 
@@ -106,7 +128,17 @@ internal fun Session.toEntity() = SessionEntity(
     voice = voice.name,
     walk = walk?.name,
     walkFromMeters = walkFromMeters,
+    slowMinutes = intervals?.slowMinutes ?: 0,
+    fastMinutes = intervals?.fastMinutes ?: 0,
+    sets = intervals?.sets ?: 0,
 )
+
+/** An outing's intervals as rows; none for any other outing, or one not yet written. */
+internal fun Session.intervalEntities(): List<SessionIntervalEntity> = if (id == 0L) {
+    emptyList()
+} else {
+    splits.map { SessionIntervalEntity(id, it.index, it.fast, it.steps, it.movingMillis, it.zoneMillis) }
+}
 
 private fun Set<SessionMilestone>.toBits(): Int = fold(0) { bits, milestone -> bits or (1 shl milestone.ordinal) }
 

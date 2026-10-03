@@ -118,11 +118,11 @@ constructor(
         val newIds = sessionDao.importOutings(
             plans = plans.toAdd.map { it.id to it.copy(id = 0).toEntity() },
             planIds = plans.matched,
-        ) { ids -> BackupMerge.sessions(localSessions, backup.sessions, ids).map { it.toEntity() } }
+        ) { ids -> BackupMerge.sessions(localSessions, backup.sessions, ids) }
         // An outing walked on the other phone today is history here, not one just over: Today's
         // card for the last outing stays put away.
         if (newIds.isNotEmpty()) {
-            val latest = sessionDao.allSessions().filter { it.endedAtMillis != null }.maxByOrNull {
+            val latest = sessionDao.allSessions().map { it.session }.filter { it.endedAtMillis != null }.maxByOrNull {
                 it.endedAtMillis
                     ?: 0
             }

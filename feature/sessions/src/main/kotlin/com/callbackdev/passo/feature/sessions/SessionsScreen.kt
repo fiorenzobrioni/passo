@@ -47,6 +47,7 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -54,6 +55,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.callbackdev.passo.core.designsystem.components.IntervalBlocks
 import com.callbackdev.passo.core.designsystem.components.SessionCard
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
@@ -381,6 +383,16 @@ private fun PlanCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            // An interval plan shows its shape: slow and fast blocks, read before any number.
+            if (plan.goalKind == SessionGoalKind.INTERVALS) {
+                IntervalBlocks(
+                    sets = plan.intervals,
+                    progress = 0f,
+                    color = MaterialTheme.colorScheme.primary,
+                    plan = true,
+                    modifier = Modifier.padding(top = 2.dp).clearAndSetSemantics {},
+                )
+            }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End), modifier = Modifier.fillMaxWidth()) {
                 TextButton(onClick = onEdit) { Text(stringResource(R.string.sessions_edit)) }
                 FilledTonalButton(
@@ -425,7 +437,8 @@ private fun estimateLine(plan: SessionPlan, state: SessionsUiState, format: Meas
     val minutes = res.format(format.minutes(estimate.minutes))
     // The two quantities the goal is not in.
     return when {
-        plan.goalKind == SessionGoalKind.TIME -> stringResource(R.string.sessions_estimate, steps, distance)
+        plan.goalKind == SessionGoalKind.TIME || plan.goalKind == SessionGoalKind.INTERVALS ->
+            stringResource(R.string.sessions_estimate, steps, distance)
 
         plan.goalKind == SessionGoalKind.STEPS -> stringResource(R.string.sessions_estimate, minutes, distance)
 
@@ -445,7 +458,9 @@ private fun estimateLine(plan: SessionPlan, state: SessionsUiState, format: Meas
 @Composable
 private fun signalsLine(plan: SessionPlan, format: MeasureFormatter): String {
     val shares = plan.milestones.sortedBy { it.percent }.joinToString(", ") { format.percent(it.percent / 100.0) }
-    val signals = if (shares.isEmpty()) {
+    val signals = if (plan.goalKind == SessionGoalKind.INTERVALS) {
+        stringResource(R.string.sessions_signals_intervals)
+    } else if (shares.isEmpty()) {
         stringResource(R.string.sessions_signals_goal_only)
     } else {
         stringResource(R.string.sessions_signals, shares)

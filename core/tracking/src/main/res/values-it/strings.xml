@@ -183,4 +183,19 @@
         <item quantity="many">%1$s iarde</item>
         <item quantity="other">%1$s iarde</item>
     </plurals>
+
+    <plurals name="spoken_intervals_started">
+        <item quantity="one">%1$s: si parte. %2$d serie di %3$s a passo lento e %4$s a passo veloce. Si comincia piano.</item>
+        <item quantity="many">%1$s: si parte. %2$d serie di %3$s a passo lento e %4$s a passo veloce. Si comincia piano.</item>
+        <item quantity="other">%1$s: si parte. %2$d serie di %3$s a passo lento e %4$s a passo veloce. Si comincia piano.</item>
+    </plurals>
+    <string name="spoken_interval_fast">Veloce, %1$s.</string>
+    <string name="spoken_interval_last_fast">Ultima serie veloce, %1$s.</string>
+    <string name="spoken_interval_slow">Lento.</string>
+    <plurals name="spoken_intervals_at_pace">
+        <item quantity="one">%1$d intervallo veloce su %2$d al ritmo.</item>
+        <item quantity="many">%1$d intervalli veloci su %2$d al ritmo.</item>
+        <item quantity="other">%1$d intervalli veloci su %2$d al ritmo.</item>
+    </plurals>
+    <string name="session_interval_title">%1$s · %2$s</string>
 </resources>

@@ -70,6 +70,50 @@ object SessionConstants {
     /** A rest of the day smaller than this is not an outing worth starting. */
     const val MIN_REST_OF_DAY_STEPS: Int = 100
 
+    /**
+     * An interval's minutes (Phase 13): one to five, three by default, as the protocol has them.
+     * Under a minute a change would come before the reader has found the pace; over five, the
+     * fast minutes stop being intervals.
+     */
+    val INTERVAL_MINUTES_RANGE: IntRange = 1..5
+
+    /** Sets: three to ten, five by default ("five sets or more", Nemoto et al., 2007). */
+    val INTERVAL_SETS_RANGE: IntRange = 3..10
+
+    /**
+     * The cadence the editor's estimate assumes for the slow minutes: an easy stroll, below the
+     * brisk band (100). An estimate, said so; the outing itself measures what was walked.
+     */
+    const val SLOW_INTERVAL_CADENCE: Int = 90
+
+    /**
+     * How close to a change of interval, in time in motion, the step counter reports every
+     * [INTERVAL_NEAR_LATENCY_MILLIS] rather than every half minute (docs/adr/0013-interval-walks.md,
+     * option A): the half-minute window and a margin, so the last report before the change is
+     * never a half-minute one.
+     */
+    const val INTERVAL_WINDOW_MILLIS: Long = 40_000L
+
+    /**
+     * The report latency near a change: the counter's own delay is up to 10 s, so a shorter one
+     * buys almost nothing and costs a wake every step.
+     */
+    const val INTERVAL_NEAR_LATENCY_MILLIS: Long = 2_000L
+
+    /**
+     * A change predicted this close, while walking, is told at this report rather than at the
+     * next one: up to two seconds early rather than up to two seconds late. Never the goal, which
+     * ends the outing and waits for the step that reaches it.
+     */
+    const val EARLY_CHANGE_MILLIS: Long = 2_000L
+
+    /**
+     * A screen's countdown carries on from the last step for at most this long: the counter hands
+     * steps over in clusters, a few seconds apart, and a countdown that waited for each would
+     * stutter. A stop longer than this holds it, as it holds the clock in motion.
+     */
+    const val COUNTDOWN_GLIDE_MILLIS: Long = 5_000L
+
     /** How many outings the launcher's long press offers. */
     const val SHORTCUTS: Int = 3
 }

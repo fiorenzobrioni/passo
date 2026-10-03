@@ -88,4 +88,35 @@
     <!-- The door to the city walks, on the Ways page (Phase 11). -->
     <string name="sessions_cities_title">Walk through a city</string>
     <string name="sessions_cities_body">Ten cities, from Milan to Cusco, walked from wherever you are: each place told as your steps reach it.</string>
+
+    <!-- The interval walk (Phase 13). -->
+    <string name="editor_kind">Kind</string>
+    <string name="editor_kind_goal">One goal</string>
+    <string name="editor_kind_intervals">Intervals</string>
+    <!-- What the Japanese interval walk is, where it is chosen: short, so it is read. -->
+    <string name="editor_intervals_about_title">The Japanese interval walk</string>
+    <string name="editor_intervals_about">Slow and fast walking in turns: 3 easy minutes, then 3 fast enough to feel the effort, five times or more. A study at Shinshu University, in Japan, found it raised fitness and lowered blood pressure more than walking at one steady pace.</string>
+    <string name="editor_intervals_how">Passo tells each change with a vibration, so the phone can stay in your pocket. The minutes are minutes in motion: a stop does not eat an interval.</string>
+    <string name="editor_intervals">Intervals</string>
+    <string name="editor_intervals_slow">Slow minutes</string>
+    <string name="editor_intervals_slow_note">Easy, to catch your breath</string>
+    <string name="editor_intervals_fast">Fast minutes</string>
+    <string name="editor_intervals_fast_note">At the pace below</string>
+    <string name="editor_intervals_sets">Sets</string>
+    <string name="editor_intervals_sets_note">One slow and one fast interval each</string>
+    <string name="editor_intervals_fewer">Fewer %1$s</string>
+    <string name="editor_intervals_more">More %1$s</string>
+    <!-- «30 min in all: it starts slow, and ends at the end of the last fast interval». -->
+    <string name="editor_intervals_total">%1$s in all, starting slow. The end of the last fast interval is the goal.</string>
+    <string name="editor_intervals_protocol">As the study did it</string>
+    <string name="editor_fast_pace">Fast pace</string>
+    <string name="editor_intervals_signals_note">The changes are the signals: “faster” into each fast interval, “slower” out of it, and the long one at the goal.</string>
+    <string name="editor_intervals_vibrate_note">Four quick taps for faster, a long and a short pulse for slower, a long one at the goal, two long ones if it ends after a long stop. They follow the phone’s silent mode.</string>
+    <string name="editor_try_faster">Faster</string>
+    <string name="editor_try_slower">Slower</string>
+    <string name="editor_intervals_voice_note">Through headphones only: the start, each change (“Fast, 3 minutes”, “Slow”), and at the goal how many fast intervals were at pace.</string>
+    <string name="editor_intervals_screen_on_title">On time only with the screen on</string>
+    <string name="editor_intervals_screen_on">This phone’s step counter cannot wake it: with the screen off, a change can come minutes late. Keep the screen on for an interval walk, or walk on a treadmill.</string>
+    <!-- On the Outings page, an interval plan's signals. -->
+    <string name="sessions_signals_intervals">A signal at each change</string>
 </resources>

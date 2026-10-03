@@ -60,7 +60,7 @@ that does not match it.
 | Module | Kind | Holds |
 |---|---|---|
 | `:core:model` | pure Kotlin/JVM | data classes shared by everything |
-| `:core:domain` | pure Kotlin/JVM | `StepAccountant`, metric calculators, `WalkDetector`, `TypicalDayCalculator`, `PeriodOverview`, `Insights` (streaks, records, averages), `SessionTracker` and `SessionPlans` (outings), the backup file and its merge (`BackupCodec`, `BackupMerge`, `CsvExport`), `StepCalibration`, the Ways and the city walks (`Ways`, `WayProgress`, `WalkDays`, `WalkPlaces`, `WayForecast`, `WayAnnouncement`, `WayProjection`, the generated `WayData`) |
+| `:core:domain` | pure Kotlin/JVM | `StepAccountant`, metric calculators, `WalkDetector`, `TypicalDayCalculator`, `PeriodOverview`, `Insights` (streaks, records, averages), `SessionTracker` and `SessionPlans` (outings), `IntervalSchedule` (the interval walk), the backup file and its merge (`BackupCodec`, `BackupMerge`, `CsvExport`), `StepCalibration`, the Ways and the city walks (`Ways`, `WayProgress`, `WalkDays`, `WalkPlaces`, `WayForecast`, `WayAnnouncement`, `WayProjection`, the generated `WayData`) |
 | `:core:data` | Android library | Room (steps, tracker state, outings, ways), DataStore (settings, profile), repositories exposing `Flow`, `BackupRepository` (export, import), `WayRepository` |
 | `:core:tracking` | Android library | `StepTrackingService` (FGS type `health`), sensor source, receivers, ongoing notification, `StepCounterProbe` (the calibration's direct read), `WayNotifier` (a stage reached) |
 | `:core:designsystem` | Android library | M3 theme, typography, shared components, the Canvas charts (`DayTrendChart`, `BarChart`), `CalendarHeatmap`, `WalkList` and `OutingList`, `SessionCard`, the ways' map and stamps (`WayMapView`, `WayStamp`) and place names, date formatting |
@@ -85,7 +85,8 @@ other. All business logic lives in `:core:domain`, with unit tests.
   wakelocks (except inside `goAsync()` for the shutdown flush), no exact alarms, no periodic
   workers for tracking; database writes are batched. Widget, notification and tile update
   only when someone can see them. The one exception: the wake-up step counter while an outing
-  the reader started is counting (`docs/adr/0009-sessions.md`); never widen it.
+  the reader started is counting, at 30 s, and at 2 s in the 40 s before a change of an interval
+  walk (`docs/adr/0009-sessions.md`, `docs/adr/0013-interval-walks.md`); never widen it.
 - **No lost steps.** Don't change the tracking engine without updating the tests for every
   edge case in PLANNING.md §4.6.
 - **Honest estimates.** Distance, calories and active time are shown as estimates; formulas

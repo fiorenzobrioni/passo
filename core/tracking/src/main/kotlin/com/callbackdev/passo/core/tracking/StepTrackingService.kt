@@ -31,6 +31,7 @@ import com.callbackdev.passo.core.domain.goals.GoalReached
 import com.callbackdev.passo.core.domain.metrics.MetricsCalculator
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.sessions.SessionAnnouncement
+import com.callbackdev.passo.core.domain.sessions.SessionConstants
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.sessions.SessionSignal
 import com.callbackdev.passo.core.domain.sessions.SessionTracker
@@ -103,6 +104,13 @@ import javax.inject.Inject
  * one. Commands (start, pause, resume, stop, keep going) arrive as intents ([SessionControl]).
  * An outing on a city walk (Phase 11) is one more: its places are told as its distance passes
  * them, by the same samples, with no timer of its own.
+ *
+ * An interval outing (Phase 13, docs/adr/0013-interval-walks.md) tells each change of interval
+ * on time with the screen off: the wake-up counter at [SESSION_LATENCY_US], and at
+ * [INTERVAL_NEAR_LATENCY_US] in the last [SessionConstants.INTERVAL_WINDOW_MILLIS] of motion
+ * before a change, back after it. A change is told once the batch of samples that crossed it is
+ * all in (the latest only, if it crossed several), with its delay in the diagnostics log. With the
+ * screen on, a one-second ticker moves the notification's countdown, and stops with the screen.
  */
 @AndroidEntryPoint
 class StepTrackingService : Service() {
@@ -172,6 +180,12 @@ class StepTrackingService : Service() {
     // with the next batch when it changed.
     private var tracker: SessionTracker? = null
     private var sessionDirty = false
+
+    // An interval outing's change found in a batch of samples, told once the batch is all in; and
+    // the screen-on countdown of its notification.
+    private var pendingChange: SessionSignal.IntervalChange? = null
+    private var changeJob: Job? = null
+    private var countdownJob: Job? = null
 
     // Session commands arrive with the start intents, and wait until tracking has started.
     private val commands = Channel<Intent>(Channel.UNLIMITED)
@@ -406,6 +420,7 @@ class StepTrackingService : Service() {
             } else {
                 widgets.notify(WidgetEvent.SCREEN_OFF)
                 tickerJob?.cancel()
+                countdownJob?.cancel()
                 notifyJob?.cancel()
                 flushSensor()
                 persist()
@@ -576,7 +591,8 @@ class StepTrackingService : Service() {
         val outing = tracker?.takeIf { it.session.live }
         if (outing != null) {
             val units = preferences?.settings?.units ?: UnitPreference.SYSTEM
-            val notice = SessionNotice(outing.session, outing.cadenceAt(System.currentTimeMillis()), units)
+            val now = System.currentTimeMillis()
+            val notice = SessionNotice(outing.session, outing.cadenceAt(now), units, now)
             return NotificationContent(steps, units = units, session = notice)
         }
         val preferences = preferences ?: return NotificationContent(steps)
@@ -641,12 +657,67 @@ class StepTrackingService : Service() {
      */
     private fun applyRegistration() {
         val measuring = tracker?.session?.state == SessionState.ACTIVE
+        // An interval outing near a change: reports every two seconds, so it is felt on time.
+        val nearChange = tracker?.untilIntervalSignal()?.let { it <= SessionConstants.INTERVAL_WINDOW_MILLIS } == true
         val latency = when {
             interactive -> SCREEN_ON_LATENCY_US
+            measuring && nearChange -> INTERVAL_NEAR_LATENCY_US
             measuring -> SESSION_LATENCY_US
             else -> SCREEN_OFF_LATENCY_US
         }
         sensorSource.register(latency, wakeUp = measuring)
+        startCountdown()
+    }
+
+    /**
+     * Screen on, an interval outing counting: the notification's countdown moves once a second
+     * (§9.4 allows a ticker while the screen is on). It ends by itself with the screen, a pause or
+     * the outing's last interval.
+     */
+    private fun startCountdown() {
+        if (!interactive || countdownJob?.isActive == true || tracker?.untilIntervalSignal() == null) return
+        countdownJob = scope.launch {
+            while (isActive && interactive && tracker?.untilIntervalSignal() != null) {
+                delay(COUNTDOWN_TICK_MS - System.currentTimeMillis() % COUNTDOWN_TICK_MS)
+                notifyNow()
+            }
+        }
+    }
+
+    /**
+     * Once the batch of samples in hand is all accounted (a job dispatched after it, not run
+     * inside it): the change it crossed is told, the latest only, and the sensor's latency follows
+     * what is left to the next one.
+     */
+    private fun afterIntervalBatch() {
+        if (changeJob?.isActive == true) return
+        changeJob = scope.launch(Dispatchers.Main) {
+            pendingChange?.let(::tellIntervalChange)
+            pendingChange = null
+            if (!interactive) applyRegistration()
+        }
+    }
+
+    /** A change of interval: "faster" or "slower", the voice if the outing speaks, and its delay logged. */
+    private fun tellIntervalChange(change: SessionSignal.IntervalChange) {
+        val session = tracker?.session?.takeIf { it.live } ?: return
+        val now = System.currentTimeMillis()
+        val position = change.position
+        ledger?.note(
+            DiagnosticsEvent(
+                now,
+                DiagnosticsType.INTERVAL_CHANGE,
+                "interval=${position.index} fast=${position.fast} late=${now - change.changedAtMillis}ms " +
+                    "early=${change.early} screen=${if (interactive) "on" else "off"} " +
+                    "wakeUp=${sensorSource.wakeUpSensor != null}",
+            ),
+        )
+        val allowed = sessionNotifications.signalsAllowed()
+        if (session.vibrate && allowed) SessionHaptics.playInterval(this, position.fast)
+        if (session.voice != SessionVoice.OFF && allowed) speak(SessionAnnouncement.intervalChanged(position), session)
+        // Once, even with the screen off: whoever looks next sees the interval they are in.
+        notifyNow()
+        publishSession()
     }
 
     private fun onSessionSteps(steps: Int, atWallMillis: Long) {
@@ -656,6 +727,7 @@ class StepTrackingService : Service() {
         sessionDirty = true
         dropExpiredKeepGoing()
         publishSession()
+        if (this.tracker?.untilIntervalSignal() != null || pendingChange != null) afterIntervalBatch()
     }
 
     /** Closes an outing left still, paused or open for too long; drops a "Keep going" gone stale. */
@@ -702,6 +774,9 @@ class StepTrackingService : Service() {
                     if (!atEnd) notifyNow()
                 }
 
+                // Told once the batch is in: a later change in the same batch replaces it.
+                is SessionSignal.IntervalChange -> pendingChange = signal
+
                 is SessionSignal.Finished -> onSessionFinished(signal)
             }
         }
@@ -709,6 +784,8 @@ class StepTrackingService : Service() {
 
     private fun onSessionFinished(finished: SessionSignal.Finished) {
         val session = finished.session
+        // The goal is the last interval's end: its long pulse, never a change on top of it.
+        pendingChange = null
         // Kept a while after its goal or a long stillness, for "Keep going" and "Resume";
         // otherwise it is over here. The voice is let go once its last sentence is said.
         val reopenable = finished.kept && tracker?.canKeepGoing(System.currentTimeMillis()) == true
@@ -807,8 +884,9 @@ class StepTrackingService : Service() {
                     if (reopened) {
                         sessionNotifications.cancelEnd()
                         if (tracker?.session?.voice?.let { it != SessionVoice.OFF } == true) speech.prepare()
-                        // The steps since the end may have crossed a milestone, or the goal.
+                        // The steps since the end may have crossed a milestone, a change, or the goal.
                         onSessionSignals(crossed)
+                        afterIntervalBatch()
                     }
                 }
 
@@ -955,6 +1033,16 @@ class StepTrackingService : Service() {
          * and none while still (docs/adr/0009-sessions.md).
          */
         const val SESSION_LATENCY_US = 30 * 1_000_000
+
+        /**
+         * An interval outing in the last [SessionConstants.INTERVAL_WINDOW_MILLIS] of motion before
+         * a change (docs/adr/0013-interval-walks.md, option A): reports every two seconds, so the
+         * change is felt within a few seconds; back to [SESSION_LATENCY_US] once it is told.
+         */
+        const val INTERVAL_NEAR_LATENCY_US = (SessionConstants.INTERVAL_NEAR_LATENCY_MILLIS * 1_000).toInt()
+
+        /** The screen-on countdown of an interval outing moves once a second. */
+        const val COUNTDOWN_TICK_MS = 1_000L
 
         val SESSION_ACTIONS = setOf(
             SessionControl.ACTION_START,

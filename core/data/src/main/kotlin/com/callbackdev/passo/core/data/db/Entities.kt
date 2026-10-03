@@ -1,9 +1,11 @@
 package com.callbackdev.passo.core.data.db
 
 import androidx.room.ColumnInfo
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import androidx.room.Relation
 
 /**
  * The tracker's single row (id 0): where the counter stood at the last written sample
@@ -72,6 +74,9 @@ data class SessionPlanEntity(
     val position: Int,
     val lastUsedAtMillis: Long?,
     @ColumnInfo(defaultValue = "OFF") val voice: String = "OFF",
+    @ColumnInfo(defaultValue = "3") val slowMinutes: Int = 3,
+    @ColumnInfo(defaultValue = "3") val fastMinutes: Int = 3,
+    @ColumnInfo(defaultValue = "5") val sets: Int = 5,
 )
 
 /**
@@ -108,6 +113,30 @@ data class SessionEntity(
     @ColumnInfo(defaultValue = "OFF") val voice: String = "OFF",
     @ColumnInfo(defaultValue = "NULL") val walk: String? = null,
     @ColumnInfo(defaultValue = "0") val walkFromMeters: Int = 0,
+    @ColumnInfo(defaultValue = "0") val slowMinutes: Int = 0,
+    @ColumnInfo(defaultValue = "0") val fastMinutes: Int = 0,
+    @ColumnInfo(defaultValue = "0") val sets: Int = 0,
+)
+
+/**
+ * One interval of an interval outing as it was walked (Phase 13): `intervalIndex` from 0, slow
+ * when even. Written with the outing, in the same transaction; deleted with it.
+ */
+@Entity(tableName = "session_interval", primaryKeys = ["sessionId", "intervalIndex"])
+data class SessionIntervalEntity(
+    val sessionId: Long,
+    val intervalIndex: Int,
+    val fast: Boolean,
+    val steps: Int,
+    val movingMillis: Long,
+    val zoneMillis: Long,
+)
+
+/** An outing with its intervals, read in one go. */
+data class SessionRow(
+    @Embedded val session: SessionEntity,
+    @Relation(parentColumn = "id", entityColumn = "sessionId")
+    val intervals: List<SessionIntervalEntity>,
 )
 
 /**

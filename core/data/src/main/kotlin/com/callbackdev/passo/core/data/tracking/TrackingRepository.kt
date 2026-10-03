@@ -4,6 +4,7 @@ import com.callbackdev.passo.core.data.db.DiagnosticsEventEntity
 import com.callbackdev.passo.core.data.db.MinuteStepsEntity
 import com.callbackdev.passo.core.data.db.TrackerStateEntity
 import com.callbackdev.passo.core.data.db.TrackingDao
+import com.callbackdev.passo.core.data.db.intervalEntities
 import com.callbackdev.passo.core.data.db.toEntity
 import com.callbackdev.passo.core.data.db.toModel
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
@@ -120,6 +121,7 @@ constructor(
             today = todaySource.epochDay(),
             diagnosticsKept = TrackingConstants.DIAGNOSTICS_LOG_SIZE,
             session = session?.toEntity(),
+            intervals = session?.intervalEntities().orEmpty(),
         )
     }
 

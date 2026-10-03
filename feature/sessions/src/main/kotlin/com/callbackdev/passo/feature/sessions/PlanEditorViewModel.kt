@@ -14,6 +14,7 @@ import com.callbackdev.passo.core.domain.sessions.SessionAnnouncement
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.sessions.cadenceFloor
 import com.callbackdev.passo.core.domain.settings.resolve
+import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
@@ -24,7 +25,9 @@ import com.callbackdev.passo.core.model.UnitSystem
 import com.callbackdev.passo.core.tracking.SessionHaptics
 import com.callbackdev.passo.core.tracking.SessionShortcuts
 import com.callbackdev.passo.core.tracking.SessionSpeech
+import com.callbackdev.passo.core.tracking.StepTracking
 import com.callbackdev.passo.core.tracking.VoiceAvailability
+import com.callbackdev.passo.core.tracking.spokenIntervalSample
 import com.callbackdev.passo.core.tracking.spokenSample
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -50,6 +53,8 @@ import kotlin.math.ceil
  * @property canVibrate the phone has a vibrator: without one the switch is not offered.
  * @property voiceAvailability whether the phone can speak in the app's language, once asked
  *   (the engine is bound only when the outing speaks, or the reader picks a voice).
+ * @property changesWhileScreenOff the phone has a wake-up step counter: an interval walk's
+ *   changes reach it on time with the screen off (docs/adr/0013-interval-walks.md).
  */
 @Immutable
 data class PlanEditorState(
@@ -62,6 +67,7 @@ data class PlanEditorState(
     val restOfDaySteps: Int,
     val canVibrate: Boolean,
     val voiceAvailability: VoiceAvailability = VoiceAvailability.UNKNOWN,
+    val changesWhileScreenOff: Boolean = true,
 ) {
     val changed: Boolean get() = draft != original
 }
@@ -109,6 +115,7 @@ constructor(
                 lengths = StepLengths.of(profile),
                 restOfDaySteps = SessionPlans.restOfDay(steps, settings.dailyGoalSteps),
                 canVibrate = SessionHaptics.available(context),
+                changesWhileScreenOff = StepTracking.hasWakeUpStepCounter(context),
             )
         }
     }
@@ -126,6 +133,38 @@ constructor(
         }
         current.copy(goalKind = kind, goalValue = value)
     }
+
+    /**
+     * One goal or intervals (Phase 13). Intervals keep the reader's sets, or the protocol's; back
+     * to one goal, the same outing in minutes.
+     */
+    fun intervals(on: Boolean) = edit { state ->
+        val current = state.draft
+        when {
+            on && current.goalKind != SessionGoalKind.INTERVALS -> SessionPlans.withIntervals(
+                current,
+                current.intervals,
+            )
+
+            !on && current.goalKind == SessionGoalKind.INTERVALS -> current.copy(
+                goalKind = SessionGoalKind.TIME,
+                goalValue = SessionPlans.snapForEditor(
+                    SessionGoalKind.TIME,
+                    current.intervals.totalMinutes.toDouble(),
+                    state.imperial,
+                ),
+            )
+
+            else -> current
+        }
+    }
+
+    /** The sets changed by [change], kept in the editor's ranges. */
+    fun sets(change: (IntervalSets) -> IntervalSets) = edit { state ->
+        SessionPlans.withIntervals(state.draft, change(state.draft.intervals))
+    }
+
+    fun tryInterval(fast: Boolean) = SessionHaptics.playInterval(context, fast)
 
     fun goalValue(value: Double) = edit { state ->
         state.draft.copy(goalValue = SessionPlans.snapForEditor(state.draft.goalKind, value, state.imperial))
@@ -158,13 +197,18 @@ constructor(
     fun tryVoice() {
         val state = editor.value ?: return
         val plan = state.draft
+        // An interval walk says its changes, not shares of the goal: its first fast interval.
+        if (plan.goalKind == SessionGoalKind.INTERVALS) {
+            speech.preview(context.spokenIntervalSample(plan.intervals.fastMinutes))
+            return
+        }
         val half = when (plan.goalKind) {
             SessionGoalKind.REST_OF_DAY -> SessionAmount(
                 SessionGoalKind.STEPS,
                 (state.restOfDaySteps / 2).coerceAtLeast(1).toDouble(),
             )
 
-            SessionGoalKind.TIME -> SessionAmount(plan.goalKind, ceil(plan.goalValue / 2.0))
+            SessionGoalKind.TIME, SessionGoalKind.INTERVALS -> SessionAmount(plan.goalKind, ceil(plan.goalValue / 2.0))
 
             else -> SessionAmount(plan.goalKind, plan.goalValue / 2.0)
         }

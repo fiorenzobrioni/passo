@@ -12,6 +12,8 @@ import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.tracking.LedgerBatch
+import com.callbackdev.passo.core.model.IntervalSets
+import com.callbackdev.passo.core.model.IntervalSplit
 import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
@@ -73,9 +75,69 @@ class SessionRepositoryTest {
     fun `the presets are written once, and deleting them is the reader's choice`() = runTest {
         val first = repository.plans.first()
         assertThat(first.map { it.goalKind })
-            .containsExactly(SessionGoalKind.TIME, SessionGoalKind.TIME, SessionGoalKind.REST_OF_DAY).inOrder()
+            .containsExactly(
+                SessionGoalKind.TIME,
+                SessionGoalKind.TIME,
+                SessionGoalKind.REST_OF_DAY,
+                SessionGoalKind.INTERVALS,
+            ).inOrder()
         first.forEach { repository.deletePlan(it.id) }
         assertThat(repository.plans.first()).isEmpty()
+    }
+
+    @Test
+    fun `plans seeded before the interval walk get its preset once, after theirs`() = runTest {
+        // Seeded by a build without it: the three first presets only.
+        preferences.markSessionPlansSeeded()
+        SessionPlans.PRESETS.take(3).forEach { repository.savePlan(it) }
+        val plans = repository.plans.first()
+        assertThat(plans.last().goalKind).isEqualTo(SessionGoalKind.INTERVALS)
+        assertThat(plans.last().intervals).isEqualTo(IntervalSets())
+        repository.deletePlan(plans.last().id)
+        assertThat(repository.plans.first().map { it.goalKind }).doesNotContain(SessionGoalKind.INTERVALS)
+    }
+
+    @Test
+    fun `an interval outing is written with its intervals, and deleted with them`() = runTest {
+        val tracking = TrackingRepository(database.trackingDao(), preferences) { day }
+        val started = repository.insert(SessionPlans.start(SessionPlans.JAPANESE_WALKING, 1_000L, day, 0, 8_000)!!)
+        val moved = started.copy(
+            totals = SessionTotals(steps = 600, movingMillis = 200_000),
+            splits = listOf(
+                IntervalSplit(0, fast = false, steps = 270, movingMillis = 180_000),
+                IntervalSplit(1, fast = true, steps = 40, movingMillis = 20_000, zoneMillis = 12_000),
+            ),
+        )
+        tracking.persist(
+            LedgerBatch(listOf(MinuteSteps(100, day, 600)), TrackerState(1, 500, 2L, 3L), emptyList()),
+            nowWallMillis = 210_000L,
+            session = moved,
+        )
+        assertThat(repository.liveSession()).isEqualTo(moved)
+
+        val further = moved.copy(splits = moved.splits.dropLast(1) + moved.splits.last().copy(steps = 300))
+        repository.save(further)
+        assertThat(repository.session(moved.id)?.splits?.last()?.steps).isEqualTo(300)
+
+        repository.delete(moved.id)
+        assertThat(repository.session(moved.id)).isNull()
+        assertThat(repository.insert(started.copy(id = 0)).splits).isEmpty()
+    }
+
+    @Test
+    fun `version 5 migrates to 6 with every plan the protocol's sets, and every outing none`() {
+        migrations.createDatabase(MIGRATION_DB, 5).use { db ->
+            db.execSQL(
+                "INSERT INTO session_plan (name, goalKind, goalValue, intensity, milestones, vibrate, position, " +
+                    "lastUsedAtMillis, voice) VALUES (NULL, 'TIME', 20, 'BRISK', 2, 1, 0, NULL, 'OFF')",
+            )
+        }
+        migrations.runMigrationsAndValidate(MIGRATION_DB, 6, true).use { db ->
+            db.query("SELECT slowMinutes, fastMinutes, sets FROM session_plan").use { cursor ->
+                assertThat(cursor.moveToFirst()).isTrue()
+                assertThat(listOf(cursor.getInt(0), cursor.getInt(1), cursor.getInt(2))).containsExactly(3, 3, 5)
+            }
+        }
     }
 
     @Test
@@ -109,7 +171,7 @@ class SessionRepositoryTest {
         repository.markPlanUsed(plans[2].id, 5_000L)
         repository.markPlanUsed(plans[1].id, 1_000L)
         assertThat(repository.plansByUse().map { it.id })
-            .containsExactly(plans[2].id, plans[1].id, plans[0].id).inOrder()
+            .containsExactly(plans[2].id, plans[1].id, plans[0].id, plans[3].id).inOrder()
     }
 
     @Test

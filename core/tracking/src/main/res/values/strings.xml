@@ -174,4 +174,22 @@
         <item quantity="one">%1$s yard</item>
         <item quantity="other">%1$s yards</item>
     </plurals>
+
+    <!-- The interval walk (Phase 13), said aloud. «Japanese walking: off you go. 5 sets of 3
+         minutes slow and 3 minutes fast. Start slow.» -->
+    <plurals name="spoken_intervals_started">
+        <item quantity="one">%1$s: off you go. %2$d set of %3$s slow and %4$s fast. Start slow.</item>
+        <item quantity="other">%1$s: off you go. %2$d sets of %3$s slow and %4$s fast. Start slow.</item>
+    </plurals>
+    <!-- A change: short, to be heard through the breath of a fast walk. «Fast, 3 minutes.» -->
+    <string name="spoken_interval_fast">Fast, %1$s.</string>
+    <string name="spoken_interval_last_fast">Last fast interval, %1$s.</string>
+    <string name="spoken_interval_slow">Slow.</string>
+    <!-- At the goal: «4 fast intervals of 5 at pace.» The quantity is the first number. -->
+    <plurals name="spoken_intervals_at_pace">
+        <item quantity="one">%1$d fast interval of %2$d at pace.</item>
+        <item quantity="other">%1$d fast intervals of %2$d at pace.</item>
+    </plurals>
+    <!-- The notification's title while an interval outing goes: «Fast · 1:40». -->
+    <string name="session_interval_title">%1$s · %2$s</string>
 </resources>

@@ -1,10 +1,13 @@
 package com.callbackdev.passo.core.domain.backup
 
+import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.model.AppFont
 import com.callbackdev.passo.core.model.AppPalette
 import com.callbackdev.passo.core.model.DailySummary
 import com.callbackdev.passo.core.model.DiagnosticsEvent
 import com.callbackdev.passo.core.model.DiagnosticsType
+import com.callbackdev.passo.core.model.IntervalSets
+import com.callbackdev.passo.core.model.IntervalSplit
 import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.Session
@@ -62,6 +65,9 @@ sealed interface BackupRead {
  *   leaves out the plan, outing or way it belongs to.
  * - `ways` (added with the Ways, 1.1.0) lists the ways and city walks started: a file without
  *   it has none. An outing's `walk` and `walkFromMeters` say the city walk it walked, if any.
+ * - `intervals` (added with the interval walk, Phase 13) on a plan or an outing gives its sets
+ *   (`slowMinutes`, `fastMinutes`, `sets`); an outing's `splits` give each interval as walked.
+ *   An interval plan or outing read by a build without them is left out (its kind is unknown).
  *
  * Reading is lenient where a value can be dropped without lying (an unknown setting, a minute
  * with a negative count) and strict where it cannot (the format, the version, broken JSON).
@@ -162,6 +168,7 @@ private fun Backup.toFile() = BackupFile(
             voice = plan.voice.name,
             position = plan.position,
             lastUsedAtMillis = plan.lastUsedAtMillis,
+            intervals = plan.intervals.takeIf { plan.goalKind == SessionGoalKind.INTERVALS }?.toDto(),
         )
     },
     outings = sessions.sortedBy { it.startedAtMillis }.map { session ->
@@ -192,6 +199,8 @@ private fun Backup.toFile() = BackupFile(
             toldMilestones = session.toldMilestones.percents(),
             walk = session.walk?.name,
             walkFromMeters = session.walkFromMeters,
+            intervals = session.intervals?.toDto(),
+            splits = session.splits.map { SplitDto(it.index, it.fast, it.steps, it.movingMillis, it.zoneMillis) },
         )
     },
     diagnostics = diagnostics.map { DiagnosticDto(it.wallMillis, it.type.name, it.detail) },
@@ -311,12 +320,20 @@ private fun PlanDto.toPlan(): SessionPlan? {
         voice = voice.toEnumOrNull<SessionVoice>() ?: SessionVoice.OFF,
         position = position,
         lastUsedAtMillis = lastUsedAtMillis,
+        intervals = intervals?.toSets()?.let(SessionPlans::clampIntervals) ?: IntervalSets(),
     )
 }
+
+private fun IntervalSets.toDto() = IntervalsDto(slowMinutes, fastMinutes, sets)
+
+private fun IntervalsDto.toSets() = IntervalSets(slowMinutes, fastMinutes, sets)
 
 private fun OutingDto.toSession(): Session? {
     val kind = goalKind.toEnumOrNull<SessionGoalKind>()?.takeIf { it != SessionGoalKind.REST_OF_DAY } ?: return null
     val day = date.toEpochDayOrNull() ?: return null
+    // An interval outing without its sets cannot say where its changes fell: left out.
+    val sets = intervals?.toSets()?.takeIf { it.sets > 0 && it.slowMinutes > 0 && it.fastMinutes > 0 }
+    if (kind == SessionGoalKind.INTERVALS && sets == null) return null
     return Session(
         planId = planId,
         name = name?.trim()?.takeIf { it.isNotEmpty() },
@@ -347,6 +364,23 @@ private fun OutingDto.toSession(): Session? {
         toldMilestones = toldMilestones.toMilestones(),
         walk = walk.toEnumOrNull<WayId>(),
         walkFromMeters = walkFromMeters.coerceAtLeast(0),
+        intervals = sets.takeIf { kind == SessionGoalKind.INTERVALS },
+        splits = if (kind == SessionGoalKind.INTERVALS) {
+            splits.filter { it.index in 0 until checkNotNull(sets).sets * 2 }
+                .distinctBy { it.index }
+                .sortedBy { it.index }
+                .map {
+                    IntervalSplit(
+                        index = it.index,
+                        fast = it.index % 2 == 1,
+                        steps = it.steps.coerceAtLeast(0),
+                        movingMillis = it.movingMillis.coerceAtLeast(0),
+                        zoneMillis = it.zoneMillis.coerceAtLeast(0),
+                    )
+                }
+        } else {
+            emptyList()
+        },
     )
 }
 

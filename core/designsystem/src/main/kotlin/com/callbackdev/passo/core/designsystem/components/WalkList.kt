@@ -28,6 +28,7 @@ import com.callbackdev.passo.core.designsystem.format.clockTime
 import com.callbackdev.passo.core.designsystem.format.sessionGoalDescription
 import com.callbackdev.passo.core.designsystem.format.sessionName
 import com.callbackdev.passo.core.designsystem.format.sessionOutcome
+import com.callbackdev.passo.core.designsystem.format.sessionZone
 import com.callbackdev.passo.core.designsystem.format.text
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
@@ -80,7 +81,11 @@ private fun SessionRow(outing: Outing.Planned, format: MeasureFormatter) {
     val to = clockTime(outing.endMinute.coerceAtMost(MINUTES_PER_DAY - 1))
     val length = duration(outing.endMinute - outing.startMinute)
     val outcome = res.sessionOutcome(session, format)
-    val goal = res.sessionGoalDescription(session, format)
+    // An interval outing says how its fast intervals went with its sets (Phase 13).
+    val goal = listOfNotNull(
+        res.sessionGoalDescription(session, format),
+        session.intervals?.let { res.sessionZone(session, format) },
+    ).joinToString(" · ")
     val steps = pluralStringResource(R.plurals.walk_steps, session.totals.steps, format.steps(session.totals.steps))
     val distance = format.distance(session.totals.distanceMeters).text()
     val movingMinutes = session.totals.movingMillis / MILLIS_PER_MINUTE.toDouble()

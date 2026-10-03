@@ -6,6 +6,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import androidx.room.Upsert
+import com.callbackdev.passo.core.model.Session
 import kotlinx.coroutines.flow.Flow
 
 /** The outings and the plans they start from (PLANNING.md §11 Phase 10). */
@@ -43,38 +44,46 @@ abstract class SessionDao {
     open suspend fun appendPlan(plan: SessionPlanEntity): Long = insertPlan(plan.copy(position = nextPlanPosition()))
 
     /** The outing under way (or paused), if there is one; there is never more than one. */
+    @Transaction
     @Query("SELECT * FROM session WHERE state != 'FINISHED' ORDER BY startedAtMillis DESC LIMIT 1")
-    abstract suspend fun liveSession(): SessionEntity?
+    abstract suspend fun liveSession(): SessionRow?
 
+    @Transaction
     @Query("SELECT * FROM session WHERE state != 'FINISHED' ORDER BY startedAtMillis DESC LIMIT 1")
-    abstract fun observeLiveSession(): Flow<SessionEntity?>
+    abstract fun observeLiveSession(): Flow<SessionRow?>
 
+    @Transaction
     @Query("SELECT * FROM session WHERE id = :id")
-    abstract suspend fun session(id: Long): SessionEntity?
+    abstract suspend fun session(id: Long): SessionRow?
 
+    @Transaction
     @Query("SELECT * FROM session WHERE localEpochDay = :localEpochDay ORDER BY startedAtMillis")
-    abstract fun observeSessionsOn(localEpochDay: Long): Flow<List<SessionEntity>>
+    abstract fun observeSessionsOn(localEpochDay: Long): Flow<List<SessionRow>>
 
     /** The last outing to have ended, for the summary Today shows once. */
+    @Transaction
     @Query("SELECT * FROM session WHERE state = 'FINISHED' ORDER BY endedAtMillis DESC LIMIT 1")
-    abstract fun observeLatestFinished(): Flow<SessionEntity?>
+    abstract fun observeLatestFinished(): Flow<SessionRow?>
 
     @Insert
     abstract suspend fun insertSession(session: SessionEntity): Long
 
     /** Every outing, oldest first: for the export. */
+    @Transaction
     @Query("SELECT * FROM session ORDER BY startedAtMillis")
-    abstract suspend fun allSessions(): List<SessionEntity>
+    abstract suspend fun allSessions(): List<SessionRow>
 
     @Query("SELECT COUNT(*) FROM session")
     abstract fun observeSessionCount(): Flow<Int>
 
     /** The outings walked on city walks, oldest first: what moves a walk (Phase 11). */
+    @Transaction
     @Query("SELECT * FROM session WHERE walk IS NOT NULL ORDER BY startedAtMillis")
-    abstract fun observeWalkSessions(): Flow<List<SessionEntity>>
+    abstract fun observeWalkSessions(): Flow<List<SessionRow>>
 
+    @Transaction
     @Query("SELECT * FROM session WHERE walk IS NOT NULL ORDER BY startedAtMillis")
-    abstract suspend fun walkSessions(): List<SessionEntity>
+    abstract suspend fun walkSessions(): List<SessionRow>
 
     /**
      * The outings and plans an import brings (`BackupMerge`), in one transaction: the plans
@@ -85,16 +94,39 @@ abstract class SessionDao {
     open suspend fun importOutings(
         plans: List<Pair<Long, SessionPlanEntity>>,
         planIds: Map<Long, Long>,
-        sessions: (Map<Long, Long>) -> List<SessionEntity>,
+        sessions: (Map<Long, Long>) -> List<Session>,
     ): List<Long> {
         val ids = HashMap(planIds)
         for ((fileId, plan) in plans) ids[fileId] = appendPlan(plan)
-        return sessions(ids).map { insertSession(it) }
+        return sessions(ids).map { session ->
+            val id = insertSession(session.toEntity())
+            upsertIntervals(session.copy(id = id).intervalEntities())
+            id
+        }
     }
 
     @Upsert
-    abstract suspend fun upsertSession(session: SessionEntity)
+    protected abstract suspend fun upsertSessionRow(session: SessionEntity)
+
+    @Upsert
+    protected abstract suspend fun upsertIntervals(intervals: List<SessionIntervalEntity>)
+
+    /** An outing and its intervals, in one transaction. */
+    @Transaction
+    open suspend fun upsertSession(session: Session) {
+        upsertSessionRow(session.toEntity())
+        upsertIntervals(session.intervalEntities())
+    }
 
     @Query("DELETE FROM session WHERE id = :id")
-    abstract suspend fun deleteSession(id: Long)
+    protected abstract suspend fun deleteSessionRow(id: Long)
+
+    @Query("DELETE FROM session_interval WHERE sessionId = :id")
+    protected abstract suspend fun deleteIntervals(id: Long)
+
+    @Transaction
+    open suspend fun deleteSession(id: Long) {
+        deleteIntervals(id)
+        deleteSessionRow(id)
+    }
 }

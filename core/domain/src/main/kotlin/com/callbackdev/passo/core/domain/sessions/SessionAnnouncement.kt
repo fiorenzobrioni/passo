@@ -4,6 +4,7 @@ import com.callbackdev.passo.core.domain.ways.NextPlace
 import com.callbackdev.passo.core.domain.ways.WalkPlaces
 import com.callbackdev.passo.core.domain.ways.WayStop
 import com.callbackdev.passo.core.domain.ways.Ways
+import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
@@ -28,9 +29,23 @@ enum class PaceVerdict {
  * what they say.
  */
 sealed interface SessionAnnouncement {
-    /** It started: what it is. Heard first, it also says the voice works through these ears. */
-    data class Started(val goal: SessionAmount, val intensity: SessionIntensity, val restOfDay: Boolean) :
-        SessionAnnouncement
+    /**
+     * It started: what it is. Heard first, it also says the voice works through these ears. An
+     * interval outing says its [intervals], and that it begins slow.
+     */
+    data class Started(
+        val goal: SessionAmount,
+        val intensity: SessionIntensity,
+        val restOfDay: Boolean,
+        val intervals: IntervalSets? = null,
+    ) : SessionAnnouncement
+
+    /**
+     * A change of interval (Phase 13): «Fast, 3 minutes», «Slow», «Last fast interval, 3
+     * minutes». The slow one says only that: the reader knows how long it lasts, and a short word
+     * is the one that reaches through the breath of a fast walk.
+     */
+    data class IntervalChanged(val fast: Boolean, val minutes: Int, val lastSet: Boolean) : SessionAnnouncement
 
     /** A share of the goal: [left] to go, and the pace. */
     data class Milestone(
@@ -71,7 +86,14 @@ sealed interface SessionAnnouncement {
     data class PlacesReached(val places: List<WayStop>, val next: NextPlace?) : SessionAnnouncement
 
     companion object {
-        fun started(session: Session): Started = Started(session.goal(), session.intensity, session.restOfDay)
+        fun started(session: Session): Started =
+            Started(session.goal(), session.intensity, session.restOfDay, session.intervals)
+
+        fun intervalChanged(position: IntervalPosition): IntervalChanged = IntervalChanged(
+            fast = position.fast,
+            minutes = ((position.elapsedMillis + position.leftMillis) / MILLIS_PER_MINUTE).toInt(),
+            lastSet = position.lastSet,
+        )
 
         /**
          * What [milestone] says for [session] as it stands, the pace read as [cadence]; at the
@@ -115,6 +137,9 @@ sealed interface SessionAnnouncement {
          * its time in motion, the minutes otherwise.
          */
         fun paceSummary(session: Session): PaceSummary {
+            session.intervalResult()?.let { result ->
+                return if (result.judged == 0) PaceSummary.None else PaceSummary.Intervals(result.atPace, result.judged)
+            }
             val moving = session.totals.movingMillis
             if (session.intensity.cadenceFloor == null || moving < MILLIS_PER_MINUTE) return PaceSummary.None
             if (session.totals.zoneMillis >= moving * MOSTLY_AT_PACE) return PaceSummary.Mostly
@@ -157,6 +182,9 @@ sealed interface PaceSummary {
 
     /** [zoneMinutes] of [movingMinutes] at the pace. */
     data class Part(val zoneMinutes: Int, val movingMinutes: Int) : PaceSummary
+
+    /** An interval outing's: [atPace] fast intervals of [fast] at their pace or above (Phase 13). */
+    data class Intervals(val atPace: Int, val fast: Int) : PaceSummary
 }
 
 /**
