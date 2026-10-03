@@ -229,7 +229,8 @@ If the user or the OEM stops the service, no data is lost as long as the device 
 - A non-wake-up sensor never wakes the application processor. Events wait in the hardware FIFO and are delivered the next time the processor is awake.
 - If the FIFO overflows, intermediate events are dropped, but the **total stays correct** because the counter is cumulative. Only minute-level attribution gets coarser.
 - **Non-wake-up, decided from the platform documentation** (`docs/adr/0002-sensor-reporting.md`): the wake-up variant would only bound the loss on an *abrupt* power loss, and would pay for it with a wakeup per report window, every day. A device that has only a wake-up step counter still gets it.
-- `sensor.fifoMaxEventCount`, `fifoReservedEventCount`, vendor, name and wake-up mode are written to the diagnostics log at every service start.
+- `sensor.fifoMaxEventCount`, `fifoReservedEventCount`, vendor, name and wake-up mode are written to the diagnostics log at every service start, with whether the phone has a wake-up counter (and its FIFO) and which step detectors it has (read, never registered).
+- Some phones have no FIFO at all (`fifoMax=0`, the owner's Samsung, Oct 2026): with the screen off the counter's events are dropped while the processor sleeps, and its latest value arrives in a clump when the phone next wakes. The total stays exact; the attribution of §4.4 lays the clump over the minutes it took.
 
 ### 4.4 Accounting algorithm (`StepAccountant`, pure Kotlin)
 
@@ -251,10 +252,13 @@ if (eventWall is in the future or before the lower bound) eventWall = snapshot.w
 
 lowerBound = if (same boot session) state.lastSampleWallMillis else bootWallMillis
 
-// Attribute delta to minute buckets:
-//  - gap ≤ 2 min           → all to the eventWall minute
-//  - larger gap            → backward-fill from eventWall at DEFAULT_CADENCE (≈110 spm) per minute,
-//                            never before lowerBound; remainder spread evenly over [lowerBound, eventWall]
+// Attribute delta to minute buckets, by the milliseconds each minute holds of the stretch walked:
+//  - the stretch ends at eventWall and lasts delta / DEFAULT_CADENCE (≈110 spm), never before
+//    lowerBound; a delta faster than that is spread evenly over [lowerBound, eventWall]
+//  - one rule for every gap: a lone step lands in its own minute; a clump handed over at once
+//    (a sensor with no FIFO, whose events are dropped while the processor sleeps) is laid over
+//    the minutes it was walked in, never 170 steps in one minute and 25 in the next
+//  (until Oct 2026: a gap ≤ 2 min put everything in the eventWall minute, §15)
 // Sanity: if delta > MAX_CADENCE (250 spm) × gapMinutes + 50 → cap, log a diagnostics anomaly
 
 newState = state.copy(bootCount, lastCounterValue = counterValue, lastSampleWallMillis = eventWall)
@@ -286,6 +290,7 @@ All wall-clock and time-zone logic is injected, so the algorithm can be fully un
 | Time-zone change | Buckets are stored in UTC `epochMinute` together with the `localEpochDay` computed at write time. Days already recorded are never re-bucketed. |
 | Manual clock change | Same as a time-zone change. Timestamps come from elapsed realtime, so they are monotonic. |
 | Sensor jumps (buggy HAL) | Capped by `MAX_CADENCE` and logged. |
+| A counter with no FIFO, handing steps over in clumps | Each clump laid back over the time it took at 110 spm, minute by minute: no false minute of running, the total exact. |
 | `ACTIVITY_RECOGNITION` revoked | The service stops. The UI, notification and widget show "Permission needed". |
 | No step counter sensor | The APK from GitHub installs on any device, so a blocking explanation screen is **required**. `uses-feature required=true` stays in the manifest for a future Play listing, where it filters these devices. |
 | Counter float precision | Values are `Float`; convert with `toLong()`. Exact up to 2^24 steps per boot session, which is far beyond realistic use. |
@@ -1243,6 +1248,7 @@ Include:
 - **The Ways: OpenStreetMap lines, four ways, the Francigena's Italian part** (owner, 1 Oct 2026): each way's line is its OpenStreetMap relation, simplified, under ODbL (credited in About and the guide; the derived file published in the repo under ODbL, beside the GPL code), chosen over a schematic of stage towns because the true line is what makes the map worth opening. The four: Via degli Dei, Via di Francesco, Camino Francés, and the Via Francigena from the Great St Bernard Pass to Rome (about 1,000 km): from Canterbury, 2,000 km is too long for everyday walkers.
 - **The interval walk: ADR 0013 accepted** (owner, 1 Oct 2026): option A (the wake-up counter at 30 s, at 2 s in the 40 s of motion before each change; no wake lock, no timer), minutes in motion, a phone without a wake-up counter told in the editor rather than the kind hidden, the fast pace at brisk 100 by default. Option B stays the documented next step if the field test finds the counter's own delay too long.
 - **The interval walk, built** (Phase 13, 3 Oct 2026): as ADR 0013's option A, with the choices recorded under Phase 13 (the editor's "Kind", the preset's name and its one-time seeding, the proposed "faster" and "slower", a fast interval judged by its own cadence, the countdown's 5 s glide, the latest change told once a batch is in). §9.7, ADR 0009 decision 5, VISION.md's battery criterion and CLAUDE.md's invariant now name the 2 s in the 40 s before a change. The field test (owner, on a device) decides between A and B.
+- **Steps laid over the time they took, at every gap** (owner's export, 3 Oct 2026): the owner's Samsung has a step counter with no FIFO and no wake-up variant (`fifoMax=0`, `wakeUpVariant=false` in the log). With the screen off it hands over a minute and a half of walking at once, and the old rule (a gap of up to 2 minutes all in the sample's minute) wrote 172, 25, 176 steps in three minutes walked at about 100: eleven false minutes of running on 3 Oct, with the running step length, so 5.11 km where about 4.71 were walked, and the calories with them. One rule now for every gap: the steps are laid back from the sample over the time they take at 110 a minute (never before the previous sample), or evenly over the gap when they are faster than that, shared between minutes to the millisecond. A step reported alone still lands in its own minute, so a phone with a FIFO sees no change; the totals were never affected. Days already stored are not recomputed (past days are frozen). The service's log line also says which step detectors the phone has, so that a phone without a wake-up counter can be judged for ADR 0013's option B from its own export.
 
 - **City walks, as Phase 11's second part** (owner, 1 Oct 2026): an outing through a city, whose signals are its places and whose voice says them, imaginary and said so. Milan, Rome, Paris, London and Madrid; Milan and London first, the others one a release. Bound to outings rather than to the days, because a city is walked in one outing or a few, where a way takes months. The unit is the walk, grouped by city, so that a large city's second walk (London's, likely) is data and not a feature; a city shows its second level only once it has two walks. The real cost is the content (about twenty checked places a walk, in two languages), which is why the cities come one at a time.
 

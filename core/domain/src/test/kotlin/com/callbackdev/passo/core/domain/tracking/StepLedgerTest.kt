@@ -105,7 +105,8 @@ class StepLedgerTest {
         val lateEvening = wallOf("2026-09-24T23:59:30")
         val ledger = StepLedger(device.stateAt(0, lateEvening))
         ledger.recordAt(30, lateEvening + 10 * SECOND)
-        ledger.recordAt(50, lateEvening + 40 * SECOND)
+        // 20 steps take 11 s: from 00:00:04, after midnight.
+        ledger.recordAt(50, lateEvening + 45 * SECOND)
 
         assertThat(ledger.pendingStepsOn(dayOf("2026-09-24T00:00:00"))).isEqualTo(30)
         assertThat(ledger.pendingStepsOn(dayOf("2026-09-25T00:00:00"))).isEqualTo(20)

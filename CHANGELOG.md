@@ -46,6 +46,12 @@ All notable changes to Passo are documented here. The format follows
 
 ### Changed
 
+- **Steps land in the minutes they were walked in, on phones that hand them over in clumps.**
+  Some phones (some Samsungs among them) deliver the steps of a minute and a half at once while
+  the screen is off; Passo put them all in one minute, which could read as a minute of running
+  and make the distance and calories of the day too high. They are now spread over the time they
+  took. The day's steps were always right, and days already recorded stay as they are.
+
 - **The first-day note** on Today goes as soon as you open the guide from it, instead of
   staying until the end of the day.
 

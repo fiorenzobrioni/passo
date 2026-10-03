@@ -3,7 +3,6 @@ package com.callbackdev.passo.core.domain.tracking
 import com.callbackdev.passo.core.domain.tracking.TrackingConstants.DEFAULT_CADENCE
 import com.callbackdev.passo.core.domain.tracking.TrackingConstants.JUMP_SLACK_STEPS
 import com.callbackdev.passo.core.domain.tracking.TrackingConstants.MAX_CADENCE
-import com.callbackdev.passo.core.domain.tracking.TrackingConstants.SHORT_GAP_MILLIS
 import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.StepSample
 import com.callbackdev.passo.core.model.SystemSnapshot
@@ -81,7 +80,6 @@ object StepAccountant {
             steps = delta,
             fromWall = eventWall - gapMillis,
             toWall = eventWall,
-            gapMillis = gapMillis,
             zoneId = snapshot.zoneId,
         )
 
@@ -117,51 +115,40 @@ object StepAccountant {
     }
 
     /**
-     * Spreads [steps] over the minutes of `[fromWall, toWall]`.
+     * Spreads [steps] over the minutes of `[fromWall, toWall]`, by the time each minute holds of
+     * the stretch they were walked in.
      *
-     * A short gap puts everything in the sample's minute. A long one is back-filled from the
-     * sample's minute at [DEFAULT_CADENCE] (steps come in walks, and the walk is most likely
-     * what ended just before the sensor reported); whatever still does not fit is spread evenly
-     * over the whole gap. The sum is always exactly [steps].
+     * The stretch ends at the sample and lasts as long as [steps] take at [DEFAULT_CADENCE]
+     * (steps come in walks, and the walk is most likely what ended just before the sensor
+     * reported), never longer than the gap; steps more than that cadence fills are spread
+     * evenly over the whole gap, at their own average. One rule for every gap, measured to the
+     * millisecond: a sensor that hands over a minute and a half of walking at once (one with no
+     * hardware FIFO, whose events are dropped while the processor sleeps) puts it across the two
+     * minutes it was walked in, not 170 steps in one and 25 in the other, which would read as a
+     * minute of running. A step reported alone, as most are, falls in its own minute. The sum is
+     * always exactly [steps].
      */
-    private fun attribute(
-        steps: Long,
-        fromWall: Long,
-        toWall: Long,
-        gapMillis: Long,
-        zoneId: ZoneId,
-    ): List<MinuteSteps> {
+    private fun attribute(steps: Long, fromWall: Long, toWall: Long, zoneId: ZoneId): List<MinuteSteps> {
         if (steps <= 0L) return emptyList()
-        val lastMinute = Math.floorDiv(toWall, MILLIS_PER_MINUTE)
-        if (gapMillis <= SHORT_GAP_MILLIS) {
-            return listOf(minuteSteps(lastMinute, steps, zoneId))
+        val atCadence = (steps * MILLIS_PER_MINUTE + DEFAULT_CADENCE - 1) / DEFAULT_CADENCE
+        val span = minOf(toWall - fromWall, atCadence)
+        if (span <= 0L) return listOf(minuteSteps(Math.floorDiv(toWall, MILLIS_PER_MINUTE), steps, zoneId))
+        val start = toWall - span
+        val increments = ArrayList<MinuteSteps>()
+        var minute = Math.floorDiv(start, MILLIS_PER_MINUTE)
+        var covered = 0L
+        var laid = 0L
+        while (covered < span) {
+            val end = minOf((minute + 1) * MILLIS_PER_MINUTE, toWall)
+            covered += end - maxOf(start, minute * MILLIS_PER_MINUTE)
+            // Shared by the time covered so far, rounded down: the parts add up to the whole, and
+            // a lone step, whose time is mostly before its own instant, still lands at it.
+            val upTo = steps * covered / span
+            if (upTo > laid) increments += minuteSteps(minute, upTo - laid, zoneId)
+            laid = upTo
+            minute++
         }
-        val firstMinute = Math.floorDiv(fromWall, MILLIS_PER_MINUTE)
-        val minutes = lastMinute - firstMinute + 1
-
-        val perMinute = LinkedHashMap<Long, Long>()
-        var left = steps
-        var minute = lastMinute
-        while (left > 0L && minute >= firstMinute) {
-            val take = minOf(left, DEFAULT_CADENCE.toLong())
-            perMinute[minute] = take
-            left -= take
-            minute--
-        }
-        if (left > 0L) {
-            // Every minute already holds DEFAULT_CADENCE: share the rest evenly, the odd steps
-            // going to the latest minutes.
-            val base = left / minutes
-            val extra = left % minutes
-            for (m in firstMinute..lastMinute) {
-                val bonus = if (lastMinute - m < extra) 1L else 0L
-                perMinute[m] = (perMinute[m] ?: 0L) + base + bonus
-            }
-        }
-        return perMinute.entries
-            .filter { it.value > 0L }
-            .sortedBy { it.key }
-            .map { (m, s) -> minuteSteps(m, s, zoneId) }
+        return increments
     }
 
     private fun minuteSteps(epochMinute: Long, steps: Long, zoneId: ZoneId): MinuteSteps = MinuteSteps(
