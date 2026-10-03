@@ -95,12 +95,27 @@ internal class StepSensorSource(private val sensorManager: SensorManager, privat
         channel.close()
     }
 
-    /** One line for the log: which sensor this device gave us, and how much it can batch. */
-    fun describe(): String = sensor?.let {
-        "sensor=${it.name} vendor=${it.vendor} version=${it.version} wakeUp=${it.isWakeUpSensor} " +
-            "fifoMax=${it.fifoMaxEventCount} fifoReserved=${it.fifoReservedEventCount} " +
-            "wakeUpVariant=${wakeUpSensor != null}"
-    } ?: "sensor=none"
+    /**
+     * One line for the log: which sensor this device gave us, and how much it can batch; whether
+     * it has a wake-up counter besides it (and that one's FIFO); and which step detectors it has.
+     * The detectors are read, never registered: they say whether an interval walk's changes
+     * could reach a phone without a wake-up counter on time (docs/adr/0013-interval-walks.md,
+     * option B), on the phones the field tests are run on.
+     */
+    fun describe(): String {
+        val counter = sensor ?: return "sensor=none"
+        val detector = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR, false)
+        val wakeUpDetector = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR, true)
+            ?.takeIf { it.isWakeUpSensor }
+        return buildString {
+            append("sensor=${counter.name} vendor=${counter.vendor} version=${counter.version} ")
+            append("wakeUp=${counter.isWakeUpSensor} fifoMax=${counter.fifoMaxEventCount} ")
+            append("fifoReserved=${counter.fifoReservedEventCount} wakeUpVariant=${wakeUpSensor != null}")
+            wakeUpSensor?.let { append(" wakeUpFifoMax=${it.fifoMaxEventCount}") }
+            append(" stepDetector=${detector != null} stepDetectorWakeUp=${wakeUpDetector != null}")
+            wakeUpDetector?.let { append(" stepDetectorWakeUpFifoMax=${it.fifoMaxEventCount}") }
+        }
+    }
 }
 
 /**

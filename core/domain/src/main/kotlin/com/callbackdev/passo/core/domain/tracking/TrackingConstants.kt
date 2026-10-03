@@ -3,14 +3,9 @@ package com.callbackdev.passo.core.domain.tracking
 /** The tracking engine's constants (PLANNING.md §4.4, §4.5), in one place. */
 object TrackingConstants {
     /**
-     * A sample at most this far from the previous one puts all its steps in its own minute.
-     * Beyond it, the steps are spread backwards over the gap: a delta that arrives after ten
-     * minutes of batching was not all walked in the last one.
-     */
-    const val SHORT_GAP_MILLIS: Long = 2 * 60_000L
-
-    /**
-     * The cadence a long gap is back-filled at, from the sample's minute backwards. About
+     * The cadence a sample's steps are laid back from it at, over the time they took (and never
+     * past the previous sample): a delta that arrives after minutes of batching was not all
+     * walked in the last one. About
      * 110 steps per minute is a typical free-walking cadence in adults (Tudor-Locke et al.,
      * "How fast is fast enough?", Br J Sports Med 2020: 100 spm is the moderate-intensity
      * threshold, habitual walking sits a little above it).

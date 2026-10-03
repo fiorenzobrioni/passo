@@ -42,7 +42,21 @@ class StepAccountantTest {
     // --- Attribution ---------------------------------------------------------------------------
 
     @Test
-    fun `a short gap puts every step in the event's minute`() {
+    fun `a step reported alone falls in its own minute`() {
+        val last = wallOf("2026-09-24T10:00:59.500")
+        val at = wallOf("2026-09-24T10:01:00.050")
+
+        val result = StepAccountant.account(
+            device.stateAt(1_000, last),
+            device.sample(1_001, at),
+            device.snapshotAt(at),
+        )
+
+        assertThat(result.increments.single().epochMinute).isEqualTo(minuteOf(at))
+    }
+
+    @Test
+    fun `a short gap is spread over the time its steps took, minute by minute`() {
         val last = wallOf("2026-09-24T10:00:10")
         val at = last + 90 * SECOND
 
@@ -52,16 +66,39 @@ class StepAccountantTest {
             device.snapshotAt(at),
         )
 
-        assertThat(result.increments).hasSize(1)
-        assertThat(result.increments.single().steps).isEqualTo(150)
-        assertThat(result.increments.single().epochMinute).isEqualTo(minuteOf(at))
-        assertThat(result.increments.single().localEpochDay).isEqualTo(dayOf("2026-09-24T10:01:40"))
+        // 150 steps take 81.8 s at 110 a minute: from 10:00:18 to 10:01:40, 41.8 s and 40 s.
+        assertThat(result.increments.map { it.epochMinute to it.steps }).containsExactly(
+            minuteOf(at) - 1 to 76,
+            minuteOf(at) to 74,
+        ).inOrder()
+        assertThat(result.increments.last().localEpochDay).isEqualTo(dayOf("2026-09-24T10:01:40"))
+    }
+
+    @Test
+    fun `a sensor that hands over walking in clumps makes no minute of running`() {
+        // A phone with no hardware FIFO, at 100 steps a minute: every minute and a half or so
+        // the processor wakes and the counter's latest value arrives, a clump of steps at once.
+        var state = device.stateAt(0, wallOf("2026-09-24T07:40:00"))
+        var counter = 0L
+        val perMinute = HashMap<Long, Int>()
+        for (gapSeconds in listOf(95, 80, 110, 70, 100, 85, 90, 105)) {
+            val at = state.lastSampleWallMillis + gapSeconds * SECOND
+            counter += gapSeconds * 100L / 60
+            val result = StepAccountant.account(state, device.sample(counter, at), device.snapshotAt(at))
+            result.increments.forEach { perMinute.merge(it.epochMinute, it.steps, Int::plus) }
+            state = result.newState
+        }
+        // Every whole minute walked reads about as it was walked; none reaches a run (140).
+        val whole = perMinute.toSortedMap().values.drop(1).dropLast(1)
+        assertThat(whole.max()).isAtMost(TrackingConstants.DEFAULT_CADENCE)
+        assertThat(whole.min()).isAtLeast(80)
+        assertThat(perMinute.values.sum().toLong()).isEqualTo(counter)
     }
 
     @Test
     fun `a batched event lands at its own timestamp, not at its arrival`() {
         val last = wallOf("2026-09-24T10:00:00")
-        val happened = wallOf("2026-09-24T10:01:00")
+        val happened = wallOf("2026-09-24T10:01:30")
         val delivered = wallOf("2026-09-24T10:09:30")
 
         val result = StepAccountant.account(
@@ -70,15 +107,16 @@ class StepAccountantTest {
             device.snapshotAt(delivered),
         )
 
-        assertThat(result.increments.single().epochMinute).isEqualTo(minuteOf(happened))
+        assertThat(result.increments.last().epochMinute).isEqualTo(minuteOf(happened))
+        assertThat(result.increments.map { it.epochMinute }).doesNotContain(minuteOf(delivered))
         assertThat(result.newState.lastSampleWallMillis).isEqualTo(happened)
         assertThat(result.usedArrivalTime).isFalse()
     }
 
     @Test
-    fun `a long gap is back-filled from the event's minute at the default cadence`() {
+    fun `a long gap is back-filled from the event at the default cadence`() {
         val last = wallOf("2026-09-24T10:00:00")
-        val at = wallOf("2026-09-24T10:10:00")
+        val at = wallOf("2026-09-24T10:10:30")
 
         val result = StepAccountant.account(
             device.stateAt(1_000, last),
@@ -86,10 +124,12 @@ class StepAccountantTest {
             device.snapshotAt(at),
         )
 
+        // 300 steps at 110 a minute: the 2 min 43.6 s before 10:10:30.
         assertThat(result.increments.map { it.epochMinute to it.steps }).containsExactly(
-            minuteOf(at) - 2 to 80,
+            minuteOf(at) - 3 to 25,
+            minuteOf(at) - 2 to 110,
             minuteOf(at) - 1 to 110,
-            minuteOf(at) to 110,
+            minuteOf(at) to 55,
         ).inOrder()
     }
 
@@ -100,13 +140,12 @@ class StepAccountantTest {
 
         val result = StepAccountant.account(device.stateAt(0, last), device.sample(2_000, at), device.snapshotAt(at))
 
-        // 10:00 to 10:10 inclusive: eleven minutes.
-        assertThat(result.increments).hasSize(11)
+        // The ten minutes from 10:00 to 10:10, at the gap's own average of 200.
+        assertThat(result.increments).hasSize(10)
         assertThat(result.increments.sumOf { it.steps }).isEqualTo(2_000)
         assertThat(result.increments.first().epochMinute).isEqualTo(minuteOf(last))
-        assertThat(result.increments.last().epochMinute).isEqualTo(minuteOf(at))
-        val counts = result.increments.map { it.steps }
-        assertThat(counts.max() - counts.min()).isAtMost(1)
+        assertThat(result.increments.last().epochMinute).isEqualTo(minuteOf(at) - 1)
+        assertThat(result.increments.map { it.steps }.toSet()).containsExactly(200)
         assertThat(result.cappedFromSteps).isNull()
     }
 
@@ -256,9 +295,24 @@ class StepAccountantTest {
         val last = wallOf("2026-09-24T23:59:40")
         val at = wallOf("2026-09-25T00:00:20")
 
-        val result = StepAccountant.account(device.stateAt(0, last), device.sample(60, at), device.snapshotAt(at))
+        // 20 steps take 11 s: walked after midnight.
+        val result = StepAccountant.account(device.stateAt(0, last), device.sample(20, at), device.snapshotAt(at))
 
         assertThat(result.increments.single().localEpochDay).isEqualTo(dayOf("2026-09-25T00:00:20"))
+    }
+
+    @Test
+    fun `a walk across midnight is split at it, as it was walked`() {
+        val last = wallOf("2026-09-24T23:59:40")
+        val at = wallOf("2026-09-25T00:00:20")
+
+        // 60 steps take 32.7 s: 12.7 s of them before midnight.
+        val result = StepAccountant.account(device.stateAt(0, last), device.sample(60, at), device.snapshotAt(at))
+
+        assertThat(result.increments.map { it.localEpochDay to it.steps }).containsExactly(
+            dayOf("2026-09-24T23:59:50") to 23,
+            dayOf("2026-09-25T00:00:20") to 37,
+        ).inOrder()
     }
 
     @Test
@@ -269,12 +323,12 @@ class StepAccountantTest {
         val result = StepAccountant.account(device.stateAt(0, last), device.sample(1_000, at), device.snapshotAt(at))
 
         val byDay = result.increments.groupBy { it.localEpochDay }.mapValues { (_, v) -> v.sumOf { it.steps } }
-        // 00:00 to 00:05 is six minutes at 110; the other 340 go back into the evening before.
+        // 1,000 steps take 9 min 5 s at 110 a minute: 4 min 5 s of them before midnight.
         assertThat(byDay).containsExactly(
             dayOf("2026-09-24T23:55:00"),
-            340,
+            450,
             dayOf("2026-09-25T00:05:00"),
-            660,
+            550,
         )
     }
 
