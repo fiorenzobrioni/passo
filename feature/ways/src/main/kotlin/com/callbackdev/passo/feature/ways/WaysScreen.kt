@@ -422,6 +422,7 @@ private val THUMBNAIL = 64.dp
 
 /** Hooks for the UI tests. */
 object WaysTags {
+    const val WALK_AWAKE = "ways_walk_awake"
     const val LIST = "ways_list"
     const val ACTIVE = "ways_active"
     const val CATALOGUE = "ways_catalogue"

@@ -66,6 +66,9 @@ import javax.inject.Inject
  * @property canWalk whether an outing can start now: counting on, with its permission.
  * @property stepMeters the reader's walking step, for a walk's steps before it is walked.
  * @property voiceAvailability whether the phone can speak the places, once asked.
+ * @property wakeUpCounter the phone has a wake-up step counter; without it a walk, which always
+ *   tells its places, keeps the phone awake while it counts, and its page says so
+ *   (docs/adr/0013-interval-walks.md).
  */
 @Immutable
 data class WaysUiState(
@@ -82,6 +85,7 @@ data class WaysUiState(
     val canWalk: WalkReadiness = WalkReadiness.READY,
     val stepMeters: Double = DEFAULT_STEP_METERS,
     val voiceAvailability: VoiceAvailability = VoiceAvailability.UNKNOWN,
+    val wakeUpCounter: Boolean = true,
 ) {
     fun journey(id: Long): JourneyView? = active?.takeIf { it.journey.id == id }
         ?: past.firstOrNull { it.journey.id == id }
@@ -140,6 +144,8 @@ constructor(
     sessions: SessionRepository,
     liveSession: LiveSession,
 ) : ViewModel() {
+    // Read once: a phone's sensors do not change while the page is open.
+    private val wakeUpCounter = StepTracking.hasWakeUpStepCounter(context)
     private val readiness = MutableStateFlow(StepTracking.readiness(context))
 
     /** The service's outing when it runs; the stored one when the system has stopped it. */
@@ -236,6 +242,7 @@ constructor(
             },
             stepMeters = stepMeters,
             voiceAvailability = voice,
+            wakeUpCounter = wakeUpCounter,
         )
     }.flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), null)

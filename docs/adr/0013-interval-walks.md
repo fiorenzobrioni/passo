@@ -168,8 +168,10 @@ Decided with the owner:
   them as before, in minutes in motion. A wall-clock timer was considered and not chosen: a stop
   at a traffic light would eat a fast interval.
 - **Said:** one plain line in the editor where the signals are chosen, on such phones and for a
-  plan with signals only ("a little more battery: about 1 to 3% an hour"), the Outings page's
-  footer, the guide's battery paragraph. No dialog, no switch: vibration and voice off is the
+  plan with signals only ("a little more battery: about 1 to 3% an hour"), the same on a city
+  walk's page (a walk always vibrates at its places, where a late signal is a place already
+  passed), the Outings page's footer, the guide's battery paragraph. The Ways are not outings and
+  need none of it: a stage is told from the days' written steps, and a few minutes do not matter. No dialog, no switch: vibration and voice off is the
   switch.
 - **Measured:** each take and release is a diagnostics row (`SIGNAL_WAKE`) with how long it was
   held; the cost is to be read with `batterystats` on the owner's phone and written to
