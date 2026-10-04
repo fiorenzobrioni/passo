@@ -17,7 +17,7 @@
     <string name="sessions_signals_vibrate">%1$s, con vibrazione</string>
     <string name="sessions_live_busy">C’è un’uscita in corso: terminala per iniziarne un’altra.</string>
     <string name="sessions_footer">Distanze e calorie sono stime dal tuo passo. Le vibrazioni seguono la modalità silenziosa del telefono.</string>
-    <string name="sessions_footer_late">Su questo telefono il contapassi non può risvegliarlo: a schermo spento, un segnale può arrivare con qualche minuto di ritardo.</string>
+    <string name="sessions_footer_late">Su questo telefono un’uscita con segnali lo tiene sveglio perché arrivino puntuali: un po’ più di batteria, finché dura.</string>
     <string name="sessions_paused_title">Il conteggio è in pausa</string>
     <string name="sessions_paused_body">Un’uscita si misura dai tuoi passi: riprendi il conteggio per iniziarne una.</string>
     <string name="sessions_paused_action">Riprendi</string>
@@ -108,7 +108,7 @@
     <string name="editor_try_faster">Più veloce</string>
     <string name="editor_try_slower">Più lento</string>
     <string name="editor_intervals_voice_note">Solo nelle cuffie: la partenza, ogni cambio (“Veloce, 3 minuti”, “Lento”) e all’obiettivo quanti intervalli veloci erano al ritmo.</string>
-    <string name="editor_intervals_screen_on_title">Puntuali solo a schermo acceso</string>
-    <string name="editor_intervals_screen_on">Il contapassi di questo telefono non può risvegliarlo: a schermo spento un cambio può arrivare con minuti di ritardo. Per una camminata a intervalli tieni lo schermo acceso, o cammina sul tapis roulant.</string>
+    <!-- On a phone whose counter cannot wake it: how the signals stay on time, and its cost (ADR 0013). -->
+    <string name="editor_awake_note" formatted="false">Su questo telefono Passo lo tiene sveglio durante l’uscita, così i segnali arrivano puntuali. Un po’ più di batteria: circa l’1–3% all’ora.</string>
     <string name="sessions_signals_intervals">Un segnale a ogni cambio</string>
 </resources>

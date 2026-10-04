@@ -24,6 +24,10 @@
          install, never asked for. -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.POST_PROMOTED_NOTIFICATIONS" />
+    <!-- An outing's signals on a phone whose step counter cannot wake it
+         (docs/adr/0013-interval-walks.md): the processor kept awake while the outing counts.
+         A normal permission, granted at install; WorkManager declares it too. -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <!-- The outings' voice (docs/adr/0010-voice.md): since Android 11 an app sees a
          text-to-speech engine only if it says it looks for one. Not a permission. -->

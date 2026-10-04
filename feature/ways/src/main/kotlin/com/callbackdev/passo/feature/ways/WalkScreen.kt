@@ -146,6 +146,9 @@ internal fun WalkPage(
         }
         if (live == null && view?.journey?.state != WayJourneyState.FINISHED) {
             item(key = "voice") { VoiceChoice(state.walkVoice, state.voiceAvailability, actions) }
+            // A walk always tells its places: on a phone its counter cannot wake, it keeps the
+            // phone awake while it counts, said once, plainly (docs/adr/0013-interval-walks.md).
+            if (!state.wakeUpCounter) item(key = "awake") { AwakeNote() }
             item(key = "how") {
                 Text(
                     text = stringResource(R.string.walk_how),
@@ -499,3 +502,28 @@ private fun VoiceChoice(voice: SessionVoice, availability: VoiceAvailability, ac
 }
 
 private const val STEPS_ROUNDING = 100
+
+/** How a walk's places stay on time on this phone, and what it costs: one plain line. */
+@Composable
+private fun AwakeNote() {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.Top,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp)
+            .testTag(WaysTags.WALK_AWAKE),
+    ) {
+        Icon(
+            PassoIcons.Battery,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(18.dp),
+        )
+        Text(
+            stringResource(R.string.walk_awake_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}

@@ -43,4 +43,11 @@ enum class DiagnosticsType {
      * so a field test reads the delay instead of guessing it (docs/adr/0013-interval-walks.md).
      */
     INTERVAL_CHANGE,
+
+    /**
+     * The processor kept awake for an outing's signals, on a phone whose step counter cannot wake
+     * it (docs/adr/0013-interval-walks.md): when it was taken, and when let go with how long it
+     * was held, so an export shows it never outlives the outing.
+     */
+    SIGNAL_WAKE,
 }

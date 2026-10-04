@@ -94,6 +94,7 @@
     <string name="walk_voice_off_note">Una breve vibrazione a ogni luogo, senza parole.</string>
     <string name="walk_voice_headphones_note">A ogni luogo il suo nome e una frase che lo racconta, solo nelle cuffie.</string>
     <string name="walk_voice_always_note">Nelle cuffie, oppure ad alta voce dal telefono quando non è in silenzioso.</string>
+    <string name="walk_awake_note" formatted="false">Su questo telefono Passo lo tiene sveglio durante la passeggiata, così ogni luogo arriva puntuale. Un po’ più di batteria: circa l’1–3% all’ora.</string>
     <string name="walk_voice_offline">Una voce installata sul telefono: Passo non invia nulla.</string>
     <string name="walk_voice_try">Ascoltala</string>
     <string name="walk_voice_change">Cambia voce</string>

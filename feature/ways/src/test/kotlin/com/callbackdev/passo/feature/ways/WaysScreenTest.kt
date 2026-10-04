@@ -378,6 +378,24 @@ class WaysScreenTest {
     }
 
     @Test
+    fun `on a phone its counter cannot wake, a walk's page says it keeps the phone awake`() {
+        showWay(
+            WayId.MILAN_DUOMO_NAVIGLI,
+            state = WaysSamples.state(walks = listOf(WaysSamples.london), live = null).copy(wakeUpCounter = false),
+        )
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasTestTag(WaysTags.WALK_AWAKE))
+        compose.onNodeWithText("Passo keeps it awake during the walk", substring = true).assertIsDisplayed()
+        snapshot("walk_awake")
+    }
+
+    @Test
+    fun `on a phone its counter can wake, nothing is said`() {
+        showWay(WayId.MILAN_DUOMO_NAVIGLI, state = WaysSamples.state(walks = listOf(WaysSamples.london), live = null))
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasTestTag(WaysTags.WALK_VOICE))
+        compose.onNodeWithTag(WaysTags.WALK_AWAKE).assertDoesNotExist()
+    }
+
+    @Test
     fun `a walk walked to its end says when, and can be walked again`() {
         showWay(WayId.MILAN_DUOMO_NAVIGLI, journeyId = WaysSamples.milan.id)
         compose.onNodeWithText("The walk is done: Naviglio Grande.").assertIsDisplayed()

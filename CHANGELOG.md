@@ -46,6 +46,14 @@ All notable changes to Passo are documented here. The format follows
 
 ### Changed
 
+- **Signals on time on every phone.** On phones whose step counter cannot wake them (some
+  Samsungs among them), an outing's vibrations and voice could come a minute or two late with the
+  screen off. There, an outing with signals now keeps the phone awake while it counts, for a
+  little more battery (about 1 to 3% an hour); the outing editor and a city walk's page say so. Outings without
+  vibration or voice, and every other phone, are as before.
+- **An outing's distance on phones that hand steps over in clumps.** The same phones made an
+  outing read its pace as a run, and measure its distance and calories with the running step
+  (about a quarter too long). Its pace is now measured over the time the steps took.
 - **Steps land in the minutes they were walked in, on phones that hand them over in clumps.**
   Some phones (some Samsungs among them) deliver the steps of a minute and a half at once while
   the screen is off; Passo put them all in one minute, which could read as a minute of running

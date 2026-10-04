@@ -92,6 +92,7 @@
     <string name="walk_voice_off_note">A short vibration at each place, nothing said.</string>
     <string name="walk_voice_headphones_note">At each place its name and a line about it, through headphones only.</string>
     <string name="walk_voice_always_note">Through headphones, or out loud from the phone when it is not on silent.</string>
+    <string name="walk_awake_note" formatted="false">On this phone, Passo keeps it awake during the walk so each place is told on time. A little more battery: about 1 to 3% an hour.</string>
     <string name="walk_voice_offline">A voice installed on this phone: Passo sends nothing.</string>
     <string name="walk_voice_try">Hear it</string>
     <string name="walk_voice_change">Change voice</string>

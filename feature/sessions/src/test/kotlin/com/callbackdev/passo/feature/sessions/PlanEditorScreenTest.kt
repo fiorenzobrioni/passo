@@ -309,16 +309,31 @@ class PlanEditorScreenTest {
     }
 
     @Test
-    fun `on a phone that cannot be woken by its counter, it says the changes need the screen on`() {
-        val japanese = state(SessionPlans.JAPANESE_WALKING.copy(id = 4), isNew = false)
-            .copy(changesWhileScreenOff = false)
+    fun `on a phone its counter cannot wake, it says once that the outing keeps it awake`() {
+        val japanese = state(SessionPlans.JAPANESE_WALKING.copy(id = 4), isNew = false).copy(wakeUpCounter = false)
         compose.setContent {
             PassoTheme(darkTheme = true) { PlanEditorScreen(japanese, onBack = {}, actions = PlanEditorActions()) }
         }
 
-        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.SCREEN_ON))
-        compose.onNodeWithText("On time only with the screen on").assertIsDisplayed()
-        snapshot("editor_intervals_screen_on_dark")
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.AWAKE))
+        compose.onNodeWithText("Passo keeps it awake during the outing", substring = true).assertIsDisplayed()
+        snapshot("editor_awake_dark")
+    }
+
+    @Test
+    fun `with no signal, or a counter that wakes the phone, nothing is said`() {
+        val silent = SessionPlans.JAPANESE_WALKING.copy(id = 4, vibrate = false)
+        compose.setContent {
+            PassoTheme {
+                PlanEditorScreen(
+                    state(silent, isNew = false).copy(wakeUpCounter = false),
+                    onBack = {},
+                    actions = PlanEditorActions(),
+                )
+            }
+        }
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.VOICE))
+        compose.onNodeWithTag(EditorTags.AWAKE).assertDoesNotExist()
     }
 
     @Test

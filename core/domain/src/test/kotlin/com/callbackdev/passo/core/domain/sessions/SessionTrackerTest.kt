@@ -61,6 +61,31 @@ class SessionTrackerTest {
     }
 
     @Test
+    fun `steps handed over in clumps keep their walking cadence and their walking step`() {
+        // A sensor with no FIFO: every minute and a half, that much walking at 100 a minute.
+        val tracker = tracker()
+        var at = start
+        repeat(8) {
+            at += 90_000
+            tracker.onSteps(at, 150)
+            assertThat(tracker.cadenceAt(at)).isIn(com.google.common.collect.Range.closed(95, 105))
+        }
+        val totals = tracker.session.totals
+        assertThat(totals.distanceMeters).isWithin(0.01).of(totals.steps * lengths.walkingMeters)
+        // Brisk is from 100: a pace walked at 100 is at it.
+        assertThat(totals.zoneMillis).isEqualTo(totals.movingMillis)
+    }
+
+    @Test
+    fun `a stop shows as the cadence falling`() {
+        val tracker = tracker()
+        tracker.walk(start, 60_000)
+        val walking = checkNotNull(tracker.cadenceAt(start + 60_000))
+        assertThat(checkNotNull(tracker.cadenceAt(start + 80_000))).isLessThan(walking / 2)
+        assertThat(tracker.cadenceAt(start + 120_000)).isEqualTo(0)
+    }
+
+    @Test
     fun `standing still adds no time, and one step after it adds a step's worth`() {
         val tracker = tracker()
         tracker.walk(start, 30_000)
