@@ -53,8 +53,9 @@ import kotlin.math.ceil
  * @property canVibrate the phone has a vibrator: without one the switch is not offered.
  * @property voiceAvailability whether the phone can speak in the app's language, once asked
  *   (the engine is bound only when the outing speaks, or the reader picks a voice).
- * @property changesWhileScreenOff the phone has a wake-up step counter: an interval walk's
- *   changes reach it on time with the screen off (docs/adr/0013-interval-walks.md).
+ * @property wakeUpCounter the phone has a wake-up step counter: an outing's signals reach it on
+ *   time with the screen off by themselves; without it, Passo keeps the phone awake for them
+ *   while the outing counts (docs/adr/0013-interval-walks.md), and the editor says so.
  */
 @Immutable
 data class PlanEditorState(
@@ -67,7 +68,7 @@ data class PlanEditorState(
     val restOfDaySteps: Int,
     val canVibrate: Boolean,
     val voiceAvailability: VoiceAvailability = VoiceAvailability.UNKNOWN,
-    val changesWhileScreenOff: Boolean = true,
+    val wakeUpCounter: Boolean = true,
 ) {
     val changed: Boolean get() = draft != original
 }
@@ -115,7 +116,7 @@ constructor(
                 lengths = StepLengths.of(profile),
                 restOfDaySteps = SessionPlans.restOfDay(steps, settings.dailyGoalSteps),
                 canVibrate = SessionHaptics.available(context),
-                changesWhileScreenOff = StepTracking.hasWakeUpStepCounter(context),
+                wakeUpCounter = StepTracking.hasWakeUpStepCounter(context),
             )
         }
     }

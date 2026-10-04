@@ -90,6 +90,7 @@ import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.sessions.SessionAmount
 import com.callbackdev.passo.core.domain.sessions.SessionConstants
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
+import com.callbackdev.passo.core.domain.sessions.SignalWake
 import com.callbackdev.passo.core.domain.sessions.typicalCadence
 import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.SessionGoalKind
@@ -384,15 +385,6 @@ private fun EditorList(state: PlanEditorState, actions: PlanEditorActions, modif
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 4.dp),
                 )
-                if (intervals && !state.changesWhileScreenOff) {
-                    StatusCard(
-                        icon = PassoIcons.Warning,
-                        title = stringResource(R.string.editor_intervals_screen_on_title),
-                        body = stringResource(R.string.editor_intervals_screen_on),
-                        tone = StatusTone.PROBLEM,
-                        modifier = Modifier.testTag(EditorTags.SCREEN_ON),
-                    )
-                }
                 if (!intervals) MilestoneChips(plan.milestones, format, actions)
             }
         }
@@ -424,6 +416,9 @@ private fun EditorList(state: PlanEditorState, actions: PlanEditorActions, modif
             }
         }
         item(key = "voice") { VoiceChoice(state, actions) }
+        if (SignalWake.neededFor(plan, wakeUpCounter = state.wakeUpCounter)) {
+            item(key = "awake") { AwakeNote() }
+        }
     }
 }
 
@@ -928,6 +923,35 @@ private fun CountRow(
     }
 }
 
+/**
+ * On a phone whose step counter cannot wake it, an outing with signals keeps it awake while it
+ * counts: said once, plainly, where the signals are chosen, with what it costs. Not a warning:
+ * it is how the signals arrive on time, and turning them off turns it off.
+ */
+@Composable
+private fun AwakeNote() {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.Top,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = ScreenMargin + 4.dp, end = ScreenMargin, top = 12.dp)
+            .testTag(EditorTags.AWAKE),
+    ) {
+        Icon(
+            PassoIcons.Battery,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(18.dp),
+        )
+        Text(
+            stringResource(R.string.editor_awake_note),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
 /** Hooks for the UI tests. */
 object EditorTags {
     const val LIST = "editor_list"
@@ -954,5 +978,5 @@ object EditorTags {
     const val BLOCKS = "editor_blocks"
     const val PROTOCOL = "editor_protocol"
     const val TRY_INTERVAL = "editor_try_interval"
-    const val SCREEN_ON = "editor_screen_on"
+    const val AWAKE = "editor_awake"
 }

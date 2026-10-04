@@ -41,9 +41,9 @@ over at once inside its half-minute window, so 150 steps read as 300 a minute. F
 change as this note: the cadence measures each sample's steps against the time in motion they
 took (`SessionTracker.cadenceAt`). The day itself was right, after the attribution fix of 3 Oct.
 
-## What is left to decide
+## What was decided
 
-On a phone like this one a change is on time only with the screen on, or with ADR 0013's option
-C (the processor kept awake by Passo in the 45 s before each change, about 0.3% of a battery for
-half an hour, the first wake lock of Passo's own). C is the owner's decision. The goal is now
-logged like the changes (`interval=goal`), so a second outing measures all of it.
+The same day, with the owner: on a phone like this one, an outing with signals keeps the processor
+awake while it counts (ADR 0013, amendment of 4 Oct 2026). The next walk measures it.
+
+The goal is now logged like the changes (`interval=goal`), so the next walk measures all of it.

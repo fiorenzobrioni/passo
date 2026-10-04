@@ -84,9 +84,10 @@ other. All business logic lives in `:core:domain`, with unit tests.
 - **Battery first** (PLANNING.md §9): never poll or run timers while the screen is off; no
   wakelocks (except inside `goAsync()` for the shutdown flush), no exact alarms, no periodic
   workers for tracking; database writes are batched. Widget, notification and tile update
-  only when someone can see them. The one exception: the wake-up step counter while an outing
-  the reader started is counting, at 30 s, and at 2 s in the 40 s before a change of an interval
-  walk (`docs/adr/0009-sessions.md`, `docs/adr/0013-interval-walks.md`); never widen it.
+  only when someone can see them. The one exception: an outing the reader started, while it
+  counts: the wake-up step counter at 30 s, and at 2 s in the 40 s before a change of an interval
+  walk; on a phone with no wake-up counter, a partial wake lock instead, for an outing with signals
+  only (`SignalWake`; `docs/adr/0009-sessions.md`, `docs/adr/0013-interval-walks.md`); never widen it.
 - **No lost steps.** Don't change the tracking engine without updating the tests for every
   edge case in PLANNING.md §4.6.
 - **Honest estimates.** Distance, calories and active time are shown as estimates; formulas

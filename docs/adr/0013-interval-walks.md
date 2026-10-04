@@ -5,8 +5,9 @@
 - Date: 2026-10-01
 - Amends, in the change that builds Phase 13: `docs/adr/0009-sessions.md` (decision 5) and
   PLANNING.md §9.7, for an interval outing only
-- Built: 3 Oct 2026 (Phase 13), as option A; the delay and the battery are still to be measured
-  on the owner's phone (below)
+- Built: 3 Oct 2026 (Phase 13), as option A
+- Amended: 4 Oct 2026 (owner, after the first field test): on a phone with no wake-up step
+  counter, every outing with signals keeps the processor awake while it counts (below)
 
 ## Context
 
@@ -144,3 +145,37 @@ go to `docs/battery/` and decide between A and B.
 - AOSP, Sensor types: https://source.android.com/docs/core/interaction/sensors/sensor-types
 - AOSP, Suspend mode (wake-up sensors and their wake lock):
   https://source.android.com/docs/core/interaction/sensors/suspend-mode
+
+## Amendment, 4 Oct 2026: phones a step counter cannot wake
+
+The first field test (`docs/battery/2026-10-04-interval-walk.md`) ran on a phone with no wake-up
+step sensor of any kind. There A told the changes into a fast interval 33 to 127 s late, and the
+milestones of ordinary outings would be as late without music playing (which keeps the phone
+awake by itself, and is why the owner's earlier outings were on time). C as written cannot start
+on such a phone: nothing wakes it at the 45 s window's beginning (no wake-up sensor, a timer does
+not run while the processor sleeps, exact alarms are forbidden).
+
+Decided with the owner:
+
+- **Where:** only on a phone whose `getDefaultSensor(TYPE_STEP_COUNTER, true)` is null. Elsewhere A
+  stays, at a fraction of the cost.
+- **When:** while an outing counts and tells its signals (vibration or voice, and the outings'
+  channel on). Not paused, not after its end, not for an outing with no signal (whose end and
+  numbers come from the steps' timestamps whenever they arrive), never outside an outing.
+- **How:** a partial wake lock (`SignalWakeLock`, the screen stays off), not reference counted,
+  bounded at the longest outing and ten minutes; the counter registered at 2 s while it is held.
+  No timer: awake, the processor receives the steps as they are taken, and the signals ride on
+  them as before, in minutes in motion. A wall-clock timer was considered and not chosen: a stop
+  at a traffic light would eat a fast interval.
+- **Said:** one plain line in the editor where the signals are chosen, on such phones and for a
+  plan with signals only ("a little more battery: about 1 to 3% an hour"), the Outings page's
+  footer, the guide's battery paragraph. No dialog, no switch: vibration and voice off is the
+  switch.
+- **Measured:** each take and release is a diagnostics row (`SIGNAL_WAKE`) with how long it was
+  held; the cost is to be read with `batterystats` on the owner's phone and written to
+  `docs/battery/`.
+
+The cost, an estimate until measured: a processor kept awake with little to do draws in the order
+of 0.1 to 0.5 W above sleep, so about 0.5 to 1.5% of a 17 Wh battery for half an hour, 1 to 3%
+for an hour, 2 to 6% for two. A phone with GPS on for a run uses several times that.
+

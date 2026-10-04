@@ -57,6 +57,9 @@ while one is under way.
    *Amended 3 Oct 2026 (Phase 13, `docs/adr/0013-interval-walks.md`):* an interval outing
    reports within 2 s in the 40 s of motion before each change of interval, and within 30 s
    otherwise.
+   *Amended 4 Oct 2026 (`docs/adr/0013-interval-walks.md`):* on a phone with no wake-up counter, an
+   outing with signals keeps the processor awake while it counts (a partial wake lock), so its
+   signals are on time there too.
 6. **It ends by itself.** At its goal; after 15 minutes without a step (at its last step,
    noticed by the next step or the screen, so a forgotten outing costs nothing); after an
    hour paused; at four hours. One with fewer than 30 steps is not kept. Pausing the count

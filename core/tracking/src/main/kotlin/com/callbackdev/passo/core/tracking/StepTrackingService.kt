@@ -36,6 +36,7 @@ import com.callbackdev.passo.core.domain.sessions.SessionConstants
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.sessions.SessionSignal
 import com.callbackdev.passo.core.domain.sessions.SessionTracker
+import com.callbackdev.passo.core.domain.sessions.SignalWake
 import com.callbackdev.passo.core.domain.today.DayMinute
 import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.today.minuteOfDay
@@ -112,6 +113,11 @@ import javax.inject.Inject
  * before a change, back after it. A change is told once the batch of samples that crossed it is
  * all in (the latest only, if it crossed several), with its delay in the diagnostics log. With the
  * screen on, a one-second ticker moves the notification's countdown, and stops with the screen.
+ *
+ * On a phone whose step counter cannot wake it, an outing that tells its signals keeps the
+ * processor awake while it counts ([SignalWakeLock], [SignalWake]): the steps then arrive as they
+ * are taken, and every signal with them. The one wake lock of Passo's own besides the shutdown
+ * flush's; let go at a pause, the end, or the service's.
  */
 @AndroidEntryPoint
 class StepTrackingService : Service() {
@@ -142,6 +148,7 @@ class StepTrackingService : Service() {
     private lateinit var speech: SessionSpeech
     private lateinit var sensorSource: StepSensorSource
     private lateinit var powerManager: PowerManager
+    private lateinit var signalWake: SignalWakeLock
 
     private var ledger: StepLedger? = null
     private var started = false
@@ -204,6 +211,9 @@ class StepTrackingService : Service() {
             handler = Handler(Looper.getMainLooper()),
         )
         powerManager = requireNotNull(getSystemService(PowerManager::class.java)) { "No PowerManager" }
+        signalWake = SignalWakeLock(powerManager) { detail ->
+            ledger?.note(DiagnosticsEvent(System.currentTimeMillis(), DiagnosticsType.SIGNAL_WAKE, detail))
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -251,6 +261,7 @@ class StepTrackingService : Service() {
         liveSteps.setServiceRunning(false)
         liveSession.publish(null)
         speech.release()
+        signalWake.hold(false)
         unregisterReceivers()
         sensorSource.close()
         // Whatever is still buffered is written on a scope that outlives this one. If the
@@ -656,13 +667,25 @@ class StepTrackingService : Service() {
      * with the screen off. Paused, over, or none: exactly the registration of every other
      * moment (docs/adr/0002-sensor-reporting.md).
      */
-    private fun applyRegistration() {
+    private fun applyRegistration(reconsiderWake: Boolean = true) {
         val measuring = tracker?.session?.state == SessionState.ACTIVE
-        // An interval outing near a change: reports every two seconds, so it is felt on time.
+        // A phone its counter cannot wake, an outing with signals: the processor is kept awake
+        // while it counts, and the steps come as they are taken (docs/adr/0013-interval-walks.md).
+        if (reconsiderWake) {
+            signalWake.hold(
+                SignalWake.needed(
+                    session = tracker?.session,
+                    wakeUpCounter = sensorSource.wakeUpSensor != null,
+                    signalsAllowed = sessionNotifications.signalsAllowed(),
+                ),
+            )
+        }
+        // An interval outing near a change: reports every two seconds, so it is felt on time. Kept
+        // awake, the same: a counter with a FIFO would otherwise hold the steps for half a minute.
         val nearChange = tracker?.untilIntervalSignal()?.let { it <= SessionConstants.INTERVAL_WINDOW_MILLIS } == true
         val latency = when {
             interactive -> SCREEN_ON_LATENCY_US
-            measuring && nearChange -> INTERVAL_NEAR_LATENCY_US
+            measuring && (nearChange || signalWake.held) -> INTERVAL_NEAR_LATENCY_US
             measuring -> SESSION_LATENCY_US
             else -> SCREEN_OFF_LATENCY_US
         }
@@ -695,7 +718,7 @@ class StepTrackingService : Service() {
         changeJob = scope.launch(Dispatchers.Main) {
             pendingChange?.let(::tellIntervalChange)
             pendingChange = null
-            if (!interactive) applyRegistration()
+            if (!interactive) applyRegistration(reconsiderWake = false)
         }
     }
 

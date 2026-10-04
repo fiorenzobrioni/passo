@@ -19,7 +19,7 @@
     <string name="sessions_signals_vibrate">%1$s, with vibration</string>
     <string name="sessions_live_busy">An outing is under way: stop it to start another.</string>
     <string name="sessions_footer">Distances and calories are estimates from your step length. Vibrations follow the phone’s silent mode.</string>
-    <string name="sessions_footer_late">On this phone the step counter cannot wake it: with the screen off, a signal can come a few minutes late.</string>
+    <string name="sessions_footer_late">On this phone, an outing with signals keeps it awake so they arrive on time: a little more battery while it lasts.</string>
     <string name="sessions_paused_title">Counting is paused</string>
     <string name="sessions_paused_body">An outing is measured from your steps: resume counting to start one.</string>
     <string name="sessions_paused_action">Resume</string>
@@ -115,8 +115,8 @@
     <string name="editor_try_faster">Faster</string>
     <string name="editor_try_slower">Slower</string>
     <string name="editor_intervals_voice_note">Through headphones only: the start, each change (“Fast, 3 minutes”, “Slow”), and at the goal how many fast intervals were at pace.</string>
-    <string name="editor_intervals_screen_on_title">On time only with the screen on</string>
-    <string name="editor_intervals_screen_on">This phone’s step counter cannot wake it: with the screen off, a change can come minutes late. Keep the screen on for an interval walk, or walk on a treadmill.</string>
+    <!-- On a phone whose counter cannot wake it: how the signals stay on time, and its cost (ADR 0013). -->
+    <string name="editor_awake_note" formatted="false">On this phone, Passo keeps it awake during the outing so the signals arrive on time. A little more battery: about 1 to 3% an hour.</string>
     <!-- On the Outings page, an interval plan's signals. -->
     <string name="sessions_signals_intervals">A signal at each change</string>
 </resources>
