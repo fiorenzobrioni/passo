@@ -30,6 +30,7 @@ import com.callbackdev.passo.core.data.widget.WidgetUpdates
 import com.callbackdev.passo.core.domain.goals.GoalReached
 import com.callbackdev.passo.core.domain.metrics.MetricsCalculator
 import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.sessions.IntervalSchedule
 import com.callbackdev.passo.core.domain.sessions.SessionAnnouncement
 import com.callbackdev.passo.core.domain.sessions.SessionConstants
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
@@ -698,6 +699,25 @@ class StepTrackingService : Service() {
         }
     }
 
+    /**
+     * An interval outing's goal, logged as its changes are: the step that crossed it is the last
+     * of the batch's time in motion, so the moment it fell is that much before the batch's end.
+     */
+    private fun logIntervalGoal(session: Session) {
+        val schedule = IntervalSchedule.of(session) ?: return
+        val reachedAt = session.reachedAtMillis?.takeIf { session.end == SessionEnd.GOAL } ?: return
+        val now = System.currentTimeMillis()
+        val fellAt = reachedAt - (session.totals.movingMillis - schedule.totalMillis).coerceAtLeast(0)
+        ledger?.note(
+            DiagnosticsEvent(
+                now,
+                DiagnosticsType.INTERVAL_CHANGE,
+                "interval=goal late=${now - fellAt}ms screen=${if (interactive) "on" else "off"} " +
+                    "wakeUp=${sensorSource.wakeUpSensor != null}",
+            ),
+        )
+    }
+
     /** A change of interval: "faster" or "slower", the voice if the outing speaks, and its delay logged. */
     private fun tellIntervalChange(change: SessionSignal.IntervalChange) {
         val session = tracker?.session?.takeIf { it.live } ?: return
@@ -786,6 +806,7 @@ class StepTrackingService : Service() {
         val session = finished.session
         // The goal is the last interval's end: its long pulse, never a change on top of it.
         pendingChange = null
+        logIntervalGoal(session)
         // Kept a while after its goal or a long stillness, for "Keep going" and "Resume";
         // otherwise it is over here. The voice is let go once its last sentence is said.
         val reopenable = finished.kept && tracker?.canKeepGoing(System.currentTimeMillis()) == true

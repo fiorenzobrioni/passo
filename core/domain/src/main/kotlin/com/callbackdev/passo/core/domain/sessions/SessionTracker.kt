@@ -60,9 +60,9 @@ sealed interface SessionSignal {
  *
  * - **Time in motion** is made of the gaps between steps, each credited with at most
  *   [MAX_MILLIS_PER_STEP] per step: no timer runs, and standing still adds nothing.
- * - **The cadence** is the last [CADENCE_WINDOW_MILLIS] of steps; it decides the step length and
- *   the energy cost of each step, as the minute's cadence does for the day, and whether the time
- *   is at the outing's intensity.
+ * - **The cadence** is the last [CADENCE_WINDOW_MILLIS] of steps, over the time in motion they
+ *   took; it decides the step length and the energy cost of each step, as the minute's cadence
+ *   does for the day, and whether the time is at the outing's intensity.
  * - **Signals** come from the steps: the milestones the reader chose, then the goal, which ends
  *   the outing. For [KEEP_GOING_MILLIS] after it the steps are still counted aside, so "Keep
  *   going" reopens it with them.
@@ -121,16 +121,23 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
     }
 
     /**
-     * The cadence at [nowMillis], over the last [CADENCE_WINDOW_MILLIS]; null before there is
-     * enough of it to be a pace, or while paused.
+     * The cadence at [nowMillis], from the steps of the last [CADENCE_WINDOW_MILLIS]; null before
+     * there is enough of it to be a pace, or while paused.
+     *
+     * Each sample's steps are measured against the time in motion they took, not against the
+     * window: a sensor with no FIFO hands over a minute and a half of walking in one sample, and
+     * those 170 steps inside a half-minute window would read as 340 a minute, a run, pricing the
+     * outing's distance with the running step. The time since the last sample is added, so the
+     * cadence falls when the reader stops.
      */
     fun cadenceAt(nowMillis: Long): Int? {
         if (session.state == SessionState.PAUSED) return null
         val from = maxOf(nowMillis - CADENCE_WINDOW_MILLIS, windowFrom)
-        val span = nowMillis - from
+        val marks = window.filter { it.atMillis > from && it.atMillis <= nowMillis }
+        val idle = nowMillis - (marks.lastOrNull()?.atMillis ?: from)
+        val span = marks.sumOf { it.movingMillis } + idle
         if (span < MIN_CADENCE_SPAN_MILLIS) return null
-        val steps = window.filter { it.atMillis > from && it.atMillis <= nowMillis }.sumOf { it.steps }
-        return (steps * MILLIS_PER_MINUTE.toDouble() / span).roundToInt()
+        return (marks.sumOf { it.steps } * MILLIS_PER_MINUTE.toDouble() / span).roundToInt()
     }
 
     /** Ends it by itself when it has been still, paused or open for too long. */
@@ -331,7 +338,7 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
     private fun measure(atMillis: Long, steps: Int, lastEventAtMillis: Long): SessionTotals {
         val gap = (atMillis - lastEventAtMillis).coerceAtLeast(0)
         val moving = minOf(gap, steps * MAX_MILLIS_PER_STEP)
-        window.addLast(Mark(atMillis, steps))
+        window.addLast(Mark(atMillis, steps, moving))
         while (window.isNotEmpty() && window.first().atMillis <= atMillis - CADENCE_WINDOW_MILLIS) window.removeFirst()
         val cadence = cadenceAt(atMillis)
         val floor = session.intensity.cadenceFloor
@@ -362,7 +369,7 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
         return SessionSignal.Finished(finished, kept = finished.reached || finished.totals.steps >= MIN_KEPT_STEPS)
     }
 
-    private data class Mark(val atMillis: Long, val steps: Int)
+    private data class Mark(val atMillis: Long, val steps: Int, val movingMillis: Long)
 
     private companion object {
         const val MILLIS_PER_MINUTE = 60_000L

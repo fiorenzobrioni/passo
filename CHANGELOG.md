@@ -46,6 +46,9 @@ All notable changes to Passo are documented here. The format follows
 
 ### Changed
 
+- **An outing's distance on phones that hand steps over in clumps.** The same phones made an
+  outing read its pace as a run, and measure its distance and calories with the running step
+  (about a quarter too long). Its pace is now measured over the time the steps took.
 - **Steps land in the minutes they were walked in, on phones that hand them over in clumps.**
   Some phones (some Samsungs among them) deliver the steps of a minute and a half at once while
   the screen is off; Passo put them all in one minute, which could read as a minute of running
