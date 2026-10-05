@@ -27,7 +27,10 @@ moves with the distance their steps measure.
    route, and nothing added to fill a count). Rome, Paris and Madrid followed (2 Oct 2026): 9.6 km
    with 15 places, 10.4 km with 14, 9.6 km with 14; then Lima's historic centre (10.1 km, 15) and
    Cusco (9.4 km, 12), whose map has parks and no water; then the first short walks (decision
-   10): Porto (5.3 km, 10), Amsterdam (5.2 km, 9) and Prague (5.2 km, 9).
+   10): Porto (5.3 km, 10), Amsterdam (5.2 km, 9) and Prague (5.2 km, 9); then, with the cities
+   grouped by continent (decision 12), Berlin (10.5 km, 13) and Vienna (9.7 km, 13), which
+   bring Europe to ten. `fetch` with walk ids fetches only those walks, so a city is added
+   without moving the others with the map's edits since.
 3. **The city behind the line is OpenStreetMap too**: the water (the Thames, the Darsena) as
    areas, the canals (the Navigli) as lines drawn as wide as they are (`riverWidthMeters`, with
    `WayProjection.pixelsPerMeter`), the largest parks as areas. Parks are a new colour role,

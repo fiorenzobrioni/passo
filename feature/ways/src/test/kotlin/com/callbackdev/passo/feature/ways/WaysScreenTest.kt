@@ -234,7 +234,7 @@ class WaysScreenTest {
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.CITIES))
         // London under way, Milan walked; Lima and Cusco not begun.
         compose.onNodeWithTag(WaysTags.continent(Continent.EUROPE))
-            .assert(hasText("8 cities · 1 walked", substring = true))
+            .assert(hasText("10 cities · 1 walked", substring = true))
             .assert(hasText("Under way: London", substring = true))
         compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).assert(hasText("2 cities", substring = true))
         compose.onNodeWithTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)).assertDoesNotExist()
@@ -251,7 +251,7 @@ class WaysScreenTest {
     fun `a continent's page has its map, then its cities with where each walk stands`() {
         var opened: Pair<WayId, Long?>? = null
         showContinent(Continent.EUROPE, onOpen = { way, journey -> opened = way to journey })
-        compose.onNodeWithContentDescription("Europe on the map: 8 cities, 1 under way, 1 walked.").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Europe on the map: 10 cities, 1 under way, 1 walked.").assertIsDisplayed()
         compose.onNodeWithTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)).assert(hasText("Under way:", substring = true))
         compose.onNodeWithTag(WaysTags.way(WayId.MILAN_DUOMO_NAVIGLI))
             .assert(hasText("Walked on Sep 12", substring = true))
@@ -273,6 +273,8 @@ class WaysScreenTest {
                 WayId.PARIS_VOSGES_EIFFEL,
                 WayId.LONDON_PALACE_TOWER,
                 WayId.MADRID_DEBOD_RETIRO,
+                WayId.BERLIN_WALL_VICTORY,
+                WayId.VIENNA_BELVEDERE_PRATER,
                 WayId.PORTO_SE_PILAR,
                 WayId.AMSTERDAM_CENTRAAL_WESTERKERK,
                 WayId.PRAGUE_CASTLE_WENCESLAS,
@@ -364,6 +366,25 @@ class WaysScreenTest {
         showWay(WayId.MADRID_DEBOD_RETIRO, state = WaysSamples.state(walks = emptyList(), live = null))
         compose.onNodeWithText("From the Temple of Debod to the Retiro", substring = true).assertExists()
         snapshot("walk_madrid")
+    }
+
+    @Test
+    fun `Berlin's walk, from the Wall along the Spree to the Tiergarten`() {
+        showWay(WayId.BERLIN_WALL_VICTORY, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("From the Wall to the Victory Column", substring = true).assertExists()
+        snapshot("walk_berlin")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Checkpoint Charlie"))
+        compose.onNodeWithText("Soviet and American tanks", substring = true).assertExists()
+        snapshot("walk_berlin_places")
+    }
+
+    @Test
+    fun `Vienna's walk, round the Ring and over the Danube Canal, in the dark`() {
+        showWay(WayId.VIENNA_BELVEDERE_PRATER, state = WaysSamples.state(walks = emptyList(), live = null), dark = true)
+        compose.onNodeWithText("From the Belvedere to the Prater", substring = true).assertExists()
+        snapshot("walk_vienna_dark")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Giant Ferris Wheel"))
+        compose.onNodeWithText("The Third Man", substring = true).assertExists()
     }
 
     @Test

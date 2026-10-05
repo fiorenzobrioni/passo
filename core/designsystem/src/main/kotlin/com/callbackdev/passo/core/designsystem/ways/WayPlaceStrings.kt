@@ -18,6 +18,8 @@ fun wayNameRes(id: WayId): Int = when (id) {
     WayId.PARIS_VOSGES_EIFFEL -> R.string.way_name_paris_vosges_eiffel
     WayId.LONDON_PALACE_TOWER -> R.string.way_name_london_palace_tower
     WayId.MADRID_DEBOD_RETIRO -> R.string.way_name_madrid_debod_retiro
+    WayId.BERLIN_WALL_VICTORY -> R.string.way_name_berlin_wall_victory
+    WayId.VIENNA_BELVEDERE_PRATER -> R.string.way_name_vienna_belvedere_prater
     WayId.PORTO_SE_PILAR -> R.string.way_name_porto_se_pilar
     WayId.AMSTERDAM_CENTRAAL_WESTERKERK -> R.string.way_name_amsterdam_centraal_westerkerk
     WayId.PRAGUE_CASTLE_WENCESLAS -> R.string.way_name_prague_castle_wenceslas
@@ -38,6 +40,8 @@ fun wayRouteRes(id: WayId): Int = when (id) {
     WayId.PARIS_VOSGES_EIFFEL -> R.string.way_route_paris_vosges_eiffel
     WayId.LONDON_PALACE_TOWER -> R.string.way_route_london_palace_tower
     WayId.MADRID_DEBOD_RETIRO -> R.string.way_route_madrid_debod_retiro
+    WayId.BERLIN_WALL_VICTORY -> R.string.way_route_berlin_wall_victory
+    WayId.VIENNA_BELVEDERE_PRATER -> R.string.way_route_vienna_belvedere_prater
     WayId.PORTO_SE_PILAR -> R.string.way_route_porto_se_pilar
     WayId.AMSTERDAM_CENTRAAL_WESTERKERK -> R.string.way_route_amsterdam_centraal_westerkerk
     WayId.PRAGUE_CASTLE_WENCESLAS -> R.string.way_route_prague_castle_wenceslas
@@ -53,6 +57,8 @@ fun walkOutingRes(id: WayId): Int? = when (id) {
     WayId.PARIS_VOSGES_EIFFEL -> R.string.way_outing_paris_vosges_eiffel
     WayId.LONDON_PALACE_TOWER -> R.string.way_outing_london_palace_tower
     WayId.MADRID_DEBOD_RETIRO -> R.string.way_outing_madrid_debod_retiro
+    WayId.BERLIN_WALL_VICTORY -> R.string.way_outing_berlin_wall_victory
+    WayId.VIENNA_BELVEDERE_PRATER -> R.string.way_outing_vienna_belvedere_prater
     WayId.PORTO_SE_PILAR -> R.string.way_outing_porto_se_pilar
     WayId.AMSTERDAM_CENTRAAL_WESTERKERK -> R.string.way_outing_amsterdam_centraal_westerkerk
     WayId.PRAGUE_CASTLE_WENCESLAS -> R.string.way_outing_prague_castle_wenceslas
@@ -85,6 +91,19 @@ fun placeNameRes(key: String): Int = when (key) {
     "barcelos" -> R.string.way_place_barcelos
     "belorado" -> R.string.way_place_belorado
     "berceto" -> R.string.way_place_berceto
+    "berlin_bebelplatz" -> R.string.way_place_berlin_bebelplatz
+    "berlin_brandenburg_gate" -> R.string.way_place_berlin_brandenburg_gate
+    "berlin_cathedral" -> R.string.way_place_berlin_cathedral
+    "berlin_checkpoint_charlie" -> R.string.way_place_berlin_checkpoint_charlie
+    "berlin_gendarmenmarkt" -> R.string.way_place_berlin_gendarmenmarkt
+    "berlin_hackesche_hoefe" -> R.string.way_place_berlin_hackesche_hoefe
+    "berlin_holocaust_memorial" -> R.string.way_place_berlin_holocaust_memorial
+    "berlin_new_synagogue" -> R.string.way_place_berlin_new_synagogue
+    "berlin_potsdamer_platz" -> R.string.way_place_berlin_potsdamer_platz
+    "berlin_reichstag" -> R.string.way_place_berlin_reichstag
+    "berlin_tv_tower" -> R.string.way_place_berlin_tv_tower
+    "berlin_victory_column" -> R.string.way_place_berlin_victory_column
+    "berlin_wall_memorial" -> R.string.way_place_berlin_wall_memorial
     "bivigliano" -> R.string.way_place_bivigliano
     "bologna" -> R.string.way_place_bologna
     "bolsena" -> R.string.way_place_bolsena
@@ -313,6 +332,19 @@ fun placeNameRes(key: String): Int = when (key) {
     "vercelli" -> R.string.way_place_vercelli
     "verres" -> R.string.way_place_verres
     "vetralla" -> R.string.way_place_vetralla
+    "vienna_belvedere" -> R.string.way_place_vienna_belvedere
+    "vienna_city_hall" -> R.string.way_place_vienna_city_hall
+    "vienna_hofburg" -> R.string.way_place_vienna_hofburg
+    "vienna_hundertwasserhaus" -> R.string.way_place_vienna_hundertwasserhaus
+    "vienna_karlskirche" -> R.string.way_place_vienna_karlskirche
+    "vienna_maria_theresien_platz" -> R.string.way_place_vienna_maria_theresien_platz
+    "vienna_parliament" -> R.string.way_place_vienna_parliament
+    "vienna_plague_column" -> R.string.way_place_vienna_plague_column
+    "vienna_riesenrad" -> R.string.way_place_vienna_riesenrad
+    "vienna_secession" -> R.string.way_place_vienna_secession
+    "vienna_stadtpark" -> R.string.way_place_vienna_stadtpark
+    "vienna_state_opera" -> R.string.way_place_vienna_state_opera
+    "vienna_stephansdom" -> R.string.way_place_vienna_stephansdom
     "vilarinho" -> R.string.way_place_vilarinho
     "villafranca" -> R.string.way_place_villafranca
     "viterbo" -> R.string.way_place_viterbo
@@ -337,6 +369,19 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "assisi" -> R.string.way_note_assisi
     "astorga" -> R.string.way_note_astorga
     "barcelos" -> R.string.way_note_barcelos
+    "berlin_bebelplatz" -> R.string.way_note_berlin_bebelplatz
+    "berlin_brandenburg_gate" -> R.string.way_note_berlin_brandenburg_gate
+    "berlin_cathedral" -> R.string.way_note_berlin_cathedral
+    "berlin_checkpoint_charlie" -> R.string.way_note_berlin_checkpoint_charlie
+    "berlin_gendarmenmarkt" -> R.string.way_note_berlin_gendarmenmarkt
+    "berlin_hackesche_hoefe" -> R.string.way_note_berlin_hackesche_hoefe
+    "berlin_holocaust_memorial" -> R.string.way_note_berlin_holocaust_memorial
+    "berlin_new_synagogue" -> R.string.way_note_berlin_new_synagogue
+    "berlin_potsdamer_platz" -> R.string.way_note_berlin_potsdamer_platz
+    "berlin_reichstag" -> R.string.way_note_berlin_reichstag
+    "berlin_tv_tower" -> R.string.way_note_berlin_tv_tower
+    "berlin_victory_column" -> R.string.way_note_berlin_victory_column
+    "berlin_wall_memorial" -> R.string.way_note_berlin_wall_memorial
     "bologna" -> R.string.way_note_bologna
     "bolsena" -> R.string.way_note_bolsena
     "burgos" -> R.string.way_note_burgos
@@ -500,6 +545,19 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "tui" -> R.string.way_note_tui
     "valenca" -> R.string.way_note_valenca
     "vercelli" -> R.string.way_note_vercelli
+    "vienna_belvedere" -> R.string.way_note_vienna_belvedere
+    "vienna_city_hall" -> R.string.way_note_vienna_city_hall
+    "vienna_hofburg" -> R.string.way_note_vienna_hofburg
+    "vienna_hundertwasserhaus" -> R.string.way_note_vienna_hundertwasserhaus
+    "vienna_karlskirche" -> R.string.way_note_vienna_karlskirche
+    "vienna_maria_theresien_platz" -> R.string.way_note_vienna_maria_theresien_platz
+    "vienna_parliament" -> R.string.way_note_vienna_parliament
+    "vienna_plague_column" -> R.string.way_note_vienna_plague_column
+    "vienna_riesenrad" -> R.string.way_note_vienna_riesenrad
+    "vienna_secession" -> R.string.way_note_vienna_secession
+    "vienna_stadtpark" -> R.string.way_note_vienna_stadtpark
+    "vienna_state_opera" -> R.string.way_note_vienna_state_opera
+    "vienna_stephansdom" -> R.string.way_note_vienna_stephansdom
     "viterbo" -> R.string.way_note_viterbo
     else -> null
 }

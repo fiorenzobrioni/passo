@@ -87,7 +87,7 @@
     <string name="editor_voice_change">Change voice</string>
     <!-- The door to the city walks, on the Ways page (Phase 11). -->
     <string name="sessions_cities_title">Walk through a city</string>
-    <string name="sessions_cities_body">Ten cities, from Milan to Cusco, walked from wherever you are: each place told as your steps reach it.</string>
+    <string name="sessions_cities_body">Cities from Milan to Cusco, walked from wherever you are: each place told as your steps reach it.</string>
 
     <!-- The interval walk (Phase 13). -->
     <string name="editor_kind">Kind</string>

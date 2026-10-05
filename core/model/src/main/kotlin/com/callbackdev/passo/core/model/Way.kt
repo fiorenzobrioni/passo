@@ -34,6 +34,8 @@ enum class WayId(val kind: WayKind, val city: String? = null, val continent: Con
     PARIS_VOSGES_EIFFEL(WayKind.WALK, city = "paris", continent = Continent.EUROPE),
     LONDON_PALACE_TOWER(WayKind.WALK, city = "london", continent = Continent.EUROPE),
     MADRID_DEBOD_RETIRO(WayKind.WALK, city = "madrid", continent = Continent.EUROPE),
+    BERLIN_WALL_VICTORY(WayKind.WALK, city = "berlin", continent = Continent.EUROPE),
+    VIENNA_BELVEDERE_PRATER(WayKind.WALK, city = "vienna", continent = Continent.EUROPE),
     PORTO_SE_PILAR(WayKind.WALK, city = "porto", continent = Continent.EUROPE),
     AMSTERDAM_CENTRAAL_WESTERKERK(WayKind.WALK, city = "amsterdam", continent = Continent.EUROPE),
     PRAGUE_CASTLE_WENCESLAS(WayKind.WALK, city = "prague", continent = Continent.EUROPE),

@@ -3,7 +3,8 @@
 behind it, from OpenStreetMap and Natural Earth.
 
     python3 tools/build_ways.py fetch   # downloads what is missing into tools/ways-cache/ (not
-                                        # committed), and routes the walks into tools/walks/
+                                        # committed), and routes the walks into tools/walks/;
+                                        # `fetch MILAN_DUOMO_NAVIGLI ...` only those walks
     python3 tools/build_ways.py         # writes the app's files from that cache
     python3 tools/build_ways.py continents  # writes only the continents' maps (Natural Earth's
                                             # land, fetched if missing; the walks' committed routes)
@@ -98,38 +99,49 @@ MERCATOR = 6378137.0
 
 # --- Fetch ------------------------------------------------------------------------------------
 
-def fetch():
+def fetch(only=()):
+    """Downloads what is missing. With [only] (walk ids), only what those walks need (their
+    sources and the locators' land), for a city added without fetching the world again."""
+    unknown = set(only) - {walk.id for walk in WALKS}
+    if unknown:
+        sys.exit(f"No walk {', '.join(sorted(unknown))}")
     CACHE.mkdir(exist_ok=True)
-    for way in WAYS:
-        for relation in way.relations:
-            download(WMT.format(relation), CACHE / f"relation-{relation}.json")
-    for layer in NE_LAYERS:
+    if not only:
+        for way in WAYS:
+            for relation in way.relations:
+                download(WMT.format(relation), CACHE / f"relation-{relation}.json")
+    for layer in NE_LAYERS if not only else ["ne_50m_land"]:
         download(NE.format(layer), CACHE / f"{layer}.geojson")
     ROUTES.mkdir(exist_ok=True)
     for walk in WALKS:
-        lonlats = "|".join(f"{stop.lon:.6f},{stop.lat:.6f}" for stop in walk.stops)
-        route = ROUTES / f"{walk.id.lower()}.geojson"
-        if not route.exists():
-            raw = CACHE / f"brouter-{walk.id.lower()}.geojson"
-            download(BROUTER.format(lonlats), raw)
-            # Only the line is kept: BRouter's turn-by-turn table would triple the file.
-            geometry = json.loads(raw.read_text())["features"][0]["geometry"]
-            geometry["coordinates"] = [[round(c[0], 6), round(c[1], 6)] for c in geometry["coordinates"]]
-            route.write_text(json.dumps({
-                "type": "FeatureCollection",
-                "features": [{
-                    "type": "Feature",
-                    "properties": {"source": "BRouter, profile hiking-mountain; © OpenStreetMap contributors, ODbL"},
-                    "geometry": geometry,
-                }],
-            }, separators=(",", ":")) + "\n")
-        for ref in walk.water + walk.canals + walk.parks:
-            kind, number = ref.split("/")
-            download(OSM.format(kind, number), CACHE / f"osm-{kind}-{number}.xml")
-        if walk.streets:
-            for tile, name in street_tiles(walk):
-                water = CACHE / water_tile_name(name) if walk.water_from_tiles else None
-                fetch_streets(tile, CACHE / name, MAIN_STREETS | MINOR_STREETS | LANES, water)
+        if not only or walk.id in only:
+            fetch_walk(walk)
+
+
+def fetch_walk(walk):
+    lonlats = "|".join(f"{stop.lon:.6f},{stop.lat:.6f}" for stop in walk.stops)
+    route = ROUTES / f"{walk.id.lower()}.geojson"
+    if not route.exists():
+        raw = CACHE / f"brouter-{walk.id.lower()}.geojson"
+        download(BROUTER.format(lonlats), raw)
+        # Only the line is kept: BRouter's turn-by-turn table would triple the file.
+        geometry = json.loads(raw.read_text())["features"][0]["geometry"]
+        geometry["coordinates"] = [[round(c[0], 6), round(c[1], 6)] for c in geometry["coordinates"]]
+        route.write_text(json.dumps({
+            "type": "FeatureCollection",
+            "features": [{
+                "type": "Feature",
+                "properties": {"source": "BRouter, profile hiking-mountain; © OpenStreetMap contributors, ODbL"},
+                "geometry": geometry,
+            }],
+        }, separators=(",", ":")) + "\n")
+    for ref in walk.water + walk.canals + walk.parks:
+        kind, number = ref.split("/")
+        download(OSM.format(kind, number), CACHE / f"osm-{kind}-{number}.xml")
+    if walk.streets:
+        for tile, name in street_tiles(walk):
+            water = CACHE / water_tile_name(name) if walk.water_from_tiles else None
+            fetch_streets(tile, CACHE / name, MAIN_STREETS | MINOR_STREETS | LANES, water)
 
 
 def fetch_streets(tile, target, classes, water_target=None):
@@ -1153,8 +1165,8 @@ fun placeNoteRes(key: String): Int? = when (key) {{
 
 
 if __name__ == "__main__":
-    if sys.argv[1:] == ["fetch"]:
-        fetch()
+    if sys.argv[1:2] == ["fetch"]:
+        fetch(sys.argv[2:])
     elif not sys.argv[1:]:
         build()
     elif sys.argv[1:] == ["continents"]:

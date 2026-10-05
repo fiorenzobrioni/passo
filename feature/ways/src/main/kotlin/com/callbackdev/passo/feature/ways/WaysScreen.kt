@@ -161,7 +161,7 @@ private fun WaysList(
             }
         }
         item(key = "cities") {
-            // Ten cities is the ceiling of one flat list: past it, a row a continent, each
+            // Ten cities was the ceiling of one flat list: past it, a row a continent, each
             // with its own page (ADR 0015 decision 12).
             SettingsGroup(modifier = Modifier.testTag(WaysTags.CITIES)) {
                 Continent.entries.forEachIndexed { index, continent ->

@@ -144,7 +144,7 @@ internal fun continentCities(walks: List<WalkView>): List<ContinentCity> {
     }
 }
 
-/** The map in one sentence, for TalkBack: «Europe on the map: 8 cities, 1 under way, 2 walked.» */
+/** The map in one sentence, for TalkBack: «Europe on the map: 10 cities, 1 under way, 2 walked.» */
 @Composable
 private fun continentMapSpoken(continent: Continent, walks: List<WalkView>): String {
     val underWay = walks.count { it.mark == CityMark.UNDER_WAY }

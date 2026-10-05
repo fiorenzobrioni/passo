@@ -110,5 +110,5 @@
     <!-- Il cammino in corso (PLANNING.md §11 Fase 11) -->
     <string name="insights_group_way">Il tuo cammino</string>
     <string name="insights_ways_door_title">Percorri un cammino o una città</string>
-    <string name="insights_ways_door_body">Cinque cammini, dalla Via degli Dei al Cammino di Santiago, e passeggiate in dieci città, da Milano a Cusco, con i passi che fai comunque.</string>
+    <string name="insights_ways_door_body">Cinque cammini, dalla Via degli Dei al Cammino di Santiago, e passeggiate in città d’Europa e delle Americhe, da Milano a Cusco, con i passi che fai comunque.</string>
 </resources>

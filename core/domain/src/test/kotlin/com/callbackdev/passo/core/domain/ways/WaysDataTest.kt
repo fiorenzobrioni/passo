@@ -28,6 +28,8 @@ class WaysDataTest {
                 WayId.PARIS_VOSGES_EIFFEL,
                 WayId.LONDON_PALACE_TOWER,
                 WayId.MADRID_DEBOD_RETIRO,
+                WayId.BERLIN_WALL_VICTORY,
+                WayId.VIENNA_BELVEDERE_PRATER,
                 WayId.PORTO_SE_PILAR,
                 WayId.AMSTERDAM_CENTRAAL_WESTERKERK,
                 WayId.PRAGUE_CASTLE_WENCESLAS,
@@ -38,7 +40,8 @@ class WaysDataTest {
         // One walk a city for now (PLANNING.md §11 Phase 11, later).
         assertThat(Ways.walks.map { it.id.city })
             .containsExactly(
-                "milan", "rome", "paris", "london", "madrid", "porto", "amsterdam", "prague", "lima", "cusco",
+                "milan", "rome", "paris", "london", "madrid", "berlin", "vienna", "porto", "amsterdam", "prague",
+                "lima", "cusco",
             )
             .inOrder()
     }
@@ -137,7 +140,9 @@ class WaysDataTest {
         assertThat(WayId.entries.filter { it.kind == WayKind.WALK }.map { it.continent }.toSet())
             .containsExactlyElementsIn(Continent.entries)
         assertThat(Ways.walksIn(Continent.EUROPE).map { it.id.city })
-            .containsExactly("milan", "rome", "paris", "london", "madrid", "porto", "amsterdam", "prague")
+            .containsExactly(
+                "milan", "rome", "paris", "london", "madrid", "berlin", "vienna", "porto", "amsterdam", "prague",
+            )
             .inOrder()
         assertThat(Ways.walksIn(Continent.AMERICAS).map { it.id.city }).containsExactly("lima", "cusco").inOrder()
     }
