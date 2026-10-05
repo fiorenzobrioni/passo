@@ -11,7 +11,7 @@ the line or out of order.
 Every note is one sentence, made to be read in a notification and heard, with nothing that
 goes stale (no opening hours, no prices). Each was checked when written (1 Oct 2026; the fifth
 way and Rome, Paris and Madrid on 2 Oct 2026, Lima and Cusco after them); the source is the
-line after it.
+line after it. Berlin and Vienna (5 Oct 2026) were checked in the English and German Wikipedias.
 """
 
 from dataclasses import dataclass, field
@@ -415,6 +415,7 @@ class Walk:
     outing_en: str  # the outing's name in History and on Today
     outing_it: str
     country: str  # the locator map's country
+    continent: str  # its group on the Ways page: a key of CONTINENTS
     stops: list = field(default_factory=list)
     water: list = field(default_factory=list)
     canals: list = field(default_factory=list)
@@ -445,6 +446,7 @@ MILAN = Walk(
     outing_en="A walk in Milan",
     outing_it="Passeggiata a Milano",
     country="IT",
+    continent="EUROPE",
     water=["way/345030396"],
     canals=["relation/3340142", "relation/3350738"],
     parks=["relation/10172760", "way/5110320", "way/260829251"],
@@ -515,6 +517,7 @@ ROME = Walk(
     outing_en="A walk in Rome",
     outing_it="Passeggiata a Roma",
     country="IT",
+    continent="EUROPE",
     water=["relation/5071", "way/22797948", "way/22747533"],
     parks=["relation/2985896", "relation/11384819", "relation/10646138", "way/113038199"],
     more_streets=("residential", "unclassified", "living_street"),
@@ -594,6 +597,7 @@ PARIS = Walk(
     outing_en="A walk in Paris",
     outing_it="Passeggiata a Parigi",
     country="FR",
+    continent="EUROPE",
     water=["relation/2191006", "relation/10837211"],
     parks=["way/53820452", "way/4208595", "way/128206209"],
     stops=[
@@ -666,6 +670,7 @@ LONDON = Walk(
     outing_en="A walk in London",
     outing_it="Passeggiata a Londra",
     country="GB",
+    continent="EUROPE",
     water=["relation/28934", "relation/70347", "relation/276130"],
     parks=["way/374960368", "way/863554956", "way/4373996", "way/4254099", "way/367694522", "way/142680571",
            "way/372975520"],
@@ -752,6 +757,7 @@ MADRID = Walk(
     outing_en="A walk in Madrid",
     outing_it="Passeggiata a Madrid",
     country="IBERIA",
+    continent="EUROPE",
     water=["relation/3615910", "way/4088758"],
     parks=["relation/13616929", "relation/535694", "relation/1505193", "relation/2061818", "way/15244804"],
     stops=[
@@ -814,6 +820,157 @@ MADRID = Walk(
     ],
 )
 
+BERLIN = Walk(
+    id="BERLIN_WALL_VICTORY",
+    city="berlin",
+    city_en="Berlin",
+    city_it="Berlino",
+    route_en="From the Wall to the Victory Column, by the Brandenburg Gate",
+    route_it="Dal Muro alla Colonna della Vittoria, passando per la Porta di Brandeburgo",
+    outing_en="A walk in Berlin",
+    outing_it="Passeggiata a Berlino",
+    country="DE",
+    continent="EUROPE",
+    # The Spree (mapped in pieces: through the centre, past the Tiergarten, east of the island),
+    # the Kupfergraben by Museum Island, the Humboldthafen and the Tiergarten's Neuer See; the
+    # Landwehrkanal, narrow, as a line.
+    water=[
+        "relation/6306415", "way/4778262", "relation/6529251", "relation/7388656", "way/52189421",
+        "relation/26993",
+    ],
+    canals=["relation/412199"],
+    parks=["relation/7643526", "way/340138573", "way/23852021", "way/16000014"],
+    stops=[
+        Stop("berlin_wall_memorial", "Berlin Wall Memorial", "Memoriale del Muro di Berlino", 52.5351, 13.3903,
+             note_en="Here the houses stood in the East and the pavement in the West: in 1961 people jumped from their windows to flee.",
+             note_it="Qui le case erano a Est e il marciapiede a Ovest: nel 1961 c'era chi saltava dalle finestre per fuggire."),
+        # Source: Wikipedia, Bernauer Straße; Wikipedia (de), Bernauer Straße.
+        Stop("berlin_new_synagogue", "New Synagogue", "Nuova Sinagoga", 52.52482, 13.39445,
+             note_en="Inaugurated in 1866 with about 3,000 seats, it was the largest synagogue in Berlin.",
+             note_it="Inaugurata nel 1866 con circa 3.000 posti, era la sinagoga più grande di Berlino."),
+        # Source: Wikipedia, New Synagogue (Berlin); Wikipedia (de), Neue Synagoge (Berlin).
+        Stop("berlin_hackesche_hoefe", "Hackesche Höfe", "Hackesche Höfe", 52.5244, 13.4022,
+             note_en="Eight courtyards open one into the next behind a single gateway; they opened in 1906.",
+             note_it="Otto cortili si aprono uno nell'altro dietro un unico portone; furono inaugurati nel 1906."),
+        # Source: Wikipedia, Hackesche Höfe; Wikipedia (de), Hackesche Höfe.
+        Stop("berlin_tv_tower", "TV Tower", "Torre della televisione", 52.5208, 13.4094,
+             note_en="Built by East Germany between 1965 and 1969, at 368 metres it is the tallest structure in Germany.",
+             note_it="Costruita dalla Germania Est tra il 1965 e il 1969, con 368 metri è la struttura più alta della Germania."),
+        # Source: Wikipedia, Fernsehturm Berlin; Wikipedia (de), Berliner Fernsehturm.
+        Stop("berlin_cathedral", "Berlin Cathedral", "Duomo di Berlino", 52.5190, 13.4006,
+             note_en="Finished in 1905 for Emperor William II, it holds the tombs of the Hohenzollern, Prussia's ruling house.",
+             note_it="Finito nel 1905 per l'imperatore Guglielmo II, custodisce le tombe degli Hohenzollern, la casa regnante di Prussia."),
+        # Source: Wikipedia, Berlin Cathedral; Wikipedia (de), Berliner Dom.
+        Stop("berlin_bebelplatz", "Bebelplatz", "Bebelplatz", 52.5165, 13.3938,
+             note_en="On 10 May 1933 books were burned here; a glass pane in the square looks down on empty shelves.",
+             note_it="Il 10 maggio 1933 qui furono bruciati i libri; una lastra di vetro nella piazza mostra scaffali vuoti."),
+        # Source: Wikipedia, Bebelplatz; Wikipedia (de), Bebelplatz.
+        Stop("berlin_gendarmenmarkt", "Gendarmenmarkt", "Gendarmenmarkt", 52.5136, 13.3923,
+             note_en="Two domed churches, the French and the German, flank the concert hall Schinkel built in 1821.",
+             note_it="Due chiese con la cupola, la francese e la tedesca, affiancano la sala da concerto costruita da Schinkel nel 1821."),
+        # Source: Wikipedia, Gendarmenmarkt; Wikipedia (de), Gendarmenmarkt.
+        Stop("berlin_checkpoint_charlie", "Checkpoint Charlie", "Checkpoint Charlie", 52.5075, 13.3904,
+             note_en="In October 1961, Soviet and American tanks faced each other at this crossing, ready to fire.",
+             note_it="Nell'ottobre 1961 carri armati sovietici e americani si fronteggiarono a questo valico, pronti a sparare."),
+        # Source: Wikipedia, Checkpoint Charlie; Wikipedia (de), Checkpoint Charlie.
+        Stop("berlin_potsdamer_platz", "Potsdamer Platz", "Potsdamer Platz", 52.5096, 13.3760,
+             note_en="Once one of the busiest squares in Europe, it lay empty along the Wall until 1989.",
+             note_it="Un tempo tra le piazze più trafficate d'Europa, rimase vuota lungo il Muro fino al 1989."),
+        # Source: Wikipedia, Potsdamer Platz; Wikipedia (de), Potsdamer Platz.
+        Stop("berlin_holocaust_memorial", "Memorial to the Murdered Jews of Europe", "Memoriale agli ebrei assassinati d'Europa",
+             52.5139, 13.3787,
+             note_en="Peter Eisenman's field of 2,711 concrete slabs was opened in 2005.",
+             note_it="Il campo di 2.711 blocchi di cemento di Peter Eisenman fu inaugurato nel 2005."),
+        # Source: Wikipedia, Memorial to the Murdered Jews of Europe; Wikipedia (de), Denkmal für die ermordeten Juden Europas.
+        Stop("berlin_brandenburg_gate", "Brandenburg Gate", "Porta di Brandeburgo", 52.5163, 13.3777,
+             note_en="Napoleon carried the Quadriga on top of the gate off to Paris in 1806; it came back in 1814.",
+             note_it="Napoleone portò a Parigi la Quadriga in cima alla porta nel 1806; tornò nel 1814."),
+        # Source: Wikipedia, Brandenburg Gate; Wikipedia (de), Brandenburger Tor.
+        Stop("berlin_reichstag", "Reichstag", "Reichstag", 52.5186, 13.3748,
+             note_en="The Bundestag has sat here since 1999, under a glass dome open to visitors.",
+             note_it="Il Bundestag siede qui dal 1999, sotto una cupola di vetro aperta ai visitatori."),
+        # Source: Wikipedia, Reichstag building; Wikipedia (de), Reichstagsgebäude.
+        Stop("berlin_victory_column", "Victory Column", "Colonna della Vittoria", 52.5145, 13.3501,
+             note_en="It first stood before the Reichstag; in 1939 it was moved here, to the Großer Stern.",
+             note_it="Sorgeva davanti al Reichstag; nel 1939 fu spostata qui, al Großer Stern."),
+        # Source: Wikipedia, Victory Column (Berlin); Wikipedia (de), Siegessäule (Berlin).
+    ],
+)
+
+VIENNA = Walk(
+    id="VIENNA_BELVEDERE_PRATER",
+    city="vienna",
+    city_en="Vienna",
+    city_it="Vienna",
+    route_en="From the Belvedere to the Prater, by the Ring and St Stephen's",
+    route_it="Dal Belvedere al Prater, passando per il Ring e Santo Stefano",
+    outing_en="A walk in Vienna",
+    outing_it="Passeggiata a Vienna",
+    country="AT",
+    continent="EUROPE",
+    # The Danube Canal, the Wien river through the Stadtpark, and the Stadtpark's pond.
+    water=["relation/65901", "relation/21407746", "relation/2577803"],
+    parks=[
+        "relation/7000697", "way/12988858", "way/28151223", "way/8063831", "way/8063768", "relation/7735480",
+        "way/551031461", "way/8044066",
+    ],
+    stops=[
+        Stop("vienna_belvedere", "Upper Belvedere", "Belvedere Superiore", 48.1915, 16.3809,
+             note_en="Built as the summer palace of Prince Eugene of Savoy, it now keeps Klimt's The Kiss.",
+             note_it="Costruito come residenza estiva del principe Eugenio di Savoia, oggi custodisce Il bacio di Klimt."),
+        # Source: Wikipedia, Belvedere, Vienna; Wikipedia (de), Schloss Belvedere and Österreichische Galerie Belvedere.
+        Stop("vienna_karlskirche", "Karlskirche", "Karlskirche", 48.1980, 16.3719,
+             note_en="In 1713 Emperor Charles VI vowed this church to Saint Charles Borromeo, a protector against the plague.",
+             note_it="Nel 1713 l'imperatore Carlo VI fece voto di questa chiesa a san Carlo Borromeo, protettore contro la peste."),
+        # Source: Wikipedia, Karlskirche; Wikipedia (de), Karlskirche (Wien). The two disagree on
+        # whether the vow came during the plague or a year after it: neither is said.
+        Stop("vienna_secession", "Secession Building", "Palazzo della Secessione", 48.2005, 16.3660,
+             note_en="Finished in 1898, it carries its motto in gold: To every age its art, to art its freedom.",
+             note_it="Finito nel 1898, porta in oro il suo motto: A ogni epoca la sua arte, all'arte la sua libertà."),
+        # Source: Wikipedia, Secession Building; Wikipedia (de), Wiener Secessionsgebäude.
+        Stop("vienna_state_opera", "State Opera", "Opera di Stato", 48.2030, 16.3692,
+             note_en="The opera house opened in 1869 with Mozart's Don Giovanni.",
+             note_it="Il teatro dell'opera fu inaugurato nel 1869 con il Don Giovanni di Mozart."),
+        # Source: Wikipedia, Vienna State Opera; Wikipedia (de), Wiener Staatsoper.
+        Stop("vienna_maria_theresien_platz", "Maria-Theresien-Platz", "Maria-Theresien-Platz", 48.2045, 16.3609,
+             note_en="Two twin museums, of art history and of natural history, face each other across Maria Theresa's monument.",
+             note_it="Due musei gemelli, di storia dell'arte e di storia naturale, si guardano attraverso il monumento a Maria Teresa."),
+        # Source: Wikipedia, Maria-Theresien-Platz; Wikipedia (de), Maria-Theresien-Platz.
+        Stop("vienna_parliament", "Parliament", "Parlamento", 48.2081, 16.3592,
+             note_en="Theophil Hansen built it in the Greek style, with Pallas Athena standing before it.",
+             note_it="Theophil Hansen lo costruì in stile greco, con Pallade Atena in piedi davanti."),
+        # Source: Wikipedia, Austrian Parliament Building; Wikipedia (de), Parlamentsgebäude (Wien).
+        Stop("vienna_city_hall", "City Hall", "Municipio", 48.2106, 16.3576,
+             note_en="Finished in 1883, the neo-Gothic city hall has the Rathausmann, a standard-bearer, on top of its tower.",
+             note_it="Finito nel 1883, il municipio neogotico ha in cima alla torre il Rathausmann, un portabandiera."),
+        # Source: Wikipedia, Vienna City Hall; Wikipedia (de), Wiener Rathaus.
+        Stop("vienna_hofburg", "Hofburg", "Hofburg", 48.2080, 16.3664,
+             note_en="The Habsburgs ruled from this palace, their winter residence, until 1918.",
+             note_it="Gli Asburgo governarono da questo palazzo, la loro residenza invernale, fino al 1918."),
+        # Source: Wikipedia, Hofburg; Wikipedia (de), Hofburg.
+        Stop("vienna_plague_column", "Plague Column", "Colonna della peste", 48.2087, 16.3698,
+             note_en="Emperor Leopold I vowed it during the plague of 1679, in the middle of the Graben.",
+             note_it="L'imperatore Leopoldo I ne fece voto durante la peste del 1679, in mezzo al Graben."),
+        # Source: Wikipedia, Vienna Plague Column; Wikipedia (de), Wiener Pestsäule.
+        Stop("vienna_stephansdom", "St Stephen's Cathedral", "Duomo di Santo Stefano", 48.2085, 16.3724,
+             note_en="Its south tower rises 136 metres; its great bell, the Pummerin, was first cast from Ottoman cannons.",
+             note_it="La sua torre sud si alza per 136 metri; la sua grande campana, la Pummerin, fu fusa la prima volta con cannoni ottomani."),
+        # Source: Wikipedia, St. Stephen's Cathedral, Vienna; Wikipedia (de), Stephansdom.
+        Stop("vienna_stadtpark", "Stadtpark", "Stadtpark", 48.2029, 16.3797,
+             note_en="Opened in 1862, the park keeps the gilded statue of Johann Strauss II.",
+             note_it="Aperto nel 1862, il parco custodisce la statua dorata di Johann Strauss figlio."),
+        # Source: Wikipedia, Stadtpark, Vienna; Wikipedia (de), Wiener Stadtpark.
+        Stop("vienna_hundertwasserhaus", "Hundertwasserhaus", "Hundertwasserhaus", 48.2074, 16.3939,
+             note_en="Council flats finished in 1985, with undulating floors and trees growing from the rooms.",
+             note_it="Case popolari finite nel 1985, con pavimenti ondulati e alberi che crescono dalle stanze."),
+        # Source: Wikipedia, Hundertwasserhaus; Wikipedia (de), Hundertwasserhaus (Wien).
+        Stop("vienna_riesenrad", "Giant Ferris Wheel", "Ruota panoramica", 48.2167, 16.3959,
+             note_en="Built in 1897, the Prater's wheel turns in a famous scene of the film The Third Man.",
+             note_it="Costruita nel 1897, la ruota del Prater gira in una famosa scena del film Il terzo uomo."),
+        # Source: Wikipedia, Wiener Riesenrad; Wikipedia (de), Wiener Riesenrad.
+    ],
+)
+
 PORTO = Walk(
     id="PORTO_SE_PILAR",
     city="porto",
@@ -824,6 +981,7 @@ PORTO = Walk(
     outing_en="A walk in Porto",
     outing_it="Passeggiata a Porto",
     country="IBERIA",
+    continent="EUROPE",
     water=["relation/3688750"],
     parks=["way/244599647", "way/215304932", "way/98836111", "relation/3251867"],
     stops=[
@@ -886,6 +1044,7 @@ AMSTERDAM = Walk(
     outing_en="A walk in Amsterdam",
     outing_it="Passeggiata ad Amsterdam",
     country="NL",
+    continent="EUROPE",
     # The IJ and the docks are large areas listed here; the canals are read from the tiles.
     water=["relation/554702", "relation/8878552", "relation/8730108", "relation/12113080", "relation/14235038"],
     water_from_tiles=True,
@@ -944,6 +1103,7 @@ PRAGUE = Walk(
     outing_en="A walk in Prague",
     outing_it="Passeggiata a Praga",
     country="CZ",
+    continent="EUROPE",
     water=["relation/19221"],
     # The Old Town's lanes are mapped as residential streets, as Milan's and Rome's centres
     # are: without the longer ones, its map was the emptiest of all.
@@ -1010,6 +1170,7 @@ LIMA = Walk(
     outing_en="A walk in Lima",
     outing_it="Passeggiata a Lima",
     country="PE",
+    continent="AMERICAS",
     water=["way/367932671", "way/402037791", "way/402037790", "way/402037789"],
     parks=["way/39413088", "relation/12175742", "way/44364384", "way/117755695", "way/172243636"],
     stops=[
@@ -1086,6 +1247,7 @@ CUSCO = Walk(
     outing_en="A walk in Cusco",
     outing_it="Passeggiata a Cusco",
     country="PE",
+    continent="AMERICAS",
     # No water: the rivers of the old centre run in channels, mostly covered, and the Huatanay
     # begins south of the map.
     parks=["way/83130621"],
@@ -1139,7 +1301,7 @@ CUSCO = Walk(
     ],
 )
 
-WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO]
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
@@ -1151,4 +1313,17 @@ LOCATORS = {
     "PE": (-18.6, -81.6, 0.2, -68.4),
     "NL": (50.7, 3.3, 53.6, 7.3),
     "CZ": (48.5, 12.0, 51.1, 18.9),
+    "DE": (47.2, 5.8, 55.1, 15.1),
+    "AT": (46.3, 9.5, 49.1, 17.2),
+}
+
+# The continents the Ways page groups the cities by, in its order (the Kotlin enum Continent has
+# the same names): the frame of each one's map (south, west, north, east), in degrees, drawn
+# from Natural Earth's land. A continent is listed only once it has a walk: the build fails on
+# one without, and on a walk whose route falls outside its continent's frame.
+CONTINENTS = {
+    # From Lisbon to Istanbul and Helsinki: the cities a walk is likely to visit, not the Urals.
+    "EUROPE": (34.5, -11.5, 61.5, 31.5),
+    # From southern Canada to Cape Horn, the Pacific coast to Brazil's eastern tip.
+    "AMERICAS": (-56.0, -126.0, 56.0, -33.0),
 }

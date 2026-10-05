@@ -3,8 +3,11 @@
 behind it, from OpenStreetMap and Natural Earth.
 
     python3 tools/build_ways.py fetch   # downloads what is missing into tools/ways-cache/ (not
-                                        # committed), and routes the walks into tools/walks/
+                                        # committed), and routes the walks into tools/walks/;
+                                        # `fetch MILAN_DUOMO_NAVIGLI ...` only those walks
     python3 tools/build_ways.py         # writes the app's files from that cache
+    python3 tools/build_ways.py continents  # writes only the continents' maps (Natural Earth's
+                                            # land, fetched if missing; the walks' committed routes)
 
 The content (which relations, which stops, what is said of them) is tools/ways_content.py.
 Re-running this script IS the data: its outputs are not edited by hand.
@@ -13,6 +16,7 @@ Re-running this script IS the data: its outputs are not edited by hand.
   every point), its stops snapped to it, and the map behind it, as encoded polylines.
 - core/designsystem/src/main/res/values{,-it}/strings_ways_places.xml: the names and the notes.
 - core/designsystem/.../ways/WayPlaceStrings.kt: from a stop's key to its strings.
+- core/domain/.../ways/ContinentData.kt: the land of each continent the cities are grouped by.
 
 Sources and licences:
 - The lines are OpenStreetMap route relations, read through the Waymarked Trails API, which
@@ -39,13 +43,14 @@ from pathlib import Path
 
 import xml.etree.ElementTree as ElementTree
 
-from ways_content import LOCATORS, WALKS, WAYS
+from ways_content import CONTINENTS, LOCATORS, WALKS, WAYS
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE = Path(__file__).resolve().parent / "ways-cache"
 # The walks' routes, as BRouter drew them: committed, so a build needs no router (ODbL data).
 ROUTES = Path(__file__).resolve().parent / "walks"
 DOMAIN_OUT = ROOT / "core/domain/src/main/kotlin/com/callbackdev/passo/core/domain/ways/WayData.kt"
+CONTINENTS_OUT = ROOT / "core/domain/src/main/kotlin/com/callbackdev/passo/core/domain/ways/ContinentData.kt"
 STRINGS_EN = ROOT / "core/designsystem/src/main/res/values/strings_ways_places.xml"
 STRINGS_IT = ROOT / "core/designsystem/src/main/res/values-it/strings_ways_places.xml"
 STRINGS_KT = ROOT / "core/designsystem/src/main/kotlin/com/callbackdev/passo/core/designsystem/ways/WayPlaceStrings.kt"
@@ -82,6 +87,11 @@ MAX_GAP_METRES = 3000  # a break in the mapping wider than this is not joined
 LINE_TOLERANCE = 1 / 4000  # of the frame's diagonal: under a pixel on the largest phone
 MAP_TOLERANCE = 1 / 1500
 LOCATOR_TOLERANCE_METRES = 2500
+# A continent's map: a page wide at most, a thumbnail at least. Its coasts are simplified to
+# under a pixel of the page's map, and an island under a dot's width there is left out.
+CONTINENT_TOLERANCE = 1 / 1200  # of the frame's diagonal
+CONTINENT_MIN_ISLAND = 1 / 300  # the island's longer side, of the frame's diagonal
+CONTINENT_GROUND = 1.15  # the ground's side, of the frame's longer one: a square box finds land to its edges
 RIVER_MAX_SCALERANK = 8  # Natural Earth's rank: lower is larger; small streams left out
 EARTH = 6371008.8
 MERCATOR = 6378137.0
@@ -89,38 +99,49 @@ MERCATOR = 6378137.0
 
 # --- Fetch ------------------------------------------------------------------------------------
 
-def fetch():
+def fetch(only=()):
+    """Downloads what is missing. With [only] (walk ids), only what those walks need (their
+    sources and the locators' land), for a city added without fetching the world again."""
+    unknown = set(only) - {walk.id for walk in WALKS}
+    if unknown:
+        sys.exit(f"No walk {', '.join(sorted(unknown))}")
     CACHE.mkdir(exist_ok=True)
-    for way in WAYS:
-        for relation in way.relations:
-            download(WMT.format(relation), CACHE / f"relation-{relation}.json")
-    for layer in NE_LAYERS:
+    if not only:
+        for way in WAYS:
+            for relation in way.relations:
+                download(WMT.format(relation), CACHE / f"relation-{relation}.json")
+    for layer in NE_LAYERS if not only else ["ne_50m_land"]:
         download(NE.format(layer), CACHE / f"{layer}.geojson")
     ROUTES.mkdir(exist_ok=True)
     for walk in WALKS:
-        lonlats = "|".join(f"{stop.lon:.6f},{stop.lat:.6f}" for stop in walk.stops)
-        route = ROUTES / f"{walk.id.lower()}.geojson"
-        if not route.exists():
-            raw = CACHE / f"brouter-{walk.id.lower()}.geojson"
-            download(BROUTER.format(lonlats), raw)
-            # Only the line is kept: BRouter's turn-by-turn table would triple the file.
-            geometry = json.loads(raw.read_text())["features"][0]["geometry"]
-            geometry["coordinates"] = [[round(c[0], 6), round(c[1], 6)] for c in geometry["coordinates"]]
-            route.write_text(json.dumps({
-                "type": "FeatureCollection",
-                "features": [{
-                    "type": "Feature",
-                    "properties": {"source": "BRouter, profile hiking-mountain; © OpenStreetMap contributors, ODbL"},
-                    "geometry": geometry,
-                }],
-            }, separators=(",", ":")) + "\n")
-        for ref in walk.water + walk.canals + walk.parks:
-            kind, number = ref.split("/")
-            download(OSM.format(kind, number), CACHE / f"osm-{kind}-{number}.xml")
-        if walk.streets:
-            for tile, name in street_tiles(walk):
-                water = CACHE / water_tile_name(name) if walk.water_from_tiles else None
-                fetch_streets(tile, CACHE / name, MAIN_STREETS | MINOR_STREETS | LANES, water)
+        if not only or walk.id in only:
+            fetch_walk(walk)
+
+
+def fetch_walk(walk):
+    lonlats = "|".join(f"{stop.lon:.6f},{stop.lat:.6f}" for stop in walk.stops)
+    route = ROUTES / f"{walk.id.lower()}.geojson"
+    if not route.exists():
+        raw = CACHE / f"brouter-{walk.id.lower()}.geojson"
+        download(BROUTER.format(lonlats), raw)
+        # Only the line is kept: BRouter's turn-by-turn table would triple the file.
+        geometry = json.loads(raw.read_text())["features"][0]["geometry"]
+        geometry["coordinates"] = [[round(c[0], 6), round(c[1], 6)] for c in geometry["coordinates"]]
+        route.write_text(json.dumps({
+            "type": "FeatureCollection",
+            "features": [{
+                "type": "Feature",
+                "properties": {"source": "BRouter, profile hiking-mountain; © OpenStreetMap contributors, ODbL"},
+                "geometry": geometry,
+            }],
+        }, separators=(",", ":")) + "\n")
+    for ref in walk.water + walk.canals + walk.parks:
+        kind, number = ref.split("/")
+        download(OSM.format(kind, number), CACHE / f"osm-{kind}-{number}.xml")
+    if walk.streets:
+        for tile, name in street_tiles(walk):
+            water = CACHE / water_tile_name(name) if walk.water_from_tiles else None
+            fetch_streets(tile, CACHE / name, MAIN_STREETS | MINOR_STREETS | LANES, water)
 
 
 def fetch_streets(tile, target, classes, water_target=None):
@@ -726,6 +747,67 @@ def build():
         notes.update(walk_notes)
     write_domain(blocks)
     write_strings(places, notes)
+    build_continents()
+
+
+# --- The continents ---------------------------------------------------------------------------
+
+def build_continents():
+    """Each continent's land, for the map that shows where its cities are: Natural Earth's
+    1:50m, cut to a square around the frame and simplified. Fails on a continent with no walk
+    (the page would list an empty group) and on a walk outside its continent's frame."""
+    download(NE.format("ne_50m_land"), CACHE / "ne_50m_land.geojson")
+    for walk in WALKS:
+        if walk.continent not in CONTINENTS:
+            sys.exit(f"{walk.id}: no continent {walk.continent}")
+        south, west, north, east = CONTINENTS[walk.continent]
+        if not all(south <= lat <= north and west <= lon <= east for lat, lon in walk_line(walk)):
+            sys.exit(f"{walk.id}: its route leaves the frame of {walk.continent}")
+    blocks = []
+    for key, frame in CONTINENTS.items():
+        walks = [walk for walk in WALKS if walk.continent == key]
+        if not walks:
+            sys.exit(f"{key} has no walk: a continent is listed only with its cities")
+        south, west, north, east = frame
+        local = Local((south + north) / 2)
+        width, height = (east - west) * local.kx, (north - south) * local.ky
+        diagonal = math.hypot(width, height)
+        half = CONTINENT_GROUND * max(width, height) / 2
+        cy, cx = (south + north) / 2, (west + east) / 2
+        ground = (
+            max(-85.0, cy - half / local.ky),
+            max(-180.0, cx - half / local.kx),
+            min(85.0, cy + half / local.ky),
+            min(180.0, cx + half / local.kx),
+        )
+        land = []
+        for ring in polygons("ne_50m_land", ground, diagonal * CONTINENT_TOLERANCE, local):
+            box = bbox_of(ring)
+            longer = max((box[3] - box[1]) * local.kx, (box[2] - box[0]) * local.ky)
+            if longer >= diagonal * CONTINENT_MIN_ISLAND:
+                land.append(ring)
+        print(f"{key}: {len(walks)} walks, land {len(land)} rings, {sum(map(len, land))} points")
+        blocks.append(f"""
+    private fun {camel(key)}() = ContinentSource(
+        frame = {box_literal(frame)},
+        land = {kotlin_paths(land, 8)},
+    )
+""")
+    cases = "".join(f"        Continent.{key} -> {camel(key)}()\n" for key in CONTINENTS)
+    CONTINENTS_OUT.write_text(f"""// {GENERATED}
+//
+// The land of each continent the city walks are grouped by: Natural Earth (1:50m), public
+// domain. Every path is an encoded polyline (latitude and longitude at 1e-5 degrees), decoded
+// by [Polyline].
+package com.callbackdev.passo.core.domain.ways
+
+import com.callbackdev.passo.core.model.Continent
+
+internal object ContinentData {{
+    fun source(continent: Continent): ContinentSource = when (continent) {{
+{cases}    }}
+{"".join(blocks)}}}
+""")
 
 
 # --- The walks --------------------------------------------------------------------------------
@@ -1083,9 +1165,12 @@ fun placeNoteRes(key: String): Int? = when (key) {{
 
 
 if __name__ == "__main__":
-    if sys.argv[1:] == ["fetch"]:
-        fetch()
+    if sys.argv[1:2] == ["fetch"]:
+        fetch(sys.argv[2:])
     elif not sys.argv[1:]:
         build()
+    elif sys.argv[1:] == ["continents"]:
+        CACHE.mkdir(exist_ok=True)
+        build_continents()
     else:
         sys.exit(__doc__)

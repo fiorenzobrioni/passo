@@ -1,6 +1,8 @@
 package com.callbackdev.passo.core.domain.ways
 
+import com.callbackdev.passo.core.model.Continent
 import com.callbackdev.passo.core.model.WayId
+import com.callbackdev.passo.core.model.WayKind
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import kotlin.math.abs
@@ -26,6 +28,8 @@ class WaysDataTest {
                 WayId.PARIS_VOSGES_EIFFEL,
                 WayId.LONDON_PALACE_TOWER,
                 WayId.MADRID_DEBOD_RETIRO,
+                WayId.BERLIN_WALL_VICTORY,
+                WayId.VIENNA_BELVEDERE_PRATER,
                 WayId.PORTO_SE_PILAR,
                 WayId.AMSTERDAM_CENTRAAL_WESTERKERK,
                 WayId.PRAGUE_CASTLE_WENCESLAS,
@@ -36,7 +40,8 @@ class WaysDataTest {
         // One walk a city for now (PLANNING.md §11 Phase 11, later).
         assertThat(Ways.walks.map { it.id.city })
             .containsExactly(
-                "milan", "rome", "paris", "london", "madrid", "porto", "amsterdam", "prague", "lima", "cusco",
+                "milan", "rome", "paris", "london", "madrid", "berlin", "vienna", "porto", "amsterdam", "prague",
+                "lima", "cusco",
             )
             .inOrder()
     }
@@ -124,5 +129,53 @@ class WaysDataTest {
         assertThat(way.stops.first().key).isEqualTo("porto")
         assertThat(way.stops.last().key).isEqualTo(Ways.of(WayId.CAMINO_FRANCES).stops.last().key)
         assertThat(way.map.locatorFrame).isEqualTo(Ways.of(WayId.CAMINO_FRANCES).map.locatorFrame)
+    }
+
+    // --- Continents (ADR 0015 decision 12) ------------------------------------------------------
+
+    @Test
+    fun `every walk has its continent, a way none, and each continent its cities`() {
+        for (way in Ways.all) assertThat(way.id.continent).isNull()
+        for (walk in Ways.walks) assertThat(walk.id.continent).isNotNull()
+        assertThat(WayId.entries.filter { it.kind == WayKind.WALK }.map { it.continent }.toSet())
+            .containsExactlyElementsIn(Continent.entries)
+        assertThat(Ways.walksIn(Continent.EUROPE).map { it.id.city })
+            .containsExactly(
+                "milan", "rome", "paris", "london", "madrid", "berlin", "vienna", "porto", "amsterdam", "prague",
+            )
+            .inOrder()
+        assertThat(Ways.walksIn(Continent.AMERICAS).map { it.id.city }).containsExactly("lima", "cusco").inOrder()
+    }
+
+    @Test
+    fun `each city lies inside its continent's frame, with land behind it`() {
+        for (continent in Continent.entries) {
+            val map = Continents.map(continent)
+            val frame = map.frame
+            assertThat(map.land).isNotEmpty()
+            for (walk in Ways.walksIn(continent)) {
+                val start = walk.stops.first()
+                assertThat(start.latitude in frame.south..frame.north).isTrue()
+                assertThat(start.longitude in frame.west..frame.east).isTrue()
+                // On land, as drawn: a city in the sea would mean the frame or the data is wrong.
+                assertThat(map.land.any { it.contains(start.latitude, start.longitude) }).isTrue()
+            }
+        }
+    }
+
+    /** Whether the closed ring holds the point: even-odd, in degrees, as the map fills it. */
+    private fun GeoPath.contains(latitude: Double, longitude: Double): Boolean {
+        var inside = false
+        var j = size - 1
+        for (i in 0 until size) {
+            val crosses = (latitudes[i] > latitude) != (latitudes[j] > latitude)
+            if (crosses) {
+                val at = longitudes[i] +
+                    (latitude - latitudes[i]) / (latitudes[j] - latitudes[i]) * (longitudes[j] - longitudes[i])
+                if (longitude < at) inside = !inside
+            }
+            j = i
+        }
+        return inside
     }
 }

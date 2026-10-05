@@ -7,27 +7,40 @@ enum class WayKind {
 }
 
 /**
+ * The continents the city walks are grouped by, in the order the Ways page lists them
+ * (docs/adr/0015-city-walks.md, decision 12). Never stored: a walk's continent is its [WayId]'s.
+ * One is added with its first city, never before: the page has no empty group.
+ */
+enum class Continent {
+    EUROPE,
+    AMERICAS,
+}
+
+/**
  * The ways and the city walks (PLANNING.md §11 Phase 11), in the order the Ways page lists them:
  * the ways shortest first, then the walks. Stored by name: the order may change, a name may not.
  *
  * @property city for a walk, its city's key: the walks of one city are listed together.
+ * @property continent for a walk, the continent its city is listed under.
  */
-enum class WayId(val kind: WayKind, val city: String? = null) {
+enum class WayId(val kind: WayKind, val city: String? = null, val continent: Continent? = null) {
     VIA_DEGLI_DEI(WayKind.WAY),
     CAMINO_PORTUGUES(WayKind.WAY),
     VIA_DI_FRANCESCO(WayKind.WAY),
     CAMINO_FRANCES(WayKind.WAY),
     VIA_FRANCIGENA(WayKind.WAY),
-    MILAN_DUOMO_NAVIGLI(WayKind.WALK, city = "milan"),
-    ROME_COLOSSEUM_VATICAN(WayKind.WALK, city = "rome"),
-    PARIS_VOSGES_EIFFEL(WayKind.WALK, city = "paris"),
-    LONDON_PALACE_TOWER(WayKind.WALK, city = "london"),
-    MADRID_DEBOD_RETIRO(WayKind.WALK, city = "madrid"),
-    PORTO_SE_PILAR(WayKind.WALK, city = "porto"),
-    AMSTERDAM_CENTRAAL_WESTERKERK(WayKind.WALK, city = "amsterdam"),
-    PRAGUE_CASTLE_WENCESLAS(WayKind.WALK, city = "prague"),
-    LIMA_SAN_MARTIN_RESERVA(WayKind.WALK, city = "lima"),
-    CUSCO_ARMAS_QORIKANCHA(WayKind.WALK, city = "cusco"),
+    MILAN_DUOMO_NAVIGLI(WayKind.WALK, city = "milan", continent = Continent.EUROPE),
+    ROME_COLOSSEUM_VATICAN(WayKind.WALK, city = "rome", continent = Continent.EUROPE),
+    PARIS_VOSGES_EIFFEL(WayKind.WALK, city = "paris", continent = Continent.EUROPE),
+    LONDON_PALACE_TOWER(WayKind.WALK, city = "london", continent = Continent.EUROPE),
+    MADRID_DEBOD_RETIRO(WayKind.WALK, city = "madrid", continent = Continent.EUROPE),
+    BERLIN_WALL_VICTORY(WayKind.WALK, city = "berlin", continent = Continent.EUROPE),
+    VIENNA_BELVEDERE_PRATER(WayKind.WALK, city = "vienna", continent = Continent.EUROPE),
+    PORTO_SE_PILAR(WayKind.WALK, city = "porto", continent = Continent.EUROPE),
+    AMSTERDAM_CENTRAAL_WESTERKERK(WayKind.WALK, city = "amsterdam", continent = Continent.EUROPE),
+    PRAGUE_CASTLE_WENCESLAS(WayKind.WALK, city = "prague", continent = Continent.EUROPE),
+    LIMA_SAN_MARTIN_RESERVA(WayKind.WALK, city = "lima", continent = Continent.AMERICAS),
+    CUSCO_ARMAS_QORIKANCHA(WayKind.WALK, city = "cusco", continent = Continent.AMERICAS),
 }
 
 /** Where a way the reader started stands. Stored by name. */

@@ -1,5 +1,6 @@
 package com.callbackdev.passo.core.domain.ways
 
+import com.callbackdev.passo.core.model.Continent
 import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.model.WayKind
 
@@ -105,5 +106,31 @@ object Ways {
     /** The city walks, walked in outings, grouped by city in the order they are listed. */
     val walks: List<Way> by lazy { everything.filter { it.kind == WayKind.WALK } }
 
+    /** The walks of [continent]'s cities, in the order they are listed. */
+    fun walksIn(continent: Continent): List<Way> = walks.filter { it.id.continent == continent }
+
     fun of(id: WayId): Way = everything.first { it.id == id }
+}
+
+/** A continent's map as `tools/build_ways.py` writes it: encoded, decoded only when drawn. */
+internal class ContinentSource(val frame: GeoBox, val land: List<String>)
+
+/**
+ * The map of a continent the cities are grouped by: the [frame] its cities are shown in, and
+ * the [land] behind them (Natural Earth), cut to a square around the frame so that a box of
+ * another shape, a thumbnail's, still finds ground to its edges.
+ */
+class ContinentMap(val frame: GeoBox, val land: List<GeoPath>)
+
+/** The continents the city walks are grouped by (docs/adr/0015-city-walks.md, decision 12). */
+object Continents {
+    private val maps = mutableMapOf<Continent, ContinentMap>()
+
+    /** [continent]'s map, decoded the first time it is asked for (a couple of thousand points). */
+    fun map(continent: Continent): ContinentMap = synchronized(maps) {
+        maps.getOrPut(continent) {
+            val source = ContinentData.source(continent)
+            ContinentMap(source.frame, source.land.map(Polyline::decodePath))
+        }
+    }
 }

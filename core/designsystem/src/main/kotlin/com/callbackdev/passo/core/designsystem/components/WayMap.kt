@@ -256,7 +256,7 @@ private fun DrawScope.line(width: Dp) = line(width.toPx())
 
 private fun line(width: Float) = Stroke(width, cap = StrokeCap.Round, join = StrokeJoin.Round)
 
-private fun GeoPath.toPath(projection: WayProjection, close: Boolean): Path = Path().also { path ->
+internal fun GeoPath.toPath(projection: WayProjection, close: Boolean): Path = Path().also { path ->
     for (i in 0 until size) {
         val x = projection.x(longitudes[i])
         val y = projection.y(latitudes[i])
@@ -337,10 +337,13 @@ private fun Density.labelRect(label: Label, size: Size): Rect {
 }
 
 /** A name beside its point, on a small pill of the page's colour. */
-private fun DrawScope.drawLabel(label: Label, colors: WayMapColors) {
-    val box = labelRect(label, size)
-    drawRoundRect(colors.halo.copy(alpha = PILL_ALPHA), box.topLeft, box.size, CornerRadius(box.height / 2))
-    drawText(label.text, colors.ink, Offset(box.left + LABEL_PAD_X.toPx(), box.top + LABEL_PAD_Y.toPx()))
+private fun DrawScope.drawLabel(label: Label, colors: WayMapColors) =
+    drawLabel(label.text, labelRect(label, size), colors.halo, colors.ink)
+
+/** A name on a small pill of the page's colour ([halo]), in [box]. */
+internal fun DrawScope.drawLabel(text: TextLayoutResult, box: Rect, halo: Color, ink: Color) {
+    drawRoundRect(halo.copy(alpha = PILL_ALPHA), box.topLeft, box.size, CornerRadius(box.height / 2))
+    drawText(text, ink, Offset(box.left + LABEL_PAD_X.toPx(), box.top + LABEL_PAD_Y.toPx()))
 }
 
 private const val MIN_ASPECT = 0.62
@@ -369,6 +372,6 @@ private val SMALL_HERE_HALO = 7.dp
 private val LABEL_ROOM = 40.dp
 private val STREET_WIDTH = 1.5.dp
 private val MAIN_STREET_WIDTH = 2.5.dp
-private val LABEL_PAD_X = 5.dp
-private val LABEL_PAD_Y = 2.dp
+internal val LABEL_PAD_X = 5.dp
+internal val LABEL_PAD_Y = 2.dp
 private val TOUCH_RADIUS = 28.dp

@@ -17,6 +17,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import com.callbackdev.passo.R
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.domain.calibration.CalibratedStep
+import com.callbackdev.passo.core.model.Continent
 import com.callbackdev.passo.core.model.WayId
 import kotlinx.serialization.Serializable
 
@@ -67,6 +68,10 @@ data class PlanEditorKey(val planId: Long?) : NavKey
 /** The Ways, from Insights and from a stage's notification (PLANNING.md §11 Phase 11). */
 @Serializable
 data object WaysKey : NavKey
+
+/** The cities of one continent, from the Ways page (docs/adr/0015-city-walks.md, decision 12). */
+@Serializable
+data class ContinentKey(val continent: Continent) : NavKey
 
 /** One way: the journey [journeyId], or with none the way itself (under way, or ready to start). */
 @Serializable

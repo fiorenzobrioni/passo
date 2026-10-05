@@ -57,6 +57,7 @@ import com.callbackdev.passo.feature.sessions.SessionsRoute
 import com.callbackdev.passo.feature.settings.SettingsRoute
 import com.callbackdev.passo.feature.settings.calibration.CalibrationRoute
 import com.callbackdev.passo.feature.today.TodayRoute
+import com.callbackdev.passo.feature.ways.ContinentRoute
 import com.callbackdev.passo.feature.ways.WayRoute
 import com.callbackdev.passo.feature.ways.WaysRoute
 
@@ -156,7 +157,20 @@ private fun MainPages(openWays: Boolean, onWaysOpened: () -> Unit) {
             SessionsRoute(onBack = nav::goBack, onEdit = { open(PlanEditorKey(it)) }, onOpenWays = { open(WaysKey) })
         }
         entry<PlanEditorKey> { key -> PlanEditorRoute(planId = key.planId, onDone = nav::goBack) }
-        entry<WaysKey> { WaysRoute(onBack = nav::goBack, onOpenWay = { way, journey -> open(WayKey(way, journey)) }) }
+        entry<WaysKey> {
+            WaysRoute(
+                onBack = nav::goBack,
+                onOpenWay = { way, journey -> open(WayKey(way, journey)) },
+                onOpenContinent = { open(ContinentKey(it)) },
+            )
+        }
+        entry<ContinentKey> { key ->
+            ContinentRoute(
+                continent = key.continent,
+                onBack = nav::goBack,
+                onOpenWay = { way, journey -> open(WayKey(way, journey)) },
+            )
+        }
         entry<WayKey> { key -> WayRoute(way = key.way, journeyId = key.journeyId, onBack = nav::goBack) }
     }
 

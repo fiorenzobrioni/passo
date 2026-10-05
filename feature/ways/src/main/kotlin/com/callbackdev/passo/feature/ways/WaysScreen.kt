@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -35,6 +36,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.callbackdev.passo.core.designsystem.components.CityMark
+import com.callbackdev.passo.core.designsystem.components.ContinentMapView
 import com.callbackdev.passo.core.designsystem.components.GroupDivider
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
 import com.callbackdev.passo.core.designsystem.components.WayMapView
@@ -54,25 +57,32 @@ import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.designsystem.ways.wayNameRes
 import com.callbackdev.passo.core.designsystem.ways.wayRouteRes
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
+import com.callbackdev.passo.core.domain.ways.Continents
 import com.callbackdev.passo.core.domain.ways.WalkPlaces
 import com.callbackdev.passo.core.domain.ways.Way
 import com.callbackdev.passo.core.domain.ways.WayForecast
 import com.callbackdev.passo.core.domain.ways.Ways
+import com.callbackdev.passo.core.model.Continent
 import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.model.WayJourneyState
 
 /** The Ways page, with its state from [WaysViewModel]. */
 @Composable
-fun WaysRoute(onBack: () -> Unit, onOpenWay: (WayId, Long?) -> Unit, viewModel: WaysViewModel = hiltViewModel()) {
+fun WaysRoute(
+    onBack: () -> Unit,
+    onOpenWay: (WayId, Long?) -> Unit,
+    onOpenContinent: (Continent) -> Unit,
+    viewModel: WaysViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    WaysScreen(state, onBack, onOpenWay)
+    WaysScreen(state, onBack, onOpenWay, onOpenContinent)
 }
 
 /**
  * The Ways page (PLANNING.md §11 Phase 11): what a way is, in one sentence; the way under way,
  * with its map; the five ways, each with what it would take at the reader's pace; the cities,
- * each walk with where it stands; and the ways finished or left, the cities walked. Each opens
- * its own page.
+ * by continent, each with its map and where its walks stand; and the ways finished or left, the
+ * cities walked. Each opens its own page.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -80,6 +90,7 @@ fun WaysScreen(
     state: WaysUiState?,
     onBack: () -> Unit,
     onOpenWay: (WayId, Long?) -> Unit,
+    onOpenContinent: (Continent) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val scroll = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
@@ -99,12 +110,17 @@ fun WaysScreen(
         },
     ) { padding ->
         // Until the days are read, a bare page: a list without them would say nothing is walked.
-        if (state != null) WaysList(state, onOpenWay, Modifier.fillMaxSize().padding(padding))
+        if (state != null) WaysList(state, onOpenWay, onOpenContinent, Modifier.fillMaxSize().padding(padding))
     }
 }
 
 @Composable
-private fun WaysList(state: WaysUiState, onOpenWay: (WayId, Long?) -> Unit, modifier: Modifier) {
+private fun WaysList(
+    state: WaysUiState,
+    onOpenWay: (WayId, Long?) -> Unit,
+    onOpenContinent: (Continent) -> Unit,
+    modifier: Modifier,
+) {
     val format = rememberMeasureFormatter(state.units)
     LazyColumn(
         modifier = modifier.testTag(WaysTags.LIST),
@@ -145,10 +161,12 @@ private fun WaysList(state: WaysUiState, onOpenWay: (WayId, Long?) -> Unit, modi
             }
         }
         item(key = "cities") {
+            // Ten cities was the ceiling of one flat list: past it, a row a continent, each
+            // with its own page (ADR 0015 decision 12).
             SettingsGroup(modifier = Modifier.testTag(WaysTags.CITIES)) {
-                state.walks.forEachIndexed { index, walk ->
+                Continent.entries.forEachIndexed { index, continent ->
                     if (index > 0) GroupDivider()
-                    WalkRow(walk, state, format) { onOpenWay(walk.way.id, null) }
+                    ContinentRow(continent, state.walksIn(continent)) { onOpenContinent(continent) }
                 }
             }
         }
@@ -286,7 +304,7 @@ private fun WayRow(way: Way, pace: Double?, format: MeasureFormatter, onClick: (
  * length and places, and where it stands: under way, or when it was last walked to its end.
  */
 @Composable
-private fun WalkRow(walk: WalkView, state: WaysUiState, format: MeasureFormatter, onClick: () -> Unit) {
+internal fun WalkRow(walk: WalkView, state: WaysUiState, format: MeasureFormatter, onClick: () -> Unit) {
     val way = walk.way
     val current = walk.current?.progress
     val walked = walk.live?.session?.let { WalkPlaces.along(it) } ?: current?.walkedMeters
@@ -341,6 +359,60 @@ private fun WalkRow(walk: WalkView, state: WaysUiState, format: MeasureFormatter
                 Text(
                     text = it,
                     style = MaterialTheme.typography.bodySmall.copy(fontFeatureSettings = "tnum"),
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
+        Icon(PassoIcons.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+/**
+ * A continent: its small map with its cities as points, its name, how many cities and how many
+ * walked, and the cities under way, by name.
+ */
+@Composable
+private fun ContinentRow(continent: Continent, walks: List<WalkView>, onClick: () -> Unit) {
+    val walked = walks.count { it.lastFinished != null }
+    val cities = pluralStringResource(R.plurals.ways_continent_cities, walks.size, walks.size)
+    val facts = if (walked > 0) {
+        stringResource(
+            R.string.ways_row_facts,
+            cities,
+            pluralStringResource(R.plurals.ways_continent_walked, walked, walked),
+        )
+    } else {
+        cities
+    }
+    val underWay = walks.filter { it.mark == CityMark.UNDER_WAY }.map { stringResource(wayNameRes(it.way.id)) }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick, role = Role.Button)
+            .padding(horizontal = ScreenMargin, vertical = 14.dp)
+            .testTag(WaysTags.continent(continent)),
+    ) {
+        ContinentMapView(
+            map = Continents.map(continent),
+            cities = continentCities(walks),
+            contentDescription = "",
+            detailed = false,
+            ratio = 1f,
+            modifier = Modifier.size(THUMBNAIL),
+        )
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(stringResource(continentNameRes(continent)), style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = facts,
+                style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (underWay.isNotEmpty()) {
+                Text(
+                    text = stringResource(R.string.ways_row_walk_under_way, underWay.joinToString()),
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
@@ -418,7 +490,7 @@ internal fun Footer() {
     }
 }
 
-private val THUMBNAIL = 64.dp
+internal val THUMBNAIL = 64.dp
 
 /** Hooks for the UI tests. */
 object WaysTags {
@@ -428,6 +500,8 @@ object WaysTags {
     const val CATALOGUE = "ways_catalogue"
     const val YOURS = "ways_yours"
     const val CITIES = "ways_cities"
+    const val CONTINENT_PAGE = "ways_continent_page"
+    const val CONTINENT_MAP = "ways_continent_map"
     const val WALK_START = "walk_start"
     const val WALK_AGAIN = "walk_again"
     const val WALK_VOICE = "walk_voice"
@@ -442,4 +516,6 @@ object WaysTags {
     const val START_DIALOG = "way_start_dialog"
 
     fun way(id: WayId) = "ways_way_${id.name.lowercase()}"
+
+    fun continent(continent: Continent) = "ways_continent_${continent.name.lowercase()}"
 }

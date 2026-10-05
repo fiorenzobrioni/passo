@@ -159,5 +159,5 @@
     <string name="settings_credit_sources">Formulas</string>
     <string name="settings_credit_sources_note">Distance and calories follow the ACSM equations; the cadence bands, the CADENCE-adults study; the brisk minutes, the WHO guidelines</string>
     <string name="settings_credit_maps">Maps of the ways</string>
-    <string name="settings_credit_maps_note">The ways and the city walks: © OpenStreetMap contributors, Open Database License. The ways’ land and water: Natural Earth, public domain</string>
+    <string name="settings_credit_maps_note">The ways and the city walks: © OpenStreetMap contributors, Open Database License. The land and water of the ways and of the continents: Natural Earth, public domain</string>
 </resources>

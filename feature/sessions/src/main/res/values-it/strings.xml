@@ -83,7 +83,7 @@
     <string name="editor_voice_change">Cambia voce</string>
     <!-- The door to the city walks, on the Ways page (Phase 11). -->
     <string name="sessions_cities_title">Passeggia in una città</string>
-    <string name="sessions_cities_body">Dieci città, da Milano a Cusco, percorse da dove sei: ogni luogo ti viene detto quando i tuoi passi lo raggiungono.</string>
+    <string name="sessions_cities_body">Città da Milano a Cusco, percorse da dove sei: ogni luogo ti viene detto quando i tuoi passi lo raggiungono.</string>
 
     <string name="editor_kind">Tipo</string>
     <string name="editor_kind_goal">Un obiettivo</string>
