@@ -415,6 +415,7 @@ class Walk:
     outing_en: str  # the outing's name in History and on Today
     outing_it: str
     country: str  # the locator map's country
+    continent: str  # its group on the Ways page: a key of CONTINENTS
     stops: list = field(default_factory=list)
     water: list = field(default_factory=list)
     canals: list = field(default_factory=list)
@@ -445,6 +446,7 @@ MILAN = Walk(
     outing_en="A walk in Milan",
     outing_it="Passeggiata a Milano",
     country="IT",
+    continent="EUROPE",
     water=["way/345030396"],
     canals=["relation/3340142", "relation/3350738"],
     parks=["relation/10172760", "way/5110320", "way/260829251"],
@@ -515,6 +517,7 @@ ROME = Walk(
     outing_en="A walk in Rome",
     outing_it="Passeggiata a Roma",
     country="IT",
+    continent="EUROPE",
     water=["relation/5071", "way/22797948", "way/22747533"],
     parks=["relation/2985896", "relation/11384819", "relation/10646138", "way/113038199"],
     more_streets=("residential", "unclassified", "living_street"),
@@ -594,6 +597,7 @@ PARIS = Walk(
     outing_en="A walk in Paris",
     outing_it="Passeggiata a Parigi",
     country="FR",
+    continent="EUROPE",
     water=["relation/2191006", "relation/10837211"],
     parks=["way/53820452", "way/4208595", "way/128206209"],
     stops=[
@@ -666,6 +670,7 @@ LONDON = Walk(
     outing_en="A walk in London",
     outing_it="Passeggiata a Londra",
     country="GB",
+    continent="EUROPE",
     water=["relation/28934", "relation/70347", "relation/276130"],
     parks=["way/374960368", "way/863554956", "way/4373996", "way/4254099", "way/367694522", "way/142680571",
            "way/372975520"],
@@ -752,6 +757,7 @@ MADRID = Walk(
     outing_en="A walk in Madrid",
     outing_it="Passeggiata a Madrid",
     country="IBERIA",
+    continent="EUROPE",
     water=["relation/3615910", "way/4088758"],
     parks=["relation/13616929", "relation/535694", "relation/1505193", "relation/2061818", "way/15244804"],
     stops=[
@@ -824,6 +830,7 @@ PORTO = Walk(
     outing_en="A walk in Porto",
     outing_it="Passeggiata a Porto",
     country="IBERIA",
+    continent="EUROPE",
     water=["relation/3688750"],
     parks=["way/244599647", "way/215304932", "way/98836111", "relation/3251867"],
     stops=[
@@ -886,6 +893,7 @@ AMSTERDAM = Walk(
     outing_en="A walk in Amsterdam",
     outing_it="Passeggiata ad Amsterdam",
     country="NL",
+    continent="EUROPE",
     # The IJ and the docks are large areas listed here; the canals are read from the tiles.
     water=["relation/554702", "relation/8878552", "relation/8730108", "relation/12113080", "relation/14235038"],
     water_from_tiles=True,
@@ -944,6 +952,7 @@ PRAGUE = Walk(
     outing_en="A walk in Prague",
     outing_it="Passeggiata a Praga",
     country="CZ",
+    continent="EUROPE",
     water=["relation/19221"],
     # The Old Town's lanes are mapped as residential streets, as Milan's and Rome's centres
     # are: without the longer ones, its map was the emptiest of all.
@@ -1010,6 +1019,7 @@ LIMA = Walk(
     outing_en="A walk in Lima",
     outing_it="Passeggiata a Lima",
     country="PE",
+    continent="AMERICAS",
     water=["way/367932671", "way/402037791", "way/402037790", "way/402037789"],
     parks=["way/39413088", "relation/12175742", "way/44364384", "way/117755695", "way/172243636"],
     stops=[
@@ -1086,6 +1096,7 @@ CUSCO = Walk(
     outing_en="A walk in Cusco",
     outing_it="Passeggiata a Cusco",
     country="PE",
+    continent="AMERICAS",
     # No water: the rivers of the old centre run in channels, mostly covered, and the Huatanay
     # begins south of the map.
     parks=["way/83130621"],
@@ -1151,4 +1162,15 @@ LOCATORS = {
     "PE": (-18.6, -81.6, 0.2, -68.4),
     "NL": (50.7, 3.3, 53.6, 7.3),
     "CZ": (48.5, 12.0, 51.1, 18.9),
+}
+
+# The continents the Ways page groups the cities by, in its order (the Kotlin enum Continent has
+# the same names): the frame of each one's map (south, west, north, east), in degrees, drawn
+# from Natural Earth's land. A continent is listed only once it has a walk: the build fails on
+# one without, and on a walk whose route falls outside its continent's frame.
+CONTINENTS = {
+    # From Lisbon to Istanbul and Helsinki: the cities a walk is likely to visit, not the Urals.
+    "EUROPE": (34.5, -11.5, 61.5, 31.5),
+    # From southern Canada to Cape Horn, the Pacific coast to Brazil's eastern tip.
+    "AMERICAS": (-56.0, -126.0, 56.0, -33.0),
 }

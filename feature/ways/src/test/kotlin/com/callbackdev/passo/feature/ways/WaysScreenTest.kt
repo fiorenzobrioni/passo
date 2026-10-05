@@ -1,23 +1,37 @@
 package com.callbackdev.passo.feature.ways
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.designsystem.components.SessionCardTags
+import com.callbackdev.passo.core.designsystem.components.continentMapRatio
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
+import com.callbackdev.passo.core.domain.ways.Continents
+import com.callbackdev.passo.core.domain.ways.WayProjection
 import com.callbackdev.passo.core.domain.ways.WayStartChoice
+import com.callbackdev.passo.core.domain.ways.Ways
+import com.callbackdev.passo.core.model.Continent
 import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.WayId
+import com.callbackdev.passo.core.model.WayKind
 import com.callbackdev.passo.core.testing.assertAccessible
 import com.callbackdev.passo.core.testing.walkPage
 import com.callbackdev.passo.core.testing.writeScreenshot
@@ -40,13 +54,34 @@ class WaysScreenTest {
     private fun showList(
         state: WaysUiState = WaysSamples.state(),
         dark: Boolean = false,
+        onOpenContinent: (Continent) -> Unit = {},
         onOpen: (WayId, Long?) -> Unit = {
                 _,
                 _,
             ->
         },
     ) {
-        compose.setContent { PassoTheme(darkTheme = dark) { WaysScreen(state, onBack = {}, onOpenWay = onOpen) } }
+        compose.setContent {
+            PassoTheme(darkTheme = dark) {
+                WaysScreen(state, onBack = {}, onOpenWay = onOpen, onOpenContinent = onOpenContinent)
+            }
+        }
+        compose.waitForIdle()
+    }
+
+    private fun showContinent(
+        continent: Continent,
+        state: WaysUiState = WaysSamples.state(),
+        dark: Boolean = false,
+        onOpen: (WayId, Long?) -> Unit = {
+                _,
+                _,
+            ->
+        },
+    ) {
+        compose.setContent {
+            PassoTheme(darkTheme = dark) { ContinentScreen(state, continent, onBack = {}, onOpenWay = onOpen) }
+        }
         compose.waitForIdle()
     }
 
@@ -193,44 +228,118 @@ class WaysScreenTest {
     // --- City walks (Phase 11, second part) ---------------------------------------------------
 
     @Test
-    fun `the cities are listed with where each walk stands`() {
-        var opened: Pair<WayId, Long?>? = null
-        showList(onOpen = { way, journey -> opened = way to journey })
+    fun `the cities are listed by continent, with where their walks stand`() {
+        var continent: Continent? = null
+        showList(onOpenContinent = { continent = it })
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.CITIES))
-        compose.onNodeWithText("Under way:", substring = true).assertExists()
-        // In its city's row, and in Your ways, further down past the cities.
-        compose.onNodeWithTag(WaysTags.way(WayId.MILAN_DUOMO_NAVIGLI))
-            .assert(hasText("Walked on Sep 12", substring = true))
+        // London under way, Milan walked; Lima and Cusco not begun.
+        compose.onNodeWithTag(WaysTags.continent(Continent.EUROPE))
+            .assert(hasText("8 cities · 1 walked", substring = true))
+            .assert(hasText("Under way: London", substring = true))
+        compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).assert(hasText("2 cities", substring = true))
+        compose.onNodeWithTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)).assertDoesNotExist()
         snapshot("ways_cities")
-        compose.onNodeWithTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)).performClick()
-        assertThat(opened).isEqualTo(WayId.LONDON_PALACE_TOWER to null)
+        compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).performClick()
+        assertThat(continent).isEqualTo(Continent.AMERICAS)
+        // A city walked to its end is still kept in Your ways, on the Ways page itself.
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.YOURS))
         compose.onAllNodes(hasText("Walked on Sep 12", substring = true) and hasAnyAncestor(hasTestTag(WaysTags.YOURS)))
             .assertCountEquals(1)
     }
 
     @Test
-    fun `every city has its walk`() {
+    fun `a continent's page has its map, then its cities with where each walk stands`() {
         var opened: Pair<WayId, Long?>? = null
-        showList(onOpen = { way, journey -> opened = way to journey })
-        for (walk in listOf(
-            WayId.MILAN_DUOMO_NAVIGLI,
-            WayId.ROME_COLOSSEUM_VATICAN,
-            WayId.PARIS_VOSGES_EIFFEL,
-            WayId.LONDON_PALACE_TOWER,
-            WayId.MADRID_DEBOD_RETIRO,
-            WayId.PORTO_SE_PILAR,
-            WayId.AMSTERDAM_CENTRAAL_WESTERKERK,
-            WayId.PRAGUE_CASTLE_WENCESLAS,
-            WayId.LIMA_SAN_MARTIN_RESERVA,
-            WayId.CUSCO_ARMAS_QORIKANCHA,
-        )) {
-            compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.way(walk)))
-            compose.onNodeWithTag(WaysTags.way(walk)).assertExists()
+        showContinent(Continent.EUROPE, onOpen = { way, journey -> opened = way to journey })
+        compose.onNodeWithContentDescription("Europe on the map: 8 cities, 1 under way, 1 walked.").assertIsDisplayed()
+        compose.onNodeWithTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)).assert(hasText("Under way:", substring = true))
+        compose.onNodeWithTag(WaysTags.way(WayId.MILAN_DUOMO_NAVIGLI))
+            .assert(hasText("Walked on Sep 12", substring = true))
+        snapshot("continent_europe")
+        compose.onNodeWithTag(WaysTags.CONTINENT_PAGE).performScrollToNode(hasTestTag(WaysTags.CREDIT))
+        snapshot("continent_europe_cities")
+        compose.onNodeWithTag(WaysTags.CONTINENT_PAGE)
+            .performScrollToNode(hasTestTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)))
+        compose.onNodeWithTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)).performClick()
+        assertThat(opened).isEqualTo(WayId.LONDON_PALACE_TOWER to null)
+    }
+
+    @Test
+    fun `every city has its walk, under its continent`() {
+        val byContinent = mapOf(
+            Continent.EUROPE to listOf(
+                WayId.MILAN_DUOMO_NAVIGLI,
+                WayId.ROME_COLOSSEUM_VATICAN,
+                WayId.PARIS_VOSGES_EIFFEL,
+                WayId.LONDON_PALACE_TOWER,
+                WayId.MADRID_DEBOD_RETIRO,
+                WayId.PORTO_SE_PILAR,
+                WayId.AMSTERDAM_CENTRAAL_WESTERKERK,
+                WayId.PRAGUE_CASTLE_WENCESLAS,
+            ),
+            Continent.AMERICAS to listOf(WayId.LIMA_SAN_MARTIN_RESERVA, WayId.CUSCO_ARMAS_QORIKANCHA),
+        )
+        assertThat(byContinent.keys).containsExactlyElementsIn(Continent.entries)
+        var continent by mutableStateOf(Continent.EUROPE)
+        var opened: Pair<WayId, Long?>? = null
+        compose.setContent {
+            PassoTheme {
+                ContinentScreen(WaysSamples.state(), continent, onBack = {
+                }, onOpenWay = { way, j -> opened = way to j })
+            }
         }
-        snapshot("ways_cities_all")
+        for ((shown, walks) in byContinent) {
+            continent = shown
+            compose.waitForIdle()
+            for (walk in walks) {
+                compose.onNodeWithTag(WaysTags.CONTINENT_PAGE).performScrollToNode(hasTestTag(WaysTags.way(walk)))
+                compose.onNodeWithTag(WaysTags.way(walk)).assertExists()
+            }
+            for (other in WayId.entries.filter { it.kind == WayKind.WALK && it !in walks }) {
+                compose.onNodeWithTag(WaysTags.way(other)).assertDoesNotExist()
+            }
+        }
+        snapshot("continent_americas_cities")
         compose.onNodeWithTag(WaysTags.way(WayId.CUSCO_ARMAS_QORIKANCHA)).performClick()
         assertThat(opened).isEqualTo(WayId.CUSCO_ARMAS_QORIKANCHA to null)
+    }
+
+    @Test
+    fun `the Americas' map, none of its cities begun, in the dark`() {
+        showContinent(Continent.AMERICAS, dark = true)
+        compose.onNodeWithContentDescription("The Americas on the map: 2 cities.").assertIsDisplayed()
+        snapshot("continent_americas_dark")
+    }
+
+    @Test
+    fun `touching a city on the map names it`() {
+        showContinent(Continent.EUROPE, state = WaysSamples.state(walks = emptyList(), live = null))
+        val map = compose.onNodeWithTag(WaysTags.CONTINENT_MAP)
+        val frame = Continents.map(Continent.EUROPE).frame
+        val prague = Ways.of(WayId.PRAGUE_CASTLE_WENCESLAS).stops.first()
+        // The map's box has its frame's shape, so the frame fills it to the margin on each side.
+        assertThat(continentMapRatio(frame)).isGreaterThan(1f)
+        map.performTouchInput {
+            val inset = 12.dp.toPx()
+            val projection = WayProjection(frame, width.toFloat(), height.toFloat(), inset)
+            click(Offset(projection.x(prague.longitude), projection.y(prague.latitude)))
+        }
+        // The name is drawn on the map, not put in the tree: the picture shows it.
+        snapshot("continent_touched")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
+    fun `at twice the text size on a small phone, a continent still reads`() {
+        showContinent(Continent.EUROPE)
+        compose.walkPage(hasTestTag(WaysTags.CONTINENT_PAGE), "continent_large_text", maxScreens = 8)
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w841dp-h701dp-xhdpi")
+    fun `on an open foldable a continent is a column in the middle`() {
+        showContinent(Continent.EUROPE)
+        compose.walkPage(hasTestTag(WaysTags.CONTINENT_PAGE), "continent_foldable", maxScreens = 4)
     }
 
     @Test

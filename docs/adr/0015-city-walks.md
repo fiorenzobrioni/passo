@@ -109,6 +109,35 @@ moves with the distance their steps measure.
     says. A walk left is not kept in Your ways, unlike a way left (decision 5's rule stands):
     a way is months, and a credential half stamped is worth keeping; a walk is an afternoon,
     and its outings already keep the record.
+12. **The cities by continent** (owner, 5 Oct 2026, from a proposal). Ten cities was the
+    ceiling of one flat list (decision 10), and the owner plans walks around the world. The
+    Ways page has a row a continent, in the cities' place: its small map with the cities as
+    points, how many cities and how many walked, the ones under way by name. Each opens the
+    continent's page: its map, then its cities, each row as the Ways page listed it before. A
+    row a continent rather than a selector over one list: a selector would hide a walk under way
+    on another continent and remember a choice, where the rows say every continent's state at
+    once and stay four rows at most. The page has two levels, never three: a city's own second
+    level (decision 1) still waits for a second walk.
+    A continent is the walk's `WayId.continent` (`Continent`, never stored), its frame in
+    `tools/ways_content.py` (`CONTINENTS`), and its land Natural Earth's 1:50m, cut to a square
+    around the frame and simplified to under a pixel of the page's map
+    (`ContinentData.kt`, about 2,300 points a continent, written by the script; `continents`
+    writes only it). The build fails on a continent without a walk (no empty group: one is
+    added with its first city) and on a walk whose route leaves its continent's frame.
+    The map is `ContinentMapView`, drawn like a way's: the land cut out of the sea, a city a
+    point where its walk begins, a ring before it is begun, a bead in the goal's colour once
+    walked, the reader's point with its halo while under way. The names go where they find room,
+    the reader's cities first (they may cover another city's point at a large text size), the
+    rest dropped when crowded; a touch names the nearest. One image to TalkBack, in a sentence:
+    "Europe on the map: 8 cities, 1 under way, 1 walked."
+    Planned (owner): four continents of about ten cities, about seven of 10 km and three of
+    5 km, the city still choosing its length (decision 10). Proposed, for the owner to confirm:
+    Europe and the Americas now, then Asia and Oceania, and Africa. Cities only, for now: a famous park belongs to its city's walk
+    (the Retiro is Madrid's), while a mountain path or a natural site would need a map of terrain
+    the script does not draw, and would blur what a city walk is. The ways are not grouped: five,
+    all in Europe, read best as one list. Many of the cities planned are on the sea (Barcelona,
+    Lisbon, Istanbul, New York, Rio, Sydney, Cape Town), so the coastline (Consequences) comes
+    before them.
 
 ## Consequences
 

@@ -11,6 +11,7 @@ import com.callbackdev.passo.core.data.settings.SettingsRepository
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.data.ways.WayRepository
 import com.callbackdev.passo.core.data.ways.distances
+import com.callbackdev.passo.core.designsystem.components.CityMark
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.ways.WalkDays
 import com.callbackdev.passo.core.domain.ways.Way
@@ -19,6 +20,7 @@ import com.callbackdev.passo.core.domain.ways.WayProgress
 import com.callbackdev.passo.core.domain.ways.WayStartChoice
 import com.callbackdev.passo.core.domain.ways.WayStarts
 import com.callbackdev.passo.core.domain.ways.Ways
+import com.callbackdev.passo.core.model.Continent
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.UnitPreference
@@ -93,6 +95,9 @@ data class WaysUiState(
 
     fun walk(id: WayId): WalkView? = walks.firstOrNull { it.way.id == id }
 
+    /** The walks of [continent]'s cities, in the order they are listed. */
+    fun walksIn(continent: Continent): List<WalkView> = walks.filter { it.way.id.continent == continent }
+
     private companion object {
         const val DEFAULT_STEP_METERS = 0.7
     }
@@ -111,6 +116,17 @@ data class WalkView(
 ) {
     /** Where the next outing on it starts: where the journey under way stands, or the start. */
     val fromMeters: Double get() = current?.progress?.walkedMeters ?: 0.0
+
+    /**
+     * Where it stands, as its continent's map marks it: under way as its row says it (a journey
+     * begun, or an outing on it), walked once walked to its end, otherwise not begun.
+     */
+    val mark: CityMark
+        get() = when {
+            live != null || current != null -> CityMark.UNDER_WAY
+            lastFinished != null -> CityMark.WALKED
+            else -> CityMark.NOT_BEGUN
+        }
 }
 
 /** Whether a walk can start now, and if not, why. */

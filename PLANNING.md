@@ -925,8 +925,19 @@ a city for now.
   Portugués begins, and crosses the Douro to the Serra do Pilar; Amsterdam's goes from
   Centraal Station along the canals to the Westerkerk; Prague's comes down from the Castle over
   Charles Bridge to Wenceslas Square. Ten cities: the ceiling of one flat list.
+- [x] **The cities by continent** (owner, 5 Oct 2026, from a proposal): past ten cities one
+  list no longer reads, and more are planned around the world. The Ways page has a row a
+  continent (its small map, its cities, how many walked, the ones under way), each opening the
+  continent's page: its map with the cities as points, then the cities as before. Europe (the
+  eight European cities) and the Americas (Lima and Cusco); `docs/adr/0015-city-walks.md`
+  decision 12.
+- [ ] **About ten cities a continent** (owner; the continents proposed, to be confirmed): about seven of 10 km and three of 5 km, the city
+  choosing its length; Europe two more, the Americas eight, then Asia and Oceania, and Africa,
+  each continent added with its first cities. Cities only; the coastline first, for the cities
+  on the sea.
 - [ ] On a device (owner): the Camino Portugués drawn in both themes; Rome, Paris, Madrid, Lima,
-  Cusco, Porto, Amsterdam and Prague each walked once, with the voice.
+  Cusco, Porto, Amsterdam and Prague each walked once, with the voice; the continents' maps in
+  both themes.
 
 Built as the content of the first two parts, with nothing new in the code: the fifth way is the
 Caminho Português's main relation (12786090), whose line the script takes from Porto's
@@ -1289,6 +1300,7 @@ Include:
 - **Porto, Amsterdam and Prague, the first short walks** (owner, 2 Oct 2026, from a proposal): three countries not yet on the Ways page, each a centre about 5 km across, so none is padded. Porto ties the cities to the ways (its walk begins where the Camino Portugués begins); Amsterdam is flat and compact, its canals on the map; Prague comes downhill from the Castle. One addition to the script, so that Amsterdam's canals can be drawn: a walk may read its water from the street tiles (`water_from_tiles`), since its hundreds of areas cut at every bridge cannot be listed by id. Phase 11, later.
 
 - **Nothing on a card is cut** (owner, 5 Oct 2026, two screenshots from the owner's Samsung: «At a glance» 4×1 "Obiettivo raggiunto alle 14:…", «In words» 4×2 "9.6…"; and "the steps can pass 10,000: the longest wording must always fit, everywhere"). Three causes, all fixed in `:widget`. (1) **The face**: Glance sets a weighted `Text` with a `TextAppearanceSpan` whose family is the theme's device default (SamsungOne on a Samsung, Google Sans on a Pixel), and the cards measured in plain sans-serif; they now measure with the same span (`widgetPaint`, `text_faces.xml` copying Glance's private appearances), with the TextView's own line breaking, and budget every line 6% wider than measured (`FACE_MARGIN`). (2) **The count**: a hero's floor no longer outranks its column (`spThatFits`, taken last, with the rounding slack), so a count past ten thousand gets smaller, never cut. (3) **The words**: every sentence has a short form (`sentence(short = true)`: «Reached at 14:23», «+4,581 on usual», «15,000 to go»; an outing's without its name, `sessionBriefShort`), tried in order by `SentenceForms.fit` in every form of both cards; where neither fits, the day's sentence is left out (a status or an outing keeps its last form); the goal, the eyebrow and the day in figures are drawn whole or not at all, and the status footnote shrinks rather than cut. `WidgetFitTest` draws every form of both cards, both arrangements, English and Italian, at 100, 115 and 130% text, with counts to 99,999, a pause and an outing, every line 5% wider than measured, and finds nothing cut. At the reference grants the cards read as before but for a slightly smaller count on «In words» 2×2 (README screenshots regenerated) and the short form where the long one only just fitted.
+- **The cities by continent** (owner, 5 Oct 2026: "start grouping the cities by continent, so we can add walks in other cities of the world", four continents of about ten cities, seven long and three short; "is it worth it, or noise?"). Worth it, now: ADR 0015 decision 10 had set ten cities as the ceiling of one list, and Passo had ten. A row a continent on the Ways page, each opening its page with a map of where its cities are (`ContinentMapView`, Natural Earth's land generated into `ContinentData.kt` by `tools/build_ways.py`), not a selector that would hide a walk under way on another continent. Only the continents with cities exist (Europe, the Americas): the build fails on an empty one. Proposed for the owner to confirm: Europe, the Americas, Asia and Oceania, Africa. Not grouped: the ways (five, all in Europe). Not mixed in: parks (part of their city's walk), mountain paths and natural sites (another map, another idea). `docs/adr/0015-city-walks.md` decision 12.
 
 ### Open
 

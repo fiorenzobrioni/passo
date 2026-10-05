@@ -28,8 +28,9 @@ All notable changes to Passo are documented here. The format follows
   water, parks and main streets, so the area is recognisable at a glance. Walked where you are
   in one outing or a few. Each place is told as your steps reach it, with a short vibration and,
   if you like, its name and a line about it in your headphones; the notification says the next
-  one. Stop when you like and continue later from where you were. On the Ways page, and from
-  Outings. "Hear it" plays a place as you will hear it, and "Change voice" opens the phone's
+  one. Stop when you like and continue later from where you were. On the Ways page, by
+  continent (Europe, the Americas), each with a map of where its cities are and which you have
+  walked; and from Outings. "Hear it" plays a place as you will hear it, and "Change voice" opens the phone's
   voices.
 - **The Japanese interval walk**: slow and fast walking in turns, 3 minutes each, five sets or
   more, as a study at Shinshu University proposed it. Ready to start as "Japanese walking", or

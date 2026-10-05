@@ -12,7 +12,7 @@
     <string name="ways_row_walked">Walked from %1$s to %2$s</string>
     <string name="ways_row_left">Left on %1$s, %2$s</string>
     <string name="ways_footer">Distances are estimates, from your steps and your step length: measuring your step makes them truer. A day counts as Passo recorded it, so History, Insights and your way always agree.</string>
-    <string name="ways_credit">Ways and walks drawn from OpenStreetMap, © OpenStreetMap contributors (ODbL); the walks routed with BRouter. Land and water of the ways: Natural Earth.</string>
+    <string name="ways_credit">Ways and walks drawn from OpenStreetMap, © OpenStreetMap contributors (ODbL); the walks routed with BRouter. Land and water of the ways and of the continents: Natural Earth.</string>
 
     <!-- One way's page -->
     <string name="way_start">Start this way</string>
@@ -72,6 +72,22 @@
     <string name="ways_cities_intro">A walk through a city, in one outing or a few: each place is told, with a line about it, as your steps reach it.</string>
     <string name="ways_row_walk_under_way">Under way: %1$s</string>
     <string name="ways_row_walk_walked">Walked on %1$s</string>
+    <!-- The cities by continent (ADR 0015 decision 12): a row a continent, its page with its map. -->
+    <string name="ways_continent_europe">Europe</string>
+    <string name="ways_continent_americas">The Americas</string>
+    <plurals name="ways_continent_cities">
+        <item quantity="one">%1$d city</item>
+        <item quantity="other">%1$d cities</item>
+    </plurals>
+    <plurals name="ways_continent_walked">
+        <item quantity="one">%1$d walked</item>
+        <item quantity="other">%1$d walked</item>
+    </plurals>
+    <plurals name="ways_continent_under_way">
+        <item quantity="one">%1$d under way</item>
+        <item quantity="other">%1$d under way</item>
+    </plurals>
+    <string name="ways_continent_map">%1$s on the map: %2$s.</string>
     <string name="walk_how">Start it, then put the phone away: Passo tells each place as your steps reach it, with a short vibration. Stop when you like: the next outing goes on from there.</string>
     <string name="walk_steps">About %1$s steps, in one outing or a few.</string>
     <string name="walk_start">Start the walk</string>
