@@ -8,8 +8,8 @@ import com.callbackdev.passo.core.domain.sessions.SignalWake
  * The processor kept awake for an outing's signals (docs/adr/0013-interval-walks.md, amended
  * 4 Oct 2026): a partial wake lock, the screen untouched, taken and let go only as
  * [SignalWake.needed] says. Not reference counted: taking it twice is holding it once, and one
- * release lets it go. Bounded by [SignalWake.TIMEOUT_MILLIS] whatever happens. [log] hears every
- * take and release.
+ * release lets it go. Bounded by [SignalWake.TIMEOUT_MILLIS] whatever happens. [log] hears each
+ * release, with how long it was held: one row an outing, enough to see it never outlived one.
  *
  * Main thread only, like the tracking service that drives it.
  */
@@ -25,7 +25,6 @@ internal class SignalWakeLock(powerManager: PowerManager, private val log: (Stri
         if (on && !lock.isHeld) {
             lock.acquire(SignalWake.TIMEOUT_MILLIS)
             heldSinceElapsed = SystemClock.elapsedRealtime()
-            log("held")
         } else if (!on && heldSinceElapsed != null) {
             if (lock.isHeld) lock.release()
             val seconds = (SystemClock.elapsedRealtime() - (heldSinceElapsed ?: 0L)) / MILLIS_PER_SECOND

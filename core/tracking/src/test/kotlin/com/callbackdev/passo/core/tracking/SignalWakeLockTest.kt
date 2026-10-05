@@ -18,7 +18,7 @@ class SignalWakeLockTest {
     private val lock = SignalWakeLock(powerManager) { log += it }
 
     @Test
-    fun `held once however often asked, let go once, and logged both ways`() {
+    fun `held once however often asked, let go once, and its release logged`() {
         lock.hold(true)
         lock.hold(true)
         assertThat(lock.held).isTrue()
@@ -28,9 +28,8 @@ class SignalWakeLockTest {
         lock.hold(false)
         assertThat(lock.held).isFalse()
         assertThat(ShadowPowerManager.getLatestWakeLock()?.isHeld).isFalse()
-        assertThat(log).hasSize(2)
-        assertThat(log[0]).isEqualTo("held")
-        assertThat(log[1]).startsWith("released after ")
+        assertThat(log).hasSize(1)
+        assertThat(log.single()).startsWith("released after ")
     }
 
     @Test

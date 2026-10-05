@@ -191,6 +191,7 @@
     </plurals>
     <string name="spoken_interval_fast">Veloce, %1$s.</string>
     <string name="spoken_interval_last_fast">Ultima serie veloce, %1$s.</string>
+    <string name="spoken_interval_now">%1$s, ancora %2$s.</string>
     <string name="spoken_interval_slow">Lento.</string>
     <plurals name="spoken_intervals_at_pace">
         <item quantity="one">%1$d intervallo veloce su %2$d al ritmo.</item>

@@ -10,6 +10,7 @@ import android.media.AudioManager
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice
@@ -70,6 +71,10 @@ enum class VoiceAvailability {
  * - **Over the music, not instead of it:** navigation-guidance audio with a transient focus that
  *   lets the music duck, given back as soon as the sentence ends.
  * - **Bound only for an outing that speaks**, from its start to its end, then released.
+ * - **Not over a phone call.** Android gives a call the audio: a sentence due during one is kept
+ *   (the latest only) and said when the call ends, through [onCallEnded], which may put it in
+ *   today's words (an interval's time left has moved on). Kept no longer than
+ *   [CALL_HOLD_MILLIS]: a signal an hour late says nothing.
  *
  * Main thread only, like the tracking service that drives it.
  */
@@ -87,6 +92,17 @@ class SessionSpeech(context: Context) {
 
     private var tts: TextToSpeech? = null
     private var queued: String? = null
+
+    // A sentence due during a call, with when it was due, and the route it was to take; the
+    // call's end is heard only while one waits.
+    private var missed: Missed? = null
+    private var listeningForCallEnd = false
+
+    /**
+     * What to say when a call ends, given the sentence it hid: the same sentence, or one in
+     * today's words. Set by the outing's service; null says the sentence as it was.
+     */
+    var onCallEnded: ((String) -> String)? = null
     private var releaseWhenQuiet = false
     private var utterance = 0
 
@@ -121,6 +137,11 @@ class SessionSpeech(context: Context) {
 
     /** Says [text] if [voice] lets it be heard now (headphones, ringer), binding the engine if needed. */
     fun say(text: String, voice: SessionVoice) {
+        if (inCall()) {
+            missed = Missed(text, voice, SystemClock.elapsedRealtime())
+            listenForCallEnd()
+            return
+        }
         if (!SpeechRoute.speaks(voice, headphonesConnected(), ringerNormal())) return
         speak(text)
     }
@@ -131,7 +152,7 @@ class SessionSpeech(context: Context) {
     /** Unbinds the engine, once every sentence handed to it (or waiting for it) is said. */
     fun release() {
         if (tts == null) return
-        if (unfinished > 0 || queued != null) releaseWhenQuiet = true else shutdown()
+        if (unfinished > 0 || queued != null || missed != null) releaseWhenQuiet = true else shutdown()
     }
 
     private fun speak(text: String) {
@@ -213,7 +234,54 @@ class SessionSpeech(context: Context) {
         if (releaseWhenQuiet) shutdown()
     }
 
+    /**
+     * A call, a VoIP call, or a phone ringing, and Android refuses Passo the audio: both, so that
+     * a mode left behind by another app never silences the voice (the focus is then given, and
+     * the sentence said as always).
+     */
+    private fun inCall(): Boolean {
+        val manager = audio ?: return false
+        if (manager.mode == AudioManager.MODE_NORMAL) return false
+        val granted = manager.requestAudioFocus(focus) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+        if (granted) manager.abandonAudioFocusRequest(focus)
+        return !granted
+    }
+
+    private fun listenForCallEnd() {
+        if (listeningForCallEnd || audio == null) return
+        audio.addOnModeChangedListener(app.mainExecutor, modeListener)
+        listeningForCallEnd = true
+    }
+
+    private fun stopListeningForCallEnd() {
+        if (!listeningForCallEnd) return
+        audio?.removeOnModeChangedListener(modeListener)
+        listeningForCallEnd = false
+    }
+
+    private val modeListener = AudioManager.OnModeChangedListener { mode ->
+        if (mode != AudioManager.MODE_NORMAL) return@OnModeChangedListener
+        stopListeningForCallEnd()
+        val waiting = missed ?: return@OnModeChangedListener
+        missed = null
+        val fresh = SystemClock.elapsedRealtime() - waiting.atElapsed <= CALL_HOLD_MILLIS
+        if (fresh && SpeechRoute.speaks(waiting.voice, headphonesConnected(), ringerNormal())) {
+            // A moment for the headphones to leave the call's audio, or the first words are lost.
+            unfinished++
+            main.postDelayed({
+                if (unfinished > 0) unfinished--
+                if (tts != null) speak(onCallEnded?.invoke(waiting.text) ?: waiting.text) else quiet()
+            }, CALL_SETTLE_MILLIS)
+        } else if (releaseWhenQuiet && unfinished == 0 && queued == null) {
+            shutdown()
+        }
+    }
+
+    private class Missed(val text: String, val voice: SessionVoice, val atElapsed: Long)
+
     private fun shutdown() {
+        stopListeningForCallEnd()
+        missed = null
         tts?.shutdown()
         tts = null
         queued = null
@@ -230,6 +298,12 @@ class SessionSpeech(context: Context) {
 
     companion object {
         private const val TAG = "PassoVoice"
+
+        /** A sentence a call hid is said after it only within this long. */
+        private const val CALL_HOLD_MILLIS = 15 * 60_000L
+
+        /** How long after a call its hidden sentence waits, for the audio to come back. */
+        private const val CALL_SETTLE_MILLIS = 1_500L
 
         /**
          * What counts as headphones: what the reader alone hears, or their car. A Bluetooth
