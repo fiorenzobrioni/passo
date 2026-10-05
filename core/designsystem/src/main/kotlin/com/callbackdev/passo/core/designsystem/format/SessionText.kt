@@ -306,6 +306,20 @@ fun Resources.sessionBrief(session: Session, format: MeasureFormatter): String =
 
 private const val NO_BREAK = '\u00A0'
 
+/**
+ * [sessionBrief] without the outing's name, for a card too narrow for the whole of it: «Set 3 of
+ * 5», «12 of 20 min», «Outing paused».
+ */
+fun Resources.sessionBriefShort(session: Session, format: MeasureFormatter): String =
+    if (session.state == SessionState.PAUSED) {
+        getString(R.string.session_brief_short_paused)
+    } else {
+        val where = session.intervalAt(session.lastStepAtMillis)
+            ?.let { getString(R.string.session_interval_set_inline, it.set, it.sets) }
+            ?: sessionProgress(session, format)
+        where.replaceFirstChar { it.titlecase(configuration.locales[0]) }.replace(' ', NO_BREAK)
+    }
+
 /** «2,140 steps». */
 fun Resources.sessionSteps(session: Session, format: MeasureFormatter): String =
     getQuantityString(R.plurals.session_amount_steps, session.totals.steps, format.steps(session.totals.steps))

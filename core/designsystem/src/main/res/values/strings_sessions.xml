@@ -83,6 +83,7 @@
     <!-- An outing in a line, for the widgets and the Quick Settings tile. -->
     <string name="session_brief">%1$s: %2$s</string>
     <string name="session_brief_paused">%1$s: paused</string>
+    <string name="session_brief_short_paused">Outing paused</string>
     <!-- A city walk under way (Phase 11): «Next: the Duomo, 600 m». -->
     <string name="walk_next">Next: %1$s, %2$s</string>
     <!-- A city walk walked to its last place: «The walk is done: Tower Bridge.» -->

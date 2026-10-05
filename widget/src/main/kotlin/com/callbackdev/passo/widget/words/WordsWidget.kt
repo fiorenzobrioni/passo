@@ -41,6 +41,7 @@ import com.callbackdev.passo.widget.FACT_SP
 import com.callbackdev.passo.widget.MessageContent
 import com.callbackdev.passo.widget.PassoWidgetReceiver
 import com.callbackdev.passo.widget.R
+import com.callbackdev.passo.widget.SentenceForms
 import com.callbackdev.passo.widget.StatusFootnote
 import com.callbackdev.passo.widget.TextWeight
 import com.callbackdev.passo.widget.WidgetCard
@@ -62,7 +63,6 @@ import com.callbackdev.passo.widget.messageHint
 import com.callbackdev.passo.widget.messageTitle
 import com.callbackdev.passo.widget.metricsText
 import com.callbackdev.passo.widget.rememberWidgetModel
-import com.callbackdev.passo.widget.sentence
 import com.callbackdev.passo.widget.statusText
 import com.callbackdev.passo.widget.textEm
 import com.callbackdev.passo.widget.widgetDressFor
@@ -137,55 +137,82 @@ private class WordsParts(
     val status = model.state != CountingState.COUNTING
     val scale = fontScale(context)
     val count: String = format.steps(overview.steps)
-    val heroEm: Float = textEm(format.steps(maxOf(overview.steps, overview.goalSteps)), TextWeight.BOLD)
+    val heroEm: Float = textEm(context, format.steps(maxOf(overview.steps, overview.goalSteps)), TextWeight.BOLD)
     val reached = overview.goalReachedAt != null
 
     /**
      * What the sentence's place says: what a tap does while the count is not moving, else the
      * outing under way, else the sentence.
      */
-    val slot: String? = statusText(context, model.state)
-        ?: model.session?.let { context.resources.sessionBrief(it, format) }
-        ?: if (look.showSentence) sentence(context, overview, format) else null
+    val forms = SentenceForms.of(context, model.state, model.session, overview, format, look.showSentence)
     val slotIsStatus = status
 
-    fun slotNeeds(width: Dp): Int =
-        slot?.let { measureWidgetLines(context, it, WORDS_SENTENCE_SP, width, TextWeight.MEDIUM) } ?: 0
+    fun slotLines(text: String, width: Dp): Int =
+        measureWidgetLines(context, text, WORDS_SENTENCE_SP, width, TextWeight.MEDIUM)
+
+    /** The form a column of [width] can give its lines whole ([plan] of those lines), with that plan. */
+    fun <P> fitSlot(width: Dp, plan: (Int) -> P, lines: (P) -> Int): Pair<P, String?> =
+        forms.fit({ slotLines(it, width) }, plan, lines)
 
     /** The metrics line is drawn whole or not at all: a cut estimate is a wrong one. */
     fun metrics(width: Dp): Boolean = look.showMetrics &&
         measureWidgetText(context, metricsText(context, overview, format), FACT_SP, TextWeight.MEDIUM).withSlack() <=
         width
 
-    fun eyebrow(room: Dp): String {
-        val long = eyebrowText(context, short = false)
-        return if (measureWidgetText(context, long, FACT_SP).withSlack() <=
-            room
-        ) {
-            long
-        } else {
-            eyebrowText(context, short = true)
-        }
+    /** The day in figures, figure and words, in the order a table prints them. */
+    fun detailLines(): List<Pair<String, String>> {
+        val res = context.resources
+        val metrics = overview.metrics
+        return listOf(
+            res.format(format.distance(metrics.distanceMeters)) to R.string.widget_detail_distance,
+            res.format(format.energy(metrics.activeKcal)) to R.string.widget_detail_calories,
+            res.format(format.minutes(metrics.activeMinutes)) to R.string.widget_detail_active,
+            res.format(format.minutes(metrics.briskMinutes)) to R.string.widget_detail_brisk,
+        ).map { (value, label) -> value to context.getString(label) }
     }
 
-    /** «84% of 10,000», or «84%» where the whole fact does not fit [room] (the check mark included). */
-    fun goal(room: Dp): String {
+    fun detailValueColumn(lines: List<Pair<String, String>>): Dp =
+        lines.maxOf { measureWidgetText(context, it.first, FACT_SP, TextWeight.MEDIUM) } + DetailValueGap
+
+    /** The day in figures where [width] holds every line of it whole, figure and words; else none. */
+    fun details(width: Dp): Boolean {
+        if (!look.showDetails) return false
+        val lines = detailLines()
+        val words = lines.maxOf { measureWidgetText(context, it.second, DETAIL_LABEL_SP) }.withSlack()
+        return detailValueColumn(lines) + words <= width
+    }
+
+    /** «Steps today», «Today» where that does not fit [room], nothing where neither does. */
+    fun eyebrow(room: Dp): String? = listOf(false, true)
+        .map { eyebrowText(context, short = it) }
+        .firstOrNull { measureWidgetText(context, it, FACT_SP).withSlack() <= room }
+
+    /**
+     * The goal as [room] holds it whole: «84% of 10,000», else «84%», each with the check mark
+     * once it is met, else the share alone (past 100% it says the goal is met); null where not
+     * even that fits.
+     */
+    fun goal(room: Dp): GoalShown? {
+        val mark = markSize(scale) + MarkGap
+        fun width(text: String) = measureWidgetText(context, text, FACT_SP, TextWeight.MEDIUM).withSlack()
         val share = goalShareText(context, overview, format)
-        val mark = if (reached) markSize(scale) + MarkGap else 0.dp
-        return if (measureWidgetText(context, share, FACT_SP, TextWeight.MEDIUM).withSlack() + mark <= room) {
-            share
-        } else {
-            goalPercentText(overview, format)
-        }
+        val percent = goalPercentText(overview, format)
+        val tries = listOf(share to reached, percent to reached, percent to false).distinct()
+        return tries.firstOrNull { (text, marked) -> width(text) + (if (marked) mark else 0.dp) <= room }
+            ?.let { (text, marked) -> GoalShown(text, marked) }
     }
 }
+
+/** The goal as a card prints it: the words, and whether the check mark goes before them. */
+private data class GoalShown(val text: String, val marked: Boolean)
 
 // --- Lines -------------------------------------------------------------------------------------
 
 @Composable
 private fun Eyebrow(parts: WordsParts, room: Dp) {
+    val text = parts.eyebrow(room) ?: return
     Text(
-        text = parts.eyebrow(room),
+        text = text,
         style = TextStyle(color = parts.palette.secondaryInk, fontSize = FACT_SP.sp),
         maxLines = 1,
     )
@@ -201,9 +228,8 @@ private fun Count(parts: WordsParts, sp: Float) {
 }
 
 @Composable
-private fun SentenceText(parts: WordsParts, lines: Int, align: TextAlign, column: Dp) {
-    val text = parts.slot ?: return
-    if (lines <= 0) return
+private fun SentenceText(parts: WordsParts, text: String?, lines: Int, align: TextAlign, column: Dp) {
+    if (text == null || lines <= 0) return
     val width = balancedWidth(parts.context, text, WORDS_SENTENCE_SP, column, TextWeight.MEDIUM, lines)
     Text(
         text = text,
@@ -234,8 +260,9 @@ private fun factStyle(parts: WordsParts, align: TextAlign = TextAlign.Start) = T
  */
 @Composable
 private fun GoalFact(parts: WordsParts, room: Dp) {
+    val goal = parts.goal(room) ?: return
     Row(verticalAlignment = Alignment.CenterVertically) {
-        if (parts.reached) {
+        if (goal.marked) {
             Box(modifier = GlanceModifier.padding(end = MarkGap)) {
                 Image(
                     provider = ImageProvider(R.drawable.widget_mark_check),
@@ -245,7 +272,7 @@ private fun GoalFact(parts: WordsParts, room: Dp) {
                 )
             }
         }
-        Text(text = parts.goal(room), style = factStyle(parts), maxLines = 1)
+        Text(text = goal.text, style = factStyle(parts), maxLines = 1)
     }
 }
 
@@ -267,21 +294,14 @@ private val MarkGap = 4.dp
 private fun Details(parts: WordsParts, rows: Int) {
     if (rows <= 0) return
     val context = parts.context
-    val res = context.resources
-    val metrics = parts.overview.metrics
-    val lines = listOf(
-        res.format(parts.format.distance(metrics.distanceMeters)) to R.string.widget_detail_distance,
-        res.format(parts.format.energy(metrics.activeKcal)) to R.string.widget_detail_calories,
-        res.format(parts.format.minutes(metrics.activeMinutes)) to R.string.widget_detail_active,
-        res.format(parts.format.minutes(metrics.briskMinutes)) to R.string.widget_detail_brisk,
-    ).take(rows)
-    val valueColumn = lines.maxOf { measureWidgetText(context, it.first, FACT_SP, TextWeight.MEDIUM) } + DetailValueGap
+    val lines = parts.detailLines().take(rows)
+    val valueColumn = parts.detailValueColumn(lines)
     Column(modifier = GlanceModifier.fillMaxWidth().padding(top = DetailGap)) {
         lines.forEach { (value, label) ->
             Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(text = value, style = factStyle(parts), maxLines = 1, modifier = GlanceModifier.width(valueColumn))
                 Text(
-                    text = context.getString(label),
+                    text = label,
                     style = TextStyle(color = parts.palette.secondaryInk, fontSize = DETAIL_LABEL_SP.sp),
                     maxLines = 1,
                     modifier = GlanceModifier.defaultWeight(),
@@ -316,7 +336,12 @@ private fun RowContent(parts: WordsParts, size: DpSize) {
     val leading = rowLeading(size, parts.scale, parts.heroEm, eyebrowWidth)
     val column = rowSentenceColumn(size, leading)
     val hero = rowHeroSp(size, parts.scale, parts.heroEm, leading)
-    val plan = rowColumnPlan(size, parts.scale, parts.slotNeeds(column), parts.look.showGoal, parts.metrics(column))
+    val metrics = parts.metrics(column)
+    val (plan, slot) = parts.fitSlot(
+        column,
+        plan = { rowColumnPlan(size, parts.scale, it, parts.look.showGoal, metrics) },
+        lines = { it.sentenceLines },
+    )
     Row(modifier = GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
         Column(modifier = GlanceModifier.width(leading)) {
             Eyebrow(parts, leading)
@@ -326,7 +351,7 @@ private fun RowContent(parts: WordsParts, size: DpSize) {
             horizontalAlignment = Alignment.End,
             modifier = GlanceModifier.padding(start = ColumnGap).defaultWeight(),
         ) {
-            SentenceText(parts, plan.sentenceLines, TextAlign.End, column)
+            SentenceText(parts, slot, plan.sentenceLines, TextAlign.End, column)
             if (plan.goal) GoalFact(parts, column)
             if (plan.metrics) MetricsFact(parts, TextAlign.End)
         }
@@ -337,20 +362,27 @@ private fun RowContent(parts: WordsParts, size: DpSize) {
 @Composable
 private fun StackContent(parts: WordsParts, size: DpSize) {
     val width = size.width - WidgetCardPadding * 2
-    val plan = stackPlan(
-        size,
-        parts.scale,
-        parts.heroEm,
-        parts.slotNeeds(width),
-        goal = parts.look.showGoal,
-        metrics = parts.metrics(width),
-        details = parts.look.showDetails,
+    val metrics = parts.metrics(width)
+    val (plan, slot) = parts.fitSlot(
+        width,
+        plan = {
+            stackPlan(
+                size,
+                parts.scale,
+                parts.heroEm,
+                it,
+                goal = parts.look.showGoal,
+                metrics = metrics,
+                details = parts.details(width),
+            )
+        },
+        lines = { it.column.sentenceLines },
     )
     Column(modifier = GlanceModifier.fillMaxSize()) {
         Eyebrow(parts, width)
         Spacer(modifier = GlanceModifier.defaultWeight())
         Count(parts, plan.heroSp)
-        SentenceText(parts, plan.column.sentenceLines, TextAlign.Start, width)
+        SentenceText(parts, slot, plan.column.sentenceLines, TextAlign.Start, width)
         if (plan.column.goal) GoalFact(parts, width)
         if (plan.column.metrics) MetricsFact(parts, TextAlign.Start)
         Details(parts, plan.detailRows)
@@ -365,14 +397,21 @@ private fun StackContent(parts: WordsParts, size: DpSize) {
 private fun PanelContent(parts: WordsParts, size: DpSize) {
     val width = size.width - WidgetCardPadding * 2
     val sentenceColumn = width - ColumnGap - leadingFor(parts, size)
-    val plan = panelPlan(
-        size,
-        parts.scale,
-        parts.heroEm,
-        parts.slotNeeds(sentenceColumn),
-        goal = parts.look.showGoal,
-        metrics = parts.metrics(sentenceColumn),
-        details = parts.look.showDetails,
+    val metrics = parts.metrics(sentenceColumn)
+    val (plan, slot) = parts.fitSlot(
+        sentenceColumn,
+        plan = {
+            panelPlan(
+                size,
+                parts.scale,
+                parts.heroEm,
+                it,
+                goal = parts.look.showGoal,
+                metrics = metrics,
+                details = parts.details(width),
+            )
+        },
+        lines = { it.column.sentenceLines },
     )
     Column(modifier = GlanceModifier.fillMaxSize()) {
         Eyebrow(parts, width)
@@ -389,7 +428,7 @@ private fun PanelContent(parts: WordsParts, size: DpSize) {
                     horizontalAlignment = Alignment.End,
                     modifier = GlanceModifier.padding(bottom = plan.baselineLift),
                 ) {
-                    SentenceText(parts, plan.column.sentenceLines, TextAlign.End, sentenceColumn)
+                    SentenceText(parts, slot, plan.column.sentenceLines, TextAlign.End, sentenceColumn)
                     if (plan.column.goal) GoalFact(parts, width - plan.leading - ColumnGap)
                     if (plan.column.metrics) MetricsFact(parts, TextAlign.End)
                 }

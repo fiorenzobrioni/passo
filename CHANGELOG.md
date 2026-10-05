@@ -59,11 +59,12 @@ All notable changes to Passo are documented here. The format follows
   the screen is off; Passo put them all in one minute, which could read as a minute of running
   and make the distance and calories of the day too high. They are now spread over the time they
   took. The day's steps were always right, and days already recorded stay as they are.
-- **The widget's sentence is no longer cut where it has less room.** On a card with fewer lines
-  (larger text, a shorter grid), «At a glance» could lose the end of its sentence, the very time
-  the goal was reached among it. It now says the same thing in fewer words there («Reached at
-  2:23 PM»); where the whole sentence fits, nothing changes.
-
+- **Nothing on the widgets is cut any more.** On some phones (a Samsung among them) both cards
+  could cut the count («9.6…») or the end of their sentence («Goal reached at 14:…»): they
+  measured their text in a different typeface from the one the home screen draws it in. They now
+  measure in the home screen's own, with a little room to spare; a sentence that would not fit
+  says the same thing in fewer words («Reached at 2:23 PM»), and the count is made smaller rather
+  than cut, past ten thousand steps too.
 - **The first-day note** on Today goes as soon as you open the guide from it, instead of
   staying until the end of the day.
 

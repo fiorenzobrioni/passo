@@ -113,3 +113,57 @@ internal object Grants {
     val FourByThree = DpSize(340.dp, 293.dp)
     val OneByTwo = DpSize(85.dp, 189.dp)
 }
+
+/**
+ * The texts a launcher would cut on [size]: composed and laid out as [renderCard] does, but with
+ * every line set [stretch] times wider than this process measures it, as a launcher on another
+ * face draws it (a Samsung's One UI Home, 5 Oct 2026: the count and the sentence cut). Each entry
+ * is the text and how it was cut.
+ */
+@OptIn(ExperimentalGlanceRemoteViewsApi::class)
+internal fun cutTexts(context: Context, size: DpSize, stretch: Float, content: @Composable () -> Unit): List<String> =
+    runBlocking {
+        val density = context.resources.displayMetrics.density
+        val views = GlanceRemoteViews().compose(context, size) { content() }.remoteViews
+        val host = FrameLayout(context)
+        host.addView(views.apply(context, host))
+        val texts = mutableListOf<android.widget.TextView>()
+        fun collect(view: View) {
+            if (view is android.widget.TextView) texts += view
+            if (view is android.view.ViewGroup) for (i in 0 until view.childCount) collect(view.getChildAt(i))
+        }
+        collect(host)
+        texts.forEach { it.textScaleX = stretch }
+        val w = (size.width.value * density).roundToInt()
+        val h = (size.height.value * density).roundToInt()
+        host.measure(
+            View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY),
+            View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY),
+        )
+        host.layout(0, 0, w, h)
+        texts.filter { it.visibility == View.VISIBLE && it.text.isNotEmpty() }.mapNotNull { text ->
+            val layout = text.layout ?: return@mapNotNull null
+            val room = text.width - text.totalPaddingLeft - text.totalPaddingRight
+            val ellipsized = (0 until layout.lineCount).any { layout.getEllipsisCount(it) > 0 }
+            // A line's visible ink, its trailing space left out (a right-aligned line keeps it in its width).
+            val overflow = (0 until layout.lineCount).any { line ->
+                val visible = text.text.subSequence(layout.getLineStart(line), layout.getLineVisibleEnd(line))
+                android.text.Layout.getDesiredWidth(visible, text.paint) > room + 1
+            }
+            val need = text.paint.measureText(text.text.toString()) / density
+            val spans = (text.text as? android.text.Spanned)?.let { sp ->
+                sp.getSpans(0, sp.length, Any::class.java).joinToString { it.javaClass.simpleName }
+            }
+            val ours = android.text.StaticLayout.Builder.obtain(text.text, 0, text.text.length, text.paint, room)
+                .setIncludePad(true).build().lineCount
+            val how = "(lines %d of max %d, ours %d; room %.1f dp, ls %.3f, bs %d, hy %d, spans %s, w %d mw %d)".format(
+                layout.lineCount, text.maxLines, ours, room / density, text.letterSpacing, text.breakStrategy,
+                text.hyphenationFrequency, spans, text.width, text.measuredWidth,
+            )
+            when {
+                ellipsized -> "«${text.text}» ellipsized $how"
+                overflow -> "«${text.text}» clipped $how"
+                else -> null
+            }
+        }
+    }

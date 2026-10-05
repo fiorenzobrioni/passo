@@ -5,11 +5,14 @@ import android.icu.text.CompactDecimalFormat
 import android.text.format.DateFormat
 import com.callbackdev.passo.core.designsystem.format.format
 import com.callbackdev.passo.core.designsystem.format.measureFormatter
+import com.callbackdev.passo.core.designsystem.format.sessionBrief
+import com.callbackdev.passo.core.designsystem.format.sessionBriefShort
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.today.Headline
 import com.callbackdev.passo.core.domain.today.Pace
 import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.widget.CountingState
+import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.UserSettings
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -67,6 +70,64 @@ internal fun sentence(
             headline.steps,
             format.steps(headline.steps),
         )
+    }
+}
+
+/**
+ * What a card's sentence place may say, in the order it is tried: whole first, then in fewer
+ * words. [mayGo]: the day's sentence may go unsaid where neither form fits, since a card without
+ * it still reads; a status or an outing may not, and its last form is cut instead.
+ */
+internal class SentenceForms(val forms: List<String>, val mayGo: Boolean) {
+    val first: String? get() = forms.firstOrNull()
+
+    /**
+     * The first form whose lines ([measure]) the card gives it whole ([plan] of those lines, and
+     * the [lines] that plan grants), with that plan; else, where it may, none at all.
+     */
+    fun <P> fit(measure: (String) -> Int, plan: (Int) -> P, lines: (P) -> Int): Pair<P, String?> {
+        forms.forEach { form ->
+            val needs = measure(form)
+            val planned = plan(needs)
+            if (lines(planned) >= needs) return planned to form
+        }
+        val last = forms.lastOrNull()
+        if (mayGo || last == null) return plan(0) to null
+        return plan(measure(last)) to last
+    }
+
+    companion object {
+        /**
+         * What a tap does while the count is not moving, else the outing under way, else the
+         * day's sentence where the card shows it ([showSentence]).
+         */
+        fun of(
+            context: Context,
+            state: CountingState,
+            session: Session?,
+            overview: TodayOverview,
+            format: MeasureFormatter,
+            showSentence: Boolean,
+        ): SentenceForms {
+            val status = statusText(context, state)
+            if (status !=
+                null
+            ) {
+                return SentenceForms(listOfNotNull(status, statusText(context, state, short = true)), false)
+            }
+            if (session != null) {
+                val res = context.resources
+                return SentenceForms(
+                    listOf(res.sessionBrief(session, format), res.sessionBriefShort(session, format)),
+                    false,
+                )
+            }
+            if (!showSentence) return SentenceForms(emptyList(), true)
+            return SentenceForms(
+                listOf(sentence(context, overview, format), sentence(context, overview, format, short = true)),
+                mayGo = true,
+            )
+        }
     }
 }
 

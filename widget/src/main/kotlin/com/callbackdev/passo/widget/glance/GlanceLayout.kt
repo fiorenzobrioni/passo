@@ -9,6 +9,7 @@ import com.callbackdev.passo.widget.WidgetCardPadding
 import com.callbackdev.passo.widget.WidgetCardPaddingSnug
 import com.callbackdev.passo.widget.linesThatFit
 import com.callbackdev.passo.widget.quarterPoint
+import com.callbackdev.passo.widget.spThatFits
 import com.callbackdev.passo.widget.textInkBalance
 import com.callbackdev.passo.widget.textLineHeight
 import com.callbackdev.passo.widget.textSizeForLine
@@ -110,8 +111,8 @@ internal fun rowWordsColumn(width: Dp, ring: Dp, wordsNeed: Dp, sentenceKeep: Dp
 internal fun rowHeroSp(height: Dp, column: Dp, heroEm: Float, fontScale: Float, footnote: Boolean): Float {
     val room = height - WidgetCardPaddingSnug * 2 - textLineHeight(FACT_SP, fontScale) -
         (if (footnote) textLineHeight(STATUS_SP, fontScale) else textInkBalance(ROW_HERO_SP, fontScale))
-    val byWidth = column.value / (heroEm * fontScale.coerceAtLeast(0.1f))
-    return quarterPoint(minOf(ROW_HERO_SP, textSizeForLine(room, fontScale), byWidth).coerceAtLeast(HERO_FLOOR_SP))
+    val byHeight = minOf(ROW_HERO_SP, textSizeForLine(room, fontScale)).coerceAtLeast(HERO_FLOOR_SP)
+    return quarterPoint(minOf(byHeight, spThatFits(column, heroEm, fontScale)))
 }
 
 internal const val ROW_HERO_SP = 34f
@@ -149,8 +150,8 @@ internal fun tallPlan(size: DpSize, fontScale: Float, heroEm: Float, sentenceLin
     val inner = size.height - WidgetCardPadding * 2
     val width = size.width - WidgetCardPadding * 2
     val fixed = textLineHeight(FACT_SP, fontScale)
-    val byWidth = width.value / (heroEm * fontScale.coerceAtLeast(0.1f))
-    val baseHero = minOf(ROW_HERO_SP, byWidth).coerceAtLeast(HERO_FLOOR_SP)
+    val byWidth = spThatFits(width, heroEm, fontScale)
+    val baseHero = minOf(ROW_HERO_SP, byWidth)
     var lines = minOf(sentenceLines, TALL_SENTENCE_MAX_LINES)
     fun ringRoom(l: Int) =
         inner - fixed - textLineHeight(baseHero, fontScale) - textLineHeight(SENTENCE_LINE_SP, fontScale) * l
