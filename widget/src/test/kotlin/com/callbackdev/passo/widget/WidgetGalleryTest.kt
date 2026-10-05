@@ -4,7 +4,11 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.designsystem.theme.WidgetCardColor
+import com.callbackdev.passo.core.domain.today.DayMinute
+import com.callbackdev.passo.core.domain.today.HourlySteps
+import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.widget.CountingState
+import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
@@ -111,6 +115,26 @@ class WidgetGalleryTest {
             Grants.TwoByTwo to renderCard(context, Grants.TwoByTwo) { WordsWidgetContent(WidgetSamples.model()) },
         )
         board.draw().saveTo(out, "widget-italian")
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT-w411dp-h891dp-xhdpi", fontScale = 1.3f)
+    fun `the goal reached, in Italian at large text`() {
+        // The owner's card of 5 Oct 2026: the whole sentence would lose its time, the short one keeps it.
+        val minutes = (13 * 60 until 14 * 60 + 40).map { DayMinute(it, 96) }
+        val overview = TodayOverview.of(
+            minutes = minutes,
+            profile = Profile(heightMeters = 1.78, weightKg = 74.0),
+            goalSteps = 8_000,
+            nowMinute = 15 * 60.0,
+            typical = null,
+        )
+        val model = WidgetSamples.model().copy(day = WidgetDay(overview, HourlySteps.of(minutes), 15 * 60))
+        val board = HomeBoard(context, widthDp = 380)
+        listOf(Grants.FourByOne, Grants.TwoByTwo).forEach { size ->
+            board.row(size to renderCard(context, size) { GlanceWidgetContent(model) })
+        }
+        board.draw().saveTo(out, "widget-goal-reached-large-text")
     }
 
     @Test

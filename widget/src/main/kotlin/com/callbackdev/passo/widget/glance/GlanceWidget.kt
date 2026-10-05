@@ -143,6 +143,9 @@ internal fun GlanceWidgetContent(model: WidgetModel) {
     }
 }
 
+/** A sentence as a card prints it: its words, and the lines it is given. */
+private data class FittedSentence(val text: String, val lines: Int)
+
 /** What every form draws from, read once. */
 private class CardParts(
     val context: Context,
@@ -168,6 +171,29 @@ private class CardParts(
         ?: model.session?.let { context.resources.sessionBrief(it, format) }
         ?: if (model.look.showSentence) sentence(context, overview, format) else null
     val sentenceIsStatus = status
+
+    /** The day's sentence in fewer words; null where the place says a status or an outing. */
+    private val sentenceShort: String? = sentence.takeIf {
+        statusText(context, model.state) == null && model.session == null
+    }?.let { sentence(context, overview, format, short = true) }
+
+    /**
+     * The sentence for [maxLines] at [width], with the lines it takes: the whole one where it
+     * fits, else the same thing in fewer words (a time cut off is worse than words left out),
+     * else the whole one, cut as before.
+     */
+    fun fitSentence(width: Dp, maxLines: Int): FittedSentence? {
+        val long = sentence ?: return null
+        val longLines = measureWidgetLines(context, long, SENTENCE_LINE_SP, width, TextWeight.MEDIUM)
+        if (longLines <= maxLines) return FittedSentence(long, longLines)
+        val short = sentenceShort
+        val shortLines = short?.let { measureWidgetLines(context, it, SENTENCE_LINE_SP, width, TextWeight.MEDIUM) }
+        return if (short != null && shortLines != null && shortLines <= maxLines) {
+            FittedSentence(short, shortLines)
+        } else {
+            FittedSentence(long, maxLines)
+        }
+    }
 
     fun goalLine(room: Dp): String {
         val long = goalOfText(context, overview.goalSteps, format, short = false)
@@ -308,18 +334,22 @@ private fun GoalLine(parts: CardParts, room: Dp) {
 }
 
 @Composable
-private fun Sentence(parts: CardParts, lines: Int, align: TextAlign, modifier: GlanceModifier = GlanceModifier) {
-    val text = parts.sentence ?: return
-    if (lines <= 0) return
+private fun Sentence(
+    parts: CardParts,
+    fitted: FittedSentence?,
+    align: TextAlign,
+    modifier: GlanceModifier = GlanceModifier,
+) {
+    if (fitted == null || fitted.lines <= 0) return
     Text(
-        text = text,
+        text = fitted.text,
         style = TextStyle(
             color = if (parts.sentenceIsStatus) parts.palette.attentionInk else parts.palette.primaryInk,
             fontSize = SENTENCE_LINE_SP.sp,
             fontWeight = FontWeight.Medium,
             textAlign = align,
         ),
-        maxLines = lines,
+        maxLines = fitted.lines,
         modifier = modifier,
     )
 }
@@ -381,16 +411,15 @@ private fun RowContent(
         }
         if (sentenceText != null) {
             val sentenceColumn = words - column - SentenceGap
-            val measured =
-                measureWidgetLines(context, sentenceText, SENTENCE_LINE_SP, sentenceColumn, TextWeight.MEDIUM)
+            val fitted = parts.fitSentence(sentenceColumn, rowSentenceLines(height, scale, Int.MAX_VALUE))
             Column(
                 horizontalAlignment = Alignment.End,
                 modifier = GlanceModifier.padding(start = SentenceGap).defaultWeight(),
             ) {
-                val lines = rowSentenceLines(height, scale, measured)
-                val balanced =
-                    balancedWidth(context, sentenceText, SENTENCE_LINE_SP, sentenceColumn, TextWeight.MEDIUM, lines)
-                Sentence(parts, lines, TextAlign.End, GlanceModifier.width(balanced))
+                val balanced = fitted?.let {
+                    balancedWidth(context, it.text, SENTENCE_LINE_SP, sentenceColumn, TextWeight.MEDIUM, it.lines)
+                } ?: sentenceColumn
+                Sentence(parts, fitted, TextAlign.End, GlanceModifier.width(balanced))
             }
         }
     }
@@ -419,12 +448,9 @@ private fun MirroredRow(parts: CardParts, width: Dp, height: Dp, ring: Dp, wide:
             Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Count(parts, hero)
                 if (showSentence) {
-                    val sentenceText = parts.sentence.orEmpty()
-                    val measured =
-                        measureWidgetLines(context, sentenceText, SENTENCE_LINE_SP, shoulder, TextWeight.MEDIUM)
                     Sentence(
                         parts,
-                        minOf(measured, TALL_SENTENCE_MAX_LINES),
+                        parts.fitSentence(shoulder, TALL_SENTENCE_MAX_LINES),
                         TextAlign.Start,
                         GlanceModifier.padding(start = SentenceGap).defaultWeight(),
                     )
@@ -447,15 +473,18 @@ private fun TallContent(parts: CardParts, size: DpSize) {
     val width = size.width - WidgetCardPadding * 2
     val measured =
         parts.sentence?.let { measureWidgetLines(context, it, SENTENCE_LINE_SP, width, TextWeight.MEDIUM) } ?: 0
-    val plan = tallPlan(size, parts.scale, parts.heroEm, measured)
+    val first = tallPlan(size, parts.scale, parts.heroEm, measured)
+    val fitted = parts.fitSentence(width, first.sentenceLines)
+    // Fewer words may need fewer lines, and the ring takes back what they leave.
+    val plan = fitted?.let { tallPlan(size, parts.scale, parts.heroEm, it.lines) } ?: first
     Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Alignment.TopEnd) {
         Ring(parts, plan.ring)
         Column(modifier = GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.Bottom) {
             Count(parts, plan.heroSp)
-            val sentenceWidth = parts.sentence?.let {
-                balancedWidth(context, it, SENTENCE_LINE_SP, width, TextWeight.MEDIUM, plan.sentenceLines)
+            val sentenceWidth = fitted?.let {
+                balancedWidth(context, it.text, SENTENCE_LINE_SP, width, TextWeight.MEDIUM, it.lines)
             } ?: width
-            Sentence(parts, plan.sentenceLines, TextAlign.Start, GlanceModifier.width(sentenceWidth))
+            Sentence(parts, fitted, TextAlign.Start, GlanceModifier.width(sentenceWidth))
             GoalLine(parts, width)
         }
     }

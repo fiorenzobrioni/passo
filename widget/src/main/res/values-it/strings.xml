@@ -23,6 +23,16 @@
         <item quantity="many">Mancano %1$s passi</item>
         <item quantity="other">Mancano %1$s passi</item>
     </plurals>
+    <string name="widget_sentence_no_steps_short">Nessun passo</string>
+    <string name="widget_sentence_goal_reached_short">Raggiunto alle %1$s</string>
+    <string name="widget_sentence_ahead_short">+%1$s sul solito</string>
+    <string name="widget_sentence_behind_short">−%1$s sul solito</string>
+    <string name="widget_sentence_on_pace_short">Al tuo solito ritmo</string>
+    <plurals name="widget_sentence_to_go_short">
+        <item quantity="one">Manca %1$s</item>
+        <item quantity="many">Mancano %1$s</item>
+        <item quantity="other">Mancano %1$s</item>
+    </plurals>
 
     <plurals name="widget_goal_of">
         <item quantity="one">di %1$s passo</item>

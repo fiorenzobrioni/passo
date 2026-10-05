@@ -22,6 +22,16 @@
         <item quantity="one">%1$s step to go</item>
         <item quantity="other">%1$s steps to go</item>
     </plurals>
+    <!-- The same, in fewer words: for a card where the whole sentence would be cut -->
+    <string name="widget_sentence_no_steps_short">No steps yet</string>
+    <string name="widget_sentence_goal_reached_short">Reached at %1$s</string>
+    <string name="widget_sentence_ahead_short">+%1$s on usual</string>
+    <string name="widget_sentence_behind_short">−%1$s on usual</string>
+    <string name="widget_sentence_on_pace_short">On your usual pace</string>
+    <plurals name="widget_sentence_to_go_short">
+        <item quantity="one">%1$s to go</item>
+        <item quantity="other">%1$s to go</item>
+    </plurals>
 
     <!-- The goal and the estimates -->
     <plurals name="widget_goal_of">

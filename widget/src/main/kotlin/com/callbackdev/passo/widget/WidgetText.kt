@@ -23,35 +23,47 @@ import java.time.format.DateTimeFormatter
 internal fun widgetFormatter(context: Context, settings: UserSettings): MeasureFormatter =
     context.measureFormatter(settings.units)
 
-/** The day's sentence, brief: the one sentence before any number (Chiaro's rule, Today's headline). */
-internal fun sentence(context: Context, overview: TodayOverview, format: MeasureFormatter): String {
+/**
+ * The day's sentence, brief: the one sentence before any number (Chiaro's rule, Today's headline).
+ * [short] is the same thing said in fewer words, for a card where the whole sentence would be cut.
+ */
+internal fun sentence(
+    context: Context,
+    overview: TodayOverview,
+    format: MeasureFormatter,
+    short: Boolean = false,
+): String {
     val res = context.resources
     return when (val headline = overview.headline) {
-        Headline.NoStepsYet -> res.getString(R.string.widget_sentence_no_steps)
+        Headline.NoStepsYet -> res.getString(
+            if (short) R.string.widget_sentence_no_steps_short else R.string.widget_sentence_no_steps,
+        )
 
         is Headline.GoalReached -> res.getString(
-            R.string.widget_sentence_goal_reached,
+            if (short) R.string.widget_sentence_goal_reached_short else R.string.widget_sentence_goal_reached,
             clockTime(context, headline.minuteOfDay),
         )
 
         is Headline.VersusUsual -> when (val pace = headline.pace) {
-            is Pace.Ahead -> res.getQuantityString(
-                R.plurals.widget_sentence_ahead,
-                pace.steps,
-                format.steps(pace.steps),
-            )
+            is Pace.Ahead -> if (short) {
+                res.getString(R.string.widget_sentence_ahead_short, format.steps(pace.steps))
+            } else {
+                res.getQuantityString(R.plurals.widget_sentence_ahead, pace.steps, format.steps(pace.steps))
+            }
 
-            is Pace.Behind -> res.getQuantityString(
-                R.plurals.widget_sentence_behind,
-                pace.steps,
-                format.steps(pace.steps),
-            )
+            is Pace.Behind -> if (short) {
+                res.getString(R.string.widget_sentence_behind_short, format.steps(pace.steps))
+            } else {
+                res.getQuantityString(R.plurals.widget_sentence_behind, pace.steps, format.steps(pace.steps))
+            }
 
-            Pace.OnPace -> res.getString(R.string.widget_sentence_on_pace)
+            Pace.OnPace -> res.getString(
+                if (short) R.string.widget_sentence_on_pace_short else R.string.widget_sentence_on_pace,
+            )
         }
 
         is Headline.ToGo -> res.getQuantityString(
-            R.plurals.widget_sentence_to_go,
+            if (short) R.plurals.widget_sentence_to_go_short else R.plurals.widget_sentence_to_go,
             headline.steps,
             format.steps(headline.steps),
         )
