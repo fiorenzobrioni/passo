@@ -25,6 +25,8 @@ fun wayNameRes(id: WayId): Int = when (id) {
     WayId.PRAGUE_CASTLE_WENCESLAS -> R.string.way_name_prague_castle_wenceslas
     WayId.LIMA_SAN_MARTIN_RESERVA -> R.string.way_name_lima_san_martin_reserva
     WayId.CUSCO_ARMAS_QORIKANCHA -> R.string.way_name_cusco_armas_qorikancha
+    WayId.NEW_YORK_PARK_BRIDGE -> R.string.way_name_new_york_park_bridge
+    WayId.RIO_CENTRO_SUGARLOAF -> R.string.way_name_rio_centro_sugarloaf
 }
 
 /** Where a way runs, in one line. */
@@ -47,6 +49,8 @@ fun wayRouteRes(id: WayId): Int = when (id) {
     WayId.PRAGUE_CASTLE_WENCESLAS -> R.string.way_route_prague_castle_wenceslas
     WayId.LIMA_SAN_MARTIN_RESERVA -> R.string.way_route_lima_san_martin_reserva
     WayId.CUSCO_ARMAS_QORIKANCHA -> R.string.way_route_cusco_armas_qorikancha
+    WayId.NEW_YORK_PARK_BRIDGE -> R.string.way_route_new_york_park_bridge
+    WayId.RIO_CENTRO_SUGARLOAF -> R.string.way_route_rio_centro_sugarloaf
 }
 
 /** A walk's outing, as History and Today name it; null for a way, which is not an outing. */
@@ -64,6 +68,8 @@ fun walkOutingRes(id: WayId): Int? = when (id) {
     WayId.PRAGUE_CASTLE_WENCESLAS -> R.string.way_outing_prague_castle_wenceslas
     WayId.LIMA_SAN_MARTIN_RESERVA -> R.string.way_outing_lima_san_martin_reserva
     WayId.CUSCO_ARMAS_QORIKANCHA -> R.string.way_outing_cusco_armas_qorikancha
+    WayId.NEW_YORK_PARK_BRIDGE -> R.string.way_outing_new_york_park_bridge
+    WayId.RIO_CENTRO_SUGARLOAF -> R.string.way_outing_rio_centro_sugarloaf
     else -> null
 }
 
@@ -223,6 +229,19 @@ fun placeNameRes(key: String): Int = when (key) {
     "monzuno" -> R.string.way_place_monzuno
     "mortara" -> R.string.way_place_mortara
     "najera" -> R.string.way_place_najera
+    "new_york_911_memorial" -> R.string.way_place_new_york_911_memorial
+    "new_york_brooklyn_bridge" -> R.string.way_place_new_york_brooklyn_bridge
+    "new_york_central_park" -> R.string.way_place_new_york_central_park
+    "new_york_empire_state" -> R.string.way_place_new_york_empire_state
+    "new_york_flatiron" -> R.string.way_place_new_york_flatiron
+    "new_york_grand_central" -> R.string.way_place_new_york_grand_central
+    "new_york_haughwout" -> R.string.way_place_new_york_haughwout
+    "new_york_public_library" -> R.string.way_place_new_york_public_library
+    "new_york_rockefeller_center" -> R.string.way_place_new_york_rockefeller_center
+    "new_york_times_square" -> R.string.way_place_new_york_times_square
+    "new_york_union_square" -> R.string.way_place_new_york_union_square
+    "new_york_washington_square" -> R.string.way_place_new_york_washington_square
+    "new_york_woolworth" -> R.string.way_place_new_york_woolworth
     "o_cebreiro" -> R.string.way_place_o_cebreiro
     "o_pedrouzo" -> R.string.way_place_o_pedrouzo
     "o_porrino" -> R.string.way_place_o_porrino
@@ -286,6 +305,18 @@ fun placeNameRes(key: String): Int = when (key) {
     "radicofani" -> R.string.way_place_radicofani
     "redondela" -> R.string.way_place_redondela
     "rieti" -> R.string.way_place_rieti
+    "rio_arcos_da_lapa" -> R.string.way_place_rio_arcos_da_lapa
+    "rio_benjamin_constant" -> R.string.way_place_rio_benjamin_constant
+    "rio_botafogo" -> R.string.way_place_rio_botafogo
+    "rio_candelaria" -> R.string.way_place_rio_candelaria
+    "rio_confeitaria_colombo" -> R.string.way_place_rio_confeitaria_colombo
+    "rio_flamengo_park" -> R.string.way_place_rio_flamengo_park
+    "rio_gloria" -> R.string.way_place_rio_gloria
+    "rio_museum_of_tomorrow" -> R.string.way_place_rio_museum_of_tomorrow
+    "rio_paco_imperial" -> R.string.way_place_rio_paco_imperial
+    "rio_selaron_steps" -> R.string.way_place_rio_selaron_steps
+    "rio_sugarloaf" -> R.string.way_place_rio_sugarloaf
+    "rio_theatro_municipal" -> R.string.way_place_rio_theatro_municipal
     "robbio" -> R.string.way_place_robbio
     "roma_san_pietro" -> R.string.way_place_roma_san_pietro
     "rome_ara_pacis" -> R.string.way_place_rome_ara_pacis
@@ -467,6 +498,19 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "milan_scala" -> R.string.way_note_milan_scala
     "milan_sempione" -> R.string.way_note_milan_sempione
     "monteriggioni" -> R.string.way_note_monteriggioni
+    "new_york_911_memorial" -> R.string.way_note_new_york_911_memorial
+    "new_york_brooklyn_bridge" -> R.string.way_note_new_york_brooklyn_bridge
+    "new_york_central_park" -> R.string.way_note_new_york_central_park
+    "new_york_empire_state" -> R.string.way_note_new_york_empire_state
+    "new_york_flatiron" -> R.string.way_note_new_york_flatiron
+    "new_york_grand_central" -> R.string.way_note_new_york_grand_central
+    "new_york_haughwout" -> R.string.way_note_new_york_haughwout
+    "new_york_public_library" -> R.string.way_note_new_york_public_library
+    "new_york_rockefeller_center" -> R.string.way_note_new_york_rockefeller_center
+    "new_york_times_square" -> R.string.way_note_new_york_times_square
+    "new_york_union_square" -> R.string.way_note_new_york_union_square
+    "new_york_washington_square" -> R.string.way_note_new_york_washington_square
+    "new_york_woolworth" -> R.string.way_note_new_york_woolworth
     "o_cebreiro" -> R.string.way_note_o_cebreiro
     "orio_litta" -> R.string.way_note_orio_litta
     "padron" -> R.string.way_note_padron
@@ -516,6 +560,17 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "radicofani" -> R.string.way_note_radicofani
     "redondela" -> R.string.way_note_redondela
     "rieti" -> R.string.way_note_rieti
+    "rio_arcos_da_lapa" -> R.string.way_note_rio_arcos_da_lapa
+    "rio_benjamin_constant" -> R.string.way_note_rio_benjamin_constant
+    "rio_botafogo" -> R.string.way_note_rio_botafogo
+    "rio_candelaria" -> R.string.way_note_rio_candelaria
+    "rio_confeitaria_colombo" -> R.string.way_note_rio_confeitaria_colombo
+    "rio_flamengo_park" -> R.string.way_note_rio_flamengo_park
+    "rio_museum_of_tomorrow" -> R.string.way_note_rio_museum_of_tomorrow
+    "rio_paco_imperial" -> R.string.way_note_rio_paco_imperial
+    "rio_selaron_steps" -> R.string.way_note_rio_selaron_steps
+    "rio_sugarloaf" -> R.string.way_note_rio_sugarloaf
+    "rio_theatro_municipal" -> R.string.way_note_rio_theatro_municipal
     "roma_san_pietro" -> R.string.way_note_roma_san_pietro
     "rome_ara_pacis" -> R.string.way_note_rome_ara_pacis
     "rome_arch_constantine" -> R.string.way_note_rome_arch_constantine

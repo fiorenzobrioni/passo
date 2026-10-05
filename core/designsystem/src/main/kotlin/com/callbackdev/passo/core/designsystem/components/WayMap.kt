@@ -167,8 +167,9 @@ fun WayMapView(
                     null
                 }
                 onDrawBehind {
-                    // A country's map is cut out of the sea; a city has no sea around it.
-                    drawRect(if (way.kind == WayKind.WALK) colors.land else colors.water)
+                    // A country's map is cut out of the sea, and so is a city's on the coast;
+                    // another city has no sea around it.
+                    drawRect(if (way.kind == WayKind.WALK && !map.sea) colors.land else colors.water)
                     land.forEach { drawPath(it, colors.land) }
                     parks.forEach { drawPath(it, colors.park) }
                     lakes.forEach { drawPath(it, colors.water) }

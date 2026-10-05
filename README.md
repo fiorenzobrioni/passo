@@ -93,7 +93,7 @@ Italian). The phone's status bar is not in the pictures. The command that redraw
 - ⏱️ **Japanese interval walk**: 3 slow minutes and 3 fast ones, five sets or more, each change told with a vibration of its own so the phone stays in your pocket; at the end, how many fast intervals were at pace.
 - 🏆 **Insights**: your streak, your best day, week and month, and the averages.
 - 🗺️ **Ways**: five pilgrim ways (Via degli Dei, Camino Portugués, Via di Francesco, Camino de Santiago, Via Francigena) walked from home, stage by stage, with a stamp for each. No location: only your distance.
-- 🏛️ **City walks**: Milan, Rome, Paris, London, Madrid, Berlin, Vienna, Porto, Amsterdam and Prague in Europe, Lima and Cusco in the Americas, walked where you are in one outing or a few, about 5 km or about 10. Each continent has its page, with a map of where its cities are and which you have walked. Each place is told as your steps reach it, with a short vibration and, if you like, a line about it in your headphones.
+- 🏛️ **City walks**: Milan, Rome, Paris, London, Madrid, Berlin, Vienna, Porto, Amsterdam and Prague in Europe, Lima, Cusco, New York and Rio de Janeiro in the Americas, walked where you are in one outing or a few, about 5 km or about 10. Each continent has its page, with a map of where its cities are and which you have walked. Each place is told as your steps reach it, with a short vibration and, if you like, a line about it in your headphones.
 - 📏 **Measure your step**: walk a distance you know and Passo works out your step length. No GPS.
 - 🏠 **Two widgets**: At a glance and In words, resizable, in six colours and any opacity.
 - 🔔 **Notifications**: goal reached, an evening reminder, a weekly summary. Each one optional.

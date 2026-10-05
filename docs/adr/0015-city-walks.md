@@ -139,8 +139,22 @@ moves with the distance their steps measure.
     (the Retiro is Madrid's), while a mountain path or a natural site would need a map of terrain
     the script does not draw, and would blur what a city walk is. The ways are not grouped: five,
     all in Europe, read best as one list. Many of the cities planned are on the sea (Barcelona,
-    Lisbon, Istanbul, New York, Rio, Sydney, Cape Town), so the coastline (Consequences) comes
+    Lisbon, Istanbul, New York, Rio, Sydney, Cape Town), so the coastline (decision 13) comes
     before them.
+13. **A city on the sea is cut out of it** (owner, 5 Oct 2026: "start with Rio and New York, so
+    the script begins to handle coasts"). A walk marked `coast` keeps, from the same street
+    tiles, OpenStreetMap's coastline ways; the script joins them end to end, cuts them to the
+    tiles' box and closes each piece along the box's edge, counterclockwise, since the
+    coastline always has the land on its left; a ring inside the box is an island. That land
+    replaces the city's plain ground, and the map's ground is water (`WaySource.sea`), as a
+    way's map is cut out of the sea. Natural Earth would not do: at a city's scale its coast is
+    hundreds of metres off. The tiles of a city on the sea cover a square around what its page
+    shows, so a square thumbnail finds the coast to its edges too. The build fails on a
+    coastline that ends inside the map (a tile missing) or on a city marked `coast` with none.
+    New York's Hudson and East River are coastline in OpenStreetMap, so Manhattan stands
+    between its two rivers with nothing listed; Rio's bay is the Guanabara's, and the
+    Sugarloaf and Urca hills, a protected natural monument, are drawn as a park, so the walk's
+    end shows on the map.
 
 ## Consequences
 
@@ -150,7 +164,7 @@ moves with the distance their steps measure.
   each, its route fetched and committed, its places' sentences checked in two languages; so
   were Lima and Cusco, and Porto, Amsterdam and Prague (with the script's one addition,
   Amsterdam's water from the tiles). The set has no limit (owner). A city's second walk would be the same, with
-  the second level of the page (decision 1) still to build; a coastal walk (Lima's Costa Verde)
-  also needs a sea built from OpenStreetMap's coastline, which the script does not do yet.
+  the second level of the page (decision 1) still to build. A coastal walk is content too, since
+  decision 13: `coast=True`, and the sea is built from the coastline in its tiles.
 - To be checked on a device (owner): Milan in one outing and London over two, the voice through
   headphones and with the screen off, once on a treadmill.

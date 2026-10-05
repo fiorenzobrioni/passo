@@ -11,7 +11,8 @@ the line or out of order.
 Every note is one sentence, made to be read in a notification and heard, with nothing that
 goes stale (no opening hours, no prices). Each was checked when written (1 Oct 2026; the fifth
 way and Rome, Paris and Madrid on 2 Oct 2026, Lima and Cusco after them); the source is the
-line after it. Berlin and Vienna (5 Oct 2026) were checked in the English and German Wikipedias.
+line after it. Berlin and Vienna (5 Oct 2026) were checked in the English and German Wikipedias,
+New York in the English and Italian (or German), Rio in the English and Portuguese.
 """
 
 from dataclasses import dataclass, field
@@ -434,6 +435,9 @@ class Walk:
     # areas listed in [water]: for a city whose canals are hundreds of areas cut at every
     # bridge (Amsterdam's), too many to list by id. Only where the streets are fetched.
     water_from_tiles: bool = False
+    # A city on the sea: its land is built from OpenStreetMap's coastline in its tiles, and its
+    # map is cut out of the sea as a way's is (Rio's bay, New York's harbour).
+    coast: bool = False
 
 
 MILAN = Walk(
@@ -1301,7 +1305,149 @@ CUSCO = Walk(
     ],
 )
 
-WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO]
+NEW_YORK = Walk(
+    id="NEW_YORK_PARK_BRIDGE",
+    city="new_york",
+    city_en="New York",
+    city_it="New York",
+    route_en="From Central Park to the Brooklyn Bridge, by Times Square and the Empire State",
+    route_it="Da Central Park al ponte di Brooklyn, passando per Times Square e l'Empire State",
+    outing_en="A walk in New York",
+    outing_it="Passeggiata a New York",
+    country="US",
+    continent="AMERICAS",
+    # The Hudson and the East River are in the coastline: the sea comes up both sides of Manhattan.
+    coast=True,
+    # Central Park's Pond and Lake, and the two pools of the 9/11 Memorial.
+    water=["way/22726524", "relation/7895705", "way/697722178", "way/697722181"],
+    parks=[
+        "way/427818536", "way/22727025", "way/22899286", "relation/7095444", "way/22899302", "way/413055246",
+        "way/5029111", "relation/20812866",
+    ],
+    stops=[
+        Stop("new_york_central_park", "Central Park", "Central Park", 40.7668, -73.9740,
+             note_en="Frederick Law Olmsted and Calvert Vaux won the competition to design the park with their Greensward Plan.",
+             note_it="Frederick Law Olmsted e Calvert Vaux vinsero il concorso per il parco con il loro Greensward Plan."),
+        # Source: Wikipedia, Central Park; Wikipedia (it), Central Park. The year it opened differs between the two: neither is said.
+        Stop("new_york_rockefeller_center", "Rockefeller Center", "Rockefeller Center", 40.7587, -73.9787,
+             note_en="Every year a great Christmas tree rises here, above the skating rink opened in 1936.",
+             note_it="Ogni anno qui si alza un grande albero di Natale, sopra la pista di pattinaggio aperta nel 1936."),
+        # Source: Wikipedia, Rockefeller Center Christmas Tree; Wikipedia (it), Rockefeller Center.
+        Stop("new_york_times_square", "Times Square", "Times Square", 40.7580, -73.9855,
+             note_en="The square was named in 1904 after The New York Times, which had just moved here.",
+             note_it="La piazza prese il nome nel 1904 dal New York Times, che vi si era appena trasferito."),
+        # Source: Wikipedia, Times Square; Wikipedia (it), Times Square.
+        Stop("new_york_public_library", "New York Public Library", "Biblioteca pubblica di New York", 40.7536, -73.9822,
+             note_en="Two lions guard the library's steps: in the 1930s Mayor La Guardia named them Patience and Fortitude.",
+             note_it="Due leoni custodiscono la scalinata della biblioteca: negli anni Trenta il sindaco La Guardia li chiamò Patience e Fortitude."),
+        # Source: Wikipedia, New York Public Library Main Branch; Wikipedia (de), New York Public Library.
+        Stop("new_york_grand_central", "Grand Central Terminal", "Grand Central Terminal", 40.7527, -73.9772,
+             note_en="Opened in 1913, Grand Central has more platforms than any other station in the world.",
+             note_it="Aperta nel 1913, la Grand Central ha più binari di qualunque altra stazione al mondo."),
+        # Source: Wikipedia, Grand Central Terminal; Wikipedia (it), Grand Central Terminal.
+        Stop("new_york_empire_state", "Empire State Building", "Empire State Building", 40.7484, -73.9857,
+             note_en="Opened in 1931, it was then the tallest building in the world.",
+             note_it="Inaugurato nel 1931, era allora l'edificio più alto del mondo."),
+        # Source: Wikipedia, Empire State Building; Wikipedia (it), Empire State Building. How long it stayed the tallest differs: not said.
+        Stop("new_york_flatiron", "Flatiron Building", "Flatiron Building", 40.7411, -73.9897,
+             note_en="Since 1902 it has filled its triangular plot, where Fifth Avenue crosses Broadway.",
+             note_it="Dal 1902 occupa il suo lotto triangolare, dove la Quinta Strada incrocia Broadway."),
+        # Source: Wikipedia, Flatiron Building; Wikipedia (it), Flatiron Building.
+        Stop("new_york_union_square", "Union Square", "Union Square", 40.7359, -73.9911,
+             note_en="On 5 September 1882 the first Labor Day parade marched up Broadway to this square.",
+             note_it="Il 5 settembre 1882 la prima parata del Labor Day risalì Broadway fino a questa piazza."),
+        # Source: Wikipedia, Union Square, Manhattan; Wikipedia (it), Union Square (Manhattan).
+        Stop("new_york_washington_square", "Washington Square", "Washington Square", 40.7308, -73.9973,
+             note_en="Stanford White designed its arch for the centennial of George Washington's inauguration.",
+             note_it="Stanford White ne disegnò l'arco per il centenario dell'insediamento di George Washington."),
+        # Source: Wikipedia, Washington Square Arch; Wikipedia (de), Washington Square Arch.
+        Stop("new_york_haughwout", "Haughwout Building", "Haughwout Building", 40.7222, -73.9992,
+             note_en="In 1857 this cast-iron building had the world's first passenger elevator, by Elisha Otis.",
+             note_it="Nel 1857 questo palazzo in ghisa ebbe il primo ascensore per persone del mondo, di Elisha Otis."),
+        # Source: Wikipedia, E. V. Haughwout Building; Wikipedia (de), E. V. Haughwout Building.
+        Stop("new_york_911_memorial", "9/11 Memorial", "Memoriale dell'11 settembre", 40.7115, -74.0134,
+             note_en="Two pools fill the footprints of the Twin Towers, the names of the victims around their edges.",
+             note_it="Due vasche occupano le impronte delle Torri Gemelle, con i nomi delle vittime lungo i bordi."),
+        # Source: Wikipedia, National September 11 Memorial & Museum; Wikipedia (it), National September 11 Memorial & Museum.
+        Stop("new_york_woolworth", "Woolworth Building", "Woolworth Building", 40.7124, -74.0080,
+             note_en="When it opened in 1913, it was the tallest building in the world.",
+             note_it="Quando fu inaugurato, nel 1913, era l'edificio più alto del mondo."),
+        # Source: Wikipedia, Woolworth Building; Wikipedia (it), Woolworth Building.
+        Stop("new_york_brooklyn_bridge", "Brooklyn Bridge", "Ponte di Brooklyn", 40.7106, -74.0026,
+             note_en="Opened in 1883 across the East River, it was then the longest suspension bridge in the world.",
+             note_it="Aperto nel 1883 sull'East River, era allora il ponte sospeso più lungo del mondo."),
+        # Source: Wikipedia, Brooklyn Bridge; Wikipedia (it), Ponte di Brooklyn.
+    ],
+)
+
+RIO = Walk(
+    id="RIO_CENTRO_SUGARLOAF",
+    city="rio",
+    city_en="Rio de Janeiro",
+    city_it="Rio de Janeiro",
+    route_en="From the Museum of Tomorrow to the Sugarloaf, by Lapa and the bay",
+    route_it="Dal Museo del Domani al Pan di Zucchero, passando per Lapa e la baia",
+    outing_en="A walk in Rio",
+    outing_it="Passeggiata a Rio",
+    country="BR",
+    continent="AMERICAS",
+    # Guanabara Bay and the Atlantic, from the coastline.
+    coast=True,
+    # Flamengo Park, the Passeio Público, the Campo de Santana, and the natural monument of the
+    # Sugarloaf and Urca hills, so the two hills show where the walk ends.
+    parks=["relation/1124430", "way/64370326", "way/64370320", "way/1002850847"],
+    stops=[
+        Stop("rio_museum_of_tomorrow", "Museum of Tomorrow", "Museo del Domani", -22.8941, -43.1794,
+             note_en="Santiago Calatrava's museum opened in 2015 on Pier Mauá, by the bay.",
+             note_it="Il museo di Santiago Calatrava fu inaugurato nel 2015 sul molo Mauá, sulla baia."),
+        # Source: Wikipedia, Museum of Tomorrow; Wikipedia (pt), Museu do Amanhã.
+        Stop("rio_candelaria", "Candelária Church", "Chiesa della Candelária", -22.9008, -43.1774,
+             note_en="Begun in 1775, the Candelária church had its dome only in 1877.",
+             note_it="Iniziata nel 1775, la chiesa della Candelária ebbe la sua cupola solo nel 1877."),
+        # Source: Wikipedia, Candelária Church; Wikipedia (pt), Igreja de Nossa Senhora da Candelária.
+        Stop("rio_paco_imperial", "Imperial Palace", "Palazzo Imperiale", -22.9036, -43.1747,
+             note_en="In this palace, in 1888, Princess Isabel signed the Golden Law that ended slavery in Brazil.",
+             note_it="In questo palazzo, nel 1888, la principessa Isabella firmò la Legge Aurea che abolì la schiavitù in Brasile."),
+        # Source: Wikipedia, Paço Imperial; Wikipedia (pt), Paço Imperial.
+        Stop("rio_confeitaria_colombo", "Confeitaria Colombo", "Confeitaria Colombo", -22.9052, -43.1785,
+             note_en="Founded in 1894, the café keeps the great crystal mirrors brought from Antwerp in the 1910s.",
+             note_it="Fondata nel 1894, la pasticceria conserva i grandi specchi di cristallo arrivati da Anversa negli anni Dieci."),
+        # Source: Wikipedia, Confeitaria Colombo; Wikipedia (pt), Confeitaria Colombo.
+        Stop("rio_theatro_municipal", "Theatro Municipal", "Theatro Municipal", -22.9088, -43.1762,
+             note_en="Opened in 1909, the theatre was inspired by Garnier's opera house in Paris.",
+             note_it="Inaugurato nel 1909, il teatro si ispira all'Opéra di Garnier a Parigi."),
+        # Source: Wikipedia, Theatro Municipal (Rio de Janeiro); Wikipedia (pt), Theatro Municipal do Rio de Janeiro.
+        Stop("rio_arcos_da_lapa", "Lapa Arches", "Arcos da Lapa", -22.9128, -43.1800,
+             note_en="Built as an aqueduct, the arches have carried the Santa Teresa tram since 1896.",
+             note_it="Costruiti come acquedotto, gli archi portano dal 1896 il tram di Santa Teresa."),
+        # Source: Wikipedia, Carioca Aqueduct; Wikipedia (pt), Arcos da Lapa.
+        Stop("rio_selaron_steps", "Selarón Steps", "Scalinata Selarón", -22.9153, -43.1794,
+             note_en="The Chilean artist Jorge Selarón covered these steps in tiles, first in the colours of Brazil's flag.",
+             note_it="L'artista cileno Jorge Selarón ricoprì questi gradini di piastrelle, all'inizio nei colori della bandiera del Brasile."),
+        # Source: Wikipedia, Escadaria Selarón; Wikipedia (pt), Escadaria Selarón.
+        Stop("rio_gloria", "Outeiro da Glória", "Outeiro da Glória", -22.9213, -43.1752),
+        # No sentence: the two Wikipedias disagree on its age (17th or 18th century), and the
+        # imperial baptisms are in the Portuguese one only.
+        Stop("rio_flamengo_park", "Flamengo Park", "Parco del Flamengo", -22.9340, -43.1742,
+             note_en="Roberto Burle Marx, the great Brazilian landscape designer, laid out the gardens of this park by the bay.",
+             note_it="Roberto Burle Marx, il grande paesaggista brasiliano, disegnò i giardini di questo parco sulla baia."),
+        # Source: Wikipedia, Flamengo Park; Wikipedia (pt), Parque do Flamengo.
+        Stop("rio_botafogo", "Botafogo Beach", "Spiaggia di Botafogo", -22.9440, -43.1820,
+             note_en="Across the cove rises the Sugarloaf, 396 metres high.",
+             note_it="Oltre l'insenatura si alza il Pan di Zucchero, alto 396 metri."),
+        # Source: Wikipedia, Sugarloaf Mountain; Wikipedia (pt), Pão de Açúcar (Rio de Janeiro).
+        Stop("rio_benjamin_constant", "Benjamin Constant Institute", "Istituto Benjamin Constant", -22.9536, -43.1722,
+             note_en="Created by imperial decree in 1854, the institute teaches blind and partially sighted children.",
+             note_it="Creato per decreto imperiale nel 1854, l'istituto insegna a bambini ciechi e ipovedenti."),
+        # Source: Wikipedia, Instituto Benjamin Constant; Wikipedia (pt), Instituto Benjamin Constant.
+        Stop("rio_sugarloaf", "Sugarloaf cable car", "Funivia del Pan di Zucchero", -22.9549, -43.1664,
+             note_en="Opened in 1912, the cable car climbs from here to Urca Hill, then on to the Sugarloaf.",
+             note_it="Inaugurata nel 1912, la funivia sale da qui al Morro da Urca, poi al Pan di Zucchero."),
+        # Source: Wikipedia, Sugarloaf Cable Car; Wikipedia (pt), Bondinho do Pão de Açúcar.
+    ],
+)
+
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
@@ -1315,6 +1461,8 @@ LOCATORS = {
     "CZ": (48.5, 12.0, 51.1, 18.9),
     "DE": (47.2, 5.8, 55.1, 15.1),
     "AT": (46.3, 9.5, 49.1, 17.2),
+    "US": (24.5, -125.0, 49.5, -66.9),
+    "BR": (-33.8, -74.0, 5.3, -34.8),
 }
 
 # The continents the Ways page groups the cities by, in its order (the Kotlin enum Continent has

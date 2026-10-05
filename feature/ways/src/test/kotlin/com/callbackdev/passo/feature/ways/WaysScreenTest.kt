@@ -236,7 +236,7 @@ class WaysScreenTest {
         compose.onNodeWithTag(WaysTags.continent(Continent.EUROPE))
             .assert(hasText("10 cities · 1 walked", substring = true))
             .assert(hasText("Under way: London", substring = true))
-        compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).assert(hasText("2 cities", substring = true))
+        compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).assert(hasText("4 cities", substring = true))
         compose.onNodeWithTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)).assertDoesNotExist()
         snapshot("ways_cities")
         compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).performClick()
@@ -279,7 +279,12 @@ class WaysScreenTest {
                 WayId.AMSTERDAM_CENTRAAL_WESTERKERK,
                 WayId.PRAGUE_CASTLE_WENCESLAS,
             ),
-            Continent.AMERICAS to listOf(WayId.LIMA_SAN_MARTIN_RESERVA, WayId.CUSCO_ARMAS_QORIKANCHA),
+            Continent.AMERICAS to listOf(
+                WayId.LIMA_SAN_MARTIN_RESERVA,
+                WayId.CUSCO_ARMAS_QORIKANCHA,
+                WayId.NEW_YORK_PARK_BRIDGE,
+                WayId.RIO_CENTRO_SUGARLOAF,
+            ),
         )
         assertThat(byContinent.keys).containsExactlyElementsIn(Continent.entries)
         var continent by mutableStateOf(Continent.EUROPE)
@@ -309,7 +314,7 @@ class WaysScreenTest {
     @Test
     fun `the Americas' map, none of its cities begun, in the dark`() {
         showContinent(Continent.AMERICAS, dark = true)
-        compose.onNodeWithContentDescription("The Americas on the map: 2 cities.").assertIsDisplayed()
+        compose.onNodeWithContentDescription("The Americas on the map: 4 cities.").assertIsDisplayed()
         snapshot("continent_americas_dark")
     }
 
@@ -411,6 +416,28 @@ class WaysScreenTest {
         showWay(WayId.PRAGUE_CASTLE_WENCESLAS, state = WaysSamples.state(walks = emptyList(), live = null), dark = true)
         compose.onNodeWithText("From the Castle to Wenceslas Square", substring = true).assertExists()
         snapshot("walk_prague_dark")
+    }
+
+    @Test
+    fun `New York's walk, Manhattan between its two rivers`() {
+        showWay(WayId.NEW_YORK_PARK_BRIDGE, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("From Central Park to the Brooklyn Bridge", substring = true).assertExists()
+        snapshot("walk_new_york")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Haughwout Building"))
+        snapshot("walk_new_york_places")
+    }
+
+    @Test
+    fun `Rio's walk, along the bay to the Sugarloaf, in the dark`() {
+        showWay(WayId.RIO_CENTRO_SUGARLOAF, state = WaysSamples.state(walks = emptyList(), live = null), dark = true)
+        compose.onNodeWithText("From the Museum of Tomorrow to the Sugarloaf", substring = true).assertExists()
+        snapshot("walk_rio_dark")
+    }
+
+    @Test
+    fun `Rio's walk in the light`() {
+        showWay(WayId.RIO_CENTRO_SUGARLOAF, state = WaysSamples.state(walks = emptyList(), live = null))
+        snapshot("walk_rio")
     }
 
     @Test

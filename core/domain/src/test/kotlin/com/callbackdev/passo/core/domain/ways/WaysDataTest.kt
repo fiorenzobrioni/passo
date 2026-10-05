@@ -6,6 +6,8 @@ import com.callbackdev.passo.core.model.WayKind
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.hypot
 
 /** The generated data (`tools/build_ways.py`) decodes, and holds what the screens rely on. */
 class WaysDataTest {
@@ -35,13 +37,15 @@ class WaysDataTest {
                 WayId.PRAGUE_CASTLE_WENCESLAS,
                 WayId.LIMA_SAN_MARTIN_RESERVA,
                 WayId.CUSCO_ARMAS_QORIKANCHA,
+                WayId.NEW_YORK_PARK_BRIDGE,
+                WayId.RIO_CENTRO_SUGARLOAF,
             )
             .inOrder()
         // One walk a city for now (PLANNING.md §11 Phase 11, later).
         assertThat(Ways.walks.map { it.id.city })
             .containsExactly(
                 "milan", "rome", "paris", "london", "madrid", "berlin", "vienna", "porto", "amsterdam", "prague",
-                "lima", "cusco",
+                "lima", "cusco", "new_york", "rio",
             )
             .inOrder()
     }
@@ -144,7 +148,11 @@ class WaysDataTest {
                 "milan", "rome", "paris", "london", "madrid", "berlin", "vienna", "porto", "amsterdam", "prague",
             )
             .inOrder()
-        assertThat(Ways.walksIn(Continent.AMERICAS).map { it.id.city }).containsExactly("lima", "cusco").inOrder()
+        assertThat(
+            Ways.walksIn(Continent.AMERICAS).map {
+                it.id.city
+            },
+        ).containsExactly("lima", "cusco", "new_york", "rio").inOrder()
     }
 
     @Test
@@ -157,10 +165,49 @@ class WaysDataTest {
                 val start = walk.stops.first()
                 assertThat(start.latitude in frame.south..frame.north).isTrue()
                 assertThat(start.longitude in frame.west..frame.east).isTrue()
-                // On land, as drawn: a city in the sea would mean the frame or the data is wrong.
-                assertThat(map.land.any { it.contains(start.latitude, start.longitude) }).isTrue()
+                // On land as drawn, or on a coast within a point's width of it (the continent's
+                // shores are simplified by some 13 km, under a dp): a city out at sea would mean
+                // the frame or the data is wrong.
+                val onLand = map.land.any { it.contains(start.latitude, start.longitude) }
+                val nearShore = map.land.minOf { it.kilometresTo(start.latitude, start.longitude) } < COAST_SLACK_KM
+                assertThat(onLand || nearShore).isTrue()
             }
         }
+    }
+
+    @Test
+    fun `a city on the sea is cut out of it, its route and its places on land`() {
+        val coastal = Ways.walks.filter { it.map.sea }.map { it.id }
+        assertThat(coastal).containsExactly(WayId.NEW_YORK_PARK_BRIDGE, WayId.RIO_CENTRO_SUGARLOAF)
+        for (id in coastal) {
+            val map = Ways.of(id).map
+            // The land from the coastline, not the whole ground: a few shores and islands.
+            assertThat(map.land.size).isGreaterThan(1)
+            for (stop in Ways.of(id).stops) {
+                assertThat(map.land.any { it.contains(stop.latitude, stop.longitude) }).isTrue()
+            }
+        }
+        // Every other city stands on its ground, one rectangle with no sea around it.
+        for (walk in Ways.walks.filter { !it.map.sea }) assertThat(walk.map.land).hasSize(1)
+    }
+
+    /** The distance from the point to the ring's nearest edge, near enough on a small scale. */
+    private fun GeoPath.kilometresTo(latitude: Double, longitude: Double): Double {
+        val kx = 111.32 * cos(Math.toRadians(latitude))
+        val ky = 110.57
+        var best = Double.MAX_VALUE
+        for (i in 0 until size) {
+            val j = (i + 1) % size
+            val ax = (longitudes[i] - longitude) * kx
+            val ay = (latitudes[i] - latitude) * ky
+            val bx = (longitudes[j] - longitude) * kx
+            val by = (latitudes[j] - latitude) * ky
+            val dx = bx - ax
+            val dy = by - ay
+            val t = if (dx == 0.0 && dy == 0.0) 0.0 else (-(ax * dx + ay * dy) / (dx * dx + dy * dy)).coerceIn(0.0, 1.0)
+            best = minOf(best, hypot(ax + t * dx, ay + t * dy))
+        }
+        return best
     }
 
     /** Whether the closed ring holds the point: even-odd, in degrees, as the map fills it. */
@@ -177,5 +224,9 @@ class WaysDataTest {
             j = i
         }
         return inside
+    }
+
+    private companion object {
+        const val COAST_SLACK_KM = 30.0
     }
 }

@@ -138,18 +138,21 @@ def fetch_walk(walk):
     for ref in walk.water + walk.canals + walk.parks:
         kind, number = ref.split("/")
         download(OSM.format(kind, number), CACHE / f"osm-{kind}-{number}.xml")
-    if walk.streets:
+    if walk.streets or walk.coast:
         for tile, name in street_tiles(walk):
             water = CACHE / water_tile_name(name) if walk.water_from_tiles else None
-            fetch_streets(tile, CACHE / name, MAIN_STREETS | MINOR_STREETS | LANES, water)
+            coast = CACHE / coast_tile_name(name) if walk.coast else None
+            fetch_streets(tile, CACHE / name, MAIN_STREETS | MINOR_STREETS | LANES, water, coast)
 
 
-def fetch_streets(tile, target, classes, water_target=None):
+def fetch_streets(tile, target, classes, water_target=None, coast_target=None):
     """One tile's streets, kept as they are drawn (each way's class and points), not as the
     map call answers (every building too: a hundred times the size). A tile too dense for the
     call is fetched in four. With [water_target], the tile's water areas (each closed way
-    tagged as water) are kept there too."""
-    if target.exists() and (water_target is None or water_target.exists()):
+    tagged as water) are kept there too; with [coast_target], its coastline ways, each with
+    its end nodes, so they can be joined end to end."""
+    extras = [t for t in (water_target, coast_target) if t is not None]
+    if target.exists() and all(t.exists() for t in extras):
         return
     south, west, north, east = tile
     url = OSM_MAP.format(west, south, east, north)
@@ -165,41 +168,42 @@ def fetch_streets(tile, target, classes, water_target=None):
             (south, west, middle[0], middle[1]), (south, middle[1], middle[0], east),
             (middle[0], west, north, middle[1]), (middle[0], middle[1], north, east),
         ]
-        ways, waters = {}, {}
+        merged = {path: {} for path in [target] + extras}
         for i, quarter in enumerate(quarters):
-            part = target.with_suffix(f".{i}.json")
-            water_part = water_target.with_suffix(f".{i}.json") if water_target else None
-            fetch_streets(quarter, part, classes, water_part)
-            ways.update(json.loads(part.read_text()))
-            part.unlink()
-            if water_part:
-                waters.update(json.loads(water_part.read_text()))
-                water_part.unlink()
-        target.write_text(json.dumps(ways))
-        if water_target:
-            water_target.write_text(json.dumps(waters))
+            parts = {path: path.with_suffix(f".{i}.json") for path in merged}
+            fetch_streets(
+                quarter, parts[target], classes,
+                parts.get(water_target) if water_target else None,
+                parts.get(coast_target) if coast_target else None,
+            )
+            for path, part in parts.items():
+                merged[path].update(json.loads(part.read_text()))
+                part.unlink()
+        for path, content in merged.items():
+            path.write_text(json.dumps(content))
         return
     nodes = {n.get("id"): (float(n.get("lat")), float(n.get("lon"))) for n in root.iter("node")}
-    ways = {}
+    ways, waters, coasts = {}, {}, {}
     for w in root.iter("way"):
         tags = {t.get("k"): t.get("v") for t in w.iter("tag")}
+        refs = [nd.get("ref") for nd in w.iter("nd")]
         kind = tags.get("highway")
         # A pedestrian area (a square) is a shape, not a street.
-        if kind not in classes or tags.get("area") == "yes":
-            continue
-        points = [nodes[nd.get("ref")] for nd in w.iter("nd") if nd.get("ref") in nodes]
-        if len(points) >= 2:
-            ways[w.get("id")] = [kind, [[round(a, 7), round(b, 7)] for a, b in points]]
+        if kind in classes and tags.get("area") != "yes":
+            points = [nodes[r] for r in refs if r in nodes]
+            if len(points) >= 2:
+                ways[w.get("id")] = [kind, [[round(a, 7), round(b, 7)] for a, b in points]]
+        # A way is returned whole, with all its nodes, so a closed one is a whole ring.
+        if water_target and tags.get("natural") == "water" and len(refs) > 3 and refs[0] == refs[-1] \
+                and all(r in nodes for r in refs):
+            waters[w.get("id")] = [[round(nodes[r][0], 7), round(nodes[r][1], 7)] for r in refs]
+        if coast_target and tags.get("natural") == "coastline" and len(refs) >= 2 and all(r in nodes for r in refs):
+            coasts[w.get("id")] = [refs[0], refs[-1], [[round(nodes[r][0], 7), round(nodes[r][1], 7)] for r in refs]]
     target.write_text(json.dumps(ways))
     if water_target:
-        waters = {}
-        for w in root.iter("way"):
-            tags = {t.get("k"): t.get("v") for t in w.iter("tag")}
-            refs = [nd.get("ref") for nd in w.iter("nd")]
-            # A way is returned whole, with all its nodes, so a closed one is a whole ring.
-            if tags.get("natural") == "water" and len(refs) > 3 and refs[0] == refs[-1] and all(r in nodes for r in refs):
-                waters[w.get("id")] = [[round(nodes[r][0], 7), round(nodes[r][1], 7)] for r in refs]
         water_target.write_text(json.dumps(waters))
+    if coast_target:
+        coast_target.write_text(json.dumps(coasts))
 
 
 def read_retrying(request, attempts=4):
@@ -237,9 +241,22 @@ def street_box(walk):
     )
 
 
+def tile_box(walk):
+    """What the walk's tiles cover: its street box or, on the sea, the square around it, so the
+    coast is known wherever a map of the walk can reach (a thumbnail is square)."""
+    box = street_box(walk)
+    if not walk.coast:
+        return box
+    south, west, north, east = box
+    local = Local((south + north) / 2)
+    half = max((east - west) * local.kx, (north - south) * local.ky) / 2
+    middle = ((south + north) / 2, (west + east) / 2)
+    return (middle[0] - half / local.ky, middle[1] - half / local.kx, middle[0] + half / local.ky, middle[1] + half / local.kx)
+
+
 def street_tiles(walk):
-    """The walk's street box cut into tiles the map call accepts, with their cache names."""
-    south, west, north, east = street_box(walk)
+    """The walk's tile box cut into tiles the map call accepts, with their cache names."""
+    south, west, north, east = tile_box(walk)
     rows = math.ceil((north - south) / STREET_TILE[0])
     columns = math.ceil((east - west) / STREET_TILE[1])
     for row in range(rows):
@@ -257,6 +274,11 @@ def street_tiles(walk):
 def water_tile_name(name):
     """Where a street tile's water areas are kept, for a walk that reads its water there."""
     return name.replace("roads-", "water-", 1)
+
+
+def coast_tile_name(name):
+    """Where a street tile's coastline ways are kept, for a walk on the sea."""
+    return name.replace("roads-", "coast-", 1)
 
 
 def download(url, target):
@@ -897,6 +919,130 @@ def tile_water(walk, box, tolerance, local):
     return out
 
 
+def coast_land(walk, tolerance, local):
+    """The land of a walk on the sea, from the coastline ways of its tiles: joined end to end,
+    cut to the tile box, and closed along the box's edge. OpenStreetMap draws every coastline
+    with the land on its left, so a piece that leaves the box goes on, around the edge
+    counterclockwise, to the next piece that comes in; a ring inside the box is an island.
+    The map is then cut out of the sea, as a way's is."""
+    ways = {}
+    for _, name in street_tiles(walk):
+        ways.update(json.loads((CACHE / coast_tile_name(name)).read_text()))
+    chains = join_coast(ways)
+    box = tile_box(walk)
+    pieces, rings = [], []
+    for chain in chains:
+        if chain[0] == chain[-1] and all(box[0] <= p[0] <= box[2] and box[1] <= p[1] <= box[3] for p in chain):
+            rings.append(chain)
+            continue
+        if chain[0] != chain[-1] and (inside(chain[0], box) or inside(chain[-1], box)):
+            sys.exit(f"{walk.id}: a coastline ends inside the map at {chain[0]} / {chain[-1]}: fetch it again")
+        if chain[0] == chain[-1]:
+            # A ring across the edge is cut from a point outside, so no piece starts inside.
+            out = next(i for i, p in enumerate(chain) if not inside(p, box))
+            chain = chain[out:] + chain[1:out + 1]
+        for piece in clip_line(chain, box):
+            if not (on_edge(piece[0], box) and on_edge(piece[-1], box)):
+                sys.exit(f"{walk.id}: a coastline piece does not reach the map's edge")
+            pieces.append(piece)
+    if not pieces and not rings:
+        sys.exit(f"{walk.id}: no coastline in its tiles, yet it is on the sea")
+    perimeter = 2 * ((box[3] - box[1]) + (box[2] - box[0]))
+    land = []
+    left = set(range(len(pieces)))
+    while left:
+        first = min(left)
+        left.discard(first)
+        polygon, current = list(pieces[first]), first
+        while True:
+            leaving = edge_position(pieces[current][-1], box)
+            # The next piece to come in, counterclockwise from where this one left.
+            candidates = list(left) + [first]
+            following = min(candidates, key=lambda i: (edge_position(pieces[i][0], box) - leaving) % perimeter)
+            polygon += corners_between(leaving, edge_position(pieces[following][0], box), box, perimeter)
+            if following == first:
+                break
+            polygon += pieces[following]
+            left.discard(following)
+            current = following
+        land.append(polygon)
+    land += rings
+    out = []
+    for polygon in land:
+        simple = simplify(polygon, tolerance, local, closed=True)
+        if len(simple) >= 3:
+            out.append(simple)
+    return out
+
+
+def join_coast(ways):
+    """Coastline ways joined into chains where one ends on the node the next begins with."""
+    starting = {}
+    for key, (first, _, _) in ways.items():
+        starting.setdefault(first, []).append(key)
+    ends = {last for _, last, _ in ways.values()}
+    used, chains = set(), []
+
+    def follow(key):
+        chain = []
+        while key is not None and key not in used:
+            used.add(key)
+            _, last, points = ways[key]
+            chain += [tuple(p) for p in (points if not chain else points[1:])]
+            key = next((k for k in starting.get(last, []) if k not in used), None)
+        return chain
+
+    # The chains' heads first (a way no other leads into), then what is left: rings.
+    for key, (first, _, _) in ways.items():
+        if first not in ends and key not in used:
+            chains.append(follow(key))
+    for key in ways:
+        if key not in used:
+            chains.append(follow(key))
+    return chains
+
+
+def inside(point, box):
+    return box[0] < point[0] < box[2] and box[1] < point[1] < box[3]
+
+
+def on_edge(point, box, slack=1e-9):
+    lat, lon = point
+    return min(abs(lat - box[0]), abs(lat - box[2]), abs(lon - box[1]), abs(lon - box[3])) <= slack
+
+
+def edge_position(point, box):
+    """Where a point on the box's edge lies, going counterclockwise from the south-west corner
+    (east along the south edge, north up the east, west along the north, south down the west)."""
+    south, west, north, east = box
+    lat, lon = point
+    width, height = east - west, north - south
+    distances = [abs(lat - south), abs(lon - east), abs(lat - north), abs(lon - west)]
+    edge = distances.index(min(distances))
+    if edge == 0:
+        return lon - west
+    if edge == 1:
+        return width + (lat - south)
+    if edge == 2:
+        return width + height + (east - lon)
+    return 2 * width + height + (north - lat)
+
+
+def corners_between(start, end, box, perimeter):
+    """The box's corners passed going counterclockwise from [start] to [end], in order."""
+    south, west, north, east = box
+    width, height = east - west, north - south
+    corners = [(width, (south, east)), (width + height, (north, east)),
+               (2 * width + height, (north, west)), (perimeter, (south, west))]
+    span = (end - start) % perimeter
+    passed = []
+    for position, corner in corners:
+        offset = (position - start) % perimeter
+        if 0 < offset < span:
+            passed.append((offset, corner))
+    return [corner for _, corner in sorted(passed)]
+
+
 def city_lines(refs, box, tolerance, local):
     out = []
     for ref in refs:
@@ -937,7 +1083,7 @@ def build_walk(walk):
     rows = [(path[i][0], path[i][1], along[i]) for i in line]
     tolerance = diagonal * MAP_TOLERANCE
     south, west, north, east = ground
-    land = [[(south, west), (south, east), (north, east), (north, west)]]
+    land = coast_land(walk, tolerance, local) if walk.coast else [[(south, west), (south, east), (north, east), (north, west)]]
     water = city_polygons(walk.water, ground, tolerance, local)
     if walk.water_from_tiles:
         water += tile_water(walk, ground, tolerance, local)
@@ -979,7 +1125,7 @@ def build_walk(walk):
         locatorLand = {kotlin_paths(locator_land, 8)},
         locatorLine = {kotlin_string(encode(locator_line, (1e5, 1e5)), 8, len('locatorLine = '))},
         parks = {kotlin_paths(parks, 8)},
-        riverWidthMeters = {walk.canal_width},{streets_block(main_streets, minor_streets)}
+        riverWidthMeters = {walk.canal_width},{streets_block(main_streets, minor_streets)}{sea_line(walk)}
     )
 """
     return block, places, notes
@@ -1054,6 +1200,11 @@ def streets_block(main, minor):
         f"\n        mainStreets = {kotlin_paths(main, 8)},"
         f"\n        streets = {kotlin_paths(minor, 8)},"
     )
+
+
+def sea_line(walk):
+    """A walk on the sea has its map cut out of it, as a way's is: its background is water."""
+    return "\n        sea = true," if walk.coast else ""
 
 
 def camel(constant):
