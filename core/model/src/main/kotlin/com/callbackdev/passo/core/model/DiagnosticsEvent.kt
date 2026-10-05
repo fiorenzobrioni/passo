@@ -38,16 +38,17 @@ enum class DiagnosticsType {
     RESTORED,
 
     /**
-     * A change of an interval outing told (Phase 13): the detail says which interval it began,
-     * and how late it was told against the step that crossed it (negative when told ahead of it),
-     * so a field test reads the delay instead of guessing it (docs/adr/0013-interval-walks.md).
+     * An interval outing's changes, in one row when it ends (Phase 13): how many were told, how
+     * late the median and the latest one were against the step that crossed each (negative when
+     * told ahead of it), and the goal's, so a field test reads the delay instead of guessing it
+     * (docs/adr/0013-interval-walks.md). Until 5 Oct 2026, one row a change.
      */
     INTERVAL_CHANGE,
 
     /**
      * The processor kept awake for an outing's signals, on a phone whose step counter cannot wake
-     * it (docs/adr/0013-interval-walks.md): when it was taken, and when let go with how long it
-     * was held, so an export shows it never outlives the outing.
+     * it (docs/adr/0013-interval-walks.md): when it was let go, and how long it was held, so an
+     * export shows it never outlives the outing. Until 5 Oct 2026, also a row when it was taken.
      */
     SIGNAL_WAKE,
 }

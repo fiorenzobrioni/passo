@@ -27,6 +27,7 @@ import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.data.tracking.withPending
 import com.callbackdev.passo.core.data.ways.WayRepository
 import com.callbackdev.passo.core.data.widget.WidgetUpdates
+import com.callbackdev.passo.core.designsystem.format.intervalWord
 import com.callbackdev.passo.core.domain.goals.GoalReached
 import com.callbackdev.passo.core.domain.metrics.MetricsCalculator
 import com.callbackdev.passo.core.domain.metrics.StepLengths
@@ -37,6 +38,7 @@ import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.sessions.SessionSignal
 import com.callbackdev.passo.core.domain.sessions.SessionTracker
 import com.callbackdev.passo.core.domain.sessions.SignalWake
+import com.callbackdev.passo.core.domain.sessions.intervalAt
 import com.callbackdev.passo.core.domain.today.DayMinute
 import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.today.minuteOfDay
@@ -192,6 +194,9 @@ class StepTrackingService : Service() {
     // An interval outing's change found in a batch of samples, told once the batch is all in; and
     // the screen-on countdown of its notification.
     private var pendingChange: SessionSignal.IntervalChange? = null
+
+    // How late each change of the interval outing under way was told, for its one log row.
+    private val intervalDelays = mutableListOf<Long>()
     private var changeJob: Job? = null
     private var countdownJob: Job? = null
 
@@ -205,7 +210,9 @@ class StepTrackingService : Service() {
         snapshots = SystemSnapshots(contentResolver)
         notifications = TrackingNotifications(this).also { it.ensureChannel() }
         sessionNotifications = SessionNotifications(this).also { it.ensureChannel() }
-        speech = SessionSpeech(this)
+        speech = SessionSpeech(this).also { voice ->
+            voice.onCallEnded = { hidden -> intervalNowSentence() ?: hidden }
+        }
         sensorSource = StepSensorSource(
             sensorManager = requireNotNull(getSystemService(SensorManager::class.java)) { "No SensorManager" },
             handler = Handler(Looper.getMainLooper()),
@@ -723,21 +730,44 @@ class StepTrackingService : Service() {
     }
 
     /**
-     * An interval outing's goal, logged as its changes are: the step that crossed it is the last
-     * of the batch's time in motion, so the moment it fell is that much before the batch's end.
+     * An interval outing's delays, in one log row when it ends: how many changes were told, how
+     * late the median and the latest one were (negative: told ahead of the step that crossed it),
+     * and the goal's, if it was reached. One row an outing, not one a change: the log is a ring
+     * of the latest rows, and its rare rows (a reboot, a reset) must not be pushed out by walks.
+     * The goal's step is the last of its batch's time in motion, so the moment it fell is that
+     * much before the batch's end.
      */
-    private fun logIntervalGoal(session: Session) {
+    private fun logIntervalSummary(session: Session) {
         val schedule = IntervalSchedule.of(session) ?: return
-        val reachedAt = session.reachedAtMillis?.takeIf { session.end == SessionEnd.GOAL } ?: return
         val now = System.currentTimeMillis()
-        val fellAt = reachedAt - (session.totals.movingMillis - schedule.totalMillis).coerceAtLeast(0)
-        ledger?.note(
-            DiagnosticsEvent(
-                now,
-                DiagnosticsType.INTERVAL_CHANGE,
-                "interval=goal late=${now - fellAt}ms screen=${if (interactive) "on" else "off"} " +
-                    "wakeUp=${sensorSource.wakeUpSensor != null}",
-            ),
+        val goalLate = session.reachedAtMillis?.takeIf { session.end == SessionEnd.GOAL }?.let { reachedAt ->
+            now - (reachedAt - (session.totals.movingMillis - schedule.totalMillis).coerceAtLeast(0))
+        }
+        val delays = intervalDelays.sorted()
+        intervalDelays.clear()
+        if (delays.isEmpty() && goalLate == null) return
+        val detail = buildString {
+            append("changes=${delays.size}")
+            if (delays.isNotEmpty()) append(" lateMedian=${delays[delays.size / 2]}ms lateMax=${delays.last()}ms")
+            goalLate?.let { append(" goalLate=${it}ms") }
+            append(" wakeUp=${sensorSource.wakeUpSensor != null}")
+        }
+        ledger?.note(DiagnosticsEvent(now, DiagnosticsType.INTERVAL_CHANGE, detail))
+    }
+
+    /**
+     * After a call that hid a sentence of an interval outing still counting: the interval it is
+     * in now, with what is left of it («Slow, 2 minutes left»), not a change that is minutes old.
+     * Null for any other outing, whose sentence is said as it was.
+     */
+    private fun intervalNowSentence(): String? {
+        val session = tracker?.session?.takeIf { it.state == SessionState.ACTIVE } ?: return null
+        val position = session.intervalAt(System.currentTimeMillis()) ?: return null
+        val minutes = ((position.leftMillis + MILLIS_PER_MINUTE - 1) / MILLIS_PER_MINUTE).toInt().coerceAtLeast(1)
+        return getString(
+            R.string.spoken_interval_now,
+            resources.intervalWord(position.fast),
+            resources.getQuantityString(R.plurals.spoken_minutes, minutes, minutes),
         )
     }
 
@@ -746,15 +776,7 @@ class StepTrackingService : Service() {
         val session = tracker?.session?.takeIf { it.live } ?: return
         val now = System.currentTimeMillis()
         val position = change.position
-        ledger?.note(
-            DiagnosticsEvent(
-                now,
-                DiagnosticsType.INTERVAL_CHANGE,
-                "interval=${position.index} fast=${position.fast} late=${now - change.changedAtMillis}ms " +
-                    "early=${change.early} screen=${if (interactive) "on" else "off"} " +
-                    "wakeUp=${sensorSource.wakeUpSensor != null}",
-            ),
-        )
+        intervalDelays += now - change.changedAtMillis
         val allowed = sessionNotifications.signalsAllowed()
         if (session.vibrate && allowed) SessionHaptics.playInterval(this, position.fast)
         if (session.voice != SessionVoice.OFF && allowed) speak(SessionAnnouncement.intervalChanged(position), session)
@@ -829,7 +851,7 @@ class StepTrackingService : Service() {
         val session = finished.session
         // The goal is the last interval's end: its long pulse, never a change on top of it.
         pendingChange = null
-        logIntervalGoal(session)
+        logIntervalSummary(session)
         // Kept a while after its goal or a long stillness, for "Keep going" and "Resume";
         // otherwise it is over here. The voice is let go once its last sentence is said.
         val reopenable = finished.kept && tracker?.canKeepGoing(System.currentTimeMillis()) == true

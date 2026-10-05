@@ -184,6 +184,8 @@
     <!-- A change: short, to be heard through the breath of a fast walk. «Fast, 3 minutes.» -->
     <string name="spoken_interval_fast">Fast, %1$s.</string>
     <string name="spoken_interval_last_fast">Last fast interval, %1$s.</string>
+    <!-- After a phone call that hid a change: the interval now, and what is left of it. «Slow, 2 minutes left.» -->
+    <string name="spoken_interval_now">%1$s, %2$s left.</string>
     <string name="spoken_interval_slow">Slow.</string>
     <!-- At the goal: «4 fast intervals of 5 at pace.» The quantity is the first number. -->
     <plurals name="spoken_intervals_at_pace">

@@ -46,6 +46,9 @@ All notable changes to Passo are documented here. The format follows
 
 ### Changed
 
+- **A signal is not lost to a phone call.** A spoken signal due while you are on the phone is
+  said when the call ends; in an interval walk, as the interval you are in then and the time left
+  of it («Slow, 2 minutes left»).
 - **Signals on time on every phone.** On phones whose step counter cannot wake them (some
   Samsungs among them), an outing's vibrations and voice could come a minute or two late with the
   screen off. There, an outing with signals now keeps the phone awake while it counts, for a

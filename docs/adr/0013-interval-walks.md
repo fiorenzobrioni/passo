@@ -173,8 +173,8 @@ Decided with the owner:
   passed), the Outings page's footer, the guide's battery paragraph. The Ways are not outings and
   need none of it: a stage is told from the days' written steps, and a few minutes do not matter. No dialog, no switch: vibration and voice off is the
   switch.
-- **Measured:** each take and release is a diagnostics row (`SIGNAL_WAKE`) with how long it was
-  held; the cost is to be read with `batterystats` on the owner's phone and written to
+- **Measured:** each release is a diagnostics row (`SIGNAL_WAKE`) with how long it was held (each
+  take too, until 5 Oct 2026); an interval outing's delays are one row when it ends; the cost is to be read with `batterystats` on the owner's phone and written to
   `docs/battery/`.
 
 The cost, an estimate until measured: a processor kept awake with little to do draws in the order
