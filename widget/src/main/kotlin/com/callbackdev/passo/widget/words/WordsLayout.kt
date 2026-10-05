@@ -8,6 +8,7 @@ import com.callbackdev.passo.widget.STATUS_SP
 import com.callbackdev.passo.widget.WidgetCardPadding
 import com.callbackdev.passo.widget.WidgetCardPaddingSnug
 import com.callbackdev.passo.widget.quarterPoint
+import com.callbackdev.passo.widget.spThatFits
 import com.callbackdev.passo.widget.textLineHeight
 import com.callbackdev.passo.widget.textSizeForLine
 
@@ -88,10 +89,8 @@ private fun rowHeroByHeight(height: Dp, fontScale: Float): Float =
  * Chiaro's reason: the number never outgrows the block of words beside it.
  */
 internal fun rowHeroSp(size: DpSize, fontScale: Float, heroEm: Float, column: Dp): Float {
-    val byWidth = column.value / (heroEm * fontScale.coerceAtLeast(0.1f))
-    return quarterPoint(
-        minOf(rowHeroByHeight(size.height, fontScale), byWidth, ROW_HERO_MAX).coerceAtLeast(HERO_FLOOR_SP),
-    )
+    val byHeight = minOf(rowHeroByHeight(size.height, fontScale), ROW_HERO_MAX).coerceAtLeast(HERO_FLOOR_SP)
+    return quarterPoint(minOf(byHeight, spThatFits(column, heroEm, fontScale)))
 }
 
 internal const val ROW_HERO_MAX = 44f
@@ -157,9 +156,9 @@ internal fun linePlan(size: DpSize, fontScale: Float, heroEm: Float, goal: Boole
     val width = size.width - WidgetCardPadding * 2
     val room = size.height - WidgetCardPaddingSnug * 2 - textLineHeight(FACT_SP, fontScale) -
         (if (status) textLineHeight(STATUS_SP, fontScale) else 0.dp)
-    val byWidth = width.value / (heroEm * fontScale.coerceAtLeast(0.1f))
+    val byWidth = spThatFits(width, heroEm, fontScale)
     fun hero(height: Dp) =
-        minOf(textSizeForLine(height, fontScale), byWidth, ROW_HERO_MAX).coerceAtLeast(LINE_HERO_FLOOR)
+        minOf(minOf(textSizeForLine(height, fontScale), ROW_HERO_MAX).coerceAtLeast(LINE_HERO_FLOOR), byWidth)
     val without = hero(room)
     val with = hero(room - textLineHeight(FACT_SP, fontScale))
     val showGoal = goal && (with >= without || with >= LINE_HERO_COMFORT)
@@ -192,9 +191,10 @@ internal fun stackPlan(
     val room = size.height - WidgetCardPadding * 2 - textLineHeight(FACT_SP, fontScale) - floor
     val column = fillColumn(room, fontScale, sentenceNeeds, goal, metrics, maxLines = TALL_SENTENCE_MAX_LINES)
     val heroRoom = floor + column.left.coerceAtLeast(0.dp)
-    val byWidth = (size.width - WidgetCardPadding * 2).value / (heroEm * fontScale.coerceAtLeast(0.1f))
-    val hero =
-        quarterPoint(minOf(textSizeForLine(heroRoom, fontScale), byWidth, STACK_HERO_MAX).coerceAtLeast(HERO_FLOOR_SP))
+    val byWidth = spThatFits(size.width - WidgetCardPadding * 2, heroEm, fontScale)
+    val hero = quarterPoint(
+        minOf(minOf(textSizeForLine(heroRoom, fontScale), STACK_HERO_MAX).coerceAtLeast(HERO_FLOOR_SP), byWidth),
+    )
     val spare = heroRoom - textLineHeight(hero, fontScale)
     return withDetails(StackPlan(hero, column, 0), spare, fontScale, details, column.metrics) { plan, rows, freed ->
         plan.copy(column = plan.column.copy(metrics = !freed && plan.column.metrics), detailRows = rows)
@@ -230,9 +230,10 @@ internal fun panelPlan(
 ): PanelPlan {
     val top = size.height - WidgetCardPadding * 2 - textLineHeight(FACT_SP, fontScale)
     val maxLeading = size.width - WidgetCardPadding * 2 - ColumnGap - PanelSentenceMin
-    val byWidth = maxLeading.value / (heroEm * fontScale.coerceAtLeast(0.1f))
-    val hero =
-        quarterPoint(minOf(textSizeForLine(top, fontScale), byWidth, PANEL_HERO_MAX).coerceAtLeast(HERO_FLOOR_SP))
+    val byWidth = spThatFits(maxLeading, heroEm, fontScale)
+    val hero = quarterPoint(
+        minOf(minOf(textSizeForLine(top, fontScale), PANEL_HERO_MAX).coerceAtLeast(HERO_FLOOR_SP), byWidth),
+    )
     val leading = (heroEm * hero * fontScale).dp + 4.dp
     val column = fillColumn(top, fontScale, sentenceNeeds, goal, metrics, maxLines = TALL_SENTENCE_MAX_LINES)
     val trailingLast = when {

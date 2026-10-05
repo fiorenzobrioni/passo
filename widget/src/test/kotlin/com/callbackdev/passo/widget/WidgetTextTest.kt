@@ -54,6 +54,29 @@ class WidgetTextTest {
     }
 
     @Test
+    @Config(qualifiers = "it-rIT")
+    fun `every sentence has a shorter form, for a card that would cut the whole one`() {
+        val reached = overview(listOf(DayMinute(14 * 60 + 23, 9_600)), 900)
+        assertThat(sentence(context, reached, italian)).isEqualTo("Obiettivo raggiunto alle 14:23")
+        assertThat(sentence(context, reached, italian, short = true)).isEqualTo("Raggiunto alle 14:23")
+        val usual = List(2) { listOf(DayMinute(600, 3_000)) }
+        val days = listOf(
+            reached,
+            overview(emptyList(), 480),
+            overview(listOf(DayMinute(600, 1_000)), 720),
+            overview(listOf(DayMinute(600, 1_000)), 720, usual),
+            overview(listOf(DayMinute(600, 5_000)), 720, usual),
+            overview(listOf(DayMinute(600, 3_000)), 720, usual),
+        )
+        days.forEach { day ->
+            val long = sentence(context, day, italian)
+            val short = sentence(context, day, italian, short = true)
+            assertThat(measureWidgetText(context, short, 16f).value)
+                .isLessThan(measureWidgetText(context, long, 16f).value)
+        }
+    }
+
+    @Test
     @Config(qualifiers = "en-rUS")
     fun `the goal reads as a fact, floored`() {
         val day = overview(listOf(DayMinute(600, 7_999)), 720)

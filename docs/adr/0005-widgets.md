@@ -83,6 +83,13 @@ part in the style of Chiaro's «Colpo d'occhio».
     reached, so the read is bounded (10 s) and cannot throw: a failure is logged under the tag
     `PassoWidget` and drawn as a card that says the day could not be read, and the next repaint
     tries again (`guardedLoad`, `GuardedLoadTest`).
+13. **Measured in the launcher's face, and never cut** (amendment of 5 Oct 2026, from the owner's
+    Samsung). A card measures its text with the very appearance Glance sets it in (the theme's
+    device-default family at the weight asked, `widgetPaint`), breaks lines as a `TextView` does,
+    and budgets each line 6% wider than measured (`FACE_MARGIN`). What would still not fit is said
+    in fewer words, made smaller (a count, the status footnote) or left out (the day's sentence,
+    the goal, the eyebrow, the day in figures), never cut. `WidgetFitTest` pins it across every
+    form, both languages and three text sizes, with every line drawn 5% wider.
 
 ## Consequences
 

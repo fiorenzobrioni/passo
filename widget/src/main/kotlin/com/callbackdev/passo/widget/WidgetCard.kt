@@ -6,10 +6,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Paint
-import android.graphics.Typeface
+import android.graphics.text.LineBreaker
+import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
+import android.text.style.TextAppearanceSpan
 import android.util.TypedValue
+import androidx.annotation.StyleRes
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
@@ -238,21 +241,24 @@ internal fun MessageContent(title: String, hint: String?, palette: WidgetPalette
 
 /**
  * The footnote that says the count is not moving, on a card with no place for a sentence: the
- * whole phrase where [room] holds it, the word alone where it does not (Chiaro's stale marker,
- * in the same freshness ink, on a line no budget may drop).
+ * whole phrase where [room] holds it, the word alone where it does not, and the word a little
+ * smaller where even it does not (Chiaro's stale marker, in the same freshness ink, on a line no
+ * budget may drop, and so never cut either).
  */
 @Composable
 internal fun StatusFootnote(state: CountingState, palette: WidgetPalette, room: Dp) {
     val context = LocalContext.current
     val long = statusText(context, state) ?: return
-    val text = if (measureWidgetText(context, long, STATUS_SP, TextWeight.MEDIUM).withSlack() <= room) {
-        long
-    } else {
-        statusText(context, state, short = true) ?: return
-    }
+    val fits = measureWidgetText(context, long, STATUS_SP, TextWeight.MEDIUM).withSlack() <= room
+    val text = if (fits) long else statusText(context, state, short = true) ?: return
+    val size = minOf(STATUS_SP, spThatFits(room, textEm(context, text, TextWeight.MEDIUM), fontScale(context)))
     Text(
         text = text,
-        style = TextStyle(color = palette.attentionInk, fontSize = STATUS_SP.sp, fontWeight = FontWeight.Medium),
+        style = TextStyle(
+            color = palette.attentionInk,
+            fontSize = quarterPoint(size).sp,
+            fontWeight = FontWeight.Medium,
+        ),
         maxLines = 1,
     )
 }
@@ -273,11 +279,8 @@ internal fun measureWidgetText(
     weight: TextWeight = TextWeight.REGULAR,
 ): Dp {
     val metrics = context.resources.displayMetrics
-    val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        typeface = weight.typeface
-        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sizeSp, metrics)
-    }
-    return (paint.measureText(text) / metrics.density).dp
+    val paint = widgetPaint(context, weight, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sizeSp, metrics))
+    return (paint.measureText(text) * FACE_MARGIN / metrics.density).dp
 }
 
 /**
@@ -286,29 +289,55 @@ internal fun measureWidgetText(
  */
 internal fun measureWidgetLines(context: Context, text: String, sizeSp: Float, width: Dp, weight: TextWeight): Int {
     val metrics = context.resources.displayMetrics
-    val widthPx = (width.value * metrics.density).toInt()
+    val widthPx = (width.value * metrics.density / FACE_MARGIN).toInt()
     if (widthPx <= 0 || text.isEmpty()) return if (text.isEmpty()) 0 else Int.MAX_VALUE
-    val paint = TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
-        typeface = weight.typeface
-        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sizeSp, metrics)
+    val paint = widgetPaint(context, weight, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sizeSp, metrics))
+    // A TextView's own breaking: the high-quality strategy, no hyphens.
+    return StaticLayout.Builder.obtain(text, 0, text.length, paint, widthPx)
+        .setIncludePad(true)
+        .setBreakStrategy(LineBreaker.BREAK_STRATEGY_HIGH_QUALITY)
+        .setHyphenationFrequency(Layout.HYPHENATION_FREQUENCY_NONE)
+        .build()
+        .lineCount
+}
+
+/**
+ * The three weights a card sets text in, each with the appearance Glance sets it in
+ * (`text_faces.xml`): its weight, in the theme's device-default family.
+ */
+internal enum class TextWeight(@StyleRes val appearance: Int) {
+    REGULAR(R.style.WidgetTextFace_Regular),
+    MEDIUM(R.style.WidgetTextFace_Medium),
+    BOLD(R.style.WidgetTextFace_Bold),
+}
+
+/**
+ * A paint in the face the launcher will draw [weight] in, at [sizePx]: the very span Glance
+ * puts on a weighted `Text`, applied here. Measured in plain sans-serif instead, a Samsung's
+ * SamsungOne came out a tenth wider than budgeted, and the count and the sentence were cut
+ * (5 Oct 2026).
+ */
+internal fun widgetPaint(context: Context, weight: TextWeight, sizePx: Float): TextPaint =
+    TextPaint(Paint.ANTI_ALIAS_FLAG).apply {
+        TextAppearanceSpan(context, weight.appearance).updateMeasureState(this)
+        textSize = sizePx
     }
-    return StaticLayout.Builder.obtain(text, 0, text.length, paint, widthPx).setIncludePad(true).build().lineCount
-}
 
-/** The three weights a card sets text in, and the faces Glance's weights resolve to on the launcher. */
-internal enum class TextWeight {
-    REGULAR,
-    MEDIUM,
-    BOLD,
-    ;
+/**
+ * The largest size at which a figure [em] wide fits [width] whole, the slack a launcher's
+ * rounding takes kept out of it. Every hero size takes it last, under its floor too: a smaller
+ * number still reads, a cut one does not.
+ */
+internal fun spThatFits(width: Dp, em: Float, fontScale: Float): Float =
+    (width - RowFitSlack).value.coerceAtLeast(0f) / (em * fontScale.coerceAtLeast(0.1f))
 
-    val typeface: Typeface
-        get() = when (this) {
-            REGULAR -> Typeface.DEFAULT
-            MEDIUM -> Typeface.create("sans-serif-medium", Typeface.NORMAL)
-            BOLD -> Typeface.DEFAULT_BOLD
-        }
-}
+/**
+ * How much wider than measured a card budgets every line: measured in the launcher's own face
+ * now, but a launcher may still set a line a little wider (its hinting, a face substituted for
+ * a digit), and a figure cut by a few dp is a figure lost. `WidgetFitTest` draws every form at
+ * 5% wider than measured and finds nothing cut.
+ */
+internal const val FACE_MARGIN = 1.06f
 
 /** A measured width, given the few dp a launcher on another face may want more of. */
 internal fun Dp.withSlack(): Dp = this + RowFitSlack
@@ -354,13 +383,8 @@ private const val TRACK_ALPHA = 0.2f
  * The width of [text] in ems of the system face at [weight]: independent of the density and of
  * the reader's font scale, which the layouts apply themselves.
  */
-internal fun textEm(text: String, weight: TextWeight): Float {
-    val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        typeface = weight.typeface
-        textSize = EM_PROBE_PX
-    }
-    return paint.measureText(text) / EM_PROBE_PX
-}
+internal fun textEm(context: Context, text: String, weight: TextWeight): Float =
+    widgetPaint(context, weight, EM_PROBE_PX).measureText(text) * FACE_MARGIN / EM_PROBE_PX
 
 private const val EM_PROBE_PX = 100f
 

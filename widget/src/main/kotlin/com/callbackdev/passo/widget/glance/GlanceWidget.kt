@@ -48,6 +48,7 @@ import com.callbackdev.passo.widget.FACT_SP
 import com.callbackdev.passo.widget.MessageContent
 import com.callbackdev.passo.widget.PassoWidgetReceiver
 import com.callbackdev.passo.widget.R
+import com.callbackdev.passo.widget.SentenceForms
 import com.callbackdev.passo.widget.StatusFootnote
 import com.callbackdev.passo.widget.TextWeight
 import com.callbackdev.passo.widget.WidgetArrangement
@@ -64,16 +65,16 @@ import com.callbackdev.passo.widget.balancedWidth
 import com.callbackdev.passo.widget.compactCount
 import com.callbackdev.passo.widget.fontScale
 import com.callbackdev.passo.widget.goalOfText
+import com.callbackdev.passo.widget.linesThatFit
 import com.callbackdev.passo.widget.measureWidgetLines
 import com.callbackdev.passo.widget.measureWidgetText
 import com.callbackdev.passo.widget.messageHint
 import com.callbackdev.passo.widget.messageTitle
 import com.callbackdev.passo.widget.rememberWidgetModel
 import com.callbackdev.passo.widget.ringDescription
-import com.callbackdev.passo.widget.sentence
-import com.callbackdev.passo.widget.statusText
 import com.callbackdev.passo.widget.textEm
 import com.callbackdev.passo.widget.textInkBalance
+import com.callbackdev.passo.widget.textLineHeight
 import com.callbackdev.passo.widget.widgetDressFor
 import com.callbackdev.passo.widget.widgetFormatter
 import com.callbackdev.passo.widget.withSlack
@@ -143,6 +144,9 @@ internal fun GlanceWidgetContent(model: WidgetModel) {
     }
 }
 
+/** A sentence as a card prints it: its words, and the lines it is given. */
+private data class FittedSentence(val text: String, val lines: Int)
+
 /** What every form draws from, read once. */
 private class CardParts(
     val context: Context,
@@ -158,25 +162,26 @@ private class CardParts(
     val count: String = format.steps(overview.steps)
 
     /** The widest count this day is likely to print, so the number keeps its size as it grows. */
-    val heroEm: Float = textEm(format.steps(maxOf(overview.steps, overview.goalSteps)), TextWeight.BOLD)
+    val heroEm: Float = textEm(context, format.steps(maxOf(overview.steps, overview.goalSteps)), TextWeight.BOLD)
 
-    /**
-     * What the sentence's place says: what a tap does while the count is not moving, else the
-     * outing under way, else the sentence.
-     */
-    val sentence: String? = statusText(context, model.state)
-        ?: model.session?.let { context.resources.sessionBrief(it, format) }
-        ?: if (model.look.showSentence) sentence(context, overview, format) else null
+    /** What the sentence's place may say (`SentenceForms.of`), whole first. */
+    val forms = SentenceForms.of(context, model.state, model.session, overview, format, model.look.showSentence)
+    val sentence: String? = forms.first
     val sentenceIsStatus = status
 
-    fun goalLine(room: Dp): String {
-        val long = goalOfText(context, overview.goalSteps, format, short = false)
-        return if (measureWidgetText(context, long, FACT_SP).withSlack() <= room) {
-            long
-        } else {
-            goalOfText(context, overview.goalSteps, format, short = true)
-        }
+    fun sentenceLines(text: String, width: Dp): Int =
+        measureWidgetLines(context, text, SENTENCE_LINE_SP, width, TextWeight.MEDIUM)
+
+    /** The form that fits [maxLines] at [width] whole, with its lines; null where none may be said. */
+    fun fitSentence(width: Dp, maxLines: Int): FittedSentence? {
+        val (lines, text) = forms.fit({ sentenceLines(it, width) }, { minOf(it, maxLines) }, { it })
+        return text?.let { FittedSentence(it, lines) }
     }
+
+    /** «of 10,000 steps», «of 10,000» where that does not fit [room], nothing where neither does. */
+    fun goalLine(room: Dp): String? = listOf(false, true)
+        .map { goalOfText(context, overview.goalSteps, format, short = it) }
+        .firstOrNull { measureWidgetText(context, it, FACT_SP).withSlack() <= room }
 
     fun ringSpec() = RingSpec(
         progress = overview.progress.toFloat(),
@@ -245,7 +250,7 @@ private fun Ring(parts: CardParts, side: Dp, dot: Boolean = false) {
 
 @Composable
 private fun RingFigure(text: String, ring: Dp, parts: CardParts, maxSp: Float, bold: Boolean) {
-    val em = textEm(text, if (bold) TextWeight.BOLD else TextWeight.MEDIUM)
+    val em = textEm(parts.context, text, if (bold) TextWeight.BOLD else TextWeight.MEDIUM)
     val sp = insideSp(ring, em, parts.scale, maxSp) ?: return
     Text(
         text = text,
@@ -300,26 +305,31 @@ private fun Count(parts: CardParts, sp: Float) {
 
 @Composable
 private fun GoalLine(parts: CardParts, room: Dp) {
+    val text = parts.goalLine(room) ?: return
     Text(
-        text = parts.goalLine(room),
+        text = text,
         style = TextStyle(color = parts.palette.secondaryInk, fontSize = FACT_SP.sp),
         maxLines = 1,
     )
 }
 
 @Composable
-private fun Sentence(parts: CardParts, lines: Int, align: TextAlign, modifier: GlanceModifier = GlanceModifier) {
-    val text = parts.sentence ?: return
-    if (lines <= 0) return
+private fun Sentence(
+    parts: CardParts,
+    fitted: FittedSentence?,
+    align: TextAlign,
+    modifier: GlanceModifier = GlanceModifier,
+) {
+    if (fitted == null || fitted.lines <= 0) return
     Text(
-        text = text,
+        text = fitted.text,
         style = TextStyle(
             color = if (parts.sentenceIsStatus) parts.palette.attentionInk else parts.palette.primaryInk,
             fontSize = SENTENCE_LINE_SP.sp,
             fontWeight = FontWeight.Medium,
             textAlign = align,
         ),
-        maxLines = lines,
+        maxLines = fitted.lines,
         modifier = modifier,
     )
 }
@@ -344,14 +354,8 @@ private fun RowContent(
         MirroredRow(parts, width, height, ring, wide)
         return
     }
-    val sentenceText = parts.sentence.takeIf { wide }
-    val footnote = parts.status && sentenceText == null
-    // The words' ink and the ring's share a centre line (Chiaro's `textInkBalance`); a footnote
-    // under them already fills that band.
-    val balance = if (footnote) GlanceModifier else GlanceModifier.padding(bottom = textInkBalance(ROW_HERO_SP, scale))
-    val column = if (sentenceText == null) {
-        words
-    } else {
+    // The split is measured on the sentence's first form; then the form that fits it whole, if any.
+    val split = parts.sentence.takeIf { wide }?.let { first ->
         val need = maxOf(
             measureWidgetText(context, parts.count, ROW_HERO_SP, TextWeight.BOLD),
             measureWidgetText(
@@ -360,41 +364,50 @@ private fun RowContent(
                 FACT_SP,
             ),
         ).withSlack()
-        val keep = measureWidgetText(context, sentenceText, SENTENCE_LINE_SP, TextWeight.MEDIUM).withSlack()
-        rowWordsColumn(width, ring, need, keep)
+        val keep = measureWidgetText(context, first, SENTENCE_LINE_SP, TextWeight.MEDIUM).withSlack()
+        val column = rowWordsColumn(width, ring, need, keep)
+        val sentenceColumn = words - column - SentenceGap
+        parts.fitSentence(sentenceColumn, rowSentenceLines(height, scale, Int.MAX_VALUE))
+            ?.let { RowSplit(column, sentenceColumn, it) }
     }
+    val footnote = parts.status && split == null
+    // The words' ink and the ring's share a centre line (Chiaro's `textInkBalance`); a footnote
+    // under them already fills that band.
+    val balance = if (footnote) GlanceModifier else GlanceModifier.padding(bottom = textInkBalance(ROW_HERO_SP, scale))
+    val column = split?.column ?: words
     val hero = rowHeroSp(height, column, parts.heroEm, scale, footnote)
     Row(modifier = GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
         Ring(parts, ring)
         // A width beside a sentence, where the split was measured; the whole row without one.
-        val sized = if (sentenceText !=
-            null
-        ) {
-            GlanceModifier.width(RingTextGap + column)
-        } else {
-            GlanceModifier.defaultWeight()
-        }
+        val sized = if (split != null) GlanceModifier.width(RingTextGap + column) else GlanceModifier.defaultWeight()
         Column(modifier = GlanceModifier.padding(start = RingTextGap).then(balance).then(sized)) {
             Count(parts, hero)
             GoalLine(parts, column)
             if (footnote) StatusFootnote(parts.model.state, parts.palette, column)
         }
-        if (sentenceText != null) {
-            val sentenceColumn = words - column - SentenceGap
-            val measured =
-                measureWidgetLines(context, sentenceText, SENTENCE_LINE_SP, sentenceColumn, TextWeight.MEDIUM)
+        if (split != null) {
             Column(
                 horizontalAlignment = Alignment.End,
                 modifier = GlanceModifier.padding(start = SentenceGap).defaultWeight(),
             ) {
-                val lines = rowSentenceLines(height, scale, measured)
+                val fitted = split.sentence
                 val balanced =
-                    balancedWidth(context, sentenceText, SENTENCE_LINE_SP, sentenceColumn, TextWeight.MEDIUM, lines)
-                Sentence(parts, lines, TextAlign.End, GlanceModifier.width(balanced))
+                    balancedWidth(
+                        context,
+                        fitted.text,
+                        SENTENCE_LINE_SP,
+                        split.sentenceColumn,
+                        TextWeight.MEDIUM,
+                        fitted.lines,
+                    )
+                Sentence(parts, fitted, TextAlign.End, GlanceModifier.width(balanced))
             }
         }
     }
 }
+
+/** A one-row card's columns: the words', the sentence's, and the sentence that fits it. */
+private class RowSplit(val column: Dp, val sentenceColumn: Dp, val sentence: FittedSentence)
 
 /**
  * The row the other way round (Chiaro's `ICON_END`): the count with the sentence at its
@@ -408,7 +421,13 @@ private fun MirroredRow(parts: CardParts, width: Dp, height: Dp, ring: Dp, wide:
     val words = rowWordsWidth(width, ring)
     val countWidth = measureWidgetText(context, parts.count, ROW_HERO_SP, TextWeight.BOLD).withSlack()
     val shoulder = mirroredSentenceWidth(width, ring, countWidth)
-    val showSentence = wide && parts.sentence != null && shoulder >= SentenceColumnMin
+    // Beside the count, over the goal line: the lines the height leaves, two at most.
+    val sentenceRoom = minOf(
+        TALL_SENTENCE_MAX_LINES,
+        linesThatFit(height - WidgetCardPaddingSnug * 2 - textLineHeight(FACT_SP, scale), SENTENCE_LINE_SP, scale),
+    )
+    val fitted = parts.fitSentence(shoulder, sentenceRoom).takeIf { wide && shoulder >= SentenceColumnMin }
+    val showSentence = fitted != null
     val footnote = parts.status && !showSentence
     val hero = rowHeroSp(height, words, parts.heroEm, scale, footnote)
     val balance = if (footnote) 0.dp else textInkBalance(ROW_HERO_SP, scale)
@@ -419,12 +438,9 @@ private fun MirroredRow(parts: CardParts, width: Dp, height: Dp, ring: Dp, wide:
             Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Count(parts, hero)
                 if (showSentence) {
-                    val sentenceText = parts.sentence.orEmpty()
-                    val measured =
-                        measureWidgetLines(context, sentenceText, SENTENCE_LINE_SP, shoulder, TextWeight.MEDIUM)
                     Sentence(
                         parts,
-                        minOf(measured, TALL_SENTENCE_MAX_LINES),
+                        fitted,
                         TextAlign.Start,
                         GlanceModifier.padding(start = SentenceGap).defaultWeight(),
                     )
@@ -445,17 +461,21 @@ private fun MirroredRow(parts: CardParts, width: Dp, height: Dp, ring: Dp, wide:
 private fun TallContent(parts: CardParts, size: DpSize) {
     val context = parts.context
     val width = size.width - WidgetCardPadding * 2
-    val measured =
-        parts.sentence?.let { measureWidgetLines(context, it, SENTENCE_LINE_SP, width, TextWeight.MEDIUM) } ?: 0
-    val plan = tallPlan(size, parts.scale, parts.heroEm, measured)
+    // The form the card can give its lines whole; fewer words leave the ring more of the height.
+    val (plan, text) = parts.forms.fit(
+        measure = { parts.sentenceLines(it, width) },
+        plan = { tallPlan(size, parts.scale, parts.heroEm, it) },
+        lines = { it.sentenceLines },
+    )
+    val fitted = text?.let { FittedSentence(it, plan.sentenceLines) }
     Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Alignment.TopEnd) {
         Ring(parts, plan.ring)
         Column(modifier = GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.Bottom) {
             Count(parts, plan.heroSp)
-            val sentenceWidth = parts.sentence?.let {
-                balancedWidth(context, it, SENTENCE_LINE_SP, width, TextWeight.MEDIUM, plan.sentenceLines)
+            val sentenceWidth = fitted?.let {
+                balancedWidth(context, it.text, SENTENCE_LINE_SP, width, TextWeight.MEDIUM, it.lines)
             } ?: width
-            Sentence(parts, plan.sentenceLines, TextAlign.Start, GlanceModifier.width(sentenceWidth))
+            Sentence(parts, fitted, TextAlign.Start, GlanceModifier.width(sentenceWidth))
             GoalLine(parts, width)
         }
     }
