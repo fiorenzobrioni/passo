@@ -297,7 +297,7 @@ class WaysScreenTest {
                 WayId.TOKYO_SENSOJI_PALACE,
                 WayId.SYDNEY_LUNA_PARK_GARDEN,
                 WayId.SEOUL_GWANGHWAMUN_NAMSAN,
-                WayId.BEIJING_TIANANMEN_NANLUOGUXIANG,
+                WayId.BEIJING_TIANANMEN_YONGHE,
             ),
         )
         assertThat(byContinent.keys).containsExactlyElementsIn(Continent.entries)
@@ -553,14 +553,20 @@ class WaysScreenTest {
     }
 
     @Test
-    fun `Beijing's walk, by the Forbidden City and Beihai to the hutongs, in the dark`() {
+    fun `Beijing's walk, through the Forbidden City to the Lama Temple, in the dark`() {
         showWay(
-            WayId.BEIJING_TIANANMEN_NANLUOGUXIANG,
+            WayId.BEIJING_TIANANMEN_YONGHE,
             state = WaysSamples.state(walks = emptyList(), live = null),
             dark = true,
         )
-        compose.onNodeWithText("From Tiananmen Square to Nanluoguxiang", substring = true).assertExists()
+        compose.onNodeWithText("From Tiananmen Square to the Lama Temple", substring = true).assertExists()
         snapshot("walk_beijing_dark")
+        // In by the Meridian Gate, out by the Gate of Divine Might, the palace's places between.
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Meridian Gate"))
+        compose.onNodeWithText("you enter the Forbidden City", substring = true).assertExists()
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Gate of Divine Might"))
+        compose.onNodeWithText("you leave the Forbidden City", substring = true).assertExists()
+        snapshot("walk_beijing_palace_dark")
     }
 
     @Test

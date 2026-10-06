@@ -2075,12 +2075,12 @@ SEOUL = Walk(
 )
 
 BEIJING = Walk(
-    id="BEIJING_TIANANMEN_NANLUOGUXIANG",
+    id="BEIJING_TIANANMEN_YONGHE",
     city="beijing",
     city_en="Beijing",
     city_it="Pechino",
-    route_en="From Tiananmen Square to Nanluoguxiang, by the Forbidden City, Beihai and the Drum Tower",
-    route_it="Da piazza Tienanmen a Nanluoguxiang, passando per la Città Proibita, Beihai e la Torre del Tamburo",
+    route_en="From Tiananmen Square to the Lama Temple, through the Forbidden City and by Beihai and the Drum Tower",
+    route_it="Da piazza Tienanmen al Tempio dei Lama, attraverso la Città Proibita e passando per Beihai e la Torre del Tamburo",
     outing_en="A walk in Beijing",
     outing_it="Passeggiata a Pechino",
     country="CN",
@@ -2104,14 +2104,24 @@ BEIJING = Walk(
              note_en="Called Chengtianmen under the Ming, this gate of the Imperial City now appears on China's national emblem.",
              note_it="Sotto i Ming si chiamava Chengtianmen; questa porta della Città imperiale compare oggi sull'emblema nazionale cinese."),
         # Source: Wikipedia, Tiananmen; Wikipedia (zh), 天安门. The year it was built differs (1417 or 1420): not said.
-        Stop("beijing_forbidden_city", "Forbidden City", "Città Proibita", 39.9139, 116.3962,
-             note_en="Finished in 1420, the emperors' palace became a museum after the last emperor, Puyi, left it in 1924.",
-             note_it="Finita nel 1420, la reggia degli imperatori divenne un museo dopo che l'ultimo imperatore, Puyi, la lasciò nel 1924."),
-        # Source: Wikipedia, Forbidden City; Wikipedia (zh), 故宫. The stop is the East Gate, Donghuamen.
-        Stop("beijing_corner_tower", "Corner Tower", "Torre d'angolo", 39.9218, 116.3975,
-             note_en="Each corner of the palace walls has a tower like this one, its intricate roof with 72 ridges.",
-             note_it="A ogni angolo delle mura del palazzo c'è una torre come questa, dal tetto intricato con 72 creste."),
-        # Source: Wikipedia, Forbidden City; Wikipedia (zh), 故宫. The moat's width differs (52 or 59 m): not said.
+        # Through the Forbidden City (owner, 6 Oct 2026): in by the Meridian Gate, out by the Gate of
+        # Divine Might, as visitors go; the places inside are closer than elsewhere, by design.
+        Stop("beijing_meridian_gate", "Meridian Gate", "Porta Meridiana", 39.9128, 116.3912,
+             note_en="Through the Meridian Gate, its south gate, you enter the Forbidden City, home of the emperors from 1420 until 1924.",
+             note_it="Dalla Porta Meridiana, la sua porta sud, si entra nella Città Proibita, dimora degli imperatori dal 1420 al 1924."),
+        # Source: Wikipedia, Meridian Gate, and Forbidden City (the emperors' residence from 1420 to 1924); Wikipedia (zh), 午門 (北京), and 故宫 (finished in 1420, Puyi gone in 1924).
+        Stop("beijing_supreme_harmony", "Hall of Supreme Harmony", "Sala della Suprema Armonia", 39.9155, 116.3908,
+             note_en="The palace's largest hall, on a terrace of three marble tiers, is where the Ming and Qing emperors were enthroned.",
+             note_it="La sala più grande del palazzo, su una terrazza di marmo a tre livelli, è dove salivano al trono gli imperatori Ming e Qing."),
+        # Source: Wikipedia, Hall of Supreme Harmony; Wikipedia (zh), 太和殿.
+        Stop("beijing_heavenly_purity", "Palace of Heavenly Purity", "Palazzo della Purezza Celeste", 39.9183, 116.3908,
+             note_en="From the Yongzheng Emperor on, the Qing hid the name of their heir behind the tablet above this throne.",
+             note_it="Dall'imperatore Yongzheng in poi, i Qing nascosero il nome del loro erede dietro la tavoletta sopra questo trono."),
+        # Source: Wikipedia, Palace of Heavenly Purity; Wikipedia (zh), 乾清宫.
+        Stop("beijing_divine_might", "Gate of Divine Might", "Porta del Vigore Divino", 39.9218, 116.3906,
+             note_en="Past the Imperial Garden, you leave the Forbidden City by its north gate, first named for the Black Tortoise of the north.",
+             note_it="Passato il Giardino Imperiale, si esce dalla Città Proibita dalla sua porta nord, che in origine prendeva il nome dalla Tartaruga Nera del nord."),
+        # Source: Wikipedia, Gate of Divine Prowess, and Forbidden City (the garden south of the gate); Wikipedia (zh), 神武門. The Imperial Garden has an article in Chinese only: named, not a stop.
         Stop("beijing_jingshan", "Jingshan Park", "Parco Jingshan", 39.9236, 116.3917,
              note_en="In 1644, as rebels took Beijing, the last Ming emperor, Chongzhen, hanged himself from a tree on this hill.",
              note_it="Nel 1644, mentre i ribelli prendevano Pechino, l'ultimo imperatore Ming, Chongzhen, si impiccò a un albero su questa collina."),
@@ -2140,10 +2150,14 @@ BEIJING = Walk(
              note_en="Just behind the Drum Tower, the Bell Tower kept the city's official time with it until 1924.",
              note_it="Subito dietro la Torre del Tamburo, la Torre della Campana scandì con lei l'ora ufficiale della città fino al 1924."),
         # Source: Wikipedia, Drum Tower and Bell Tower of Beijing; Wikipedia (zh), 北京鼓楼和钟楼.
-        Stop("beijing_nanluoguxiang", "Nanluoguxiang", "Nanluoguxiang", 39.9332, 116.3968,
+        Stop("beijing_nanluoguxiang", "Nanluoguxiang", "Nanluoguxiang", 39.9403, 116.3966,
              note_en="Nearly 800 metres long, this hutong took its present name under the Qing, by about 1750.",
              note_it="Lungo quasi 800 metri, questo hutong prese il nome attuale sotto i Qing, intorno al 1750."),
-        # Source: Wikipedia, Nanluoguxiang; Wikipedia (zh), 南锣鼓巷.
+        # Source: Wikipedia, Nanluoguxiang; Wikipedia (zh), 南锣鼓巷. The stop is its north end, crossed on the way east.
+        Stop("beijing_lama_temple", "Lama Temple", "Tempio dei Lama", 39.9435, 116.4116,
+             note_en="Built as the home of Prince Yong, the future Yongzheng Emperor, it became a monastery of Tibetan Buddhism's Gelug school in 1744.",
+             note_it="Nata come residenza del principe Yong, il futuro imperatore Yongzheng, nel 1744 divenne un monastero della scuola Gelug del buddhismo tibetano."),
+        # Source: Wikipedia, Yonghe Temple; Wikipedia (zh), 雍和宫.
     ],
 )
 

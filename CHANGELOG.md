@@ -29,8 +29,9 @@ All notable changes to Passo are documented here. The format follows
   Francisco, from the Ferry Building by Coit Tower and the Wharf to the Palace of Fine Arts;
   Tokyo, from Sensō-ji by Ueno and Akihabara to the Imperial Palace; Sydney, from Luna Park over
   the Harbour Bridge, by the Opera House, to the Chinese Garden; Seoul, from Gwanghwamun Square
-  by the palaces and the Cheonggyecheon up to N Seoul Tower; Beijing, from Tiananmen Square by
-  the Forbidden City, Beihai and the Drum Tower to Nanluoguxiang; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And six short ones, about 5 km, an hour
+  by the palaces and the Cheonggyecheon up to N Seoul Tower; Beijing, from Tiananmen Square
+  through the Forbidden City, in by the Meridian Gate and out by the Gate of Divine Might, then by
+  Beihai and the Drum Tower to the Lama Temple; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And six short ones, about 5 km, an hour
   or so: Porto, from the cathedral across the Douro to the Serra do Pilar; Amsterdam, from
   Centraal Station along the canals to the Westerkerk; Prague, from the Castle over Charles
   Bridge to Wenceslas Square; Québec, from the Parliament by the Plains of Abraham and the

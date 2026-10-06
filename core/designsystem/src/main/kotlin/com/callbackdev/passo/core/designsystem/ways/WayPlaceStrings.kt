@@ -36,7 +36,7 @@ fun wayNameRes(id: WayId): Int = when (id) {
     WayId.TOKYO_SENSOJI_PALACE -> R.string.way_name_tokyo_sensoji_palace
     WayId.SYDNEY_LUNA_PARK_GARDEN -> R.string.way_name_sydney_luna_park_garden
     WayId.SEOUL_GWANGHWAMUN_NAMSAN -> R.string.way_name_seoul_gwanghwamun_namsan
-    WayId.BEIJING_TIANANMEN_NANLUOGUXIANG -> R.string.way_name_beijing_tiananmen_nanluoguxiang
+    WayId.BEIJING_TIANANMEN_YONGHE -> R.string.way_name_beijing_tiananmen_yonghe
 }
 
 /** Where a way runs, in one line. */
@@ -70,7 +70,7 @@ fun wayRouteRes(id: WayId): Int = when (id) {
     WayId.TOKYO_SENSOJI_PALACE -> R.string.way_route_tokyo_sensoji_palace
     WayId.SYDNEY_LUNA_PARK_GARDEN -> R.string.way_route_sydney_luna_park_garden
     WayId.SEOUL_GWANGHWAMUN_NAMSAN -> R.string.way_route_seoul_gwanghwamun_namsan
-    WayId.BEIJING_TIANANMEN_NANLUOGUXIANG -> R.string.way_route_beijing_tiananmen_nanluoguxiang
+    WayId.BEIJING_TIANANMEN_YONGHE -> R.string.way_route_beijing_tiananmen_yonghe
 }
 
 /** A walk's outing, as History and Today name it; null for a way, which is not an outing. */
@@ -99,7 +99,7 @@ fun walkOutingRes(id: WayId): Int? = when (id) {
     WayId.TOKYO_SENSOJI_PALACE -> R.string.way_outing_tokyo_sensoji_palace
     WayId.SYDNEY_LUNA_PARK_GARDEN -> R.string.way_outing_sydney_luna_park_garden
     WayId.SEOUL_GWANGHWAMUN_NAMSAN -> R.string.way_outing_seoul_gwanghwamun_namsan
-    WayId.BEIJING_TIANANMEN_NANLUOGUXIANG -> R.string.way_outing_beijing_tiananmen_nanluoguxiang
+    WayId.BEIJING_TIANANMEN_YONGHE -> R.string.way_outing_beijing_tiananmen_yonghe
     else -> null
 }
 
@@ -126,14 +126,17 @@ fun placeNameRes(key: String): Int = when (key) {
     "badolo" -> R.string.way_place_badolo
     "barcelos" -> R.string.way_place_barcelos
     "beijing_bell_tower" -> R.string.way_place_beijing_bell_tower
-    "beijing_corner_tower" -> R.string.way_place_beijing_corner_tower
+    "beijing_divine_might" -> R.string.way_place_beijing_divine_might
     "beijing_drum_tower" -> R.string.way_place_beijing_drum_tower
-    "beijing_forbidden_city" -> R.string.way_place_beijing_forbidden_city
+    "beijing_heavenly_purity" -> R.string.way_place_beijing_heavenly_purity
     "beijing_jingshan" -> R.string.way_place_beijing_jingshan
+    "beijing_lama_temple" -> R.string.way_place_beijing_lama_temple
+    "beijing_meridian_gate" -> R.string.way_place_beijing_meridian_gate
     "beijing_nanluoguxiang" -> R.string.way_place_beijing_nanluoguxiang
     "beijing_nine_dragon_wall" -> R.string.way_place_beijing_nine_dragon_wall
     "beijing_prince_gong" -> R.string.way_place_beijing_prince_gong
     "beijing_shichahai" -> R.string.way_place_beijing_shichahai
+    "beijing_supreme_harmony" -> R.string.way_place_beijing_supreme_harmony
     "beijing_tiananmen" -> R.string.way_place_beijing_tiananmen
     "beijing_tiananmen_square" -> R.string.way_place_beijing_tiananmen_square
     "beijing_white_dagoba" -> R.string.way_place_beijing_white_dagoba
@@ -546,14 +549,17 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "astorga" -> R.string.way_note_astorga
     "barcelos" -> R.string.way_note_barcelos
     "beijing_bell_tower" -> R.string.way_note_beijing_bell_tower
-    "beijing_corner_tower" -> R.string.way_note_beijing_corner_tower
+    "beijing_divine_might" -> R.string.way_note_beijing_divine_might
     "beijing_drum_tower" -> R.string.way_note_beijing_drum_tower
-    "beijing_forbidden_city" -> R.string.way_note_beijing_forbidden_city
+    "beijing_heavenly_purity" -> R.string.way_note_beijing_heavenly_purity
     "beijing_jingshan" -> R.string.way_note_beijing_jingshan
+    "beijing_lama_temple" -> R.string.way_note_beijing_lama_temple
+    "beijing_meridian_gate" -> R.string.way_note_beijing_meridian_gate
     "beijing_nanluoguxiang" -> R.string.way_note_beijing_nanluoguxiang
     "beijing_nine_dragon_wall" -> R.string.way_note_beijing_nine_dragon_wall
     "beijing_prince_gong" -> R.string.way_note_beijing_prince_gong
     "beijing_shichahai" -> R.string.way_note_beijing_shichahai
+    "beijing_supreme_harmony" -> R.string.way_note_beijing_supreme_harmony
     "beijing_tiananmen" -> R.string.way_note_beijing_tiananmen
     "beijing_tiananmen_square" -> R.string.way_note_beijing_tiananmen_square
     "beijing_white_dagoba" -> R.string.way_note_beijing_white_dagoba

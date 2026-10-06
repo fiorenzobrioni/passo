@@ -48,7 +48,7 @@ class WaysDataTest {
                 WayId.TOKYO_SENSOJI_PALACE,
                 WayId.SYDNEY_LUNA_PARK_GARDEN,
                 WayId.SEOUL_GWANGHWAMUN_NAMSAN,
-                WayId.BEIJING_TIANANMEN_NANLUOGUXIANG,
+                WayId.BEIJING_TIANANMEN_YONGHE,
             )
             .inOrder()
         // One walk a city for now (PLANNING.md §11 Phase 11, later).
