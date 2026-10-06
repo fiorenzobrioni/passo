@@ -963,7 +963,7 @@ a city for now.
   Québec, Havana and Cartagena, short (Washington, Montréal, Boston's Freedom Trail and Valparaíso if
   one does not work out). Then Asia and Oceania, and Africa, each continent added with its
   first cities. Cities only.
-- [ ] **Asia and Oceania** (owner, 6 Oct 2026: "start the Asia and Oceania group, tell me which
+- [x] **Asia and Oceania** (owner, 6 Oct 2026: "start the Asia and Oceania group, tell me which
   cities, and do the first two"), proposed: Tokyo, Sydney, Seoul, Beijing, Hong Kong, Singapore
   and Bangkok, long; Kyoto (Higashiyama, from Kiyomizu-dera to Gion), Hanoi (the Hoàn Kiếm lake,
   the Old Quarter and the Temple of Literature) and Melbourne (its centre and laneways to the
@@ -999,9 +999,15 @@ a city for now.
     Memorial Bridge to Wat Arun (9.8 km, 12 places); Kyoto's, short, from Kiyomizu-dera down
     Sannenzaka by the Yasaka pagoda, Kōdai-ji, Maruyama Park and the Yasaka Shrine, through Gion
     and by Kennin-ji, over the Kamo to Pontochō and the Nishiki market (4.2 km, 10 places).
+  - [x] **Hanoi and Melbourne** (owner, 6 Oct 2026), the continent's ten: Hanoi's short walk
+    goes from the Temple of Literature by Hỏa Lò and St Joseph's Cathedral, round Hoàn Kiếm Lake
+    to the Ngọc Sơn temple, through the Old Quarter and by the Đồng Xuân market to the Long Biên
+    Bridge (5.9 km, 8 places); Melbourne's from Flinders Street Station by St Paul's and
+    Federation Square, the State Library and the Old Melbourne Gaol, the Princess Theatre,
+    Parliament and St Patrick's, to the Royal Exhibition Building (4.6 km, 9 places).
 - [ ] On a device (owner): the Camino Portugués drawn in both themes; Rome, Paris, Madrid,
   Berlin, Vienna, Lima, Cusco, New York, Rio, Mexico City, Buenos Aires, San Francisco, Québec,
-  Havana, Cartagena, Tokyo, Sydney, Seoul, Beijing, Hong Kong, Singapore, Bangkok, Kyoto, Porto, Amsterdam and Prague each walked once, with the voice; the continents' maps and the coastal cities in both
+  Havana, Cartagena, Tokyo, Sydney, Seoul, Beijing, Hong Kong, Singapore, Bangkok, Kyoto, Hanoi, Melbourne, Porto, Amsterdam and Prague each walked once, with the voice; the continents' maps and the coastal cities in both
   themes.
 
 Built as the content of the first two parts, with nothing new in the code: the fifth way is the
@@ -1378,6 +1384,8 @@ Include:
 - **Hong Kong and Singapore** (owner, 6 Oct 2026). Hong Kong's sentences checked in the English and Chinese Wikipedias, Singapore's in the English and Chinese (the German for Fort Canning, St Andrew's and Raffles's arrival; the Italian for the Supertrees, which the Chinese article does not describe), and rewritten where they differ: the Star Ferry's first year (1880 or 1888), the Man Mo Temple's (1847, or 1847 to 1862), the day Raffles landed (28 or 29 January 1819), why the Noonday Gun is fired (a penalty, or an apology: the sentence says amends); the Esplanade's nickname, the Durian, is in one only. Hong Kong's centre is compact (6.3 km from Wan Chai to Western Market), so its walk starts at Victoria Park in Causeway Bay to be a long one; the Blue House, 100 m from the Pak Tai Temple, was left out. Hong Kong is `coast`, its harbour the sea; Singapore is not, since its coastline lies beyond the Marina Barrage, outside the map, and Marina Bay inside the barrage is a reservoir, listed as water with the river. Raffles' Landing Site keeps a hedge ("is held to have landed here"): the spot is the English article's; the arrival in 1819 is in both.
 
 - **Bangkok and Kyoto** (owner, 6 Oct 2026). Bangkok's sentences checked in the English and German Wikipedias (the Italian for the Democracy Monument), Kyoto's in the English and Japanese, and rewritten where they differ: the Golden Mount's steps (344 or 318), how many of Bangkok's fourteen forts remain (four or two: "few"), the year the Emerald Buddha crossed the river (1784 or 1785), the year Sannenzaka was protected (1972 or 1976). Two places without a second source were left out: Bangkok's flower market, Pak Khlong Talat, and Kyoto's Shirakawa, whose protected teahouses only the Japanese article describes. Bangkok's walk crosses the Chao Phraya by the Memorial Bridge, as a walker would, and ends at Wat Arun on the Thonburi bank; its river, many water areas, is read from the street tiles, its old moats and klongs drawn as lines. Kyoto's centre is mapped mostly as residential lanes, so its map adds the longer ones, as Milan's does; the Kamo, many small areas, comes from the street tiles, the Takase and the lake canal are lines.
+
+- **Hanoi and Melbourne, Asia and Oceania's ten** (owner, 6 Oct 2026): seven long walks and three short, as planned. Hanoi's sentences checked in the English and French Wikipedias (the Italian for the Old Quarter), Melbourne's in the English and German (the French for Federation Square), and rewritten where they differ: when the Temple of Literature's teaching ended (1779 or 1915), the year the Long Biên Bridge was finished (1902 or 1903), the year the State Library began (1854 or 1856), how many were hanged at the Old Melbourne Gaol (133 or 135), the year the federal parliament left (1927 or 1928). Places with a single source were left out or replaced: Hanoi's Bạch Mã temple (an article in Vietnamese only: the stop is the Old Quarter) and the Opera House, which took the walk past 6 km; Melbourne's Hosier Lane, Block Arcade and GPO (English only), so its walk goes by the Princess Theatre and St Patrick's instead, whose sentence names its architect, William Wardell, as Sydney's St Mary's does. Hanoi's walk is 5.9 km, at the top of a short walk's range. On the continent's map Kyoto's name gives way to Tokyo's, a point away, as the map drops a name it has no room for.
 
 ### Open
 

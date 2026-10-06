@@ -18,7 +18,8 @@ Spanish, German), Québec in the English and French, Havana and Cartagena in the
 Spanish, Tokyo in the English and Japanese (or Italian), Sydney in the English and German (or
 Italian, French, Spanish), Seoul in the English and Korean, Beijing and Hong Kong in the English and Chinese,
 Singapore in the English and Chinese (or German, Italian), Bangkok in the English and German (or
-Italian), Kyoto in the English and Japanese.
+Italian), Kyoto in the English and Japanese, Hanoi in the English and French (or Italian), Melbourne in
+the English and German (or French).
 """
 
 from dataclasses import dataclass, field
@@ -2458,7 +2459,117 @@ KYOTO = Walk(
     ],
 )
 
-WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING, HONG_KONG, SINGAPORE, BANGKOK, KYOTO]
+HANOI = Walk(
+    id="HANOI_VAN_MIEU_LONG_BIEN",
+    city="hanoi",
+    city_en="Hanoi",
+    city_it="Hanoi",
+    route_en="From the Temple of Literature to the Long Biên Bridge, by Hoàn Kiếm Lake and the Old Quarter",
+    route_it="Dal Tempio della Letteratura al ponte Long Biên, passando per il lago Hoàn Kiếm e il Quartiere vecchio",
+    outing_en="A walk in Hanoi",
+    outing_it="Passeggiata a Hanoi",
+    country="VN",
+    continent="ASIA_OCEANIA",
+    # A short walk (about 5 km). Hoàn Kiếm Lake; the Red River.
+    water=["relation/198437", "relation/6907107"],
+    parks=[
+        "relation/21390321", "relation/21422526", "relation/21422527", "way/218414273", "relation/14048553",
+    ],
+    stops=[
+        Stop("hanoi_van_mieu", "Temple of Literature", "Tempio della Letteratura", 21.0274, 105.8357,
+             note_en="Founded in 1070 for Confucius, the temple keeps stelae on stone turtles with the names of the scholars who passed the royal exams.",
+             note_it="Fondato nel 1070 in onore di Confucio, il tempio conserva stele su tartarughe di pietra con i nomi dei dotti promossi agli esami reali."),
+        # Source: Wikipedia, Temple of Literature, Hanoi; Wikipedia (fr), Temple de la Littérature de Hanoï. When its teaching ended differs (1779 or 1915): not said.
+        Stop("hanoi_hoa_lo", "Hỏa Lò Prison", "Prigione di Hỏa Lò", 21.0254, 105.8465,
+             note_en="Built by the French colonial government, the prison later held American prisoners of war, who called it the Hanoi Hilton; part of it is now a museum.",
+             note_it="Costruita dall'amministrazione coloniale francese, la prigione rinchiuse poi prigionieri di guerra americani, che la chiamarono Hanoi Hilton; oggi in parte è un museo."),
+        # Source: Wikipedia, Hỏa Lò Prison; Wikipedia (fr), Prison Hỏa Lò.
+        Stop("hanoi_st_joseph", "St Joseph's Cathedral", "Cattedrale di San Giuseppe", 21.0285, 105.8489,
+             note_en="Finished in 1886 in the Gothic Revival style, the cathedral is said to resemble Notre-Dame de Paris.",
+             note_it="Finita nel 1886 in stile neogotico, la cattedrale ricorderebbe Notre-Dame di Parigi."),
+        # Source: Wikipedia, St. Joseph's Cathedral, Hanoi; Wikipedia (fr), Cathédrale Saint-Joseph de Hanoï.
+        Stop("hanoi_hoan_kiem", "Hoàn Kiếm Lake", "Lago Hoàn Kiếm", 21.0279, 105.8516,
+             note_en="Here, the legend says, Emperor Lê Lợi gave his magic sword back to a turtle, after he had driven out the Chinese.",
+             note_it="Qui, dice la leggenda, l'imperatore Lê Lợi restituì la sua spada magica a una tartaruga, dopo aver cacciato i cinesi."),
+        # Source: Wikipedia, Hoàn Kiếm Lake; Wikipedia (fr), Lac Hoan Kiem. The turtle is golden in one only: not said.
+        Stop("hanoi_ngoc_son", "Ngọc Sơn Temple", "Tempio di Ngọc Sơn", 21.0311, 105.8528,
+             note_en="The Thê Húc bridge leads to this temple on its islet, which honours, among others, the national hero Trần Hưng Đạo.",
+             note_it="Il ponte Thê Húc porta a questo tempio sul suo isolotto, che onora tra gli altri l'eroe nazionale Trần Hưng Đạo."),
+        # Source: Wikipedia, Ngọc Sơn Temple; Wikipedia (fr), Temple Ngoc Son.
+        Stop("hanoi_old_quarter", "Old Quarter", "Quartiere vecchio", 21.0359, 105.8511,
+             note_en="Known as the 36 streets, the Old Quarter once gave each street its own trade.",
+             note_it="Detto le 36 strade, il Quartiere vecchio dava un tempo a ogni via il suo mestiere."),
+        # Source: Wikipedia, Old Quarter, Hanoi; Wikipedia (it), Quartiere vecchio di Hanoi. The Bạch Mã temple, here, has an article in Vietnamese only.
+        Stop("hanoi_dong_xuan", "Đồng Xuân Market", "Mercato di Đồng Xuân", 21.038, 105.8497,
+             note_en="Built by the French in place of two older markets, it was nearly destroyed by fire in 1994.",
+             note_it="Costruito dai francesi al posto di due mercati più antichi, fu quasi distrutto da un incendio nel 1994."),
+        # Source: Wikipedia, Đồng Xuân Market; Wikipedia (fr), Marché Đồng Xuân.
+        Stop("hanoi_long_bien", "Long Biên Bridge", "Ponte Long Biên", 21.0426, 105.8563,
+             note_en="Built by Daydé & Pillé of Paris and first named after Paul Doumer, the bridge carries the railway over the Red River.",
+             note_it="Costruito dalla ditta parigina Daydé & Pillé e chiamato all'inizio come Paul Doumer, il ponte porta la ferrovia oltre il fiume Rosso."),
+        # Source: Wikipedia, Long Biên Bridge; Wikipedia (fr), Pont Long Biên. The year it was finished differs (1902 or 1903): not said.
+    ],
+)
+
+MELBOURNE = Walk(
+    id="MELBOURNE_FLINDERS_EXHIBITION",
+    city="melbourne",
+    city_en="Melbourne",
+    city_it="Melbourne",
+    route_en="From Flinders Street to the Royal Exhibition Building, by the State Library and Parliament",
+    route_it="Da Flinders Street al Royal Exhibition Building, passando per la State Library e il Parlamento",
+    outing_en="A walk in Melbourne",
+    outing_it="Passeggiata a Melbourne",
+    country="AU",
+    continent="ASIA_OCEANIA",
+    # A short walk (about 5 km). The Yarra.
+    water=["relation/954522"],
+    # The gardens along the Yarra, the Treasury and Fitzroy Gardens, the Carlton Gardens.
+    parks=[
+        "way/46330961", "way/23909867", "way/24593719", "way/24593825", "way/4817097", "way/4817020",
+        "relation/6614802",
+    ],
+    stops=[
+        Stop("melbourne_flinders_street", "Flinders Street Station", "Stazione di Flinders Street", -37.818, 144.9669,
+             note_en="The first station here served Australia's first railway in 1854; the clocks over the entrance show each line's next train.",
+             note_it="La prima stazione qui servì nel 1854 la prima ferrovia d'Australia; gli orologi sopra l'ingresso indicano il prossimo treno di ogni linea."),
+        # Source: Wikipedia, Flinders Street railway station; Wikipedia (de), Bahnhof Melbourne Flinders Street.
+        Stop("melbourne_st_pauls", "St Paul's Cathedral", "Cattedrale di San Paolo", -37.817, 144.9676,
+             note_en="William Butterfield's cathedral of 1891 stands where Melbourne's first public Christian service was held, in 1835.",
+             note_it="La cattedrale di William Butterfield, del 1891, sorge dove nel 1835 si tenne la prima funzione cristiana pubblica di Melbourne."),
+        # Source: Wikipedia, St Paul's Cathedral, Melbourne; Wikipedia (de), Pauluskathedrale (Melbourne).
+        Stop("melbourne_federation_square", "Federation Square", "Federation Square", -37.8179, 144.969,
+             note_en="Opened in 2002, the square and its galleries stand on a concrete deck above the railway lines.",
+             note_it="Aperta nel 2002, la piazza con le sue gallerie poggia su una piattaforma di cemento sopra i binari."),
+        # Source: Wikipedia, Federation Square; Wikipedia (fr), Federation Square. Hosier Lane, the Block Arcade and the GPO, on the way, have articles in English only.
+        Stop("melbourne_state_library", "State Library Victoria", "State Library Victoria", -37.8098, 144.965,
+             note_en="Among the library's treasures is the armour of the bushranger Ned Kelly.",
+             note_it="Tra i tesori della biblioteca c'è l'armatura del bandito Ned Kelly."),
+        # Source: Wikipedia, State Library Victoria; Wikipedia (de), State Library of Victoria. Its first year differs (1854 or 1856): not said.
+        Stop("melbourne_old_gaol", "Old Melbourne Gaol", "Old Melbourne Gaol", -37.8077, 144.9655,
+             note_en="Ned Kelly was among the prisoners of this gaol, closed in 1924 and now a museum.",
+             note_it="Ned Kelly fu tra i detenuti di questo carcere, chiuso nel 1924 e oggi museo."),
+        # Source: Wikipedia, Old Melbourne Gaol; Wikipedia (de), Old Melbourne Gaol. The number hanged differs (133 or 135): not said.
+        Stop("melbourne_princess_theatre", "Princess Theatre", "Princess Theatre", -37.8108, 144.9727,
+             note_en="Rebuilt in 1886 to William Pitt's design, the theatre had the world's first sliding roof.",
+             note_it="Ricostruito nel 1886 su progetto di William Pitt, il teatro ebbe il primo tetto scorrevole al mondo."),
+        # Source: Wikipedia, Princess Theatre (Melbourne); Wikipedia (de), Princess Theatre (Melbourne).
+        Stop("melbourne_parliament", "Parliament House", "Parlamento", -37.811, 144.9733,
+             note_en="Australia's parliament sat here while Melbourne was the capital; the dome its builders planned was never built.",
+             note_it="Qui si riunì il parlamento australiano quando Melbourne era la capitale; la cupola prevista non fu mai costruita."),
+        # Source: Wikipedia, Parliament House, Melbourne; Wikipedia (de), Parliament House (Melbourne). The year it left differs (1927 or 1928): not said.
+        Stop("melbourne_st_patricks", "St Patrick's Cathedral", "Cattedrale di San Patrizio", -37.8099, 144.9765,
+             note_en="This Gothic Revival cathedral is by William Wardell, the architect of Sydney's St Mary's.",
+             note_it="Questa cattedrale neogotica è di William Wardell, l'architetto della cattedrale di Santa Maria a Sydney."),
+        # Source: Wikipedia, St Patrick's Cathedral, Melbourne; Wikipedia (de), St. Patrick’s Cathedral (Melbourne); for St Mary's, the Sydney walk's sources.
+        Stop("melbourne_exhibition", "Royal Exhibition Building", "Royal Exhibition Building", -37.8055, 144.9715,
+             note_en="Built for the international exhibition of 1880, the hall and its gardens have been a World Heritage Site since 2004.",
+             note_it="Costruito per l'esposizione internazionale del 1880, il palazzo con i suoi giardini è patrimonio dell'umanità dal 2004."),
+        # Source: Wikipedia, Royal Exhibition Building; Wikipedia (de), Royal Exhibition Building.
+    ],
+)
+
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING, HONG_KONG, SINGAPORE, BANGKOK, KYOTO, HANOI, MELBOURNE]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
@@ -2486,6 +2597,7 @@ LOCATORS = {
     "HK": (22.15, 113.83, 22.57, 114.44),
     "SG": (1.16, 103.6, 1.48, 104.1),
     "TH": (5.6, 97.3, 20.5, 105.7),
+    "VN": (8.4, 102.1, 23.4, 109.5),
 }
 
 # The continents the Ways page groups the cities by, in its order (the Kotlin enum Continent has

@@ -34,14 +34,16 @@ All notable changes to Passo are documented here. The format follows
   Beihai and the Drum Tower to the Lama Temple; Hong Kong, from Victoria Park by Wan Chai, the
   Star Ferry and Central to Western Market; Singapore, from Chinatown by Fort Canning, the river
   and the Merlion to Marina Bay Sands and the Supertrees; Bangkok, from the Giant Swing by the
-  Golden Mount, Khao San, the Grand Palace and Wat Pho, over the Memorial Bridge to Wat Arun; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And seven short ones, about 5 km, an hour
+  Golden Mount, Khao San, the Grand Palace and Wat Pho, over the Memorial Bridge to Wat Arun; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And nine short ones, about 5 km, an hour
   or so: Porto, from the cathedral across the Douro to the Serra do Pilar; Amsterdam, from
   Centraal Station along the canals to the Westerkerk; Prague, from the Castle over Charles
   Bridge to Wenceslas Square; Québec, from the Parliament by the Plains of Abraham and the
   Château Frontenac down to the Lower Town; Havana, from the Capitolio by the Malecón and the old
   squares to the Alameda de Paula; Cartagena, from the Clock Tower along the walls and
-  through Getsemaní to San Felipe; and Kyoto, from Kiyomizu-dera by the Yasaka pagoda, Gion and
-  Pontochō to the Nishiki market. Each map has the city's
+  through Getsemaní to San Felipe; Kyoto, from Kiyomizu-dera by the Yasaka pagoda, Gion and
+  Pontochō to the Nishiki market; Hanoi, from the Temple of Literature round Hoàn Kiếm Lake and
+  through the Old Quarter to the Long Biên Bridge; and Melbourne, from Flinders Street by the
+  State Library and Parliament to the Royal Exhibition Building. Each map has the city's
   water, parks and main streets, and, for a city on the sea, its coast, so the area is
   recognisable at a glance. Walked where you are
   in one outing or a few. Each place is told as your steps reach it, with a short vibration and,
