@@ -238,7 +238,7 @@ class WaysScreenTest {
             .assert(hasText("Under way: London", substring = true))
         compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).assert(hasText("10 cities", substring = true))
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.continent(Continent.ASIA_OCEANIA)))
-        compose.onNodeWithTag(WaysTags.continent(Continent.ASIA_OCEANIA)).assert(hasText("6 cities", substring = true))
+        compose.onNodeWithTag(WaysTags.continent(Continent.ASIA_OCEANIA)).assert(hasText("8 cities", substring = true))
         compose.onNodeWithTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)).assertDoesNotExist()
         snapshot("ways_cities")
         compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).performClick()
@@ -300,6 +300,8 @@ class WaysScreenTest {
                 WayId.BEIJING_TIANANMEN_YONGHE,
                 WayId.HONG_KONG_VICTORIA_WESTERN,
                 WayId.SINGAPORE_CHINATOWN_GARDENS,
+                WayId.BANGKOK_SWING_ARUN,
+                WayId.KYOTO_KIYOMIZU_NISHIKI,
             ),
         )
         assertThat(byContinent.keys).containsExactlyElementsIn(Continent.entries)
@@ -343,7 +345,7 @@ class WaysScreenTest {
     @Test
     fun `Asia and Oceania's map, from Beijing to Sydney`() {
         showContinent(Continent.ASIA_OCEANIA)
-        compose.onNodeWithContentDescription("Asia and Oceania on the map: 6 cities.").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Asia and Oceania on the map: 8 cities.").assertIsDisplayed()
         snapshot("continent_asia_oceania")
     }
 
@@ -590,6 +592,23 @@ class WaysScreenTest {
         )
         compose.onNodeWithText("From Chinatown to Gardens by the Bay", substring = true).assertExists()
         snapshot("walk_singapore_dark")
+    }
+
+    @Test
+    fun `Bangkok's walk, from the Giant Swing over the river to Wat Arun`() {
+        showWay(WayId.BANGKOK_SWING_ARUN, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("From the Giant Swing to Wat Arun", substring = true).assertExists()
+        snapshot("walk_bangkok")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Wat Pho"))
+        compose.onNodeWithText("46 metres long", substring = true).assertExists()
+        snapshot("walk_bangkok_places")
+    }
+
+    @Test
+    fun `Kyoto's short walk, from Kiyomizu-dera through Gion, in the dark`() {
+        showWay(WayId.KYOTO_KIYOMIZU_NISHIKI, state = WaysSamples.state(walks = emptyList(), live = null), dark = true)
+        compose.onNodeWithText("From Kiyomizu-dera to the Nishiki market", substring = true).assertExists()
+        snapshot("walk_kyoto_dark")
     }
 
     @Test

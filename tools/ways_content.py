@@ -17,7 +17,8 @@ and Buenos Aires in the English and Spanish, San Francisco in the English and It
 Spanish, German), Québec in the English and French, Havana and Cartagena in the English and
 Spanish, Tokyo in the English and Japanese (or Italian), Sydney in the English and German (or
 Italian, French, Spanish), Seoul in the English and Korean, Beijing and Hong Kong in the English and Chinese,
-Singapore in the English and Chinese (or German, Italian).
+Singapore in the English and Chinese (or German, Italian), Bangkok in the English and German (or
+Italian), Kyoto in the English and Japanese.
 """
 
 from dataclasses import dataclass, field
@@ -2320,7 +2321,144 @@ SINGAPORE = Walk(
     ],
 )
 
-WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING, HONG_KONG, SINGAPORE]
+BANGKOK = Walk(
+    id="BANGKOK_SWING_ARUN",
+    city="bangkok",
+    city_en="Bangkok",
+    city_it="Bangkok",
+    route_en="From the Giant Swing to Wat Arun, by the Golden Mount, the Grand Palace and Wat Pho",
+    route_it="Dall'Altalena gigante al Wat Arun, passando per il Monte d'oro, il Grande Palazzo e il Wat Pho",
+    outing_en="A walk in Bangkok",
+    outing_it="Passeggiata a Bangkok",
+    country="TH",
+    continent="ASIA_OCEANIA",
+    # The Chao Phraya, in two areas and many small ones (from the street tiles); the old city's
+    # moats and canals as lines.
+    water=["relation/14038958", "relation/14038959", "relation/14038956", "relation/1291706"],
+    water_from_tiles=True,
+    canals=["relation/19051851", "relation/21173153", "relation/20072015"],
+    canal_width=15.0,
+    parks=[
+        "way/23630232", "way/23486019", "relation/19894289", "way/560595626", "way/1552957093",
+    ],
+    stops=[
+        Stop("bangkok_giant_swing", "Giant Swing", "Altalena gigante", 13.7518, 100.5013,
+             note_en="In front of Wat Suthat, the swing served a Brahmin ceremony until 1935, when accidents brought it to an end.",
+             note_it="Davanti al Wat Suthat, l'altalena serviva a una cerimonia brahmanica fino al 1935, quando gli incidenti la fecero cessare."),
+        # Source: Wikipedia, Giant Swing; Wikipedia (de), Sao Ching Cha.
+        Stop("bangkok_golden_mount", "Golden Mount", "Monte d'oro", 13.7537, 100.506,
+             note_en="This artificial hill, crowned by a golden chedi, rose where a huge chedi begun under Rama III sank into the soft ground.",
+             note_it="Questa collina artificiale, coronata da un chedi d'oro, sorse dove un enorme chedi voluto da Rama III sprofondò nel terreno molle."),
+        # Source: Wikipedia, Wat Saket; Wikipedia (de), Wat Saket. Its steps differ (344 or 318): not said.
+        Stop("bangkok_loha_prasat", "Loha Prasat", "Loha Prasat", 13.7548, 100.5043,
+             note_en="Rama III built this temple in 1846 for his granddaughter; it is known for the Loha Prasat, the Iron Palace.",
+             note_it="Rama III fece costruire questo tempio nel 1846 per la nipote; è noto per il Loha Prasat, il Palazzo di ferro."),
+        # Source: Wikipedia, Wat Ratchanatdaram; Wikipedia (de), Wat Ratchanatdaram.
+        Stop("bangkok_democracy_monument", "Democracy Monument", "Monumento alla Democrazia", 13.7567, 100.5018,
+             note_en="Raised by Phibun's government, the monument recalls the revolution of 1932, which gave Siam a constitution.",
+             note_it="Voluto dal governo di Phibun, il monumento ricorda la rivoluzione del 1932, che diede al Siam una costituzione."),
+        # Source: Wikipedia, Democracy Monument; Wikipedia (it), Monumento alla Democrazia.
+        Stop("bangkok_khaosan", "Khaosan Road", "Khaosan Road", 13.7589, 100.4973,
+             note_en="Its name means milled rice, once sold here; since the 1980s it has been the backpackers' street.",
+             note_it="Il nome significa riso brillato, che un tempo si vendeva qui; dagli anni Ottanta è la via dei viaggiatori con lo zaino."),
+        # Source: Wikipedia, Khaosan Road; Wikipedia (de), Khaosan Road.
+        Stop("bangkok_phra_sumen", "Phra Sumen Fort", "Forte Phra Sumen", 13.7637, 100.4958,
+             note_en="Phra Sumen is one of the few left of the fourteen forts that guarded Bangkok's old walls.",
+             note_it="Phra Sumen è uno dei pochi rimasti dei quattordici forti che difendevano le antiche mura di Bangkok."),
+        # Source: Wikipedia, Fortifications of Bangkok (four remain); Wikipedia (de), Phra Nakhon (two remain): "few".
+        Stop("bangkok_national_museum", "National Museum", "Museo nazionale", 13.7578, 100.4925,
+             note_en="Founded by King Chulalongkorn in 1874, the museum fills the Front Palace of the old vice-kings, the Wang Na.",
+             note_it="Fondato dal re Chulalongkorn nel 1874, il museo occupa il Palazzo anteriore degli antichi viceré, il Wang Na."),
+        # Source: Wikipedia, Bangkok National Museum; Wikipedia (de), Nationalmuseum Bangkok.
+        Stop("bangkok_wat_mahathat", "Wat Mahathat", "Wat Mahathat", 13.7551, 100.4917,
+             note_en="Older than Bangkok, when it was called Wat Salak, the temple now holds a Buddhist university for monks.",
+             note_it="Più antico di Bangkok, quando si chiamava Wat Salak, il tempio ospita oggi un'università buddhista per monaci."),
+        # Source: Wikipedia, Wat Mahathat Yuwaratrangsarit; Wikipedia (de), Wat Mahathat (Bangkok).
+        Stop("bangkok_wat_phra_kaew", "Wat Phra Kaew", "Wat Phra Kaew", 13.7522, 100.4937,
+             note_en="In the grounds of the Grand Palace, this is the temple of the Emerald Buddha, the kings' own.",
+             note_it="Nel recinto del Grande Palazzo, è il tempio del Buddha di Smeraldo, il tempio dei re."),
+        # Source: Wikipedia, Wat Phra Kaew; Wikipedia (de), Wat Phra Kaeo.
+        Stop("bangkok_wat_pho", "Wat Pho", "Wat Pho", 13.7465, 100.4935,
+             note_en="Its reclining Buddha is 46 metres long, and the temple is a home of traditional Thai massage.",
+             note_it="Il suo Buddha disteso è lungo 46 metri, e il tempio è una casa del massaggio tradizionale thailandese."),
+        # Source: Wikipedia, Wat Pho; Wikipedia (de), Wat Pho.
+        Stop("bangkok_memorial_bridge", "Memorial Bridge", "Ponte Phra Phutthayotfa", 13.7393, 100.4976,
+             note_en="Opened in 1932 for the 150th year of the Chakri dynasty, the bridge crosses to Thonburi; its middle once lifted for ships.",
+             note_it="Aperto nel 1932 per i 150 anni della dinastia Chakri, il ponte porta a Thonburi; un tempo la parte centrale si alzava per le navi."),
+        # Source: Wikipedia, Memorial Bridge (Bangkok); Wikipedia (de), Phra-Phutthayotfa-Brücke. Pak Khlong Talat, the flower market before it, has an article in English only.
+        Stop("bangkok_wat_arun", "Wat Arun", "Wat Arun", 13.7437, 100.4895,
+             note_en="The Temple of Dawn kept the Emerald Buddha before it crossed the river; its prang is covered in pieces of Chinese porcelain.",
+             note_it="Il Tempio dell'Aurora custodì il Buddha di Smeraldo prima che attraversasse il fiume; il suo prang è rivestito di frammenti di porcellana cinese."),
+        # Source: Wikipedia, Wat Arun; Wikipedia (de), Wat Arun. The year the Buddha moved differs (1784 or 1785): not said.
+    ],
+)
+
+KYOTO = Walk(
+    id="KYOTO_KIYOMIZU_NISHIKI",
+    city="kyoto",
+    city_en="Kyoto",
+    city_it="Kyoto",
+    route_en="From Kiyomizu-dera to the Nishiki market, by Gion and Pontochō",
+    route_it="Dal Kiyomizu-dera al mercato di Nishiki, passando per Gion e Pontochō",
+    outing_en="A walk in Kyoto",
+    outing_it="Passeggiata a Kyoto",
+    country="JP",
+    continent="ASIA_OCEANIA",
+    # A short walk (about 5 km). The Kamo, many small areas, from the street tiles; the Takase
+    # and the lake canal as lines.
+    water=[],
+    water_from_tiles=True,
+    canals=["relation/18827840", "relation/9491921"],
+    canal_width=8.0,
+    # Gion and Higashiyama are mapped mostly as residential lanes: without them the map is a few lines.
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=400,
+    parks=["way/54170783", "relation/9371889"],
+    stops=[
+        Stop("kyoto_kiyomizu", "Kiyomizu-dera", "Kiyomizu-dera", 34.9963, 135.7826,
+             note_en="The temple's great wooden stage, built without a single nail, gave Japan the saying: to jump off the stage at Kiyomizu, to take the plunge.",
+             note_it="La grande terrazza di legno del tempio, costruita senza un solo chiodo, ha dato al Giappone il detto: saltare dalla terrazza del Kiyomizu, cioè buttarsi."),
+        # Source: Wikipedia, Kiyomizu-dera; Wikipedia (ja), 清水寺.
+        Stop("kyoto_sannenzaka", "Sannenzaka", "Sannenzaka", 34.997, 135.7812,
+             note_en="On the way up to Kiyomizu, this stepped lane is a protected district of traditional houses.",
+             note_it="Sulla salita al Kiyomizu, questa via a gradini è un quartiere protetto di case tradizionali."),
+        # Source: Wikipedia, Sannenzaka; Wikipedia (ja), 産寧坂. The year it was protected differs (1972 or 1976): not said.
+        Stop("kyoto_yasaka_pagoda", "Yasaka Pagoda", "Pagoda di Yasaka", 34.9985, 135.7795,
+             note_en="The five-storey pagoda standing today was rebuilt in 1440, after it had been destroyed more than once.",
+             note_it="La pagoda a cinque piani che si vede oggi fu ricostruita nel 1440, dopo essere stata distrutta più volte."),
+        # Source: Wikipedia, Yasaka Pagoda; Wikipedia (ja), 法観寺.
+        Stop("kyoto_kodaiji", "Kōdai-ji", "Kōdai-ji", 35.001, 135.78,
+             note_en="Toyotomi Hideyoshi's widow, become the nun Kōdai-in, founded this temple to pray for his soul.",
+             note_it="La vedova di Toyotomi Hideyoshi, divenuta la monaca Kōdai-in, fondò questo tempio per pregare per la sua anima."),
+        # Source: Wikipedia, Kōdai-ji; Wikipedia (ja), 高台寺.
+        Stop("kyoto_maruyama", "Maruyama Park", "Parco Maruyama", 35.0038, 135.78,
+             note_en="Kyoto's best-known park for the cherry blossom is famous for its great weeping cherry.",
+             note_it="Il parco più noto di Kyoto per la fioritura dei ciliegi è famoso per il suo grande ciliegio piangente."),
+        # Source: Wikipedia, Maruyama Park; Wikipedia (ja), 円山公園 (京都府).
+        Stop("kyoto_yasaka_shrine", "Yasaka Shrine", "Santuario di Yasaka", 35.0036, 135.7766,
+             note_en="Dedicated to the god Susanoo, the shrine holds the Gion Matsuri every July.",
+             note_it="Dedicato al dio Susanoo, il santuario celebra ogni luglio il Gion Matsuri."),
+        # Source: Wikipedia, Yasaka Shrine; Wikipedia (ja), 八坂神社.
+        Stop("kyoto_hanamikoji", "Hanamikōji", "Hanamikōji", 35.0022, 135.7748,
+             note_en="Gion is one of Japan's best-known geisha districts; in Kyoto the geisha are called geiko.",
+             note_it="Gion è uno dei quartieri delle geisha più noti del Giappone; a Kyoto le geisha si chiamano geiko."),
+        # Source: Wikipedia, Gion; Wikipedia (ja), 祇園. Shirakawa, beyond, is described in the Japanese article only: not a stop.
+        Stop("kyoto_kenninji", "Kennin-ji", "Kennin-ji", 35.0003, 135.774,
+             note_en="This Zen temple was founded in 1202, with the monk Eisai as its first abbot.",
+             note_it="Questo tempio zen fu fondato nel 1202, con il monaco Eisai come primo abate."),
+        # Source: Wikipedia, Kennin-ji; Wikipedia (ja), 建仁寺.
+        Stop("kyoto_pontocho", "Pontochō", "Pontochō", 35.0042, 135.7712,
+             note_en="This narrow lane by the Kamo River may take its name from Portuguese, and is one of Kyoto's geisha districts.",
+             note_it="Questo vicolo stretto lungo il fiume Kamo deve forse il nome al portoghese, ed è uno dei quartieri delle geisha di Kyoto."),
+        # Source: Wikipedia, Ponto-chō; Wikipedia (ja), 先斗町. Both give the Portuguese as a theory.
+        Stop("kyoto_nishiki", "Nishiki Market", "Mercato di Nishiki", 35.005, 135.766,
+             note_en="Called Kyoto's kitchen, the market grew from fish shops that kept their fish fresh in the cold groundwater, for the palace.",
+             note_it="Detto «la cucina di Kyoto», il mercato nacque da botteghe di pesce che lo tenevano fresco nell'acqua fredda del sottosuolo, per il palazzo."),
+        # Source: Wikipedia, Nishiki Market; Wikipedia (ja), 錦市場.
+    ],
+)
+
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING, HONG_KONG, SINGAPORE, BANGKOK, KYOTO]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
@@ -2347,6 +2485,7 @@ LOCATORS = {
     "CN": (18.2, 73.5, 53.6, 134.8),
     "HK": (22.15, 113.83, 22.57, 114.44),
     "SG": (1.16, 103.6, 1.48, 104.1),
+    "TH": (5.6, 97.3, 20.5, 105.7),
 }
 
 # The continents the Ways page groups the cities by, in its order (the Kotlin enum Continent has
