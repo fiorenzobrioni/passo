@@ -961,8 +961,8 @@ a city for now.
   seven of 10 km and three of 5 km, the city choosing its length. The Americas, proposed (5 Oct
   2026): all ten done: New York, Rio, Mexico City, Buenos Aires and San Francisco, long;
   Québec, Havana and Cartagena, short (Washington, Montréal, Boston's Freedom Trail and Valparaíso if
-  one does not work out). Then Asia and Oceania (all ten done), and Africa, each continent added
-  with its first cities. Cities only.
+  one does not work out). Then Asia and Oceania (all ten done), and Africa (all ten done), each
+  continent added with its first cities. Cities only.
 - [x] **Asia and Oceania** (owner, 6 Oct 2026: "start the Asia and Oceania group, tell me which
   cities, and do the first two"), proposed: Tokyo, Sydney, Seoul, Beijing, Hong Kong, Singapore
   and Bangkok, long; Kyoto (Higashiyama, from Kiyomizu-dera to Gion), Hanoi (the Hoàn Kiếm lake,
@@ -1005,7 +1005,7 @@ a city for now.
     Bridge (5.9 km, 8 places); Melbourne's from Flinders Street Station by St Paul's and
     Federation Square, the State Library and the Old Melbourne Gaol, the Princess Theatre,
     Parliament and St Patrick's, to the Royal Exhibition Building (4.6 km, 9 places).
-- [ ] **Africa** (owner, 6 Oct 2026: "start the Africa group, tell me which cities, and do the
+- [x] **Africa** (owner, 6 Oct 2026: "start the Africa group, tell me which cities, and do the
   first two"), proposed: Cairo, Cape Town, Marrakech (from Jemaa el-Fnaa and the Koutoubia
   through the souks to the Ben Youssef madrasa, the Bahia Palace and the Saadian Tombs), Tunis
   (the Kasbah, the medina and the Zitouna Mosque, out by Bab el Bhar along the Avenue Habib
@@ -1055,9 +1055,16 @@ a city for now.
     Hall, the National Palace and Menelik's, the Holy Trinity Cathedral, Arat Kilo, the
     National Museum (Lucy), the Yekatit 12 monument and the Guenete Leul Palace, down to St
     George's and the Taitu Hotel (11.9 km, 12 places).
+  - [x] **Zanzibar and Luxor** (owner, 6 Oct 2026), the continent's ten, both short: Zanzibar's
+    walk goes from Michenzani in Ng'ambo over Creek Road into Stone Town, by Christ Church on
+    the old slave market, the Hamamni baths, St Joseph's and Freddie Mercury's house, to the
+    Forodhani Gardens, the Old Fort, the House of Wonders and the Sultan's Palace, to the Old
+    Dispensary (4.3 km, 11 places), on the coast; Luxor's from Luxor Temple by the Abu Haggag
+    Mosque, the Mummification Museum and the Luxor Museum, along the Avenue of Sphinxes by the
+    Precinct of Mut and the Temple of Khonsu, to Karnak (4.2 km, 8 places).
 - [ ] On a device (owner): the Camino Portugués drawn in both themes; Rome, Paris, Madrid,
   Berlin, Vienna, Lima, Cusco, New York, Rio, Mexico City, Buenos Aires, San Francisco, Québec,
-  Havana, Cartagena, Tokyo, Sydney, Seoul, Beijing, Hong Kong, Singapore, Bangkok, Kyoto, Hanoi, Melbourne, Cairo, Cape Town, Marrakech, Tunis, Alexandria, Dakar, Addis Ababa, Fez, Porto, Amsterdam and Prague each walked once, with the voice; the continents' maps and the coastal cities in both
+  Havana, Cartagena, Tokyo, Sydney, Seoul, Beijing, Hong Kong, Singapore, Bangkok, Kyoto, Hanoi, Melbourne, Cairo, Cape Town, Marrakech, Tunis, Alexandria, Dakar, Addis Ababa, Fez, Zanzibar, Luxor, Porto, Amsterdam and Prague each walked once, with the voice; the continents' maps and the coastal cities in both
   themes.
 
 Built as the content of the first two parts, with nothing new in the code: the fifth way is the
@@ -1443,6 +1450,7 @@ Include:
 - **Cape Town's hill and streets** (owner, 6 Oct 2026: "the map looks thin, and the green of the hill is missing"). Signal Hill and Lion's Head are mapped only as part of Table Mountain National Park (relation 338191), a protected area, not a park or a wood, so `features` did not list them: the map now has the national park, cut to the page, behind Bo-Kaap. Green Point, De Waterkant, Bo-Kaap and Gardens are mapped mostly as residential streets, now drawn down to 200 m, as Cairo's and Marrakech's are. `splice` replaces a walk already in `WayData.kt`, so a committed city's map can be redrawn without restoring the file by hand.
 - **Tunis and Alexandria** (owner, 6 Oct 2026: "go on with Tunis and Alexandria"). Both checked in the English and French Wikipedias (for Tunis, the Arabic for the Clock Tower's square, which has no English article, and the Italian for the cathedral, whose English article says neither fact; for Alexandria, the Arabic for the Cecil Hotel, the Unknown Soldier Memorial and the Terbana Mosque), and rewritten where they differ: the Zitouna's founding year, which Istanbul mosque Sidi Mahrez's follows, the Abu al-Abbas mosque's first year (1306 or 1307), when the Unknown Soldier Memorial changed its dedication (after 1952, or 1964), and the years of the Bibliotheca and the National Museum (template dates in one source, so not said). Left out: the Kasbah Mosque of Tunis (no French article: Dar El Bey, on the same square, is the place), Bab Souika (150 m after Sidi Mahrez, walked through), the Pasteur Institute (a 3 km detour round the Belvedere's walls), Alexandria's Cavafy Museum (no article of its own) and Misr Station (none either). Tunis's walk ends with a 2.2 km climb to the top of the Belvedere with no place, as Seoul's does up Namsan; Alexandria's needed a twelfth place to be a long walk, so it starts at the catacombs of Kom el Shoqafa, 800 m before Pompey's Pillar, at 11.8 km. St Mark's and the Eliyahu Hanavi synagogue are 140 m apart, both kept. Alexandria is `coast`; the Lake of Tunis is a water area, so Tunis is not. OpenStreetMap's API answered 509 (bandwidth) during the fetch: the build script now waits and retries on 429, 509 and 5xx, as the helpers do.
 - **Dakar and Addis Ababa** (owner, 6 Oct 2026: "go on with Dakar and Addis Ababa"). Dakar checked in the English and French Wikipedias (the German for the Demba and Dupont monument, in front of the station, whose own article is in French only), Addis Ababa in the English and French (the Italian for the Red Terror museum, the National Museum, whose French article says nothing of Lucy, and the Taitu Hotel), and rewritten where they differ: when the Théodore Monod museum became a museum, the years of the Guenete Leul Palace (1930 to 1932, or 1934) and of the Taitu Hotel (1905 or 1907), whether the Taitu is the oldest hotel in Ethiopia or in Addis Ababa (the sentence says Addis Ababa), and dates that are templates in one source (the Museum of Black Civilisations' opening, the cathedral's consecration), not said. Dakar's Plateau is thin in the encyclopaedias: Kermel and Sandaga markets, the Place de l'Indépendance and the City Hall have no article in two languages, so the walk passes them without a line, and to reach a long walk's twelve places it goes on through the Médina, by the Iba Mar Diop stadium, to Soumbédioune and the university. In Addis Ababa, Unity Park, the Ethnological Museum and the City Hall have English articles only: the places are Menelik's palace, the Guenete Leul Palace that holds the museum, and the Taitu Hotel. OpenStreetMap's API throttled the fetch 34 times; the retries carried it through. Dakar is `coast`.
+- **Zanzibar and Luxor, Africa's ten** (owner, 6 Oct 2026: "go on with Zanzibar and Luxor"): seven long walks and three short, as planned. Zanzibar checked in the English and Italian Wikipedias (the German for Michenzani, the French for St Joseph's), Luxor in the English and French (the Italian for the Abu Haggag Mosque), and rewritten where they differ: the Hamamni baths' years (1870 to 1888, or 1850), who first built the Old Fort and when, how long the Anglo-Zanzibar War lasted (38 to 45 minutes, or 38: the sentence says less than an hour), the Avenue of Sphinxes' length and number of statues, the decade of Michenzani's blocks. Stone Town is a kilometre across and its places are close together; to be a short walk of 4 km it starts in Ng'ambo, at Michenzani's blocks built with East German help, and crosses Creek Road into Stone Town, whose stop by the Darajani market tells the town itself (the market has an English article only). Left out: Livingstone House and Tippu Tip's house (no source that says the house), the Peace Memorial Museum (none). Luxor Temple's sentence ties to Cairo's: of its two obelisks one is in Paris, and the clock France gave in return is in the Citadel's mosque, where the Cairo walk ends. Zanzibar is `coast`, its land a single shore in its frame: the coastal test now asks for land drawn from the coastline, one ring or several, never the ground's four corners. The Africa group is complete.
 
 ### Open
 

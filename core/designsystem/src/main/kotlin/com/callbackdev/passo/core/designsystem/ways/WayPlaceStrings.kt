@@ -51,6 +51,8 @@ fun wayNameRes(id: WayId): Int = when (id) {
     WayId.DAKAR_MUSEUM_UNIVERSITY -> R.string.way_name_dakar_museum_university
     WayId.ADDIS_ABABA_MESKEL_TAITU -> R.string.way_name_addis_ababa_meskel_taitu
     WayId.FEZ_PALACE_ANDALUSIANS -> R.string.way_name_fez_palace_andalusians
+    WayId.ZANZIBAR_MICHENZANI_DISPENSARY -> R.string.way_name_zanzibar_michenzani_dispensary
+    WayId.LUXOR_TEMPLE_KARNAK -> R.string.way_name_luxor_temple_karnak
 }
 
 /** Where a way runs, in one line. */
@@ -99,6 +101,8 @@ fun wayRouteRes(id: WayId): Int = when (id) {
     WayId.DAKAR_MUSEUM_UNIVERSITY -> R.string.way_route_dakar_museum_university
     WayId.ADDIS_ABABA_MESKEL_TAITU -> R.string.way_route_addis_ababa_meskel_taitu
     WayId.FEZ_PALACE_ANDALUSIANS -> R.string.way_route_fez_palace_andalusians
+    WayId.ZANZIBAR_MICHENZANI_DISPENSARY -> R.string.way_route_zanzibar_michenzani_dispensary
+    WayId.LUXOR_TEMPLE_KARNAK -> R.string.way_route_luxor_temple_karnak
 }
 
 /** A walk's outing, as History and Today name it; null for a way, which is not an outing. */
@@ -142,6 +146,8 @@ fun walkOutingRes(id: WayId): Int? = when (id) {
     WayId.DAKAR_MUSEUM_UNIVERSITY -> R.string.way_outing_dakar_museum_university
     WayId.ADDIS_ABABA_MESKEL_TAITU -> R.string.way_outing_addis_ababa_meskel_taitu
     WayId.FEZ_PALACE_ANDALUSIANS -> R.string.way_outing_fez_palace_andalusians
+    WayId.ZANZIBAR_MICHENZANI_DISPENSARY -> R.string.way_outing_zanzibar_michenzani_dispensary
+    WayId.LUXOR_TEMPLE_KARNAK -> R.string.way_outing_luxor_temple_karnak
     else -> null
 }
 
@@ -426,6 +432,14 @@ fun placeNameRes(key: String): Int = when (key) {
     "london_westminster_bridge" -> R.string.way_place_london_westminster_bridge
     "los_arcos" -> R.string.way_place_los_arcos
     "lucca" -> R.string.way_place_lucca
+    "luxor_abu_haggag" -> R.string.way_place_luxor_abu_haggag
+    "luxor_avenue_of_sphinxes" -> R.string.way_place_luxor_avenue_of_sphinxes
+    "luxor_karnak" -> R.string.way_place_luxor_karnak
+    "luxor_mummification_museum" -> R.string.way_place_luxor_mummification_museum
+    "luxor_museum" -> R.string.way_place_luxor_museum
+    "luxor_precinct_of_mut" -> R.string.way_place_luxor_precinct_of_mut
+    "luxor_temple" -> R.string.way_place_luxor_temple
+    "luxor_temple_of_khonsu" -> R.string.way_place_luxor_temple_of_khonsu
     "madonna_dei_fornelli" -> R.string.way_place_madonna_dei_fornelli
     "madrid_almudena" -> R.string.way_place_madrid_almudena
     "madrid_angel_caido" -> R.string.way_place_madrid_angel_caido
@@ -740,6 +754,17 @@ fun placeNameRes(key: String): Int = when (key) {
     "villafranca" -> R.string.way_place_villafranca
     "viterbo" -> R.string.way_place_viterbo
     "viverone" -> R.string.way_place_viverone
+    "zanzibar_christ_church" -> R.string.way_place_zanzibar_christ_church
+    "zanzibar_forodhani" -> R.string.way_place_zanzibar_forodhani
+    "zanzibar_hamamni" -> R.string.way_place_zanzibar_hamamni
+    "zanzibar_house_of_wonders" -> R.string.way_place_zanzibar_house_of_wonders
+    "zanzibar_mercury_house" -> R.string.way_place_zanzibar_mercury_house
+    "zanzibar_michenzani" -> R.string.way_place_zanzibar_michenzani
+    "zanzibar_old_dispensary" -> R.string.way_place_zanzibar_old_dispensary
+    "zanzibar_old_fort" -> R.string.way_place_zanzibar_old_fort
+    "zanzibar_st_joseph" -> R.string.way_place_zanzibar_st_joseph
+    "zanzibar_stone_town" -> R.string.way_place_zanzibar_stone_town
+    "zanzibar_sultans_palace" -> R.string.way_place_zanzibar_sultans_palace
     "zubiri" -> R.string.way_place_zubiri
     else -> error("No name for the stop $key")
 }
@@ -995,6 +1020,14 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "london_trafalgar" -> R.string.way_note_london_trafalgar
     "london_westminster_bridge" -> R.string.way_note_london_westminster_bridge
     "lucca" -> R.string.way_note_lucca
+    "luxor_abu_haggag" -> R.string.way_note_luxor_abu_haggag
+    "luxor_avenue_of_sphinxes" -> R.string.way_note_luxor_avenue_of_sphinxes
+    "luxor_karnak" -> R.string.way_note_luxor_karnak
+    "luxor_mummification_museum" -> R.string.way_note_luxor_mummification_museum
+    "luxor_museum" -> R.string.way_note_luxor_museum
+    "luxor_precinct_of_mut" -> R.string.way_note_luxor_precinct_of_mut
+    "luxor_temple" -> R.string.way_note_luxor_temple
+    "luxor_temple_of_khonsu" -> R.string.way_note_luxor_temple_of_khonsu
     "madonna_dei_fornelli" -> R.string.way_note_madonna_dei_fornelli
     "madrid_almudena" -> R.string.way_note_madrid_almudena
     "madrid_angel_caido" -> R.string.way_note_madrid_angel_caido
@@ -1264,5 +1297,16 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "vienna_state_opera" -> R.string.way_note_vienna_state_opera
     "vienna_stephansdom" -> R.string.way_note_vienna_stephansdom
     "viterbo" -> R.string.way_note_viterbo
+    "zanzibar_christ_church" -> R.string.way_note_zanzibar_christ_church
+    "zanzibar_forodhani" -> R.string.way_note_zanzibar_forodhani
+    "zanzibar_hamamni" -> R.string.way_note_zanzibar_hamamni
+    "zanzibar_house_of_wonders" -> R.string.way_note_zanzibar_house_of_wonders
+    "zanzibar_mercury_house" -> R.string.way_note_zanzibar_mercury_house
+    "zanzibar_michenzani" -> R.string.way_note_zanzibar_michenzani
+    "zanzibar_old_dispensary" -> R.string.way_note_zanzibar_old_dispensary
+    "zanzibar_old_fort" -> R.string.way_note_zanzibar_old_fort
+    "zanzibar_st_joseph" -> R.string.way_note_zanzibar_st_joseph
+    "zanzibar_stone_town" -> R.string.way_note_zanzibar_stone_town
+    "zanzibar_sultans_palace" -> R.string.way_note_zanzibar_sultans_palace
     else -> null
 }

@@ -240,7 +240,7 @@ class WaysScreenTest {
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.continent(Continent.ASIA_OCEANIA)))
         compose.onNodeWithTag(WaysTags.continent(Continent.ASIA_OCEANIA)).assert(hasText("10 cities", substring = true))
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.continent(Continent.AFRICA)))
-        compose.onNodeWithTag(WaysTags.continent(Continent.AFRICA)).assert(hasText("8 cities", substring = true))
+        compose.onNodeWithTag(WaysTags.continent(Continent.AFRICA)).assert(hasText("10 cities", substring = true))
         compose.onNodeWithTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)).assertDoesNotExist()
         snapshot("ways_cities")
         compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).performClick()
@@ -316,6 +316,8 @@ class WaysScreenTest {
                 WayId.DAKAR_MUSEUM_UNIVERSITY,
                 WayId.ADDIS_ABABA_MESKEL_TAITU,
                 WayId.FEZ_PALACE_ANDALUSIANS,
+                WayId.ZANZIBAR_MICHENZANI_DISPENSARY,
+                WayId.LUXOR_TEMPLE_KARNAK,
             ),
         )
         assertThat(byContinent.keys).containsExactlyElementsIn(Continent.entries)
@@ -369,7 +371,7 @@ class WaysScreenTest {
     @Test
     fun `Africa's map, from Cairo to Cape Town`() {
         showContinent(Continent.AFRICA)
-        compose.onNodeWithContentDescription("Africa on the map: 8 cities.").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Africa on the map: 10 cities.").assertIsDisplayed()
         snapshot("continent_africa")
     }
 
@@ -741,6 +743,27 @@ class WaysScreenTest {
         )
         compose.onNodeWithText("From Meskel Square to the Taitu Hotel", substring = true).assertExists()
         snapshot("walk_addis_ababa_dark")
+    }
+
+    @Test
+    fun `Zanzibar's short walk, through Stone Town to the Old Dispensary`() {
+        showWay(WayId.ZANZIBAR_MICHENZANI_DISPENSARY, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("From Michenzani through Stone Town", substring = true).assertExists()
+        snapshot("walk_zanzibar")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("House of Wonders"))
+        compose.onNodeWithText("shortest war in history", substring = true).assertExists()
+        snapshot("walk_zanzibar_places")
+    }
+
+    @Test
+    fun `Luxor's short walk, along the Avenue of Sphinxes to Karnak, in the dark`() {
+        showWay(
+            WayId.LUXOR_TEMPLE_KARNAK,
+            state = WaysSamples.state(walks = emptyList(), live = null),
+            dark = true,
+        )
+        compose.onNodeWithText("From Luxor Temple to Karnak", substring = true).assertExists()
+        snapshot("walk_luxor_dark")
     }
 
     @Test

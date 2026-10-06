@@ -69,6 +69,8 @@ enum class WayId(val kind: WayKind, val city: String? = null, val continent: Con
     DAKAR_MUSEUM_UNIVERSITY(WayKind.WALK, city = "dakar", continent = Continent.AFRICA),
     ADDIS_ABABA_MESKEL_TAITU(WayKind.WALK, city = "addis_ababa", continent = Continent.AFRICA),
     FEZ_PALACE_ANDALUSIANS(WayKind.WALK, city = "fez", continent = Continent.AFRICA),
+    ZANZIBAR_MICHENZANI_DISPENSARY(WayKind.WALK, city = "zanzibar", continent = Continent.AFRICA),
+    LUXOR_TEMPLE_KARNAK(WayKind.WALK, city = "luxor", continent = Continent.AFRICA),
 }
 
 /** Where a way the reader started stands. Stored by name. */

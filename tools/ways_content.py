@@ -23,7 +23,8 @@ the English and German (or French), Cairo in the English and French (or Arabic, 
 Town in the English and German (or Dutch, French, Afrikaans), Marrakech in the English and French, Fez in
 the English and French (or Italian, Spanish, German), Tunis in the English and French (or Arabic,
 Italian), Alexandria in the English and French (or Arabic), Dakar in the English and
-French (or German), Addis Ababa in the English and French (or Italian).
+French (or German), Addis Ababa in the English and French (or Italian), Zanzibar in the English and
+Italian (or German, French), Luxor in the English and French (or Italian).
 """
 
 from dataclasses import dataclass, field
@@ -3162,7 +3163,124 @@ FEZ = Walk(
     ],
 )
 
-WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING, HONG_KONG, SINGAPORE, BANGKOK, KYOTO, HANOI, MELBOURNE, CAIRO, CAPE_TOWN, MARRAKECH, TUNIS, ALEXANDRIA, DAKAR, ADDIS_ABABA, FEZ]
+ZANZIBAR = Walk(
+    id="ZANZIBAR_MICHENZANI_DISPENSARY",
+    city="zanzibar",
+    city_en="Zanzibar",
+    city_it="Zanzibar",
+    route_en="From Michenzani through Stone Town to the Old Dispensary, by the cathedrals, the fort and the House of Wonders",
+    route_it="Da Michenzani attraverso Stone Town al Vecchio dispensario, passando per le cattedrali, il forte e il Palazzo delle Meraviglie",
+    outing_en="A walk in Zanzibar",
+    outing_it="Passeggiata a Zanzibar",
+    country="TZ",
+    continent="AFRICA",
+    # The Indian Ocean, from the coastline.
+    coast=True,
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=200,
+    # Forodhani Park, Jamhuri Gardens.
+    parks=["way/1380038636", "way/355486731"],
+    stops=[
+        Stop("zanzibar_michenzani", "Michenzani", "Michenzani", -6.1652, 39.1989,
+             note_en="In Ng'ambo, the other side, the blocks of Michenzani were built with the help of East Germany.",
+             note_it="A Ng'ambo, «l'altra parte», i caseggiati di Michenzani furono costruiti con l'aiuto della Germania Est."),
+        # Source: Wikipedia, Ng'ambo; Wikipedia (de), Sansibar (Stadt). Their decade differs (a plan of 1968, or the 1970s): not said.
+        Stop("zanzibar_stone_town", "Stone Town", "Stone Town", -6.1622, 39.1937,
+             note_en="Across Creek Road begins Stone Town, whose buildings of the 19th century mix Arab, Persian, Indian and European elements; it is a UNESCO World Heritage Site.",
+             note_it="Oltre la Creek Road comincia Stone Town, i cui edifici dell'Ottocento uniscono elementi arabi, persiani, indiani ed europei; è patrimonio dell'umanità UNESCO."),
+        # Source: Wikipedia, Stone Town, and Ng'ambo (Creek Road between them); Wikipedia (it), Stone Town. The stop is by the Darajani market, which has an article in English only.
+        Stop("zanzibar_christ_church", "Christ Church Cathedral", "Cattedrale di Cristo", -6.1629, 39.1926,
+             note_en="Built from 1873 to 1879 where the slave market stood, the cathedral has its altar, it is said, on the spot of the whipping post.",
+             note_it="Costruita dal 1873 al 1879 dove sorgeva il mercato degli schiavi, la cattedrale ha l'altare, si dice, nel punto del palo della fustigazione."),
+        # Source: Wikipedia, Christ Church Cathedral, Zanzibar; Wikipedia (it), Cattedrale di Cristo (Zanzibar).
+        Stop("zanzibar_hamamni", "Hamamni Persian Baths", "Bagni persiani di Hamamni", -6.1622, 39.1910,
+             note_en="Built for Sultan Barghash by Shirazi architects, hence Persian, the public baths were in use until 1920.",
+             note_it="Costruiti per il sultano Barghash da architetti shirazi, da cui il nome di persiani, i bagni pubblici restarono in uso fino al 1920."),
+        # Source: Wikipedia, Hamamni Persian Baths; Wikipedia (it), Bagni persiani di Hamamni. Their years differ (1870 to 1888, or 1850): not said.
+        Stop("zanzibar_st_joseph", "St Joseph's Cathedral", "Cattedrale di San Giuseppe", -6.1628, 39.1888,
+             note_en="Built by French missionaries from 1893 to 1898, the cathedral has twin spires that recall the cathedral of Marseille.",
+             note_it="Costruita da missionari francesi dal 1893 al 1898, la cattedrale ha due campanili che ricordano la cattedrale di Marsiglia."),
+        # Source: Wikipedia, St. Joseph's Cathedral, Zanzibar; Wikipedia (fr), Cathédrale Saint-Joseph de Zanzibar.
+        Stop("zanzibar_mercury_house", "Freddie Mercury's house", "Casa di Freddie Mercury", -6.1622, 39.1878,
+             note_en="Freddie Mercury, born Farrokh Bulsara in Stone Town in 1946, spent his first years here with his family.",
+             note_it="Freddie Mercury, nato Farrokh Bulsara a Stone Town nel 1946, trascorse qui i primi anni con la sua famiglia."),
+        # Source: Wikipedia, Freddie Mercury; Wikipedia (it), Freddie Mercury (with the family's house in Stone Town).
+        Stop("zanzibar_forodhani", "Forodhani Gardens", "Giardini di Forodhani", -6.1604, 39.1888,
+             note_en="Restored by the Aga Khan, the gardens on the sea front fill every evening with a market of Zanzibari dishes.",
+             note_it="Restaurati dall'Aga Khan, i giardini sul lungomare si riempiono ogni sera di un mercato di piatti zanzibarini."),
+        # Source: Wikipedia, Forodhani Gardens; Wikipedia (it), Giardini di Forodhani.
+        Stop("zanzibar_old_fort", "Old Fort", "Forte arabo", -6.1614, 39.1893,
+             note_en="The Omani fort keeps in its courtyard the remains of earlier buildings, among them a Portuguese church.",
+             note_it="Il forte omanita conserva nel cortile i resti di edifici più antichi, tra cui una chiesa portoghese."),
+        # Source: Wikipedia, Old Fort of Zanzibar; Wikipedia (it), Forte arabo di Stone Town. Who built it first, and when, differs: not said.
+        Stop("zanzibar_house_of_wonders", "House of Wonders", "Palazzo delle Meraviglie", -6.1609, 39.1899,
+             note_en="Built in 1883 for Sultan Barghash, the House of Wonders was the first building in East Africa with a lift, and the first in Zanzibar with electricity.",
+             note_it="Costruito nel 1883 per il sultano Barghash, il Palazzo delle Meraviglie fu il primo edificio dell'Africa orientale con un ascensore e il primo di Zanzibar con l'elettricità."),
+        # Source: Wikipedia, House of Wonders; Wikipedia (it), Palazzo delle Meraviglie.
+        Stop("zanzibar_sultans_palace", "Sultan's Palace", "Palazzo del sultano", -6.1600, 39.1906,
+             note_en="The sultan's palace was shelled in the Anglo-Zanzibar War of 1896, held to be the shortest war in history: it lasted less than an hour.",
+             note_it="Il palazzo del sultano fu bombardato nella guerra anglo-zanzibariana del 1896, considerata la più breve della storia: durò meno di un'ora."),
+        # Source: Wikipedia, Anglo-Zanzibar War (38 to 45 minutes); Wikipedia (it), Guerra anglo-zanzibariana (38 minutes): the sentence says less than an hour.
+        Stop("zanzibar_old_dispensary", "Old Dispensary", "Vecchio dispensario", -6.1583, 39.1926,
+             note_en="Begun in 1887 by the merchant Tharia Topan for Queen Victoria's golden jubilee, the building, with its carved balconies, was finished in 1894.",
+             note_it="Iniziato nel 1887 dal mercante Tharia Topan per il giubileo d'oro della regina Vittoria, l'edificio, con i suoi balconi intagliati, fu finito nel 1894."),
+        # Source: Wikipedia, Old Dispensary (Zanzibar); Wikipedia (it), Vecchio dispensario.
+    ],
+)
+
+LUXOR = Walk(
+    id="LUXOR_TEMPLE_KARNAK",
+    city="luxor",
+    city_en="Luxor",
+    city_it="Luxor",
+    route_en="From Luxor Temple to Karnak, along the Avenue of Sphinxes",
+    route_it="Dal tempio di Luxor a Karnak, lungo il viale delle Sfingi",
+    outing_en="A walk in Luxor",
+    outing_it="Passeggiata a Luxor",
+    country="EG",
+    continent="AFRICA",
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=200,
+    # The Nile; Karnak's sacred lake.
+    water=["relation/2063478", "way/26083110"],
+    parks=["way/90384482"],
+    stops=[
+        Stop("luxor_temple", "Luxor Temple", "Tempio di Luxor", 25.6990, 32.6378,
+             note_en="Of the two obelisks Ramesses II raised here, one now stands in Paris; the clock France gave in return is in Cairo's Citadel.",
+             note_it="Dei due obelischi che Ramses II eresse qui, uno si trova oggi a Parigi; l'orologio che la Francia donò in cambio è nella Cittadella del Cairo."),
+        # Source: Wikipedia, Luxor Temple, and Muhammad Ali Mosque (the clock, for the obelisk); Wikipedia (fr), Temple d'Amon (Louxor) (Louis-Philippe's clock, in the mosque's court in Cairo).
+        Stop("luxor_abu_haggag", "Abu Haggag Mosque", "Moschea di Abu al-Haggag", 25.7004, 32.6398,
+             note_en="Built within the temple, the mosque holds the tomb of the sheikh Yusuf Abu al-Haggag, after whom it is named.",
+             note_it="Costruita dentro il tempio, la moschea custodisce la tomba dello sceicco Yusuf Abu al-Haggag, da cui prende il nome."),
+        # Source: Wikipedia, Abu Haggag Mosque; Wikipedia (it), Moschea di Abu al-Hajjaj.
+        Stop("luxor_mummification_museum", "Mummification Museum", "Museo della mummificazione", 25.7025, 32.6399,
+             note_en="The museum is given to the ancient art of mummification, practised not only on people but on many animals.",
+             note_it="Il museo è dedicato all'antica arte della mummificazione, praticata non solo sulle persone ma su molti animali."),
+        # Source: Wikipedia, Mummification Museum; Wikipedia (fr), Musée de la momification de Louxor.
+        Stop("luxor_museum", "Luxor Museum", "Museo di Luxor", 25.7077, 32.6445,
+             note_en="Opened in 1975, the museum shows statues found in a cache beneath Luxor Temple, and a rebuilt wall of Akhenaten's temple at Karnak.",
+             note_it="Aperto nel 1975, il museo espone le statue trovate in un nascondiglio sotto il tempio di Luxor e un muro ricostruito del tempio di Akhenaton a Karnak."),
+        # Source: Wikipedia, Luxor Museum; Wikipedia (fr), Musée de Louxor.
+        Stop("luxor_avenue_of_sphinxes", "Avenue of Sphinxes", "Viale delle Sfingi", 25.7098, 32.6501,
+             note_en="Lined with sphinxes, some with the heads of rams, this avenue joined the temples of Luxor and Karnak.",
+             note_it="Fiancheggiato da sfingi, alcune con la testa di ariete, questo viale univa i templi di Luxor e di Karnak."),
+        # Source: Wikipedia, Avenue of Sphinxes; Wikipedia (fr), Allée des sphinx. Its length and the number of statues differ: not said.
+        Stop("luxor_precinct_of_mut", "Precinct of Mut", "Recinto di Mut", 25.7128, 32.6535,
+             note_en="The precinct of the goddess Mut, south of Karnak, keeps a sacred lake around her temple.",
+             note_it="Il recinto della dea Mut, a sud di Karnak, conserva un lago sacro intorno al suo tempio."),
+        # Source: Wikipedia, Precinct of Mut; Wikipedia (fr), Temple de Mout (Karnak).
+        Stop("luxor_temple_of_khonsu", "Temple of Khonsu", "Tempio di Khonsu", 25.7160, 32.6561,
+             note_en="Built by Ramesses III on the site of an earlier temple, this is an almost complete temple of the New Kingdom.",
+             note_it="Costruito da Ramses III dove sorgeva un tempio più antico, è un tempio del Nuovo Regno quasi completo."),
+        # Source: Wikipedia, Temple of Khonsu; Wikipedia (fr), Temple de Khonsou (Karnak).
+        Stop("luxor_karnak", "Karnak", "Karnak", 25.7186, 32.6573,
+             note_en="Built and rebuilt over some two thousand years, Karnak was the main temple of Amun, at the head of the Theban triad.",
+             note_it="Costruito e ricostruito nell'arco di duemila anni, Karnak era il tempio principale di Amon, a capo della triade tebana."),
+        # Source: Wikipedia, Karnak; Wikipedia (fr), Karnak. The stop is the great hypostyle hall.
+    ],
+)
+
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING, HONG_KONG, SINGAPORE, BANGKOK, KYOTO, HANOI, MELBOURNE, CAIRO, CAPE_TOWN, MARRAKECH, TUNIS, ALEXANDRIA, DAKAR, ADDIS_ABABA, FEZ, ZANZIBAR, LUXOR]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
@@ -3197,6 +3315,7 @@ LOCATORS = {
     "TN": (30.2, 7.5, 37.6, 11.6),
     "SN": (12.2, -17.6, 16.8, -11.3),
     "ET": (3.3, 32.9, 15.0, 48.0),
+    "TZ": (-11.8, 29.3, -0.9, 40.5),
 }
 
 # The continents the Ways page groups the cities by, in its order (the Kotlin enum Continent has

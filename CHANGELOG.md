@@ -42,7 +42,7 @@ All notable changes to Passo are documented here. The format follows
   Alexandria, from the Catacombs of Kom el Shoqafa by Pompey's Pillar, the Library and the
   Corniche to the Citadel of Qaitbay; Dakar, from the Museum of Black Civilisations through the Plateau
   and the Médina, along the Corniche to the University; Addis Ababa, from Meskel Square by the
-  palaces, Arat Kilo and St George's to the Taitu Hotel; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And ten short ones, about 5 km, an hour
+  palaces, Arat Kilo and St George's to the Taitu Hotel; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And twelve short ones, about 5 km, an hour
   or so: Porto, from the cathedral across the Douro to the Serra do Pilar; Amsterdam, from
   Centraal Station along the canals to the Westerkerk; Prague, from the Castle over Charles
   Bridge to Wenceslas Square; Québec, from the Parliament by the Plains of Abraham and the
@@ -51,8 +51,10 @@ All notable changes to Passo are documented here. The format follows
   through Getsemaní to San Felipe; Kyoto, from Kiyomizu-dera by the Yasaka pagoda, Gion and
   Pontochō to the Nishiki market; Hanoi, from the Temple of Literature round Hoàn Kiếm Lake and
   through the Old Quarter to the Long Biên Bridge; and Melbourne, from Flinders Street by the
-  State Library and Parliament to the Royal Exhibition Building; and Fez, from the Royal Palace
-  through the medina by Bou Inania, al-Qarawiyyin and the tanneries to the Andalusian Mosque. Each map has the city's
+  State Library and Parliament to the Royal Exhibition Building; Fez, from the Royal Palace
+  through the medina by Bou Inania, al-Qarawiyyin and the tanneries to the Andalusian Mosque;
+  Zanzibar, from Michenzani through Stone Town by the cathedrals, the fort and the House of Wonders
+  to the Old Dispensary; and Luxor, from Luxor Temple along the Avenue of Sphinxes to Karnak. Each map has the city's
   water, parks and main streets, and, for a city on the sea, its coast, so the area is
   recognisable at a glance. Walked where you are
   in one outing or a few. Each place is told as your steps reach it, with a short vibration and,
