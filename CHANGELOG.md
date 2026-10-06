@@ -40,7 +40,9 @@ All notable changes to Passo are documented here. The format follows
   Jemaa el-Fnaa, the Koutoubia and the Saadian Tombs to the Bahia Palace and Dar Si Said; Tunis, from
   the Clock Tower along Avenue Habib Bourguiba and through the medina to the Belvedere Park;
   Alexandria, from the Catacombs of Kom el Shoqafa by Pompey's Pillar, the Library and the
-  Corniche to the Citadel of Qaitbay; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And ten short ones, about 5 km, an hour
+  Corniche to the Citadel of Qaitbay; Dakar, from the Museum of Black Civilisations through the Plateau
+  and the Médina, along the Corniche to the University; Addis Ababa, from Meskel Square by the
+  palaces, Arat Kilo and St George's to the Taitu Hotel; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And ten short ones, about 5 km, an hour
   or so: Porto, from the cathedral across the Douro to the Serra do Pilar; Amsterdam, from
   Centraal Station along the canals to the Westerkerk; Prague, from the Castle over Charles
   Bridge to Wenceslas Square; Québec, from the Parliament by the Plains of Abraham and the

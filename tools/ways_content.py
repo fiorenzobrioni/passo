@@ -22,7 +22,8 @@ Italian), Kyoto in the English and Japanese, Hanoi in the English and French (or
 the English and German (or French), Cairo in the English and French (or Arabic, German, Italian), Cape
 Town in the English and German (or Dutch, French, Afrikaans), Marrakech in the English and French, Fez in
 the English and French (or Italian, Spanish, German), Tunis in the English and French (or Arabic,
-Italian), Alexandria in the English and French (or Arabic).
+Italian), Alexandria in the English and French (or Arabic), Dakar in the English and
+French (or German), Addis Ababa in the English and French (or Italian).
 """
 
 from dataclasses import dataclass, field
@@ -2967,6 +2968,145 @@ ALEXANDRIA = Walk(
     ],
 )
 
+DAKAR = Walk(
+    id="DAKAR_MUSEUM_UNIVERSITY",
+    city="dakar",
+    city_en="Dakar",
+    city_it="Dakar",
+    route_en="From the Museum of Black Civilisations to the University, by the Plateau, the Médina and the Corniche",
+    route_it="Dal Museo delle civiltà nere all'Università, passando per il Plateau, la Médina e la Corniche",
+    outing_en="A walk in Dakar",
+    outing_it="Passeggiata a Dakar",
+    country="SN",
+    continent="AFRICA",
+    # The Atlantic, from the coastline.
+    coast=True,
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=200,
+    # The Place de l'Indépendance, the Institut français's gardens.
+    parks=["way/27811247", "way/116541061", "relation/7004021"],
+    stops=[
+        Stop("dakar_black_civilisations", "Museum of Black Civilisations", "Museo delle civiltà nere", 14.6768, -17.4352,
+             note_en="Imagined by Léopold Sédar Senghor, the museum tells the histories and cultures of Black people everywhere.",
+             note_it="Immaginato da Léopold Sédar Senghor, il museo racconta le storie e le culture dei popoli neri di tutto il mondo."),
+        # Source: Wikipedia, Museum of Black Civilisations; Wikipedia (fr), Musée des civilisations noires. Its opening date is a template in one: not said.
+        Stop("dakar_station", "Dakar station", "Stazione di Dakar", 14.6760, -17.4330,
+             note_en="In front of the station stand Demba and Dupont, a Senegalese tirailleur and a French soldier, statues unveiled in 1923.",
+             note_it="Davanti alla stazione stanno Demba e Dupont, un tirailleur senegalese e un soldato francese, statue inaugurate nel 1923."),
+        # Source: Wikipedia (fr), Monument aux morts Demba et Dupont; Wikipedia (de), Monument Demba et Dupont. Kermel market and the Place de l'Indépendance, walked by, have no article of their own.
+        Stop("dakar_palace", "Presidential Palace", "Palazzo presidenziale", 14.6638, -17.4335,
+             note_en="Ordered in 1902 for the governor-general of French West Africa, who until then lived in Saint-Louis, the palace is now the home of Senegal's president.",
+             note_it="Voluto nel 1902 per il governatore generale dell'Africa occidentale francese, che fino ad allora risiedeva a Saint-Louis, il palazzo è oggi la residenza del presidente del Senegal."),
+        # Source: Wikipedia, Palace of the Republic, Dakar; Wikipedia (fr), Palais de la République (Sénégal).
+        Stop("dakar_national_assembly", "National Assembly", "Assemblea nazionale", 14.6626, -17.4385,
+             note_en="Senegal's single chamber, the National Assembly, sits here; it twice had a Senate beside it, from 1999 to 2001 and from 2007 to 2012.",
+             note_it="Qui siede l'Assemblea nazionale, la camera unica del Senegal; due volte ebbe accanto un Senato, dal 1999 al 2001 e dal 2007 al 2012."),
+        # Source: Wikipedia, National Assembly (Senegal); Wikipedia (fr), Assemblée nationale (Sénégal).
+        Stop("dakar_ifan_museum", "Théodore Monod Museum", "Museo Théodore Monod", 14.6637, -17.4383,
+             note_en="Part of the IFAN institute, the museum of African art has borne the name of the naturalist Théodore Monod since 2007.",
+             note_it="Parte dell'istituto IFAN, il museo d'arte africana porta dal 2007 il nome del naturalista Théodore Monod."),
+        # Source: Wikipedia, Théodore Monod African Art Museum; Wikipedia (fr), Musée Théodore-Monod d'Art africain. When it became a museum differs: not said.
+        Stop("dakar_cathedral", "Cathedral of Our Lady of Victories", "Cattedrale di Nostra Signora delle Vittorie", 14.6654, -17.4376,
+             note_en="Seat of the archbishop of Dakar, the cathedral was consecrated by Cardinal Jean Verdier, archbishop of Paris.",
+             note_it="Sede dell'arcivescovo di Dakar, la cattedrale fu consacrata dal cardinale Jean Verdier, arcivescovo di Parigi."),
+        # Source: Wikipedia, Our Lady of Victories Cathedral, Dakar; Wikipedia (fr), Cathédrale du Souvenir africain de Dakar.
+        Stop("dakar_sorano", "Daniel Sorano Theatre", "Teatro Daniel Sorano", 14.6663, -17.4395,
+             note_en="Opened in 1965, Senegal's national theatre is named after the French-Senegalese actor Daniel Sorano.",
+             note_it="Inaugurato nel 1965, il teatro nazionale del Senegal porta il nome dell'attore franco-senegalese Daniel Sorano."),
+        # Source: Wikipedia, Daniel Sorano National Theater; Wikipedia (fr), Théâtre national Daniel-Sorano. The Sandaga market, walked by, has no article.
+        Stop("dakar_grand_mosque", "Grand Mosque", "Grande Moschea", 14.6782, -17.4425,
+             note_en="Built by Moroccan and French architects, the Grand Mosque was inaugurated in 1964 by King Hassan II of Morocco and President Senghor.",
+             note_it="Costruita da architetti marocchini e francesi, la Grande Moschea fu inaugurata nel 1964 dal re del Marocco Hassan II e dal presidente Senghor."),
+        # Source: Wikipedia, Grand Mosque of Dakar; Wikipedia (fr), Grande mosquée de Dakar.
+        Stop("dakar_iba_mar_diop", "Iba Mar Diop Stadium", "Stadio Iba Mar Diop", 14.6793, -17.4468,
+             note_en="Renovated for the 2026 Youth Olympic Games, the stadium is used by two of Dakar's football clubs, ASC Jaraaf and US Gorée.",
+             note_it="Rinnovato per i Giochi olimpici giovanili del 2026, lo stadio è usato da due squadre di calcio di Dakar, l'ASC Jaraaf e l'US Gorée."),
+        # Source: Wikipedia, Stade Iba Mar Diop; Wikipedia (fr), Stade Iba-Mar-Diop.
+        Stop("dakar_medina", "Médina", "Médina", 14.6765, -17.4520,
+             note_en="The Médina was founded by the French colonial authorities in 1914; the singer Youssou N'Dour was born here.",
+             note_it="La Médina fu fondata dalle autorità coloniali francesi nel 1914; qui è nato il cantante Youssou N'Dour."),
+        # Source: Wikipedia, Médina, Dakar; Wikipedia (fr), Médina (Dakar), which says why: a plague, the Africans of the Plateau moved out (in one only).
+        Stop("dakar_soumbedioune", "Soumbédioune", "Soumbédioune", 14.6769, -17.4578,
+             note_en="On the Corniche, beside the Médina, Soumbédioune's craft market is one of the best known in Dakar.",
+             note_it="Sulla Corniche, accanto alla Médina, il mercato artigiano di Soumbédioune è uno dei più noti di Dakar."),
+        # Source: Wikipedia, Médina, Dakar, and Wikipedia (fr), Médina (Dakar), on the market; Wikipedia (fr), Village artisanal de Soumbedioune, on the Corniche.
+        Stop("dakar_ucad", "Cheikh Anta Diop University", "Università Cheikh Anta Diop", 14.6850, -17.4625,
+             note_en="Grown from a medical school of French West Africa, the university bears the name of the historian Cheikh Anta Diop.",
+             note_it="Nata da una scuola di medicina dell'Africa occidentale francese, l'università porta il nome dello storico Cheikh Anta Diop."),
+        # Source: Wikipedia, Cheikh Anta Diop University; Wikipedia (fr), Université Cheikh-Anta-Diop.
+    ],
+)
+
+ADDIS_ABABA = Walk(
+    id="ADDIS_ABABA_MESKEL_TAITU",
+    city="addis_ababa",
+    city_en="Addis Ababa",
+    city_it="Addis Abeba",
+    route_en="From Meskel Square to the Taitu Hotel, by the palaces, Arat Kilo and St George's",
+    route_it="Da piazza Meskel all'Hotel Taitu, passando per i palazzi, Arat Kilo e San Giorgio",
+    outing_en="A walk in Addis Ababa",
+    outing_it="Passeggiata ad Addis Abeba",
+    country="ET",
+    continent="AFRICA",
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=200,
+    # Unity Park, in Menelik's palace; Sheger Park; Africa, Addis Ababa and Ethiopia parks.
+    parks=[
+        "relation/16249545", "way/906864463", "way/1049534731", "way/24254768", "way/50833472",
+        "way/50833473", "way/1534984980",
+    ],
+    stops=[
+        Stop("addis_ababa_meskel_square", "Meskel Square", "Piazza Meskel", 9.0110, 38.7605,
+             note_en="The square takes its name from Meskel, the feast of the finding of the True Cross, when a great bonfire is lit here.",
+             note_it="La piazza prende il nome da Meskel, la festa del ritrovamento della Vera Croce, quando qui si accende un grande falò."),
+        # Source: Wikipedia, Meskel Square; Wikipedia (fr), Mesqel adebabay.
+        Stop("addis_ababa_red_terror", "Red Terror Martyrs' Memorial Museum", "Museo dei martiri del Terrore rosso", 9.0102, 38.7625,
+             note_en="Opened in 2010, the museum remembers the victims of the Red Terror under the Derg, with their skulls, bones and photographs.",
+             note_it="Aperto nel 2010, il museo ricorda le vittime del Terrore rosso sotto il Derg, con i loro teschi, le ossa e le fotografie."),
+        # Source: Wikipedia, Red Terror Martyrs' Memorial Museum; Wikipedia (it), Museo memoriale dei martiri del Terrore rosso.
+        Stop("addis_ababa_africa_hall", "Africa Hall", "Africa Hall", 9.0160, 38.7632,
+             note_en="Built in 1961, Africa Hall holds Afewerk Tekle's best-known work, the stained-glass triptych Total Liberation of Africa.",
+             note_it="Costruita nel 1961, l'Africa Hall custodisce l'opera più famosa di Afewerk Tekle, il trittico di vetrate Liberazione totale dell'Africa."),
+        # Source: Wikipedia, Africa Hall; Wikipedia (fr), Africa Hall. The founding of the OAU here, in 1963, is in one only: not said.
+        Stop("addis_ababa_national_palace", "National Palace", "Palazzo nazionale", 9.0163, 38.7604,
+             note_en="Built in 1955 for the silver jubilee of Haile Selassie, the palace was his home until the coup of 1974, when he was deposed here.",
+             note_it="Costruito nel 1955 per il giubileo d'argento di Hailé Selassié, il palazzo fu la sua casa fino al colpo di stato del 1974, quando qui fu deposto."),
+        # Source: Wikipedia, National Palace, Addis Ababa; Wikipedia (fr), Palais national (Éthiopie).
+        Stop("addis_ababa_menelik_palace", "Menelik Palace", "Palazzo di Menelik", 9.0228, 38.7612,
+             note_en="The Gebbi, seat of Ethiopia's emperors, keeps the mausoleum of Menelik II, of Empress Taytu and of his daughter Empress Zewditu.",
+             note_it="Il Gebbi, sede degli imperatori d'Etiopia, custodisce il mausoleo di Menelik II, dell'imperatrice Taytu e di sua figlia, l'imperatrice Zewditu."),
+        # Source: Wikipedia, Menelik Palace; Wikipedia (fr), Palais Ménélik. Unity Park, as its grounds are called, has an article in English only.
+        Stop("addis_ababa_holy_trinity", "Holy Trinity Cathedral", "Cattedrale della Santissima Trinità", 9.0308, 38.7660,
+             note_en="Finished in 1942 after the liberation from Italian occupation, the cathedral holds, in its north transept, the tombs of Haile Selassie and Empress Menen.",
+             note_it="Finita nel 1942 dopo la liberazione dall'occupazione italiana, la cattedrale custodisce nel transetto nord le tombe di Hailé Selassié e dell'imperatrice Menen."),
+        # Source: Wikipedia, Holy Trinity Cathedral, Addis Ababa; Wikipedia (fr), Cathédrale de la Sainte-Trinité d'Addis-Abeba.
+        Stop("addis_ababa_arat_kilo", "Arat Kilo", "Arat Kilo", 9.0329, 38.7634,
+             note_en="The square's name is a date, 27 Miyazya, the 5 May on which Addis Ababa was freed in 1941; the monument in the middle celebrates the liberation.",
+             note_it="Il nome della piazza è una data, il 27 miyazya, il 5 maggio in cui Addis Abeba fu liberata nel 1941; il monumento al centro celebra la liberazione."),
+        # Source: Wikipedia, Meyazia 27 Square; Wikipedia (fr), Miyazya 27 adebabay.
+        Stop("addis_ababa_national_museum", "National Museum", "Museo nazionale", 9.0380, 38.7619,
+             note_en="Among the museum's fossils are Lucy, a partial skeleton of Australopithecus afarensis, and Selam, found between 2000 and 2004.",
+             note_it="Tra i fossili del museo ci sono Lucy, scheletro parziale di un Australopithecus afarensis, e Selam, trovata tra il 2000 e il 2004."),
+        # Source: Wikipedia, National Museum of Ethiopia; Wikipedia (it), Museo nazionale dell'Etiopia. The French says neither.
+        Stop("addis_ababa_yekatit_12", "Yekatit 12 Monument", "Monumento allo Yekatit 12", 9.0438, 38.7612,
+             note_en="The obelisk remembers the massacre that Italian forces began on Yekatit 12, 19 February 1937.",
+             note_it="L'obelisco ricorda il massacro che le forze italiane cominciarono il 12 yekatit, il 19 febbraio 1937."),
+        # Source: Wikipedia, Yekatit 12 monument; Wikipedia (fr), Yekatit 12.
+        Stop("addis_ababa_guenete_leul", "Guenete Leul Palace", "Palazzo Guenete Leul", 9.0467, 38.7576,
+             note_en="Built for Haile Selassie in the 1930s, the Paradise of Princes was the scene of the failed coup of 1960.",
+             note_it="Costruito per Hailé Selassié negli anni Trenta, il Paradiso dei principi fu teatro del tentato colpo di stato del 1960."),
+        # Source: Wikipedia, Guenete Leul Palace; Wikipedia (fr), Palais Guenete Leul. Its years differ (1930 to 1932, or 1934): the decade is said. Its Ethnological Museum has an article in English only.
+        Stop("addis_ababa_st_george", "St George's Cathedral", "Cattedrale di San Giorgio", 9.0370, 38.7520,
+             note_en="Built to celebrate the victory over the Italians at Adwa, in 1896, this octagonal cathedral is where Haile Selassie was crowned.",
+             note_it="Costruita per celebrare la vittoria sugli italiani ad Adua, nel 1896, questa cattedrale ottagonale è dove fu incoronato Hailé Selassié."),
+        # Source: Wikipedia, St. George's Cathedral, Addis Ababa; Wikipedia (fr), Cathédrale Saint-Georges d'Addis-Abeba.
+        Stop("addis_ababa_taitu_hotel", "Taitu Hotel", "Hotel Taitu", 9.0304, 38.7541,
+             note_en="Founded by Empress Taytu, Menelik II's wife, to lodge foreign guests, this is the oldest hotel in Addis Ababa.",
+             note_it="Fondato dall'imperatrice Taytu, moglie di Menelik II, per accogliere gli ospiti stranieri, è l'albergo più antico di Addis Abeba."),
+        # Source: Wikipedia, Taitu Hotel (the oldest in Ethiopia); Wikipedia (it), Taitu Hotel (in Addis Ababa). Its year differs (1905 or 1907): not said. The City Hall, nearby, has an article in English only.
+    ],
+)
+
 FEZ = Walk(
     id="FEZ_PALACE_ANDALUSIANS",
     city="fez",
@@ -3022,7 +3162,7 @@ FEZ = Walk(
     ],
 )
 
-WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING, HONG_KONG, SINGAPORE, BANGKOK, KYOTO, HANOI, MELBOURNE, CAIRO, CAPE_TOWN, MARRAKECH, TUNIS, ALEXANDRIA, FEZ]
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING, HONG_KONG, SINGAPORE, BANGKOK, KYOTO, HANOI, MELBOURNE, CAIRO, CAPE_TOWN, MARRAKECH, TUNIS, ALEXANDRIA, DAKAR, ADDIS_ABABA, FEZ]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
@@ -3055,6 +3195,8 @@ LOCATORS = {
     "ZA": (-34.9, 16.4, -22.1, 32.9),
     "MA": (27.6, -13.3, 36.0, -1.0),
     "TN": (30.2, 7.5, 37.6, 11.6),
+    "SN": (12.2, -17.6, 16.8, -11.3),
+    "ET": (3.3, 32.9, 15.0, 48.0),
 }
 
 # The continents the Ways page groups the cities by, in its order (the Kotlin enum Continent has

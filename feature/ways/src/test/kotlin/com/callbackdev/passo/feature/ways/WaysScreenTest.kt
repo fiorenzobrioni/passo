@@ -240,7 +240,7 @@ class WaysScreenTest {
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.continent(Continent.ASIA_OCEANIA)))
         compose.onNodeWithTag(WaysTags.continent(Continent.ASIA_OCEANIA)).assert(hasText("10 cities", substring = true))
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.continent(Continent.AFRICA)))
-        compose.onNodeWithTag(WaysTags.continent(Continent.AFRICA)).assert(hasText("6 cities", substring = true))
+        compose.onNodeWithTag(WaysTags.continent(Continent.AFRICA)).assert(hasText("8 cities", substring = true))
         compose.onNodeWithTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)).assertDoesNotExist()
         snapshot("ways_cities")
         compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).performClick()
@@ -313,6 +313,8 @@ class WaysScreenTest {
                 WayId.MARRAKECH_MAJORELLE_SI_SAID,
                 WayId.TUNIS_CLOCK_BELVEDERE,
                 WayId.ALEXANDRIA_SHOQAFA_QAITBAY,
+                WayId.DAKAR_MUSEUM_UNIVERSITY,
+                WayId.ADDIS_ABABA_MESKEL_TAITU,
                 WayId.FEZ_PALACE_ANDALUSIANS,
             ),
         )
@@ -367,7 +369,7 @@ class WaysScreenTest {
     @Test
     fun `Africa's map, from Cairo to Cape Town`() {
         showContinent(Continent.AFRICA)
-        compose.onNodeWithContentDescription("Africa on the map: 6 cities.").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Africa on the map: 8 cities.").assertIsDisplayed()
         snapshot("continent_africa")
     }
 
@@ -715,6 +717,30 @@ class WaysScreenTest {
         )
         compose.onNodeWithText("to the Citadel of Qaitbay", substring = true).assertExists()
         snapshot("walk_alexandria_dark")
+    }
+
+    @Test
+    fun `Dakar's walk, from the Museum of Black Civilisations by the Médina to the University`() {
+        showWay(WayId.DAKAR_MUSEUM_UNIVERSITY, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText(
+            "From the Museum of Black Civilisations to the University",
+            substring = true,
+        ).assertExists()
+        snapshot("walk_dakar")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Dakar station"))
+        compose.onNodeWithText("Demba and Dupont", substring = true).assertExists()
+        snapshot("walk_dakar_places")
+    }
+
+    @Test
+    fun `Addis Ababa's walk, from Meskel Square by Arat Kilo to the Taitu Hotel, in the dark`() {
+        showWay(
+            WayId.ADDIS_ABABA_MESKEL_TAITU,
+            state = WaysSamples.state(walks = emptyList(), live = null),
+            dark = true,
+        )
+        compose.onNodeWithText("From Meskel Square to the Taitu Hotel", substring = true).assertExists()
+        snapshot("walk_addis_ababa_dark")
     }
 
     @Test
