@@ -2472,11 +2472,15 @@ HANOI = Walk(
     continent="ASIA_OCEANIA",
     # A short walk (about 5 km). Hoàn Kiếm Lake; the Red River.
     water=["relation/198437", "relation/6907107"],
+    # The Long Biên Bridge's deck is mapped as a residential street, and so are many of the Old
+    # Quarter's: the longer ones drawn, so the bridge reads as one over the river.
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=400,
     parks=[
         "relation/21390321", "relation/21422526", "relation/21422527", "way/218414273", "relation/14048553",
     ],
     stops=[
-        Stop("hanoi_van_mieu", "Temple of Literature", "Tempio della Letteratura", 21.0274, 105.8357,
+        Stop("hanoi_van_mieu", "Temple of Literature", "Tempio della Letteratura", 21.0285, 105.837,
              note_en="Founded in 1070 for Confucius, the temple keeps stelae on stone turtles with the names of the scholars who passed the royal exams.",
              note_it="Fondato nel 1070 in onore di Confucio, il tempio conserva stele su tartarughe di pietra con i nomi dei dotti promossi agli esami reali."),
         # Source: Wikipedia, Temple of Literature, Hanoi; Wikipedia (fr), Temple de la Littérature de Hanoï. When its teaching ended differs (1779 or 1915): not said.
@@ -2504,10 +2508,11 @@ HANOI = Walk(
              note_en="Built by the French in place of two older markets, it was nearly destroyed by fire in 1994.",
              note_it="Costruito dai francesi al posto di due mercati più antichi, fu quasi distrutto da un incendio nel 1994."),
         # Source: Wikipedia, Đồng Xuân Market; Wikipedia (fr), Marché Đồng Xuân.
-        Stop("hanoi_long_bien", "Long Biên Bridge", "Ponte Long Biên", 21.0426, 105.8563,
+        Stop("hanoi_long_bien", "Long Biên Bridge", "Ponte Long Biên", 21.044, 105.8605,
              note_en="Built by Daydé & Pillé of Paris and first named after Paul Doumer, the bridge carries the railway over the Red River.",
              note_it="Costruito dalla ditta parigina Daydé & Pillé e chiamato all'inizio come Paul Doumer, il ponte porta la ferrovia oltre il fiume Rosso."),
         # Source: Wikipedia, Long Biên Bridge; Wikipedia (fr), Pont Long Biên. The year it was finished differs (1902 or 1903): not said.
+        # The stop is on the bridge, over the river, so the walk ends where the map shows a bridge.
     ],
 )
 
@@ -2524,10 +2529,12 @@ MELBOURNE = Walk(
     continent="ASIA_OCEANIA",
     # A short walk (about 5 km). The Yarra.
     water=["relation/954522"],
-    # The gardens along the Yarra, the Treasury and Fitzroy Gardens, the Carlton Gardens.
+    # The gardens along the Yarra, the Treasury and Fitzroy Gardens, the Carlton Gardens; the
+    # smaller ones the walk passes: Parliament's gardens, Gordon Reserve, the squares to the north.
     parks=[
         "way/46330961", "way/23909867", "way/24593719", "way/24593825", "way/4817097", "way/4817020",
-        "relation/6614802",
+        "relation/6614802", "way/222848213", "way/27783990", "way/46142201", "way/510918356",
+        "way/32943432", "way/154434398", "way/177499279", "way/4817077",
     ],
     stops=[
         Stop("melbourne_flinders_street", "Flinders Street Station", "Stazione di Flinders Street", -37.818, 144.9669,
