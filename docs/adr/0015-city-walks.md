@@ -29,7 +29,11 @@ moves with the distance their steps measure.
    Cusco (9.4 km, 12), whose map has parks and no water; then the first short walks (decision
    10): Porto (5.3 km, 10), Amsterdam (5.2 km, 9) and Prague (5.2 km, 9); then, with the cities
    grouped by continent (decision 12), Berlin (10.5 km, 13) and Vienna (9.7 km, 13), which
-   bring Europe to ten. `fetch` with walk ids fetches only those walks, so a city is added
+   bring Europe to ten; then, opening Asia and Oceania, Tokyo (11.6 km, 14) and Sydney
+   (10.1 km, 14); then Seoul (11.1 km, 12) and Beijing (10.6 km, 15, through the Forbidden City); then Hong Kong
+   (11.0 km, 15) and Singapore (8.4 km, 14); then Bangkok (9.8 km, 12) and Kyoto, short
+   (4.2 km, 10); then Hanoi (5.9 km, 8) and Melbourne (4.6 km, 9), short, which bring Asia and
+   Oceania to ten. `fetch` with walk ids fetches only those walks, so a city is added
    without moving the others with the map's edits since.
 3. **The city behind the line is OpenStreetMap too**: the water (the Thames, the Darsena) as
    areas, the canals (the Navigli) as lines drawn as wide as they are (`riverWidthMeters`, with
@@ -135,7 +139,8 @@ moves with the distance their steps measure.
     "Europe on the map: 8 cities, 1 under way, 1 walked."
     Planned (owner): four continents of about ten cities, about seven of 10 km and three of
     5 km, the city still choosing its length (decision 10). Proposed, for the owner to confirm:
-    Europe and the Americas now, then Asia and Oceania, and Africa. Cities only, for now: a famous park belongs to its city's walk
+    Europe and the Americas now, then Asia and Oceania (begun with Tokyo and Sydney, 6 Oct 2026,
+    its frame from Mumbai to New Zealand), and Africa. Cities only, for now: a famous park belongs to its city's walk
     (the Retiro is Madrid's), while a mountain path or a natural site would need a map of terrain
     the script does not draw, and would blur what a city walk is. The ways are not grouped: five,
     all in Europe, read best as one list. Many of the cities planned are on the sea (Barcelona,

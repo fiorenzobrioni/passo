@@ -77,6 +77,7 @@
     <!-- Le città per continente (ADR 0015 decisione 12): una riga per continente, la sua pagina con la mappa. -->
     <string name="ways_continent_europe">Europa</string>
     <string name="ways_continent_americas">Americhe</string>
+    <string name="ways_continent_asia_oceania">Asia e Oceania</string>
     <plurals name="ways_continent_cities">
         <item quantity="one">%1$d città</item>
         <item quantity="many">%1$d città</item>

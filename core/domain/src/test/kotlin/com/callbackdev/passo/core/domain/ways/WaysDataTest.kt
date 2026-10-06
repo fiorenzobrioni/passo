@@ -45,6 +45,16 @@ class WaysDataTest {
                 WayId.QUEBEC_PARLEMENT_BASSE_VILLE,
                 WayId.HAVANA_CAPITOLIO_PAULA,
                 WayId.CARTAGENA_RELOJ_SAN_FELIPE,
+                WayId.TOKYO_SENSOJI_PALACE,
+                WayId.SYDNEY_LUNA_PARK_GARDEN,
+                WayId.SEOUL_GWANGHWAMUN_NAMSAN,
+                WayId.BEIJING_TIANANMEN_YONGHE,
+                WayId.HONG_KONG_VICTORIA_WESTERN,
+                WayId.SINGAPORE_CHINATOWN_GARDENS,
+                WayId.BANGKOK_SWING_ARUN,
+                WayId.KYOTO_KIYOMIZU_NISHIKI,
+                WayId.HANOI_VAN_MIEU_LONG_BIEN,
+                WayId.MELBOURNE_FLINDERS_EXHIBITION,
             )
             .inOrder()
         // One walk a city for now (PLANNING.md §11 Phase 11, later).
@@ -52,7 +62,8 @@ class WaysDataTest {
             .containsExactly(
                 "milan", "rome", "paris", "london", "madrid", "berlin", "vienna", "porto", "amsterdam", "prague",
                 "lima", "cusco", "new_york", "rio", "mexico_city", "buenos_aires", "san_francisco", "quebec",
-                "havana", "cartagena",
+                "havana", "cartagena", "tokyo", "sydney", "seoul", "beijing", "hong_kong", "singapore", "bangkok",
+                "kyoto", "hanoi", "melbourne",
             )
             .inOrder()
     }
@@ -87,6 +98,9 @@ class WaysDataTest {
                 WayId.QUEBEC_PARLEMENT_BASSE_VILLE,
                 WayId.HAVANA_CAPITOLIO_PAULA,
                 WayId.CARTAGENA_RELOJ_SAN_FELIPE,
+                WayId.KYOTO_KIYOMIZU_NISHIKI,
+                WayId.HANOI_VAN_MIEU_LONG_BIEN,
+                WayId.MELBOURNE_FLINDERS_EXHIBITION,
             )
     }
 
@@ -171,6 +185,12 @@ class WaysDataTest {
             "havana", "cartagena",
         )
             .inOrder()
+        assertThat(Ways.walksIn(Continent.ASIA_OCEANIA).map { it.id.city })
+            .containsExactly(
+                "tokyo", "sydney", "seoul", "beijing", "hong_kong", "singapore", "bangkok", "kyoto", "hanoi",
+                "melbourne",
+            )
+            .inOrder()
     }
 
     @Test
@@ -204,6 +224,7 @@ class WaysDataTest {
                 WayId.SAN_FRANCISCO_FERRY_PALACE,
                 WayId.HAVANA_CAPITOLIO_PAULA,
                 WayId.CARTAGENA_RELOJ_SAN_FELIPE,
+                WayId.HONG_KONG_VICTORIA_WESTERN,
             )
         for (id in coastal) {
             val map = Ways.of(id).map

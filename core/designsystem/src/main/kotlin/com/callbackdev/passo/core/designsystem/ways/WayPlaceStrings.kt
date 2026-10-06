@@ -33,6 +33,16 @@ fun wayNameRes(id: WayId): Int = when (id) {
     WayId.QUEBEC_PARLEMENT_BASSE_VILLE -> R.string.way_name_quebec_parlement_basse_ville
     WayId.HAVANA_CAPITOLIO_PAULA -> R.string.way_name_havana_capitolio_paula
     WayId.CARTAGENA_RELOJ_SAN_FELIPE -> R.string.way_name_cartagena_reloj_san_felipe
+    WayId.TOKYO_SENSOJI_PALACE -> R.string.way_name_tokyo_sensoji_palace
+    WayId.SYDNEY_LUNA_PARK_GARDEN -> R.string.way_name_sydney_luna_park_garden
+    WayId.SEOUL_GWANGHWAMUN_NAMSAN -> R.string.way_name_seoul_gwanghwamun_namsan
+    WayId.BEIJING_TIANANMEN_YONGHE -> R.string.way_name_beijing_tiananmen_yonghe
+    WayId.HONG_KONG_VICTORIA_WESTERN -> R.string.way_name_hong_kong_victoria_western
+    WayId.SINGAPORE_CHINATOWN_GARDENS -> R.string.way_name_singapore_chinatown_gardens
+    WayId.BANGKOK_SWING_ARUN -> R.string.way_name_bangkok_swing_arun
+    WayId.KYOTO_KIYOMIZU_NISHIKI -> R.string.way_name_kyoto_kiyomizu_nishiki
+    WayId.HANOI_VAN_MIEU_LONG_BIEN -> R.string.way_name_hanoi_van_mieu_long_bien
+    WayId.MELBOURNE_FLINDERS_EXHIBITION -> R.string.way_name_melbourne_flinders_exhibition
 }
 
 /** Where a way runs, in one line. */
@@ -63,6 +73,16 @@ fun wayRouteRes(id: WayId): Int = when (id) {
     WayId.QUEBEC_PARLEMENT_BASSE_VILLE -> R.string.way_route_quebec_parlement_basse_ville
     WayId.HAVANA_CAPITOLIO_PAULA -> R.string.way_route_havana_capitolio_paula
     WayId.CARTAGENA_RELOJ_SAN_FELIPE -> R.string.way_route_cartagena_reloj_san_felipe
+    WayId.TOKYO_SENSOJI_PALACE -> R.string.way_route_tokyo_sensoji_palace
+    WayId.SYDNEY_LUNA_PARK_GARDEN -> R.string.way_route_sydney_luna_park_garden
+    WayId.SEOUL_GWANGHWAMUN_NAMSAN -> R.string.way_route_seoul_gwanghwamun_namsan
+    WayId.BEIJING_TIANANMEN_YONGHE -> R.string.way_route_beijing_tiananmen_yonghe
+    WayId.HONG_KONG_VICTORIA_WESTERN -> R.string.way_route_hong_kong_victoria_western
+    WayId.SINGAPORE_CHINATOWN_GARDENS -> R.string.way_route_singapore_chinatown_gardens
+    WayId.BANGKOK_SWING_ARUN -> R.string.way_route_bangkok_swing_arun
+    WayId.KYOTO_KIYOMIZU_NISHIKI -> R.string.way_route_kyoto_kiyomizu_nishiki
+    WayId.HANOI_VAN_MIEU_LONG_BIEN -> R.string.way_route_hanoi_van_mieu_long_bien
+    WayId.MELBOURNE_FLINDERS_EXHIBITION -> R.string.way_route_melbourne_flinders_exhibition
 }
 
 /** A walk's outing, as History and Today name it; null for a way, which is not an outing. */
@@ -88,6 +108,16 @@ fun walkOutingRes(id: WayId): Int? = when (id) {
     WayId.QUEBEC_PARLEMENT_BASSE_VILLE -> R.string.way_outing_quebec_parlement_basse_ville
     WayId.HAVANA_CAPITOLIO_PAULA -> R.string.way_outing_havana_capitolio_paula
     WayId.CARTAGENA_RELOJ_SAN_FELIPE -> R.string.way_outing_cartagena_reloj_san_felipe
+    WayId.TOKYO_SENSOJI_PALACE -> R.string.way_outing_tokyo_sensoji_palace
+    WayId.SYDNEY_LUNA_PARK_GARDEN -> R.string.way_outing_sydney_luna_park_garden
+    WayId.SEOUL_GWANGHWAMUN_NAMSAN -> R.string.way_outing_seoul_gwanghwamun_namsan
+    WayId.BEIJING_TIANANMEN_YONGHE -> R.string.way_outing_beijing_tiananmen_yonghe
+    WayId.HONG_KONG_VICTORIA_WESTERN -> R.string.way_outing_hong_kong_victoria_western
+    WayId.SINGAPORE_CHINATOWN_GARDENS -> R.string.way_outing_singapore_chinatown_gardens
+    WayId.BANGKOK_SWING_ARUN -> R.string.way_outing_bangkok_swing_arun
+    WayId.KYOTO_KIYOMIZU_NISHIKI -> R.string.way_outing_kyoto_kiyomizu_nishiki
+    WayId.HANOI_VAN_MIEU_LONG_BIEN -> R.string.way_outing_hanoi_van_mieu_long_bien
+    WayId.MELBOURNE_FLINDERS_EXHIBITION -> R.string.way_outing_melbourne_flinders_exhibition
     else -> null
 }
 
@@ -112,7 +142,34 @@ fun placeNameRes(key: String): Int = when (key) {
     "astorga" -> R.string.way_place_astorga
     "aulla" -> R.string.way_place_aulla
     "badolo" -> R.string.way_place_badolo
+    "bangkok_democracy_monument" -> R.string.way_place_bangkok_democracy_monument
+    "bangkok_giant_swing" -> R.string.way_place_bangkok_giant_swing
+    "bangkok_golden_mount" -> R.string.way_place_bangkok_golden_mount
+    "bangkok_khaosan" -> R.string.way_place_bangkok_khaosan
+    "bangkok_loha_prasat" -> R.string.way_place_bangkok_loha_prasat
+    "bangkok_memorial_bridge" -> R.string.way_place_bangkok_memorial_bridge
+    "bangkok_national_museum" -> R.string.way_place_bangkok_national_museum
+    "bangkok_phra_sumen" -> R.string.way_place_bangkok_phra_sumen
+    "bangkok_wat_arun" -> R.string.way_place_bangkok_wat_arun
+    "bangkok_wat_mahathat" -> R.string.way_place_bangkok_wat_mahathat
+    "bangkok_wat_pho" -> R.string.way_place_bangkok_wat_pho
+    "bangkok_wat_phra_kaew" -> R.string.way_place_bangkok_wat_phra_kaew
     "barcelos" -> R.string.way_place_barcelos
+    "beijing_bell_tower" -> R.string.way_place_beijing_bell_tower
+    "beijing_divine_might" -> R.string.way_place_beijing_divine_might
+    "beijing_drum_tower" -> R.string.way_place_beijing_drum_tower
+    "beijing_heavenly_purity" -> R.string.way_place_beijing_heavenly_purity
+    "beijing_jingshan" -> R.string.way_place_beijing_jingshan
+    "beijing_lama_temple" -> R.string.way_place_beijing_lama_temple
+    "beijing_meridian_gate" -> R.string.way_place_beijing_meridian_gate
+    "beijing_nanluoguxiang" -> R.string.way_place_beijing_nanluoguxiang
+    "beijing_nine_dragon_wall" -> R.string.way_place_beijing_nine_dragon_wall
+    "beijing_prince_gong" -> R.string.way_place_beijing_prince_gong
+    "beijing_shichahai" -> R.string.way_place_beijing_shichahai
+    "beijing_supreme_harmony" -> R.string.way_place_beijing_supreme_harmony
+    "beijing_tiananmen" -> R.string.way_place_beijing_tiananmen
+    "beijing_tiananmen_square" -> R.string.way_place_beijing_tiananmen_square
+    "beijing_white_dagoba" -> R.string.way_place_beijing_white_dagoba
     "belorado" -> R.string.way_place_belorado
     "berceto" -> R.string.way_place_berceto
     "berlin_bebelplatz" -> R.string.way_place_berlin_bebelplatz
@@ -187,6 +244,14 @@ fun placeNameRes(key: String): Int = when (key) {
     "garlasco" -> R.string.way_place_garlasco
     "gran_san_bernardo" -> R.string.way_place_gran_san_bernardo
     "gubbio" -> R.string.way_place_gubbio
+    "hanoi_dong_xuan" -> R.string.way_place_hanoi_dong_xuan
+    "hanoi_hoa_lo" -> R.string.way_place_hanoi_hoa_lo
+    "hanoi_hoan_kiem" -> R.string.way_place_hanoi_hoan_kiem
+    "hanoi_long_bien" -> R.string.way_place_hanoi_long_bien
+    "hanoi_ngoc_son" -> R.string.way_place_hanoi_ngoc_son
+    "hanoi_old_quarter" -> R.string.way_place_hanoi_old_quarter
+    "hanoi_st_joseph" -> R.string.way_place_hanoi_st_joseph
+    "hanoi_van_mieu" -> R.string.way_place_hanoi_van_mieu
     "havana_alameda_paula" -> R.string.way_place_havana_alameda_paula
     "havana_capitolio" -> R.string.way_place_havana_capitolio
     "havana_cathedral" -> R.string.way_place_havana_cathedral
@@ -197,9 +262,34 @@ fun placeNameRes(key: String): Int = when (key) {
     "havana_prado" -> R.string.way_place_havana_prado
     "havana_real_fuerza" -> R.string.way_place_havana_real_fuerza
     "havana_san_francisco" -> R.string.way_place_havana_san_francisco
+    "hong_kong_bank_of_china" -> R.string.way_place_hong_kong_bank_of_china
+    "hong_kong_flagstaff_house" -> R.string.way_place_hong_kong_flagstaff_house
+    "hong_kong_golden_bauhinia" -> R.string.way_place_hong_kong_golden_bauhinia
+    "hong_kong_hsbc" -> R.string.way_place_hong_kong_hsbc
+    "hong_kong_man_mo" -> R.string.way_place_hong_kong_man_mo
+    "hong_kong_noonday_gun" -> R.string.way_place_hong_kong_noonday_gun
+    "hong_kong_pak_tai" -> R.string.way_place_hong_kong_pak_tai
+    "hong_kong_peak_tram" -> R.string.way_place_hong_kong_peak_tram
+    "hong_kong_pmq" -> R.string.way_place_hong_kong_pmq
+    "hong_kong_st_johns" -> R.string.way_place_hong_kong_st_johns
+    "hong_kong_star_ferry" -> R.string.way_place_hong_kong_star_ferry
+    "hong_kong_statue_square" -> R.string.way_place_hong_kong_statue_square
+    "hong_kong_tai_kwun" -> R.string.way_place_hong_kong_tai_kwun
+    "hong_kong_victoria_park" -> R.string.way_place_hong_kong_victoria_park
+    "hong_kong_western_market" -> R.string.way_place_hong_kong_western_market
     "hornillos" -> R.string.way_place_hornillos
     "hospital_de_orbigo" -> R.string.way_place_hospital_de_orbigo
     "ivrea" -> R.string.way_place_ivrea
+    "kyoto_hanamikoji" -> R.string.way_place_kyoto_hanamikoji
+    "kyoto_kenninji" -> R.string.way_place_kyoto_kenninji
+    "kyoto_kiyomizu" -> R.string.way_place_kyoto_kiyomizu
+    "kyoto_kodaiji" -> R.string.way_place_kyoto_kodaiji
+    "kyoto_maruyama" -> R.string.way_place_kyoto_maruyama
+    "kyoto_nishiki" -> R.string.way_place_kyoto_nishiki
+    "kyoto_pontocho" -> R.string.way_place_kyoto_pontocho
+    "kyoto_sannenzaka" -> R.string.way_place_kyoto_sannenzaka
+    "kyoto_yasaka_pagoda" -> R.string.way_place_kyoto_yasaka_pagoda
+    "kyoto_yasaka_shrine" -> R.string.way_place_kyoto_yasaka_shrine
     "la_storta" -> R.string.way_place_la_storta
     "la_verna" -> R.string.way_place_la_verna
     "leon" -> R.string.way_place_leon
@@ -256,6 +346,15 @@ fun placeNameRes(key: String): Int = when (key) {
     "mansilla" -> R.string.way_place_mansilla
     "massa" -> R.string.way_place_massa
     "medesano" -> R.string.way_place_medesano
+    "melbourne_exhibition" -> R.string.way_place_melbourne_exhibition
+    "melbourne_federation_square" -> R.string.way_place_melbourne_federation_square
+    "melbourne_flinders_street" -> R.string.way_place_melbourne_flinders_street
+    "melbourne_old_gaol" -> R.string.way_place_melbourne_old_gaol
+    "melbourne_parliament" -> R.string.way_place_melbourne_parliament
+    "melbourne_princess_theatre" -> R.string.way_place_melbourne_princess_theatre
+    "melbourne_st_patricks" -> R.string.way_place_melbourne_st_patricks
+    "melbourne_st_pauls" -> R.string.way_place_melbourne_st_pauls
+    "melbourne_state_library" -> R.string.way_place_melbourne_state_library
     "mexico_alameda" -> R.string.way_place_mexico_alameda
     "mexico_angel" -> R.string.way_place_mexico_angel
     "mexico_anthropology" -> R.string.way_place_mexico_anthropology
@@ -419,6 +518,18 @@ fun placeNameRes(key: String): Int = when (key) {
     "santo_domingo" -> R.string.way_place_santo_domingo
     "sarria" -> R.string.way_place_sarria
     "sarzana" -> R.string.way_place_sarzana
+    "seoul_bukchon" -> R.string.way_place_seoul_bukchon
+    "seoul_changdeokgung" -> R.string.way_place_seoul_changdeokgung
+    "seoul_cheonggyecheon" -> R.string.way_place_seoul_cheonggyecheon
+    "seoul_deoksugung" -> R.string.way_place_seoul_deoksugung
+    "seoul_gwanghwamun" -> R.string.way_place_seoul_gwanghwamun
+    "seoul_gwanghwamun_square" -> R.string.way_place_seoul_gwanghwamun_square
+    "seoul_insadong" -> R.string.way_place_seoul_insadong
+    "seoul_jogyesa" -> R.string.way_place_seoul_jogyesa
+    "seoul_jongmyo" -> R.string.way_place_seoul_jongmyo
+    "seoul_n_tower" -> R.string.way_place_seoul_n_tower
+    "seoul_namdaemun_market" -> R.string.way_place_seoul_namdaemun_market
+    "seoul_sungnyemun" -> R.string.way_place_seoul_sungnyemun
     "sf_chinatown" -> R.string.way_place_sf_chinatown
     "sf_city_lights" -> R.string.way_place_sf_city_lights
     "sf_coit_tower" -> R.string.way_place_sf_coit_tower
@@ -432,10 +543,52 @@ fun placeNameRes(key: String): Int = when (key) {
     "sf_saints_peter_paul" -> R.string.way_place_sf_saints_peter_paul
     "sf_transamerica" -> R.string.way_place_sf_transamerica
     "siena" -> R.string.way_place_siena
+    "singapore_buddha_tooth" -> R.string.way_place_singapore_buddha_tooth
+    "singapore_clarke_quay" -> R.string.way_place_singapore_clarke_quay
+    "singapore_esplanade" -> R.string.way_place_singapore_esplanade
+    "singapore_fort_canning" -> R.string.way_place_singapore_fort_canning
+    "singapore_fullerton" -> R.string.way_place_singapore_fullerton
+    "singapore_helix_bridge" -> R.string.way_place_singapore_helix_bridge
+    "singapore_marina_bay_sands" -> R.string.way_place_singapore_marina_bay_sands
+    "singapore_merlion" -> R.string.way_place_singapore_merlion
+    "singapore_national_gallery" -> R.string.way_place_singapore_national_gallery
+    "singapore_raffles_hotel" -> R.string.way_place_singapore_raffles_hotel
+    "singapore_raffles_landing" -> R.string.way_place_singapore_raffles_landing
+    "singapore_sri_mariamman" -> R.string.way_place_singapore_sri_mariamman
+    "singapore_st_andrews" -> R.string.way_place_singapore_st_andrews
+    "singapore_supertree_grove" -> R.string.way_place_singapore_supertree_grove
     "spello" -> R.string.way_place_spello
     "spoleto" -> R.string.way_place_spoleto
     "sutri" -> R.string.way_place_sutri
+    "sydney_anzac_memorial" -> R.string.way_place_sydney_anzac_memorial
+    "sydney_art_gallery" -> R.string.way_place_sydney_art_gallery
+    "sydney_botanic_garden" -> R.string.way_place_sydney_botanic_garden
+    "sydney_cadmans_cottage" -> R.string.way_place_sydney_cadmans_cottage
+    "sydney_chinese_garden" -> R.string.way_place_sydney_chinese_garden
+    "sydney_circular_quay" -> R.string.way_place_sydney_circular_quay
+    "sydney_darling_harbour" -> R.string.way_place_sydney_darling_harbour
+    "sydney_harbour_bridge" -> R.string.way_place_sydney_harbour_bridge
+    "sydney_hyde_park_barracks" -> R.string.way_place_sydney_hyde_park_barracks
+    "sydney_luna_park" -> R.string.way_place_sydney_luna_park
+    "sydney_macquarie_chair" -> R.string.way_place_sydney_macquarie_chair
+    "sydney_opera_house" -> R.string.way_place_sydney_opera_house
+    "sydney_qvb" -> R.string.way_place_sydney_qvb
+    "sydney_st_marys" -> R.string.way_place_sydney_st_marys
     "terradillos" -> R.string.way_place_terradillos
+    "tokyo_akihabara" -> R.string.way_place_tokyo_akihabara
+    "tokyo_ameyoko" -> R.string.way_place_tokyo_ameyoko
+    "tokyo_imperial_palace" -> R.string.way_place_tokyo_imperial_palace
+    "tokyo_kaminarimon" -> R.string.way_place_tokyo_kaminarimon
+    "tokyo_kanda_myojin" -> R.string.way_place_tokyo_kanda_myojin
+    "tokyo_kappabashi" -> R.string.way_place_tokyo_kappabashi
+    "tokyo_mitsukoshi" -> R.string.way_place_tokyo_mitsukoshi
+    "tokyo_national_museum" -> R.string.way_place_tokyo_national_museum
+    "tokyo_nihonbashi" -> R.string.way_place_tokyo_nihonbashi
+    "tokyo_sensoji" -> R.string.way_place_tokyo_sensoji
+    "tokyo_shinobazu" -> R.string.way_place_tokyo_shinobazu
+    "tokyo_station" -> R.string.way_place_tokyo_station
+    "tokyo_toshogu" -> R.string.way_place_tokyo_toshogu
+    "tokyo_yushima_seido" -> R.string.way_place_tokyo_yushima_seido
     "trevi" -> R.string.way_place_trevi
     "triacastela" -> R.string.way_place_triacastela
     "tui" -> R.string.way_place_tui
@@ -480,7 +633,34 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "aosta" -> R.string.way_note_aosta
     "assisi" -> R.string.way_note_assisi
     "astorga" -> R.string.way_note_astorga
+    "bangkok_democracy_monument" -> R.string.way_note_bangkok_democracy_monument
+    "bangkok_giant_swing" -> R.string.way_note_bangkok_giant_swing
+    "bangkok_golden_mount" -> R.string.way_note_bangkok_golden_mount
+    "bangkok_khaosan" -> R.string.way_note_bangkok_khaosan
+    "bangkok_loha_prasat" -> R.string.way_note_bangkok_loha_prasat
+    "bangkok_memorial_bridge" -> R.string.way_note_bangkok_memorial_bridge
+    "bangkok_national_museum" -> R.string.way_note_bangkok_national_museum
+    "bangkok_phra_sumen" -> R.string.way_note_bangkok_phra_sumen
+    "bangkok_wat_arun" -> R.string.way_note_bangkok_wat_arun
+    "bangkok_wat_mahathat" -> R.string.way_note_bangkok_wat_mahathat
+    "bangkok_wat_pho" -> R.string.way_note_bangkok_wat_pho
+    "bangkok_wat_phra_kaew" -> R.string.way_note_bangkok_wat_phra_kaew
     "barcelos" -> R.string.way_note_barcelos
+    "beijing_bell_tower" -> R.string.way_note_beijing_bell_tower
+    "beijing_divine_might" -> R.string.way_note_beijing_divine_might
+    "beijing_drum_tower" -> R.string.way_note_beijing_drum_tower
+    "beijing_heavenly_purity" -> R.string.way_note_beijing_heavenly_purity
+    "beijing_jingshan" -> R.string.way_note_beijing_jingshan
+    "beijing_lama_temple" -> R.string.way_note_beijing_lama_temple
+    "beijing_meridian_gate" -> R.string.way_note_beijing_meridian_gate
+    "beijing_nanluoguxiang" -> R.string.way_note_beijing_nanluoguxiang
+    "beijing_nine_dragon_wall" -> R.string.way_note_beijing_nine_dragon_wall
+    "beijing_prince_gong" -> R.string.way_note_beijing_prince_gong
+    "beijing_shichahai" -> R.string.way_note_beijing_shichahai
+    "beijing_supreme_harmony" -> R.string.way_note_beijing_supreme_harmony
+    "beijing_tiananmen" -> R.string.way_note_beijing_tiananmen
+    "beijing_tiananmen_square" -> R.string.way_note_beijing_tiananmen_square
+    "beijing_white_dagoba" -> R.string.way_note_beijing_white_dagoba
     "berlin_bebelplatz" -> R.string.way_note_berlin_bebelplatz
     "berlin_brandenburg_gate" -> R.string.way_note_berlin_brandenburg_gate
     "berlin_cathedral" -> R.string.way_note_berlin_cathedral
@@ -536,6 +716,14 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "firenze" -> R.string.way_note_firenze
     "gran_san_bernardo" -> R.string.way_note_gran_san_bernardo
     "gubbio" -> R.string.way_note_gubbio
+    "hanoi_dong_xuan" -> R.string.way_note_hanoi_dong_xuan
+    "hanoi_hoa_lo" -> R.string.way_note_hanoi_hoa_lo
+    "hanoi_hoan_kiem" -> R.string.way_note_hanoi_hoan_kiem
+    "hanoi_long_bien" -> R.string.way_note_hanoi_long_bien
+    "hanoi_ngoc_son" -> R.string.way_note_hanoi_ngoc_son
+    "hanoi_old_quarter" -> R.string.way_note_hanoi_old_quarter
+    "hanoi_st_joseph" -> R.string.way_note_hanoi_st_joseph
+    "hanoi_van_mieu" -> R.string.way_note_hanoi_van_mieu
     "havana_alameda_paula" -> R.string.way_note_havana_alameda_paula
     "havana_capitolio" -> R.string.way_note_havana_capitolio
     "havana_cathedral" -> R.string.way_note_havana_cathedral
@@ -546,7 +734,32 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "havana_prado" -> R.string.way_note_havana_prado
     "havana_real_fuerza" -> R.string.way_note_havana_real_fuerza
     "havana_san_francisco" -> R.string.way_note_havana_san_francisco
+    "hong_kong_bank_of_china" -> R.string.way_note_hong_kong_bank_of_china
+    "hong_kong_flagstaff_house" -> R.string.way_note_hong_kong_flagstaff_house
+    "hong_kong_golden_bauhinia" -> R.string.way_note_hong_kong_golden_bauhinia
+    "hong_kong_hsbc" -> R.string.way_note_hong_kong_hsbc
+    "hong_kong_man_mo" -> R.string.way_note_hong_kong_man_mo
+    "hong_kong_noonday_gun" -> R.string.way_note_hong_kong_noonday_gun
+    "hong_kong_pak_tai" -> R.string.way_note_hong_kong_pak_tai
+    "hong_kong_peak_tram" -> R.string.way_note_hong_kong_peak_tram
+    "hong_kong_pmq" -> R.string.way_note_hong_kong_pmq
+    "hong_kong_st_johns" -> R.string.way_note_hong_kong_st_johns
+    "hong_kong_star_ferry" -> R.string.way_note_hong_kong_star_ferry
+    "hong_kong_statue_square" -> R.string.way_note_hong_kong_statue_square
+    "hong_kong_tai_kwun" -> R.string.way_note_hong_kong_tai_kwun
+    "hong_kong_victoria_park" -> R.string.way_note_hong_kong_victoria_park
+    "hong_kong_western_market" -> R.string.way_note_hong_kong_western_market
     "ivrea" -> R.string.way_note_ivrea
+    "kyoto_hanamikoji" -> R.string.way_note_kyoto_hanamikoji
+    "kyoto_kenninji" -> R.string.way_note_kyoto_kenninji
+    "kyoto_kiyomizu" -> R.string.way_note_kyoto_kiyomizu
+    "kyoto_kodaiji" -> R.string.way_note_kyoto_kodaiji
+    "kyoto_maruyama" -> R.string.way_note_kyoto_maruyama
+    "kyoto_nishiki" -> R.string.way_note_kyoto_nishiki
+    "kyoto_pontocho" -> R.string.way_note_kyoto_pontocho
+    "kyoto_sannenzaka" -> R.string.way_note_kyoto_sannenzaka
+    "kyoto_yasaka_pagoda" -> R.string.way_note_kyoto_yasaka_pagoda
+    "kyoto_yasaka_shrine" -> R.string.way_note_kyoto_yasaka_shrine
     "la_verna" -> R.string.way_note_la_verna
     "leon" -> R.string.way_note_leon
     "lima_alameda_descalzos" -> R.string.way_note_lima_alameda_descalzos
@@ -597,6 +810,15 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "madrid_puerta_del_sol" -> R.string.way_note_madrid_puerta_del_sol
     "madrid_reina_sofia" -> R.string.way_note_madrid_reina_sofia
     "madrid_retiro_pond" -> R.string.way_note_madrid_retiro_pond
+    "melbourne_exhibition" -> R.string.way_note_melbourne_exhibition
+    "melbourne_federation_square" -> R.string.way_note_melbourne_federation_square
+    "melbourne_flinders_street" -> R.string.way_note_melbourne_flinders_street
+    "melbourne_old_gaol" -> R.string.way_note_melbourne_old_gaol
+    "melbourne_parliament" -> R.string.way_note_melbourne_parliament
+    "melbourne_princess_theatre" -> R.string.way_note_melbourne_princess_theatre
+    "melbourne_st_patricks" -> R.string.way_note_melbourne_st_patricks
+    "melbourne_st_pauls" -> R.string.way_note_melbourne_st_pauls
+    "melbourne_state_library" -> R.string.way_note_melbourne_state_library
     "mexico_alameda" -> R.string.way_note_mexico_alameda
     "mexico_angel" -> R.string.way_note_mexico_angel
     "mexico_anthropology" -> R.string.way_note_mexico_anthropology
@@ -729,6 +951,18 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "sansepolcro" -> R.string.way_note_sansepolcro
     "santiago" -> R.string.way_note_santiago
     "sarria" -> R.string.way_note_sarria
+    "seoul_bukchon" -> R.string.way_note_seoul_bukchon
+    "seoul_changdeokgung" -> R.string.way_note_seoul_changdeokgung
+    "seoul_cheonggyecheon" -> R.string.way_note_seoul_cheonggyecheon
+    "seoul_deoksugung" -> R.string.way_note_seoul_deoksugung
+    "seoul_gwanghwamun" -> R.string.way_note_seoul_gwanghwamun
+    "seoul_gwanghwamun_square" -> R.string.way_note_seoul_gwanghwamun_square
+    "seoul_insadong" -> R.string.way_note_seoul_insadong
+    "seoul_jogyesa" -> R.string.way_note_seoul_jogyesa
+    "seoul_jongmyo" -> R.string.way_note_seoul_jongmyo
+    "seoul_n_tower" -> R.string.way_note_seoul_n_tower
+    "seoul_namdaemun_market" -> R.string.way_note_seoul_namdaemun_market
+    "seoul_sungnyemun" -> R.string.way_note_seoul_sungnyemun
     "sf_chinatown" -> R.string.way_note_sf_chinatown
     "sf_city_lights" -> R.string.way_note_sf_city_lights
     "sf_coit_tower" -> R.string.way_note_sf_coit_tower
@@ -742,7 +976,49 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "sf_saints_peter_paul" -> R.string.way_note_sf_saints_peter_paul
     "sf_transamerica" -> R.string.way_note_sf_transamerica
     "siena" -> R.string.way_note_siena
+    "singapore_buddha_tooth" -> R.string.way_note_singapore_buddha_tooth
+    "singapore_clarke_quay" -> R.string.way_note_singapore_clarke_quay
+    "singapore_esplanade" -> R.string.way_note_singapore_esplanade
+    "singapore_fort_canning" -> R.string.way_note_singapore_fort_canning
+    "singapore_fullerton" -> R.string.way_note_singapore_fullerton
+    "singapore_helix_bridge" -> R.string.way_note_singapore_helix_bridge
+    "singapore_marina_bay_sands" -> R.string.way_note_singapore_marina_bay_sands
+    "singapore_merlion" -> R.string.way_note_singapore_merlion
+    "singapore_national_gallery" -> R.string.way_note_singapore_national_gallery
+    "singapore_raffles_hotel" -> R.string.way_note_singapore_raffles_hotel
+    "singapore_raffles_landing" -> R.string.way_note_singapore_raffles_landing
+    "singapore_sri_mariamman" -> R.string.way_note_singapore_sri_mariamman
+    "singapore_st_andrews" -> R.string.way_note_singapore_st_andrews
+    "singapore_supertree_grove" -> R.string.way_note_singapore_supertree_grove
     "spoleto" -> R.string.way_note_spoleto
+    "sydney_anzac_memorial" -> R.string.way_note_sydney_anzac_memorial
+    "sydney_art_gallery" -> R.string.way_note_sydney_art_gallery
+    "sydney_botanic_garden" -> R.string.way_note_sydney_botanic_garden
+    "sydney_cadmans_cottage" -> R.string.way_note_sydney_cadmans_cottage
+    "sydney_chinese_garden" -> R.string.way_note_sydney_chinese_garden
+    "sydney_circular_quay" -> R.string.way_note_sydney_circular_quay
+    "sydney_darling_harbour" -> R.string.way_note_sydney_darling_harbour
+    "sydney_harbour_bridge" -> R.string.way_note_sydney_harbour_bridge
+    "sydney_hyde_park_barracks" -> R.string.way_note_sydney_hyde_park_barracks
+    "sydney_luna_park" -> R.string.way_note_sydney_luna_park
+    "sydney_macquarie_chair" -> R.string.way_note_sydney_macquarie_chair
+    "sydney_opera_house" -> R.string.way_note_sydney_opera_house
+    "sydney_qvb" -> R.string.way_note_sydney_qvb
+    "sydney_st_marys" -> R.string.way_note_sydney_st_marys
+    "tokyo_akihabara" -> R.string.way_note_tokyo_akihabara
+    "tokyo_ameyoko" -> R.string.way_note_tokyo_ameyoko
+    "tokyo_imperial_palace" -> R.string.way_note_tokyo_imperial_palace
+    "tokyo_kaminarimon" -> R.string.way_note_tokyo_kaminarimon
+    "tokyo_kanda_myojin" -> R.string.way_note_tokyo_kanda_myojin
+    "tokyo_kappabashi" -> R.string.way_note_tokyo_kappabashi
+    "tokyo_mitsukoshi" -> R.string.way_note_tokyo_mitsukoshi
+    "tokyo_national_museum" -> R.string.way_note_tokyo_national_museum
+    "tokyo_nihonbashi" -> R.string.way_note_tokyo_nihonbashi
+    "tokyo_sensoji" -> R.string.way_note_tokyo_sensoji
+    "tokyo_shinobazu" -> R.string.way_note_tokyo_shinobazu
+    "tokyo_station" -> R.string.way_note_tokyo_station
+    "tokyo_toshogu" -> R.string.way_note_tokyo_toshogu
+    "tokyo_yushima_seido" -> R.string.way_note_tokyo_yushima_seido
     "tui" -> R.string.way_note_tui
     "valenca" -> R.string.way_note_valenca
     "vercelli" -> R.string.way_note_vercelli

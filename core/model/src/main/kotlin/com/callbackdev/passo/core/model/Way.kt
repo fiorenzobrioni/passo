@@ -14,6 +14,7 @@ enum class WayKind {
 enum class Continent {
     EUROPE,
     AMERICAS,
+    ASIA_OCEANIA,
 }
 
 /**
@@ -49,6 +50,16 @@ enum class WayId(val kind: WayKind, val city: String? = null, val continent: Con
     QUEBEC_PARLEMENT_BASSE_VILLE(WayKind.WALK, city = "quebec", continent = Continent.AMERICAS),
     HAVANA_CAPITOLIO_PAULA(WayKind.WALK, city = "havana", continent = Continent.AMERICAS),
     CARTAGENA_RELOJ_SAN_FELIPE(WayKind.WALK, city = "cartagena", continent = Continent.AMERICAS),
+    TOKYO_SENSOJI_PALACE(WayKind.WALK, city = "tokyo", continent = Continent.ASIA_OCEANIA),
+    SYDNEY_LUNA_PARK_GARDEN(WayKind.WALK, city = "sydney", continent = Continent.ASIA_OCEANIA),
+    SEOUL_GWANGHWAMUN_NAMSAN(WayKind.WALK, city = "seoul", continent = Continent.ASIA_OCEANIA),
+    BEIJING_TIANANMEN_YONGHE(WayKind.WALK, city = "beijing", continent = Continent.ASIA_OCEANIA),
+    HONG_KONG_VICTORIA_WESTERN(WayKind.WALK, city = "hong_kong", continent = Continent.ASIA_OCEANIA),
+    SINGAPORE_CHINATOWN_GARDENS(WayKind.WALK, city = "singapore", continent = Continent.ASIA_OCEANIA),
+    BANGKOK_SWING_ARUN(WayKind.WALK, city = "bangkok", continent = Continent.ASIA_OCEANIA),
+    KYOTO_KIYOMIZU_NISHIKI(WayKind.WALK, city = "kyoto", continent = Continent.ASIA_OCEANIA),
+    HANOI_VAN_MIEU_LONG_BIEN(WayKind.WALK, city = "hanoi", continent = Continent.ASIA_OCEANIA),
+    MELBOURNE_FLINDERS_EXHIBITION(WayKind.WALK, city = "melbourne", continent = Continent.ASIA_OCEANIA),
 }
 
 /** Where a way the reader started stands. Stored by name. */

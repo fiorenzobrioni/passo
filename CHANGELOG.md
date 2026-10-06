@@ -26,20 +26,30 @@ All notable changes to Passo are documented here. The format follows
   Bridge, by Times Square and the Empire State; Rio, from the Museum of Tomorrow through Lapa and
   along the bay to the Sugarloaf; Mexico City, from the Zócalo along the Reforma to Chapultepec;
   Buenos Aires, from the Plaza de Mayo by the Congress and the Obelisco to Recoleta; San
-  Francisco, from the Ferry Building by Coit Tower and the Wharf to the Palace of Fine Arts; and
-  Cusco, up to Sacsayhuamán and down to the Qorikancha. And six short ones, about 5 km, an hour
+  Francisco, from the Ferry Building by Coit Tower and the Wharf to the Palace of Fine Arts;
+  Tokyo, from Sensō-ji by Ueno and Akihabara to the Imperial Palace; Sydney, from Luna Park over
+  the Harbour Bridge, by the Opera House, to the Chinese Garden; Seoul, from Gwanghwamun Square
+  by the palaces and the Cheonggyecheon up to N Seoul Tower; Beijing, from Tiananmen Square
+  through the Forbidden City, in by the Meridian Gate and out by the Gate of Divine Might, then by
+  Beihai and the Drum Tower to the Lama Temple; Hong Kong, from Victoria Park by Wan Chai, the
+  Star Ferry and Central to Western Market; Singapore, from Chinatown by Fort Canning, the river
+  and the Merlion to Marina Bay Sands and the Supertrees; Bangkok, from the Giant Swing by the
+  Golden Mount, Khao San, the Grand Palace and Wat Pho, over the Memorial Bridge to Wat Arun; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And nine short ones, about 5 km, an hour
   or so: Porto, from the cathedral across the Douro to the Serra do Pilar; Amsterdam, from
   Centraal Station along the canals to the Westerkerk; Prague, from the Castle over Charles
   Bridge to Wenceslas Square; Québec, from the Parliament by the Plains of Abraham and the
   Château Frontenac down to the Lower Town; Havana, from the Capitolio by the Malecón and the old
-  squares to the Alameda de Paula; and Cartagena, from the Clock Tower along the walls and
-  through Getsemaní to San Felipe. Each map has the city's
+  squares to the Alameda de Paula; Cartagena, from the Clock Tower along the walls and
+  through Getsemaní to San Felipe; Kyoto, from Kiyomizu-dera by the Yasaka pagoda, Gion and
+  Pontochō to the Nishiki market; Hanoi, from the Temple of Literature round Hoàn Kiếm Lake and
+  through the Old Quarter to the Long Biên Bridge; and Melbourne, from Flinders Street by the
+  State Library and Parliament to the Royal Exhibition Building. Each map has the city's
   water, parks and main streets, and, for a city on the sea, its coast, so the area is
   recognisable at a glance. Walked where you are
   in one outing or a few. Each place is told as your steps reach it, with a short vibration and,
   if you like, its name and a line about it in your headphones; the notification says the next
   one. Stop when you like and continue later from where you were. On the Ways page, by
-  continent (Europe, the Americas), each with a map of where its cities are and which you have
+  continent (Europe, the Americas, Asia and Oceania), each with a map of where its cities are and which you have
   walked; and from Outings. "Hear it" plays a place as you will hear it, and "Change voice" opens the phone's
   voices.
 - **The Japanese interval walk**: slow and fast walking in turns, 3 minutes each, five sets or

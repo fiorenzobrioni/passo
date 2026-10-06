@@ -15,7 +15,11 @@ line after it. Berlin and Vienna (5 Oct 2026) were checked in the English and Ge
 New York in the English and Italian (or German), Rio in the English and Portuguese, Mexico City
 and Buenos Aires in the English and Spanish, San Francisco in the English and Italian (or
 Spanish, German), Québec in the English and French, Havana and Cartagena in the English and
-Spanish.
+Spanish, Tokyo in the English and Japanese (or Italian), Sydney in the English and German (or
+Italian, French, Spanish), Seoul in the English and Korean, Beijing and Hong Kong in the English and Chinese,
+Singapore in the English and Chinese (or German, Italian), Bangkok in the English and German (or
+Italian), Kyoto in the English and Japanese, Hanoi in the English and French (or Italian), Melbourne in
+the English and German (or French).
 """
 
 from dataclasses import dataclass, field
@@ -1838,7 +1842,741 @@ CARTAGENA = Walk(
     ],
 )
 
-WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA]
+TOKYO = Walk(
+    id="TOKYO_SENSOJI_PALACE",
+    city="tokyo",
+    city_en="Tokyo",
+    city_it="Tokyo",
+    route_en="From Sensō-ji to the Imperial Palace, by Ueno and Akihabara",
+    route_it="Dal Sensō-ji al Palazzo imperiale, passando per Ueno e Akihabara",
+    outing_en="A walk in Tokyo",
+    outing_it="Passeggiata a Tokyo",
+    country="JP",
+    continent="ASIA_OCEANIA",
+    # The Sumida, in several areas; the Kanda; the palace's moats; Shinobazu Pond. The Sumida's
+    # banks and the Nihonbashi River are also many small areas, read from the street tiles.
+    water=[
+        "relation/14352161", "relation/8284278", "relation/12489063", "relation/7913942", "relation/12489064",
+        "relation/3553642",
+        "relation/5415353", "relation/5415354", "relation/5415355", "relation/5415347", "relation/5415372",
+        "relation/5415371", "relation/5415373", "relation/5415352", "relation/5415356", "relation/3682169",
+        "relation/5414261", "relation/7904532",
+    ],
+    water_from_tiles=True,
+    # Ueno Park, the palace's gardens and woods, Kitanomaru, Hibiya and the Sumida's park.
+    parks=[
+        "relation/5413419", "relation/3551852", "relation/5415394", "relation/2102944", "way/624081603",
+        "way/145408909", "relation/14235095",
+    ],
+    stops=[
+        Stop("tokyo_kaminarimon", "Kaminarimon", "Kaminarimon", 35.7111, 139.7964,
+             note_en="Guarded by the gods of wind and thunder, this gate was rebuilt in 1960 with a gift from Panasonic's founder, Kōnosuke Matsushita.",
+             note_it="Custodita dagli dei del vento e del tuono, questa porta fu ricostruita nel 1960 con un dono del fondatore di Panasonic, Kōnosuke Matsushita."),
+        # Source: Wikipedia, Kaminarimon; Wikipedia (ja), 雷門. The first gate's year differs (941 or 942): not said.
+        Stop("tokyo_sensoji", "Sensō-ji", "Sensō-ji", 35.7146, 139.7966,
+             note_en="Tokyo's oldest temple began, the legend says, with a statue of Kannon two brothers found while fishing in the Sumida in 628.",
+             note_it="Il tempio più antico di Tokyo nacque, dice la leggenda, da una statua di Kannon trovata da due fratelli mentre pescavano nel Sumida nel 628."),
+        # Source: Wikipedia, Sensō-ji; Wikipedia (it), Sensō-ji.
+        Stop("tokyo_kappabashi", "Kappabashi", "Kappabashi", 35.7135, 139.788,
+             note_en="Between Asakusa and Ueno, this street sells restaurants everything from knives to the display food in their windows.",
+             note_it="Tra Asakusa e Ueno, questa via vende ai ristoranti di tutto, dai coltelli ai piatti finti esposti in vetrina."),
+        # Source: Wikipedia, Kappabashi-dori; Wikipedia (ja), かっぱ橋道具街.
+        Stop("tokyo_national_museum", "Tokyo National Museum", "Museo nazionale di Tokyo", 35.718, 139.7765,
+             note_en="Japan's oldest national museum, founded in 1872, opened here in Ueno Park in 1882.",
+             note_it="Il più antico museo nazionale del Giappone, fondato nel 1872, aprì qui nel parco di Ueno nel 1882."),
+        # Source: Wikipedia, Tokyo National Museum; Wikipedia (ja), 東京国立博物館 (Japan's oldest museum). Which is its largest differs (art museum, or museum): not said.
+        Stop("tokyo_toshogu", "Ueno Tōshō-gū", "Ueno Tōshō-gū", 35.7154, 139.7706,
+             note_en="A shrine to Tokugawa Ieyasu, the first Tokugawa shōgun; its buildings, renewed by Iemitsu in 1651, have come down almost intact.",
+             note_it="È un santuario dedicato a Tokugawa Ieyasu, il primo shōgun Tokugawa; i suoi edifici, rinnovati da Iemitsu nel 1651, sono giunti quasi intatti."),
+        # Source: Wikipedia, Ueno Tōshō-gū; Wikipedia (ja), 上野東照宮.
+        Stop("tokyo_shinobazu", "Shinobazu Pond", "Stagno Shinobazu", 35.7122, 139.7708,
+             note_en="In summer lotus leaves cover part of the pond; on its island stands a temple to the goddess Benzaiten.",
+             note_it="D'estate le foglie di loto coprono parte dello stagno; sulla sua isola c'è un tempio dedicato alla dea Benzaiten."),
+        # Source: Wikipedia, Shinobazu Pond; Wikipedia (ja), 不忍池.
+        Stop("tokyo_ameyoko", "Ameyoko", "Ameyoko", 35.7095, 139.7745,
+             note_en="This market along the railway may take its name from the sweets sold here after the war, or from American army goods.",
+             note_it="Questo mercato lungo la ferrovia prenderebbe il nome dai dolci venduti qui nel dopoguerra, o dalle merci dell'esercito americano."),
+        # Source: Wikipedia, Ameya-Yokochō; Wikipedia (ja), アメ横. Both give the two theories.
+        Stop("tokyo_kanda_myojin", "Kanda Shrine", "Santuario di Kanda", 35.7019, 139.7677,
+             note_en="Founded, by tradition, in 730, the shrine was moved as Edo Castle grew, and came to this hill in 1616.",
+             note_it="Fondato, secondo la tradizione, nel 730, il santuario fu spostato via via che il castello di Edo cresceva, e giunse su questa collina nel 1616."),
+        # Source: Wikipedia, Kanda Shrine; Wikipedia (ja), 神田明神.
+        Stop("tokyo_yushima_seido", "Yushima Seidō", "Yushima Seidō", 35.7004, 139.7666,
+             note_en="The shōgun Tsunayoshi set this Confucian temple here; in 1872 it held the exhibition from which the national museum was born.",
+             note_it="Lo shōgun Tsunayoshi volle qui questo tempio confuciano; nel 1872 ospitò la mostra da cui nacque il museo nazionale."),
+        # Source: Wikipedia, Yushima Seidō; Wikipedia (ja), 湯島聖堂; for the exhibition, Wikipedia, Tokyo National Museum, and (ja) 東京国立博物館. The year it came here differs (1690 or 1691): not said.
+        Stop("tokyo_akihabara", "Akihabara", "Akihabara", 35.6985, 139.7712,
+             note_en="After the war Akihabara grew from a black market into Electric Town, and later the heart of otaku culture.",
+             note_it="Nel dopoguerra Akihabara passò dal mercato nero alla Città elettrica, e divenne poi il cuore della cultura otaku."),
+        # Source: Wikipedia, Akihabara; Wikipedia (ja), 秋葉原.
+        Stop("tokyo_mitsukoshi", "Mitsukoshi", "Mitsukoshi", 35.6862, 139.7735,
+             note_en="Mitsukoshi began in 1673 as Echigoya, a kimono shop; this store was finished in 1914.",
+             note_it="Mitsukoshi nacque nel 1673 come Echigoya, un negozio di kimono; questo grande magazzino fu finito nel 1914."),
+        # Source: Wikipedia, Mitsukoshi; Wikipedia (ja), 三越日本橋本店. Whether it was Japan's first department store is debated: not said.
+        Stop("tokyo_nihonbashi", "Nihonbashi", "Nihonbashi", 35.684, 139.774,
+             note_en="The five great roads of the Edo period began at this bridge, and road distances to Tokyo are still counted from here.",
+             note_it="Le cinque grandi strade dell'epoca Edo partivano da questo ponte, e le distanze stradali per Tokyo si contano ancora da qui."),
+        # Source: Wikipedia, Nihonbashi; Wikipedia (ja), 日本橋 (東京都中央区).
+        Stop("tokyo_station", "Tokyo Station", "Stazione di Tokyo", 35.6812, 139.766,
+             note_en="Tatsuno Kingo's red-brick station opened in 1914; damaged in the bombing of 1945, it was restored as it first stood in 2012.",
+             note_it="La stazione in mattoni rossi di Tatsuno Kingo aprì nel 1914; danneggiata dai bombardamenti del 1945, nel 2012 tornò com'era in origine."),
+        # Source: Wikipedia, Tokyo Station; Wikipedia (ja), 東京駅.
+        Stop("tokyo_imperial_palace", "Imperial Palace", "Palazzo imperiale", 35.6797, 139.755,
+             note_en="Only at the New Year and on the Emperor's birthday may the public cross into the palace, where the imperial family greets them.",
+             note_it="Solo a Capodanno e per il compleanno dell'imperatore il pubblico può entrare nel palazzo, dove la famiglia imperiale lo saluta."),
+        # Source: Wikipedia, Tokyo Imperial Palace; Wikipedia (ja), 二重橋 (the gate opened, and the bridge crossed, on those days).
+    ],
+)
+
+SYDNEY = Walk(
+    id="SYDNEY_LUNA_PARK_GARDEN",
+    city="sydney",
+    city_en="Sydney",
+    city_it="Sydney",
+    route_en="From Luna Park to the Chinese Garden, over the Harbour Bridge and by the Opera House",
+    route_it="Dal Luna Park al Giardino cinese, attraverso l'Harbour Bridge e passando per l'Opera House",
+    outing_en="A walk in Sydney",
+    outing_it="Passeggiata a Sydney",
+    country="AU",
+    continent="ASIA_OCEANIA",
+    # The harbour is a water area in OpenStreetMap, its coastline out at the Heads.
+    water=["relation/1252425"],
+    # The Botanic Garden and the Domain, Hyde Park, the parks at the bridge's ends, Darling Harbour's.
+    parks=[
+        "relation/3744999", "relation/3744998", "way/1224921215", "relation/2030042", "way/4334301",
+        "relation/2068542", "way/55218510", "way/183246960", "way/4334305",
+    ],
+    stops=[
+        Stop("sydney_luna_park", "Luna Park", "Luna Park", -33.8479, 151.21,
+             note_en="Built in 1935, the park is entered through a giant face, made again several times since.",
+             note_it="Costruito nel 1935, al parco si entra attraverso un volto gigante, rifatto più volte da allora."),
+        # Source: Wikipedia, Luna Park Sydney; Wikipedia (de), Luna Park (Sydney).
+        Stop("sydney_harbour_bridge", "Sydney Harbour Bridge", "Sydney Harbour Bridge", -33.8525, 151.2108,
+             note_en="Sydney calls this steel arch, opened in 1932, the Coathanger.",
+             note_it="Sydney chiama Coathanger, l'attaccapanni, questo arco d'acciaio inaugurato nel 1932."),
+        # Source: Wikipedia, Sydney Harbour Bridge; Wikipedia (de), Sydney Harbour Bridge. Its records are given differently (the tallest steel arch and once the widest, or the widest): not said.
+        Stop("sydney_cadmans_cottage", "Cadmans Cottage", "Cadmans Cottage", -33.8589, 151.2092,
+             note_en="Built in 1816 for the government's boat crews, the cottage stood by the water, now about 100 m away.",
+             note_it="Costruita nel 1816 per gli equipaggi delle barche del governo, la casetta era in riva all'acqua, che oggi è a circa 100 m."),
+        # Source: Wikipedia, Cadmans Cottage; Wikipedia (de), Cadmans Cottage. Which is older differs (the second oldest house in Sydney, or the oldest building of The Rocks): not said.
+        Stop("sydney_circular_quay", "Circular Quay", "Circular Quay", -33.8612, 151.211,
+             note_en="The First Fleet landed in this cove in 1788, and founded the settlement that became Sydney.",
+             note_it="La Prima Flotta approdò in questa baia nel 1788, e fondò l'insediamento da cui nacque Sydney."),
+        # Source: Wikipedia, Sydney Cove; Wikipedia (de), Circular Quay.
+        Stop("sydney_opera_house", "Sydney Opera House", "Opera House di Sydney", -33.858, 151.2148,
+             note_en="Designed by the Dane Jørn Utzon, it was opened by Queen Elizabeth II in 1973, and has been a World Heritage Site since 2007.",
+             note_it="Progettata dal danese Jørn Utzon, fu inaugurata dalla regina Elisabetta II nel 1973 ed è patrimonio dell'umanità dal 2007."),
+        # Source: Wikipedia, Sydney Opera House; Wikipedia (it), Teatro dell'Opera di Sydney.
+        Stop("sydney_botanic_garden", "Royal Botanic Garden", "Royal Botanic Garden", -33.864, 151.217,
+             note_en="Founded in 1816 on Farm Cove, where the colony's first farm was laid out, it is Australia's oldest scientific institution.",
+             note_it="Fondato nel 1816 sulla Farm Cove, dove sorse la prima fattoria della colonia, è la più antica istituzione scientifica dell'Australia."),
+        # Source: Wikipedia, Royal Botanic Garden, Sydney; Wikipedia (de), Royal Botanic Gardens (Sydney).
+        Stop("sydney_macquarie_chair", "Mrs Macquarie's Chair", "Mrs Macquarie's Chair", -33.8597, 151.2224,
+             note_en="Convicts carved this seat in the sandstone in 1810 for Elizabeth Macquarie, the governor's wife.",
+             note_it="Nel 1810 alcuni detenuti scavarono questo sedile nell'arenaria per Elizabeth Macquarie, la moglie del governatore."),
+        # Source: Wikipedia, Mrs Macquarie's Chair; Wikipedia (de), Mrs Macquarie’s Chair.
+        Stop("sydney_art_gallery", "Art Gallery of New South Wales", "Art Gallery of New South Wales", -33.8684, 151.2172,
+             note_en="In 2022 the gallery opened a second building, designed by the Japanese studio SANAA.",
+             note_it="Nel 2022 il museo ha aperto un secondo edificio, progettato dallo studio giapponese SANAA."),
+        # Source: Wikipedia, Art Gallery of New South Wales; Wikipedia (de), Art Gallery of New South Wales.
+        Stop("sydney_hyde_park_barracks", "Hyde Park Barracks", "Hyde Park Barracks", -33.8697, 151.2124,
+             note_en="Francis Greenway designed these barracks for the colony's male convicts; they are a World Heritage Site.",
+             note_it="Francis Greenway progettò queste caserme per i detenuti maschi della colonia; sono patrimonio dell'umanità."),
+        # Source: Wikipedia, Hyde Park Barracks, Sydney; Wikipedia (fr), Hyde Park Barracks (Sydney). The years they were built differ (from 1817 or 1818): not said.
+        Stop("sydney_st_marys", "St Mary's Cathedral", "Cattedrale di Santa Maria", -33.8714, 151.2128,
+             note_en="Begun after a fire destroyed the first church in 1865, William Wardell's cathedral was largely finished in 1928.",
+             note_it="Iniziata dopo che un incendio distrusse la prima chiesa nel 1865, la cattedrale di William Wardell fu quasi finita nel 1928."),
+        # Source: Wikipedia, St Mary's Cathedral, Sydney; Wikipedia (it), Cattedrale di Santa Maria (Sydney).
+        Stop("sydney_anzac_memorial", "Anzac Memorial", "Memoriale degli Anzac", -33.8752, 151.2108,
+             note_en="This Art Deco memorial in Hyde Park, designed by Bruce Dellit, opened in 1934.",
+             note_it="Questo memoriale Art déco a Hyde Park, progettato da Bruce Dellit, fu inaugurato nel 1934."),
+        # Source: Wikipedia, Anzac Memorial; Wikipedia (it), Memoriale degli Anzac.
+        Stop("sydney_qvb", "Queen Victoria Building", "Queen Victoria Building", -33.8717, 151.2069,
+             note_en="George McRae's market hall, finished in 1898, was nearly pulled down in 1959 and now holds shops again.",
+             note_it="Il mercato coperto di George McRae, finito nel 1898, rischiò la demolizione nel 1959 e oggi ospita di nuovo negozi."),
+        # Source: Wikipedia, Queen Victoria Building; Wikipedia (de), Queen Victoria Building.
+        Stop("sydney_darling_harbour", "Darling Harbour", "Darling Harbour", -33.8707, 151.2015,
+             note_en="Once a port of wharves and railway yards, Darling Harbour is now mostly for people on foot.",
+             note_it="Un tempo porto di moli e scali ferroviari, Darling Harbour è oggi soprattutto per chi va a piedi."),
+        # Source: Wikipedia, Darling Harbour; Wikipedia (de), Darling Harbour. Pyrmont Bridge, crossed here, has an article in English only.
+        Stop("sydney_chinese_garden", "Chinese Garden of Friendship", "Giardino cinese dell'Amicizia", -33.8763, 151.2028,
+             note_en="Designed by Guangzhou, Sydney's Chinese sister city, the garden opened in 1988, for the bicentenary.",
+             note_it="Progettato da Canton, la città cinese gemellata con Sydney, il giardino fu aperto nel 1988, per il bicentenario."),
+        # Source: Wikipedia, Chinese Garden of Friendship; Wikipedia (es), Jardín chino de la Amistad.
+    ],
+)
+
+SEOUL = Walk(
+    id="SEOUL_GWANGHWAMUN_NAMSAN",
+    city="seoul",
+    city_en="Seoul",
+    city_it="Seul",
+    route_en="From Gwanghwamun Square to N Seoul Tower, by the palaces and the Cheonggyecheon",
+    route_it="Da piazza Gwanghwamun alla N Seoul Tower, passando per i palazzi e il Cheonggyecheon",
+    outing_en="A walk in Seoul",
+    outing_it="Passeggiata a Seul",
+    country="KR",
+    continent="ASIA_OCEANIA",
+    # The palaces' ponds. The Cheonggyecheon is a narrow stream: drawn as a line, as wide as it is.
+    water=["relation/4005465", "relation/13407146", "relation/15457595", "relation/5672591"],
+    canals=["way/368276771", "way/769631455"],
+    # Namsan's woods, Jongmyo's, Changdeokgung's Secret Garden, Gyeongbokgung's lawns, the hills behind.
+    parks=[
+        "way/244397333", "relation/5688761", "relation/10799909", "relation/10966163", "relation/6638151",
+        "relation/10351443", "way/624285855", "relation/10804175", "way/370019676",
+    ],
+    stops=[
+        Stop("seoul_gwanghwamun_square", "Gwanghwamun Square", "Piazza Gwanghwamun", 37.5711, 126.9769,
+             note_en="Opened in 2009 in front of Gyeongbokgung, the square holds the statues of King Sejong and Admiral Yi Sun-sin.",
+             note_it="Aperta nel 2009 davanti al Gyeongbokgung, la piazza ospita le statue del re Sejong e dell'ammiraglio Yi Sun-sin."),
+        # Source: Wikipedia, Gwanghwamun Square; Wikipedia (ko), 광화문광장.
+        Stop("seoul_gwanghwamun", "Gwanghwamun", "Gwanghwamun", 37.5753, 126.9769,
+             note_en="Gyeongbokgung's great gate was moved under Japanese rule, burned in the Korean War, and stood again in its place in 2010.",
+             note_it="La grande porta del Gyeongbokgung fu spostata sotto il dominio giapponese, bruciò nella guerra di Corea e nel 2010 tornò al suo posto."),
+        # Source: Wikipedia, Gwanghwamun; Wikipedia (ko), 광화문.
+        Stop("seoul_bukchon", "Bukchon Hanok Village", "Bukchon Hanok Village", 37.5826, 126.985,
+             note_en="Bukchon means north village, north of the Cheonggyecheon; its lanes keep many hanok, traditional Korean houses.",
+             note_it="Bukchon vuol dire villaggio del nord, a nord del Cheonggyecheon; i suoi vicoli conservano molti hanok, le case tradizionali coreane."),
+        # Source: Wikipedia, Bukchon Hanok Village; Wikipedia (ko), 북촌 한옥마을.
+        Stop("seoul_changdeokgung", "Changdeokgung", "Changdeokgung", 37.5794, 126.991,
+             note_en="Built in 1405, after Gyeongbokgung, this palace was for centuries the kings' main seat, and is a World Heritage Site.",
+             note_it="Costruito nel 1405, dopo il Gyeongbokgung, questo palazzo fu per secoli la sede principale dei re ed è patrimonio dell'umanità."),
+        # Source: Wikipedia, Changdeokgung; Wikipedia (ko), 창덕궁.
+        Stop("seoul_jongmyo", "Jongmyo", "Jongmyo", 37.5716, 126.9941,
+             note_en="The spirit tablets of Joseon's kings and queens are kept in this shrine, a World Heritage Site since 1995.",
+             note_it="In questo santuario sono custodite le tavolette spirituali dei re e delle regine di Joseon; è patrimonio dell'umanità dal 1995."),
+        # Source: Wikipedia, Jongmyo; Wikipedia (ko), 종묘.
+        Stop("seoul_insadong", "Insa-dong", "Insa-dong", 37.574, 126.9852,
+             note_en="Insa-dong's antique trade began under Japanese rule; galleries came later, and fill its alleys today.",
+             note_it="Il commercio di antichità di Insa-dong cominciò sotto il dominio giapponese; poi arrivarono le gallerie, che oggi riempiono i suoi vicoli."),
+        # Source: Wikipedia, Insa-dong; Wikipedia (ko), 인사동.
+        Stop("seoul_jogyesa", "Jogyesa", "Jogyesa", 37.5737, 126.9818,
+             note_en="Founded in 1910 and named Jogyesa in 1954, the temple keeps in its courtyard a white pine protected as a natural monument.",
+             note_it="Fondato nel 1910 e chiamato Jogyesa dal 1954, il tempio custodisce nel cortile un pino bianco protetto come monumento naturale."),
+        # Source: Wikipedia, Jogyesa; Wikipedia (ko), 조계사.
+        Stop("seoul_cheonggyecheon", "Cheonggyecheon", "Cheonggyecheon", 37.569, 126.9813,
+             note_en="Covered last century by concrete and an elevated road, the stream was brought back to light in 2005.",
+             note_it="Coperto nel secolo scorso dal cemento e da una strada sopraelevata, il torrente tornò alla luce nel 2005."),
+        # Source: Wikipedia, Cheonggyecheon; Wikipedia (ko), 청계천.
+        Stop("seoul_deoksugung", "Deoksugung", "Deoksugung", 37.5658, 126.9768,
+             note_en="The main palace of the Korean Empire, proclaimed by Gojong in 1897, it mixes Korean halls with Western buildings.",
+             note_it="Palazzo principale dell'Impero coreano, proclamato da Gojong nel 1897, unisce padiglioni coreani ed edifici occidentali."),
+        # Source: Wikipedia, Deoksugung; Wikipedia (ko), 덕수궁.
+        Stop("seoul_sungnyemun", "Sungnyemun", "Sungnyemun", 37.5603, 126.9754,
+             note_en="The old south gate of Seoul's walls burned in an arson attack in 2008, and was restored by 2013.",
+             note_it="L'antica porta sud delle mura di Seul bruciò in un incendio doloso nel 2008 e fu restaurata entro il 2013."),
+        # Source: Wikipedia, Namdaemun; Wikipedia (ko), 숭례문. The year it was built differs (1396 or 1398): not said.
+        Stop("seoul_namdaemun_market", "Namdaemun Market", "Mercato di Namdaemun", 37.5592, 126.9776,
+             note_en="In 1414 the court built shops here by the south gate: the beginning of today's market.",
+             note_it="Nel 1414 la corte costruì qui botteghe presso la porta sud: è l'inizio del mercato di oggi."),
+        # Source: Wikipedia, Namdaemun Market; Wikipedia (ko), 남대문시장.
+        Stop("seoul_n_tower", "N Seoul Tower", "N Seoul Tower", 37.5513, 126.9882,
+             note_en="Finished in 1975 on Namsan, the 236-metre tower sends out the broadcasters' signals over Seoul.",
+             note_it="Finita nel 1975 sul Namsan, la torre alta 236 metri trasmette i segnali delle emittenti su Seul."),
+        # Source: Wikipedia, Namsan Seoul Tower; Wikipedia (ko), YTN서울타워.
+    ],
+)
+
+BEIJING = Walk(
+    id="BEIJING_TIANANMEN_YONGHE",
+    city="beijing",
+    city_en="Beijing",
+    city_it="Pechino",
+    route_en="From Tiananmen Square to the Lama Temple, through the Forbidden City and by Beihai and the Drum Tower",
+    route_it="Da piazza Tienanmen al Tempio dei Lama, attraverso la Città Proibita e passando per Beihai e la Torre del Tamburo",
+    outing_en="A walk in Beijing",
+    outing_it="Passeggiata a Pechino",
+    country="CN",
+    continent="ASIA_OCEANIA",
+    # The Forbidden City's moat; Beihai, Zhonghai and Nanhai; Shichahai's lakes.
+    water=[
+        "way/4845030", "relation/5451458", "relation/68127", "relation/3531212", "relation/11518929",
+        "relation/409777",
+    ],
+    # Jingshan, Beihai, Zhongshan Park, the parks along the Imperial City's old wall, Prince Gong's garden.
+    parks=[
+        "way/29201967", "way/366464114", "relation/18320943", "relation/9054321", "way/30843688",
+        "relation/9509823", "way/268548508",
+    ],
+    stops=[
+        Stop("beijing_tiananmen_square", "Tiananmen Square", "Piazza Tienanmen", 39.9032, 116.3918,
+             note_en="The square lies where the Ming and the Qing had their Corridor of a Thousand Steps; it was widened in the 1950s.",
+             note_it="La piazza sorge dove i Ming e i Qing avevano il Corridoio dei mille passi; fu allargata negli anni Cinquanta."),
+        # Source: Wikipedia, Tiananmen Square; Wikipedia (zh), 天安门广场.
+        Stop("beijing_tiananmen", "Tiananmen", "Tienanmen", 39.9073, 116.3913,
+             note_en="Called Chengtianmen under the Ming, this gate of the Imperial City now appears on China's national emblem.",
+             note_it="Sotto i Ming si chiamava Chengtianmen; questa porta della Città imperiale compare oggi sull'emblema nazionale cinese."),
+        # Source: Wikipedia, Tiananmen; Wikipedia (zh), 天安门. The year it was built differs (1417 or 1420): not said.
+        # Through the Forbidden City (owner, 6 Oct 2026): in by the Meridian Gate, out by the Gate of
+        # Divine Might, as visitors go; the places inside are closer than elsewhere, by design.
+        Stop("beijing_meridian_gate", "Meridian Gate", "Porta Meridiana", 39.9128, 116.3912,
+             note_en="Through the Meridian Gate, its south gate, you enter the Forbidden City, home of the emperors from 1420 until 1924.",
+             note_it="Dalla Porta Meridiana, la sua porta sud, si entra nella Città Proibita, dimora degli imperatori dal 1420 al 1924."),
+        # Source: Wikipedia, Meridian Gate, and Forbidden City (the emperors' residence from 1420 to 1924); Wikipedia (zh), 午門 (北京), and 故宫 (finished in 1420, Puyi gone in 1924).
+        Stop("beijing_supreme_harmony", "Hall of Supreme Harmony", "Sala della Suprema Armonia", 39.9155, 116.3908,
+             note_en="The palace's largest hall, on a terrace of three marble tiers, is where the Ming and Qing emperors were enthroned.",
+             note_it="La sala più grande del palazzo, su una terrazza di marmo a tre livelli, è dove salivano al trono gli imperatori Ming e Qing."),
+        # Source: Wikipedia, Hall of Supreme Harmony; Wikipedia (zh), 太和殿.
+        Stop("beijing_heavenly_purity", "Palace of Heavenly Purity", "Palazzo della Purezza Celeste", 39.9183, 116.3908,
+             note_en="From the Yongzheng Emperor on, the Qing hid the name of their heir behind the tablet above this throne.",
+             note_it="Dall'imperatore Yongzheng in poi, i Qing nascosero il nome del loro erede dietro la tavoletta sopra questo trono."),
+        # Source: Wikipedia, Palace of Heavenly Purity; Wikipedia (zh), 乾清宫.
+        Stop("beijing_divine_might", "Gate of Divine Might", "Porta del Vigore Divino", 39.9218, 116.3906,
+             note_en="Past the Imperial Garden, you leave the Forbidden City by its north gate, first named for the Black Tortoise of the north.",
+             note_it="Passato il Giardino Imperiale, si esce dalla Città Proibita dalla sua porta nord, che in origine prendeva il nome dalla Tartaruga Nera del nord."),
+        # Source: Wikipedia, Gate of Divine Prowess, and Forbidden City (the garden south of the gate); Wikipedia (zh), 神武門. The Imperial Garden has an article in Chinese only: named, not a stop.
+        Stop("beijing_jingshan", "Jingshan Park", "Parco Jingshan", 39.9236, 116.3917,
+             note_en="In 1644, as rebels took Beijing, the last Ming emperor, Chongzhen, hanged himself from a tree on this hill.",
+             note_it="Nel 1644, mentre i ribelli prendevano Pechino, l'ultimo imperatore Ming, Chongzhen, si impiccò a un albero su questa collina."),
+        # Source: Wikipedia, Jingshan Park; Wikipedia (zh), 景山公园. When the hill was raised differs: not said.
+        Stop("beijing_white_dagoba", "White Dagoba", "Dagoba Bianco", 39.9255, 116.3836,
+             note_en="Raised in 1651, the White Dagoba crowns Jade Flower Island, in the middle of Beihai's lake.",
+             note_it="Eretto nel 1651, il Dagoba Bianco corona l'isola dei Fiori di Giada, in mezzo al lago di Beihai."),
+        # Source: Wikipedia, Beihai Park; Wikipedia (zh), 北海公园. Why it was built differs (a Dalai Lama's visit, a lama's request), and the year the park opened (1922 or 1925): not said.
+        Stop("beijing_nine_dragon_wall", "Nine-Dragon Wall", "Muro dei Nove Draghi", 39.931, 116.3822,
+             note_en="Built in 1756, this screen wall has nine dragons on each side.",
+             note_it="Costruito nel 1756, questo muro schermo ha nove draghi su ciascun lato."),
+        # Source: Wikipedia, Nine-Dragon Wall; Wikipedia (zh), 九龙壁.
+        Stop("beijing_prince_gong", "Prince Gong's Mansion", "Residenza del principe Gong", 39.9362, 116.3815,
+             note_en="Built for Heshen, a minister of the Qianlong Emperor, the mansion later became the home of Prince Gong, whose name it keeps.",
+             note_it="Costruita per Heshen, ministro dell'imperatore Qianlong, la residenza fu poi la casa del principe Gong, di cui porta il nome."),
+        # Source: Wikipedia, Prince Gong's Mansion; Wikipedia (zh), 恭王府. The years differ (1777, or 1780 to 1788): not said.
+        Stop("beijing_shichahai", "Shichahai", "Shichahai", 39.9376, 116.3872,
+             note_en="Shichahai's three lakes were once part of the Grand Canal, which reached Beijing from Hangzhou.",
+             note_it="I tre laghi di Shichahai facevano parte del Canale Imperiale, che arrivava a Pechino da Hangzhou."),
+        # Source: Wikipedia, Shichahai; Wikipedia (zh), 什刹海. The stop is the Yinding Bridge.
+        Stop("beijing_drum_tower", "Drum Tower", "Torre del Tamburo", 39.939, 116.3897,
+             note_en="First built in 1272, under the Yuan, the Drum Tower was rebuilt here under the Ming.",
+             note_it="Costruita per la prima volta nel 1272, sotto gli Yuan, la Torre del Tamburo fu ricostruita qui sotto i Ming."),
+        # Source: Wikipedia, Drum Tower and Bell Tower of Beijing; Wikipedia (zh), 北京鼓楼和钟楼.
+        Stop("beijing_bell_tower", "Bell Tower", "Torre della Campana", 39.9412, 116.3897,
+             note_en="Just behind the Drum Tower, the Bell Tower kept the city's official time with it until 1924.",
+             note_it="Subito dietro la Torre del Tamburo, la Torre della Campana scandì con lei l'ora ufficiale della città fino al 1924."),
+        # Source: Wikipedia, Drum Tower and Bell Tower of Beijing; Wikipedia (zh), 北京鼓楼和钟楼.
+        Stop("beijing_nanluoguxiang", "Nanluoguxiang", "Nanluoguxiang", 39.9403, 116.3966,
+             note_en="Nearly 800 metres long, this hutong took its present name under the Qing, by about 1750.",
+             note_it="Lungo quasi 800 metri, questo hutong prese il nome attuale sotto i Qing, intorno al 1750."),
+        # Source: Wikipedia, Nanluoguxiang; Wikipedia (zh), 南锣鼓巷. The stop is its north end, crossed on the way east.
+        Stop("beijing_lama_temple", "Lama Temple", "Tempio dei Lama", 39.9435, 116.4116,
+             note_en="Built as the home of Prince Yong, the future Yongzheng Emperor, it became a monastery of Tibetan Buddhism's Gelug school in 1744.",
+             note_it="Nata come residenza del principe Yong, il futuro imperatore Yongzheng, nel 1744 divenne un monastero della scuola Gelug del buddhismo tibetano."),
+        # Source: Wikipedia, Yonghe Temple; Wikipedia (zh), 雍和宫.
+    ],
+)
+
+HONG_KONG = Walk(
+    id="HONG_KONG_VICTORIA_WESTERN",
+    city="hong_kong",
+    city_en="Hong Kong",
+    city_it="Hong Kong",
+    route_en="From Victoria Park to Western Market, by Wan Chai, the harbour and Central",
+    route_it="Da Victoria Park al Western Market, passando per Wan Chai, il porto e Central",
+    outing_en="A walk in Hong Kong",
+    outing_it="Passeggiata a Hong Kong",
+    country="HK",
+    continent="ASIA_OCEANIA",
+    # The harbour, from the coastline.
+    coast=True,
+    water=[],
+    # Victoria Park, Hong Kong Park, the Botanical Gardens, Tamar Park, Chater Garden, the woods above.
+    parks=[
+        "way/4182605", "way/42255430", "relation/12955557", "way/138602057", "way/148784038",
+        "relation/11794569", "relation/4186983", "relation/11795322",
+    ],
+    stops=[
+        Stop("hong_kong_victoria_park", "Victoria Park", "Victoria Park", 22.2815, 114.1885,
+             note_en="Opened in 1957 on land reclaimed from the old Causeway Bay typhoon shelter, the park is named after Queen Victoria.",
+             note_it="Aperto nel 1957 su terreni strappati al vecchio rifugio per tifoni di Causeway Bay, il parco porta il nome della regina Vittoria."),
+        # Source: Wikipedia, Victoria Park (Hong Kong); Wikipedia (zh), 維多利亞公園.
+        Stop("hong_kong_noonday_gun", "Noonday Gun", "Noonday Gun", 22.283, 114.1832,
+             note_en="Every day at noon Jardines fires this gun, in amends, the story goes, for a salute once fired for the firm's own head.",
+             note_it="Ogni giorno a mezzogiorno la Jardines spara questo cannone, per rimediare, si racconta, a una salva sparata un tempo per il capo della ditta."),
+        # Source: Wikipedia, Noonday Gun (a penalty); Wikipedia (zh), 怡和午炮 (an apology): the sentence says amends.
+        Stop("hong_kong_pak_tai", "Pak Tai Temple", "Tempio di Pak Tai", 22.2731, 114.1738,
+             note_en="Built by the people of Wan Chai in 1863, the temple keeps a statue of Pak Tai three metres tall.",
+             note_it="Costruito dagli abitanti di Wan Chai nel 1863, il tempio custodisce una statua di Pak Tai alta tre metri."),
+        # Source: Wikipedia, Wan Chai Pak Tai Temple; Wikipedia (zh), 灣仔北帝廟.
+        Stop("hong_kong_golden_bauhinia", "Golden Bauhinia Square", "Piazza del Bauhinia d'oro", 22.284, 114.1738,
+             note_en="A gilded bauhinia six metres tall marks the handover of Hong Kong in 1997; the flag is raised here every morning at eight.",
+             note_it="Un bauhinia dorato alto sei metri ricorda il passaggio di Hong Kong del 1997; qui la bandiera sale ogni mattina alle otto."),
+        # Source: Wikipedia, Golden Bauhinia Square; Wikipedia (zh), 金紫荊廣場.
+        Stop("hong_kong_star_ferry", "Star Ferry Pier", "Molo dello Star Ferry", 22.287, 114.161,
+             note_en="From here the Star Ferry crosses the harbour to Tsim Sha Tsui, a service begun by Dorabjee Naorojee Mithaiwala, a Parsi.",
+             note_it="Da qui lo Star Ferry attraversa il porto fino a Tsim Sha Tsui, un servizio avviato da Dorabjee Naorojee Mithaiwala, un parsi."),
+        # Source: Wikipedia, Star Ferry; Wikipedia (zh), 天星小輪. The year it began differs (1880 or 1888): not said.
+        Stop("hong_kong_statue_square", "Statue Square", "Statue Square", 22.2812, 114.1603,
+             note_en="Named for Queen Victoria's statue, now in Victoria Park, the square keeps a single statue, of the banker Sir Thomas Jackson.",
+             note_it="Il nome viene dalla statua della regina Vittoria, oggi a Victoria Park; nella piazza resta una sola statua, del banchiere Sir Thomas Jackson."),
+        # Source: Wikipedia, Statue Square; Wikipedia (zh), 皇后像廣場.
+        Stop("hong_kong_hsbc", "HSBC Building", "Sede della HSBC", 22.28, 114.1593,
+             note_en="Opened in 1986, the bank's tower shows its steel frame outside; the bronze lions at its door follow those of its Shanghai office.",
+             note_it="Aperta nel 1986, la sede della banca mostra all'esterno la sua struttura d'acciaio; i leoni di bronzo all'ingresso imitano quelli della sede di Shanghai."),
+        # Source: Wikipedia, HSBC Building (Hong Kong); Wikipedia (zh), 滙豐總行大廈.
+        Stop("hong_kong_bank_of_china", "Bank of China Tower", "Bank of China Tower", 22.2795, 114.1612,
+             note_en="Designed by I. M. Pei, it was the tallest building in Hong Kong and in Asia when it opened in 1990.",
+             note_it="Progettata da I. M. Pei, quando aprì nel 1990 era l'edificio più alto di Hong Kong e dell'Asia."),
+        # Source: Wikipedia, Bank of China Tower (Hong Kong); Wikipedia (zh), 中銀大廈 (香港).
+        Stop("hong_kong_flagstaff_house", "Flagstaff House", "Flagstaff House", 22.278, 114.1625,
+             note_en="Built in 1846 for the commander of the British forces, the house is now a museum of tea ware.",
+             note_it="Costruita nel 1846 per il comandante delle forze britanniche, la casa è oggi un museo di teiere e servizi da tè."),
+        # Source: Wikipedia, Flagstaff House, Hong Kong; Wikipedia (zh), 茶具文物館.
+        Stop("hong_kong_st_johns", "St John's Cathedral", "Cattedrale di San Giovanni", 22.2789, 114.1599,
+             note_en="Hong Kong's oldest Western church, finished in 1849, stands on the only freehold land in the city.",
+             note_it="La più antica chiesa occidentale di Hong Kong, finita nel 1849, sorge sull'unico terreno in piena proprietà della città."),
+        # Source: Wikipedia, St John's Cathedral (Hong Kong); Wikipedia (zh), 聖約翰座堂 (香港).
+        Stop("hong_kong_peak_tram", "Peak Tram", "Peak Tram", 22.2776, 114.1597,
+             note_en="Opened in 1888, the funicular climbs from here to Victoria Peak.",
+             note_it="Aperta nel 1888, la funicolare sale da qui fino al Victoria Peak."),
+        # Source: Wikipedia, Peak Tram; Wikipedia (zh), 山頂纜車.
+        Stop("hong_kong_tai_kwun", "Tai Kwun", "Tai Kwun", 22.2814, 114.1546,
+             note_en="The old Central Police Station, with the magistracy and Victoria Prison, reopened to the public in 2018 as Tai Kwun.",
+             note_it="La vecchia stazione di polizia centrale, con il tribunale e la prigione Victoria, ha riaperto al pubblico nel 2018 come Tai Kwun."),
+        # Source: Wikipedia, Tai Kwun; Wikipedia (zh), 大館.
+        Stop("hong_kong_pmq", "PMQ", "PMQ", 22.2832, 114.152,
+             note_en="Once quarters for married policemen, on the site of Queen's College, the buildings became a creative centre in 2014.",
+             note_it="Un tempo alloggi per poliziotti sposati, dove sorgeva il Queen's College, gli edifici sono diventati un centro creativo nel 2014."),
+        # Source: Wikipedia, PMQ (Hong Kong); Wikipedia (zh), 元創方 (the Central School, Queen's College's first name).
+        Stop("hong_kong_man_mo", "Man Mo Temple", "Tempio di Man Mo", 22.284, 114.1503,
+             note_en="The temple honours Man Cheong, god of literature, and Kwan Tai, god of war; the Tung Wah hospitals have run it since 1908.",
+             note_it="Il tempio onora Man Cheong, dio della letteratura, e Kwan Tai, dio della guerra; dal 1908 è gestito dagli ospedali Tung Wah."),
+        # Source: Wikipedia, Man Mo temples in Hong Kong; Wikipedia (zh), 東華三院文武廟. Its year differs (1847, or 1847 to 1862): not said.
+        Stop("hong_kong_western_market", "Western Market", "Western Market", 22.2873, 114.1502,
+             note_en="Built in 1906, this was the north block of the old Western Market.",
+             note_it="Costruito nel 1906, era il blocco nord del vecchio Western Market."),
+        # Source: Wikipedia, Western Market; Wikipedia (zh), 西港城.
+    ],
+)
+
+SINGAPORE = Walk(
+    id="SINGAPORE_CHINATOWN_GARDENS",
+    city="singapore",
+    city_en="Singapore",
+    city_it="Singapore",
+    route_en="From Chinatown to Gardens by the Bay, by Fort Canning, the river and Marina Bay",
+    route_it="Da Chinatown ai Gardens by the Bay, passando per Fort Canning, il fiume e Marina Bay",
+    outing_en="A walk in Singapore",
+    outing_it="Passeggiata a Singapore",
+    country="SG",
+    continent="ASIA_OCEANIA",
+    # Inside the Marina Barrage, Marina Bay is a reservoir, with the river; the sea's coastline is
+    # beyond the barrage, outside the map.
+    water=["relation/9542146", "relation/9569901"],
+    parks=["way/16892550", "relation/10231144", "relation/9976848", "way/687917300", "way/460428718"],
+    stops=[
+        Stop("singapore_buddha_tooth", "Buddha Tooth Relic Temple", "Tempio della Reliquia del Dente di Buddha", 1.2815, 103.8443,
+             note_en="In the heart of Chinatown, this temple keeps a relic held to be a tooth of the Buddha.",
+             note_it="Nel cuore di Chinatown, questo tempio custodisce una reliquia ritenuta un dente del Buddha."),
+        # Source: Wikipedia, Buddha Tooth Relic Temple and Museum ("it is claimed"); Wikipedia (zh), 佛牙寺龙华院.
+        Stop("singapore_sri_mariamman", "Sri Mariamman Temple", "Tempio di Sri Mariamman", 1.2827, 103.8455,
+             note_en="Founded in 1827 by Naraina Pillai, this is Singapore's oldest Hindu temple.",
+             note_it="Fondato nel 1827 da Naraina Pillai, è il più antico tempio indù di Singapore."),
+        # Source: Wikipedia, Sri Mariamman Temple, Singapore; Wikipedia (zh), 马里安曼庙.
+        Stop("singapore_clarke_quay", "Clarke Quay", "Clarke Quay", 1.289, 103.8463,
+             note_en="Named after the governor Sir Andrew Clarke, the quay's old warehouses are now restaurants and bars.",
+             note_it="Intitolato al governatore Sir Andrew Clarke, il molo ha i vecchi magazzini trasformati in ristoranti e locali."),
+        # Source: Wikipedia, Clarke Quay; Wikipedia (zh), 克拉码头.
+        Stop("singapore_fort_canning", "Fort Canning", "Fort Canning", 1.2945, 103.847,
+             note_en="The Malays called it Bukit Larangan, the Forbidden Hill; Stamford Raffles built his house on it.",
+             note_it="I malesi la chiamavano Bukit Larangan, la collina proibita; Stamford Raffles vi costruì la sua casa."),
+        # Source: Wikipedia, Fort Canning Hill; Wikipedia (de), Fort Canning Park.
+        Stop("singapore_raffles_hotel", "Raffles Hotel", "Raffles Hotel", 1.2947, 103.8546,
+             note_en="Opened in 1887, the hotel is where the Singapore Sling was invented.",
+             note_it="Aperto nel 1887, l'albergo è il luogo dove fu inventato il Singapore Sling."),
+        # Source: Wikipedia, Raffles Hotel; Wikipedia (zh), 萊佛士酒店.
+        Stop("singapore_st_andrews", "St Andrew's Cathedral", "Cattedrale di Sant'Andrea", 1.2925, 103.8521,
+             note_en="The first church here was struck twice by lightning; this cathedral, finished in 1861, took its place.",
+             note_it="La prima chiesa qui fu colpita due volte dal fulmine; questa cattedrale, finita nel 1861, ne prese il posto."),
+        # Source: Wikipedia, St Andrew's Cathedral, Singapore; Wikipedia (de), St. Andrew’s Cathedral (Singapur).
+        Stop("singapore_national_gallery", "National Gallery Singapore", "National Gallery Singapore", 1.2902, 103.8516,
+             note_en="Opened in 2015 in the former City Hall and Supreme Court, it is Singapore's largest visual arts venue.",
+             note_it="Aperta nel 2015 nell'ex municipio e nell'ex Corte suprema, è il più grande spazio per le arti visive di Singapore."),
+        # Source: Wikipedia, National Gallery Singapore; Wikipedia (zh), 新加坡國家美術館.
+        Stop("singapore_raffles_landing", "Raffles' Landing Site", "Approdo di Raffles", 1.2877, 103.8507,
+             note_en="Stamford Raffles is held to have landed here in 1819; his statue marks the spot.",
+             note_it="Si ritiene che Stamford Raffles sia sbarcato qui nel 1819; la sua statua segna il punto."),
+        # Source: Wikipedia, Raffles's Landing Site; Wikipedia (de), Thomas Stamford Raffles (his arrival in 1819). The day differs (28 or 29 January): not said.
+        Stop("singapore_fullerton", "Fullerton Hotel", "Fullerton Hotel", 1.2862, 103.853,
+             note_en="Finished in 1928 as the General Post Office, the building, named after Robert Fullerton, is now a hotel.",
+             note_it="Finito nel 1928 come sede delle Poste centrali, l'edificio, intitolato a Robert Fullerton, è oggi un albergo."),
+        # Source: Wikipedia, The Fullerton Hotel Singapore; Wikipedia (zh), 富麗敦酒店.
+        Stop("singapore_merlion", "Merlion", "Merlion", 1.2868, 103.8545,
+             note_en="Half lion, half fish, the Merlion recalls the Lion City and the fishing village Singapore once was; this one is 8.6 metres tall.",
+             note_it="Metà leone e metà pesce, il Merlion ricorda la Città del Leone e il villaggio di pescatori che Singapore era un tempo; questo è alto 8,6 metri."),
+        # Source: Wikipedia, Merlion; Wikipedia (zh), 鱼尾狮.
+        Stop("singapore_esplanade", "Esplanade", "Esplanade", 1.2896, 103.856,
+             note_en="Opened in 2002, the theatres' two domes are covered in aluminium sunshades against the tropical sun.",
+             note_it="Aperti nel 2002, i teatri hanno due cupole coperte di frangisole d'alluminio contro il sole tropicale."),
+        # Source: Wikipedia, Esplanade – Theatres on the Bay; Wikipedia (zh), 濱海藝術中心. Its nickname, the Durian, is in one only: not said.
+        Stop("singapore_helix_bridge", "Helix Bridge", "Helix Bridge", 1.2876, 103.8603,
+             note_en="Opened in 2010, this footbridge is shaped like DNA; at night it lights up the letters c, g, a and t, its four bases.",
+             note_it="Aperto nel 2010, questo ponte pedonale ha la forma del DNA; di notte vi si accendono le lettere c, g, a e t, le sue quattro basi."),
+        # Source: Wikipedia, Helix Bridge; Wikipedia (zh), 螺旋桥.
+        Stop("singapore_marina_bay_sands", "Marina Bay Sands", "Marina Bay Sands", 1.2837, 103.8605,
+             note_en="Designed by Moshe Safdie and opened in 2010, its three towers are joined at the top by the SkyPark and a 150-metre infinity pool.",
+             note_it="Progettato da Moshe Safdie e aperto nel 2010, ha tre torri unite in cima dallo SkyPark e da una piscina a sfioro di 150 metri."),
+        # Source: Wikipedia, Marina Bay Sands; Wikipedia (zh), 濱海灣金沙.
+        Stop("singapore_supertree_grove", "Supertree Grove", "Supertree Grove", 1.2818, 103.8638,
+             note_en="In Gardens by the Bay, opened in 2012, the Supertrees are covered in plants and light up every evening to music.",
+             note_it="Nei Gardens by the Bay, aperti nel 2012, i Supertree sono coperti di piante e si accendono ogni sera a ritmo di musica."),
+        # Source: Wikipedia, Gardens by the Bay; Wikipedia (it), Gardens by the Bay (the Chinese article has nothing on the Supertrees).
+    ],
+)
+
+BANGKOK = Walk(
+    id="BANGKOK_SWING_ARUN",
+    city="bangkok",
+    city_en="Bangkok",
+    city_it="Bangkok",
+    route_en="From the Giant Swing to Wat Arun, by the Golden Mount, the Grand Palace and Wat Pho",
+    route_it="Dall'Altalena gigante al Wat Arun, passando per il Monte d'oro, il Grande Palazzo e il Wat Pho",
+    outing_en="A walk in Bangkok",
+    outing_it="Passeggiata a Bangkok",
+    country="TH",
+    continent="ASIA_OCEANIA",
+    # The Chao Phraya, in two areas and many small ones (from the street tiles); the old city's
+    # moats and canals as lines.
+    water=["relation/14038958", "relation/14038959", "relation/14038956", "relation/1291706"],
+    water_from_tiles=True,
+    canals=["relation/19051851", "relation/21173153", "relation/20072015"],
+    canal_width=15.0,
+    parks=[
+        "way/23630232", "way/23486019", "relation/19894289", "way/560595626", "way/1552957093",
+    ],
+    stops=[
+        Stop("bangkok_giant_swing", "Giant Swing", "Altalena gigante", 13.7518, 100.5013,
+             note_en="In front of Wat Suthat, the swing served a Brahmin ceremony until 1935, when accidents brought it to an end.",
+             note_it="Davanti al Wat Suthat, l'altalena serviva a una cerimonia brahmanica fino al 1935, quando gli incidenti la fecero cessare."),
+        # Source: Wikipedia, Giant Swing; Wikipedia (de), Sao Ching Cha.
+        Stop("bangkok_golden_mount", "Golden Mount", "Monte d'oro", 13.7537, 100.506,
+             note_en="This artificial hill, crowned by a golden chedi, rose where a huge chedi begun under Rama III sank into the soft ground.",
+             note_it="Questa collina artificiale, coronata da un chedi d'oro, sorse dove un enorme chedi voluto da Rama III sprofondò nel terreno molle."),
+        # Source: Wikipedia, Wat Saket; Wikipedia (de), Wat Saket. Its steps differ (344 or 318): not said.
+        Stop("bangkok_loha_prasat", "Loha Prasat", "Loha Prasat", 13.7548, 100.5043,
+             note_en="Rama III built this temple in 1846 for his granddaughter; it is known for the Loha Prasat, the Iron Palace.",
+             note_it="Rama III fece costruire questo tempio nel 1846 per la nipote; è noto per il Loha Prasat, il Palazzo di ferro."),
+        # Source: Wikipedia, Wat Ratchanatdaram; Wikipedia (de), Wat Ratchanatdaram.
+        Stop("bangkok_democracy_monument", "Democracy Monument", "Monumento alla Democrazia", 13.7567, 100.5018,
+             note_en="Raised by Phibun's government, the monument recalls the revolution of 1932, which gave Siam a constitution.",
+             note_it="Voluto dal governo di Phibun, il monumento ricorda la rivoluzione del 1932, che diede al Siam una costituzione."),
+        # Source: Wikipedia, Democracy Monument; Wikipedia (it), Monumento alla Democrazia.
+        Stop("bangkok_khaosan", "Khaosan Road", "Khaosan Road", 13.7589, 100.4973,
+             note_en="Its name means milled rice, once sold here; since the 1980s it has been the backpackers' street.",
+             note_it="Il nome significa riso brillato, che un tempo si vendeva qui; dagli anni Ottanta è la via dei viaggiatori con lo zaino."),
+        # Source: Wikipedia, Khaosan Road; Wikipedia (de), Khaosan Road.
+        Stop("bangkok_phra_sumen", "Phra Sumen Fort", "Forte Phra Sumen", 13.7637, 100.4958,
+             note_en="Phra Sumen is one of the few left of the fourteen forts that guarded Bangkok's old walls.",
+             note_it="Phra Sumen è uno dei pochi rimasti dei quattordici forti che difendevano le antiche mura di Bangkok."),
+        # Source: Wikipedia, Fortifications of Bangkok (four remain); Wikipedia (de), Phra Nakhon (two remain): "few".
+        Stop("bangkok_national_museum", "National Museum", "Museo nazionale", 13.7578, 100.4925,
+             note_en="Founded by King Chulalongkorn in 1874, the museum fills the Front Palace of the old vice-kings, the Wang Na.",
+             note_it="Fondato dal re Chulalongkorn nel 1874, il museo occupa il Palazzo anteriore degli antichi viceré, il Wang Na."),
+        # Source: Wikipedia, Bangkok National Museum; Wikipedia (de), Nationalmuseum Bangkok.
+        Stop("bangkok_wat_mahathat", "Wat Mahathat", "Wat Mahathat", 13.7551, 100.4917,
+             note_en="Older than Bangkok, when it was called Wat Salak, the temple now holds a Buddhist university for monks.",
+             note_it="Più antico di Bangkok, quando si chiamava Wat Salak, il tempio ospita oggi un'università buddhista per monaci."),
+        # Source: Wikipedia, Wat Mahathat Yuwaratrangsarit; Wikipedia (de), Wat Mahathat (Bangkok).
+        Stop("bangkok_wat_phra_kaew", "Wat Phra Kaew", "Wat Phra Kaew", 13.7522, 100.4937,
+             note_en="In the grounds of the Grand Palace, this is the temple of the Emerald Buddha, the kings' own.",
+             note_it="Nel recinto del Grande Palazzo, è il tempio del Buddha di Smeraldo, il tempio dei re."),
+        # Source: Wikipedia, Wat Phra Kaew; Wikipedia (de), Wat Phra Kaeo.
+        Stop("bangkok_wat_pho", "Wat Pho", "Wat Pho", 13.7465, 100.4935,
+             note_en="Its reclining Buddha is 46 metres long, and the temple is a home of traditional Thai massage.",
+             note_it="Il suo Buddha disteso è lungo 46 metri, e il tempio è una casa del massaggio tradizionale thailandese."),
+        # Source: Wikipedia, Wat Pho; Wikipedia (de), Wat Pho.
+        Stop("bangkok_memorial_bridge", "Memorial Bridge", "Ponte Phra Phutthayotfa", 13.7393, 100.4976,
+             note_en="Opened in 1932 for the 150th year of the Chakri dynasty, the bridge crosses to Thonburi; its middle once lifted for ships.",
+             note_it="Aperto nel 1932 per i 150 anni della dinastia Chakri, il ponte porta a Thonburi; un tempo la parte centrale si alzava per le navi."),
+        # Source: Wikipedia, Memorial Bridge (Bangkok); Wikipedia (de), Phra-Phutthayotfa-Brücke. Pak Khlong Talat, the flower market before it, has an article in English only.
+        Stop("bangkok_wat_arun", "Wat Arun", "Wat Arun", 13.7437, 100.4895,
+             note_en="The Temple of Dawn kept the Emerald Buddha before it crossed the river; its prang is covered in pieces of Chinese porcelain.",
+             note_it="Il Tempio dell'Aurora custodì il Buddha di Smeraldo prima che attraversasse il fiume; il suo prang è rivestito di frammenti di porcellana cinese."),
+        # Source: Wikipedia, Wat Arun; Wikipedia (de), Wat Arun. The year the Buddha moved differs (1784 or 1785): not said.
+    ],
+)
+
+KYOTO = Walk(
+    id="KYOTO_KIYOMIZU_NISHIKI",
+    city="kyoto",
+    city_en="Kyoto",
+    city_it="Kyoto",
+    route_en="From Kiyomizu-dera to the Nishiki market, by Gion and Pontochō",
+    route_it="Dal Kiyomizu-dera al mercato di Nishiki, passando per Gion e Pontochō",
+    outing_en="A walk in Kyoto",
+    outing_it="Passeggiata a Kyoto",
+    country="JP",
+    continent="ASIA_OCEANIA",
+    # A short walk (about 5 km). The Kamo, many small areas, from the street tiles; the Takase
+    # and the lake canal as lines.
+    water=[],
+    water_from_tiles=True,
+    canals=["relation/18827840", "relation/9491921"],
+    canal_width=8.0,
+    # Gion and Higashiyama are mapped mostly as residential lanes: without them the map is a few lines.
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=400,
+    parks=["way/54170783", "relation/9371889"],
+    stops=[
+        Stop("kyoto_kiyomizu", "Kiyomizu-dera", "Kiyomizu-dera", 34.9963, 135.7826,
+             note_en="The temple's great wooden stage, built without a single nail, gave Japan the saying: to jump off the stage at Kiyomizu, to take the plunge.",
+             note_it="La grande terrazza di legno del tempio, costruita senza un solo chiodo, ha dato al Giappone il detto: saltare dalla terrazza del Kiyomizu, cioè buttarsi."),
+        # Source: Wikipedia, Kiyomizu-dera; Wikipedia (ja), 清水寺.
+        Stop("kyoto_sannenzaka", "Sannenzaka", "Sannenzaka", 34.997, 135.7812,
+             note_en="On the way up to Kiyomizu, this stepped lane is a protected district of traditional houses.",
+             note_it="Sulla salita al Kiyomizu, questa via a gradini è un quartiere protetto di case tradizionali."),
+        # Source: Wikipedia, Sannenzaka; Wikipedia (ja), 産寧坂. The year it was protected differs (1972 or 1976): not said.
+        Stop("kyoto_yasaka_pagoda", "Yasaka Pagoda", "Pagoda di Yasaka", 34.9985, 135.7795,
+             note_en="The five-storey pagoda standing today was rebuilt in 1440, after it had been destroyed more than once.",
+             note_it="La pagoda a cinque piani che si vede oggi fu ricostruita nel 1440, dopo essere stata distrutta più volte."),
+        # Source: Wikipedia, Yasaka Pagoda; Wikipedia (ja), 法観寺.
+        Stop("kyoto_kodaiji", "Kōdai-ji", "Kōdai-ji", 35.001, 135.78,
+             note_en="Toyotomi Hideyoshi's widow, become the nun Kōdai-in, founded this temple to pray for his soul.",
+             note_it="La vedova di Toyotomi Hideyoshi, divenuta la monaca Kōdai-in, fondò questo tempio per pregare per la sua anima."),
+        # Source: Wikipedia, Kōdai-ji; Wikipedia (ja), 高台寺.
+        Stop("kyoto_maruyama", "Maruyama Park", "Parco Maruyama", 35.0038, 135.78,
+             note_en="Kyoto's best-known park for the cherry blossom is famous for its great weeping cherry.",
+             note_it="Il parco più noto di Kyoto per la fioritura dei ciliegi è famoso per il suo grande ciliegio piangente."),
+        # Source: Wikipedia, Maruyama Park; Wikipedia (ja), 円山公園 (京都府).
+        Stop("kyoto_yasaka_shrine", "Yasaka Shrine", "Santuario di Yasaka", 35.0036, 135.7766,
+             note_en="Dedicated to the god Susanoo, the shrine holds the Gion Matsuri every July.",
+             note_it="Dedicato al dio Susanoo, il santuario celebra ogni luglio il Gion Matsuri."),
+        # Source: Wikipedia, Yasaka Shrine; Wikipedia (ja), 八坂神社.
+        Stop("kyoto_hanamikoji", "Hanamikōji", "Hanamikōji", 35.0022, 135.7748,
+             note_en="Gion is one of Japan's best-known geisha districts; in Kyoto the geisha are called geiko.",
+             note_it="Gion è uno dei quartieri delle geisha più noti del Giappone; a Kyoto le geisha si chiamano geiko."),
+        # Source: Wikipedia, Gion; Wikipedia (ja), 祇園. Shirakawa, beyond, is described in the Japanese article only: not a stop.
+        Stop("kyoto_kenninji", "Kennin-ji", "Kennin-ji", 35.0003, 135.774,
+             note_en="This Zen temple was founded in 1202, with the monk Eisai as its first abbot.",
+             note_it="Questo tempio zen fu fondato nel 1202, con il monaco Eisai come primo abate."),
+        # Source: Wikipedia, Kennin-ji; Wikipedia (ja), 建仁寺.
+        Stop("kyoto_pontocho", "Pontochō", "Pontochō", 35.0042, 135.7712,
+             note_en="This narrow lane by the Kamo River may take its name from Portuguese, and is one of Kyoto's geisha districts.",
+             note_it="Questo vicolo stretto lungo il fiume Kamo deve forse il nome al portoghese, ed è uno dei quartieri delle geisha di Kyoto."),
+        # Source: Wikipedia, Ponto-chō; Wikipedia (ja), 先斗町. Both give the Portuguese as a theory.
+        Stop("kyoto_nishiki", "Nishiki Market", "Mercato di Nishiki", 35.005, 135.766,
+             note_en="Called Kyoto's kitchen, the market grew from fish shops that kept their fish fresh in the cold groundwater, for the palace.",
+             note_it="Detto «la cucina di Kyoto», il mercato nacque da botteghe di pesce che lo tenevano fresco nell'acqua fredda del sottosuolo, per il palazzo."),
+        # Source: Wikipedia, Nishiki Market; Wikipedia (ja), 錦市場.
+    ],
+)
+
+HANOI = Walk(
+    id="HANOI_VAN_MIEU_LONG_BIEN",
+    city="hanoi",
+    city_en="Hanoi",
+    city_it="Hanoi",
+    route_en="From the Temple of Literature to the Long Biên Bridge, by Hoàn Kiếm Lake and the Old Quarter",
+    route_it="Dal Tempio della Letteratura al ponte Long Biên, passando per il lago Hoàn Kiếm e il Quartiere vecchio",
+    outing_en="A walk in Hanoi",
+    outing_it="Passeggiata a Hanoi",
+    country="VN",
+    continent="ASIA_OCEANIA",
+    # A short walk (about 5 km). Hoàn Kiếm Lake; the Red River.
+    water=["relation/198437", "relation/6907107"],
+    # The Long Biên Bridge's deck is mapped as a residential street, and so are many of the Old
+    # Quarter's: the longer ones drawn, so the bridge reads as one over the river.
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=400,
+    parks=[
+        "relation/21390321", "relation/21422526", "relation/21422527", "way/218414273", "relation/14048553",
+    ],
+    stops=[
+        Stop("hanoi_van_mieu", "Temple of Literature", "Tempio della Letteratura", 21.0285, 105.837,
+             note_en="Founded in 1070 for Confucius, the temple keeps stelae on stone turtles with the names of the scholars who passed the royal exams.",
+             note_it="Fondato nel 1070 in onore di Confucio, il tempio conserva stele su tartarughe di pietra con i nomi dei dotti promossi agli esami reali."),
+        # Source: Wikipedia, Temple of Literature, Hanoi; Wikipedia (fr), Temple de la Littérature de Hanoï. When its teaching ended differs (1779 or 1915): not said.
+        Stop("hanoi_hoa_lo", "Hỏa Lò Prison", "Prigione di Hỏa Lò", 21.0254, 105.8465,
+             note_en="Built by the French colonial government, the prison later held American prisoners of war, who called it the Hanoi Hilton; part of it is now a museum.",
+             note_it="Costruita dall'amministrazione coloniale francese, la prigione rinchiuse poi prigionieri di guerra americani, che la chiamarono Hanoi Hilton; oggi in parte è un museo."),
+        # Source: Wikipedia, Hỏa Lò Prison; Wikipedia (fr), Prison Hỏa Lò.
+        Stop("hanoi_st_joseph", "St Joseph's Cathedral", "Cattedrale di San Giuseppe", 21.0285, 105.8489,
+             note_en="Finished in 1886 in the Gothic Revival style, the cathedral is said to resemble Notre-Dame de Paris.",
+             note_it="Finita nel 1886 in stile neogotico, la cattedrale ricorderebbe Notre-Dame di Parigi."),
+        # Source: Wikipedia, St. Joseph's Cathedral, Hanoi; Wikipedia (fr), Cathédrale Saint-Joseph de Hanoï.
+        Stop("hanoi_hoan_kiem", "Hoàn Kiếm Lake", "Lago Hoàn Kiếm", 21.0279, 105.8516,
+             note_en="Here, the legend says, Emperor Lê Lợi gave his magic sword back to a turtle, after he had driven out the Chinese.",
+             note_it="Qui, dice la leggenda, l'imperatore Lê Lợi restituì la sua spada magica a una tartaruga, dopo aver cacciato i cinesi."),
+        # Source: Wikipedia, Hoàn Kiếm Lake; Wikipedia (fr), Lac Hoan Kiem. The turtle is golden in one only: not said.
+        Stop("hanoi_ngoc_son", "Ngọc Sơn Temple", "Tempio di Ngọc Sơn", 21.0311, 105.8528,
+             note_en="The Thê Húc bridge leads to this temple on its islet, which honours, among others, the national hero Trần Hưng Đạo.",
+             note_it="Il ponte Thê Húc porta a questo tempio sul suo isolotto, che onora tra gli altri l'eroe nazionale Trần Hưng Đạo."),
+        # Source: Wikipedia, Ngọc Sơn Temple; Wikipedia (fr), Temple Ngoc Son.
+        Stop("hanoi_old_quarter", "Old Quarter", "Quartiere vecchio", 21.0359, 105.8511,
+             note_en="Known as the 36 streets, the Old Quarter once gave each street its own trade.",
+             note_it="Detto le 36 strade, il Quartiere vecchio dava un tempo a ogni via il suo mestiere."),
+        # Source: Wikipedia, Old Quarter, Hanoi; Wikipedia (it), Quartiere vecchio di Hanoi. The Bạch Mã temple, here, has an article in Vietnamese only.
+        Stop("hanoi_dong_xuan", "Đồng Xuân Market", "Mercato di Đồng Xuân", 21.038, 105.8497,
+             note_en="Built by the French in place of two older markets, it was nearly destroyed by fire in 1994.",
+             note_it="Costruito dai francesi al posto di due mercati più antichi, fu quasi distrutto da un incendio nel 1994."),
+        # Source: Wikipedia, Đồng Xuân Market; Wikipedia (fr), Marché Đồng Xuân.
+        Stop("hanoi_long_bien", "Long Biên Bridge", "Ponte Long Biên", 21.044, 105.8605,
+             note_en="Built by Daydé & Pillé of Paris and first named after Paul Doumer, the bridge carries the railway over the Red River.",
+             note_it="Costruito dalla ditta parigina Daydé & Pillé e chiamato all'inizio come Paul Doumer, il ponte porta la ferrovia oltre il fiume Rosso."),
+        # Source: Wikipedia, Long Biên Bridge; Wikipedia (fr), Pont Long Biên. The year it was finished differs (1902 or 1903): not said.
+        # The stop is on the bridge, over the river, so the walk ends where the map shows a bridge.
+    ],
+)
+
+MELBOURNE = Walk(
+    id="MELBOURNE_FLINDERS_EXHIBITION",
+    city="melbourne",
+    city_en="Melbourne",
+    city_it="Melbourne",
+    route_en="From Flinders Street to the Royal Exhibition Building, by the State Library and Parliament",
+    route_it="Da Flinders Street al Royal Exhibition Building, passando per la State Library e il Parlamento",
+    outing_en="A walk in Melbourne",
+    outing_it="Passeggiata a Melbourne",
+    country="AU",
+    continent="ASIA_OCEANIA",
+    # A short walk (about 5 km). The Yarra.
+    water=["relation/954522"],
+    # The gardens along the Yarra, the Treasury and Fitzroy Gardens, the Carlton Gardens; the
+    # smaller ones the walk passes: Parliament's gardens, Gordon Reserve, the squares to the north.
+    parks=[
+        "way/46330961", "way/23909867", "way/24593719", "way/24593825", "way/4817097", "way/4817020",
+        "relation/6614802", "way/222848213", "way/27783990", "way/46142201", "way/510918356",
+        "way/32943432", "way/154434398", "way/177499279", "way/4817077",
+    ],
+    stops=[
+        Stop("melbourne_flinders_street", "Flinders Street Station", "Stazione di Flinders Street", -37.818, 144.9669,
+             note_en="The first station here served Australia's first railway in 1854; the clocks over the entrance show each line's next train.",
+             note_it="La prima stazione qui servì nel 1854 la prima ferrovia d'Australia; gli orologi sopra l'ingresso indicano il prossimo treno di ogni linea."),
+        # Source: Wikipedia, Flinders Street railway station; Wikipedia (de), Bahnhof Melbourne Flinders Street.
+        Stop("melbourne_st_pauls", "St Paul's Cathedral", "Cattedrale di San Paolo", -37.817, 144.9676,
+             note_en="William Butterfield's cathedral of 1891 stands where Melbourne's first public Christian service was held, in 1835.",
+             note_it="La cattedrale di William Butterfield, del 1891, sorge dove nel 1835 si tenne la prima funzione cristiana pubblica di Melbourne."),
+        # Source: Wikipedia, St Paul's Cathedral, Melbourne; Wikipedia (de), Pauluskathedrale (Melbourne).
+        Stop("melbourne_federation_square", "Federation Square", "Federation Square", -37.8179, 144.969,
+             note_en="Opened in 2002, the square and its galleries stand on a concrete deck above the railway lines.",
+             note_it="Aperta nel 2002, la piazza con le sue gallerie poggia su una piattaforma di cemento sopra i binari."),
+        # Source: Wikipedia, Federation Square; Wikipedia (fr), Federation Square. Hosier Lane, the Block Arcade and the GPO, on the way, have articles in English only.
+        Stop("melbourne_state_library", "State Library Victoria", "State Library Victoria", -37.8098, 144.965,
+             note_en="Among the library's treasures is the armour of the bushranger Ned Kelly.",
+             note_it="Tra i tesori della biblioteca c'è l'armatura del bandito Ned Kelly."),
+        # Source: Wikipedia, State Library Victoria; Wikipedia (de), State Library of Victoria. Its first year differs (1854 or 1856): not said.
+        Stop("melbourne_old_gaol", "Old Melbourne Gaol", "Old Melbourne Gaol", -37.8077, 144.9655,
+             note_en="Ned Kelly was among the prisoners of this gaol, closed in 1924 and now a museum.",
+             note_it="Ned Kelly fu tra i detenuti di questo carcere, chiuso nel 1924 e oggi museo."),
+        # Source: Wikipedia, Old Melbourne Gaol; Wikipedia (de), Old Melbourne Gaol. The number hanged differs (133 or 135): not said.
+        Stop("melbourne_princess_theatre", "Princess Theatre", "Princess Theatre", -37.8108, 144.9727,
+             note_en="Rebuilt in 1886 to William Pitt's design, the theatre had the world's first sliding roof.",
+             note_it="Ricostruito nel 1886 su progetto di William Pitt, il teatro ebbe il primo tetto scorrevole al mondo."),
+        # Source: Wikipedia, Princess Theatre (Melbourne); Wikipedia (de), Princess Theatre (Melbourne).
+        Stop("melbourne_parliament", "Parliament House", "Parlamento", -37.811, 144.9733,
+             note_en="Australia's parliament sat here while Melbourne was the capital; the dome its builders planned was never built.",
+             note_it="Qui si riunì il parlamento australiano quando Melbourne era la capitale; la cupola prevista non fu mai costruita."),
+        # Source: Wikipedia, Parliament House, Melbourne; Wikipedia (de), Parliament House (Melbourne). The year it left differs (1927 or 1928): not said.
+        Stop("melbourne_st_patricks", "St Patrick's Cathedral", "Cattedrale di San Patrizio", -37.8099, 144.9765,
+             note_en="This Gothic Revival cathedral is by William Wardell, the architect of Sydney's St Mary's.",
+             note_it="Questa cattedrale neogotica è di William Wardell, l'architetto della cattedrale di Santa Maria a Sydney."),
+        # Source: Wikipedia, St Patrick's Cathedral, Melbourne; Wikipedia (de), St. Patrick’s Cathedral (Melbourne); for St Mary's, the Sydney walk's sources.
+        Stop("melbourne_exhibition", "Royal Exhibition Building", "Royal Exhibition Building", -37.8055, 144.9715,
+             note_en="Built for the international exhibition of 1880, the hall and its gardens have been a World Heritage Site since 2004.",
+             note_it="Costruito per l'esposizione internazionale del 1880, il palazzo con i suoi giardini è patrimonio dell'umanità dal 2004."),
+        # Source: Wikipedia, Royal Exhibition Building; Wikipedia (de), Royal Exhibition Building.
+    ],
+)
+
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING, HONG_KONG, SINGAPORE, BANGKOK, KYOTO, HANOI, MELBOURNE]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
@@ -1859,6 +2597,14 @@ LOCATORS = {
     "CA": (41.6, -141.0, 70.0, -52.6),
     "CU": (19.8, -85.0, 23.3, -74.1),
     "CO": (-4.3, -79.1, 12.5, -66.8),
+    "JP": (24.0, 122.9, 45.6, 146.0),
+    "AU": (-43.7, 112.9, -10.6, 153.7),
+    "KR": (33.1, 124.6, 38.6, 131.9),
+    "CN": (18.2, 73.5, 53.6, 134.8),
+    "HK": (22.15, 113.83, 22.57, 114.44),
+    "SG": (1.16, 103.6, 1.48, 104.1),
+    "TH": (5.6, 97.3, 20.5, 105.7),
+    "VN": (8.4, 102.1, 23.4, 109.5),
 }
 
 # The continents the Ways page groups the cities by, in its order (the Kotlin enum Continent has
@@ -1870,4 +2616,7 @@ CONTINENTS = {
     "EUROPE": (34.5, -11.5, 61.5, 31.5),
     # From southern Canada to Cape Horn, the Pacific coast to Brazil's eastern tip.
     "AMERICAS": (-56.0, -126.0, 56.0, -33.0),
+    # From Mumbai and Delhi to Japan, and down to Tasmania and New Zealand: the cities a walk is
+    # likely to visit, not the Middle East (Istanbul is Europe's).
+    "ASIA_OCEANIA": (-47.5, 66.0, 46.0, 179.0),
 }
