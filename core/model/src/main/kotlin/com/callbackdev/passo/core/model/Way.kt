@@ -54,6 +54,8 @@ enum class WayId(val kind: WayKind, val city: String? = null, val continent: Con
     SYDNEY_LUNA_PARK_GARDEN(WayKind.WALK, city = "sydney", continent = Continent.ASIA_OCEANIA),
     SEOUL_GWANGHWAMUN_NAMSAN(WayKind.WALK, city = "seoul", continent = Continent.ASIA_OCEANIA),
     BEIJING_TIANANMEN_YONGHE(WayKind.WALK, city = "beijing", continent = Continent.ASIA_OCEANIA),
+    HONG_KONG_VICTORIA_WESTERN(WayKind.WALK, city = "hong_kong", continent = Continent.ASIA_OCEANIA),
+    SINGAPORE_CHINATOWN_GARDENS(WayKind.WALK, city = "singapore", continent = Continent.ASIA_OCEANIA),
 }
 
 /** Where a way the reader started stands. Stored by name. */

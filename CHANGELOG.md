@@ -31,7 +31,9 @@ All notable changes to Passo are documented here. The format follows
   the Harbour Bridge, by the Opera House, to the Chinese Garden; Seoul, from Gwanghwamun Square
   by the palaces and the Cheonggyecheon up to N Seoul Tower; Beijing, from Tiananmen Square
   through the Forbidden City, in by the Meridian Gate and out by the Gate of Divine Might, then by
-  Beihai and the Drum Tower to the Lama Temple; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And six short ones, about 5 km, an hour
+  Beihai and the Drum Tower to the Lama Temple; Hong Kong, from Victoria Park by Wan Chai, the
+  Star Ferry and Central to Western Market; Singapore, from Chinatown by Fort Canning, the river
+  and the Merlion to Marina Bay Sands and the Supertrees; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And six short ones, about 5 km, an hour
   or so: Porto, from the cathedral across the Douro to the Serra do Pilar; Amsterdam, from
   Centraal Station along the canals to the Westerkerk; Prague, from the Castle over Charles
   Bridge to Wenceslas Square; Québec, from the Parliament by the Plains of Abraham and the

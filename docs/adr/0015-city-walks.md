@@ -30,7 +30,8 @@ moves with the distance their steps measure.
    10): Porto (5.3 km, 10), Amsterdam (5.2 km, 9) and Prague (5.2 km, 9); then, with the cities
    grouped by continent (decision 12), Berlin (10.5 km, 13) and Vienna (9.7 km, 13), which
    bring Europe to ten; then, opening Asia and Oceania, Tokyo (11.6 km, 14) and Sydney
-   (10.1 km, 14); then Seoul (11.1 km, 12) and Beijing (10.6 km, 12). `fetch` with walk ids fetches only those walks, so a city is added
+   (10.1 km, 14); then Seoul (11.1 km, 12) and Beijing (10.6 km, 15, through the Forbidden City); then Hong Kong
+   (11.0 km, 15) and Singapore (8.4 km, 14). `fetch` with walk ids fetches only those walks, so a city is added
    without moving the others with the map's edits since.
 3. **The city behind the line is OpenStreetMap too**: the water (the Thames, the Darsena) as
    areas, the canals (the Navigli) as lines drawn as wide as they are (`riverWidthMeters`, with

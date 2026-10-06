@@ -238,7 +238,7 @@ class WaysScreenTest {
             .assert(hasText("Under way: London", substring = true))
         compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).assert(hasText("10 cities", substring = true))
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.continent(Continent.ASIA_OCEANIA)))
-        compose.onNodeWithTag(WaysTags.continent(Continent.ASIA_OCEANIA)).assert(hasText("4 cities", substring = true))
+        compose.onNodeWithTag(WaysTags.continent(Continent.ASIA_OCEANIA)).assert(hasText("6 cities", substring = true))
         compose.onNodeWithTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)).assertDoesNotExist()
         snapshot("ways_cities")
         compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).performClick()
@@ -298,6 +298,8 @@ class WaysScreenTest {
                 WayId.SYDNEY_LUNA_PARK_GARDEN,
                 WayId.SEOUL_GWANGHWAMUN_NAMSAN,
                 WayId.BEIJING_TIANANMEN_YONGHE,
+                WayId.HONG_KONG_VICTORIA_WESTERN,
+                WayId.SINGAPORE_CHINATOWN_GARDENS,
             ),
         )
         assertThat(byContinent.keys).containsExactlyElementsIn(Continent.entries)
@@ -341,7 +343,7 @@ class WaysScreenTest {
     @Test
     fun `Asia and Oceania's map, from Beijing to Sydney`() {
         showContinent(Continent.ASIA_OCEANIA)
-        compose.onNodeWithContentDescription("Asia and Oceania on the map: 4 cities.").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Asia and Oceania on the map: 6 cities.").assertIsDisplayed()
         snapshot("continent_asia_oceania")
     }
 
@@ -567,6 +569,27 @@ class WaysScreenTest {
         compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Gate of Divine Might"))
         compose.onNodeWithText("you leave the Forbidden City", substring = true).assertExists()
         snapshot("walk_beijing_palace_dark")
+    }
+
+    @Test
+    fun `Hong Kong's walk, from Victoria Park along the harbour to Central and Sheung Wan`() {
+        showWay(WayId.HONG_KONG_VICTORIA_WESTERN, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("From Victoria Park to Western Market", substring = true).assertExists()
+        snapshot("walk_hong_kong")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Noonday Gun"))
+        compose.onNodeWithText("Every day at noon", substring = true).assertExists()
+        snapshot("walk_hong_kong_places")
+    }
+
+    @Test
+    fun `Singapore's walk, from Chinatown by the river to Marina Bay, in the dark`() {
+        showWay(
+            WayId.SINGAPORE_CHINATOWN_GARDENS,
+            state = WaysSamples.state(walks = emptyList(), live = null),
+            dark = true,
+        )
+        compose.onNodeWithText("From Chinatown to Gardens by the Bay", substring = true).assertExists()
+        snapshot("walk_singapore_dark")
     }
 
     @Test

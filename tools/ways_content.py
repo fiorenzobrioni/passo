@@ -16,7 +16,8 @@ New York in the English and Italian (or German), Rio in the English and Portugue
 and Buenos Aires in the English and Spanish, San Francisco in the English and Italian (or
 Spanish, German), Québec in the English and French, Havana and Cartagena in the English and
 Spanish, Tokyo in the English and Japanese (or Italian), Sydney in the English and German (or
-Italian, French, Spanish), Seoul in the English and Korean, Beijing in the English and Chinese.
+Italian, French, Spanish), Seoul in the English and Korean, Beijing and Hong Kong in the English and Chinese,
+Singapore in the English and Chinese (or German, Italian).
 """
 
 from dataclasses import dataclass, field
@@ -2161,7 +2162,165 @@ BEIJING = Walk(
     ],
 )
 
-WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING]
+HONG_KONG = Walk(
+    id="HONG_KONG_VICTORIA_WESTERN",
+    city="hong_kong",
+    city_en="Hong Kong",
+    city_it="Hong Kong",
+    route_en="From Victoria Park to Western Market, by Wan Chai, the harbour and Central",
+    route_it="Da Victoria Park al Western Market, passando per Wan Chai, il porto e Central",
+    outing_en="A walk in Hong Kong",
+    outing_it="Passeggiata a Hong Kong",
+    country="HK",
+    continent="ASIA_OCEANIA",
+    # The harbour, from the coastline.
+    coast=True,
+    water=[],
+    # Victoria Park, Hong Kong Park, the Botanical Gardens, Tamar Park, Chater Garden, the woods above.
+    parks=[
+        "way/4182605", "way/42255430", "relation/12955557", "way/138602057", "way/148784038",
+        "relation/11794569", "relation/4186983", "relation/11795322",
+    ],
+    stops=[
+        Stop("hong_kong_victoria_park", "Victoria Park", "Victoria Park", 22.2815, 114.1885,
+             note_en="Opened in 1957 on land reclaimed from the old Causeway Bay typhoon shelter, the park is named after Queen Victoria.",
+             note_it="Aperto nel 1957 su terreni strappati al vecchio rifugio per tifoni di Causeway Bay, il parco porta il nome della regina Vittoria."),
+        # Source: Wikipedia, Victoria Park (Hong Kong); Wikipedia (zh), 維多利亞公園.
+        Stop("hong_kong_noonday_gun", "Noonday Gun", "Noonday Gun", 22.283, 114.1832,
+             note_en="Every day at noon Jardines fires this gun, in amends, the story goes, for a salute once fired for the firm's own head.",
+             note_it="Ogni giorno a mezzogiorno la Jardines spara questo cannone, per rimediare, si racconta, a una salva sparata un tempo per il capo della ditta."),
+        # Source: Wikipedia, Noonday Gun (a penalty); Wikipedia (zh), 怡和午炮 (an apology): the sentence says amends.
+        Stop("hong_kong_pak_tai", "Pak Tai Temple", "Tempio di Pak Tai", 22.2731, 114.1738,
+             note_en="Built by the people of Wan Chai in 1863, the temple keeps a statue of Pak Tai three metres tall.",
+             note_it="Costruito dagli abitanti di Wan Chai nel 1863, il tempio custodisce una statua di Pak Tai alta tre metri."),
+        # Source: Wikipedia, Wan Chai Pak Tai Temple; Wikipedia (zh), 灣仔北帝廟.
+        Stop("hong_kong_golden_bauhinia", "Golden Bauhinia Square", "Piazza del Bauhinia d'oro", 22.284, 114.1738,
+             note_en="A gilded bauhinia six metres tall marks the handover of Hong Kong in 1997; the flag is raised here every morning at eight.",
+             note_it="Un bauhinia dorato alto sei metri ricorda il passaggio di Hong Kong del 1997; qui la bandiera sale ogni mattina alle otto."),
+        # Source: Wikipedia, Golden Bauhinia Square; Wikipedia (zh), 金紫荊廣場.
+        Stop("hong_kong_star_ferry", "Star Ferry Pier", "Molo dello Star Ferry", 22.287, 114.161,
+             note_en="From here the Star Ferry crosses the harbour to Tsim Sha Tsui, a service begun by Dorabjee Naorojee Mithaiwala, a Parsi.",
+             note_it="Da qui lo Star Ferry attraversa il porto fino a Tsim Sha Tsui, un servizio avviato da Dorabjee Naorojee Mithaiwala, un parsi."),
+        # Source: Wikipedia, Star Ferry; Wikipedia (zh), 天星小輪. The year it began differs (1880 or 1888): not said.
+        Stop("hong_kong_statue_square", "Statue Square", "Statue Square", 22.2812, 114.1603,
+             note_en="Named for Queen Victoria's statue, now in Victoria Park, the square keeps a single statue, of the banker Sir Thomas Jackson.",
+             note_it="Il nome viene dalla statua della regina Vittoria, oggi a Victoria Park; nella piazza resta una sola statua, del banchiere Sir Thomas Jackson."),
+        # Source: Wikipedia, Statue Square; Wikipedia (zh), 皇后像廣場.
+        Stop("hong_kong_hsbc", "HSBC Building", "Sede della HSBC", 22.28, 114.1593,
+             note_en="Opened in 1986, the bank's tower shows its steel frame outside; the bronze lions at its door follow those of its Shanghai office.",
+             note_it="Aperta nel 1986, la sede della banca mostra all'esterno la sua struttura d'acciaio; i leoni di bronzo all'ingresso imitano quelli della sede di Shanghai."),
+        # Source: Wikipedia, HSBC Building (Hong Kong); Wikipedia (zh), 滙豐總行大廈.
+        Stop("hong_kong_bank_of_china", "Bank of China Tower", "Bank of China Tower", 22.2795, 114.1612,
+             note_en="Designed by I. M. Pei, it was the tallest building in Hong Kong and in Asia when it opened in 1990.",
+             note_it="Progettata da I. M. Pei, quando aprì nel 1990 era l'edificio più alto di Hong Kong e dell'Asia."),
+        # Source: Wikipedia, Bank of China Tower (Hong Kong); Wikipedia (zh), 中銀大廈 (香港).
+        Stop("hong_kong_flagstaff_house", "Flagstaff House", "Flagstaff House", 22.278, 114.1625,
+             note_en="Built in 1846 for the commander of the British forces, the house is now a museum of tea ware.",
+             note_it="Costruita nel 1846 per il comandante delle forze britanniche, la casa è oggi un museo di teiere e servizi da tè."),
+        # Source: Wikipedia, Flagstaff House, Hong Kong; Wikipedia (zh), 茶具文物館.
+        Stop("hong_kong_st_johns", "St John's Cathedral", "Cattedrale di San Giovanni", 22.2789, 114.1599,
+             note_en="Hong Kong's oldest Western church, finished in 1849, stands on the only freehold land in the city.",
+             note_it="La più antica chiesa occidentale di Hong Kong, finita nel 1849, sorge sull'unico terreno in piena proprietà della città."),
+        # Source: Wikipedia, St John's Cathedral (Hong Kong); Wikipedia (zh), 聖約翰座堂 (香港).
+        Stop("hong_kong_peak_tram", "Peak Tram", "Peak Tram", 22.2776, 114.1597,
+             note_en="Opened in 1888, the funicular climbs from here to Victoria Peak.",
+             note_it="Aperta nel 1888, la funicolare sale da qui fino al Victoria Peak."),
+        # Source: Wikipedia, Peak Tram; Wikipedia (zh), 山頂纜車.
+        Stop("hong_kong_tai_kwun", "Tai Kwun", "Tai Kwun", 22.2814, 114.1546,
+             note_en="The old Central Police Station, with the magistracy and Victoria Prison, reopened to the public in 2018 as Tai Kwun.",
+             note_it="La vecchia stazione di polizia centrale, con il tribunale e la prigione Victoria, ha riaperto al pubblico nel 2018 come Tai Kwun."),
+        # Source: Wikipedia, Tai Kwun; Wikipedia (zh), 大館.
+        Stop("hong_kong_pmq", "PMQ", "PMQ", 22.2832, 114.152,
+             note_en="Once quarters for married policemen, on the site of Queen's College, the buildings became a creative centre in 2014.",
+             note_it="Un tempo alloggi per poliziotti sposati, dove sorgeva il Queen's College, gli edifici sono diventati un centro creativo nel 2014."),
+        # Source: Wikipedia, PMQ (Hong Kong); Wikipedia (zh), 元創方 (the Central School, Queen's College's first name).
+        Stop("hong_kong_man_mo", "Man Mo Temple", "Tempio di Man Mo", 22.284, 114.1503,
+             note_en="The temple honours Man Cheong, god of literature, and Kwan Tai, god of war; the Tung Wah hospitals have run it since 1908.",
+             note_it="Il tempio onora Man Cheong, dio della letteratura, e Kwan Tai, dio della guerra; dal 1908 è gestito dagli ospedali Tung Wah."),
+        # Source: Wikipedia, Man Mo temples in Hong Kong; Wikipedia (zh), 東華三院文武廟. Its year differs (1847, or 1847 to 1862): not said.
+        Stop("hong_kong_western_market", "Western Market", "Western Market", 22.2873, 114.1502,
+             note_en="Built in 1906, this was the north block of the old Western Market.",
+             note_it="Costruito nel 1906, era il blocco nord del vecchio Western Market."),
+        # Source: Wikipedia, Western Market; Wikipedia (zh), 西港城.
+    ],
+)
+
+SINGAPORE = Walk(
+    id="SINGAPORE_CHINATOWN_GARDENS",
+    city="singapore",
+    city_en="Singapore",
+    city_it="Singapore",
+    route_en="From Chinatown to Gardens by the Bay, by Fort Canning, the river and Marina Bay",
+    route_it="Da Chinatown ai Gardens by the Bay, passando per Fort Canning, il fiume e Marina Bay",
+    outing_en="A walk in Singapore",
+    outing_it="Passeggiata a Singapore",
+    country="SG",
+    continent="ASIA_OCEANIA",
+    # Inside the Marina Barrage, Marina Bay is a reservoir, with the river; the sea's coastline is
+    # beyond the barrage, outside the map.
+    water=["relation/9542146", "relation/9569901"],
+    parks=["way/16892550", "relation/10231144", "relation/9976848", "way/687917300", "way/460428718"],
+    stops=[
+        Stop("singapore_buddha_tooth", "Buddha Tooth Relic Temple", "Tempio della Reliquia del Dente di Buddha", 1.2815, 103.8443,
+             note_en="In the heart of Chinatown, this temple keeps a relic held to be a tooth of the Buddha.",
+             note_it="Nel cuore di Chinatown, questo tempio custodisce una reliquia ritenuta un dente del Buddha."),
+        # Source: Wikipedia, Buddha Tooth Relic Temple and Museum ("it is claimed"); Wikipedia (zh), 佛牙寺龙华院.
+        Stop("singapore_sri_mariamman", "Sri Mariamman Temple", "Tempio di Sri Mariamman", 1.2827, 103.8455,
+             note_en="Founded in 1827 by Naraina Pillai, this is Singapore's oldest Hindu temple.",
+             note_it="Fondato nel 1827 da Naraina Pillai, è il più antico tempio indù di Singapore."),
+        # Source: Wikipedia, Sri Mariamman Temple, Singapore; Wikipedia (zh), 马里安曼庙.
+        Stop("singapore_clarke_quay", "Clarke Quay", "Clarke Quay", 1.289, 103.8463,
+             note_en="Named after the governor Sir Andrew Clarke, the quay's old warehouses are now restaurants and bars.",
+             note_it="Intitolato al governatore Sir Andrew Clarke, il molo ha i vecchi magazzini trasformati in ristoranti e locali."),
+        # Source: Wikipedia, Clarke Quay; Wikipedia (zh), 克拉码头.
+        Stop("singapore_fort_canning", "Fort Canning", "Fort Canning", 1.2945, 103.847,
+             note_en="The Malays called it Bukit Larangan, the Forbidden Hill; Stamford Raffles built his house on it.",
+             note_it="I malesi la chiamavano Bukit Larangan, la collina proibita; Stamford Raffles vi costruì la sua casa."),
+        # Source: Wikipedia, Fort Canning Hill; Wikipedia (de), Fort Canning Park.
+        Stop("singapore_raffles_hotel", "Raffles Hotel", "Raffles Hotel", 1.2947, 103.8546,
+             note_en="Opened in 1887, the hotel is where the Singapore Sling was invented.",
+             note_it="Aperto nel 1887, l'albergo è il luogo dove fu inventato il Singapore Sling."),
+        # Source: Wikipedia, Raffles Hotel; Wikipedia (zh), 萊佛士酒店.
+        Stop("singapore_st_andrews", "St Andrew's Cathedral", "Cattedrale di Sant'Andrea", 1.2925, 103.8521,
+             note_en="The first church here was struck twice by lightning; this cathedral, finished in 1861, took its place.",
+             note_it="La prima chiesa qui fu colpita due volte dal fulmine; questa cattedrale, finita nel 1861, ne prese il posto."),
+        # Source: Wikipedia, St Andrew's Cathedral, Singapore; Wikipedia (de), St. Andrew’s Cathedral (Singapur).
+        Stop("singapore_national_gallery", "National Gallery Singapore", "National Gallery Singapore", 1.2902, 103.8516,
+             note_en="Opened in 2015 in the former City Hall and Supreme Court, it is Singapore's largest visual arts venue.",
+             note_it="Aperta nel 2015 nell'ex municipio e nell'ex Corte suprema, è il più grande spazio per le arti visive di Singapore."),
+        # Source: Wikipedia, National Gallery Singapore; Wikipedia (zh), 新加坡國家美術館.
+        Stop("singapore_raffles_landing", "Raffles' Landing Site", "Approdo di Raffles", 1.2877, 103.8507,
+             note_en="Stamford Raffles is held to have landed here in 1819; his statue marks the spot.",
+             note_it="Si ritiene che Stamford Raffles sia sbarcato qui nel 1819; la sua statua segna il punto."),
+        # Source: Wikipedia, Raffles's Landing Site; Wikipedia (de), Thomas Stamford Raffles (his arrival in 1819). The day differs (28 or 29 January): not said.
+        Stop("singapore_fullerton", "Fullerton Hotel", "Fullerton Hotel", 1.2862, 103.853,
+             note_en="Finished in 1928 as the General Post Office, the building, named after Robert Fullerton, is now a hotel.",
+             note_it="Finito nel 1928 come sede delle Poste centrali, l'edificio, intitolato a Robert Fullerton, è oggi un albergo."),
+        # Source: Wikipedia, The Fullerton Hotel Singapore; Wikipedia (zh), 富麗敦酒店.
+        Stop("singapore_merlion", "Merlion", "Merlion", 1.2868, 103.8545,
+             note_en="Half lion, half fish, the Merlion recalls the Lion City and the fishing village Singapore once was; this one is 8.6 metres tall.",
+             note_it="Metà leone e metà pesce, il Merlion ricorda la Città del Leone e il villaggio di pescatori che Singapore era un tempo; questo è alto 8,6 metri."),
+        # Source: Wikipedia, Merlion; Wikipedia (zh), 鱼尾狮.
+        Stop("singapore_esplanade", "Esplanade", "Esplanade", 1.2896, 103.856,
+             note_en="Opened in 2002, the theatres' two domes are covered in aluminium sunshades against the tropical sun.",
+             note_it="Aperti nel 2002, i teatri hanno due cupole coperte di frangisole d'alluminio contro il sole tropicale."),
+        # Source: Wikipedia, Esplanade – Theatres on the Bay; Wikipedia (zh), 濱海藝術中心. Its nickname, the Durian, is in one only: not said.
+        Stop("singapore_helix_bridge", "Helix Bridge", "Helix Bridge", 1.2876, 103.8603,
+             note_en="Opened in 2010, this footbridge is shaped like DNA; at night it lights up the letters c, g, a and t, its four bases.",
+             note_it="Aperto nel 2010, questo ponte pedonale ha la forma del DNA; di notte vi si accendono le lettere c, g, a e t, le sue quattro basi."),
+        # Source: Wikipedia, Helix Bridge; Wikipedia (zh), 螺旋桥.
+        Stop("singapore_marina_bay_sands", "Marina Bay Sands", "Marina Bay Sands", 1.2837, 103.8605,
+             note_en="Designed by Moshe Safdie and opened in 2010, its three towers are joined at the top by the SkyPark and a 150-metre infinity pool.",
+             note_it="Progettato da Moshe Safdie e aperto nel 2010, ha tre torri unite in cima dallo SkyPark e da una piscina a sfioro di 150 metri."),
+        # Source: Wikipedia, Marina Bay Sands; Wikipedia (zh), 濱海灣金沙.
+        Stop("singapore_supertree_grove", "Supertree Grove", "Supertree Grove", 1.2818, 103.8638,
+             note_en="In Gardens by the Bay, opened in 2012, the Supertrees are covered in plants and light up every evening to music.",
+             note_it="Nei Gardens by the Bay, aperti nel 2012, i Supertree sono coperti di piante e si accendono ogni sera a ritmo di musica."),
+        # Source: Wikipedia, Gardens by the Bay; Wikipedia (it), Gardens by the Bay (the Chinese article has nothing on the Supertrees).
+    ],
+)
+
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING, HONG_KONG, SINGAPORE]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
@@ -2186,6 +2345,8 @@ LOCATORS = {
     "AU": (-43.7, 112.9, -10.6, 153.7),
     "KR": (33.1, 124.6, 38.6, 131.9),
     "CN": (18.2, 73.5, 53.6, 134.8),
+    "HK": (22.15, 113.83, 22.57, 114.44),
+    "SG": (1.16, 103.6, 1.48, 104.1),
 }
 
 # The continents the Ways page groups the cities by, in its order (the Kotlin enum Continent has
