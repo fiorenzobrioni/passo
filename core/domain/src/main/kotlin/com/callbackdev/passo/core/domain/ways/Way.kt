@@ -36,6 +36,7 @@ internal class WaySource(
     val mainStreets: List<String> = emptyList(),
     val streets: List<String> = emptyList(),
     val sea: Boolean = false,
+    val towns: List<String> = emptyList(),
 )
 
 /**
@@ -70,6 +71,7 @@ class Way internal constructor(private val source: WaySource) {
             mainStreets = source.mainStreets.map(Polyline::decodePath),
             streets = source.streets.map(Polyline::decodePath),
             sea = source.sea,
+            towns = source.towns.map(Polyline::decodePath),
         )
     }
 }
@@ -81,7 +83,9 @@ class Way internal constructor(private val source: WaySource) {
  * map has its water as [lakes], its canals as [rivers] drawn [riverWidthMeters] wide (a
  * country's rivers are hairlines, at 0), its largest [parks] and, where the data has them, its
  * [mainStreets] and smaller [streets], so the area can be recognised. A city on the [sea] has
- * its [land] from the coastline, and is cut out of the sea as a country's map is.
+ * its [land] from the coastline, and is cut out of the sea as a country's map is. A way's map
+ * has its rivers and lakes from OpenStreetMap, the [parks] it passes through, and the larger
+ * [towns] along it.
  */
 class WayMap(
     val frame: GeoBox,
@@ -98,6 +102,7 @@ class WayMap(
     val mainStreets: List<GeoPath> = emptyList(),
     val streets: List<GeoPath> = emptyList(),
     val sea: Boolean = false,
+    val towns: List<GeoPath> = emptyList(),
 )
 
 /** The five ways, shortest first, as the Ways page lists them; and the city walks. */

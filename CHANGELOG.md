@@ -14,7 +14,8 @@ All notable changes to Passo are documented here. The format follows
 
 - **Ways**: five pilgrim ways walked from wherever you are. The Via degli Dei, the Camino
   Portugués from Porto, the Via di Francesco, the Camino de Santiago (the French Way) and the
-  Italian part of the Via Francigena, drawn from OpenStreetMap. The distance of your days
+  Italian part of the Via Francigena, drawn from OpenStreetMap, on maps with the rivers they
+  cross, their lakes, parks and towns. The distance of your days
   carries you along, stage by stage, with a stamp in a credential for each and a notification
   when you reach one. Start today or in the past, and find yourself already on the way. No
   location: only your distance. From Insights.

@@ -55,6 +55,13 @@ class Way:
     # Where the relation stops short of the way's traditional end, the last stretch is joined
     # straight (a few hundred metres to a couple of kilometres inside a city).
     join_end: bool = False
+    # The map behind the line, from OpenStreetMap objects named by id, as a city's are: the
+    # rivers the way crosses or follows and the larger ones in view (waterway relations, drawn
+    # as lines), its lakes and reservoirs, and the parks it passes through. The land, the
+    # borders and the towns are Natural Earth's.
+    rivers: list = field(default_factory=list)
+    lakes: list = field(default_factory=list)
+    parks: list = field(default_factory=list)
 
 
 VIA_DEGLI_DEI = Way(
@@ -66,6 +73,19 @@ VIA_DEGLI_DEI = Way(
     route_it="Da Bologna a Firenze, attraverso l'Appennino",
     country="IT",
     join_end=True,
+    # The Reno, the Setta, the Savena and the Sieve it follows, the Arno it ends on, the others in
+    # view.
+    rivers=["relation/2250853", "relation/2250857", "relation/2250849", "relation/2573985", "relation/2535730",
+            "relation/2573979", "relation/2250854", "relation/2250858", "relation/2250851", "relation/2498155",
+            "relation/2250856", "relation/2573983", "relation/7589532",
+            # The Savena, mapped as ways with no relation, from Madonna dei Fornelli down to Bologna.
+            "way/1157072681", "way/713034151", "way/560730395", "way/23635432"],
+    # Bilancino below the Futa, Suviana and Brasimone to the west.
+    lakes=["relation/7594866", "way/30212770", "way/30286329", "relation/12646100"],
+    # The Contrafforte Pliocenico it climbs through, Monte Sole and the parks of the hills round it, and the
+    # Casentino's forests on the map's eastern edge.
+    parks=["relation/3515483", "relation/3511205", "relation/3548332", "relation/3500659", "relation/3562535",
+           "relation/1691471"],
     stops=[
         Stop("bologna", "Bologna", "Bologna", 44.4938, 11.3426,
              note_en="The way begins in Piazza Maggiore, the heart of Bologna since the Middle Ages.",
@@ -109,6 +129,15 @@ CAMINO_PORTUGUES = Way(
     route_en="Porto to Santiago de Compostela, by Tui and Pontevedra",
     route_it="Da Porto a Santiago de Compostela, passando per Tui e Pontevedra",
     country="IBERIA",
+    # The rivers it crosses on its way north, from the Douro to the Sar, and the others in view.
+    rivers=["relation/2566210", "relation/2579329", "relation/2566010", "relation/2474015", "relation/2383409",
+            "relation/2579366", "relation/2448396", "relation/2848609", "relation/1226237", "relation/7074474",
+            "relation/20394715", "relation/9532089", "relation/19274452", "relation/8039971", "relation/15397374",
+            "relation/5739821", "relation/4558376", "relation/2579335", "relation/2191677", "relation/9532090"],
+    # The reservoirs of the Cávado and the Lima, in the hills to the east, and Eiras above Vigo.
+    lakes=["relation/2441813", "relation/16196443", "way/30645397"],
+    # Peneda-Gerês, Portugal's one national park, on the map's eastern edge.
+    parks=["relation/2383411"],
     stops=[
         Stop("porto", "Porto", "Porto", 41.1428, -8.6112,
              note_en="Porto's old centre, from the cathedral down to the Douro, is a UNESCO World Heritage Site.",
@@ -163,6 +192,16 @@ VIA_DI_FRANCESCO = Way(
     route_en="La Verna to Rome, by way of Assisi",
     route_it="Da La Verna a Roma, passando per Assisi",
     country="IT",
+    # The Tiber it follows from its upper valley to Rome, its tributaries (the Chiascio and the
+    # Topino by Assisi, the Nera and the Velino by Rieti, the Aniene), and the Arno by La Verna.
+    rivers=["relation/1827384", "relation/2535730", "relation/2570774", "relation/2570777", "relation/2570775",
+            "relation/2570779", "relation/2570776", "relation/2570773", "relation/2069637", "relation/18011377",
+            "relation/17689354", "relation/2498208", "relation/2570778"],
+    # Montedoglio on the upper Tiber, Trasimeno, the Rieti valley's lakes, and Lazio's crater lakes.
+    lakes=["way/26240505", "relation/903525", "way/342306240", "relation/14136141", "relation/15512833",
+           "relation/6074890", "relation/2215798", "relation/5688566", "relation/12674071"],
+    # The Casentino's forests round La Verna, Subasio above Assisi, the Lucretili before Rome.
+    parks=["relation/1691471", "way/461629730", "relation/15549485", "relation/3171821", "way/318725672"],
     stops=[
         Stop("la_verna", "La Verna", "La Verna", 43.7072, 11.9306,
              note_en="Francis received the stigmata at La Verna in 1224, his first biographers wrote.",
@@ -225,6 +264,23 @@ CAMINO_FRANCES = Way(
     route_en="The French Way, Saint-Jean-Pied-de-Port to Santiago de Compostela",
     route_it="Il Cammino Francese, da Saint-Jean-Pied-de-Port a Santiago de Compostela",
     country="IBERIA",
+    # The rivers it crosses from the Nive to the Sar (the Ebro at Logroño, the Pisuerga, the Esla,
+    # the Órbigo at its long bridge, the Sil at Ponferrada, the Miño at Portomarín), and the larger
+    # ones in view: the Duero, the Adour, the Bidasoa, the Nalón and the Navia.
+    rivers=["relation/136448", "relation/11104075", "relation/2195879", "relation/13364924", "relation/331157",
+            "relation/20270811", "relation/2195886", "relation/2195887", "relation/2854714", "relation/2900244",
+            "relation/2856617", "relation/2196106", "relation/1436524", "relation/1226495", "relation/1436528",
+            "relation/1436526", "relation/1436525", "relation/2197850", "relation/1240442", "relation/2197853",
+            "relation/2197858", "relation/1226237", "relation/9532089", "relation/19274452", "relation/8039971",
+            "relation/2566210", "relation/116984", "relation/17020687", "relation/2631375", "relation/2827450"],
+    # Its reservoirs, from Navarre's (Yesa, Itoiz, Alloz) to Belesar on the Miño at Portomarín,
+    # and the larger ones of the Cantabrian range to the north.
+    lakes=["way/22887206", "way/1233661247", "way/1233661246", "way/24397890", "relation/111237",
+           "relation/1843373", "relation/2588413", "relation/254780", "relation/2698318", "relation/1244239",
+           "relation/1386726", "way/23602921", "relation/18080585"],
+    # The Picos de Europa and the parks of the mountains to the north, and the Bardenas Reales.
+    parks=["relation/2401595", "relation/12492988", "relation/1222922", "relation/2700765", "relation/20986105",
+           "relation/6594547", "relation/11087864", "relation/7358257"],
     stops=[
         Stop("saint_jean", "Saint-Jean-Pied-de-Port", "Saint-Jean-Pied-de-Port", 43.1631, -1.2376,
              note_en="Many pilgrims set out from here, at the foot of the Pyrenees.",
@@ -308,6 +364,26 @@ VIA_FRANCIGENA = Way(
     route_en="The Great St Bernard Pass to Rome",
     route_it="Dal Gran San Bernardo a Roma",
     country="IT",
+    # The rivers it follows or crosses, from the Dora Baltea down the Aosta valley and the Po at
+    # Corte Sant'Andrea to the Magra, the Arno, the Elsa, the Orcia, the Paglia and the Tiber; the
+    # other great rivers in view, from the Rhône in the Valais to the Adige.
+    rivers=["relation/2146996", "relation/2233609", "relation/2146959", "relation/2146941", "relation/570545",
+            "relation/1163143", "relation/2235489", "relation/2235614", "relation/2235697", "relation/2235695",
+            "relation/2575558", "relation/2146938", "relation/2535730", "relation/2573980", "relation/2573899",
+            "relation/2573907", "relation/2573908", "relation/2570776", "relation/2573905", "relation/2573904",
+            "relation/1827384", "relation/2233733", "relation/2233730", "relation/2233722", "relation/2230557",
+            "relation/1050434", "relation/6183263", "relation/2098105", "relation/2148162", "relation/2235699",
+            "relation/2235696", "relation/2250853", "relation/1075117", "relation/1224645", "relation/2069637"],
+    # The great lakes of the Alps, Viverone and Candia that it passes, Massaciuccoli by Lucca,
+    # Bolsena that it skirts, and the other lakes of central Italy.
+    lakes=["relation/332617", "relation/11758", "relation/2024365", "relation/1342576", "relation/541757",
+           "relation/38372", "relation/9550", "relation/8569", "way/14345426", "way/86387291", "relation/2562525",
+           "relation/2215798", "relation/5688566", "relation/12674071", "relation/903525", "way/27124373"],
+    # Gran Paradiso and Mont Avic above the Aosta valley, the Ticino's park, the Apennine park by
+    # the Cisa, the Apuan Alps, the Cinque Terre, San Rossore, and the Alps' parks in view.
+    parks=["relation/919270", "way/44951105", "relation/4052216", "relation/3503470", "relation/6399787",
+           "relation/952904", "relation/3591293", "relation/13680199", "relation/300032", "relation/1024507",
+           "relation/1691471"],
     stops=[
         Stop("gran_san_bernardo", "Great St Bernard Pass", "Colle del Gran San Bernardo", 45.8686, 7.1706,
              note_en="Travellers have found a hospice at this pass since about 1050, when Bernard of Aosta founded it.",

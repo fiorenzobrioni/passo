@@ -231,5 +231,6 @@ in [licenses/](./licenses/).
 
 The ways and the city walks are drawn from [OpenStreetMap](https://www.openstreetmap.org/copyright)
 data, © OpenStreetMap contributors, under the Open Database License (the walks routed with
-[BRouter](https://brouter.de), the cities' water and parks from the same map); the land and
-water behind the ways and the continents' maps from [Natural Earth](https://www.naturalearthdata.com), public domain.
+[BRouter](https://brouter.de), the land, water and parks behind them from the same map, the ways'
+land as simplified by [osmdata.openstreetmap.de](https://osmdata.openstreetmap.de)); the ways'
+borders and towns and the continents' maps from [Natural Earth](https://www.naturalearthdata.com), public domain.

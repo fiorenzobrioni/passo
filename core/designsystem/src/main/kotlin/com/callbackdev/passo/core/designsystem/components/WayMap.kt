@@ -50,10 +50,10 @@ import kotlin.math.hypot
 
 /**
  * The map of a way or a city walk (PLANNING.md §11 Phase 11), drawn in code like every chart of
- * Passo: the ground (land, lakes, rivers, borders; a city's parks, water and canals), the whole
- * way faint, the part walked in the goal's
- * colour up to the reader's point, and the stops, filled once reached. It knows nothing of where
- * the reader is: their point is their distance along the way.
+ * Passo: the ground (land, towns, parks, lakes, rivers, borders; a city's streets, water and
+ * canals), the whole way faint, the part walked in the goal's colour up to the reader's point,
+ * and the stops, filled once reached. It knows nothing of where the reader is: their point is
+ * their distance along the way.
  *
  * [detailed] adds the start's and the end's names, the locator (the country, with the way on
  * it, in the corner the line leaves free) and a touch that names the nearest stop; the small
@@ -80,6 +80,12 @@ fun WayMapView(
     val colors = WayMapColors(
         water = PassoTheme.colors.water,
         land = scheme.surfaceContainerHigh,
+        // A town is the land a step towards the streets' line: there, not a feature to read.
+        town = lerp(
+            scheme.surfaceContainerHigh,
+            if (scheme.surface.luminance() > 0.5f) scheme.surfaceContainerLowest else scheme.surfaceBright,
+            TOWN_INK,
+        ),
         park = PassoTheme.colors.park,
         // A street is a lighter line on the land: white on the light grey, a step up in the dark.
         street = if (scheme.surface.luminance() > 0.5f) scheme.surfaceContainerLowest else scheme.surfaceBright,
@@ -122,13 +128,22 @@ fun WayMapView(
             .drawWithCache {
                 val projection = WayProjection(map.frame, size.width, size.height, inset(size))
                 val land = map.land.map { it.toPath(projection, close = true) }
+                // A way's towns and rivers only on its own page: on a thumbnail they would be noise.
+                val towns = if (detailed) map.towns.map { it.toPath(projection, close = true) } else emptyList()
                 val parks = map.parks.map { it.toPath(projection, close = true) }
                 val lakes = map.lakes.map { it.toPath(projection, close = true) }
                 // A country's rivers are hairlines; a city's canals as wide as they are.
                 val riverWidth = (map.riverWidthMeters.toFloat() * projection.pixelsPerMeter())
                     .coerceAtLeast(RIVER_WIDTH.toPx())
-                val riverInk = if (map.riverWidthMeters > 0) colors.water else colors.river
-                val rivers = map.rivers.map { it.toPath(projection, close = false) }
+                val hairlines = map.riverWidthMeters <= 0
+                val riverInk = if (hairlines) colors.river else colors.water
+                val rivers = if (detailed ||
+                    !hairlines
+                ) {
+                    map.rivers.map { it.toPath(projection, close = false) }
+                } else {
+                    emptyList()
+                }
                 // Streets only on the walk's own page: on a thumbnail they would be noise.
                 val mainStreets = if (detailed) {
                     map.mainStreets.map {
@@ -163,7 +178,11 @@ fun WayMapView(
                 // names the city anyway. The ends' names are kept clear of it (a touched stop's
                 // is not, or the locator would jump at every touch).
                 val locator = if (detailed && way.kind == WayKind.WAY) {
-                    locatorBox(size, stops.first(), whole, map.locatorFrame, labels.take(2).map { it.second })
+                    val along = (0..LOCATOR_SAMPLES).map {
+                        val p = map.line.pointAt(map.line.lengthMeters * it / LOCATOR_SAMPLES)
+                        Offset(projection.x(p.longitude), projection.y(p.latitude))
+                    }
+                    locatorBox(size, stops.first(), along, map.locatorFrame, labels.take(2).map { it.second })
                 } else {
                     null
                 }
@@ -172,13 +191,16 @@ fun WayMapView(
                     // another city has no sea around it.
                     drawRect(if (way.kind == WayKind.WALK && !map.sea) colors.land else colors.water)
                     land.forEach { drawPath(it, colors.land) }
+                    towns.forEach { drawPath(it, colors.town) }
                     parks.forEach { drawPath(it, colors.park) }
+                    // A country's rivers run through its lakes as mapped: the lakes cover them.
+                    if (hairlines) rivers.forEach { drawPath(it, riverInk, style = line(riverWidth)) }
                     lakes.forEach { drawPath(it, colors.water) }
                     // Over a river the streets are its bridges; a canal, drawn as a line, stays on
                     // top of the streets along its banks.
                     streets.forEach { drawPath(it, colors.street, style = line(STREET_WIDTH)) }
                     mainStreets.forEach { drawPath(it, colors.street, style = line(MAIN_STREET_WIDTH)) }
-                    rivers.forEach { drawPath(it, riverInk, style = line(riverWidth)) }
+                    if (!hairlines) rivers.forEach { drawPath(it, riverInk, style = line(riverWidth)) }
                     val dash = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx()))
                     borders.forEach { drawPath(it, colors.border, style = Stroke(1.dp.toPx(), pathEffect = dash)) }
                     // Not started, the line is the way itself, at full ink; under way, it steps back
@@ -236,6 +258,7 @@ fun wayMapRatio(frame: GeoBox): Float = (1.0 / WayProjection.boxAspect(frame, MI
 private class WayMapColors(
     val water: Color,
     val land: Color,
+    val town: Color,
     val park: Color,
     val street: Color,
     val river: Color,
@@ -284,9 +307,11 @@ private fun WayLine.toPath(projection: WayProjection, upTo: Double?): Path = Pat
 /**
  * The locator's box: in the corner the way's line leaves most free, away from the start and
  * clear of the ends' names ([names], where [placeLabels] puts them), a third of the map's width at
- * most.
+ * most. "Free" is measured on the line itself ([along], points at even steps along it), then on
+ * its bounds: a way that runs across the whole map (the French Way) has no corner clear of its
+ * bounds, yet one its line does not pass through.
  */
-private fun Density.locatorBox(size: Size, start: Offset, whole: Path, frame: GeoBox, names: List<Rect>): Rect {
+private fun Density.locatorBox(size: Size, start: Offset, along: List<Offset>, frame: GeoBox, names: List<Rect>): Rect {
     val width = (size.width * LOCATOR_SHARE).coerceAtMost(LOCATOR_MAX.toPx())
     val height = width * frame.aspect.toFloat()
     val margin = 8.dp.toPx()
@@ -296,12 +321,17 @@ private fun Density.locatorBox(size: Size, start: Offset, whole: Path, frame: Ge
         Rect(Offset(margin, margin), Size(width, height)),
         Rect(Offset(size.width - width - margin, size.height - height - margin), Size(width, height)),
     )
-    val bounds = whole.getBounds()
-    return corners.minBy { corner ->
-        val overlap = corner.intersect(bounds).let { if (it.isEmpty) 0f else it.width * it.height }
-        val covered = corner.inflate(LABEL_ROOM.toPx()).contains(start) || names.any { it.overlaps(corner) }
-        overlap + if (covered) size.width * size.height else 0f
-    }
+    val bounds = Rect(along.minOf { it.x }, along.minOf { it.y }, along.maxOf { it.x }, along.maxOf { it.y })
+    val room = LOCATOR_CLEARANCE.toPx()
+    return corners.minWith(
+        compareBy<Rect> { corner ->
+            corner.inflate(LABEL_ROOM.toPx()).contains(start) || names.any { it.overlaps(corner) }
+        }.thenBy { corner ->
+            corner.inflate(room).let { clear -> along.count { clear.contains(it) } }
+        }.thenBy { corner ->
+            corner.intersect(bounds).let { if (it.isEmpty) 0f else it.width * it.height }
+        },
+    )
 }
 
 private fun DrawScope.drawLocator(box: Rect, land: List<GeoPath>, line: GeoPath, frame: GeoBox, colors: WayMapColors) {
@@ -371,6 +401,7 @@ internal fun DrawScope.drawLabel(text: TextLayoutResult, box: Rect, halo: Color,
 private const val MIN_ASPECT = 0.62
 private const val MAX_ASPECT = 1.2
 private const val RIVER_INK = 0.3f
+private const val TOWN_INK = 0.5f
 private const val BORDER_ALPHA = 0.55f
 private const val WAY_ALPHA = 0.4f
 private const val HALO_ALPHA = 0.22f
@@ -378,6 +409,8 @@ private const val PILL_ALPHA = 0.88f
 private const val LOCATOR_SHARE = 0.3f
 private val LOCATOR_MAX = 120.dp
 private val LOCATOR_DOT = 3.5.dp
+private val LOCATOR_CLEARANCE = 6.dp
+private const val LOCATOR_SAMPLES = 200
 private val INSET = 20.dp
 private val RIVER_WIDTH = 1.dp
 private val WAY_WIDTH = 3.dp

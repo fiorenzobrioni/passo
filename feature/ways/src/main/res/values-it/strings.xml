@@ -12,7 +12,7 @@
     <string name="ways_row_walked">Percorso dal %1$s al %2$s</string>
     <string name="ways_row_left">Lasciato il %1$s, %2$s</string>
     <string name="ways_footer">Le distanze sono stime, dai tuoi passi e dalla tua falcata: misurare il passo le rende più vere. Un giorno conta come Passo l’ha registrato, così Cronologia, Insights e il tuo cammino sono sempre d’accordo.</string>
-    <string name="ways_credit">Cammini e passeggiate tracciati da OpenStreetMap, © OpenStreetMap contributors (ODbL); le passeggiate instradate con BRouter. Terre e acque dei cammini e dei continenti: Natural Earth.</string>
+    <string name="ways_credit">Cammini e passeggiate tracciati da OpenStreetMap, © OpenStreetMap contributors (ODbL); le passeggiate instradate con BRouter. Confini e città dei cammini e terre dei continenti: Natural Earth.</string>
 
     <!-- La pagina di un cammino -->
     <string name="way_start">Inizia questo cammino</string>
