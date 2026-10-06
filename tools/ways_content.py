@@ -2674,8 +2674,12 @@ CAPE_TOWN = Walk(
     # Table Bay, from the coastline; the Waterfront's basins.
     coast=True,
     water=["relation/15602639", "relation/15602640", "relation/15602641"],
-    # Green Point Park and its gardens, the Company's Garden.
-    parks=["way/44948367", "relation/9636593", "relation/9636594", "way/8035472"],
+    # Green Point, De Waterkant, Bo-Kaap and Gardens are mapped mostly as residential streets.
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=200,
+    # Table Mountain National Park, whose Signal Hill rises behind Bo-Kaap; Green Point Park and
+    # its gardens, the Company's Garden.
+    parks=["relation/338191", "way/44948367", "relation/9636593", "relation/9636594", "way/8035472"],
     stops=[
         Stop("cape_town_lighthouse", "Green Point Lighthouse", "Faro di Green Point", -33.9014, 18.3999,
              note_en="First lit in 1824, South Africa's oldest lighthouse has had a foghorn since 1926.",

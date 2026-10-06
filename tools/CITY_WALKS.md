@@ -67,8 +67,8 @@ Add the mirror init script to every Gradle command in the cloud sandbox:
      route again after moving a place) and fetches their OpenStreetMap sources into the cache.
    - `python3 tools/city_walks.py splice ID ...` adds them to `WayData.kt`, rewrites the place
      strings (EN, IT, `WayPlaceStrings.kt`) and the continents' maps. It prints each place's
-     distance along the route and the map's counts: check them. To splice again after changing
-     the content, `git checkout` `WayData.kt` first.
+     distance along the route and the map's counts: check them. Splicing a walk already in
+     `WayData.kt` replaces it, so a map can be redone after changing the content.
    - Never run a full `fetch` and a full build to add a city: with a fresh cache every other
      city's streets would move with OpenStreetMap's edits since.
 6. **The tests.**
@@ -142,5 +142,8 @@ On top of its first two cities:
 - A crossing BRouter will not take (Cairo's Al-Muizz Street over Al-Azhar Street) shows as a
   detour of several hundred metres between two places close together: route the leg alone, see
   where it goes, and order the places so the walk takes the way it can.
+- A hill inside a national park (Cape Town's Signal Hill) is mapped as the park's protected area,
+  which `features` does not list: find the park's relation (`locate "Table Mountain National
+  Park"`) and add it to `parks`; the map cuts it to the page.
 - A disambiguation page (Green Point Lighthouse) comes back from `wiki` as a short list: ask for
   the full title.

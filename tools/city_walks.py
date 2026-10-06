@@ -20,14 +20,14 @@ are still written by tools/build_ways.py, never by hand.
         Wikipedia's article for a query, and the same article's title in en, es, fr, it, pt,
         de, nl, ja, zh, ko and ar, so a place can be checked in a second language.
     python3 tools/city_walks.py splice WALK_ID ...
-        Adds new walks to WayData.kt without rebuilding the others, then rewrites the place
-        strings and the continents' maps (see below).
+        Adds new walks to WayData.kt without rebuilding the others, or replaces walks already
+        there, then rewrites the place strings and the continents' maps (see below).
 
 Why splice: a full `build_ways.py` run rebuilds every walk from the cache, and a fresh cache
 would also move every other city's streets with OpenStreetMap's edits since, which is not part
 of adding a city. `splice` builds only the walks named and puts each block and its case where a
-full run would write them (after the walk before it in WALKS). To redo it after changing the
-content, restore WayData.kt first (`git checkout` it) and splice again.
+full run would write them (after the walk before it in WALKS). A walk already in WayData.kt is
+replaced, so a city's map can be redrawn after changing its content, committed or not.
 
 The servers are shared and some throttle (Wikipedia answers 429 when asked too fast; Nominatim
 allows one request a second): every call here waits between requests, retries with a growing
@@ -241,7 +241,11 @@ def splice(ids):
         block, _, _ = build.build_walk(walk)
         case = f"        WayId.{walk.id} -> {build.camel(walk.id)}()\n"
         if case in text:
-            sys.exit(f"{walk.id} is already in WayData.kt: git checkout it first")
+            # Already spliced (a walk committed before its map was changed): replaced in place.
+            text = text.replace(case, "", 1)
+            start = text.index(f"\n    private fun {build.camel(walk.id)}() = WaySource(")
+            end = text.index("\n    )\n", start) + len("\n    )\n")
+            text = text[:start] + text[end:]
         before = order[order.index(walk.id) - 1]
         previous = f"        WayId.{before} -> {build.camel(before)}()\n"
         if previous not in text:
