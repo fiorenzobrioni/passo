@@ -24,7 +24,8 @@ All notable changes to Passo are documented here. The format follows
   the Victory Column, by the Brandenburg Gate; Vienna, from the Belvedere round the Ring to the
   Prater; Lima, through its historic centre; New York, from Central Park to the Brooklyn
   Bridge, by Times Square and the Empire State; Rio, from the Museum of Tomorrow through Lapa and
-  along the bay to the Sugarloaf; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And three short ones, about
+  along the bay to the Sugarloaf; Mexico City, from the Zócalo along the Reforma to Chapultepec;
+  Buenos Aires, from the Plaza de Mayo by the Congress and the Obelisco to Recoleta; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And three short ones, about
   5 km, an hour or so: Porto, from the cathedral across the Douro to the Serra do Pilar;
   Amsterdam, from Centraal Station along the canals to the Westerkerk; and Prague, from the
   Castle over Charles Bridge to Wenceslas Square. Each map has the city's

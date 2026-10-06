@@ -27,6 +27,8 @@ fun wayNameRes(id: WayId): Int = when (id) {
     WayId.CUSCO_ARMAS_QORIKANCHA -> R.string.way_name_cusco_armas_qorikancha
     WayId.NEW_YORK_PARK_BRIDGE -> R.string.way_name_new_york_park_bridge
     WayId.RIO_CENTRO_SUGARLOAF -> R.string.way_name_rio_centro_sugarloaf
+    WayId.MEXICO_CITY_ZOCALO_CHAPULTEPEC -> R.string.way_name_mexico_city_zocalo_chapultepec
+    WayId.BUENOS_AIRES_MAYO_RECOLETA -> R.string.way_name_buenos_aires_mayo_recoleta
 }
 
 /** Where a way runs, in one line. */
@@ -51,6 +53,8 @@ fun wayRouteRes(id: WayId): Int = when (id) {
     WayId.CUSCO_ARMAS_QORIKANCHA -> R.string.way_route_cusco_armas_qorikancha
     WayId.NEW_YORK_PARK_BRIDGE -> R.string.way_route_new_york_park_bridge
     WayId.RIO_CENTRO_SUGARLOAF -> R.string.way_route_rio_centro_sugarloaf
+    WayId.MEXICO_CITY_ZOCALO_CHAPULTEPEC -> R.string.way_route_mexico_city_zocalo_chapultepec
+    WayId.BUENOS_AIRES_MAYO_RECOLETA -> R.string.way_route_buenos_aires_mayo_recoleta
 }
 
 /** A walk's outing, as History and Today name it; null for a way, which is not an outing. */
@@ -70,6 +74,8 @@ fun walkOutingRes(id: WayId): Int? = when (id) {
     WayId.CUSCO_ARMAS_QORIKANCHA -> R.string.way_outing_cusco_armas_qorikancha
     WayId.NEW_YORK_PARK_BRIDGE -> R.string.way_outing_new_york_park_bridge
     WayId.RIO_CENTRO_SUGARLOAF -> R.string.way_outing_rio_centro_sugarloaf
+    WayId.MEXICO_CITY_ZOCALO_CHAPULTEPEC -> R.string.way_outing_mexico_city_zocalo_chapultepec
+    WayId.BUENOS_AIRES_MAYO_RECOLETA -> R.string.way_outing_buenos_aires_mayo_recoleta
     else -> null
 }
 
@@ -113,6 +119,19 @@ fun placeNameRes(key: String): Int = when (key) {
     "bivigliano" -> R.string.way_place_bivigliano
     "bologna" -> R.string.way_place_bologna
     "bolsena" -> R.string.way_place_bolsena
+    "buenos_aires_ateneo" -> R.string.way_place_buenos_aires_ateneo
+    "buenos_aires_barolo" -> R.string.way_place_buenos_aires_barolo
+    "buenos_aires_bellas_artes" -> R.string.way_place_buenos_aires_bellas_artes
+    "buenos_aires_cabildo" -> R.string.way_place_buenos_aires_cabildo
+    "buenos_aires_casa_rosada" -> R.string.way_place_buenos_aires_casa_rosada
+    "buenos_aires_cathedral" -> R.string.way_place_buenos_aires_cathedral
+    "buenos_aires_colon" -> R.string.way_place_buenos_aires_colon
+    "buenos_aires_congreso" -> R.string.way_place_buenos_aires_congreso
+    "buenos_aires_floralis" -> R.string.way_place_buenos_aires_floralis
+    "buenos_aires_obelisco" -> R.string.way_place_buenos_aires_obelisco
+    "buenos_aires_plaza_san_martin" -> R.string.way_place_buenos_aires_plaza_san_martin
+    "buenos_aires_recoleta" -> R.string.way_place_buenos_aires_recoleta
+    "buenos_aires_tortoni" -> R.string.way_place_buenos_aires_tortoni
     "burgos" -> R.string.way_place_burgos
     "caldas_de_reis" -> R.string.way_place_caldas_de_reis
     "camaiore" -> R.string.way_place_camaiore
@@ -207,6 +226,18 @@ fun placeNameRes(key: String): Int = when (key) {
     "mansilla" -> R.string.way_place_mansilla
     "massa" -> R.string.way_place_massa
     "medesano" -> R.string.way_place_medesano
+    "mexico_alameda" -> R.string.way_place_mexico_alameda
+    "mexico_angel" -> R.string.way_place_mexico_angel
+    "mexico_anthropology" -> R.string.way_place_mexico_anthropology
+    "mexico_bellas_artes" -> R.string.way_place_mexico_bellas_artes
+    "mexico_casa_azulejos" -> R.string.way_place_mexico_casa_azulejos
+    "mexico_cathedral" -> R.string.way_place_mexico_cathedral
+    "mexico_chapultepec_castle" -> R.string.way_place_mexico_chapultepec_castle
+    "mexico_diana" -> R.string.way_place_mexico_diana
+    "mexico_ninos_heroes" -> R.string.way_place_mexico_ninos_heroes
+    "mexico_palacio_nacional" -> R.string.way_place_mexico_palacio_nacional
+    "mexico_revolucion" -> R.string.way_place_mexico_revolucion
+    "mexico_templo_mayor" -> R.string.way_place_mexico_templo_mayor
     "milan_arco_della_pace" -> R.string.way_place_milan_arco_della_pace
     "milan_brera" -> R.string.way_place_milan_brera
     "milan_castello" -> R.string.way_place_milan_castello
@@ -415,6 +446,19 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "berlin_wall_memorial" -> R.string.way_note_berlin_wall_memorial
     "bologna" -> R.string.way_note_bologna
     "bolsena" -> R.string.way_note_bolsena
+    "buenos_aires_ateneo" -> R.string.way_note_buenos_aires_ateneo
+    "buenos_aires_barolo" -> R.string.way_note_buenos_aires_barolo
+    "buenos_aires_bellas_artes" -> R.string.way_note_buenos_aires_bellas_artes
+    "buenos_aires_cabildo" -> R.string.way_note_buenos_aires_cabildo
+    "buenos_aires_casa_rosada" -> R.string.way_note_buenos_aires_casa_rosada
+    "buenos_aires_cathedral" -> R.string.way_note_buenos_aires_cathedral
+    "buenos_aires_colon" -> R.string.way_note_buenos_aires_colon
+    "buenos_aires_congreso" -> R.string.way_note_buenos_aires_congreso
+    "buenos_aires_floralis" -> R.string.way_note_buenos_aires_floralis
+    "buenos_aires_obelisco" -> R.string.way_note_buenos_aires_obelisco
+    "buenos_aires_plaza_san_martin" -> R.string.way_note_buenos_aires_plaza_san_martin
+    "buenos_aires_recoleta" -> R.string.way_note_buenos_aires_recoleta
+    "buenos_aires_tortoni" -> R.string.way_note_buenos_aires_tortoni
     "burgos" -> R.string.way_note_burgos
     "caldas_de_reis" -> R.string.way_note_caldas_de_reis
     "cruz_de_ferro" -> R.string.way_note_cruz_de_ferro
@@ -485,6 +529,18 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "madrid_puerta_del_sol" -> R.string.way_note_madrid_puerta_del_sol
     "madrid_reina_sofia" -> R.string.way_note_madrid_reina_sofia
     "madrid_retiro_pond" -> R.string.way_note_madrid_retiro_pond
+    "mexico_alameda" -> R.string.way_note_mexico_alameda
+    "mexico_angel" -> R.string.way_note_mexico_angel
+    "mexico_anthropology" -> R.string.way_note_mexico_anthropology
+    "mexico_bellas_artes" -> R.string.way_note_mexico_bellas_artes
+    "mexico_casa_azulejos" -> R.string.way_note_mexico_casa_azulejos
+    "mexico_cathedral" -> R.string.way_note_mexico_cathedral
+    "mexico_chapultepec_castle" -> R.string.way_note_mexico_chapultepec_castle
+    "mexico_diana" -> R.string.way_note_mexico_diana
+    "mexico_ninos_heroes" -> R.string.way_note_mexico_ninos_heroes
+    "mexico_palacio_nacional" -> R.string.way_note_mexico_palacio_nacional
+    "mexico_revolucion" -> R.string.way_note_mexico_revolucion
+    "mexico_templo_mayor" -> R.string.way_note_mexico_templo_mayor
     "milan_arco_della_pace" -> R.string.way_note_milan_arco_della_pace
     "milan_brera" -> R.string.way_note_milan_brera
     "milan_castello" -> R.string.way_note_milan_castello

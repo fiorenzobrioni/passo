@@ -12,7 +12,8 @@ Every note is one sentence, made to be read in a notification and heard, with no
 goes stale (no opening hours, no prices). Each was checked when written (1 Oct 2026; the fifth
 way and Rome, Paris and Madrid on 2 Oct 2026, Lima and Cusco after them); the source is the
 line after it. Berlin and Vienna (5 Oct 2026) were checked in the English and German Wikipedias,
-New York in the English and Italian (or German), Rio in the English and Portuguese.
+New York in the English and Italian (or German), Rio in the English and Portuguese, Mexico City
+and Buenos Aires in the English and Spanish.
 """
 
 from dataclasses import dataclass, field
@@ -1454,7 +1455,155 @@ RIO = Walk(
     ],
 )
 
-WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO]
+MEXICO_CITY = Walk(
+    id="MEXICO_CITY_ZOCALO_CHAPULTEPEC",
+    city="mexico_city",
+    city_en="Mexico City",
+    city_it="Città del Messico",
+    route_en="From the Zócalo to Chapultepec, along the Paseo de la Reforma",
+    route_it="Dallo Zócalo a Chapultepec, lungo il Paseo de la Reforma",
+    outing_en="A walk in Mexico City",
+    outing_it="Passeggiata a Città del Messico",
+    country="MX",
+    continent="AMERICAS",
+    # Chapultepec's lake; its forest is mapped as many woods, of which the largest are drawn.
+    water=["relation/16031520"],
+    parks=[
+        "way/4758957", "way/1356340885", "way/1356340884", "way/1356340882", "way/1356049208",
+        "way/1356049216", "way/1356049205", "way/1356049204", "way/1356049213",
+    ],
+    stops=[
+        Stop("mexico_palacio_nacional", "National Palace", "Palazzo Nazionale", 19.4326, -99.1313,
+             note_en="Diego Rivera's murals of Mexico's history cover the main stairway of the National Palace.",
+             note_it="I murales di Diego Rivera sulla storia del Messico coprono lo scalone del Palazzo Nazionale."),
+        # Source: Wikipedia, National Palace (Mexico); Wikipedia (es), Palacio Nacional (México).
+        Stop("mexico_templo_mayor", "Templo Mayor", "Templo Mayor", 19.435, -99.1318,
+             note_en="The Aztecs' great temple came to light again in 1978, found by electricity workers digging in the street.",
+             note_it="Il grande tempio degli Aztechi tornò alla luce nel 1978, trovato da operai della compagnia elettrica che scavavano in strada."),
+        # Source: Wikipedia, Templo Mayor; Wikipedia (es), Templo Mayor. The two name different electricity companies: neither is said.
+        Stop("mexico_cathedral", "Metropolitan Cathedral", "Cattedrale metropolitana", 19.4339, -99.1332,
+             note_en="Building it took from 1573 to 1813, around the church that stood here first.",
+             note_it="Costruirla richiese dal 1573 al 1813, intorno alla chiesa che sorgeva qui prima."),
+        # Source: Wikipedia, Mexico City Metropolitan Cathedral; Wikipedia (es), Catedral Metropolitana de la Ciudad de México.
+        Stop("mexico_casa_azulejos", "House of Tiles", "Casa de los Azulejos", 19.4342, -99.1398,
+             note_en="Its façade is covered in Talavera tiles from Puebla, which gave the house its name.",
+             note_it="La facciata è coperta di piastrelle di Talavera di Puebla, che hanno dato il nome alla casa."),
+        # Source: Wikipedia, Casa de los Azulejos; Wikipedia (es), Casa de los Azulejos.
+        Stop("mexico_bellas_artes", "Palace of Fine Arts", "Palazzo delle Belle Arti", 19.4353, -99.141,
+             note_en="Begun in 1904 for the centenary of independence, it opened only in 1934, after the Revolution.",
+             note_it="Iniziato nel 1904 per il centenario dell'indipendenza, fu inaugurato solo nel 1934, dopo la Rivoluzione."),
+        # Source: Wikipedia, Palacio de Bellas Artes; Wikipedia (es), Palacio de Bellas Artes (México).
+        Stop("mexico_alameda", "Alameda Central", "Alameda Central", 19.4357, -99.144,
+             note_en="Laid out in 1592, it is the oldest public park in the Americas.",
+             note_it="Creata nel 1592, è il più antico parco pubblico delle Americhe."),
+        # Source: Wikipedia, Alameda Central; Wikipedia (es), Alameda Central.
+        Stop("mexico_revolucion", "Monument to the Revolution", "Monumento alla Rivoluzione", 19.4361, -99.1546,
+             note_en="It was built from the frame of a legislative palace that was never finished.",
+             note_it="Fu costruito con la struttura di un palazzo legislativo mai terminato."),
+        # Source: Wikipedia, Monument to the Revolution (Mexico City); Wikipedia (es), Monumento a la Revolución (México).
+        Stop("mexico_angel", "Angel of Independence", "Angelo dell'Indipendenza", 19.427, -99.1677,
+             note_en="Inaugurated in 1910 for the centenary of independence, its angel fell in the earthquake of 1957.",
+             note_it="Inaugurato nel 1910 per il centenario dell'indipendenza, il suo angelo cadde nel terremoto del 1957."),
+        # Source: Wikipedia, Angel of Independence; Wikipedia (es), Ángel de la Independencia.
+        Stop("mexico_diana", "Diana the Huntress", "Diana Cacciatrice", 19.4251, -99.1716,
+             note_en="The bronze huntress, unveiled in 1942, aims her arrow at the stars of the northern sky.",
+             note_it="La cacciatrice di bronzo, inaugurata nel 1942, punta la freccia verso le stelle del cielo del nord."),
+        # Source: Wikipedia, Diana the Huntress Fountain; Wikipedia (es), Fuente de la Diana Cazadora (Ciudad de México).
+        Stop("mexico_ninos_heroes", "Monument to the Boy Heroes", "Monumento ai Niños Héroes", 19.4215, -99.1793,
+             note_en="It remembers the young cadets who died defending Chapultepec Castle in 1847.",
+             note_it="Ricorda i giovani cadetti morti difendendo il castello di Chapultepec nel 1847."),
+        # Source: Wikipedia, Niños Héroes; Wikipedia (es), Niños Héroes.
+        Stop("mexico_chapultepec_castle", "Chapultepec Castle", "Castello di Chapultepec", 19.4205, -99.182,
+             note_en="Emperor Maximilian and Empress Carlota made this castle on its hill their residence.",
+             note_it="L'imperatore Massimiliano e l'imperatrice Carlotta fecero di questo castello sulla collina la loro residenza."),
+        # Source: Wikipedia, Chapultepec Castle; Wikipedia (es), Castillo de Chapultepec.
+        Stop("mexico_anthropology", "Museum of Anthropology", "Museo di Antropologia", 19.4261, -99.1863,
+             note_en="Its heart is the Aztec Sun Stone, found under the Zócalo in 1790.",
+             note_it="Il suo cuore è la Pietra del Sole azteca, ritrovata sotto lo Zócalo nel 1790."),
+        # Source: Wikipedia, National Museum of Anthropology (Mexico) and Aztec sun stone; Wikipedia (es), Museo Nacional de Antropología (México) and Piedra del Sol.
+    ],
+)
+
+BUENOS_AIRES = Walk(
+    id="BUENOS_AIRES_MAYO_RECOLETA",
+    city="buenos_aires",
+    city_en="Buenos Aires",
+    city_it="Buenos Aires",
+    route_en="From the Plaza de Mayo to Recoleta, by the Congress and the Obelisco",
+    route_it="Da Plaza de Mayo alla Recoleta, passando per il Congresso e l'Obelisco",
+    outing_en="A walk in Buenos Aires",
+    outing_it="Passeggiata a Buenos Aires",
+    country="AR",
+    continent="AMERICAS",
+    # The Río de la Plata, from the coastline; Puerto Madero's docks.
+    coast=True,
+    # The grid of the centre is mapped mostly as residential streets: its longer ones are drawn,
+    # as Milan's are, or the map would show only the avenues.
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=400,
+    water=["relation/2364166", "relation/2364163", "relation/2364162"],
+    # The squares on the way, and the Costanera Sur's nature reserve by the river.
+    parks=[
+        "relation/17076039", "way/17493172", "relation/531073", "way/23620740", "way/23727108",
+        "relation/10343154",
+    ],
+    stops=[
+        Stop("buenos_aires_casa_rosada", "Casa Rosada", "Casa Rosada", -34.6081, -58.371,
+             note_en="The president's palace takes its name from its pink colour.",
+             note_it="Il palazzo del presidente prende il nome dal suo colore rosa."),
+        # Source: Wikipedia, Casa Rosada; Wikipedia (es), Casa Rosada.
+        Stop("buenos_aires_cathedral", "Metropolitan Cathedral", "Cattedrale metropolitana", -34.6075, -58.3733,
+             note_en="General José de San Martín, hero of independence, rests in a mausoleum inside the cathedral.",
+             note_it="Il generale José de San Martín, eroe dell'indipendenza, riposa in un mausoleo dentro la cattedrale."),
+        # Source: Wikipedia, Buenos Aires Metropolitan Cathedral; Wikipedia (es), Catedral metropolitana de Buenos Aires.
+        Stop("buenos_aires_cabildo", "Cabildo", "Cabildo", -34.6087, -58.374,
+             note_en="The colonial town hall, begun in 1725, is now the museum of the May Revolution of 1810.",
+             note_it="Il municipio coloniale, iniziato nel 1725, è oggi il museo della Rivoluzione di Maggio del 1810."),
+        # Source: Wikipedia, Cabildo of Buenos Aires; Wikipedia (es), Cabildo de Buenos Aires.
+        Stop("buenos_aires_tortoni", "Café Tortoni", "Café Tortoni", -34.6087, -58.3781,
+             note_en="Opened in 1858, the café counted Jorge Luis Borges among its regulars.",
+             note_it="Aperto nel 1858, il caffè ebbe tra i suoi frequentatori Jorge Luis Borges."),
+        # Source: Wikipedia, Café Tortoni; Wikipedia (es), Café Tortoni.
+        Stop("buenos_aires_barolo", "Palacio Barolo", "Palacio Barolo", -34.6094, -58.3856,
+             note_en="Its design follows Dante's Divine Comedy: 100 metres tall, one for each canto.",
+             note_it="Il suo progetto segue la Divina Commedia di Dante: alto 100 metri, uno per ogni canto."),
+        # Source: Wikipedia, Palacio Barolo; Wikipedia (es), Palacio Barolo.
+        Stop("buenos_aires_congreso", "Congress", "Congresso", -34.6097, -58.3921,
+             note_en="Designed by Vittorio Meano, the Congress palace was inaugurated in 1906.",
+             note_it="Progettato da Vittorio Meano, il palazzo del Congresso fu inaugurato nel 1906."),
+        # Source: Wikipedia, Argentine National Congress Palace; Wikipedia (es), Palacio del Congreso de la Nación Argentina.
+        Stop("buenos_aires_obelisco", "Obelisco", "Obelisco", -34.6037, -58.3816,
+             note_en="Raised in 1936, it marks four hundred years since the city's first founding.",
+             note_it="Eretto nel 1936, ricorda i quattrocento anni dalla prima fondazione della città."),
+        # Source: Wikipedia, Obelisco de Buenos Aires; Wikipedia (es), Obelisco de Buenos Aires.
+        Stop("buenos_aires_colon", "Teatro Colón", "Teatro Colón", -34.6011, -58.383,
+             note_en="A survey of conductors by Leo Beranek ranked its hall the best in the world for opera.",
+             note_it="Un sondaggio di Leo Beranek tra i direttori ne ha giudicato la sala la migliore al mondo per l'opera."),
+        # Source: Wikipedia, Teatro Colón; Wikipedia (es), Teatro Colón.
+        Stop("buenos_aires_plaza_san_martin", "Plaza San Martín", "Plaza San Martín", -34.595, -58.3755,
+             note_en="The square is named after General San Martín, whose equestrian statue stands here.",
+             note_it="La piazza porta il nome del generale San Martín, la cui statua equestre si trova qui."),
+        # Source: Wikipedia, Plaza San Martín (Buenos Aires); Wikipedia (es), Plaza San Martín (Buenos Aires).
+        Stop("buenos_aires_ateneo", "El Ateneo Grand Splendid", "El Ateneo Grand Splendid", -34.596, -58.3943,
+             note_en="The Grand Splendid theatre of 1919 is now a bookshop, with tables on its old stage.",
+             note_it="Il teatro Grand Splendid del 1919 è oggi una libreria, con i tavoli sul vecchio palcoscenico."),
+        # Source: Wikipedia, El Ateneo Grand Splendid; Wikipedia (es), El Ateneo Grand Splendid.
+        Stop("buenos_aires_recoleta", "Recoleta Cemetery", "Cimitero della Recoleta", -34.588, -58.3926,
+             note_en="Opened in 1822, the cemetery holds the tombs of presidents and of Eva Perón.",
+             note_it="Aperto nel 1822, il cimitero custodisce le tombe di presidenti e di Eva Perón."),
+        # Source: Wikipedia, La Recoleta Cemetery; Wikipedia (es), Cementerio de la Recoleta.
+        Stop("buenos_aires_bellas_artes", "Museum of Fine Arts", "Museo di Belle Arti", -34.5839, -58.3929,
+             note_en="Founded in 1895, the national museum of fine arts now fills an old waterworks pump house.",
+             note_it="Fondato nel 1895, il museo nazionale di belle arti occupa oggi un'antica stazione di pompaggio."),
+        # Source: Wikipedia, Museo Nacional de Bellas Artes (Buenos Aires); Wikipedia (es), Museo Nacional de Bellas Artes (Argentina).
+        Stop("buenos_aires_floralis", "Floralis Genérica", "Floralis Genérica", -34.5817, -58.3935,
+             note_en="Eduardo Catalano's metal flower, 23 metres tall, was made to close its six petals at night.",
+             note_it="Il fiore di metallo di Eduardo Catalano, alto 23 metri, fu fatto per chiudere di notte i suoi sei petali."),
+        # Source: Wikipedia, Floralis Genérica; Wikipedia (es), Floralis Genérica.
+    ],
+)
+
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
@@ -1470,6 +1619,8 @@ LOCATORS = {
     "AT": (46.3, 9.5, 49.1, 17.2),
     "US": (24.5, -125.0, 49.5, -66.9),
     "BR": (-33.8, -74.0, 5.3, -34.8),
+    "MX": (14.5, -118.4, 32.7, -86.7),
+    "AR": (-55.1, -73.6, -21.8, -53.6),
 }
 
 # The continents the Ways page groups the cities by, in its order (the Kotlin enum Continent has

@@ -39,13 +39,15 @@ class WaysDataTest {
                 WayId.CUSCO_ARMAS_QORIKANCHA,
                 WayId.NEW_YORK_PARK_BRIDGE,
                 WayId.RIO_CENTRO_SUGARLOAF,
+                WayId.MEXICO_CITY_ZOCALO_CHAPULTEPEC,
+                WayId.BUENOS_AIRES_MAYO_RECOLETA,
             )
             .inOrder()
         // One walk a city for now (PLANNING.md §11 Phase 11, later).
         assertThat(Ways.walks.map { it.id.city })
             .containsExactly(
                 "milan", "rome", "paris", "london", "madrid", "berlin", "vienna", "porto", "amsterdam", "prague",
-                "lima", "cusco", "new_york", "rio",
+                "lima", "cusco", "new_york", "rio", "mexico_city", "buenos_aires",
             )
             .inOrder()
     }
@@ -152,7 +154,8 @@ class WaysDataTest {
             Ways.walksIn(Continent.AMERICAS).map {
                 it.id.city
             },
-        ).containsExactly("lima", "cusco", "new_york", "rio").inOrder()
+        ).containsExactly("lima", "cusco", "new_york", "rio", "mexico_city", "buenos_aires")
+            .inOrder()
     }
 
     @Test
@@ -178,7 +181,8 @@ class WaysDataTest {
     @Test
     fun `a city on the sea is cut out of it, its route and its places on land`() {
         val coastal = Ways.walks.filter { it.map.sea }.map { it.id }
-        assertThat(coastal).containsExactly(WayId.NEW_YORK_PARK_BRIDGE, WayId.RIO_CENTRO_SUGARLOAF)
+        assertThat(coastal)
+            .containsExactly(WayId.NEW_YORK_PARK_BRIDGE, WayId.RIO_CENTRO_SUGARLOAF, WayId.BUENOS_AIRES_MAYO_RECOLETA)
         for (id in coastal) {
             val map = Ways.of(id).map
             // The land from the coastline, not the whole ground: a few shores and islands.
