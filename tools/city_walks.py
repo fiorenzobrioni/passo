@@ -17,8 +17,8 @@ are still written by tools/build_ways.py, never by hand.
         tools/ways-cache/wiki/. With patterns, the sentences matching each (case-insensitive
         regexes); without, the path of the cached text, for reading it whole.
     python3 tools/city_walks.py wiki-find LANG "query" ...
-        Wikipedia's article for a query, and the same article's title in en, es, fr, it, pt and
-        de, so a place can be checked in a second language.
+        Wikipedia's article for a query, and the same article's title in en, es, fr, it, pt,
+        de, ja, zh and ko, so a place can be checked in a second language.
     python3 tools/city_walks.py splice WALK_ID ...
         Adds new walks to WayData.kt without rebuilding the others, then rewrites the place
         strings and the continents' maps (see below).
@@ -51,9 +51,10 @@ AGENT = {"User-Agent": "passo-build-ways (github.com/fiorenzobrioni/passo)"}
 BROUTER = "https://brouter.de/brouter?lonlats={}&profile=hiking-mountain&alternativeidx=0&format=geojson"
 NOMINATIM = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q={}"
 OSM_MAP = "https://api.openstreetmap.org/api/0.6/map?bbox={:.5f},{:.5f},{:.5f},{:.5f}"
-LANGUAGES = ("en", "es", "fr", "it", "pt", "de")
+# Asia's cities are checked in their own language too (Japanese, Chinese, Korean).
+LANGUAGES = ("en", "es", "fr", "it", "pt", "de", "ja", "zh", "ko")
 # Redirects as each Wikipedia writes them.
-REDIRECT = re.compile(r"\s*#(REDIRECT|WEITERLEITUNG|REDIRECIONAMENTO|RINVIA|REDIRECCIÓN)\s*\[\[([^\]]+)\]\]", re.I)
+REDIRECT = re.compile(r"\s*#(REDIRECT|WEITERLEITUNG|REDIRECIONAMENTO|RINVIA|REDIRECCIÓN|転送|重定向)\s*\[\[([^\]]+)\]\]", re.I)
 
 
 def get(url, attempts=6, pause=8):
@@ -189,7 +190,8 @@ def wiki(lang, title, patterns):
     if not patterns:
         print(path)
         return
-    sentences = re.split(r"(?<=[.!?])\s+", path.read_text())
+    # Japanese and Chinese end a sentence with 。 and no space after it.
+    sentences = re.split(r"(?<=[.!?])\s+|(?<=[。！？])", path.read_text())
     for pattern in patterns:
         hits = [s for s in sentences if re.search(pattern, s, re.I)]
         print(f"[{lang}:{title} /{pattern}/]")

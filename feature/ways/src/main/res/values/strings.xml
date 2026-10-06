@@ -75,6 +75,7 @@
     <!-- The cities by continent (ADR 0015 decision 12): a row a continent, its page with its map. -->
     <string name="ways_continent_europe">Europe</string>
     <string name="ways_continent_americas">The Americas</string>
+    <string name="ways_continent_asia_oceania">Asia and Oceania</string>
     <plurals name="ways_continent_cities">
         <item quantity="one">%1$d city</item>
         <item quantity="other">%1$d cities</item>

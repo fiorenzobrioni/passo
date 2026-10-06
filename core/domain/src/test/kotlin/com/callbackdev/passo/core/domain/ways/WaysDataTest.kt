@@ -45,6 +45,8 @@ class WaysDataTest {
                 WayId.QUEBEC_PARLEMENT_BASSE_VILLE,
                 WayId.HAVANA_CAPITOLIO_PAULA,
                 WayId.CARTAGENA_RELOJ_SAN_FELIPE,
+                WayId.TOKYO_SENSOJI_PALACE,
+                WayId.SYDNEY_LUNA_PARK_GARDEN,
             )
             .inOrder()
         // One walk a city for now (PLANNING.md §11 Phase 11, later).
@@ -52,7 +54,7 @@ class WaysDataTest {
             .containsExactly(
                 "milan", "rome", "paris", "london", "madrid", "berlin", "vienna", "porto", "amsterdam", "prague",
                 "lima", "cusco", "new_york", "rio", "mexico_city", "buenos_aires", "san_francisco", "quebec",
-                "havana", "cartagena",
+                "havana", "cartagena", "tokyo", "sydney",
             )
             .inOrder()
     }
@@ -170,6 +172,9 @@ class WaysDataTest {
             "lima", "cusco", "new_york", "rio", "mexico_city", "buenos_aires", "san_francisco", "quebec",
             "havana", "cartagena",
         )
+            .inOrder()
+        assertThat(Ways.walksIn(Continent.ASIA_OCEANIA).map { it.id.city })
+            .containsExactly("tokyo", "sydney")
             .inOrder()
     }
 

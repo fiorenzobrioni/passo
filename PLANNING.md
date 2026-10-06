@@ -963,9 +963,23 @@ a city for now.
   Québec, Havana and Cartagena, short (Washington, Montréal, Boston's Freedom Trail and Valparaíso if
   one does not work out). Then Asia and Oceania, and Africa, each continent added with its
   first cities. Cities only.
+- [ ] **Asia and Oceania** (owner, 6 Oct 2026: "start the Asia and Oceania group, tell me which
+  cities, and do the first two"), proposed: Tokyo, Sydney, Seoul, Beijing, Hong Kong, Singapore
+  and Bangkok, long; Kyoto (Higashiyama, from Kiyomizu-dera to Gion), Hanoi (the Hoàn Kiếm lake,
+  the Old Quarter and the Temple of Literature) and Melbourne (its centre and laneways to the
+  Exhibition Building), short (Shanghai's Bund, Mumbai, Delhi, Auckland and Kathmandu if one
+  does not work out). The continent's frame runs from Mumbai to New Zealand, not the Middle
+  East (Istanbul is Europe's).
+  - [x] **Tokyo and Sydney**, the continent set up with them: Tokyo's walk goes from the
+    Kaminarimon and Sensō-ji by Kappabashi, Ueno Park and Shinobazu Pond, Ameyoko, the Kanda
+    shrine and Akihabara, to Nihonbashi, Tokyo Station and the Imperial Palace (11.6 km,
+    14 places); Sydney's from Luna Park over the Harbour Bridge to The Rocks and Circular Quay,
+    by the Opera House, the Botanic Garden and Mrs Macquarie's Chair, then the Domain, Hyde
+    Park and the Queen Victoria Building, to Darling Harbour and the Chinese Garden (10.1 km,
+    14 places).
 - [ ] On a device (owner): the Camino Portugués drawn in both themes; Rome, Paris, Madrid,
   Berlin, Vienna, Lima, Cusco, New York, Rio, Mexico City, Buenos Aires, San Francisco, Québec,
-  Havana, Cartagena, Porto, Amsterdam and Prague each walked once, with the voice; the continents' maps and the coastal cities in both
+  Havana, Cartagena, Tokyo, Sydney, Porto, Amsterdam and Prague each walked once, with the voice; the continents' maps and the coastal cities in both
   themes.
 
 Built as the content of the first two parts, with nothing new in the code: the fifth way is the
@@ -1335,6 +1349,7 @@ Include:
 - **Mexico City and Buenos Aires** (6 Oct 2026): checked in the English and Spanish Wikipedias, and rewritten where they differ (the Templo Mayor's finders work for a different electricity company in each: the sentence says only "electricity workers"; the Diana's nakedness story and the Cathedral as "the largest in the Americas" are in neither as written, and are not said). Chapultepec's forest is mapped as many woods, not one park, so its eight largest are drawn; Buenos Aires's centre is mapped mostly as residential streets, so its longer lanes are drawn as Milan's are, and its coast on the Río de la Plata comes from the coastline like New York's and Rio's.
 - **San Francisco, Québec, Havana and Cartagena** (6 Oct 2026), the Americas' last four, all at once (owner: "or all four, if you can do them well in one go"). Checked in two Wikipedias each: San Francisco in the English and the Italian (the Spanish for the Ferry Building and the Wharf, the German for Fort Mason), Québec in the English and French, Havana and Cartagena in the English and Spanish; rewritten where they differ or where a detail is in one only (the Ferry Building's tower "may have" been modelled on the Giralda in both, and is said so; the Breakneck Stairs' 1635 is in the English only, the French has them there in 1660, so the sentence says 1660; the Citadelle's American threat, the Plaza Vieja's order after the other squares and Monroe and DiMaggio's "wedding" photographs are in one only, and are not said; Fisherman's Wharf's crabs are in the Spanish only, so its sentence is the Maritime Park both name). Québec's St Lawrence is not coastline in OpenStreetMap but a river area (the fluvial estuary), so Québec keeps its plain ground with the river and the Louise Basin as water, and its Upper Town's residential streets are drawn as Milan's are. Québec's Old Port market has no article in either language, so it is not a place: the walk ends at the Musée de la civilisation. A city's places on the sea must stand on its land, within 150 m of it: the Ferry Building is on a pier, some 110 m past the coastline. Cartagena's walk ends near where it began, and the two ends' names overlapped: a way's map now places each name clear of the ones placed before it, beside its point, above, below or on its other side (`placeLabels` in `WayMap.kt`).
 - **How a city is added, written down** (owner, 6 Oct 2026: "put them in tools and document them so Claude Code knows how to use them"). The helpers used for the twenty cities lived in a session's scratch space and were lost with it; they are now `tools/city_walks.py` (locate, route, features, wiki, wiki-find, splice), and the procedure, the owner's rules (two cities at a time, every sentence in two sources) and what was learned are `tools/CITY_WALKS.md`, pointed to from CLAUDE.md. `splice` was checked against this round's data: from the previous commit's `WayData.kt` it writes the same file byte for byte.
+- **Asia and Oceania, with Tokyo and Sydney** (owner, 6 Oct 2026). The third continent, framed from Mumbai to New Zealand (66° E to 179° E, 47.5° S to 46° N), so the cities proposed fit without moving it; the Middle East is left out, Istanbul being Europe's. Tokyo's sentences were checked in the English and Japanese Wikipedias (the Italian for Sensō-ji), Sydney's in the English and German (Italian, French or Spanish where the German has no article), and rewritten where they differ: the Kaminarimon's first year (941 or 942), the year Tsunayoshi brought the Yushima Seidō (1690 or 1691), whether Mitsukoshi was Japan's first department store, the Harbour Bridge's records, the years of the Hyde Park Barracks (from 1817 or 1818) and which of Cadmans Cottage's titles of oldest. Ueno Park has no stop of its own (it would have pushed the walk past 12 km): the museum's sentence names it. The Pyrmont Bridge has an article in English only, so the stop is Darling Harbour. Tokyo's Sumida and its banks are many water areas, so its map lists the larger and reads the rest from the street tiles, as Amsterdam's does; the palace's moats are listed one by one. Sydney is not `coast`: in OpenStreetMap its harbour is a water area, the coastline running out at the Heads. The helper now follows Japanese and Chinese redirects, splits sentences at 「。」, and lists the Japanese, Chinese and Korean titles.
 
 ### Open
 

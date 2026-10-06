@@ -15,7 +15,8 @@ line after it. Berlin and Vienna (5 Oct 2026) were checked in the English and Ge
 New York in the English and Italian (or German), Rio in the English and Portuguese, Mexico City
 and Buenos Aires in the English and Spanish, San Francisco in the English and Italian (or
 Spanish, German), Québec in the English and French, Havana and Cartagena in the English and
-Spanish.
+Spanish, Tokyo in the English and Japanese (or Italian), Sydney in the English and German (or
+Italian, French, Spanish).
 """
 
 from dataclasses import dataclass, field
@@ -1838,7 +1839,171 @@ CARTAGENA = Walk(
     ],
 )
 
-WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA]
+TOKYO = Walk(
+    id="TOKYO_SENSOJI_PALACE",
+    city="tokyo",
+    city_en="Tokyo",
+    city_it="Tokyo",
+    route_en="From Sensō-ji to the Imperial Palace, by Ueno and Akihabara",
+    route_it="Dal Sensō-ji al Palazzo imperiale, passando per Ueno e Akihabara",
+    outing_en="A walk in Tokyo",
+    outing_it="Passeggiata a Tokyo",
+    country="JP",
+    continent="ASIA_OCEANIA",
+    # The Sumida, in several areas; the Kanda; the palace's moats; Shinobazu Pond. The Sumida's
+    # banks and the Nihonbashi River are also many small areas, read from the street tiles.
+    water=[
+        "relation/14352161", "relation/8284278", "relation/12489063", "relation/7913942", "relation/12489064",
+        "relation/3553642",
+        "relation/5415353", "relation/5415354", "relation/5415355", "relation/5415347", "relation/5415372",
+        "relation/5415371", "relation/5415373", "relation/5415352", "relation/5415356", "relation/3682169",
+        "relation/5414261", "relation/7904532",
+    ],
+    water_from_tiles=True,
+    # Ueno Park, the palace's gardens and woods, Kitanomaru, Hibiya and the Sumida's park.
+    parks=[
+        "relation/5413419", "relation/3551852", "relation/5415394", "relation/2102944", "way/624081603",
+        "way/145408909", "relation/14235095",
+    ],
+    stops=[
+        Stop("tokyo_kaminarimon", "Kaminarimon", "Kaminarimon", 35.7111, 139.7964,
+             note_en="Guarded by the gods of wind and thunder, this gate was rebuilt in 1960 with a gift from Panasonic's founder, Kōnosuke Matsushita.",
+             note_it="Custodita dagli dei del vento e del tuono, questa porta fu ricostruita nel 1960 con un dono del fondatore di Panasonic, Kōnosuke Matsushita."),
+        # Source: Wikipedia, Kaminarimon; Wikipedia (ja), 雷門. The first gate's year differs (941 or 942): not said.
+        Stop("tokyo_sensoji", "Sensō-ji", "Sensō-ji", 35.7146, 139.7966,
+             note_en="Tokyo's oldest temple began, the legend says, with a statue of Kannon two brothers found while fishing in the Sumida in 628.",
+             note_it="Il tempio più antico di Tokyo nacque, dice la leggenda, da una statua di Kannon trovata da due fratelli mentre pescavano nel Sumida nel 628."),
+        # Source: Wikipedia, Sensō-ji; Wikipedia (it), Sensō-ji.
+        Stop("tokyo_kappabashi", "Kappabashi", "Kappabashi", 35.7135, 139.788,
+             note_en="Between Asakusa and Ueno, this street sells restaurants everything from knives to the display food in their windows.",
+             note_it="Tra Asakusa e Ueno, questa via vende ai ristoranti di tutto, dai coltelli ai piatti finti esposti in vetrina."),
+        # Source: Wikipedia, Kappabashi-dori; Wikipedia (ja), かっぱ橋道具街.
+        Stop("tokyo_national_museum", "Tokyo National Museum", "Museo nazionale di Tokyo", 35.718, 139.7765,
+             note_en="Japan's oldest national museum, founded in 1872, opened here in Ueno Park in 1882.",
+             note_it="Il più antico museo nazionale del Giappone, fondato nel 1872, aprì qui nel parco di Ueno nel 1882."),
+        # Source: Wikipedia, Tokyo National Museum; Wikipedia (ja), 東京国立博物館 (Japan's oldest museum). Which is its largest differs (art museum, or museum): not said.
+        Stop("tokyo_toshogu", "Ueno Tōshō-gū", "Ueno Tōshō-gū", 35.7154, 139.7706,
+             note_en="A shrine to Tokugawa Ieyasu, the first Tokugawa shōgun; its buildings, renewed by Iemitsu in 1651, have come down almost intact.",
+             note_it="È un santuario dedicato a Tokugawa Ieyasu, il primo shōgun Tokugawa; i suoi edifici, rinnovati da Iemitsu nel 1651, sono giunti quasi intatti."),
+        # Source: Wikipedia, Ueno Tōshō-gū; Wikipedia (ja), 上野東照宮.
+        Stop("tokyo_shinobazu", "Shinobazu Pond", "Stagno Shinobazu", 35.7122, 139.7708,
+             note_en="In summer lotus leaves cover part of the pond; on its island stands a temple to the goddess Benzaiten.",
+             note_it="D'estate le foglie di loto coprono parte dello stagno; sulla sua isola c'è un tempio dedicato alla dea Benzaiten."),
+        # Source: Wikipedia, Shinobazu Pond; Wikipedia (ja), 不忍池.
+        Stop("tokyo_ameyoko", "Ameyoko", "Ameyoko", 35.7095, 139.7745,
+             note_en="This market along the railway may take its name from the sweets sold here after the war, or from American army goods.",
+             note_it="Questo mercato lungo la ferrovia prenderebbe il nome dai dolci venduti qui nel dopoguerra, o dalle merci dell'esercito americano."),
+        # Source: Wikipedia, Ameya-Yokochō; Wikipedia (ja), アメ横. Both give the two theories.
+        Stop("tokyo_kanda_myojin", "Kanda Shrine", "Santuario di Kanda", 35.7019, 139.7677,
+             note_en="Founded, by tradition, in 730, the shrine was moved as Edo Castle grew, and came to this hill in 1616.",
+             note_it="Fondato, secondo la tradizione, nel 730, il santuario fu spostato via via che il castello di Edo cresceva, e giunse su questa collina nel 1616."),
+        # Source: Wikipedia, Kanda Shrine; Wikipedia (ja), 神田明神.
+        Stop("tokyo_yushima_seido", "Yushima Seidō", "Yushima Seidō", 35.7004, 139.7666,
+             note_en="The shōgun Tsunayoshi set this Confucian temple here; in 1872 it held the exhibition from which the national museum was born.",
+             note_it="Lo shōgun Tsunayoshi volle qui questo tempio confuciano; nel 1872 ospitò la mostra da cui nacque il museo nazionale."),
+        # Source: Wikipedia, Yushima Seidō; Wikipedia (ja), 湯島聖堂; for the exhibition, Wikipedia, Tokyo National Museum, and (ja) 東京国立博物館. The year it came here differs (1690 or 1691): not said.
+        Stop("tokyo_akihabara", "Akihabara", "Akihabara", 35.6985, 139.7712,
+             note_en="After the war Akihabara grew from a black market into Electric Town, and later the heart of otaku culture.",
+             note_it="Nel dopoguerra Akihabara passò dal mercato nero alla Città elettrica, e divenne poi il cuore della cultura otaku."),
+        # Source: Wikipedia, Akihabara; Wikipedia (ja), 秋葉原.
+        Stop("tokyo_mitsukoshi", "Mitsukoshi", "Mitsukoshi", 35.6862, 139.7735,
+             note_en="Mitsukoshi began in 1673 as Echigoya, a kimono shop; this store was finished in 1914.",
+             note_it="Mitsukoshi nacque nel 1673 come Echigoya, un negozio di kimono; questo grande magazzino fu finito nel 1914."),
+        # Source: Wikipedia, Mitsukoshi; Wikipedia (ja), 三越日本橋本店. Whether it was Japan's first department store is debated: not said.
+        Stop("tokyo_nihonbashi", "Nihonbashi", "Nihonbashi", 35.684, 139.774,
+             note_en="The five great roads of the Edo period began at this bridge, and road distances to Tokyo are still counted from here.",
+             note_it="Le cinque grandi strade dell'epoca Edo partivano da questo ponte, e le distanze stradali per Tokyo si contano ancora da qui."),
+        # Source: Wikipedia, Nihonbashi; Wikipedia (ja), 日本橋 (東京都中央区).
+        Stop("tokyo_station", "Tokyo Station", "Stazione di Tokyo", 35.6812, 139.766,
+             note_en="Tatsuno Kingo's red-brick station opened in 1914; damaged in the bombing of 1945, it was restored as it first stood in 2012.",
+             note_it="La stazione in mattoni rossi di Tatsuno Kingo aprì nel 1914; danneggiata dai bombardamenti del 1945, nel 2012 tornò com'era in origine."),
+        # Source: Wikipedia, Tokyo Station; Wikipedia (ja), 東京駅.
+        Stop("tokyo_imperial_palace", "Imperial Palace", "Palazzo imperiale", 35.6797, 139.755,
+             note_en="Only at the New Year and on the Emperor's birthday may the public cross into the palace, where the imperial family greets them.",
+             note_it="Solo a Capodanno e per il compleanno dell'imperatore il pubblico può entrare nel palazzo, dove la famiglia imperiale lo saluta."),
+        # Source: Wikipedia, Tokyo Imperial Palace; Wikipedia (ja), 二重橋 (the gate opened, and the bridge crossed, on those days).
+    ],
+)
+
+SYDNEY = Walk(
+    id="SYDNEY_LUNA_PARK_GARDEN",
+    city="sydney",
+    city_en="Sydney",
+    city_it="Sydney",
+    route_en="From Luna Park to the Chinese Garden, over the Harbour Bridge and by the Opera House",
+    route_it="Dal Luna Park al Giardino cinese, attraverso l'Harbour Bridge e passando per l'Opera House",
+    outing_en="A walk in Sydney",
+    outing_it="Passeggiata a Sydney",
+    country="AU",
+    continent="ASIA_OCEANIA",
+    # The harbour is a water area in OpenStreetMap, its coastline out at the Heads.
+    water=["relation/1252425"],
+    # The Botanic Garden and the Domain, Hyde Park, the parks at the bridge's ends, Darling Harbour's.
+    parks=[
+        "relation/3744999", "relation/3744998", "way/1224921215", "relation/2030042", "way/4334301",
+        "relation/2068542", "way/55218510", "way/183246960", "way/4334305",
+    ],
+    stops=[
+        Stop("sydney_luna_park", "Luna Park", "Luna Park", -33.8479, 151.21,
+             note_en="Built in 1935, the park is entered through a giant face, made again several times since.",
+             note_it="Costruito nel 1935, al parco si entra attraverso un volto gigante, rifatto più volte da allora."),
+        # Source: Wikipedia, Luna Park Sydney; Wikipedia (de), Luna Park (Sydney).
+        Stop("sydney_harbour_bridge", "Sydney Harbour Bridge", "Sydney Harbour Bridge", -33.8525, 151.2108,
+             note_en="Sydney calls this steel arch, opened in 1932, the Coathanger.",
+             note_it="Sydney chiama Coathanger, l'attaccapanni, questo arco d'acciaio inaugurato nel 1932."),
+        # Source: Wikipedia, Sydney Harbour Bridge; Wikipedia (de), Sydney Harbour Bridge. Its records are given differently (the tallest steel arch and once the widest, or the widest): not said.
+        Stop("sydney_cadmans_cottage", "Cadmans Cottage", "Cadmans Cottage", -33.8589, 151.2092,
+             note_en="Built in 1816 for the government's boat crews, the cottage stood by the water, now about 100 m away.",
+             note_it="Costruita nel 1816 per gli equipaggi delle barche del governo, la casetta era in riva all'acqua, che oggi è a circa 100 m."),
+        # Source: Wikipedia, Cadmans Cottage; Wikipedia (de), Cadmans Cottage. Which is older differs (the second oldest house in Sydney, or the oldest building of The Rocks): not said.
+        Stop("sydney_circular_quay", "Circular Quay", "Circular Quay", -33.8612, 151.211,
+             note_en="The First Fleet landed in this cove in 1788, and founded the settlement that became Sydney.",
+             note_it="La Prima Flotta approdò in questa baia nel 1788, e fondò l'insediamento da cui nacque Sydney."),
+        # Source: Wikipedia, Sydney Cove; Wikipedia (de), Circular Quay.
+        Stop("sydney_opera_house", "Sydney Opera House", "Opera House di Sydney", -33.858, 151.2148,
+             note_en="Designed by the Dane Jørn Utzon, it was opened by Queen Elizabeth II in 1973, and has been a World Heritage Site since 2007.",
+             note_it="Progettata dal danese Jørn Utzon, fu inaugurata dalla regina Elisabetta II nel 1973 ed è patrimonio dell'umanità dal 2007."),
+        # Source: Wikipedia, Sydney Opera House; Wikipedia (it), Teatro dell'Opera di Sydney.
+        Stop("sydney_botanic_garden", "Royal Botanic Garden", "Royal Botanic Garden", -33.864, 151.217,
+             note_en="Founded in 1816 on Farm Cove, where the colony's first farm was laid out, it is Australia's oldest scientific institution.",
+             note_it="Fondato nel 1816 sulla Farm Cove, dove sorse la prima fattoria della colonia, è la più antica istituzione scientifica dell'Australia."),
+        # Source: Wikipedia, Royal Botanic Garden, Sydney; Wikipedia (de), Royal Botanic Gardens (Sydney).
+        Stop("sydney_macquarie_chair", "Mrs Macquarie's Chair", "Mrs Macquarie's Chair", -33.8597, 151.2224,
+             note_en="Convicts carved this seat in the sandstone in 1810 for Elizabeth Macquarie, the governor's wife.",
+             note_it="Nel 1810 alcuni detenuti scavarono questo sedile nell'arenaria per Elizabeth Macquarie, la moglie del governatore."),
+        # Source: Wikipedia, Mrs Macquarie's Chair; Wikipedia (de), Mrs Macquarie’s Chair.
+        Stop("sydney_art_gallery", "Art Gallery of New South Wales", "Art Gallery of New South Wales", -33.8684, 151.2172,
+             note_en="In 2022 the gallery opened a second building, designed by the Japanese studio SANAA.",
+             note_it="Nel 2022 il museo ha aperto un secondo edificio, progettato dallo studio giapponese SANAA."),
+        # Source: Wikipedia, Art Gallery of New South Wales; Wikipedia (de), Art Gallery of New South Wales.
+        Stop("sydney_hyde_park_barracks", "Hyde Park Barracks", "Hyde Park Barracks", -33.8697, 151.2124,
+             note_en="Francis Greenway designed these barracks for the colony's male convicts; they are a World Heritage Site.",
+             note_it="Francis Greenway progettò queste caserme per i detenuti maschi della colonia; sono patrimonio dell'umanità."),
+        # Source: Wikipedia, Hyde Park Barracks, Sydney; Wikipedia (fr), Hyde Park Barracks (Sydney). The years they were built differ (from 1817 or 1818): not said.
+        Stop("sydney_st_marys", "St Mary's Cathedral", "Cattedrale di Santa Maria", -33.8714, 151.2128,
+             note_en="Begun after a fire destroyed the first church in 1865, William Wardell's cathedral was largely finished in 1928.",
+             note_it="Iniziata dopo che un incendio distrusse la prima chiesa nel 1865, la cattedrale di William Wardell fu quasi finita nel 1928."),
+        # Source: Wikipedia, St Mary's Cathedral, Sydney; Wikipedia (it), Cattedrale di Santa Maria (Sydney).
+        Stop("sydney_anzac_memorial", "Anzac Memorial", "Memoriale degli Anzac", -33.8752, 151.2108,
+             note_en="This Art Deco memorial in Hyde Park, designed by Bruce Dellit, opened in 1934.",
+             note_it="Questo memoriale Art déco a Hyde Park, progettato da Bruce Dellit, fu inaugurato nel 1934."),
+        # Source: Wikipedia, Anzac Memorial; Wikipedia (it), Memoriale degli Anzac.
+        Stop("sydney_qvb", "Queen Victoria Building", "Queen Victoria Building", -33.8717, 151.2069,
+             note_en="George McRae's market hall, finished in 1898, was nearly pulled down in 1959 and now holds shops again.",
+             note_it="Il mercato coperto di George McRae, finito nel 1898, rischiò la demolizione nel 1959 e oggi ospita di nuovo negozi."),
+        # Source: Wikipedia, Queen Victoria Building; Wikipedia (de), Queen Victoria Building.
+        Stop("sydney_darling_harbour", "Darling Harbour", "Darling Harbour", -33.8707, 151.2015,
+             note_en="Once a port of wharves and railway yards, Darling Harbour is now mostly for people on foot.",
+             note_it="Un tempo porto di moli e scali ferroviari, Darling Harbour è oggi soprattutto per chi va a piedi."),
+        # Source: Wikipedia, Darling Harbour; Wikipedia (de), Darling Harbour. Pyrmont Bridge, crossed here, has an article in English only.
+        Stop("sydney_chinese_garden", "Chinese Garden of Friendship", "Giardino cinese dell'Amicizia", -33.8763, 151.2028,
+             note_en="Designed by Guangzhou, Sydney's Chinese sister city, the garden opened in 1988, for the bicentenary.",
+             note_it="Progettato da Canton, la città cinese gemellata con Sydney, il giardino fu aperto nel 1988, per il bicentenario."),
+        # Source: Wikipedia, Chinese Garden of Friendship; Wikipedia (es), Jardín chino de la Amistad.
+    ],
+)
+
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
@@ -1859,6 +2024,8 @@ LOCATORS = {
     "CA": (41.6, -141.0, 70.0, -52.6),
     "CU": (19.8, -85.0, 23.3, -74.1),
     "CO": (-4.3, -79.1, 12.5, -66.8),
+    "JP": (24.0, 122.9, 45.6, 146.0),
+    "AU": (-43.7, 112.9, -10.6, 153.7),
 }
 
 # The continents the Ways page groups the cities by, in its order (the Kotlin enum Continent has
@@ -1870,4 +2037,7 @@ CONTINENTS = {
     "EUROPE": (34.5, -11.5, 61.5, 31.5),
     # From southern Canada to Cape Horn, the Pacific coast to Brazil's eastern tip.
     "AMERICAS": (-56.0, -126.0, 56.0, -33.0),
+    # From Mumbai and Delhi to Japan, and down to Tasmania and New Zealand: the cities a walk is
+    # likely to visit, not the Middle East (Istanbul is Europe's).
+    "ASIA_OCEANIA": (-47.5, 66.0, 46.0, 179.0),
 }

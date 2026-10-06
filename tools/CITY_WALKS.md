@@ -1,6 +1,6 @@
 # Adding a city walk
 
-How a city walk is added, step by step, as the twenty cities of Europe and the Americas were.
+How a city walk is added, step by step, as the cities of Europe, the Americas, and Asia and Oceania were.
 The decisions behind it are in `docs/adr/0015-city-walks.md`; this is the procedure. The data is
 written by `tools/build_ways.py` from `tools/ways_content.py`, never by hand;
 `tools/city_walks.py` helps to find and check what goes into the content, and adds the new
@@ -120,5 +120,14 @@ On top of its first two cities:
   clear of the ones placed before it.
 - A city near a simplified Natural Earth shore (Rio) may fall just outside the continent's
   land: the continent test allows 30 km.
+- An Asian city is best checked in its own language and English (Tokyo: Japanese); `wiki`
+  follows the Japanese and Chinese redirects (`#転送`, `#重定向`) and splits their sentences at
+  「。」. A redirect cached before that fix holds only the `#転送` line: delete it from the cache.
+- A harbour may be a water area rather than coastline (Sydney's, whose coastline runs out at the
+  Heads): `features` shows no `coastline` near the centre, so the walk lists the harbour as
+  `water` and is not `coast`, as Québec's St Lawrence.
+- A river mapped as many small areas (Tokyo's Sumida and its banks): list the larger relations
+  and add `water_from_tiles=True` for the rest. Set it before the first `fetch`, or the tiles
+  are fetched a second time for their water.
 - A market, a stairway or a small square may have no article in any language: then it has no
   sentence, and usually no place on the walk.

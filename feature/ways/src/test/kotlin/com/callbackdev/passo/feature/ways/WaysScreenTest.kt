@@ -237,6 +237,8 @@ class WaysScreenTest {
             .assert(hasText("10 cities · 1 walked", substring = true))
             .assert(hasText("Under way: London", substring = true))
         compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).assert(hasText("10 cities", substring = true))
+        compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.continent(Continent.ASIA_OCEANIA)))
+        compose.onNodeWithTag(WaysTags.continent(Continent.ASIA_OCEANIA)).assert(hasText("2 cities", substring = true))
         compose.onNodeWithTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)).assertDoesNotExist()
         snapshot("ways_cities")
         compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).performClick()
@@ -291,6 +293,10 @@ class WaysScreenTest {
                 WayId.HAVANA_CAPITOLIO_PAULA,
                 WayId.CARTAGENA_RELOJ_SAN_FELIPE,
             ),
+            Continent.ASIA_OCEANIA to listOf(
+                WayId.TOKYO_SENSOJI_PALACE,
+                WayId.SYDNEY_LUNA_PARK_GARDEN,
+            ),
         )
         assertThat(byContinent.keys).containsExactlyElementsIn(Continent.entries)
         var continent by mutableStateOf(Continent.EUROPE)
@@ -312,6 +318,9 @@ class WaysScreenTest {
                 compose.onNodeWithTag(WaysTags.way(other)).assertDoesNotExist()
             }
         }
+        snapshot("continent_asia_oceania_cities")
+        continent = Continent.AMERICAS
+        compose.waitForIdle()
         snapshot("continent_americas_cities")
         // Ten cities run past the screen: back up to Cusco's row before touching it.
         compose.onNodeWithTag(WaysTags.CONTINENT_PAGE)
@@ -325,6 +334,13 @@ class WaysScreenTest {
         showContinent(Continent.AMERICAS, dark = true)
         compose.onNodeWithContentDescription("The Americas on the map: 10 cities.").assertIsDisplayed()
         snapshot("continent_americas_dark")
+    }
+
+    @Test
+    fun `Asia and Oceania's map, from Tokyo to Sydney`() {
+        showContinent(Continent.ASIA_OCEANIA)
+        compose.onNodeWithContentDescription("Asia and Oceania on the map: 2 cities.").assertIsDisplayed()
+        snapshot("continent_asia_oceania")
     }
 
     @Test
@@ -505,6 +521,23 @@ class WaysScreenTest {
         showWay(WayId.CARTAGENA_RELOJ_SAN_FELIPE, state = WaysSamples.state(walks = emptyList(), live = null))
         compose.onNodeWithText("From the Clock Tower to San Felipe", substring = true).assertExists()
         snapshot("walk_cartagena")
+    }
+
+    @Test
+    fun `Tokyo's walk, from Sensō-ji by Ueno and Akihabara to the Imperial Palace`() {
+        showWay(WayId.TOKYO_SENSOJI_PALACE, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("From Sensō-ji to the Imperial Palace", substring = true).assertExists()
+        snapshot("walk_tokyo")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Nihonbashi"))
+        compose.onNodeWithText("five great roads", substring = true).assertExists()
+        snapshot("walk_tokyo_places")
+    }
+
+    @Test
+    fun `Sydney's walk, over the Harbour Bridge to Darling Harbour, in the dark`() {
+        showWay(WayId.SYDNEY_LUNA_PARK_GARDEN, state = WaysSamples.state(walks = emptyList(), live = null), dark = true)
+        compose.onNodeWithText("From Luna Park to the Chinese Garden", substring = true).assertExists()
+        snapshot("walk_sydney_dark")
     }
 
     @Test

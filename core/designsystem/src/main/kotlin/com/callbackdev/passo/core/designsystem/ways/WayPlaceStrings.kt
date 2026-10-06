@@ -33,6 +33,8 @@ fun wayNameRes(id: WayId): Int = when (id) {
     WayId.QUEBEC_PARLEMENT_BASSE_VILLE -> R.string.way_name_quebec_parlement_basse_ville
     WayId.HAVANA_CAPITOLIO_PAULA -> R.string.way_name_havana_capitolio_paula
     WayId.CARTAGENA_RELOJ_SAN_FELIPE -> R.string.way_name_cartagena_reloj_san_felipe
+    WayId.TOKYO_SENSOJI_PALACE -> R.string.way_name_tokyo_sensoji_palace
+    WayId.SYDNEY_LUNA_PARK_GARDEN -> R.string.way_name_sydney_luna_park_garden
 }
 
 /** Where a way runs, in one line. */
@@ -63,6 +65,8 @@ fun wayRouteRes(id: WayId): Int = when (id) {
     WayId.QUEBEC_PARLEMENT_BASSE_VILLE -> R.string.way_route_quebec_parlement_basse_ville
     WayId.HAVANA_CAPITOLIO_PAULA -> R.string.way_route_havana_capitolio_paula
     WayId.CARTAGENA_RELOJ_SAN_FELIPE -> R.string.way_route_cartagena_reloj_san_felipe
+    WayId.TOKYO_SENSOJI_PALACE -> R.string.way_route_tokyo_sensoji_palace
+    WayId.SYDNEY_LUNA_PARK_GARDEN -> R.string.way_route_sydney_luna_park_garden
 }
 
 /** A walk's outing, as History and Today name it; null for a way, which is not an outing. */
@@ -88,6 +92,8 @@ fun walkOutingRes(id: WayId): Int? = when (id) {
     WayId.QUEBEC_PARLEMENT_BASSE_VILLE -> R.string.way_outing_quebec_parlement_basse_ville
     WayId.HAVANA_CAPITOLIO_PAULA -> R.string.way_outing_havana_capitolio_paula
     WayId.CARTAGENA_RELOJ_SAN_FELIPE -> R.string.way_outing_cartagena_reloj_san_felipe
+    WayId.TOKYO_SENSOJI_PALACE -> R.string.way_outing_tokyo_sensoji_palace
+    WayId.SYDNEY_LUNA_PARK_GARDEN -> R.string.way_outing_sydney_luna_park_garden
     else -> null
 }
 
@@ -435,7 +441,35 @@ fun placeNameRes(key: String): Int = when (key) {
     "spello" -> R.string.way_place_spello
     "spoleto" -> R.string.way_place_spoleto
     "sutri" -> R.string.way_place_sutri
+    "sydney_anzac_memorial" -> R.string.way_place_sydney_anzac_memorial
+    "sydney_art_gallery" -> R.string.way_place_sydney_art_gallery
+    "sydney_botanic_garden" -> R.string.way_place_sydney_botanic_garden
+    "sydney_cadmans_cottage" -> R.string.way_place_sydney_cadmans_cottage
+    "sydney_chinese_garden" -> R.string.way_place_sydney_chinese_garden
+    "sydney_circular_quay" -> R.string.way_place_sydney_circular_quay
+    "sydney_darling_harbour" -> R.string.way_place_sydney_darling_harbour
+    "sydney_harbour_bridge" -> R.string.way_place_sydney_harbour_bridge
+    "sydney_hyde_park_barracks" -> R.string.way_place_sydney_hyde_park_barracks
+    "sydney_luna_park" -> R.string.way_place_sydney_luna_park
+    "sydney_macquarie_chair" -> R.string.way_place_sydney_macquarie_chair
+    "sydney_opera_house" -> R.string.way_place_sydney_opera_house
+    "sydney_qvb" -> R.string.way_place_sydney_qvb
+    "sydney_st_marys" -> R.string.way_place_sydney_st_marys
     "terradillos" -> R.string.way_place_terradillos
+    "tokyo_akihabara" -> R.string.way_place_tokyo_akihabara
+    "tokyo_ameyoko" -> R.string.way_place_tokyo_ameyoko
+    "tokyo_imperial_palace" -> R.string.way_place_tokyo_imperial_palace
+    "tokyo_kaminarimon" -> R.string.way_place_tokyo_kaminarimon
+    "tokyo_kanda_myojin" -> R.string.way_place_tokyo_kanda_myojin
+    "tokyo_kappabashi" -> R.string.way_place_tokyo_kappabashi
+    "tokyo_mitsukoshi" -> R.string.way_place_tokyo_mitsukoshi
+    "tokyo_national_museum" -> R.string.way_place_tokyo_national_museum
+    "tokyo_nihonbashi" -> R.string.way_place_tokyo_nihonbashi
+    "tokyo_sensoji" -> R.string.way_place_tokyo_sensoji
+    "tokyo_shinobazu" -> R.string.way_place_tokyo_shinobazu
+    "tokyo_station" -> R.string.way_place_tokyo_station
+    "tokyo_toshogu" -> R.string.way_place_tokyo_toshogu
+    "tokyo_yushima_seido" -> R.string.way_place_tokyo_yushima_seido
     "trevi" -> R.string.way_place_trevi
     "triacastela" -> R.string.way_place_triacastela
     "tui" -> R.string.way_place_tui
@@ -743,6 +777,34 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "sf_transamerica" -> R.string.way_note_sf_transamerica
     "siena" -> R.string.way_note_siena
     "spoleto" -> R.string.way_note_spoleto
+    "sydney_anzac_memorial" -> R.string.way_note_sydney_anzac_memorial
+    "sydney_art_gallery" -> R.string.way_note_sydney_art_gallery
+    "sydney_botanic_garden" -> R.string.way_note_sydney_botanic_garden
+    "sydney_cadmans_cottage" -> R.string.way_note_sydney_cadmans_cottage
+    "sydney_chinese_garden" -> R.string.way_note_sydney_chinese_garden
+    "sydney_circular_quay" -> R.string.way_note_sydney_circular_quay
+    "sydney_darling_harbour" -> R.string.way_note_sydney_darling_harbour
+    "sydney_harbour_bridge" -> R.string.way_note_sydney_harbour_bridge
+    "sydney_hyde_park_barracks" -> R.string.way_note_sydney_hyde_park_barracks
+    "sydney_luna_park" -> R.string.way_note_sydney_luna_park
+    "sydney_macquarie_chair" -> R.string.way_note_sydney_macquarie_chair
+    "sydney_opera_house" -> R.string.way_note_sydney_opera_house
+    "sydney_qvb" -> R.string.way_note_sydney_qvb
+    "sydney_st_marys" -> R.string.way_note_sydney_st_marys
+    "tokyo_akihabara" -> R.string.way_note_tokyo_akihabara
+    "tokyo_ameyoko" -> R.string.way_note_tokyo_ameyoko
+    "tokyo_imperial_palace" -> R.string.way_note_tokyo_imperial_palace
+    "tokyo_kaminarimon" -> R.string.way_note_tokyo_kaminarimon
+    "tokyo_kanda_myojin" -> R.string.way_note_tokyo_kanda_myojin
+    "tokyo_kappabashi" -> R.string.way_note_tokyo_kappabashi
+    "tokyo_mitsukoshi" -> R.string.way_note_tokyo_mitsukoshi
+    "tokyo_national_museum" -> R.string.way_note_tokyo_national_museum
+    "tokyo_nihonbashi" -> R.string.way_note_tokyo_nihonbashi
+    "tokyo_sensoji" -> R.string.way_note_tokyo_sensoji
+    "tokyo_shinobazu" -> R.string.way_note_tokyo_shinobazu
+    "tokyo_station" -> R.string.way_note_tokyo_station
+    "tokyo_toshogu" -> R.string.way_note_tokyo_toshogu
+    "tokyo_yushima_seido" -> R.string.way_note_tokyo_yushima_seido
     "tui" -> R.string.way_note_tui
     "valenca" -> R.string.way_note_valenca
     "vercelli" -> R.string.way_note_vercelli
