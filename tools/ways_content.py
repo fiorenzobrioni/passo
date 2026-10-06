@@ -11,7 +11,11 @@ the line or out of order.
 Every note is one sentence, made to be read in a notification and heard, with nothing that
 goes stale (no opening hours, no prices). Each was checked when written (1 Oct 2026; the fifth
 way and Rome, Paris and Madrid on 2 Oct 2026, Lima and Cusco after them); the source is the
-line after it. Berlin and Vienna (5 Oct 2026) were checked in the English and German Wikipedias.
+line after it. Berlin and Vienna (5 Oct 2026) were checked in the English and German Wikipedias,
+New York in the English and Italian (or German), Rio in the English and Portuguese, Mexico City
+and Buenos Aires in the English and Spanish, San Francisco in the English and Italian (or
+Spanish, German), Québec in the English and French, Havana and Cartagena in the English and
+Spanish.
 """
 
 from dataclasses import dataclass, field
@@ -434,6 +438,9 @@ class Walk:
     # areas listed in [water]: for a city whose canals are hundreds of areas cut at every
     # bridge (Amsterdam's), too many to list by id. Only where the streets are fetched.
     water_from_tiles: bool = False
+    # A city on the sea: its land is built from OpenStreetMap's coastline in its tiles, and its
+    # map is cut out of the sea as a way's is (Rio's bay, New York's harbour).
+    coast: bool = False
 
 
 MILAN = Walk(
@@ -1293,7 +1300,12 @@ CUSCO = Walk(
              note_en="Its Quechua name, Kusipata, means the place of joy; it was part of the great Inca square.",
              note_it="Il suo nome quechua, Kusipata, significa luogo della gioia; faceva parte della grande piazza inca."),
         # Source: Wikipedia (es), Plaza Regocijo.
-        Stop("cusco_san_pedro", "San Pedro Market", "Mercato di San Pedro", -13.5212, -71.9825),
+        Stop("cusco_san_pedro", "San Pedro Market", "Mercato di San Pedro", -13.5212, -71.9825,
+             note_en="Cusco's central market since 1925, declared part of Peru's cultural heritage in 2024, it sells fruit, meat and cooked food.",
+             note_it="Mercato centrale di Cusco dal 1925, dichiarato patrimonio culturale del Perù nel 2024, vende frutta, carne e piatti pronti."),
+        # Source: Wikipedia (es), Mercado Central de San Pedro; Andina (Peru's state news agency),
+        # "Cusco: Gore reconoce al Mercado Central San Pedro en su centenario de fundación", 2025.
+        # Its first iron structure is often credited to Gustave Eiffel, who died in 1923: not said.
         Stop("cusco_qorikancha", "Qorikancha", "Qorikancha", -13.5203, -71.9752,
              note_en="The Incas' Temple of the Sun, once lined with gold; the Dominican convent was built on its walls.",
              note_it="Il Tempio del Sole degli Inca, un tempo rivestito d'oro; il convento domenicano fu costruito sulle sue mura."),
@@ -1301,7 +1313,532 @@ CUSCO = Walk(
     ],
 )
 
-WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO]
+NEW_YORK = Walk(
+    id="NEW_YORK_PARK_BRIDGE",
+    city="new_york",
+    city_en="New York",
+    city_it="New York",
+    route_en="From Central Park to the Brooklyn Bridge, by Times Square and the Empire State",
+    route_it="Da Central Park al ponte di Brooklyn, passando per Times Square e l'Empire State",
+    outing_en="A walk in New York",
+    outing_it="Passeggiata a New York",
+    country="US",
+    continent="AMERICAS",
+    # The Hudson and the East River are in the coastline: the sea comes up both sides of Manhattan.
+    coast=True,
+    # Central Park's Pond and Lake, and the two pools of the 9/11 Memorial.
+    water=["way/22726524", "relation/7895705", "way/697722178", "way/697722181"],
+    parks=[
+        "way/427818536", "way/22727025", "way/22899286", "relation/7095444", "way/22899302", "way/413055246",
+        "way/5029111", "relation/20812866",
+    ],
+    stops=[
+        Stop("new_york_central_park", "Central Park", "Central Park", 40.7668, -73.9740,
+             note_en="Frederick Law Olmsted and Calvert Vaux won the competition to design the park with their Greensward Plan.",
+             note_it="Frederick Law Olmsted e Calvert Vaux vinsero il concorso per il parco con il loro Greensward Plan."),
+        # Source: Wikipedia, Central Park; Wikipedia (it), Central Park. The year it opened differs between the two: neither is said.
+        Stop("new_york_rockefeller_center", "Rockefeller Center", "Rockefeller Center", 40.7587, -73.9787,
+             note_en="Every year a great Christmas tree rises here, above the skating rink opened in 1936.",
+             note_it="Ogni anno qui si alza un grande albero di Natale, sopra la pista di pattinaggio aperta nel 1936."),
+        # Source: Wikipedia, Rockefeller Center Christmas Tree; Wikipedia (it), Rockefeller Center.
+        Stop("new_york_times_square", "Times Square", "Times Square", 40.7580, -73.9855,
+             note_en="The square was named in 1904 after The New York Times, which had just moved here.",
+             note_it="La piazza prese il nome nel 1904 dal New York Times, che vi si era appena trasferito."),
+        # Source: Wikipedia, Times Square; Wikipedia (it), Times Square.
+        Stop("new_york_public_library", "New York Public Library", "Biblioteca pubblica di New York", 40.7536, -73.9822,
+             note_en="Two lions guard the library's steps: in the 1930s Mayor La Guardia named them Patience and Fortitude.",
+             note_it="Due leoni custodiscono la scalinata della biblioteca: negli anni Trenta il sindaco La Guardia li chiamò Patience e Fortitude."),
+        # Source: Wikipedia, New York Public Library Main Branch; Wikipedia (de), New York Public Library.
+        Stop("new_york_grand_central", "Grand Central Terminal", "Grand Central Terminal", 40.7527, -73.9772,
+             note_en="Opened in 1913, Grand Central has more platforms than any other station in the world.",
+             note_it="Aperta nel 1913, la Grand Central ha più binari di qualunque altra stazione al mondo."),
+        # Source: Wikipedia, Grand Central Terminal; Wikipedia (it), Grand Central Terminal.
+        Stop("new_york_empire_state", "Empire State Building", "Empire State Building", 40.7484, -73.9857,
+             note_en="Opened in 1931, it was then the tallest building in the world.",
+             note_it="Inaugurato nel 1931, era allora l'edificio più alto del mondo."),
+        # Source: Wikipedia, Empire State Building; Wikipedia (it), Empire State Building. How long it stayed the tallest differs: not said.
+        Stop("new_york_flatiron", "Flatiron Building", "Flatiron Building", 40.7411, -73.9897,
+             note_en="Since 1902 it has filled its triangular plot, where Fifth Avenue crosses Broadway.",
+             note_it="Dal 1902 occupa il suo lotto triangolare, dove la Quinta Strada incrocia Broadway."),
+        # Source: Wikipedia, Flatiron Building; Wikipedia (it), Flatiron Building.
+        Stop("new_york_union_square", "Union Square", "Union Square", 40.7359, -73.9911,
+             note_en="On 5 September 1882 the first Labor Day parade marched up Broadway to this square.",
+             note_it="Il 5 settembre 1882 la prima parata del Labor Day risalì Broadway fino a questa piazza."),
+        # Source: Wikipedia, Union Square, Manhattan; Wikipedia (it), Union Square (Manhattan).
+        Stop("new_york_washington_square", "Washington Square", "Washington Square", 40.7308, -73.9973,
+             note_en="Stanford White designed its arch for the centennial of George Washington's inauguration.",
+             note_it="Stanford White ne disegnò l'arco per il centenario dell'insediamento di George Washington."),
+        # Source: Wikipedia, Washington Square Arch; Wikipedia (de), Washington Square Arch.
+        Stop("new_york_haughwout", "Haughwout Building", "Haughwout Building", 40.7222, -73.9992,
+             note_en="In 1857 this cast-iron building had the world's first passenger elevator, by Elisha Otis.",
+             note_it="Nel 1857 questo palazzo in ghisa ebbe il primo ascensore per persone del mondo, di Elisha Otis."),
+        # Source: Wikipedia, E. V. Haughwout Building; Wikipedia (de), E. V. Haughwout Building.
+        Stop("new_york_911_memorial", "9/11 Memorial", "Memoriale dell'11 settembre", 40.7115, -74.0134,
+             note_en="Two pools fill the footprints of the Twin Towers, the names of the victims around their edges.",
+             note_it="Due vasche occupano le impronte delle Torri Gemelle, con i nomi delle vittime lungo i bordi."),
+        # Source: Wikipedia, National September 11 Memorial & Museum; Wikipedia (it), National September 11 Memorial & Museum.
+        Stop("new_york_woolworth", "Woolworth Building", "Woolworth Building", 40.7124, -74.0080,
+             note_en="When it opened in 1913, it was the tallest building in the world.",
+             note_it="Quando fu inaugurato, nel 1913, era l'edificio più alto del mondo."),
+        # Source: Wikipedia, Woolworth Building; Wikipedia (it), Woolworth Building.
+        Stop("new_york_brooklyn_bridge", "Brooklyn Bridge", "Ponte di Brooklyn", 40.7106, -74.0026,
+             note_en="Opened in 1883 across the East River, it was then the longest suspension bridge in the world.",
+             note_it="Aperto nel 1883 sull'East River, era allora il ponte sospeso più lungo del mondo."),
+        # Source: Wikipedia, Brooklyn Bridge; Wikipedia (it), Ponte di Brooklyn.
+    ],
+)
+
+RIO = Walk(
+    id="RIO_CENTRO_SUGARLOAF",
+    city="rio",
+    city_en="Rio de Janeiro",
+    city_it="Rio de Janeiro",
+    route_en="From the Museum of Tomorrow to the Sugarloaf, by Lapa and the bay",
+    route_it="Dal Museo del Domani al Pan di Zucchero, passando per Lapa e la baia",
+    outing_en="A walk in Rio",
+    outing_it="Passeggiata a Rio",
+    country="BR",
+    continent="AMERICAS",
+    # Guanabara Bay and the Atlantic, from the coastline.
+    coast=True,
+    # Flamengo Park, the Passeio Público, the Campo de Santana, and the natural monument of the
+    # Sugarloaf and Urca hills, so the two hills show where the walk ends.
+    parks=["relation/1124430", "way/64370326", "way/64370320", "way/1002850847"],
+    stops=[
+        Stop("rio_museum_of_tomorrow", "Museum of Tomorrow", "Museo del Domani", -22.8941, -43.1794,
+             note_en="Santiago Calatrava's museum opened in 2015 on Pier Mauá, by the bay.",
+             note_it="Il museo di Santiago Calatrava fu inaugurato nel 2015 sul molo Mauá, sulla baia."),
+        # Source: Wikipedia, Museum of Tomorrow; Wikipedia (pt), Museu do Amanhã.
+        Stop("rio_candelaria", "Candelária Church", "Chiesa della Candelária", -22.9008, -43.1774,
+             note_en="Begun in 1775, the Candelária church had its dome only in 1877.",
+             note_it="Iniziata nel 1775, la chiesa della Candelária ebbe la sua cupola solo nel 1877."),
+        # Source: Wikipedia, Candelária Church; Wikipedia (pt), Igreja de Nossa Senhora da Candelária.
+        Stop("rio_paco_imperial", "Imperial Palace", "Palazzo Imperiale", -22.9036, -43.1747,
+             note_en="In this palace, in 1888, Princess Isabel signed the Golden Law that ended slavery in Brazil.",
+             note_it="In questo palazzo, nel 1888, la principessa Isabella firmò la Legge Aurea che abolì la schiavitù in Brasile."),
+        # Source: Wikipedia, Paço Imperial; Wikipedia (pt), Paço Imperial.
+        Stop("rio_confeitaria_colombo", "Confeitaria Colombo", "Confeitaria Colombo", -22.9052, -43.1785,
+             note_en="Founded in 1894, the café keeps the great crystal mirrors brought from Antwerp in the 1910s.",
+             note_it="Fondata nel 1894, la pasticceria conserva i grandi specchi di cristallo arrivati da Anversa negli anni Dieci."),
+        # Source: Wikipedia, Confeitaria Colombo; Wikipedia (pt), Confeitaria Colombo.
+        Stop("rio_theatro_municipal", "Theatro Municipal", "Theatro Municipal", -22.9088, -43.1762,
+             note_en="Opened in 1909, the theatre was inspired by Garnier's opera house in Paris.",
+             note_it="Inaugurato nel 1909, il teatro si ispira all'Opéra di Garnier a Parigi."),
+        # Source: Wikipedia, Theatro Municipal (Rio de Janeiro); Wikipedia (pt), Theatro Municipal do Rio de Janeiro.
+        Stop("rio_arcos_da_lapa", "Lapa Arches", "Arcos da Lapa", -22.9128, -43.1800,
+             note_en="Built as an aqueduct, the arches have carried the Santa Teresa tram since 1896.",
+             note_it="Costruiti come acquedotto, gli archi portano dal 1896 il tram di Santa Teresa."),
+        # Source: Wikipedia, Carioca Aqueduct; Wikipedia (pt), Arcos da Lapa.
+        Stop("rio_selaron_steps", "Selarón Steps", "Scalinata Selarón", -22.9153, -43.1794,
+             note_en="The Chilean artist Jorge Selarón covered these steps in tiles, first in the colours of Brazil's flag.",
+             note_it="L'artista cileno Jorge Selarón ricoprì questi gradini di piastrelle, all'inizio nei colori della bandiera del Brasile."),
+        # Source: Wikipedia, Escadaria Selarón; Wikipedia (pt), Escadaria Selarón.
+        Stop("rio_gloria", "Outeiro da Glória", "Outeiro da Glória", -22.9213, -43.1752,
+             note_en="Built on a plan of two octagons, this church saw the baptism of every member of Brazil's imperial family.",
+             note_it="Costruita su una pianta di due ottagoni, questa chiesa vide il battesimo di tutti i membri della famiglia imperiale brasiliana."),
+        # Source: Wikipedia (pt), Igreja de Nossa Senhora da Glória do Outeiro; Wikipedia (es) and
+        # (fr), the same church. Its age (17th or 18th century) and who made its tiles differ: not said.
+        Stop("rio_flamengo_park", "Flamengo Park", "Parco del Flamengo", -22.9340, -43.1742,
+             note_en="Roberto Burle Marx, the great Brazilian landscape designer, laid out the gardens of this park by the bay.",
+             note_it="Roberto Burle Marx, il grande paesaggista brasiliano, disegnò i giardini di questo parco sulla baia."),
+        # Source: Wikipedia, Flamengo Park; Wikipedia (pt), Parque do Flamengo.
+        Stop("rio_botafogo", "Botafogo Beach", "Spiaggia di Botafogo", -22.9440, -43.1820,
+             note_en="Across the cove rises the Sugarloaf, 396 metres high.",
+             note_it="Oltre l'insenatura si alza il Pan di Zucchero, alto 396 metri."),
+        # Source: Wikipedia, Sugarloaf Mountain; Wikipedia (pt), Pão de Açúcar (Rio de Janeiro).
+        Stop("rio_palacio_universitario", "Palácio Universitário", "Palácio Universitário", -22.9533, -43.1735,
+             note_en="The palace was built for the Hospício Pedro II, the first psychiatric hospital in Brazil and the second in Latin America.",
+             note_it="Il palazzo fu costruito per l'Hospício Pedro II, il primo ospedale psichiatrico del Brasile e il secondo dell'America Latina."),
+        # Source: Wikipedia (pt), Hospício Pedro II; Wikipedia, Legacy of Pedro II of Brazil.
+        Stop("rio_sugarloaf", "Sugarloaf cable car", "Funivia del Pan di Zucchero", -22.9549, -43.1664,
+             note_en="Opened in 1912, the cable car climbs from here to Urca Hill, then on to the Sugarloaf.",
+             note_it="Inaugurata nel 1912, la funivia sale da qui al Morro da Urca, poi al Pan di Zucchero."),
+        # Source: Wikipedia, Sugarloaf Cable Car; Wikipedia (pt), Bondinho do Pão de Açúcar.
+    ],
+)
+
+MEXICO_CITY = Walk(
+    id="MEXICO_CITY_ZOCALO_CHAPULTEPEC",
+    city="mexico_city",
+    city_en="Mexico City",
+    city_it="Città del Messico",
+    route_en="From the Zócalo to Chapultepec, along the Paseo de la Reforma",
+    route_it="Dallo Zócalo a Chapultepec, lungo il Paseo de la Reforma",
+    outing_en="A walk in Mexico City",
+    outing_it="Passeggiata a Città del Messico",
+    country="MX",
+    continent="AMERICAS",
+    # Chapultepec's lake; its forest is mapped as many woods, of which the largest are drawn.
+    water=["relation/16031520"],
+    parks=[
+        "way/4758957", "way/1356340885", "way/1356340884", "way/1356340882", "way/1356049208",
+        "way/1356049216", "way/1356049205", "way/1356049204", "way/1356049213",
+    ],
+    stops=[
+        Stop("mexico_palacio_nacional", "National Palace", "Palazzo Nazionale", 19.4326, -99.1313,
+             note_en="Diego Rivera's murals of Mexico's history cover the main stairway of the National Palace.",
+             note_it="I murales di Diego Rivera sulla storia del Messico coprono lo scalone del Palazzo Nazionale."),
+        # Source: Wikipedia, National Palace (Mexico); Wikipedia (es), Palacio Nacional (México).
+        Stop("mexico_templo_mayor", "Templo Mayor", "Templo Mayor", 19.435, -99.1318,
+             note_en="The Aztecs' great temple came to light again in 1978, found by electricity workers digging in the street.",
+             note_it="Il grande tempio degli Aztechi tornò alla luce nel 1978, trovato da operai della compagnia elettrica che scavavano in strada."),
+        # Source: Wikipedia, Templo Mayor; Wikipedia (es), Templo Mayor. The two name different electricity companies: neither is said.
+        Stop("mexico_cathedral", "Metropolitan Cathedral", "Cattedrale metropolitana", 19.4339, -99.1332,
+             note_en="Building it took from 1573 to 1813, around the church that stood here first.",
+             note_it="Costruirla richiese dal 1573 al 1813, intorno alla chiesa che sorgeva qui prima."),
+        # Source: Wikipedia, Mexico City Metropolitan Cathedral; Wikipedia (es), Catedral Metropolitana de la Ciudad de México.
+        Stop("mexico_casa_azulejos", "House of Tiles", "Casa de los Azulejos", 19.4342, -99.1398,
+             note_en="Its façade is covered in Talavera tiles from Puebla, which gave the house its name.",
+             note_it="La facciata è coperta di piastrelle di Talavera di Puebla, che hanno dato il nome alla casa."),
+        # Source: Wikipedia, Casa de los Azulejos; Wikipedia (es), Casa de los Azulejos.
+        Stop("mexico_bellas_artes", "Palace of Fine Arts", "Palazzo delle Belle Arti", 19.4353, -99.141,
+             note_en="Begun in 1904 for the centenary of independence, it opened only in 1934, after the Revolution.",
+             note_it="Iniziato nel 1904 per il centenario dell'indipendenza, fu inaugurato solo nel 1934, dopo la Rivoluzione."),
+        # Source: Wikipedia, Palacio de Bellas Artes; Wikipedia (es), Palacio de Bellas Artes (México).
+        Stop("mexico_alameda", "Alameda Central", "Alameda Central", 19.4357, -99.144,
+             note_en="Laid out in 1592, it is the oldest public park in the Americas.",
+             note_it="Creata nel 1592, è il più antico parco pubblico delle Americhe."),
+        # Source: Wikipedia, Alameda Central; Wikipedia (es), Alameda Central.
+        Stop("mexico_revolucion", "Monument to the Revolution", "Monumento alla Rivoluzione", 19.4361, -99.1546,
+             note_en="It was built from the frame of a legislative palace that was never finished.",
+             note_it="Fu costruito con la struttura di un palazzo legislativo mai terminato."),
+        # Source: Wikipedia, Monument to the Revolution (Mexico City); Wikipedia (es), Monumento a la Revolución (México).
+        Stop("mexico_angel", "Angel of Independence", "Angelo dell'Indipendenza", 19.427, -99.1677,
+             note_en="Inaugurated in 1910 for the centenary of independence, its angel fell in the earthquake of 1957.",
+             note_it="Inaugurato nel 1910 per il centenario dell'indipendenza, il suo angelo cadde nel terremoto del 1957."),
+        # Source: Wikipedia, Angel of Independence; Wikipedia (es), Ángel de la Independencia.
+        Stop("mexico_diana", "Diana the Huntress", "Diana Cacciatrice", 19.4251, -99.1716,
+             note_en="The bronze huntress, unveiled in 1942, aims her arrow at the stars of the northern sky.",
+             note_it="La cacciatrice di bronzo, inaugurata nel 1942, punta la freccia verso le stelle del cielo del nord."),
+        # Source: Wikipedia, Diana the Huntress Fountain; Wikipedia (es), Fuente de la Diana Cazadora (Ciudad de México).
+        Stop("mexico_ninos_heroes", "Monument to the Boy Heroes", "Monumento ai Niños Héroes", 19.4215, -99.1793,
+             note_en="It remembers the young cadets who died defending Chapultepec Castle in 1847.",
+             note_it="Ricorda i giovani cadetti morti difendendo il castello di Chapultepec nel 1847."),
+        # Source: Wikipedia, Niños Héroes; Wikipedia (es), Niños Héroes.
+        Stop("mexico_chapultepec_castle", "Chapultepec Castle", "Castello di Chapultepec", 19.4205, -99.182,
+             note_en="Emperor Maximilian and Empress Carlota made this castle on its hill their residence.",
+             note_it="L'imperatore Massimiliano e l'imperatrice Carlotta fecero di questo castello sulla collina la loro residenza."),
+        # Source: Wikipedia, Chapultepec Castle; Wikipedia (es), Castillo de Chapultepec.
+        Stop("mexico_anthropology", "Museum of Anthropology", "Museo di Antropologia", 19.4261, -99.1863,
+             note_en="Its heart is the Aztec Sun Stone, found under the Zócalo in 1790.",
+             note_it="Il suo cuore è la Pietra del Sole azteca, ritrovata sotto lo Zócalo nel 1790."),
+        # Source: Wikipedia, National Museum of Anthropology (Mexico) and Aztec sun stone; Wikipedia (es), Museo Nacional de Antropología (México) and Piedra del Sol.
+    ],
+)
+
+BUENOS_AIRES = Walk(
+    id="BUENOS_AIRES_MAYO_RECOLETA",
+    city="buenos_aires",
+    city_en="Buenos Aires",
+    city_it="Buenos Aires",
+    route_en="From the Plaza de Mayo to Recoleta, by the Congress and the Obelisco",
+    route_it="Da Plaza de Mayo alla Recoleta, passando per il Congresso e l'Obelisco",
+    outing_en="A walk in Buenos Aires",
+    outing_it="Passeggiata a Buenos Aires",
+    country="AR",
+    continent="AMERICAS",
+    # The Río de la Plata, from the coastline; Puerto Madero's docks.
+    coast=True,
+    # The grid of the centre is mapped mostly as residential streets: its longer ones are drawn,
+    # as Milan's are, or the map would show only the avenues.
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=400,
+    water=["relation/2364166", "relation/2364163", "relation/2364162"],
+    # The squares on the way, and the Costanera Sur's nature reserve by the river.
+    parks=[
+        "relation/17076039", "way/17493172", "relation/531073", "way/23620740", "way/23727108",
+        "relation/10343154",
+    ],
+    stops=[
+        Stop("buenos_aires_casa_rosada", "Casa Rosada", "Casa Rosada", -34.6081, -58.371,
+             note_en="The president's palace takes its name from its pink colour.",
+             note_it="Il palazzo del presidente prende il nome dal suo colore rosa."),
+        # Source: Wikipedia, Casa Rosada; Wikipedia (es), Casa Rosada.
+        Stop("buenos_aires_cathedral", "Metropolitan Cathedral", "Cattedrale metropolitana", -34.6075, -58.3733,
+             note_en="General José de San Martín, hero of independence, rests in a mausoleum inside the cathedral.",
+             note_it="Il generale José de San Martín, eroe dell'indipendenza, riposa in un mausoleo dentro la cattedrale."),
+        # Source: Wikipedia, Buenos Aires Metropolitan Cathedral; Wikipedia (es), Catedral metropolitana de Buenos Aires.
+        Stop("buenos_aires_cabildo", "Cabildo", "Cabildo", -34.6087, -58.374,
+             note_en="The colonial town hall, begun in 1725, is now the museum of the May Revolution of 1810.",
+             note_it="Il municipio coloniale, iniziato nel 1725, è oggi il museo della Rivoluzione di Maggio del 1810."),
+        # Source: Wikipedia, Cabildo of Buenos Aires; Wikipedia (es), Cabildo de Buenos Aires.
+        Stop("buenos_aires_tortoni", "Café Tortoni", "Café Tortoni", -34.6087, -58.3781,
+             note_en="Opened in 1858, the café counted Jorge Luis Borges among its regulars.",
+             note_it="Aperto nel 1858, il caffè ebbe tra i suoi frequentatori Jorge Luis Borges."),
+        # Source: Wikipedia, Café Tortoni; Wikipedia (es), Café Tortoni.
+        Stop("buenos_aires_barolo", "Palacio Barolo", "Palacio Barolo", -34.6094, -58.3856,
+             note_en="Its design follows Dante's Divine Comedy: 100 metres tall, one for each canto.",
+             note_it="Il suo progetto segue la Divina Commedia di Dante: alto 100 metri, uno per ogni canto."),
+        # Source: Wikipedia, Palacio Barolo; Wikipedia (es), Palacio Barolo.
+        Stop("buenos_aires_congreso", "Congress", "Congresso", -34.6097, -58.3921,
+             note_en="Designed by Vittorio Meano, the Congress palace was inaugurated in 1906.",
+             note_it="Progettato da Vittorio Meano, il palazzo del Congresso fu inaugurato nel 1906."),
+        # Source: Wikipedia, Argentine National Congress Palace; Wikipedia (es), Palacio del Congreso de la Nación Argentina.
+        Stop("buenos_aires_obelisco", "Obelisco", "Obelisco", -34.6037, -58.3816,
+             note_en="Raised in 1936, it marks four hundred years since the city's first founding.",
+             note_it="Eretto nel 1936, ricorda i quattrocento anni dalla prima fondazione della città."),
+        # Source: Wikipedia, Obelisco de Buenos Aires; Wikipedia (es), Obelisco de Buenos Aires.
+        Stop("buenos_aires_colon", "Teatro Colón", "Teatro Colón", -34.6011, -58.383,
+             note_en="A survey of conductors by Leo Beranek ranked its hall the best in the world for opera.",
+             note_it="Un sondaggio di Leo Beranek tra i direttori ne ha giudicato la sala la migliore al mondo per l'opera."),
+        # Source: Wikipedia, Teatro Colón; Wikipedia (es), Teatro Colón.
+        Stop("buenos_aires_plaza_san_martin", "Plaza San Martín", "Plaza San Martín", -34.595, -58.3755,
+             note_en="The square is named after General San Martín, whose equestrian statue stands here.",
+             note_it="La piazza porta il nome del generale San Martín, la cui statua equestre si trova qui."),
+        # Source: Wikipedia, Plaza San Martín (Buenos Aires); Wikipedia (es), Plaza San Martín (Buenos Aires).
+        Stop("buenos_aires_ateneo", "El Ateneo Grand Splendid", "El Ateneo Grand Splendid", -34.596, -58.3943,
+             note_en="The Grand Splendid theatre of 1919 is now a bookshop, with tables on its old stage.",
+             note_it="Il teatro Grand Splendid del 1919 è oggi una libreria, con i tavoli sul vecchio palcoscenico."),
+        # Source: Wikipedia, El Ateneo Grand Splendid; Wikipedia (es), El Ateneo Grand Splendid.
+        Stop("buenos_aires_recoleta", "Recoleta Cemetery", "Cimitero della Recoleta", -34.588, -58.3926,
+             note_en="Opened in 1822, the cemetery holds the tombs of presidents and of Eva Perón.",
+             note_it="Aperto nel 1822, il cimitero custodisce le tombe di presidenti e di Eva Perón."),
+        # Source: Wikipedia, La Recoleta Cemetery; Wikipedia (es), Cementerio de la Recoleta.
+        Stop("buenos_aires_bellas_artes", "Museum of Fine Arts", "Museo di Belle Arti", -34.5839, -58.3929,
+             note_en="Founded in 1895, the national museum of fine arts now fills an old waterworks pump house.",
+             note_it="Fondato nel 1895, il museo nazionale di belle arti occupa oggi un'antica stazione di pompaggio."),
+        # Source: Wikipedia, Museo Nacional de Bellas Artes (Buenos Aires); Wikipedia (es), Museo Nacional de Bellas Artes (Argentina).
+        Stop("buenos_aires_floralis", "Floralis Genérica", "Floralis Genérica", -34.5817, -58.3935,
+             note_en="Eduardo Catalano's metal flower, 23 metres tall, was made to close its six petals at night.",
+             note_it="Il fiore di metallo di Eduardo Catalano, alto 23 metri, fu fatto per chiudere di notte i suoi sei petali."),
+        # Source: Wikipedia, Floralis Genérica; Wikipedia (es), Floralis Genérica.
+    ],
+)
+
+SAN_FRANCISCO = Walk(
+    id="SAN_FRANCISCO_FERRY_PALACE",
+    city="san_francisco",
+    city_en="San Francisco",
+    city_it="San Francisco",
+    route_en="From the Ferry Building to the Palace of Fine Arts, by Coit Tower and the Wharf",
+    route_it="Dal Ferry Building al Palace of Fine Arts, passando per la Coit Tower e il Wharf",
+    outing_en="A walk in San Francisco",
+    outing_it="Passeggiata a San Francisco",
+    country="US",
+    continent="AMERICAS",
+    # The bay, from the coastline; the lagoon of the Palace of Fine Arts.
+    coast=True,
+    water=["relation/7471537"],
+    parks=[
+        "way/18583270", "way/224941774", "way/82207054", "way/16761472", "relation/8346137",
+    ],
+    stops=[
+        Stop("sf_ferry_building", "Ferry Building", "Ferry Building", 37.7955, -122.3937,
+             note_en="The clock tower of this ferry terminal may have been modelled on the Giralda of Seville.",
+             note_it="La torre dell'orologio di questo terminal dei traghetti potrebbe ispirarsi alla Giralda di Siviglia."),
+        # Source: Wikipedia, San Francisco Ferry Building; Wikipedia (es), San Francisco Ferry Building. Both say "may have": so does the sentence.
+        Stop("sf_transamerica", "Transamerica Pyramid", "Transamerica Pyramid", 37.7952, -122.4028,
+             note_en="On its completion in 1972 the pyramid became the tallest building in San Francisco.",
+             note_it="Completata nel 1972, la piramide divenne l'edificio più alto di San Francisco."),
+        # Source: Wikipedia, Transamerica Pyramid (tallest from 1972 until 2017); Wikipedia (it), Transamerica Pyramid.
+        Stop("sf_chinatown", "Chinatown Gate", "Porta di Chinatown", 37.7907, -122.4056,
+             note_en="Through the Dragon Gate, Grant Avenue leads into the oldest Chinatown in North America.",
+             note_it="Oltre la Porta del Drago, Grant Avenue entra nella più antica Chinatown del Nord America."),
+        # Source: Wikipedia, Chinatown, San Francisco; Wikipedia (it), Chinatown (San Francisco).
+        Stop("sf_city_lights", "City Lights", "City Lights", 37.7976, -122.4065,
+             note_en="Founded in 1953 by Lawrence Ferlinghetti, the bookshop published Allen Ginsberg's Howl in 1956.",
+             note_it="Fondata nel 1953 da Lawrence Ferlinghetti, la libreria pubblicò Howl di Allen Ginsberg nel 1956."),
+        # Source: Wikipedia, City Lights Booksellers & Publishers; Wikipedia (it), City Lights Bookstore.
+        Stop("sf_saints_peter_paul", "Saints Peter and Paul Church", "Chiesa dei Santi Pietro e Paolo", 37.8013, -122.4098,
+             note_en="Marilyn Monroe and Joe DiMaggio posed for photographs on the steps of this church.",
+             note_it="Marilyn Monroe e Joe DiMaggio posarono per i fotografi sui gradini di questa chiesa."),
+        # Source: Wikipedia, Saints Peter and Paul Church (San Francisco); Wikipedia (it), Chiesa dei Santi Pietro e Paolo (San Francisco).
+        Stop("sf_coit_tower", "Coit Tower", "Coit Tower", 37.8024, -122.4058,
+             note_en="Built with the bequest of Lillie Hitchcock Coit, the tower is painted inside with murals by many artists.",
+             note_it="Costruita con il lascito di Lillie Hitchcock Coit, la torre è dipinta all'interno con murales di molti artisti."),
+        # Source: Wikipedia, Coit Tower; Wikipedia (it), Coit Tower. Their years and number of artists differ: not said.
+        Stop("sf_pier_39", "Pier 39", "Pier 39", 37.8087, -122.4098,
+             note_en="Since 1989 a colony of sea lions has rested on the docks of this pier's marina.",
+             note_it="Dal 1989 una colonia di leoni marini riposa sui pontili del porticciolo di questo molo."),
+        # Source: Wikipedia, Pier 39; Wikipedia (it), Pier 39.
+        Stop("sf_fishermans_wharf", "Fisherman's Wharf", "Fisherman's Wharf", 37.8081, -122.4166,
+             note_en="The wharf is home to the San Francisco Maritime National Historical Park and its old ships.",
+             note_it="Il molo ospita il parco storico marittimo nazionale di San Francisco e le sue vecchie navi."),
+        # Source: Wikipedia, Fisherman's Wharf, San Francisco; Wikipedia (es), Fisherman's Wharf (San Francisco).
+        Stop("sf_lombard", "Lombard Street", "Lombard Street", 37.8021, -122.4187,
+             note_en="Between Hyde and Leavenworth, the street winds down Russian Hill in tight hairpin bends.",
+             note_it="Tra Hyde e Leavenworth, la strada scende dalla Russian Hill in stretti tornanti."),
+        # Source: Wikipedia, Lombard Street (San Francisco); Wikipedia (it), Lombard Street (San Francisco).
+        Stop("sf_ghirardelli", "Ghirardelli Square", "Ghirardelli Square", 37.8059, -122.4229,
+             note_en="Once Ghirardelli's chocolate factory, it opened as a square of shops in 1964.",
+             note_it="Un tempo fabbrica di cioccolato Ghirardelli, nel 1964 divenne una piazza di negozi."),
+        # Source: Wikipedia, Ghirardelli Square; Wikipedia (it), Ghirardelli Square and Fisherman's Wharf.
+        Stop("sf_fort_mason", "Fort Mason", "Fort Mason", 37.8063, -122.429,
+             note_en="In the Second World War this was the main port for the war in the Pacific.",
+             note_it="Nella seconda guerra mondiale fu il porto principale per la guerra nel Pacifico."),
+        # Source: Wikipedia, Fort Mason; Wikipedia (de), Fort Mason.
+        Stop("sf_palace_fine_arts", "Palace of Fine Arts", "Palace of Fine Arts", 37.8029, -122.4484,
+             note_en="Built for the Panama–Pacific Exposition of 1915, it was rebuilt from the 1960s.",
+             note_it="Costruito per l'Esposizione Panama-Pacifico del 1915, fu ricostruito a partire dagli anni Sessanta."),
+        # Source: Wikipedia, Palace of Fine Arts; Wikipedia (it), Palace of Fine Arts.
+    ],
+)
+
+QUEBEC = Walk(
+    id="QUEBEC_PARLEMENT_BASSE_VILLE",
+    city="quebec",
+    city_en="Québec",
+    city_it="Québec",
+    route_en="From the Parliament to the Lower Town, by the Plains of Abraham and the Château Frontenac",
+    route_it="Dal Parlamento alla Città Bassa, passando per le Piane di Abramo e il Château Frontenac",
+    outing_en="A walk in Québec",
+    outing_it="Passeggiata a Québec",
+    country="CA",
+    continent="AMERICAS",
+    # A short walk (about 5 km). At Québec the St Lawrence is not yet coastline in OpenStreetMap
+    # but a river area, the fluvial estuary; with it, the Louise Basin of the Old Port.
+    water=["relation/2426031", "relation/5869253"],
+    # The Upper Town's streets are mostly residential: without them the map is a few lines.
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=400,
+    parks=["relation/21295717", "relation/21295715", "way/105924778", "way/105924793", "way/107619990"],
+    stops=[
+        Stop("quebec_parlement", "Parliament Building", "Palazzo del Parlamento", 46.8087, -71.2142,
+             note_en="Statues along its façade tell the history of Québec.",
+             note_it="Le statue lungo la facciata raccontano la storia del Québec."),
+        # Source: Wikipedia, Parliament Building (Quebec); Wikipedia (fr), Hôtel du Parlement du Québec.
+        Stop("quebec_plaines", "Plains of Abraham", "Piane di Abramo", 46.802, -71.218,
+             note_en="Here in 1759 the British won the battle for Québec; both generals, Wolfe and Montcalm, died of their wounds.",
+             note_it="Qui nel 1759 gli inglesi vinsero la battaglia per il Québec; entrambi i generali, Wolfe e Montcalm, morirono per le ferite."),
+        # Source: Wikipedia, Plains of Abraham; Wikipedia (fr), Plaines d'Abraham.
+        Stop("quebec_citadelle", "Citadelle", "Cittadella", 46.8077, -71.2078,
+             note_en="The British built this star-shaped fortress from 1820, under the engineer Elias Walker Durnford.",
+             note_it="Gli inglesi costruirono questa fortezza a stella dal 1820, sotto la guida dell'ingegnere Elias Walker Durnford."),
+        # Source: Wikipedia, Citadelle of Quebec; Wikipedia (fr), Citadelle de Québec.
+        Stop("quebec_frontenac", "Château Frontenac", "Château Frontenac", 46.8115, -71.2044,
+             note_en="The hotel on the cliff is called the most photographed in the world.",
+             note_it="L'albergo sulla rupe è detto il più fotografato del mondo."),
+        # Source: Wikipedia, Château Frontenac; Wikipedia (fr), Château Frontenac.
+        Stop("quebec_notre_dame", "Notre-Dame de Québec", "Notre-Dame de Québec", 46.8137, -71.2061,
+             note_en="Seat of the oldest diocese north of Mexico, it was made a basilica by Pius IX in 1874.",
+             note_it="Sede della più antica diocesi a nord del Messico, fu elevata a basilica da Pio IX nel 1874."),
+        # Source: Wikipedia, Cathedral Basilica of Notre-Dame de Québec; Wikipedia (fr), Basilique-cathédrale Notre-Dame de Québec.
+        Stop("quebec_casse_cou", "Breakneck Stairs", "Escalier Casse-Cou", 46.8128, -71.2036,
+             note_en="Québec's oldest stairway joins the Upper Town to the Lower; it was already here in 1660.",
+             note_it="La scala più antica di Québec unisce la Città Alta alla Bassa; esisteva già nel 1660."),
+        # Source: Wikipedia, Breakneck Stairs (built 1635); Wikipedia (fr), Quartier Petit Champlain (there in 1660). The year it was built is in one only: not said.
+        Stop("quebec_place_royale", "Place Royale", "Place Royale", 46.8131, -71.2027,
+             note_en="Here in 1608 Samuel de Champlain built the fortified post that became Québec.",
+             note_it="Qui nel 1608 Samuel de Champlain costruì il posto fortificato da cui nacque Québec."),
+        # Source: Wikipedia, Place Royale (Quebec City); Wikipedia (fr), Place Royale (Québec).
+        Stop("quebec_musee_civilisation", "Musée de la civilisation", "Musée de la civilisation", 46.8152, -71.2023,
+             note_en="Designed by Moshe Safdie, the museum opened in 1988 by the St Lawrence.",
+             note_it="Progettato da Moshe Safdie, il museo aprì nel 1988 sulla riva del San Lorenzo."),
+        # Source: Wikipedia, Musée de la civilisation; Wikipedia (fr), Musée de la civilisation.
+    ],
+)
+
+HAVANA = Walk(
+    id="HAVANA_CAPITOLIO_PAULA",
+    city="havana",
+    city_en="Havana",
+    city_it="L'Avana",
+    route_en="From the Capitolio to the Alameda de Paula, by the Malecón and the old squares",
+    route_it="Dal Capitolio all'Alameda de Paula, passando per il Malecón e le piazze antiche",
+    outing_en="A walk in Havana",
+    outing_it="Passeggiata all'Avana",
+    country="CU",
+    continent="AMERICAS",
+    # A short walk (about 5 km). The sea and the harbour, from the coastline.
+    coast=True,
+    water=[],
+    parks=["way/23872622"],
+    stops=[
+        Stop("havana_capitolio", "Capitolio", "Capitolio", 23.1353, -82.3597,
+             note_en="A replica diamond set in the floor of its hall marks kilometre zero of Cuba's roads.",
+             note_it="Una replica di diamante incastonata nel pavimento del salone segna il chilometro zero delle strade cubane."),
+        # Source: Wikipedia, El Capitolio; Wikipedia (es), Capitolio Nacional de Cuba.
+        Stop("havana_gran_teatro", "Gran Teatro", "Gran Teatro", 23.1369, -82.3596,
+             note_en="Inaugurated in 1914, it stands where the Teatro Tacón stood before it.",
+             note_it="Inaugurato nel 1914, sorge dove prima c'era il Teatro Tacón."),
+        # Source: Wikipedia, Gran Teatro de La Habana; Wikipedia (es), Gran Teatro de La Habana Alicia Alonso.
+        Stop("havana_prado", "Paseo del Prado", "Paseo del Prado", 23.142, -82.3585,
+             note_en="Bronze lions guard this promenade, which runs down to the Malecón.",
+             note_it="Leoni di bronzo custodiscono questo viale, che scende fino al Malecón."),
+        # Source: Wikipedia, Paseo del Prado, Havana; Wikipedia (es), Paseo del Prado (La Habana).
+        Stop("havana_la_punta", "Castillo de la Punta", "Castillo de la Punta", 23.1462, -82.3575,
+             note_en="From 1630 a heavy chain stretched from this castle to El Morro guarded the bay.",
+             note_it="Dal 1630 una pesante catena tesa da questo castello a El Morro proteggeva la baia."),
+        # Source: Wikipedia, Castillo de San Salvador de la Punta; Wikipedia (es), Castillo de San Salvador de la Punta.
+        Stop("havana_cathedral", "Havana Cathedral", "Cattedrale dell'Avana", 23.1417, -82.352,
+             note_en="Columbus's remains lay in this cathedral until 1898, when they were taken to Seville.",
+             note_it="I resti di Colombo riposarono in questa cattedrale fino al 1898, quando furono portati a Siviglia."),
+        # Source: Wikipedia, Havana Cathedral; Wikipedia (es), Catedral de La Habana. When they arrived differs (1795 or 1796): not said.
+        Stop("havana_real_fuerza", "Castillo de la Real Fuerza", "Castillo de la Real Fuerza", 23.1411, -82.3496,
+             note_en="One of the oldest stone forts in the Americas, it wears the Giraldilla weathervane on its tower.",
+             note_it="Uno dei più antichi forti di pietra delle Americhe, porta sulla torre la banderuola della Giraldilla."),
+        # Source: Wikipedia, Castillo de la Real Fuerza; Wikipedia (es), Castillo de la Real Fuerza de La Habana.
+        Stop("havana_plaza_armas", "Plaza de Armas", "Plaza de Armas", 23.1402, -82.3496,
+             note_en="This is the oldest square in Old Havana.",
+             note_it="È la piazza più antica dell'Avana Vecchia."),
+        # Source: Wikipedia, Plaza de Armas (Havana); Wikipedia (es), Plaza de Armas (La Habana).
+        Stop("havana_san_francisco", "Plaza de San Francisco", "Plaza de San Francisco", 23.1378, -82.3487,
+             note_en="The basilica on this square, begun in 1548, is now a concert hall.",
+             note_it="La basilica su questa piazza, iniziata nel 1548, è oggi una sala da concerto."),
+        # Source: Wikipedia, Basilica of San Francisco de Asís, Havana; Wikipedia (es), Convento de San Francisco de Asís (La Habana).
+        Stop("havana_plaza_vieja", "Plaza Vieja", "Plaza Vieja", 23.1361, -82.35,
+             note_en="Laid out in 1559, it was first called the Plaza Nueva, the New Square.",
+             note_it="Nata nel 1559, all'inizio si chiamava Plaza Nueva, la Piazza Nuova."),
+        # Source: Wikipedia, Plaza Vieja, Havana; Wikipedia (es), Plaza Vieja (La Habana).
+        Stop("havana_alameda_paula", "Alameda de Paula", "Alameda de Paula", 23.132, -82.3481,
+             note_en="Built in 1777, it was the city's first promenade.",
+             note_it="Costruita nel 1777, fu la prima passeggiata della città."),
+        # Source: Wikipedia, Alameda de Paula; Wikipedia (es), Alameda de Paula.
+    ],
+)
+
+CARTAGENA = Walk(
+    id="CARTAGENA_RELOJ_SAN_FELIPE",
+    city="cartagena",
+    city_en="Cartagena",
+    city_it="Cartagena",
+    route_en="From the Clock Tower to San Felipe, along the walls and through Getsemaní",
+    route_it="Dalla Torre dell'Orologio a San Felipe, lungo le mura e attraverso Getsemaní",
+    outing_en="A walk in Cartagena",
+    outing_it="Passeggiata a Cartagena",
+    country="CO",
+    continent="AMERICAS",
+    # A short walk (about 5 km). The Caribbean and the bay, from the coastline; the Chambacú lagoon.
+    coast=True,
+    water=["way/238972766"],
+    parks=["way/25841728", "way/25447599", "way/49600262"],
+    stops=[
+        Stop("cartagena_torre_reloj", "Clock Tower", "Torre dell'Orologio", 10.4227, -75.5488,
+             note_en="The main gate of the walled city takes its name from the clock set on it in the 18th century.",
+             note_it="La porta principale della città murata prende il nome dall'orologio posto in cima nel Settecento."),
+        # Source: Wikipedia, Puerta del Reloj; Wikipedia (es), Torre del Reloj (Cartagena de Indias).
+        Stop("cartagena_santo_domingo", "Plaza de Santo Domingo", "Plaza de Santo Domingo", 10.4243, -75.552,
+             note_en="The church of Santo Domingo, on this square, was built between about 1565 and 1630.",
+             note_it="La chiesa di Santo Domingo, su questa piazza, fu costruita tra il 1565 circa e il 1630."),
+        # Source: Wikipedia, Convento de Santo Domingo, Cartagena; Wikipedia (es), Convento de Santo Domingo (Cartagena).
+        Stop("cartagena_cathedral", "Cathedral", "Cattedrale", 10.4237, -75.5507,
+             note_en="In 1586, still unfinished, the cathedral was damaged in Francis Drake's attack on the city.",
+             note_it="Nel 1586, ancora incompiuta, la cattedrale fu danneggiata nell'attacco di Francis Drake alla città."),
+        # Source: Wikipedia, Cartagena Cathedral, Colombia; Wikipedia (es), Catedral de Santa Catalina de Alejandría (Cartagena de Indias).
+        Stop("cartagena_inquisicion", "Palace of the Inquisition", "Palazzo dell'Inquisizione", 10.4232, -75.5516,
+             note_en="This palace, finished in 1770, was the seat of the Inquisition's tribunal in Cartagena.",
+             note_it="Questo palazzo, finito nel 1770, fu la sede del tribunale dell'Inquisizione a Cartagena."),
+        # Source: Wikipedia, Palace of the Inquisition (Cartagena, Colombia); Wikipedia (es), Palacio de la Inquisición (Cartagena de Indias).
+        Stop("cartagena_murallas", "City walls", "Mura", 10.4262, -75.5527,
+             note_en="Begun in 1614, the walls were built in stages to protect the city from pirates.",
+             note_it="Iniziate nel 1614, le mura furono costruite a più riprese per difendere la città dai pirati."),
+        # Source: Wikipedia, Cartagena, Colombia (built between 1614 and 1796); Wikipedia (es), Cartagena de Indias.
+        Stop("cartagena_bovedas", "Las Bóvedas", "Las Bóvedas", 10.43, -75.5465,
+             note_en="Twenty-three vaults in the walls, built as storerooms and later used as prison cells.",
+             note_it="Ventitré volte nelle mura, costruite come magazzini e poi usate come celle di prigione."),
+        # Source: Wikipedia, Las Bóvedas; Wikipedia (es), Cuartel de Las Bóvedas.
+        Stop("cartagena_trinidad", "Plaza de la Trinidad", "Plaza de la Trinidad", 10.4206, -75.5454,
+             note_en="On 11 November 1811 the people of Getsemaní, with Pedro Romero, pushed Cartagena to declare its independence.",
+             note_it="L'11 novembre 1811 la gente di Getsemaní, con Pedro Romero, spinse Cartagena a dichiarare l'indipendenza."),
+        # Source: Wikipedia, Cartagena, Colombia; Wikipedia (es), Cartagena de Indias.
+        Stop("cartagena_san_felipe", "Castillo San Felipe", "Castillo San Felipe", 10.4227, -75.5394,
+             note_en="In 1741 its defenders, under Blas de Lezo, held off the British fleet of Admiral Vernon.",
+             note_it="Nel 1741 i suoi difensori, al comando di Blas de Lezo, respinsero la flotta inglese dell'ammiraglio Vernon."),
+        # Source: Wikipedia, Castillo San Felipe de Barajas; Wikipedia (es), Castillo San Felipe de Barajas.
+    ],
+)
+
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
@@ -1315,6 +1852,13 @@ LOCATORS = {
     "CZ": (48.5, 12.0, 51.1, 18.9),
     "DE": (47.2, 5.8, 55.1, 15.1),
     "AT": (46.3, 9.5, 49.1, 17.2),
+    "US": (24.5, -125.0, 49.5, -66.9),
+    "BR": (-33.8, -74.0, 5.3, -34.8),
+    "MX": (14.5, -118.4, 32.7, -86.7),
+    "AR": (-55.1, -73.6, -21.8, -53.6),
+    "CA": (41.6, -141.0, 70.0, -52.6),
+    "CU": (19.8, -85.0, 23.3, -74.1),
+    "CO": (-4.3, -79.1, 12.5, -66.8),
 }
 
 # The continents the Ways page groups the cities by, in its order (the Kotlin enum Continent has

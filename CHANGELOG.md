@@ -22,11 +22,20 @@ All notable changes to Passo are documented here. The format follows
   Paris, from Place des Vosges to the Eiffel Tower; London, from Buckingham Palace to Tower
   Bridge; Madrid, from the Temple of Debod to the Puerta de Alcalá; Berlin, from the Wall to
   the Victory Column, by the Brandenburg Gate; Vienna, from the Belvedere round the Ring to the
-  Prater; Lima, through its historic centre; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And three short ones, about
-  5 km, an hour or so: Porto, from the cathedral across the Douro to the Serra do Pilar;
-  Amsterdam, from Centraal Station along the canals to the Westerkerk; and Prague, from the
-  Castle over Charles Bridge to Wenceslas Square. Each map has the city's
-  water, parks and main streets, so the area is recognisable at a glance. Walked where you are
+  Prater; Lima, through its historic centre; New York, from Central Park to the Brooklyn
+  Bridge, by Times Square and the Empire State; Rio, from the Museum of Tomorrow through Lapa and
+  along the bay to the Sugarloaf; Mexico City, from the Zócalo along the Reforma to Chapultepec;
+  Buenos Aires, from the Plaza de Mayo by the Congress and the Obelisco to Recoleta; San
+  Francisco, from the Ferry Building by Coit Tower and the Wharf to the Palace of Fine Arts; and
+  Cusco, up to Sacsayhuamán and down to the Qorikancha. And six short ones, about 5 km, an hour
+  or so: Porto, from the cathedral across the Douro to the Serra do Pilar; Amsterdam, from
+  Centraal Station along the canals to the Westerkerk; Prague, from the Castle over Charles
+  Bridge to Wenceslas Square; Québec, from the Parliament by the Plains of Abraham and the
+  Château Frontenac down to the Lower Town; Havana, from the Capitolio by the Malecón and the old
+  squares to the Alameda de Paula; and Cartagena, from the Clock Tower along the walls and
+  through Getsemaní to San Felipe. Each map has the city's
+  water, parks and main streets, and, for a city on the sea, its coast, so the area is
+  recognisable at a glance. Walked where you are
   in one outing or a few. Each place is told as your steps reach it, with a short vibration and,
   if you like, its name and a line about it in your headphones; the notification says the next
   one. Stop when you like and continue later from where you were. On the Ways page, by

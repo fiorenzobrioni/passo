@@ -236,7 +236,7 @@ class WaysScreenTest {
         compose.onNodeWithTag(WaysTags.continent(Continent.EUROPE))
             .assert(hasText("10 cities · 1 walked", substring = true))
             .assert(hasText("Under way: London", substring = true))
-        compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).assert(hasText("2 cities", substring = true))
+        compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).assert(hasText("10 cities", substring = true))
         compose.onNodeWithTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)).assertDoesNotExist()
         snapshot("ways_cities")
         compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).performClick()
@@ -279,7 +279,18 @@ class WaysScreenTest {
                 WayId.AMSTERDAM_CENTRAAL_WESTERKERK,
                 WayId.PRAGUE_CASTLE_WENCESLAS,
             ),
-            Continent.AMERICAS to listOf(WayId.LIMA_SAN_MARTIN_RESERVA, WayId.CUSCO_ARMAS_QORIKANCHA),
+            Continent.AMERICAS to listOf(
+                WayId.LIMA_SAN_MARTIN_RESERVA,
+                WayId.CUSCO_ARMAS_QORIKANCHA,
+                WayId.NEW_YORK_PARK_BRIDGE,
+                WayId.RIO_CENTRO_SUGARLOAF,
+                WayId.MEXICO_CITY_ZOCALO_CHAPULTEPEC,
+                WayId.BUENOS_AIRES_MAYO_RECOLETA,
+                WayId.SAN_FRANCISCO_FERRY_PALACE,
+                WayId.QUEBEC_PARLEMENT_BASSE_VILLE,
+                WayId.HAVANA_CAPITOLIO_PAULA,
+                WayId.CARTAGENA_RELOJ_SAN_FELIPE,
+            ),
         )
         assertThat(byContinent.keys).containsExactlyElementsIn(Continent.entries)
         var continent by mutableStateOf(Continent.EUROPE)
@@ -302,6 +313,9 @@ class WaysScreenTest {
             }
         }
         snapshot("continent_americas_cities")
+        // Ten cities run past the screen: back up to Cusco's row before touching it.
+        compose.onNodeWithTag(WaysTags.CONTINENT_PAGE)
+            .performScrollToNode(hasTestTag(WaysTags.way(WayId.CUSCO_ARMAS_QORIKANCHA)))
         compose.onNodeWithTag(WaysTags.way(WayId.CUSCO_ARMAS_QORIKANCHA)).performClick()
         assertThat(opened).isEqualTo(WayId.CUSCO_ARMAS_QORIKANCHA to null)
     }
@@ -309,7 +323,7 @@ class WaysScreenTest {
     @Test
     fun `the Americas' map, none of its cities begun, in the dark`() {
         showContinent(Continent.AMERICAS, dark = true)
-        compose.onNodeWithContentDescription("The Americas on the map: 2 cities.").assertIsDisplayed()
+        compose.onNodeWithContentDescription("The Americas on the map: 10 cities.").assertIsDisplayed()
         snapshot("continent_americas_dark")
     }
 
@@ -411,6 +425,86 @@ class WaysScreenTest {
         showWay(WayId.PRAGUE_CASTLE_WENCESLAS, state = WaysSamples.state(walks = emptyList(), live = null), dark = true)
         compose.onNodeWithText("From the Castle to Wenceslas Square", substring = true).assertExists()
         snapshot("walk_prague_dark")
+    }
+
+    @Test
+    fun `New York's walk, Manhattan between its two rivers`() {
+        showWay(WayId.NEW_YORK_PARK_BRIDGE, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("From Central Park to the Brooklyn Bridge", substring = true).assertExists()
+        snapshot("walk_new_york")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Haughwout Building"))
+        snapshot("walk_new_york_places")
+    }
+
+    @Test
+    fun `Rio's walk, along the bay to the Sugarloaf, in the dark`() {
+        showWay(WayId.RIO_CENTRO_SUGARLOAF, state = WaysSamples.state(walks = emptyList(), live = null), dark = true)
+        compose.onNodeWithText("From the Museum of Tomorrow to the Sugarloaf", substring = true).assertExists()
+        snapshot("walk_rio_dark")
+    }
+
+    @Test
+    fun `Rio's walk in the light`() {
+        showWay(WayId.RIO_CENTRO_SUGARLOAF, state = WaysSamples.state(walks = emptyList(), live = null))
+        snapshot("walk_rio")
+    }
+
+    @Test
+    fun `Mexico City's walk, from the Zócalo along the Reforma to Chapultepec`() {
+        showWay(WayId.MEXICO_CITY_ZOCALO_CHAPULTEPEC, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("From the Zócalo to Chapultepec", substring = true).assertExists()
+        snapshot("walk_mexico_city")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Museum of Anthropology"))
+        compose.onNodeWithText("Aztec Sun Stone", substring = true).assertExists()
+    }
+
+    @Test
+    fun `Buenos Aires's walk, by the Río de la Plata, in the dark`() {
+        showWay(
+            WayId.BUENOS_AIRES_MAYO_RECOLETA,
+            state = WaysSamples.state(walks = emptyList(), live = null),
+            dark = true,
+        )
+        compose.onNodeWithText("From the Plaza de Mayo to Recoleta", substring = true).assertExists()
+        snapshot("walk_buenos_aires_dark")
+    }
+
+    @Test
+    fun `Buenos Aires's walk in the light`() {
+        showWay(WayId.BUENOS_AIRES_MAYO_RECOLETA, state = WaysSamples.state(walks = emptyList(), live = null))
+        snapshot("walk_buenos_aires")
+    }
+
+    @Test
+    fun `San Francisco's walk, along the bay from the Ferry Building`() {
+        showWay(WayId.SAN_FRANCISCO_FERRY_PALACE, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("From the Ferry Building to the Palace of Fine Arts", substring = true).assertExists()
+        snapshot("walk_san_francisco")
+    }
+
+    @Test
+    fun `Québec's short walk, from the Upper Town to the Lower, in the dark`() {
+        showWay(
+            WayId.QUEBEC_PARLEMENT_BASSE_VILLE,
+            state = WaysSamples.state(walks = emptyList(), live = null),
+            dark = true,
+        )
+        compose.onNodeWithText("From the Parliament to the Lower Town", substring = true).assertExists()
+        snapshot("walk_quebec_dark")
+    }
+
+    @Test
+    fun `Havana's short walk, by the Malecón and the old squares`() {
+        showWay(WayId.HAVANA_CAPITOLIO_PAULA, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("From the Capitolio to the Alameda de Paula", substring = true).assertExists()
+        snapshot("walk_havana")
+    }
+
+    @Test
+    fun `Cartagena's short walk, inside the walls and out to San Felipe`() {
+        showWay(WayId.CARTAGENA_RELOJ_SAN_FELIPE, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("From the Clock Tower to San Felipe", substring = true).assertExists()
+        snapshot("walk_cartagena")
     }
 
     @Test
