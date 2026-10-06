@@ -306,7 +306,6 @@ fun placeNameRes(key: String): Int = when (key) {
     "redondela" -> R.string.way_place_redondela
     "rieti" -> R.string.way_place_rieti
     "rio_arcos_da_lapa" -> R.string.way_place_rio_arcos_da_lapa
-    "rio_benjamin_constant" -> R.string.way_place_rio_benjamin_constant
     "rio_botafogo" -> R.string.way_place_rio_botafogo
     "rio_candelaria" -> R.string.way_place_rio_candelaria
     "rio_confeitaria_colombo" -> R.string.way_place_rio_confeitaria_colombo
@@ -314,6 +313,7 @@ fun placeNameRes(key: String): Int = when (key) {
     "rio_gloria" -> R.string.way_place_rio_gloria
     "rio_museum_of_tomorrow" -> R.string.way_place_rio_museum_of_tomorrow
     "rio_paco_imperial" -> R.string.way_place_rio_paco_imperial
+    "rio_palacio_universitario" -> R.string.way_place_rio_palacio_universitario
     "rio_selaron_steps" -> R.string.way_place_rio_selaron_steps
     "rio_sugarloaf" -> R.string.way_place_rio_sugarloaf
     "rio_theatro_municipal" -> R.string.way_place_rio_theatro_municipal
@@ -428,6 +428,7 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "cusco_sacsayhuaman" -> R.string.way_note_cusco_sacsayhuaman
     "cusco_san_blas" -> R.string.way_note_cusco_san_blas
     "cusco_san_cristobal" -> R.string.way_note_cusco_san_cristobal
+    "cusco_san_pedro" -> R.string.way_note_cusco_san_pedro
     "cusco_twelve_angled_stone" -> R.string.way_note_cusco_twelve_angled_stone
     "fiesole" -> R.string.way_note_fiesole
     "firenze" -> R.string.way_note_firenze
@@ -561,13 +562,14 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "redondela" -> R.string.way_note_redondela
     "rieti" -> R.string.way_note_rieti
     "rio_arcos_da_lapa" -> R.string.way_note_rio_arcos_da_lapa
-    "rio_benjamin_constant" -> R.string.way_note_rio_benjamin_constant
     "rio_botafogo" -> R.string.way_note_rio_botafogo
     "rio_candelaria" -> R.string.way_note_rio_candelaria
     "rio_confeitaria_colombo" -> R.string.way_note_rio_confeitaria_colombo
     "rio_flamengo_park" -> R.string.way_note_rio_flamengo_park
+    "rio_gloria" -> R.string.way_note_rio_gloria
     "rio_museum_of_tomorrow" -> R.string.way_note_rio_museum_of_tomorrow
     "rio_paco_imperial" -> R.string.way_note_rio_paco_imperial
+    "rio_palacio_universitario" -> R.string.way_note_rio_palacio_universitario
     "rio_selaron_steps" -> R.string.way_note_rio_selaron_steps
     "rio_sugarloaf" -> R.string.way_note_rio_sugarloaf
     "rio_theatro_municipal" -> R.string.way_note_rio_theatro_municipal

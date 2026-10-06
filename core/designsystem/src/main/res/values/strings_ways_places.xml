@@ -284,7 +284,6 @@
     <string name="way_place_redondela">Redondela</string>
     <string name="way_place_rieti">Rieti</string>
     <string name="way_place_rio_arcos_da_lapa">Lapa Arches</string>
-    <string name="way_place_rio_benjamin_constant">Benjamin Constant Institute</string>
     <string name="way_place_rio_botafogo">Botafogo Beach</string>
     <string name="way_place_rio_candelaria">Candelária Church</string>
     <string name="way_place_rio_confeitaria_colombo">Confeitaria Colombo</string>
@@ -292,6 +291,7 @@
     <string name="way_place_rio_gloria">Outeiro da Glória</string>
     <string name="way_place_rio_museum_of_tomorrow">Museum of Tomorrow</string>
     <string name="way_place_rio_paco_imperial">Imperial Palace</string>
+    <string name="way_place_rio_palacio_universitario">Palácio Universitário</string>
     <string name="way_place_rio_selaron_steps">Selarón Steps</string>
     <string name="way_place_rio_sugarloaf">Sugarloaf cable car</string>
     <string name="way_place_rio_theatro_municipal">Theatro Municipal</string>
@@ -400,6 +400,7 @@
     <string name="way_note_cusco_sacsayhuaman">Its largest stone weighs over a hundred tonnes; the Inti Raymi, the Inca feast of the sun, is held nearby every 24 June.</string>
     <string name="way_note_cusco_san_blas">The church of San Blas keeps a pulpit carved in cedar, a marvel of Churrigueresque woodwork.</string>
     <string name="way_note_cusco_san_cristobal">Paullu Inca, brother of Atahualpa, founded this church; his remains were found beneath it in 2007.</string>
+    <string name="way_note_cusco_san_pedro">Cusco’s central market since 1925, declared part of Peru’s cultural heritage in 2024, it sells fruit, meat and cooked food.</string>
     <string name="way_note_cusco_twelve_angled_stone">In Hatun Rumiyoc street, the stone of twelve angles is set in the wall of an Inca palace.</string>
     <string name="way_note_fiesole">Fiesole is older than Florence: the Etruscans founded it, and its Roman theatre still holds summer shows.</string>
     <string name="way_note_firenze">The way ends in Piazza della Signoria, in front of Palazzo Vecchio.</string>
@@ -533,13 +534,14 @@
     <string name="way_note_redondela">In 1702, in the strait of Rande below Redondela, an English and Dutch fleet attacked the Spanish treasure fleet.</string>
     <string name="way_note_rieti">Rieti calls itself the centre of Italy: a stone in Piazza San Rufo marks the spot.</string>
     <string name="way_note_rio_arcos_da_lapa">Built as an aqueduct, the arches have carried the Santa Teresa tram since 1896.</string>
-    <string name="way_note_rio_benjamin_constant">Created by imperial decree in 1854, the institute teaches blind and partially sighted children.</string>
     <string name="way_note_rio_botafogo">Across the cove rises the Sugarloaf, 396 metres high.</string>
     <string name="way_note_rio_candelaria">Begun in 1775, the Candelária church had its dome only in 1877.</string>
     <string name="way_note_rio_confeitaria_colombo">Founded in 1894, the café keeps the great crystal mirrors brought from Antwerp in the 1910s.</string>
     <string name="way_note_rio_flamengo_park">Roberto Burle Marx, the great Brazilian landscape designer, laid out the gardens of this park by the bay.</string>
+    <string name="way_note_rio_gloria">Built on a plan of two octagons, this church saw the baptism of every member of Brazil’s imperial family.</string>
     <string name="way_note_rio_museum_of_tomorrow">Santiago Calatrava’s museum opened in 2015 on Pier Mauá, by the bay.</string>
     <string name="way_note_rio_paco_imperial">In this palace, in 1888, Princess Isabel signed the Golden Law that ended slavery in Brazil.</string>
+    <string name="way_note_rio_palacio_universitario">The palace was built for the Hospício Pedro II, the first psychiatric hospital in Brazil and the second in Latin America.</string>
     <string name="way_note_rio_selaron_steps">The Chilean artist Jorge Selarón covered these steps in tiles, first in the colours of Brazil’s flag.</string>
     <string name="way_note_rio_sugarloaf">Opened in 1912, the cable car climbs from here to Urca Hill, then on to the Sugarloaf.</string>
     <string name="way_note_rio_theatro_municipal">Opened in 1909, the theatre was inspired by Garnier’s opera house in Paris.</string>

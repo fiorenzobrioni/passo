@@ -284,7 +284,6 @@
     <string name="way_place_redondela">Redondela</string>
     <string name="way_place_rieti">Rieti</string>
     <string name="way_place_rio_arcos_da_lapa">Arcos da Lapa</string>
-    <string name="way_place_rio_benjamin_constant">Istituto Benjamin Constant</string>
     <string name="way_place_rio_botafogo">Spiaggia di Botafogo</string>
     <string name="way_place_rio_candelaria">Chiesa della Candelária</string>
     <string name="way_place_rio_confeitaria_colombo">Confeitaria Colombo</string>
@@ -292,6 +291,7 @@
     <string name="way_place_rio_gloria">Outeiro da Glória</string>
     <string name="way_place_rio_museum_of_tomorrow">Museo del Domani</string>
     <string name="way_place_rio_paco_imperial">Palazzo Imperiale</string>
+    <string name="way_place_rio_palacio_universitario">Palácio Universitário</string>
     <string name="way_place_rio_selaron_steps">Scalinata Selarón</string>
     <string name="way_place_rio_sugarloaf">Funivia del Pan di Zucchero</string>
     <string name="way_place_rio_theatro_municipal">Theatro Municipal</string>
@@ -400,6 +400,7 @@
     <string name="way_note_cusco_sacsayhuaman">La sua pietra più grande pesa oltre cento tonnellate; qui vicino si celebra ogni 24 giugno l’Inti Raymi, la festa inca del sole.</string>
     <string name="way_note_cusco_san_blas">La chiesa di San Blas custodisce un pulpito intagliato nel cedro, una meraviglia di intaglio churrigueresco.</string>
     <string name="way_note_cusco_san_cristobal">Paullu Inca, fratello di Atahualpa, fondò questa chiesa; i suoi resti vi furono trovati sotto nel 2007.</string>
+    <string name="way_note_cusco_san_pedro">Mercato centrale di Cusco dal 1925, dichiarato patrimonio culturale del Perù nel 2024, vende frutta, carne e piatti pronti.</string>
     <string name="way_note_cusco_twelve_angled_stone">In calle Hatun Rumiyoc, la pietra dei dodici angoli è incastonata nel muro di un palazzo inca.</string>
     <string name="way_note_fiesole">Fiesole è più antica di Firenze: la fondarono gli Etruschi, e il suo teatro romano ospita ancora spettacoli d’estate.</string>
     <string name="way_note_firenze">Il cammino finisce in Piazza della Signoria, davanti a Palazzo Vecchio.</string>
@@ -533,13 +534,14 @@
     <string name="way_note_redondela">Nel 1702, nello stretto di Rande sotto Redondela, una flotta inglese e olandese attaccò la flotta spagnola del tesoro.</string>
     <string name="way_note_rieti">Rieti si dice il centro d’Italia: una pietra in Piazza San Rufo segna il punto.</string>
     <string name="way_note_rio_arcos_da_lapa">Costruiti come acquedotto, gli archi portano dal 1896 il tram di Santa Teresa.</string>
-    <string name="way_note_rio_benjamin_constant">Creato per decreto imperiale nel 1854, l’istituto insegna a bambini ciechi e ipovedenti.</string>
     <string name="way_note_rio_botafogo">Oltre l’insenatura si alza il Pan di Zucchero, alto 396 metri.</string>
     <string name="way_note_rio_candelaria">Iniziata nel 1775, la chiesa della Candelária ebbe la sua cupola solo nel 1877.</string>
     <string name="way_note_rio_confeitaria_colombo">Fondata nel 1894, la pasticceria conserva i grandi specchi di cristallo arrivati da Anversa negli anni Dieci.</string>
     <string name="way_note_rio_flamengo_park">Roberto Burle Marx, il grande paesaggista brasiliano, disegnò i giardini di questo parco sulla baia.</string>
+    <string name="way_note_rio_gloria">Costruita su una pianta di due ottagoni, questa chiesa vide il battesimo di tutti i membri della famiglia imperiale brasiliana.</string>
     <string name="way_note_rio_museum_of_tomorrow">Il museo di Santiago Calatrava fu inaugurato nel 2015 sul molo Mauá, sulla baia.</string>
     <string name="way_note_rio_paco_imperial">In questo palazzo, nel 1888, la principessa Isabella firmò la Legge Aurea che abolì la schiavitù in Brasile.</string>
+    <string name="way_note_rio_palacio_universitario">Il palazzo fu costruito per l’Hospício Pedro II, il primo ospedale psichiatrico del Brasile e il secondo dell’America Latina.</string>
     <string name="way_note_rio_selaron_steps">L’artista cileno Jorge Selarón ricoprì questi gradini di piastrelle, all’inizio nei colori della bandiera del Brasile.</string>
     <string name="way_note_rio_sugarloaf">Inaugurata nel 1912, la funivia sale da qui al Morro da Urca, poi al Pan di Zucchero.</string>
     <string name="way_note_rio_theatro_municipal">Inaugurato nel 1909, il teatro si ispira all’Opéra di Garnier a Parigi.</string>

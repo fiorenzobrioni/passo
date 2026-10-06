@@ -1297,7 +1297,12 @@ CUSCO = Walk(
              note_en="Its Quechua name, Kusipata, means the place of joy; it was part of the great Inca square.",
              note_it="Il suo nome quechua, Kusipata, significa luogo della gioia; faceva parte della grande piazza inca."),
         # Source: Wikipedia (es), Plaza Regocijo.
-        Stop("cusco_san_pedro", "San Pedro Market", "Mercato di San Pedro", -13.5212, -71.9825),
+        Stop("cusco_san_pedro", "San Pedro Market", "Mercato di San Pedro", -13.5212, -71.9825,
+             note_en="Cusco's central market since 1925, declared part of Peru's cultural heritage in 2024, it sells fruit, meat and cooked food.",
+             note_it="Mercato centrale di Cusco dal 1925, dichiarato patrimonio culturale del Perù nel 2024, vende frutta, carne e piatti pronti."),
+        # Source: Wikipedia (es), Mercado Central de San Pedro; Andina (Peru's state news agency),
+        # "Cusco: Gore reconoce al Mercado Central San Pedro en su centenario de fundación", 2025.
+        # Its first iron structure is often credited to Gustave Eiffel, who died in 1923: not said.
         Stop("cusco_qorikancha", "Qorikancha", "Qorikancha", -13.5203, -71.9752,
              note_en="The Incas' Temple of the Sun, once lined with gold; the Dominican convent was built on its walls.",
              note_it="Il Tempio del Sole degli Inca, un tempo rivestito d'oro; il convento domenicano fu costruito sulle sue mura."),
@@ -1425,9 +1430,11 @@ RIO = Walk(
              note_en="The Chilean artist Jorge Selarón covered these steps in tiles, first in the colours of Brazil's flag.",
              note_it="L'artista cileno Jorge Selarón ricoprì questi gradini di piastrelle, all'inizio nei colori della bandiera del Brasile."),
         # Source: Wikipedia, Escadaria Selarón; Wikipedia (pt), Escadaria Selarón.
-        Stop("rio_gloria", "Outeiro da Glória", "Outeiro da Glória", -22.9213, -43.1752),
-        # No sentence: the two Wikipedias disagree on its age (17th or 18th century), and the
-        # imperial baptisms are in the Portuguese one only.
+        Stop("rio_gloria", "Outeiro da Glória", "Outeiro da Glória", -22.9213, -43.1752,
+             note_en="Built on a plan of two octagons, this church saw the baptism of every member of Brazil's imperial family.",
+             note_it="Costruita su una pianta di due ottagoni, questa chiesa vide il battesimo di tutti i membri della famiglia imperiale brasiliana."),
+        # Source: Wikipedia (pt), Igreja de Nossa Senhora da Glória do Outeiro; Wikipedia (es) and
+        # (fr), the same church. Its age (17th or 18th century) and who made its tiles differ: not said.
         Stop("rio_flamengo_park", "Flamengo Park", "Parco del Flamengo", -22.9340, -43.1742,
              note_en="Roberto Burle Marx, the great Brazilian landscape designer, laid out the gardens of this park by the bay.",
              note_it="Roberto Burle Marx, il grande paesaggista brasiliano, disegnò i giardini di questo parco sulla baia."),
@@ -1436,10 +1443,10 @@ RIO = Walk(
              note_en="Across the cove rises the Sugarloaf, 396 metres high.",
              note_it="Oltre l'insenatura si alza il Pan di Zucchero, alto 396 metri."),
         # Source: Wikipedia, Sugarloaf Mountain; Wikipedia (pt), Pão de Açúcar (Rio de Janeiro).
-        Stop("rio_benjamin_constant", "Benjamin Constant Institute", "Istituto Benjamin Constant", -22.9536, -43.1722,
-             note_en="Created by imperial decree in 1854, the institute teaches blind and partially sighted children.",
-             note_it="Creato per decreto imperiale nel 1854, l'istituto insegna a bambini ciechi e ipovedenti."),
-        # Source: Wikipedia, Instituto Benjamin Constant; Wikipedia (pt), Instituto Benjamin Constant.
+        Stop("rio_palacio_universitario", "Palácio Universitário", "Palácio Universitário", -22.9533, -43.1735,
+             note_en="The palace was built for the Hospício Pedro II, the first psychiatric hospital in Brazil and the second in Latin America.",
+             note_it="Il palazzo fu costruito per l'Hospício Pedro II, il primo ospedale psichiatrico del Brasile e il secondo dell'America Latina."),
+        # Source: Wikipedia (pt), Hospício Pedro II; Wikipedia, Legacy of Pedro II of Brazil.
         Stop("rio_sugarloaf", "Sugarloaf cable car", "Funivia del Pan di Zucchero", -22.9549, -43.1664,
              note_en="Opened in 1912, the cable car climbs from here to Urca Hill, then on to the Sugarloaf.",
              note_it="Inaugurata nel 1912, la funivia sale da qui al Morro da Urca, poi al Pan di Zucchero."),

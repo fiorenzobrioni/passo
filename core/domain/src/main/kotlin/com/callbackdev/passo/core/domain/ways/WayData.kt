@@ -5262,7 +5262,7 @@ internal object WayData {
             WayStop("rio_gloria", 5059, -22.92125, -43.17518, stage = true),
             WayStop("rio_flamengo_park", 6723, -22.93400, -43.17421, stage = true),
             WayStop("rio_botafogo", 8562, -22.94401, -43.18197, stage = true),
-            WayStop("rio_benjamin_constant", 10462, -22.95299, -43.17216, stage = true),
+            WayStop("rio_palacio_universitario", 10281, -22.95313, -43.17338, stage = true),
             WayStop("rio_sugarloaf", 11144, -22.95490, -43.16640, stage = true),
         ),
         frame = GeoBox(-22.96000, -43.18783, -22.88910, -43.16109),
