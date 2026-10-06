@@ -130,6 +130,7 @@ internal fun continentNameRes(continent: Continent): Int = when (continent) {
     Continent.EUROPE -> R.string.ways_continent_europe
     Continent.AMERICAS -> R.string.ways_continent_americas
     Continent.ASIA_OCEANIA -> R.string.ways_continent_asia_oceania
+    Continent.AFRICA -> R.string.ways_continent_africa
 }
 
 /** The cities of [walks] as their continent's map draws them: where each walk begins. */

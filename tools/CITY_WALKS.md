@@ -1,6 +1,6 @@
 # Adding a city walk
 
-How a city walk is added, step by step, as the cities of Europe, the Americas, and Asia and Oceania were.
+How a city walk is added, step by step, as the cities of Europe, the Americas, Asia and Oceania, and Africa were.
 The decisions behind it are in `docs/adr/0015-city-walks.md`; this is the procedure. The data is
 written by `tools/build_ways.py` from `tools/ways_content.py`, never by hand;
 `tools/city_walks.py` helps to find and check what goes into the content, and adds the new
@@ -135,3 +135,12 @@ On top of its first two cities:
   places 50 m or more off the line, and the walk takes another street or drops them.
 - A market, a stairway or a small square may have no article in any language: then it has no
   sentence, and usually no place on the walk.
+- An African city is checked in English and French, Arabic or German (Cairo), or German, Dutch or
+  Afrikaans (Cape Town); `wiki-find` lists the Dutch and Arabic titles, and `wiki` follows their
+  redirects (`#DOORVERWIJZING`, `#تحويل`). Afrikaans has no place in the listing: ask `wiki af`
+  for its title directly.
+- A crossing BRouter will not take (Cairo's Al-Muizz Street over Al-Azhar Street) shows as a
+  detour of several hundred metres between two places close together: route the leg alone, see
+  where it goes, and order the places so the walk takes the way it can.
+- A disambiguation page (Green Point Lighthouse) comes back from `wiki` as a short list: ask for
+  the full title.

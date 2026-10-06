@@ -961,8 +961,8 @@ a city for now.
   seven of 10 km and three of 5 km, the city choosing its length. The Americas, proposed (5 Oct
   2026): all ten done: New York, Rio, Mexico City, Buenos Aires and San Francisco, long;
   Québec, Havana and Cartagena, short (Washington, Montréal, Boston's Freedom Trail and Valparaíso if
-  one does not work out). Then Asia and Oceania, and Africa, each continent added with its
-  first cities. Cities only.
+  one does not work out). Then Asia and Oceania (all ten done), and Africa, each continent added
+  with its first cities. Cities only.
 - [x] **Asia and Oceania** (owner, 6 Oct 2026: "start the Asia and Oceania group, tell me which
   cities, and do the first two"), proposed: Tokyo, Sydney, Seoul, Beijing, Hong Kong, Singapore
   and Bangkok, long; Kyoto (Higashiyama, from Kiyomizu-dera to Gion), Hanoi (the Hoàn Kiếm lake,
@@ -1005,9 +1005,33 @@ a city for now.
     Bridge (5.9 km, 8 places); Melbourne's from Flinders Street Station by St Paul's and
     Federation Square, the State Library and the Old Melbourne Gaol, the Princess Theatre,
     Parliament and St Patrick's, to the Royal Exhibition Building (4.6 km, 9 places).
+- [ ] **Africa** (owner, 6 Oct 2026: "start the Africa group, tell me which cities, and do the
+  first two"), proposed: Cairo, Cape Town, Marrakech (from Jemaa el-Fnaa and the Koutoubia
+  through the souks to the Ben Youssef madrasa, the Bahia Palace and the Saadian Tombs), Tunis
+  (the Kasbah, the medina and the Zitouna Mosque, out by Bab el Bhar along the Avenue Habib
+  Bourguiba), Alexandria (along the Corniche from the Citadel of Qaitbay to the Bibliotheca
+  Alexandrina, by the Roman theatre and Pompey's Pillar), Dakar (the Plateau, from the Place de
+  l'Indépendance by the cathedral, the Kermel market and the IFAN museum, along the Corniche)
+  and Addis Ababa (from Meskel Square by the Holy Trinity Cathedral and the National Museum,
+  Lucy's, to the Piazza), long; Fez (the medina, from Bab Bou Jeloud to the Qarawiyyin and the
+  tanneries), Zanzibar's Stone Town (from the Old Fort and the House of Wonders through the lanes
+  to the old slave market and the Anglican cathedral) and Luxor (from Luxor Temple along the
+  Avenue of Sphinxes to Karnak), short (Casablanca, Rabat, Algiers, Nairobi, Accra, Saint-Louis
+  and Essaouira if one does not work out). The continent's frame is the whole of it, from
+  Dakar to the Horn of Africa and from Tunis to the Cape, so the cities proposed fit without
+  moving it.
+  - [x] **Cairo and Cape Town**, the continent set up with them: Cairo's walk goes from the
+    Egyptian Museum by Talaat Harb Square, the Abdeen Palace and the Museum of Islamic Art, up
+    Al-Muizz Street by the Qalawun complex, the Aqmar Mosque and al-Hakim's to Bab al-Nasr,
+    back by Khan el-Khalili, Al-Azhar, al-Ghuri's complex and Bab Zuwayla, then by the Blue
+    Mosque and Sultan Hasan's to Muhammad Ali's mosque in the Citadel (9.9 km, 15 places); Cape
+    Town's from the Green Point Lighthouse by the stadium, the Waterfront and Nobel Square, over
+    the Foreshore to the Castle, the City Hall and the District Six Museum, then through the
+    Company's Garden by the South African Museum, St George's, the Slave Lodge and Greenmarket
+    Square, to the Auwal Mosque and Bo-Kaap (10.8 km, 15 places), on Table Bay's coast.
 - [ ] On a device (owner): the Camino Portugués drawn in both themes; Rome, Paris, Madrid,
   Berlin, Vienna, Lima, Cusco, New York, Rio, Mexico City, Buenos Aires, San Francisco, Québec,
-  Havana, Cartagena, Tokyo, Sydney, Seoul, Beijing, Hong Kong, Singapore, Bangkok, Kyoto, Hanoi, Melbourne, Porto, Amsterdam and Prague each walked once, with the voice; the continents' maps and the coastal cities in both
+  Havana, Cartagena, Tokyo, Sydney, Seoul, Beijing, Hong Kong, Singapore, Bangkok, Kyoto, Hanoi, Melbourne, Cairo, Cape Town, Porto, Amsterdam and Prague each walked once, with the voice; the continents' maps and the coastal cities in both
   themes.
 
 Built as the content of the first two parts, with nothing new in the code: the fifth way is the
@@ -1388,6 +1412,7 @@ Include:
 - **Hanoi and Melbourne, Asia and Oceania's ten** (owner, 6 Oct 2026): seven long walks and three short, as planned. Hanoi's sentences checked in the English and French Wikipedias (the Italian for the Old Quarter), Melbourne's in the English and German (the French for Federation Square), and rewritten where they differ: when the Temple of Literature's teaching ended (1779 or 1915), the year the Long Biên Bridge was finished (1902 or 1903), the year the State Library began (1854 or 1856), how many were hanged at the Old Melbourne Gaol (133 or 135), the year the federal parliament left (1927 or 1928). Places with a single source were left out or replaced: Hanoi's Bạch Mã temple (an article in Vietnamese only: the stop is the Old Quarter) and the Opera House, which took the walk past 6 km; Melbourne's Hosier Lane, Block Arcade and GPO (English only), so its walk goes by the Princess Theatre and St Patrick's instead, whose sentence names its architect, William Wardell, as Sydney's St Mary's does. Hanoi's walk is 5.9 km, at the top of a short walk's range. On the continent's map Kyoto's name gives way to Tokyo's, a point away, as the map drops a name it has no room for.
 
 - **Hanoi's bridge and Melbourne's gardens, in more detail** (owner, 6 Oct 2026: "on the map you can't tell the Long Biên is a bridge"; "there are parks not visible"). Hanoi's walk ended where the bridge begins, still over the floodplain, with the river at the map's edge: its last place now stands on the bridge over the Red River, and the map draws the city's longer residential streets, among them the bridge's deck, mapped as one, so the line crosses the water as a bridge. To keep the walk short (5.9 km), it starts on the Temple of Literature's east side rather than at its south gate. Melbourne's map had its large gardens; it now has the smaller ones the walk passes too (Parliament's gardens, Gordon Reserve, Tianjin Gardens, Wellington Park and the squares to the north). In the dark theme the parks stay the quiet sage of `PassoColors.park`, as in every city: brighter would be a change to the design system, not to one map.
+- **Africa, with Cairo and Cape Town** (owner, 6 Oct 2026: "start the Africa group, tell me which cities, and do the first two"). The fourth continent, framed as a whole (18.5° W to 52° E, 35.5° S to 38° N), so the cities proposed fit without moving it. Cairo's sentences checked in the English and French Wikipedias (the Arabic for al-Ghuri's complex and Talaat Harb Square, the German for the Museum of Islamic Art, the Qalawun complex and the Blue Mosque, the Italian for Khan el-Khalili), Cape Town's in the English and German (the Dutch for the Castle, the Company's Garden and the District Six Museum, the French for the Foreshore and Greenmarket Square, the Afrikaans for the lighthouse), and rewritten where they differ: whether the Aqmar was the first mosque whose façade follows the street or one of the first, the year the Museum of Islamic Art opened (1902 or 1903), the years of the Blue Mosque's tiles (to 1654 or 1664), which universities are older than Al-Azhar's, whether the Castle is the oldest building in South Africa, and the Auwal Mosque's title (the first mosque, or held to be the oldest: the sentence says held to be). The Egyptian Museum's sentence says nothing of Tutankhamun, whose treasures are being moved to the Grand Egyptian Museum: nothing that goes stale. Talaat Harb Square has an article in Arabic only, so its sentence is about its statue, checked with the English and Arabic articles on Talaat Harb. BRouter will not take Al-Muizz Street across Al-Azhar Street, so the walk goes up Al-Muizz from the west, back by Bab al-Nasr, Gamaliya and the Khan to the crossing by Al-Azhar's mosque, and on by al-Ghuri's complex to Bab Zuwayla, never on a street twice. Cape Town's Noon Gun, on Signal Hill, took the walk 2 km out of its way and was left out; the Foreshore, land won from Table Bay in the 1930s and 1940s, is a place of its own between the Waterfront and the Castle, which once stood on the shore. St George's and the Slave Lodge are 170 m apart, closer than elsewhere, both kept. Cape Town is `coast`, the Waterfront's basins its water; Cairo's map has the Nile, Al-Azhar Park and the Ezbekiyya Garden, and the medieval city's lanes, mapped as residential streets, as Milan's are. The wiki helper lists the Dutch and Arabic titles and follows their redirects.
 
 ### Open
 

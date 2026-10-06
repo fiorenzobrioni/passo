@@ -34,7 +34,9 @@ All notable changes to Passo are documented here. The format follows
   Beihai and the Drum Tower to the Lama Temple; Hong Kong, from Victoria Park by Wan Chai, the
   Star Ferry and Central to Western Market; Singapore, from Chinatown by Fort Canning, the river
   and the Merlion to Marina Bay Sands and the Supertrees; Bangkok, from the Giant Swing by the
-  Golden Mount, Khao San, the Grand Palace and Wat Pho, over the Memorial Bridge to Wat Arun; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And nine short ones, about 5 km, an hour
+  Golden Mount, Khao San, the Grand Palace and Wat Pho, over the Memorial Bridge to Wat Arun; Cairo, from the Egyptian Museum by Al-Muizz Street, Khan el-Khalili
+  and Al-Azhar to the Citadel; Cape Town, from the Green Point Lighthouse by the Waterfront, the
+  Castle and the Company's Garden to Bo-Kaap; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And nine short ones, about 5 km, an hour
   or so: Porto, from the cathedral across the Douro to the Serra do Pilar; Amsterdam, from
   Centraal Station along the canals to the Westerkerk; Prague, from the Castle over Charles
   Bridge to Wenceslas Square; Québec, from the Parliament by the Plains of Abraham and the
@@ -49,7 +51,7 @@ All notable changes to Passo are documented here. The format follows
   in one outing or a few. Each place is told as your steps reach it, with a short vibration and,
   if you like, its name and a line about it in your headphones; the notification says the next
   one. Stop when you like and continue later from where you were. On the Ways page, by
-  continent (Europe, the Americas, Asia and Oceania), each with a map of where its cities are and which you have
+  continent (Europe, the Americas, Asia and Oceania, Africa), each with a map of where its cities are and which you have
   walked; and from Outings. "Hear it" plays a place as you will hear it, and "Change voice" opens the phone's
   voices.
 - **The Japanese interval walk**: slow and fast walking in turns, 3 minutes each, five sets or

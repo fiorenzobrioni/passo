@@ -15,6 +15,7 @@ enum class Continent {
     EUROPE,
     AMERICAS,
     ASIA_OCEANIA,
+    AFRICA,
 }
 
 /**
@@ -60,6 +61,8 @@ enum class WayId(val kind: WayKind, val city: String? = null, val continent: Con
     KYOTO_KIYOMIZU_NISHIKI(WayKind.WALK, city = "kyoto", continent = Continent.ASIA_OCEANIA),
     HANOI_VAN_MIEU_LONG_BIEN(WayKind.WALK, city = "hanoi", continent = Continent.ASIA_OCEANIA),
     MELBOURNE_FLINDERS_EXHIBITION(WayKind.WALK, city = "melbourne", continent = Continent.ASIA_OCEANIA),
+    CAIRO_MUSEUM_CITADEL(WayKind.WALK, city = "cairo", continent = Continent.AFRICA),
+    CAPE_TOWN_LIGHTHOUSE_BO_KAAP(WayKind.WALK, city = "cape_town", continent = Continent.AFRICA),
 }
 
 /** Where a way the reader started stands. Stored by name. */

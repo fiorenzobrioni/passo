@@ -18,7 +18,7 @@ are still written by tools/build_ways.py, never by hand.
         regexes); without, the path of the cached text, for reading it whole.
     python3 tools/city_walks.py wiki-find LANG "query" ...
         Wikipedia's article for a query, and the same article's title in en, es, fr, it, pt,
-        de, ja, zh and ko, so a place can be checked in a second language.
+        de, nl, ja, zh, ko and ar, so a place can be checked in a second language.
     python3 tools/city_walks.py splice WALK_ID ...
         Adds new walks to WayData.kt without rebuilding the others, then rewrites the place
         strings and the continents' maps (see below).
@@ -51,10 +51,11 @@ AGENT = {"User-Agent": "passo-build-ways (github.com/fiorenzobrioni/passo)"}
 BROUTER = "https://brouter.de/brouter?lonlats={}&profile=hiking-mountain&alternativeidx=0&format=geojson"
 NOMINATIM = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q={}"
 OSM_MAP = "https://api.openstreetmap.org/api/0.6/map?bbox={:.5f},{:.5f},{:.5f},{:.5f}"
-# Asia's cities are checked in their own language too (Japanese, Chinese, Korean).
-LANGUAGES = ("en", "es", "fr", "it", "pt", "de", "ja", "zh", "ko")
+# Asia's and Africa's cities are checked in their own language too (Japanese, Chinese, Korean,
+# Arabic; Dutch, for Cape Town's Afrikaans and Dutch past).
+LANGUAGES = ("en", "es", "fr", "it", "pt", "de", "nl", "ja", "zh", "ko", "ar")
 # Redirects as each Wikipedia writes them.
-REDIRECT = re.compile(r"\s*#(REDIRECT|WEITERLEITUNG|REDIRECIONAMENTO|RINVIA|REDIRECCIÓN|転送|重定向)\s*\[\[([^\]]+)\]\]", re.I)
+REDIRECT = re.compile(r"\s*#(REDIRECT|WEITERLEITUNG|REDIRECIONAMENTO|RINVIA|REDIRECCIÓN|DOORVERWIJZING|転送|重定向|تحويل)\s*\[\[([^\]]+)\]\]", re.I)
 
 
 def get(url, attempts=6, pause=8):

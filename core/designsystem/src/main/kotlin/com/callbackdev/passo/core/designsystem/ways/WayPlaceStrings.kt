@@ -43,6 +43,8 @@ fun wayNameRes(id: WayId): Int = when (id) {
     WayId.KYOTO_KIYOMIZU_NISHIKI -> R.string.way_name_kyoto_kiyomizu_nishiki
     WayId.HANOI_VAN_MIEU_LONG_BIEN -> R.string.way_name_hanoi_van_mieu_long_bien
     WayId.MELBOURNE_FLINDERS_EXHIBITION -> R.string.way_name_melbourne_flinders_exhibition
+    WayId.CAIRO_MUSEUM_CITADEL -> R.string.way_name_cairo_museum_citadel
+    WayId.CAPE_TOWN_LIGHTHOUSE_BO_KAAP -> R.string.way_name_cape_town_lighthouse_bo_kaap
 }
 
 /** Where a way runs, in one line. */
@@ -83,6 +85,8 @@ fun wayRouteRes(id: WayId): Int = when (id) {
     WayId.KYOTO_KIYOMIZU_NISHIKI -> R.string.way_route_kyoto_kiyomizu_nishiki
     WayId.HANOI_VAN_MIEU_LONG_BIEN -> R.string.way_route_hanoi_van_mieu_long_bien
     WayId.MELBOURNE_FLINDERS_EXHIBITION -> R.string.way_route_melbourne_flinders_exhibition
+    WayId.CAIRO_MUSEUM_CITADEL -> R.string.way_route_cairo_museum_citadel
+    WayId.CAPE_TOWN_LIGHTHOUSE_BO_KAAP -> R.string.way_route_cape_town_lighthouse_bo_kaap
 }
 
 /** A walk's outing, as History and Today name it; null for a way, which is not an outing. */
@@ -118,6 +122,8 @@ fun walkOutingRes(id: WayId): Int? = when (id) {
     WayId.KYOTO_KIYOMIZU_NISHIKI -> R.string.way_outing_kyoto_kiyomizu_nishiki
     WayId.HANOI_VAN_MIEU_LONG_BIEN -> R.string.way_outing_hanoi_van_mieu_long_bien
     WayId.MELBOURNE_FLINDERS_EXHIBITION -> R.string.way_outing_melbourne_flinders_exhibition
+    WayId.CAIRO_MUSEUM_CITADEL -> R.string.way_outing_cairo_museum_citadel
+    WayId.CAPE_TOWN_LIGHTHOUSE_BO_KAAP -> R.string.way_outing_cape_town_lighthouse_bo_kaap
     else -> null
 }
 
@@ -202,9 +208,39 @@ fun placeNameRes(key: String): Int = when (key) {
     "buenos_aires_recoleta" -> R.string.way_place_buenos_aires_recoleta
     "buenos_aires_tortoni" -> R.string.way_place_buenos_aires_tortoni
     "burgos" -> R.string.way_place_burgos
+    "cairo_abdeen" -> R.string.way_place_cairo_abdeen
+    "cairo_al_azhar" -> R.string.way_place_cairo_al_azhar
+    "cairo_al_ghuri" -> R.string.way_place_cairo_al_ghuri
+    "cairo_al_hakim" -> R.string.way_place_cairo_al_hakim
+    "cairo_aqmar" -> R.string.way_place_cairo_aqmar
+    "cairo_bab_al_nasr" -> R.string.way_place_cairo_bab_al_nasr
+    "cairo_bab_zuwayla" -> R.string.way_place_cairo_bab_zuwayla
+    "cairo_blue_mosque" -> R.string.way_place_cairo_blue_mosque
+    "cairo_egyptian_museum" -> R.string.way_place_cairo_egyptian_museum
+    "cairo_islamic_art" -> R.string.way_place_cairo_islamic_art
+    "cairo_khan_el_khalili" -> R.string.way_place_cairo_khan_el_khalili
+    "cairo_muhammad_ali" -> R.string.way_place_cairo_muhammad_ali
+    "cairo_qalawun" -> R.string.way_place_cairo_qalawun
+    "cairo_sultan_hasan" -> R.string.way_place_cairo_sultan_hasan
+    "cairo_talaat_harb" -> R.string.way_place_cairo_talaat_harb
     "caldas_de_reis" -> R.string.way_place_caldas_de_reis
     "camaiore" -> R.string.way_place_camaiore
     "campagnano" -> R.string.way_place_campagnano
+    "cape_town_auwal" -> R.string.way_place_cape_town_auwal
+    "cape_town_bo_kaap" -> R.string.way_place_cape_town_bo_kaap
+    "cape_town_castle" -> R.string.way_place_cape_town_castle
+    "cape_town_city_hall" -> R.string.way_place_cape_town_city_hall
+    "cape_town_company_garden" -> R.string.way_place_cape_town_company_garden
+    "cape_town_district_six" -> R.string.way_place_cape_town_district_six
+    "cape_town_foreshore" -> R.string.way_place_cape_town_foreshore
+    "cape_town_greenmarket" -> R.string.way_place_cape_town_greenmarket
+    "cape_town_lighthouse" -> R.string.way_place_cape_town_lighthouse
+    "cape_town_nobel_square" -> R.string.way_place_cape_town_nobel_square
+    "cape_town_slave_lodge" -> R.string.way_place_cape_town_slave_lodge
+    "cape_town_south_african_museum" -> R.string.way_place_cape_town_south_african_museum
+    "cape_town_st_georges" -> R.string.way_place_cape_town_st_georges
+    "cape_town_stadium" -> R.string.way_place_cape_town_stadium
+    "cape_town_waterfront" -> R.string.way_place_cape_town_waterfront
     "carrion" -> R.string.way_place_carrion
     "cartagena_bovedas" -> R.string.way_place_cartagena_bovedas
     "cartagena_cathedral" -> R.string.way_place_cartagena_cathedral
@@ -690,7 +726,37 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "buenos_aires_recoleta" -> R.string.way_note_buenos_aires_recoleta
     "buenos_aires_tortoni" -> R.string.way_note_buenos_aires_tortoni
     "burgos" -> R.string.way_note_burgos
+    "cairo_abdeen" -> R.string.way_note_cairo_abdeen
+    "cairo_al_azhar" -> R.string.way_note_cairo_al_azhar
+    "cairo_al_ghuri" -> R.string.way_note_cairo_al_ghuri
+    "cairo_al_hakim" -> R.string.way_note_cairo_al_hakim
+    "cairo_aqmar" -> R.string.way_note_cairo_aqmar
+    "cairo_bab_al_nasr" -> R.string.way_note_cairo_bab_al_nasr
+    "cairo_bab_zuwayla" -> R.string.way_note_cairo_bab_zuwayla
+    "cairo_blue_mosque" -> R.string.way_note_cairo_blue_mosque
+    "cairo_egyptian_museum" -> R.string.way_note_cairo_egyptian_museum
+    "cairo_islamic_art" -> R.string.way_note_cairo_islamic_art
+    "cairo_khan_el_khalili" -> R.string.way_note_cairo_khan_el_khalili
+    "cairo_muhammad_ali" -> R.string.way_note_cairo_muhammad_ali
+    "cairo_qalawun" -> R.string.way_note_cairo_qalawun
+    "cairo_sultan_hasan" -> R.string.way_note_cairo_sultan_hasan
+    "cairo_talaat_harb" -> R.string.way_note_cairo_talaat_harb
     "caldas_de_reis" -> R.string.way_note_caldas_de_reis
+    "cape_town_auwal" -> R.string.way_note_cape_town_auwal
+    "cape_town_bo_kaap" -> R.string.way_note_cape_town_bo_kaap
+    "cape_town_castle" -> R.string.way_note_cape_town_castle
+    "cape_town_city_hall" -> R.string.way_note_cape_town_city_hall
+    "cape_town_company_garden" -> R.string.way_note_cape_town_company_garden
+    "cape_town_district_six" -> R.string.way_note_cape_town_district_six
+    "cape_town_foreshore" -> R.string.way_note_cape_town_foreshore
+    "cape_town_greenmarket" -> R.string.way_note_cape_town_greenmarket
+    "cape_town_lighthouse" -> R.string.way_note_cape_town_lighthouse
+    "cape_town_nobel_square" -> R.string.way_note_cape_town_nobel_square
+    "cape_town_slave_lodge" -> R.string.way_note_cape_town_slave_lodge
+    "cape_town_south_african_museum" -> R.string.way_note_cape_town_south_african_museum
+    "cape_town_st_georges" -> R.string.way_note_cape_town_st_georges
+    "cape_town_stadium" -> R.string.way_note_cape_town_stadium
+    "cape_town_waterfront" -> R.string.way_note_cape_town_waterfront
     "cartagena_bovedas" -> R.string.way_note_cartagena_bovedas
     "cartagena_cathedral" -> R.string.way_note_cartagena_cathedral
     "cartagena_inquisicion" -> R.string.way_note_cartagena_inquisicion

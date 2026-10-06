@@ -19,7 +19,8 @@ Spanish, Tokyo in the English and Japanese (or Italian), Sydney in the English a
 Italian, French, Spanish), Seoul in the English and Korean, Beijing and Hong Kong in the English and Chinese,
 Singapore in the English and Chinese (or German, Italian), Bangkok in the English and German (or
 Italian), Kyoto in the English and Japanese, Hanoi in the English and French (or Italian), Melbourne in
-the English and German (or French).
+the English and German (or French), Cairo in the English and French (or Arabic, German, Italian), Cape
+Town in the English and German (or Dutch, French, Afrikaans).
 """
 
 from dataclasses import dataclass, field
@@ -2576,7 +2577,169 @@ MELBOURNE = Walk(
     ],
 )
 
-WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING, HONG_KONG, SINGAPORE, BANGKOK, KYOTO, HANOI, MELBOURNE]
+CAIRO = Walk(
+    id="CAIRO_MUSEUM_CITADEL",
+    city="cairo",
+    city_en="Cairo",
+    city_it="Il Cairo",
+    route_en="From the Egyptian Museum to the Citadel, by Al-Muizz Street and Al-Azhar",
+    route_it="Dal Museo Egizio alla Cittadella, passando per via al-Muizz e al-Azhar",
+    outing_en="A walk in Cairo",
+    outing_it="Passeggiata al Cairo",
+    country="EG",
+    continent="AFRICA",
+    # The medieval city's lanes are mapped as residential streets.
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=400,
+    # The Nile.
+    water=["relation/2063663"],
+    # Al-Azhar Park, the Ezbekiyya Garden.
+    parks=["way/24745061", "way/99842004"],
+    stops=[
+        Stop("cairo_egyptian_museum", "Egyptian Museum", "Museo Egizio", 30.0476, 31.2338,
+             note_en="Opened on Tahrir Square in 1902, the museum keeps in its garden the tomb of Auguste Mariette, its first curator.",
+             note_it="Aperto su piazza Tahrir nel 1902, il museo custodisce nel suo giardino la tomba di Auguste Mariette, il suo primo conservatore."),
+        # Source: Wikipedia, Egyptian Museum (Mariette's museum at Boulaq, 1858; his tomb moved to the garden in 1902); Wikipedia (fr), Musée égyptien du Caire (premier conservateur).
+        Stop("cairo_talaat_harb", "Talaat Harb Square", "Piazza Talaat Harb", 30.0476, 31.2385,
+             note_en="The statue in the middle of the square is of Talaat Harb, who founded Banque Misr in 1920.",
+             note_it="La statua al centro della piazza è di Talaat Harb, che nel 1920 fondò la Banque Misr."),
+        # Source: Wikipedia, Talaat Harb; Wikipedia (ar), ميدان طلعت حرب, and طلعت حرب. The square has an article in Arabic only: its old name (Suleiman Pasha) is not said.
+        Stop("cairo_abdeen", "Abdeen Palace", "Palazzo Abdeen", 30.0424, 31.2462,
+             note_en="Begun in 1863 and inaugurated in 1874 on land of Abdeen Bey, whose name it keeps, the palace replaced the Citadel as the seat of power.",
+             note_it="Iniziato nel 1863 e inaugurato nel 1874 su un terreno di Abdeen Bey, di cui porta il nome, il palazzo prese il posto della Cittadella come sede del potere."),
+        # Source: Wikipedia, Abdeen Palace; Wikipedia (fr), Palais d'Abedin.
+        Stop("cairo_islamic_art", "Museum of Islamic Art", "Museo d'arte islamica", 30.0448, 31.2527,
+             note_en="Its collection began in the ruined mosque of al-Hakim, further on; this neo-Mamluk building was finished in 1902.",
+             note_it="La sua collezione nacque nella moschea in rovina di al-Hakim, più avanti sul percorso; questo edificio neomamelucco fu finito nel 1902."),
+        # Source: Wikipedia, Museum of Islamic Art, Cairo; Wikipedia (de), Museum für Islamische Kunst (Kairo). The year it opened differs (1902 or 1903): not said.
+        Stop("cairo_qalawun", "Qalawun complex", "Complesso di Qalawun", 30.0495, 31.2610,
+             note_en="Sultan Qalawun's hospital, madrasa and mausoleum date from 1284 and 1285; the complex is said to have been built in just thirteen months.",
+             note_it="L'ospedale, la madrasa e il mausoleo del sultano Qalawun risalgono al 1284 e 1285; si dice che il complesso sia stato costruito in soli tredici mesi."),
+        # Source: Wikipedia, Qalawun complex ("reportedly"); Wikipedia (de), Grabkomplex des Qalawun ("soll").
+        Stop("cairo_aqmar", "Aqmar Mosque", "Moschea al-Aqmar", 30.0516, 31.2620,
+             note_en="Built in 1125 under the Fatimids, it was one of Cairo's first mosques whose façade follows the street, while its inside faces Mecca.",
+             note_it="Costruita nel 1125 sotto i Fatimidi, fu una delle prime moschee del Cairo con la facciata allineata alla strada, mentre l'interno è rivolto alla Mecca."),
+        # Source: Wikipedia, Aqmar Mosque (the first); Wikipedia (fr), Mosquée al-Aqmar (one of the first): the sentence says one of the first.
+        Stop("cairo_al_hakim", "Al-Hakim Mosque", "Moschea di al-Hakim", 30.0545, 31.2634,
+             note_en="Begun in 990 and finished in 1013 by the caliph al-Hakim, whose name it bears, the mosque was restored in 1980 by the Dawoodi Bohras.",
+             note_it="Iniziata nel 990 e finita nel 1013 dal califfo al-Hakim, di cui porta il nome, la moschea fu restaurata nel 1980 dai Dawoodi Bohra."),
+        # Source: Wikipedia, Al-Hakim Mosque; Wikipedia (fr), Mosquée Al-Hakim.
+        Stop("cairo_bab_al_nasr", "Bab al-Nasr", "Bab al-Nasr", 30.0542, 31.2650,
+             note_en="The Gate of Victory, built by the vizier Badr al-Jamali in 1087, has names of Napoleon's officers carved near its top.",
+             note_it="La Porta della Vittoria, costruita dal visir Badr al-Jamali nel 1087, porta incisi in alto i nomi di ufficiali di Napoleone."),
+        # Source: Wikipedia, Bab al-Nasr (Cairo); Wikipedia (fr), Bab al-Nasr (Le Caire).
+        Stop("cairo_khan_el_khalili", "Khan el-Khalili", "Khan el-Khalili", 30.0473, 31.2623,
+             note_en="The bazaar is named after a caravanserai built by the emir Jaharkas al-Khalili; Naguib Mahfouz set Midaq Alley here.",
+             note_it="Il bazar prende il nome da un caravanserraglio costruito dall'emiro Jaharkas al-Khalili; qui Nagib Mahfuz ambientò Vicolo del mortaio."),
+        # Source: Wikipedia, Khan el-Khalili; Wikipedia (it), Khan el-Khalili. The stop is on the bazaar's side of al-Hussein's square.
+        Stop("cairo_al_azhar", "Al-Azhar Mosque", "Moschea di al-Azhar", 30.0456, 31.2622,
+             note_en="Built by the Fatimid general Jawhar al-Siqilli when he founded Cairo, the mosque is the seat of Al-Azhar University.",
+             note_it="Costruita dal generale fatimide Jawhar al-Siqilli quando fondò il Cairo, la moschea è la sede dell'Università di al-Azhar."),
+        # Source: Wikipedia, Al-Azhar Mosque; Wikipedia (fr), Mosquée Al-Azhar. Which universities are older differs: not said.
+        Stop("cairo_al_ghuri", "Al-Ghuri complex", "Complesso di al-Ghuri", 30.0459, 31.2598,
+             note_en="Sultan al-Ghuri built his mosque and his mausoleum face to face across the street, but after the battle of Marj Dabiq, in 1516, his body was never found.",
+             note_it="Il sultano al-Ghuri costruì moschea e mausoleo uno di fronte all'altro sulla strada, ma dopo la battaglia di Marj Dabiq, nel 1516, il suo corpo non fu mai trovato."),
+        # Source: Wikipedia, Sultan al-Ghuri Complex; Wikipedia (ar), مجموعة السلطان الأشرف الغوري.
+        Stop("cairo_bab_zuwayla", "Bab Zuwayla", "Bab Zuwayla", 30.0428, 31.2579,
+             note_en="The southern gate of the Fatimid walls, built in 1092, bears on its towers the two minarets of the mosque of al-Mu'ayyad, added in the 15th century.",
+             note_it="Porta meridionale delle mura fatimide, costruita nel 1092, regge sulle sue torri i due minareti della moschea di al-Mu'ayyad, aggiunti nel Quattrocento."),
+        # Source: Wikipedia, Bab Zuwayla; Wikipedia (fr), Bab Zuweila.
+        Stop("cairo_blue_mosque", "Blue Mosque", "Moschea Blu", 30.0362, 31.2604,
+             note_en="Finished in 1347 for the emir Aqsunqur, it is called the Blue Mosque for the tiles a Janissary, Ibrahim Agha, added in the 17th century.",
+             note_it="Finita nel 1347 per l'emiro Aqsunqur, è detta Moschea Blu per le piastrelle che un giannizzero, Ibrahim Agha, vi aggiunse nel Seicento."),
+        # Source: Wikipedia, Aqsunqur Mosque; Wikipedia (de), Aqsunqur-Moschee. The years of the tiles differ (1652 to 1654, or to 1664): the century is said.
+        Stop("cairo_sultan_hasan", "Sultan Hasan Mosque", "Moschea del sultano Hasan", 30.0324, 31.2562,
+             note_en="Begun by Sultan Hasan in 1356, the madrasa taught the four schools of Sunni law, each, it is said, in one of the great iwans around its courtyard.",
+             note_it="Iniziata dal sultano Hasan nel 1356, la madrasa insegnava le quattro scuole del diritto sunnita, ciascuna, si dice, in uno dei grandi iwan intorno al cortile."),
+        # Source: Wikipedia, Mosque-Madrasa of Sultan Hasan ("said to have"); Wikipedia (fr), Mosquée du sultan Hassan.
+        Stop("cairo_muhammad_ali", "Muhammad Ali Mosque", "Moschea di Muhammad Ali", 30.0291, 31.2598,
+             note_en="In Saladin's Citadel, Muhammad Ali's mosque holds his tomb and a clock sent by the King of the French in return for the obelisk of Luxor, now in Paris.",
+             note_it="Nella Cittadella di Saladino, la moschea di Muhammad Ali custodisce la sua tomba e un orologio donato dal re dei Francesi in cambio dell'obelisco di Luxor, oggi a Parigi."),
+        # Source: Wikipedia, Muhammad Ali Mosque; Wikipedia (fr), Mosquée Mohammed Ali.
+    ],
+)
+
+CAPE_TOWN = Walk(
+    id="CAPE_TOWN_LIGHTHOUSE_BO_KAAP",
+    city="cape_town",
+    city_en="Cape Town",
+    city_it="Città del Capo",
+    route_en="From the Green Point Lighthouse to Bo-Kaap, by the Waterfront, the Castle and the Company's Garden",
+    route_it="Dal faro di Green Point al Bo-Kaap, passando per il Waterfront, il Castello e i Company's Garden",
+    outing_en="A walk in Cape Town",
+    outing_it="Passeggiata a Città del Capo",
+    country="ZA",
+    continent="AFRICA",
+    # Table Bay, from the coastline; the Waterfront's basins.
+    coast=True,
+    water=["relation/15602639", "relation/15602640", "relation/15602641"],
+    # Green Point Park and its gardens, the Company's Garden.
+    parks=["way/44948367", "relation/9636593", "relation/9636594", "way/8035472"],
+    stops=[
+        Stop("cape_town_lighthouse", "Green Point Lighthouse", "Faro di Green Point", -33.9014, 18.3999,
+             note_en="First lit in 1824, South Africa's oldest lighthouse has had a foghorn since 1926.",
+             note_it="Acceso per la prima volta nel 1824, il faro più antico del Sudafrica ha una sirena da nebbia dal 1926."),
+        # Source: Wikipedia, Green Point Lighthouse, Cape Town; Wikipedia (af), Groenpunt-vuurtoring. Its cost differs: not said.
+        Stop("cape_town_stadium", "Cape Town Stadium", "Stadio di Città del Capo", -33.9045, 18.4105,
+             note_en="Built for the 2010 football World Cup, the stadium hosted one of its quarter-finals and a semi-final.",
+             note_it="Costruito per i Mondiali di calcio del 2010, lo stadio ne ospitò un quarto di finale e una semifinale."),
+        # Source: Wikipedia, Cape Town Stadium; Wikipedia (de), Kapstadt-Stadion. Its seats differ: not said.
+        Stop("cape_town_waterfront", "V&A Waterfront", "V&A Waterfront", -33.9065, 18.4222,
+             note_en="Its two basins are named after Queen Victoria and her son Prince Alfred, who began the harbour's breakwater in 1860.",
+             note_it="I suoi due bacini portano il nome della regina Vittoria e di suo figlio, il principe Alfredo, che nel 1860 diede inizio al frangiflutti del porto."),
+        # Source: Wikipedia, V&A Waterfront; Wikipedia (de), Victoria & Alfred Waterfront. The stop is the Clock Tower.
+        Stop("cape_town_nobel_square", "Nobel Square", "Nobel Square", -33.9055, 18.4195,
+             note_en="Its four statues are South Africa's Nobel Peace Prize winners, Albert Luthuli, Desmond Tutu, F. W. de Klerk and Nelson Mandela, with Table Mountain behind them.",
+             note_it="Le sue quattro statue sono i premi Nobel per la pace del Sudafrica, Albert Luthuli, Desmond Tutu, F. W. de Klerk e Nelson Mandela, con alle spalle la Montagna della Tavola."),
+        # Source: Wikipedia, Nobel Square; Wikipedia (de), Nobel Square.
+        Stop("cape_town_foreshore", "Foreshore", "Foreshore", -33.9174, 18.4232,
+             note_en="This district was built on land won from Table Bay in the 1930s and 1940s: the Castle, ahead, once stood on the shore.",
+             note_it="Questo quartiere sorge su terra strappata alla baia della Tavola negli anni Trenta e Quaranta: il Castello, più avanti, un tempo era sulla riva."),
+        # Source: Wikipedia, Foreshore, Cape Town, and Castle of Good Hope (on the coastline before the reclamation); Wikipedia (fr), Foreshore; Wikipedia (nl), Kasteel de Goede Hoop (its first gate faced the sea).
+        Stop("cape_town_castle", "Castle of Good Hope", "Castello di Buona Speranza", -33.9259, 18.4267,
+             note_en="Its first stone laid in 1666, the Dutch East India Company's fort has five bastions named after the titles of the Prince of Orange.",
+             note_it="Posata la prima pietra nel 1666, il forte della Compagnia olandese delle Indie orientali ha cinque bastioni che portano i titoli del principe d'Orange."),
+        # Source: Wikipedia, Castle of Good Hope; Wikipedia (nl), Kasteel de Goede Hoop. Whether it is the oldest building differs: not said.
+        Stop("cape_town_city_hall", "City Hall", "Municipio", -33.9254, 18.4237,
+             note_en="Hours after his release, on 11 February 1990, Nelson Mandela made his first public speech from this balcony; a statue of him has stood there since 2018.",
+             note_it="Poche ore dopo la sua liberazione, l'11 febbraio 1990, Nelson Mandela tenne da questo balcone il suo primo discorso pubblico; dal 2018 vi sorge una sua statua."),
+        # Source: Wikipedia, Cape Town City Hall; Wikipedia (de), Cape Town City Hall.
+        Stop("cape_town_district_six", "District Six Museum", "Museo di District Six", -33.9278, 18.4238,
+             note_en="Opened in 1994, the museum remembers the 60,000 people forced to leave District Six under apartheid, in the 1970s.",
+             note_it="Aperto nel 1994, il museo ricorda le 60.000 persone costrette a lasciare District Six sotto l'apartheid, negli anni Settanta."),
+        # Source: Wikipedia, District Six Museum; Wikipedia (nl), District Six Museum.
+        Stop("cape_town_south_african_museum", "South African Museum", "South African Museum", -33.9289, 18.4149,
+             note_en="Founded in 1825, the museum has stood in the Company's Garden since 1897; among its collections are whale skeletons.",
+             note_it="Fondato nel 1825, il museo è nei Company's Garden dal 1897; tra le sue collezioni ci sono scheletri di balena."),
+        # Source: Wikipedia, Iziko South African Museum; Wikipedia (de), Iziko South African Museum.
+        Stop("cape_town_company_garden", "Company's Garden", "Company's Garden", -33.9268, 18.4178,
+             note_en="Laid out by the first European settlers to grow fresh food for ships rounding the Cape, the garden keeps South Africa's oldest cultivated pear tree, from about 1652.",
+             note_it="Creato dai primi coloni europei per coltivare cibo fresco per le navi che doppiavano il Capo, il giardino conserva il più antico pero coltivato del Sudafrica, del 1652 circa."),
+        # Source: Wikipedia, Company's Garden; Wikipedia (nl), Company's Garden. When it was laid out differs (the 1650s, or 1650): not said.
+        Stop("cape_town_st_georges", "St George's Cathedral", "Cattedrale di San Giorgio", -33.9249, 18.4194,
+             note_en="Begun in 1901 to Herbert Baker's design, the cathedral holds the remains of Archbishop Desmond Tutu, before its high altar.",
+             note_it="Iniziata nel 1901 su progetto di Herbert Baker, la cattedrale custodisce davanti all'altare maggiore i resti dell'arcivescovo Desmond Tutu."),
+        # Source: Wikipedia, St. George's Cathedral, Cape Town; Wikipedia (de), St George’s Cathedral (Kapstadt).
+        Stop("cape_town_slave_lodge", "Slave Lodge", "Slave Lodge", -33.9252, 18.4208,
+             note_en="Built by the Dutch East India Company in 1679 to house the people it enslaved, the lodge served as such until 1811.",
+             note_it="Costruita nel 1679 dalla Compagnia olandese delle Indie orientali per alloggiare le persone che teneva in schiavitù, la Lodge servì a questo fino al 1811."),
+        # Source: Wikipedia, Slave Lodge, Cape Town; Wikipedia (de), Iziko Slave Lodge.
+        Stop("cape_town_greenmarket", "Greenmarket Square", "Greenmarket Square", -33.9227, 18.4201,
+             note_en="Laid out in 1696, the square was a slave market and a vegetable market; the front of its Old Town House is held to be the city's historic centre.",
+             note_it="Sorta nel 1696, la piazza fu mercato degli schiavi e mercato della verdura; lo spazio davanti all'Old Town House è considerato il centro storico della città."),
+        # Source: Wikipedia, Greenmarket Square; Wikipedia (fr), Place du Marché Vert.
+        Stop("cape_town_auwal", "Auwal Mosque", "Moschea Auwal", -33.9223, 18.4150,
+             note_en="Held to be South Africa's oldest mosque, from 1794, it had as its first imam Tuan Guru, who had written out the Qur'an from memory in prison.",
+             note_it="Considerata la più antica moschea del Sudafrica, del 1794, ebbe come primo imam Tuan Guru, che in prigione aveva trascritto il Corano a memoria."),
+        # Source: Wikipedia, Auwal Mosque (the first); Wikipedia (de), Auwal-Moschee ("gilt als" the oldest).
+        Stop("cape_town_bo_kaap", "Bo-Kaap", "Bo-Kaap", -33.9205, 18.4128,
+             note_en="Bo-Kaap, Afrikaans for above the Cape, is the old Malay Quarter on the slopes of Signal Hill, known for its brightly painted houses.",
+             note_it="Il Bo-Kaap, in afrikaans «sopra il Capo», è l'antico Quartiere malese sulle pendici del Signal Hill, noto per le sue case dai colori vivaci."),
+        # Source: Wikipedia, Bo-Kaap; Wikipedia (de), Bo-Kaap.
+    ],
+)
+
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING, HONG_KONG, SINGAPORE, BANGKOK, KYOTO, HANOI, MELBOURNE, CAIRO, CAPE_TOWN]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
@@ -2605,6 +2768,8 @@ LOCATORS = {
     "SG": (1.16, 103.6, 1.48, 104.1),
     "TH": (5.6, 97.3, 20.5, 105.7),
     "VN": (8.4, 102.1, 23.4, 109.5),
+    "EG": (21.7, 24.7, 31.7, 36.9),
+    "ZA": (-34.9, 16.4, -22.1, 32.9),
 }
 
 # The continents the Ways page groups the cities by, in its order (the Kotlin enum Continent has
@@ -2619,4 +2784,6 @@ CONTINENTS = {
     # From Mumbai and Delhi to Japan, and down to Tasmania and New Zealand: the cities a walk is
     # likely to visit, not the Middle East (Istanbul is Europe's).
     "ASIA_OCEANIA": (-47.5, 66.0, 46.0, 179.0),
+    # The whole continent, from Dakar to the Horn of Africa and from Tunis to the Cape.
+    "AFRICA": (-35.5, -18.5, 38.0, 52.0),
 }

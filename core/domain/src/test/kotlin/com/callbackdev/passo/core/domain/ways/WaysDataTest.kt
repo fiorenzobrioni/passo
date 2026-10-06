@@ -55,6 +55,8 @@ class WaysDataTest {
                 WayId.KYOTO_KIYOMIZU_NISHIKI,
                 WayId.HANOI_VAN_MIEU_LONG_BIEN,
                 WayId.MELBOURNE_FLINDERS_EXHIBITION,
+                WayId.CAIRO_MUSEUM_CITADEL,
+                WayId.CAPE_TOWN_LIGHTHOUSE_BO_KAAP,
             )
             .inOrder()
         // One walk a city for now (PLANNING.md §11 Phase 11, later).
@@ -63,7 +65,7 @@ class WaysDataTest {
                 "milan", "rome", "paris", "london", "madrid", "berlin", "vienna", "porto", "amsterdam", "prague",
                 "lima", "cusco", "new_york", "rio", "mexico_city", "buenos_aires", "san_francisco", "quebec",
                 "havana", "cartagena", "tokyo", "sydney", "seoul", "beijing", "hong_kong", "singapore", "bangkok",
-                "kyoto", "hanoi", "melbourne",
+                "kyoto", "hanoi", "melbourne", "cairo", "cape_town",
             )
             .inOrder()
     }
@@ -191,6 +193,9 @@ class WaysDataTest {
                 "melbourne",
             )
             .inOrder()
+        assertThat(Ways.walksIn(Continent.AFRICA).map { it.id.city })
+            .containsExactly("cairo", "cape_town")
+            .inOrder()
     }
 
     @Test
@@ -225,6 +230,7 @@ class WaysDataTest {
                 WayId.HAVANA_CAPITOLIO_PAULA,
                 WayId.CARTAGENA_RELOJ_SAN_FELIPE,
                 WayId.HONG_KONG_VICTORIA_WESTERN,
+                WayId.CAPE_TOWN_LIGHTHOUSE_BO_KAAP,
             )
         for (id in coastal) {
             val map = Ways.of(id).map

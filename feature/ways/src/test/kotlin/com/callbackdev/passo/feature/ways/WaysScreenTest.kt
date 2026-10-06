@@ -239,6 +239,8 @@ class WaysScreenTest {
         compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).assert(hasText("10 cities", substring = true))
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.continent(Continent.ASIA_OCEANIA)))
         compose.onNodeWithTag(WaysTags.continent(Continent.ASIA_OCEANIA)).assert(hasText("10 cities", substring = true))
+        compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.continent(Continent.AFRICA)))
+        compose.onNodeWithTag(WaysTags.continent(Continent.AFRICA)).assert(hasText("2 cities", substring = true))
         compose.onNodeWithTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)).assertDoesNotExist()
         snapshot("ways_cities")
         compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).performClick()
@@ -305,6 +307,10 @@ class WaysScreenTest {
                 WayId.HANOI_VAN_MIEU_LONG_BIEN,
                 WayId.MELBOURNE_FLINDERS_EXHIBITION,
             ),
+            Continent.AFRICA to listOf(
+                WayId.CAIRO_MUSEUM_CITADEL,
+                WayId.CAPE_TOWN_LIGHTHOUSE_BO_KAAP,
+            ),
         )
         assertThat(byContinent.keys).containsExactlyElementsIn(Continent.entries)
         var continent by mutableStateOf(Continent.EUROPE)
@@ -326,6 +332,9 @@ class WaysScreenTest {
                 compose.onNodeWithTag(WaysTags.way(other)).assertDoesNotExist()
             }
         }
+        snapshot("continent_africa_cities")
+        continent = Continent.ASIA_OCEANIA
+        compose.waitForIdle()
         snapshot("continent_asia_oceania_cities")
         continent = Continent.AMERICAS
         compose.waitForIdle()
@@ -349,6 +358,13 @@ class WaysScreenTest {
         showContinent(Continent.ASIA_OCEANIA)
         compose.onNodeWithContentDescription("Asia and Oceania on the map: 10 cities.").assertIsDisplayed()
         snapshot("continent_asia_oceania")
+    }
+
+    @Test
+    fun `Africa's map, from Cairo to Cape Town`() {
+        showContinent(Continent.AFRICA)
+        compose.onNodeWithContentDescription("Africa on the map: 2 cities.").assertIsDisplayed()
+        snapshot("continent_africa")
     }
 
     @Test
@@ -632,6 +648,27 @@ class WaysScreenTest {
         )
         compose.onNodeWithText("From Flinders Street to the Royal Exhibition Building", substring = true).assertExists()
         snapshot("walk_melbourne_dark")
+    }
+
+    @Test
+    fun `Cairo's walk, from the Egyptian Museum by Al-Muizz Street to the Citadel`() {
+        showWay(WayId.CAIRO_MUSEUM_CITADEL, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("From the Egyptian Museum to the Citadel", substring = true).assertExists()
+        snapshot("walk_cairo")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Bab al-Nasr"))
+        compose.onNodeWithText("names of Napoleon", substring = true).assertExists()
+        snapshot("walk_cairo_places")
+    }
+
+    @Test
+    fun `Cape Town's walk, from the Green Point Lighthouse to Bo-Kaap, in the dark`() {
+        showWay(
+            WayId.CAPE_TOWN_LIGHTHOUSE_BO_KAAP,
+            state = WaysSamples.state(walks = emptyList(), live = null),
+            dark = true,
+        )
+        compose.onNodeWithText("From the Green Point Lighthouse to Bo-Kaap", substring = true).assertExists()
+        snapshot("walk_cape_town_dark")
     }
 
     @Test
