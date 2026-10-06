@@ -35,6 +35,8 @@ fun wayNameRes(id: WayId): Int = when (id) {
     WayId.CARTAGENA_RELOJ_SAN_FELIPE -> R.string.way_name_cartagena_reloj_san_felipe
     WayId.TOKYO_SENSOJI_PALACE -> R.string.way_name_tokyo_sensoji_palace
     WayId.SYDNEY_LUNA_PARK_GARDEN -> R.string.way_name_sydney_luna_park_garden
+    WayId.SEOUL_GWANGHWAMUN_NAMSAN -> R.string.way_name_seoul_gwanghwamun_namsan
+    WayId.BEIJING_TIANANMEN_NANLUOGUXIANG -> R.string.way_name_beijing_tiananmen_nanluoguxiang
 }
 
 /** Where a way runs, in one line. */
@@ -67,6 +69,8 @@ fun wayRouteRes(id: WayId): Int = when (id) {
     WayId.CARTAGENA_RELOJ_SAN_FELIPE -> R.string.way_route_cartagena_reloj_san_felipe
     WayId.TOKYO_SENSOJI_PALACE -> R.string.way_route_tokyo_sensoji_palace
     WayId.SYDNEY_LUNA_PARK_GARDEN -> R.string.way_route_sydney_luna_park_garden
+    WayId.SEOUL_GWANGHWAMUN_NAMSAN -> R.string.way_route_seoul_gwanghwamun_namsan
+    WayId.BEIJING_TIANANMEN_NANLUOGUXIANG -> R.string.way_route_beijing_tiananmen_nanluoguxiang
 }
 
 /** A walk's outing, as History and Today name it; null for a way, which is not an outing. */
@@ -94,6 +98,8 @@ fun walkOutingRes(id: WayId): Int? = when (id) {
     WayId.CARTAGENA_RELOJ_SAN_FELIPE -> R.string.way_outing_cartagena_reloj_san_felipe
     WayId.TOKYO_SENSOJI_PALACE -> R.string.way_outing_tokyo_sensoji_palace
     WayId.SYDNEY_LUNA_PARK_GARDEN -> R.string.way_outing_sydney_luna_park_garden
+    WayId.SEOUL_GWANGHWAMUN_NAMSAN -> R.string.way_outing_seoul_gwanghwamun_namsan
+    WayId.BEIJING_TIANANMEN_NANLUOGUXIANG -> R.string.way_outing_beijing_tiananmen_nanluoguxiang
     else -> null
 }
 
@@ -119,6 +125,18 @@ fun placeNameRes(key: String): Int = when (key) {
     "aulla" -> R.string.way_place_aulla
     "badolo" -> R.string.way_place_badolo
     "barcelos" -> R.string.way_place_barcelos
+    "beijing_bell_tower" -> R.string.way_place_beijing_bell_tower
+    "beijing_corner_tower" -> R.string.way_place_beijing_corner_tower
+    "beijing_drum_tower" -> R.string.way_place_beijing_drum_tower
+    "beijing_forbidden_city" -> R.string.way_place_beijing_forbidden_city
+    "beijing_jingshan" -> R.string.way_place_beijing_jingshan
+    "beijing_nanluoguxiang" -> R.string.way_place_beijing_nanluoguxiang
+    "beijing_nine_dragon_wall" -> R.string.way_place_beijing_nine_dragon_wall
+    "beijing_prince_gong" -> R.string.way_place_beijing_prince_gong
+    "beijing_shichahai" -> R.string.way_place_beijing_shichahai
+    "beijing_tiananmen" -> R.string.way_place_beijing_tiananmen
+    "beijing_tiananmen_square" -> R.string.way_place_beijing_tiananmen_square
+    "beijing_white_dagoba" -> R.string.way_place_beijing_white_dagoba
     "belorado" -> R.string.way_place_belorado
     "berceto" -> R.string.way_place_berceto
     "berlin_bebelplatz" -> R.string.way_place_berlin_bebelplatz
@@ -425,6 +443,18 @@ fun placeNameRes(key: String): Int = when (key) {
     "santo_domingo" -> R.string.way_place_santo_domingo
     "sarria" -> R.string.way_place_sarria
     "sarzana" -> R.string.way_place_sarzana
+    "seoul_bukchon" -> R.string.way_place_seoul_bukchon
+    "seoul_changdeokgung" -> R.string.way_place_seoul_changdeokgung
+    "seoul_cheonggyecheon" -> R.string.way_place_seoul_cheonggyecheon
+    "seoul_deoksugung" -> R.string.way_place_seoul_deoksugung
+    "seoul_gwanghwamun" -> R.string.way_place_seoul_gwanghwamun
+    "seoul_gwanghwamun_square" -> R.string.way_place_seoul_gwanghwamun_square
+    "seoul_insadong" -> R.string.way_place_seoul_insadong
+    "seoul_jogyesa" -> R.string.way_place_seoul_jogyesa
+    "seoul_jongmyo" -> R.string.way_place_seoul_jongmyo
+    "seoul_n_tower" -> R.string.way_place_seoul_n_tower
+    "seoul_namdaemun_market" -> R.string.way_place_seoul_namdaemun_market
+    "seoul_sungnyemun" -> R.string.way_place_seoul_sungnyemun
     "sf_chinatown" -> R.string.way_place_sf_chinatown
     "sf_city_lights" -> R.string.way_place_sf_city_lights
     "sf_coit_tower" -> R.string.way_place_sf_coit_tower
@@ -515,6 +545,18 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "assisi" -> R.string.way_note_assisi
     "astorga" -> R.string.way_note_astorga
     "barcelos" -> R.string.way_note_barcelos
+    "beijing_bell_tower" -> R.string.way_note_beijing_bell_tower
+    "beijing_corner_tower" -> R.string.way_note_beijing_corner_tower
+    "beijing_drum_tower" -> R.string.way_note_beijing_drum_tower
+    "beijing_forbidden_city" -> R.string.way_note_beijing_forbidden_city
+    "beijing_jingshan" -> R.string.way_note_beijing_jingshan
+    "beijing_nanluoguxiang" -> R.string.way_note_beijing_nanluoguxiang
+    "beijing_nine_dragon_wall" -> R.string.way_note_beijing_nine_dragon_wall
+    "beijing_prince_gong" -> R.string.way_note_beijing_prince_gong
+    "beijing_shichahai" -> R.string.way_note_beijing_shichahai
+    "beijing_tiananmen" -> R.string.way_note_beijing_tiananmen
+    "beijing_tiananmen_square" -> R.string.way_note_beijing_tiananmen_square
+    "beijing_white_dagoba" -> R.string.way_note_beijing_white_dagoba
     "berlin_bebelplatz" -> R.string.way_note_berlin_bebelplatz
     "berlin_brandenburg_gate" -> R.string.way_note_berlin_brandenburg_gate
     "berlin_cathedral" -> R.string.way_note_berlin_cathedral
@@ -763,6 +805,18 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "sansepolcro" -> R.string.way_note_sansepolcro
     "santiago" -> R.string.way_note_santiago
     "sarria" -> R.string.way_note_sarria
+    "seoul_bukchon" -> R.string.way_note_seoul_bukchon
+    "seoul_changdeokgung" -> R.string.way_note_seoul_changdeokgung
+    "seoul_cheonggyecheon" -> R.string.way_note_seoul_cheonggyecheon
+    "seoul_deoksugung" -> R.string.way_note_seoul_deoksugung
+    "seoul_gwanghwamun" -> R.string.way_note_seoul_gwanghwamun
+    "seoul_gwanghwamun_square" -> R.string.way_note_seoul_gwanghwamun_square
+    "seoul_insadong" -> R.string.way_note_seoul_insadong
+    "seoul_jogyesa" -> R.string.way_note_seoul_jogyesa
+    "seoul_jongmyo" -> R.string.way_note_seoul_jongmyo
+    "seoul_n_tower" -> R.string.way_note_seoul_n_tower
+    "seoul_namdaemun_market" -> R.string.way_note_seoul_namdaemun_market
+    "seoul_sungnyemun" -> R.string.way_note_seoul_sungnyemun
     "sf_chinatown" -> R.string.way_note_sf_chinatown
     "sf_city_lights" -> R.string.way_note_sf_city_lights
     "sf_coit_tower" -> R.string.way_note_sf_coit_tower

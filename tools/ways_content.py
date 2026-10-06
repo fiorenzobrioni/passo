@@ -16,7 +16,7 @@ New York in the English and Italian (or German), Rio in the English and Portugue
 and Buenos Aires in the English and Spanish, San Francisco in the English and Italian (or
 Spanish, German), Québec in the English and French, Havana and Cartagena in the English and
 Spanish, Tokyo in the English and Japanese (or Italian), Sydney in the English and German (or
-Italian, French, Spanish).
+Italian, French, Spanish), Seoul in the English and Korean, Beijing in the English and Chinese.
 """
 
 from dataclasses import dataclass, field
@@ -2003,7 +2003,151 @@ SYDNEY = Walk(
     ],
 )
 
-WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY]
+SEOUL = Walk(
+    id="SEOUL_GWANGHWAMUN_NAMSAN",
+    city="seoul",
+    city_en="Seoul",
+    city_it="Seul",
+    route_en="From Gwanghwamun Square to N Seoul Tower, by the palaces and the Cheonggyecheon",
+    route_it="Da piazza Gwanghwamun alla N Seoul Tower, passando per i palazzi e il Cheonggyecheon",
+    outing_en="A walk in Seoul",
+    outing_it="Passeggiata a Seul",
+    country="KR",
+    continent="ASIA_OCEANIA",
+    # The palaces' ponds. The Cheonggyecheon is a narrow stream: drawn as a line, as wide as it is.
+    water=["relation/4005465", "relation/13407146", "relation/15457595", "relation/5672591"],
+    canals=["way/368276771", "way/769631455"],
+    # Namsan's woods, Jongmyo's, Changdeokgung's Secret Garden, Gyeongbokgung's lawns, the hills behind.
+    parks=[
+        "way/244397333", "relation/5688761", "relation/10799909", "relation/10966163", "relation/6638151",
+        "relation/10351443", "way/624285855", "relation/10804175", "way/370019676",
+    ],
+    stops=[
+        Stop("seoul_gwanghwamun_square", "Gwanghwamun Square", "Piazza Gwanghwamun", 37.5711, 126.9769,
+             note_en="Opened in 2009 in front of Gyeongbokgung, the square holds the statues of King Sejong and Admiral Yi Sun-sin.",
+             note_it="Aperta nel 2009 davanti al Gyeongbokgung, la piazza ospita le statue del re Sejong e dell'ammiraglio Yi Sun-sin."),
+        # Source: Wikipedia, Gwanghwamun Square; Wikipedia (ko), 광화문광장.
+        Stop("seoul_gwanghwamun", "Gwanghwamun", "Gwanghwamun", 37.5753, 126.9769,
+             note_en="Gyeongbokgung's great gate was moved under Japanese rule, burned in the Korean War, and stood again in its place in 2010.",
+             note_it="La grande porta del Gyeongbokgung fu spostata sotto il dominio giapponese, bruciò nella guerra di Corea e nel 2010 tornò al suo posto."),
+        # Source: Wikipedia, Gwanghwamun; Wikipedia (ko), 광화문.
+        Stop("seoul_bukchon", "Bukchon Hanok Village", "Bukchon Hanok Village", 37.5826, 126.985,
+             note_en="Bukchon means north village, north of the Cheonggyecheon; its lanes keep many hanok, traditional Korean houses.",
+             note_it="Bukchon vuol dire villaggio del nord, a nord del Cheonggyecheon; i suoi vicoli conservano molti hanok, le case tradizionali coreane."),
+        # Source: Wikipedia, Bukchon Hanok Village; Wikipedia (ko), 북촌 한옥마을.
+        Stop("seoul_changdeokgung", "Changdeokgung", "Changdeokgung", 37.5794, 126.991,
+             note_en="Built in 1405, after Gyeongbokgung, this palace was for centuries the kings' main seat, and is a World Heritage Site.",
+             note_it="Costruito nel 1405, dopo il Gyeongbokgung, questo palazzo fu per secoli la sede principale dei re ed è patrimonio dell'umanità."),
+        # Source: Wikipedia, Changdeokgung; Wikipedia (ko), 창덕궁.
+        Stop("seoul_jongmyo", "Jongmyo", "Jongmyo", 37.5716, 126.9941,
+             note_en="The spirit tablets of Joseon's kings and queens are kept in this shrine, a World Heritage Site since 1995.",
+             note_it="In questo santuario sono custodite le tavolette spirituali dei re e delle regine di Joseon; è patrimonio dell'umanità dal 1995."),
+        # Source: Wikipedia, Jongmyo; Wikipedia (ko), 종묘.
+        Stop("seoul_insadong", "Insa-dong", "Insa-dong", 37.574, 126.9852,
+             note_en="Insa-dong's antique trade began under Japanese rule; galleries came later, and fill its alleys today.",
+             note_it="Il commercio di antichità di Insa-dong cominciò sotto il dominio giapponese; poi arrivarono le gallerie, che oggi riempiono i suoi vicoli."),
+        # Source: Wikipedia, Insa-dong; Wikipedia (ko), 인사동.
+        Stop("seoul_jogyesa", "Jogyesa", "Jogyesa", 37.5737, 126.9818,
+             note_en="Founded in 1910 and named Jogyesa in 1954, the temple keeps in its courtyard a white pine protected as a natural monument.",
+             note_it="Fondato nel 1910 e chiamato Jogyesa dal 1954, il tempio custodisce nel cortile un pino bianco protetto come monumento naturale."),
+        # Source: Wikipedia, Jogyesa; Wikipedia (ko), 조계사.
+        Stop("seoul_cheonggyecheon", "Cheonggyecheon", "Cheonggyecheon", 37.569, 126.9813,
+             note_en="Covered last century by concrete and an elevated road, the stream was brought back to light in 2005.",
+             note_it="Coperto nel secolo scorso dal cemento e da una strada sopraelevata, il torrente tornò alla luce nel 2005."),
+        # Source: Wikipedia, Cheonggyecheon; Wikipedia (ko), 청계천.
+        Stop("seoul_deoksugung", "Deoksugung", "Deoksugung", 37.5658, 126.9768,
+             note_en="The main palace of the Korean Empire, proclaimed by Gojong in 1897, it mixes Korean halls with Western buildings.",
+             note_it="Palazzo principale dell'Impero coreano, proclamato da Gojong nel 1897, unisce padiglioni coreani ed edifici occidentali."),
+        # Source: Wikipedia, Deoksugung; Wikipedia (ko), 덕수궁.
+        Stop("seoul_sungnyemun", "Sungnyemun", "Sungnyemun", 37.5603, 126.9754,
+             note_en="The old south gate of Seoul's walls burned in an arson attack in 2008, and was restored by 2013.",
+             note_it="L'antica porta sud delle mura di Seul bruciò in un incendio doloso nel 2008 e fu restaurata entro il 2013."),
+        # Source: Wikipedia, Namdaemun; Wikipedia (ko), 숭례문. The year it was built differs (1396 or 1398): not said.
+        Stop("seoul_namdaemun_market", "Namdaemun Market", "Mercato di Namdaemun", 37.5592, 126.9776,
+             note_en="In 1414 the court built shops here by the south gate: the beginning of today's market.",
+             note_it="Nel 1414 la corte costruì qui botteghe presso la porta sud: è l'inizio del mercato di oggi."),
+        # Source: Wikipedia, Namdaemun Market; Wikipedia (ko), 남대문시장.
+        Stop("seoul_n_tower", "N Seoul Tower", "N Seoul Tower", 37.5513, 126.9882,
+             note_en="Finished in 1975 on Namsan, the 236-metre tower sends out the broadcasters' signals over Seoul.",
+             note_it="Finita nel 1975 sul Namsan, la torre alta 236 metri trasmette i segnali delle emittenti su Seul."),
+        # Source: Wikipedia, Namsan Seoul Tower; Wikipedia (ko), YTN서울타워.
+    ],
+)
+
+BEIJING = Walk(
+    id="BEIJING_TIANANMEN_NANLUOGUXIANG",
+    city="beijing",
+    city_en="Beijing",
+    city_it="Pechino",
+    route_en="From Tiananmen Square to Nanluoguxiang, by the Forbidden City, Beihai and the Drum Tower",
+    route_it="Da piazza Tienanmen a Nanluoguxiang, passando per la Città Proibita, Beihai e la Torre del Tamburo",
+    outing_en="A walk in Beijing",
+    outing_it="Passeggiata a Pechino",
+    country="CN",
+    continent="ASIA_OCEANIA",
+    # The Forbidden City's moat; Beihai, Zhonghai and Nanhai; Shichahai's lakes.
+    water=[
+        "way/4845030", "relation/5451458", "relation/68127", "relation/3531212", "relation/11518929",
+        "relation/409777",
+    ],
+    # Jingshan, Beihai, Zhongshan Park, the parks along the Imperial City's old wall, Prince Gong's garden.
+    parks=[
+        "way/29201967", "way/366464114", "relation/18320943", "relation/9054321", "way/30843688",
+        "relation/9509823", "way/268548508",
+    ],
+    stops=[
+        Stop("beijing_tiananmen_square", "Tiananmen Square", "Piazza Tienanmen", 39.9032, 116.3918,
+             note_en="The square lies where the Ming and the Qing had their Corridor of a Thousand Steps; it was widened in the 1950s.",
+             note_it="La piazza sorge dove i Ming e i Qing avevano il Corridoio dei mille passi; fu allargata negli anni Cinquanta."),
+        # Source: Wikipedia, Tiananmen Square; Wikipedia (zh), 天安门广场.
+        Stop("beijing_tiananmen", "Tiananmen", "Tienanmen", 39.9073, 116.3913,
+             note_en="Called Chengtianmen under the Ming, this gate of the Imperial City now appears on China's national emblem.",
+             note_it="Sotto i Ming si chiamava Chengtianmen; questa porta della Città imperiale compare oggi sull'emblema nazionale cinese."),
+        # Source: Wikipedia, Tiananmen; Wikipedia (zh), 天安门. The year it was built differs (1417 or 1420): not said.
+        Stop("beijing_forbidden_city", "Forbidden City", "Città Proibita", 39.9139, 116.3962,
+             note_en="Finished in 1420, the emperors' palace became a museum after the last emperor, Puyi, left it in 1924.",
+             note_it="Finita nel 1420, la reggia degli imperatori divenne un museo dopo che l'ultimo imperatore, Puyi, la lasciò nel 1924."),
+        # Source: Wikipedia, Forbidden City; Wikipedia (zh), 故宫. The stop is the East Gate, Donghuamen.
+        Stop("beijing_corner_tower", "Corner Tower", "Torre d'angolo", 39.9218, 116.3975,
+             note_en="Each corner of the palace walls has a tower like this one, its intricate roof with 72 ridges.",
+             note_it="A ogni angolo delle mura del palazzo c'è una torre come questa, dal tetto intricato con 72 creste."),
+        # Source: Wikipedia, Forbidden City; Wikipedia (zh), 故宫. The moat's width differs (52 or 59 m): not said.
+        Stop("beijing_jingshan", "Jingshan Park", "Parco Jingshan", 39.9236, 116.3917,
+             note_en="In 1644, as rebels took Beijing, the last Ming emperor, Chongzhen, hanged himself from a tree on this hill.",
+             note_it="Nel 1644, mentre i ribelli prendevano Pechino, l'ultimo imperatore Ming, Chongzhen, si impiccò a un albero su questa collina."),
+        # Source: Wikipedia, Jingshan Park; Wikipedia (zh), 景山公园. When the hill was raised differs: not said.
+        Stop("beijing_white_dagoba", "White Dagoba", "Dagoba Bianco", 39.9255, 116.3836,
+             note_en="Raised in 1651, the White Dagoba crowns Jade Flower Island, in the middle of Beihai's lake.",
+             note_it="Eretto nel 1651, il Dagoba Bianco corona l'isola dei Fiori di Giada, in mezzo al lago di Beihai."),
+        # Source: Wikipedia, Beihai Park; Wikipedia (zh), 北海公园. Why it was built differs (a Dalai Lama's visit, a lama's request), and the year the park opened (1922 or 1925): not said.
+        Stop("beijing_nine_dragon_wall", "Nine-Dragon Wall", "Muro dei Nove Draghi", 39.931, 116.3822,
+             note_en="Built in 1756, this screen wall has nine dragons on each side.",
+             note_it="Costruito nel 1756, questo muro schermo ha nove draghi su ciascun lato."),
+        # Source: Wikipedia, Nine-Dragon Wall; Wikipedia (zh), 九龙壁.
+        Stop("beijing_prince_gong", "Prince Gong's Mansion", "Residenza del principe Gong", 39.9362, 116.3815,
+             note_en="Built for Heshen, a minister of the Qianlong Emperor, the mansion later became the home of Prince Gong, whose name it keeps.",
+             note_it="Costruita per Heshen, ministro dell'imperatore Qianlong, la residenza fu poi la casa del principe Gong, di cui porta il nome."),
+        # Source: Wikipedia, Prince Gong's Mansion; Wikipedia (zh), 恭王府. The years differ (1777, or 1780 to 1788): not said.
+        Stop("beijing_shichahai", "Shichahai", "Shichahai", 39.9376, 116.3872,
+             note_en="Shichahai's three lakes were once part of the Grand Canal, which reached Beijing from Hangzhou.",
+             note_it="I tre laghi di Shichahai facevano parte del Canale Imperiale, che arrivava a Pechino da Hangzhou."),
+        # Source: Wikipedia, Shichahai; Wikipedia (zh), 什刹海. The stop is the Yinding Bridge.
+        Stop("beijing_drum_tower", "Drum Tower", "Torre del Tamburo", 39.939, 116.3897,
+             note_en="First built in 1272, under the Yuan, the Drum Tower was rebuilt here under the Ming.",
+             note_it="Costruita per la prima volta nel 1272, sotto gli Yuan, la Torre del Tamburo fu ricostruita qui sotto i Ming."),
+        # Source: Wikipedia, Drum Tower and Bell Tower of Beijing; Wikipedia (zh), 北京鼓楼和钟楼.
+        Stop("beijing_bell_tower", "Bell Tower", "Torre della Campana", 39.9412, 116.3897,
+             note_en="Just behind the Drum Tower, the Bell Tower kept the city's official time with it until 1924.",
+             note_it="Subito dietro la Torre del Tamburo, la Torre della Campana scandì con lei l'ora ufficiale della città fino al 1924."),
+        # Source: Wikipedia, Drum Tower and Bell Tower of Beijing; Wikipedia (zh), 北京鼓楼和钟楼.
+        Stop("beijing_nanluoguxiang", "Nanluoguxiang", "Nanluoguxiang", 39.9332, 116.3968,
+             note_en="Nearly 800 metres long, this hutong took its present name under the Qing, by about 1750.",
+             note_it="Lungo quasi 800 metri, questo hutong prese il nome attuale sotto i Qing, intorno al 1750."),
+        # Source: Wikipedia, Nanluoguxiang; Wikipedia (zh), 南锣鼓巷.
+    ],
+)
+
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
@@ -2026,6 +2170,8 @@ LOCATORS = {
     "CO": (-4.3, -79.1, 12.5, -66.8),
     "JP": (24.0, 122.9, 45.6, 146.0),
     "AU": (-43.7, 112.9, -10.6, 153.7),
+    "KR": (33.1, 124.6, 38.6, 131.9),
+    "CN": (18.2, 73.5, 53.6, 134.8),
 }
 
 # The continents the Ways page groups the cities by, in its order (the Kotlin enum Continent has

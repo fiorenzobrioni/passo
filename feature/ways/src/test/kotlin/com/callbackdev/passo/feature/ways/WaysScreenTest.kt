@@ -238,7 +238,7 @@ class WaysScreenTest {
             .assert(hasText("Under way: London", substring = true))
         compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).assert(hasText("10 cities", substring = true))
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.continent(Continent.ASIA_OCEANIA)))
-        compose.onNodeWithTag(WaysTags.continent(Continent.ASIA_OCEANIA)).assert(hasText("2 cities", substring = true))
+        compose.onNodeWithTag(WaysTags.continent(Continent.ASIA_OCEANIA)).assert(hasText("4 cities", substring = true))
         compose.onNodeWithTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)).assertDoesNotExist()
         snapshot("ways_cities")
         compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).performClick()
@@ -296,6 +296,8 @@ class WaysScreenTest {
             Continent.ASIA_OCEANIA to listOf(
                 WayId.TOKYO_SENSOJI_PALACE,
                 WayId.SYDNEY_LUNA_PARK_GARDEN,
+                WayId.SEOUL_GWANGHWAMUN_NAMSAN,
+                WayId.BEIJING_TIANANMEN_NANLUOGUXIANG,
             ),
         )
         assertThat(byContinent.keys).containsExactlyElementsIn(Continent.entries)
@@ -337,9 +339,9 @@ class WaysScreenTest {
     }
 
     @Test
-    fun `Asia and Oceania's map, from Tokyo to Sydney`() {
+    fun `Asia and Oceania's map, from Beijing to Sydney`() {
         showContinent(Continent.ASIA_OCEANIA)
-        compose.onNodeWithContentDescription("Asia and Oceania on the map: 2 cities.").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Asia and Oceania on the map: 4 cities.").assertIsDisplayed()
         snapshot("continent_asia_oceania")
     }
 
@@ -538,6 +540,27 @@ class WaysScreenTest {
         showWay(WayId.SYDNEY_LUNA_PARK_GARDEN, state = WaysSamples.state(walks = emptyList(), live = null), dark = true)
         compose.onNodeWithText("From Luna Park to the Chinese Garden", substring = true).assertExists()
         snapshot("walk_sydney_dark")
+    }
+
+    @Test
+    fun `Seoul's walk, from Gwanghwamun by the palaces up to N Seoul Tower`() {
+        showWay(WayId.SEOUL_GWANGHWAMUN_NAMSAN, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("From Gwanghwamun Square to N Seoul Tower", substring = true).assertExists()
+        snapshot("walk_seoul")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Cheonggyecheon"))
+        compose.onNodeWithText("brought back to light in 2005", substring = true).assertExists()
+        snapshot("walk_seoul_places")
+    }
+
+    @Test
+    fun `Beijing's walk, by the Forbidden City and Beihai to the hutongs, in the dark`() {
+        showWay(
+            WayId.BEIJING_TIANANMEN_NANLUOGUXIANG,
+            state = WaysSamples.state(walks = emptyList(), live = null),
+            dark = true,
+        )
+        compose.onNodeWithText("From Tiananmen Square to Nanluoguxiang", substring = true).assertExists()
+        snapshot("walk_beijing_dark")
     }
 
     @Test

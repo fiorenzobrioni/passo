@@ -129,5 +129,9 @@ On top of its first two cities:
 - A river mapped as many small areas (Tokyo's Sumida and its banks): list the larger relations
   and add `water_from_tiles=True` for the rest. Set it before the first `fetch`, or the tiles
   are fetched a second time for their water.
+- A stream too narrow to show as an area (Seoul's Cheonggyecheon): list its waterway line in
+  `canals`, drawn as wide as `canal_width`.
+- A street BRouter will not route (Beijing's Guozijian Street, as mapped): `route` shows its
+  places 50 m or more off the line, and the walk takes another street or drops them.
 - A market, a stairway or a small square may have no article in any language: then it has no
   sentence, and usually no place on the walk.
