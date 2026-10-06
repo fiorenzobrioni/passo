@@ -13,7 +13,9 @@ goes stale (no opening hours, no prices). Each was checked when written (1 Oct 2
 way and Rome, Paris and Madrid on 2 Oct 2026, Lima and Cusco after them); the source is the
 line after it. Berlin and Vienna (5 Oct 2026) were checked in the English and German Wikipedias,
 New York in the English and Italian (or German), Rio in the English and Portuguese, Mexico City
-and Buenos Aires in the English and Spanish.
+and Buenos Aires in the English and Spanish, San Francisco in the English and Italian (or
+Spanish, German), Québec in the English and French, Havana and Cartagena in the English and
+Spanish.
 """
 
 from dataclasses import dataclass, field
@@ -1603,7 +1605,240 @@ BUENOS_AIRES = Walk(
     ],
 )
 
-WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES]
+SAN_FRANCISCO = Walk(
+    id="SAN_FRANCISCO_FERRY_PALACE",
+    city="san_francisco",
+    city_en="San Francisco",
+    city_it="San Francisco",
+    route_en="From the Ferry Building to the Palace of Fine Arts, by Coit Tower and the Wharf",
+    route_it="Dal Ferry Building al Palace of Fine Arts, passando per la Coit Tower e il Wharf",
+    outing_en="A walk in San Francisco",
+    outing_it="Passeggiata a San Francisco",
+    country="US",
+    continent="AMERICAS",
+    # The bay, from the coastline; the lagoon of the Palace of Fine Arts.
+    coast=True,
+    water=["relation/7471537"],
+    parks=[
+        "way/18583270", "way/224941774", "way/82207054", "way/16761472", "relation/8346137",
+    ],
+    stops=[
+        Stop("sf_ferry_building", "Ferry Building", "Ferry Building", 37.7955, -122.3937,
+             note_en="The clock tower of this ferry terminal may have been modelled on the Giralda of Seville.",
+             note_it="La torre dell'orologio di questo terminal dei traghetti potrebbe ispirarsi alla Giralda di Siviglia."),
+        # Source: Wikipedia, San Francisco Ferry Building; Wikipedia (es), San Francisco Ferry Building. Both say "may have": so does the sentence.
+        Stop("sf_transamerica", "Transamerica Pyramid", "Transamerica Pyramid", 37.7952, -122.4028,
+             note_en="On its completion in 1972 the pyramid became the tallest building in San Francisco.",
+             note_it="Completata nel 1972, la piramide divenne l'edificio più alto di San Francisco."),
+        # Source: Wikipedia, Transamerica Pyramid (tallest from 1972 until 2017); Wikipedia (it), Transamerica Pyramid.
+        Stop("sf_chinatown", "Chinatown Gate", "Porta di Chinatown", 37.7907, -122.4056,
+             note_en="Through the Dragon Gate, Grant Avenue leads into the oldest Chinatown in North America.",
+             note_it="Oltre la Porta del Drago, Grant Avenue entra nella più antica Chinatown del Nord America."),
+        # Source: Wikipedia, Chinatown, San Francisco; Wikipedia (it), Chinatown (San Francisco).
+        Stop("sf_city_lights", "City Lights", "City Lights", 37.7976, -122.4065,
+             note_en="Founded in 1953 by Lawrence Ferlinghetti, the bookshop published Allen Ginsberg's Howl in 1956.",
+             note_it="Fondata nel 1953 da Lawrence Ferlinghetti, la libreria pubblicò Howl di Allen Ginsberg nel 1956."),
+        # Source: Wikipedia, City Lights Booksellers & Publishers; Wikipedia (it), City Lights Bookstore.
+        Stop("sf_saints_peter_paul", "Saints Peter and Paul Church", "Chiesa dei Santi Pietro e Paolo", 37.8013, -122.4098,
+             note_en="Marilyn Monroe and Joe DiMaggio posed for photographs on the steps of this church.",
+             note_it="Marilyn Monroe e Joe DiMaggio posarono per i fotografi sui gradini di questa chiesa."),
+        # Source: Wikipedia, Saints Peter and Paul Church (San Francisco); Wikipedia (it), Chiesa dei Santi Pietro e Paolo (San Francisco).
+        Stop("sf_coit_tower", "Coit Tower", "Coit Tower", 37.8024, -122.4058,
+             note_en="Built with the bequest of Lillie Hitchcock Coit, the tower is painted inside with murals by many artists.",
+             note_it="Costruita con il lascito di Lillie Hitchcock Coit, la torre è dipinta all'interno con murales di molti artisti."),
+        # Source: Wikipedia, Coit Tower; Wikipedia (it), Coit Tower. Their years and number of artists differ: not said.
+        Stop("sf_pier_39", "Pier 39", "Pier 39", 37.8087, -122.4098,
+             note_en="Since 1989 a colony of sea lions has rested on the docks of this pier's marina.",
+             note_it="Dal 1989 una colonia di leoni marini riposa sui pontili del porticciolo di questo molo."),
+        # Source: Wikipedia, Pier 39; Wikipedia (it), Pier 39.
+        Stop("sf_fishermans_wharf", "Fisherman's Wharf", "Fisherman's Wharf", 37.8081, -122.4166,
+             note_en="The wharf is home to the San Francisco Maritime National Historical Park and its old ships.",
+             note_it="Il molo ospita il parco storico marittimo nazionale di San Francisco e le sue vecchie navi."),
+        # Source: Wikipedia, Fisherman's Wharf, San Francisco; Wikipedia (es), Fisherman's Wharf (San Francisco).
+        Stop("sf_lombard", "Lombard Street", "Lombard Street", 37.8021, -122.4187,
+             note_en="Between Hyde and Leavenworth, the street winds down Russian Hill in tight hairpin bends.",
+             note_it="Tra Hyde e Leavenworth, la strada scende dalla Russian Hill in stretti tornanti."),
+        # Source: Wikipedia, Lombard Street (San Francisco); Wikipedia (it), Lombard Street (San Francisco).
+        Stop("sf_ghirardelli", "Ghirardelli Square", "Ghirardelli Square", 37.8059, -122.4229,
+             note_en="Once Ghirardelli's chocolate factory, it opened as a square of shops in 1964.",
+             note_it="Un tempo fabbrica di cioccolato Ghirardelli, nel 1964 divenne una piazza di negozi."),
+        # Source: Wikipedia, Ghirardelli Square; Wikipedia (it), Ghirardelli Square and Fisherman's Wharf.
+        Stop("sf_fort_mason", "Fort Mason", "Fort Mason", 37.8063, -122.429,
+             note_en="In the Second World War this was the main port for the war in the Pacific.",
+             note_it="Nella seconda guerra mondiale fu il porto principale per la guerra nel Pacifico."),
+        # Source: Wikipedia, Fort Mason; Wikipedia (de), Fort Mason.
+        Stop("sf_palace_fine_arts", "Palace of Fine Arts", "Palace of Fine Arts", 37.8029, -122.4484,
+             note_en="Built for the Panama–Pacific Exposition of 1915, it was rebuilt from the 1960s.",
+             note_it="Costruito per l'Esposizione Panama-Pacifico del 1915, fu ricostruito a partire dagli anni Sessanta."),
+        # Source: Wikipedia, Palace of Fine Arts; Wikipedia (it), Palace of Fine Arts.
+    ],
+)
+
+QUEBEC = Walk(
+    id="QUEBEC_PARLEMENT_BASSE_VILLE",
+    city="quebec",
+    city_en="Québec",
+    city_it="Québec",
+    route_en="From the Parliament to the Lower Town, by the Plains of Abraham and the Château Frontenac",
+    route_it="Dal Parlamento alla Città Bassa, passando per le Piane di Abramo e il Château Frontenac",
+    outing_en="A walk in Québec",
+    outing_it="Passeggiata a Québec",
+    country="CA",
+    continent="AMERICAS",
+    # A short walk (about 5 km). At Québec the St Lawrence is not yet coastline in OpenStreetMap
+    # but a river area, the fluvial estuary; with it, the Louise Basin of the Old Port.
+    water=["relation/2426031", "relation/5869253"],
+    # The Upper Town's streets are mostly residential: without them the map is a few lines.
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=400,
+    parks=["relation/21295717", "relation/21295715", "way/105924778", "way/105924793", "way/107619990"],
+    stops=[
+        Stop("quebec_parlement", "Parliament Building", "Palazzo del Parlamento", 46.8087, -71.2142,
+             note_en="Statues along its façade tell the history of Québec.",
+             note_it="Le statue lungo la facciata raccontano la storia del Québec."),
+        # Source: Wikipedia, Parliament Building (Quebec); Wikipedia (fr), Hôtel du Parlement du Québec.
+        Stop("quebec_plaines", "Plains of Abraham", "Piane di Abramo", 46.802, -71.218,
+             note_en="Here in 1759 the British won the battle for Québec; both generals, Wolfe and Montcalm, died of their wounds.",
+             note_it="Qui nel 1759 gli inglesi vinsero la battaglia per il Québec; entrambi i generali, Wolfe e Montcalm, morirono per le ferite."),
+        # Source: Wikipedia, Plains of Abraham; Wikipedia (fr), Plaines d'Abraham.
+        Stop("quebec_citadelle", "Citadelle", "Cittadella", 46.8077, -71.2078,
+             note_en="The British built this star-shaped fortress from 1820, under the engineer Elias Walker Durnford.",
+             note_it="Gli inglesi costruirono questa fortezza a stella dal 1820, sotto la guida dell'ingegnere Elias Walker Durnford."),
+        # Source: Wikipedia, Citadelle of Quebec; Wikipedia (fr), Citadelle de Québec.
+        Stop("quebec_frontenac", "Château Frontenac", "Château Frontenac", 46.8115, -71.2044,
+             note_en="The hotel on the cliff is called the most photographed in the world.",
+             note_it="L'albergo sulla rupe è detto il più fotografato del mondo."),
+        # Source: Wikipedia, Château Frontenac; Wikipedia (fr), Château Frontenac.
+        Stop("quebec_notre_dame", "Notre-Dame de Québec", "Notre-Dame de Québec", 46.8137, -71.2061,
+             note_en="Seat of the oldest diocese north of Mexico, it was made a basilica by Pius IX in 1874.",
+             note_it="Sede della più antica diocesi a nord del Messico, fu elevata a basilica da Pio IX nel 1874."),
+        # Source: Wikipedia, Cathedral Basilica of Notre-Dame de Québec; Wikipedia (fr), Basilique-cathédrale Notre-Dame de Québec.
+        Stop("quebec_casse_cou", "Breakneck Stairs", "Escalier Casse-Cou", 46.8128, -71.2036,
+             note_en="Québec's oldest stairway joins the Upper Town to the Lower; it was already here in 1660.",
+             note_it="La scala più antica di Québec unisce la Città Alta alla Bassa; esisteva già nel 1660."),
+        # Source: Wikipedia, Breakneck Stairs (built 1635); Wikipedia (fr), Quartier Petit Champlain (there in 1660). The year it was built is in one only: not said.
+        Stop("quebec_place_royale", "Place Royale", "Place Royale", 46.8131, -71.2027,
+             note_en="Here in 1608 Samuel de Champlain built the fortified post that became Québec.",
+             note_it="Qui nel 1608 Samuel de Champlain costruì il posto fortificato da cui nacque Québec."),
+        # Source: Wikipedia, Place Royale (Quebec City); Wikipedia (fr), Place Royale (Québec).
+        Stop("quebec_musee_civilisation", "Musée de la civilisation", "Musée de la civilisation", 46.8152, -71.2023,
+             note_en="Designed by Moshe Safdie, the museum opened in 1988 by the St Lawrence.",
+             note_it="Progettato da Moshe Safdie, il museo aprì nel 1988 sulla riva del San Lorenzo."),
+        # Source: Wikipedia, Musée de la civilisation; Wikipedia (fr), Musée de la civilisation.
+    ],
+)
+
+HAVANA = Walk(
+    id="HAVANA_CAPITOLIO_PAULA",
+    city="havana",
+    city_en="Havana",
+    city_it="L'Avana",
+    route_en="From the Capitolio to the Alameda de Paula, by the Malecón and the old squares",
+    route_it="Dal Capitolio all'Alameda de Paula, passando per il Malecón e le piazze antiche",
+    outing_en="A walk in Havana",
+    outing_it="Passeggiata all'Avana",
+    country="CU",
+    continent="AMERICAS",
+    # A short walk (about 5 km). The sea and the harbour, from the coastline.
+    coast=True,
+    water=[],
+    parks=["way/23872622"],
+    stops=[
+        Stop("havana_capitolio", "Capitolio", "Capitolio", 23.1353, -82.3597,
+             note_en="A replica diamond set in the floor of its hall marks kilometre zero of Cuba's roads.",
+             note_it="Una replica di diamante incastonata nel pavimento del salone segna il chilometro zero delle strade cubane."),
+        # Source: Wikipedia, El Capitolio; Wikipedia (es), Capitolio Nacional de Cuba.
+        Stop("havana_gran_teatro", "Gran Teatro", "Gran Teatro", 23.1369, -82.3596,
+             note_en="Inaugurated in 1914, it stands where the Teatro Tacón stood before it.",
+             note_it="Inaugurato nel 1914, sorge dove prima c'era il Teatro Tacón."),
+        # Source: Wikipedia, Gran Teatro de La Habana; Wikipedia (es), Gran Teatro de La Habana Alicia Alonso.
+        Stop("havana_prado", "Paseo del Prado", "Paseo del Prado", 23.142, -82.3585,
+             note_en="Bronze lions guard this promenade, which runs down to the Malecón.",
+             note_it="Leoni di bronzo custodiscono questo viale, che scende fino al Malecón."),
+        # Source: Wikipedia, Paseo del Prado, Havana; Wikipedia (es), Paseo del Prado (La Habana).
+        Stop("havana_la_punta", "Castillo de la Punta", "Castillo de la Punta", 23.1462, -82.3575,
+             note_en="From 1630 a heavy chain stretched from this castle to El Morro guarded the bay.",
+             note_it="Dal 1630 una pesante catena tesa da questo castello a El Morro proteggeva la baia."),
+        # Source: Wikipedia, Castillo de San Salvador de la Punta; Wikipedia (es), Castillo de San Salvador de la Punta.
+        Stop("havana_cathedral", "Havana Cathedral", "Cattedrale dell'Avana", 23.1417, -82.352,
+             note_en="Columbus's remains lay in this cathedral until 1898, when they were taken to Seville.",
+             note_it="I resti di Colombo riposarono in questa cattedrale fino al 1898, quando furono portati a Siviglia."),
+        # Source: Wikipedia, Havana Cathedral; Wikipedia (es), Catedral de La Habana. When they arrived differs (1795 or 1796): not said.
+        Stop("havana_real_fuerza", "Castillo de la Real Fuerza", "Castillo de la Real Fuerza", 23.1411, -82.3496,
+             note_en="One of the oldest stone forts in the Americas, it wears the Giraldilla weathervane on its tower.",
+             note_it="Uno dei più antichi forti di pietra delle Americhe, porta sulla torre la banderuola della Giraldilla."),
+        # Source: Wikipedia, Castillo de la Real Fuerza; Wikipedia (es), Castillo de la Real Fuerza de La Habana.
+        Stop("havana_plaza_armas", "Plaza de Armas", "Plaza de Armas", 23.1402, -82.3496,
+             note_en="This is the oldest square in Old Havana.",
+             note_it="È la piazza più antica dell'Avana Vecchia."),
+        # Source: Wikipedia, Plaza de Armas (Havana); Wikipedia (es), Plaza de Armas (La Habana).
+        Stop("havana_san_francisco", "Plaza de San Francisco", "Plaza de San Francisco", 23.1378, -82.3487,
+             note_en="The basilica on this square, begun in 1548, is now a concert hall.",
+             note_it="La basilica su questa piazza, iniziata nel 1548, è oggi una sala da concerto."),
+        # Source: Wikipedia, Basilica of San Francisco de Asís, Havana; Wikipedia (es), Convento de San Francisco de Asís (La Habana).
+        Stop("havana_plaza_vieja", "Plaza Vieja", "Plaza Vieja", 23.1361, -82.35,
+             note_en="Laid out in 1559, it was first called the Plaza Nueva, the New Square.",
+             note_it="Nata nel 1559, all'inizio si chiamava Plaza Nueva, la Piazza Nuova."),
+        # Source: Wikipedia, Plaza Vieja, Havana; Wikipedia (es), Plaza Vieja (La Habana).
+        Stop("havana_alameda_paula", "Alameda de Paula", "Alameda de Paula", 23.132, -82.3481,
+             note_en="Built in 1777, it was the city's first promenade.",
+             note_it="Costruita nel 1777, fu la prima passeggiata della città."),
+        # Source: Wikipedia, Alameda de Paula; Wikipedia (es), Alameda de Paula.
+    ],
+)
+
+CARTAGENA = Walk(
+    id="CARTAGENA_RELOJ_SAN_FELIPE",
+    city="cartagena",
+    city_en="Cartagena",
+    city_it="Cartagena",
+    route_en="From the Clock Tower to San Felipe, along the walls and through Getsemaní",
+    route_it="Dalla Torre dell'Orologio a San Felipe, lungo le mura e attraverso Getsemaní",
+    outing_en="A walk in Cartagena",
+    outing_it="Passeggiata a Cartagena",
+    country="CO",
+    continent="AMERICAS",
+    # A short walk (about 5 km). The Caribbean and the bay, from the coastline; the Chambacú lagoon.
+    coast=True,
+    water=["way/238972766"],
+    parks=["way/25841728", "way/25447599", "way/49600262"],
+    stops=[
+        Stop("cartagena_torre_reloj", "Clock Tower", "Torre dell'Orologio", 10.4227, -75.5488,
+             note_en="The main gate of the walled city takes its name from the clock set on it in the 18th century.",
+             note_it="La porta principale della città murata prende il nome dall'orologio posto in cima nel Settecento."),
+        # Source: Wikipedia, Puerta del Reloj; Wikipedia (es), Torre del Reloj (Cartagena de Indias).
+        Stop("cartagena_santo_domingo", "Plaza de Santo Domingo", "Plaza de Santo Domingo", 10.4243, -75.552,
+             note_en="The church of Santo Domingo, on this square, was built between about 1565 and 1630.",
+             note_it="La chiesa di Santo Domingo, su questa piazza, fu costruita tra il 1565 circa e il 1630."),
+        # Source: Wikipedia, Convento de Santo Domingo, Cartagena; Wikipedia (es), Convento de Santo Domingo (Cartagena).
+        Stop("cartagena_cathedral", "Cathedral", "Cattedrale", 10.4237, -75.5507,
+             note_en="In 1586, still unfinished, the cathedral was damaged in Francis Drake's attack on the city.",
+             note_it="Nel 1586, ancora incompiuta, la cattedrale fu danneggiata nell'attacco di Francis Drake alla città."),
+        # Source: Wikipedia, Cartagena Cathedral, Colombia; Wikipedia (es), Catedral de Santa Catalina de Alejandría (Cartagena de Indias).
+        Stop("cartagena_inquisicion", "Palace of the Inquisition", "Palazzo dell'Inquisizione", 10.4232, -75.5516,
+             note_en="This palace, finished in 1770, was the seat of the Inquisition's tribunal in Cartagena.",
+             note_it="Questo palazzo, finito nel 1770, fu la sede del tribunale dell'Inquisizione a Cartagena."),
+        # Source: Wikipedia, Palace of the Inquisition (Cartagena, Colombia); Wikipedia (es), Palacio de la Inquisición (Cartagena de Indias).
+        Stop("cartagena_murallas", "City walls", "Mura", 10.4262, -75.5527,
+             note_en="Begun in 1614, the walls were built in stages to protect the city from pirates.",
+             note_it="Iniziate nel 1614, le mura furono costruite a più riprese per difendere la città dai pirati."),
+        # Source: Wikipedia, Cartagena, Colombia (built between 1614 and 1796); Wikipedia (es), Cartagena de Indias.
+        Stop("cartagena_bovedas", "Las Bóvedas", "Las Bóvedas", 10.43, -75.5465,
+             note_en="Twenty-three vaults in the walls, built as storerooms and later used as prison cells.",
+             note_it="Ventitré volte nelle mura, costruite come magazzini e poi usate come celle di prigione."),
+        # Source: Wikipedia, Las Bóvedas; Wikipedia (es), Cuartel de Las Bóvedas.
+        Stop("cartagena_trinidad", "Plaza de la Trinidad", "Plaza de la Trinidad", 10.4206, -75.5454,
+             note_en="On 11 November 1811 the people of Getsemaní, with Pedro Romero, pushed Cartagena to declare its independence.",
+             note_it="L'11 novembre 1811 la gente di Getsemaní, con Pedro Romero, spinse Cartagena a dichiarare l'indipendenza."),
+        # Source: Wikipedia, Cartagena, Colombia; Wikipedia (es), Cartagena de Indias.
+        Stop("cartagena_san_felipe", "Castillo San Felipe", "Castillo San Felipe", 10.4227, -75.5394,
+             note_en="In 1741 its defenders, under Blas de Lezo, held off the British fleet of Admiral Vernon.",
+             note_it="Nel 1741 i suoi difensori, al comando di Blas de Lezo, respinsero la flotta inglese dell'ammiraglio Vernon."),
+        # Source: Wikipedia, Castillo San Felipe de Barajas; Wikipedia (es), Castillo San Felipe de Barajas.
+    ],
+)
+
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
@@ -1621,6 +1856,9 @@ LOCATORS = {
     "BR": (-33.8, -74.0, 5.3, -34.8),
     "MX": (14.5, -118.4, 32.7, -86.7),
     "AR": (-55.1, -73.6, -21.8, -53.6),
+    "CA": (41.6, -141.0, 70.0, -52.6),
+    "CU": (19.8, -85.0, 23.3, -74.1),
+    "CO": (-4.3, -79.1, 12.5, -66.8),
 }
 
 # The continents the Ways page groups the cities by, in its order (the Kotlin enum Continent has

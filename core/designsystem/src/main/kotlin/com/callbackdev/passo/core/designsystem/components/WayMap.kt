@@ -155,6 +155,7 @@ fun WayMapView(
                         names.last() to stops.last(),
                         touched?.takeIf { it != 0 && it != stops.lastIndex }?.let { names[it] to stops[it] },
                     ).map { (text, at) -> Label(measurer.measure(text, labelStyle), at) }
+                        .let { placeLabels(it, size) }
                 } else {
                     emptyList()
                 }
@@ -162,7 +163,7 @@ fun WayMapView(
                 // names the city anyway. The ends' names are kept clear of it (a touched stop's
                 // is not, or the locator would jump at every touch).
                 val locator = if (detailed && way.kind == WayKind.WAY) {
-                    locatorBox(size, stops.first(), whole, map.locatorFrame, labels.take(2).map { labelRect(it, size) })
+                    locatorBox(size, stops.first(), whole, map.locatorFrame, labels.take(2).map { it.second })
                 } else {
                     null
                 }
@@ -222,7 +223,7 @@ fun WayMapView(
                         drawCircle(colors.halo, radius + (if (detailed) 2.dp else 1.5.dp).toPx(), it)
                         drawCircle(colors.walked, radius, it)
                     }
-                    labels.forEach { drawLabel(it, colors) }
+                    labels.forEach { (label, box) -> drawLabel(label.text, box, colors.halo, colors.ink) }
                     locator?.let { drawLocator(it, map.locatorLand, map.locatorLine, map.locatorFrame, colors) }
                 }
             },
@@ -282,7 +283,7 @@ private fun WayLine.toPath(projection: WayProjection, upTo: Double?): Path = Pat
 
 /**
  * The locator's box: in the corner the way's line leaves most free, away from the start and
- * clear of the ends' names ([names], where [labelRect] puts them), a third of the map's width at
+ * clear of the ends' names ([names], where [placeLabels] puts them), a third of the map's width at
  * most.
  */
 private fun Density.locatorBox(size: Size, start: Offset, whole: Path, frame: GeoBox, names: List<Rect>): Rect {
@@ -324,22 +325,42 @@ private fun DrawScope.drawLocator(box: Rect, land: List<GeoPath>, line: GeoPath,
     drawRoundRect(colors.border, box.topLeft, box.size, radius, style = Stroke(1.dp.toPx()))
 }
 
-/** Where a name's pill goes: beside its point, on the right if it fits, kept inside the map. */
-private fun Density.labelRect(label: Label, size: Size): Rect {
+/**
+ * Where each name's pill goes, in order: beside its point, on the right if it fits, kept inside
+ * the map. A walk that ends near where it began (Cartagena's) would lay the second name over the
+ * first, so a name that would cover one placed before it goes above its point, below it or on
+ * its other side instead, the first of those that is clear.
+ */
+private fun Density.placeLabels(labels: List<Label>, size: Size): List<Pair<Label, Rect>> {
     val gap = 8.dp.toPx()
-    val text = label.text.size
-    val width = text.width + 2 * LABEL_PAD_X.toPx()
-    val height = text.height + 2 * LABEL_PAD_Y.toPx()
-    val right = label.at.x + gap + width <= size.width - gap
-    val x = (if (right) label.at.x + gap else label.at.x - gap - width)
-        .coerceIn(gap, (size.width - width - gap).coerceAtLeast(gap))
-    val y = (label.at.y - height / 2f).coerceIn(gap, (size.height - height - gap).coerceAtLeast(gap))
-    return Rect(Offset(x, y), Size(width, height))
+    val placed = mutableListOf<Pair<Label, Rect>>()
+    for (label in labels) {
+        val width = label.text.size.width + 2 * LABEL_PAD_X.toPx()
+        val height = label.text.size.height + 2 * LABEL_PAD_Y.toPx()
+        fun kept(x: Float, y: Float) = Rect(
+            Offset(
+                x.coerceIn(gap, (size.width - width - gap).coerceAtLeast(gap)),
+                y.coerceIn(gap, (size.height - height - gap).coerceAtLeast(gap)),
+            ),
+            Size(width, height),
+        )
+        val at = label.at
+        val beside = at.y - height / 2f
+        val rightFits = at.x + gap + width <= size.width - gap
+        val right = kept(at.x + gap, beside)
+        val left = kept(at.x - gap - width, beside)
+        // The other side last: pushed back inside the map, it may cover its own point.
+        val candidates = listOf(
+            if (rightFits) right else left,
+            kept(at.x - width / 2f, at.y - gap - height),
+            kept(at.x - width / 2f, at.y + gap),
+            if (rightFits) left else right,
+        )
+        val box = candidates.firstOrNull { box -> placed.none { it.second.overlaps(box) } } ?: candidates.first()
+        placed += label to box
+    }
+    return placed
 }
-
-/** A name beside its point, on a small pill of the page's colour. */
-private fun DrawScope.drawLabel(label: Label, colors: WayMapColors) =
-    drawLabel(label.text, labelRect(label, size), colors.halo, colors.ink)
 
 /** A name on a small pill of the page's colour ([halo]), in [box]. */
 internal fun DrawScope.drawLabel(text: TextLayoutResult, box: Rect, halo: Color, ink: Color) {

@@ -41,13 +41,18 @@ class WaysDataTest {
                 WayId.RIO_CENTRO_SUGARLOAF,
                 WayId.MEXICO_CITY_ZOCALO_CHAPULTEPEC,
                 WayId.BUENOS_AIRES_MAYO_RECOLETA,
+                WayId.SAN_FRANCISCO_FERRY_PALACE,
+                WayId.QUEBEC_PARLEMENT_BASSE_VILLE,
+                WayId.HAVANA_CAPITOLIO_PAULA,
+                WayId.CARTAGENA_RELOJ_SAN_FELIPE,
             )
             .inOrder()
         // One walk a city for now (PLANNING.md §11 Phase 11, later).
         assertThat(Ways.walks.map { it.id.city })
             .containsExactly(
                 "milan", "rome", "paris", "london", "madrid", "berlin", "vienna", "porto", "amsterdam", "prague",
-                "lima", "cusco", "new_york", "rio", "mexico_city", "buenos_aires",
+                "lima", "cusco", "new_york", "rio", "mexico_city", "buenos_aires", "san_francisco", "quebec",
+                "havana", "cartagena",
             )
             .inOrder()
     }
@@ -75,7 +80,14 @@ class WaysDataTest {
         assertThat(km(WayId.VIA_FRANCIGENA)).isIn(950..1_050)
         // The short walks.
         assertThat(Ways.walks.filter { it.lengthMeters < 7_000 }.map { it.id })
-            .containsExactly(WayId.PORTO_SE_PILAR, WayId.AMSTERDAM_CENTRAAL_WESTERKERK, WayId.PRAGUE_CASTLE_WENCESLAS)
+            .containsExactly(
+                WayId.PORTO_SE_PILAR,
+                WayId.AMSTERDAM_CENTRAAL_WESTERKERK,
+                WayId.PRAGUE_CASTLE_WENCESLAS,
+                WayId.QUEBEC_PARLEMENT_BASSE_VILLE,
+                WayId.HAVANA_CAPITOLIO_PAULA,
+                WayId.CARTAGENA_RELOJ_SAN_FELIPE,
+            )
     }
 
     @Test
@@ -154,7 +166,10 @@ class WaysDataTest {
             Ways.walksIn(Continent.AMERICAS).map {
                 it.id.city
             },
-        ).containsExactly("lima", "cusco", "new_york", "rio", "mexico_city", "buenos_aires")
+        ).containsExactly(
+            "lima", "cusco", "new_york", "rio", "mexico_city", "buenos_aires", "san_francisco", "quebec",
+            "havana", "cartagena",
+        )
             .inOrder()
     }
 
@@ -182,13 +197,24 @@ class WaysDataTest {
     fun `a city on the sea is cut out of it, its route and its places on land`() {
         val coastal = Ways.walks.filter { it.map.sea }.map { it.id }
         assertThat(coastal)
-            .containsExactly(WayId.NEW_YORK_PARK_BRIDGE, WayId.RIO_CENTRO_SUGARLOAF, WayId.BUENOS_AIRES_MAYO_RECOLETA)
+            .containsExactly(
+                WayId.NEW_YORK_PARK_BRIDGE,
+                WayId.RIO_CENTRO_SUGARLOAF,
+                WayId.BUENOS_AIRES_MAYO_RECOLETA,
+                WayId.SAN_FRANCISCO_FERRY_PALACE,
+                WayId.HAVANA_CAPITOLIO_PAULA,
+                WayId.CARTAGENA_RELOJ_SAN_FELIPE,
+            )
         for (id in coastal) {
             val map = Ways.of(id).map
             // The land from the coastline, not the whole ground: a few shores and islands.
             assertThat(map.land.size).isGreaterThan(1)
+            // A place on a pier stands over the water the coastline leaves out (San Francisco's
+            // Ferry Building, some 110 m out): a few steps from the land, never out at sea.
             for (stop in Ways.of(id).stops) {
-                assertThat(map.land.any { it.contains(stop.latitude, stop.longitude) }).isTrue()
+                val onLand = map.land.any { it.contains(stop.latitude, stop.longitude) }
+                val onPier = map.land.minOf { it.kilometresTo(stop.latitude, stop.longitude) } < PIER_SLACK_KM
+                assertThat(onLand || onPier).isTrue()
             }
         }
         // Every other city stands on its ground, one rectangle with no sea around it.
@@ -232,5 +258,6 @@ class WaysDataTest {
 
     private companion object {
         const val COAST_SLACK_KM = 30.0
+        const val PIER_SLACK_KM = 0.15
     }
 }
