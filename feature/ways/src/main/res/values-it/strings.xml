@@ -78,6 +78,7 @@
     <string name="ways_continent_europe">Europa</string>
     <string name="ways_continent_americas">Americhe</string>
     <string name="ways_continent_asia_oceania">Asia e Oceania</string>
+    <string name="ways_continent_africa">Africa</string>
     <plurals name="ways_continent_cities">
         <item quantity="one">%1$d città</item>
         <item quantity="many">%1$d città</item>

@@ -18,16 +18,16 @@ are still written by tools/build_ways.py, never by hand.
         regexes); without, the path of the cached text, for reading it whole.
     python3 tools/city_walks.py wiki-find LANG "query" ...
         Wikipedia's article for a query, and the same article's title in en, es, fr, it, pt,
-        de, ja, zh and ko, so a place can be checked in a second language.
+        de, nl, ja, zh, ko and ar, so a place can be checked in a second language.
     python3 tools/city_walks.py splice WALK_ID ...
-        Adds new walks to WayData.kt without rebuilding the others, then rewrites the place
-        strings and the continents' maps (see below).
+        Adds new walks to WayData.kt without rebuilding the others, or replaces walks already
+        there, then rewrites the place strings and the continents' maps (see below).
 
 Why splice: a full `build_ways.py` run rebuilds every walk from the cache, and a fresh cache
 would also move every other city's streets with OpenStreetMap's edits since, which is not part
 of adding a city. `splice` builds only the walks named and puts each block and its case where a
-full run would write them (after the walk before it in WALKS). To redo it after changing the
-content, restore WayData.kt first (`git checkout` it) and splice again.
+full run would write them (after the walk before it in WALKS). A walk already in WayData.kt is
+replaced, so a city's map can be redrawn after changing its content, committed or not.
 
 The servers are shared and some throttle (Wikipedia answers 429 when asked too fast; Nominatim
 allows one request a second): every call here waits between requests, retries with a growing
@@ -51,10 +51,11 @@ AGENT = {"User-Agent": "passo-build-ways (github.com/fiorenzobrioni/passo)"}
 BROUTER = "https://brouter.de/brouter?lonlats={}&profile=hiking-mountain&alternativeidx=0&format=geojson"
 NOMINATIM = "https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q={}"
 OSM_MAP = "https://api.openstreetmap.org/api/0.6/map?bbox={:.5f},{:.5f},{:.5f},{:.5f}"
-# Asia's cities are checked in their own language too (Japanese, Chinese, Korean).
-LANGUAGES = ("en", "es", "fr", "it", "pt", "de", "ja", "zh", "ko")
+# Asia's and Africa's cities are checked in their own language too (Japanese, Chinese, Korean,
+# Arabic; Dutch, for Cape Town's Afrikaans and Dutch past).
+LANGUAGES = ("en", "es", "fr", "it", "pt", "de", "nl", "ja", "zh", "ko", "ar")
 # Redirects as each Wikipedia writes them.
-REDIRECT = re.compile(r"\s*#(REDIRECT|WEITERLEITUNG|REDIRECIONAMENTO|RINVIA|REDIRECCIÓN|転送|重定向)\s*\[\[([^\]]+)\]\]", re.I)
+REDIRECT = re.compile(r"\s*#(REDIRECT|WEITERLEITUNG|REDIRECIONAMENTO|RINVIA|REDIRECCIÓN|DOORVERWIJZING|転送|重定向|تحويل)\s*\[\[([^\]]+)\]\]", re.I)
 
 
 def get(url, attempts=6, pause=8):
@@ -240,7 +241,11 @@ def splice(ids):
         block, _, _ = build.build_walk(walk)
         case = f"        WayId.{walk.id} -> {build.camel(walk.id)}()\n"
         if case in text:
-            sys.exit(f"{walk.id} is already in WayData.kt: git checkout it first")
+            # Already spliced (a walk committed before its map was changed): replaced in place.
+            text = text.replace(case, "", 1)
+            start = text.index(f"\n    private fun {build.camel(walk.id)}() = WaySource(")
+            end = text.index("\n    )\n", start) + len("\n    )\n")
+            text = text[:start] + text[end:]
         before = order[order.index(walk.id) - 1]
         previous = f"        WayId.{before} -> {build.camel(before)}()\n"
         if previous not in text:

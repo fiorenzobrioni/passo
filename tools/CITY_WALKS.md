@@ -1,6 +1,6 @@
 # Adding a city walk
 
-How a city walk is added, step by step, as the cities of Europe, the Americas, and Asia and Oceania were.
+How a city walk is added, step by step, as the cities of Europe, the Americas, Asia and Oceania, and Africa were.
 The decisions behind it are in `docs/adr/0015-city-walks.md`; this is the procedure. The data is
 written by `tools/build_ways.py` from `tools/ways_content.py`, never by hand;
 `tools/city_walks.py` helps to find and check what goes into the content, and adds the new
@@ -67,8 +67,8 @@ Add the mirror init script to every Gradle command in the cloud sandbox:
      route again after moving a place) and fetches their OpenStreetMap sources into the cache.
    - `python3 tools/city_walks.py splice ID ...` adds them to `WayData.kt`, rewrites the place
      strings (EN, IT, `WayPlaceStrings.kt`) and the continents' maps. It prints each place's
-     distance along the route and the map's counts: check them. To splice again after changing
-     the content, `git checkout` `WayData.kt` first.
+     distance along the route and the map's counts: check them. Splicing a walk already in
+     `WayData.kt` replaces it, so a map can be redone after changing the content.
    - Never run a full `fetch` and a full build to add a city: with a fresh cache every other
      city's streets would move with OpenStreetMap's edits since.
 6. **The tests.**
@@ -135,3 +135,19 @@ On top of its first two cities:
   places 50 m or more off the line, and the walk takes another street or drops them.
 - A market, a stairway or a small square may have no article in any language: then it has no
   sentence, and usually no place on the walk.
+- An African city is checked in English and French, Arabic or German (Cairo), or German, Dutch or
+  Afrikaans (Cape Town); `wiki-find` lists the Dutch and Arabic titles, and `wiki` follows their
+  redirects (`#DOORVERWIJZING`, `#تحويل`). Afrikaans has no place in the listing: ask `wiki af`
+  for its title directly.
+- A crossing BRouter will not take (Cairo's Al-Muizz Street over Al-Azhar Street) shows as a
+  detour of several hundred metres between two places close together: route the leg alone, see
+  where it goes, and order the places so the walk takes the way it can.
+- A hill inside a national park (Cape Town's Signal Hill) is mapped as the park's protected area,
+  which `features` does not list: find the park's relation (`locate "Table Mountain National
+  Park"`) and add it to `parks`; the map cuts it to the page.
+- A long walk needs at least 12 places (`WaysDataTest`): a city whose places are few (Alexandria)
+  starts a little earlier, at a place worth its line.
+- OpenStreetMap's API answers 509 when it has been asked a lot: `fetch` waits and retries; a
+  fetch that still fails can be run again, and only the missing tiles are asked for.
+- A disambiguation page (Green Point Lighthouse) comes back from `wiki` as a short list: ask for
+  the full title.

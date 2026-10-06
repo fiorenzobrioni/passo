@@ -34,7 +34,15 @@ All notable changes to Passo are documented here. The format follows
   Beihai and the Drum Tower to the Lama Temple; Hong Kong, from Victoria Park by Wan Chai, the
   Star Ferry and Central to Western Market; Singapore, from Chinatown by Fort Canning, the river
   and the Merlion to Marina Bay Sands and the Supertrees; Bangkok, from the Giant Swing by the
-  Golden Mount, Khao San, the Grand Palace and Wat Pho, over the Memorial Bridge to Wat Arun; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And nine short ones, about 5 km, an hour
+  Golden Mount, Khao San, the Grand Palace and Wat Pho, over the Memorial Bridge to Wat Arun; Cairo, from the Egyptian Museum by Al-Muizz Street, Khan el-Khalili
+  and Al-Azhar to the Citadel; Cape Town, from the Green Point Lighthouse by the Waterfront, the
+  Castle and the Company's Garden to Bo-Kaap; Marrakech, from the Majorelle Garden by the souks,
+  Jemaa el-Fnaa, the Koutoubia and the Saadian Tombs to the Bahia Palace and Dar Si Said; Tunis, from
+  the Clock Tower along Avenue Habib Bourguiba and through the medina to the Belvedere Park;
+  Alexandria, from the Catacombs of Kom el Shoqafa by Pompey's Pillar, the Library and the
+  Corniche to the Citadel of Qaitbay; Dakar, from the Museum of Black Civilisations through the Plateau
+  and the Médina, along the Corniche to the University; Addis Ababa, from Meskel Square by the
+  palaces, Arat Kilo and St George's to the Taitu Hotel; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And twelve short ones, about 5 km, an hour
   or so: Porto, from the cathedral across the Douro to the Serra do Pilar; Amsterdam, from
   Centraal Station along the canals to the Westerkerk; Prague, from the Castle over Charles
   Bridge to Wenceslas Square; Québec, from the Parliament by the Plains of Abraham and the
@@ -43,13 +51,16 @@ All notable changes to Passo are documented here. The format follows
   through Getsemaní to San Felipe; Kyoto, from Kiyomizu-dera by the Yasaka pagoda, Gion and
   Pontochō to the Nishiki market; Hanoi, from the Temple of Literature round Hoàn Kiếm Lake and
   through the Old Quarter to the Long Biên Bridge; and Melbourne, from Flinders Street by the
-  State Library and Parliament to the Royal Exhibition Building. Each map has the city's
+  State Library and Parliament to the Royal Exhibition Building; Fez, from the Royal Palace
+  through the medina by Bou Inania, al-Qarawiyyin and the tanneries to the Andalusian Mosque;
+  Zanzibar, from Michenzani through Stone Town by the cathedrals, the fort and the House of Wonders
+  to the Old Dispensary; and Luxor, from Luxor Temple along the Avenue of Sphinxes to Karnak. Each map has the city's
   water, parks and main streets, and, for a city on the sea, its coast, so the area is
   recognisable at a glance. Walked where you are
   in one outing or a few. Each place is told as your steps reach it, with a short vibration and,
   if you like, its name and a line about it in your headphones; the notification says the next
   one. Stop when you like and continue later from where you were. On the Ways page, by
-  continent (Europe, the Americas, Asia and Oceania), each with a map of where its cities are and which you have
+  continent (Europe, the Americas, Asia and Oceania, Africa), each with a map of where its cities are and which you have
   walked; and from Outings. "Hear it" plays a place as you will hear it, and "Change voice" opens the phone's
   voices.
 - **The Japanese interval walk**: slow and fast walking in turns, 3 minutes each, five sets or

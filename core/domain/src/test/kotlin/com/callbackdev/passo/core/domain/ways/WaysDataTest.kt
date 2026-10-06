@@ -55,6 +55,16 @@ class WaysDataTest {
                 WayId.KYOTO_KIYOMIZU_NISHIKI,
                 WayId.HANOI_VAN_MIEU_LONG_BIEN,
                 WayId.MELBOURNE_FLINDERS_EXHIBITION,
+                WayId.CAIRO_MUSEUM_CITADEL,
+                WayId.CAPE_TOWN_LIGHTHOUSE_BO_KAAP,
+                WayId.MARRAKECH_MAJORELLE_SI_SAID,
+                WayId.TUNIS_CLOCK_BELVEDERE,
+                WayId.ALEXANDRIA_SHOQAFA_QAITBAY,
+                WayId.DAKAR_MUSEUM_UNIVERSITY,
+                WayId.ADDIS_ABABA_MESKEL_TAITU,
+                WayId.FEZ_PALACE_ANDALUSIANS,
+                WayId.ZANZIBAR_MICHENZANI_DISPENSARY,
+                WayId.LUXOR_TEMPLE_KARNAK,
             )
             .inOrder()
         // One walk a city for now (PLANNING.md §11 Phase 11, later).
@@ -63,7 +73,9 @@ class WaysDataTest {
                 "milan", "rome", "paris", "london", "madrid", "berlin", "vienna", "porto", "amsterdam", "prague",
                 "lima", "cusco", "new_york", "rio", "mexico_city", "buenos_aires", "san_francisco", "quebec",
                 "havana", "cartagena", "tokyo", "sydney", "seoul", "beijing", "hong_kong", "singapore", "bangkok",
-                "kyoto", "hanoi", "melbourne",
+                "kyoto", "hanoi", "melbourne", "cairo", "cape_town", "marrakech",
+                "tunis", "alexandria", "dakar", "addis_ababa", "fez",
+                "zanzibar", "luxor",
             )
             .inOrder()
     }
@@ -101,6 +113,9 @@ class WaysDataTest {
                 WayId.KYOTO_KIYOMIZU_NISHIKI,
                 WayId.HANOI_VAN_MIEU_LONG_BIEN,
                 WayId.MELBOURNE_FLINDERS_EXHIBITION,
+                WayId.FEZ_PALACE_ANDALUSIANS,
+                WayId.ZANZIBAR_MICHENZANI_DISPENSARY,
+                WayId.LUXOR_TEMPLE_KARNAK,
             )
     }
 
@@ -191,6 +206,12 @@ class WaysDataTest {
                 "melbourne",
             )
             .inOrder()
+        assertThat(Ways.walksIn(Continent.AFRICA).map { it.id.city })
+            .containsExactly(
+                "cairo", "cape_town", "marrakech", "tunis", "alexandria", "dakar", "addis_ababa", "fez", "zanzibar",
+                "luxor",
+            )
+            .inOrder()
     }
 
     @Test
@@ -225,11 +246,17 @@ class WaysDataTest {
                 WayId.HAVANA_CAPITOLIO_PAULA,
                 WayId.CARTAGENA_RELOJ_SAN_FELIPE,
                 WayId.HONG_KONG_VICTORIA_WESTERN,
+                WayId.CAPE_TOWN_LIGHTHOUSE_BO_KAAP,
+                WayId.ALEXANDRIA_SHOQAFA_QAITBAY,
+                WayId.DAKAR_MUSEUM_UNIVERSITY,
+                WayId.ZANZIBAR_MICHENZANI_DISPENSARY,
             )
         for (id in coastal) {
             val map = Ways.of(id).map
-            // The land from the coastline, not the whole ground: a few shores and islands.
-            assertThat(map.land.size).isGreaterThan(1)
+            // The land from the coastline, not the whole ground: a few shores and islands, or one
+            // shore drawn point by point (Zanzibar's, the only land in its frame), never the
+            // ground's four corners.
+            assertThat(map.land.size > 1 || map.land.single().size > 4).isTrue()
             // A place on a pier stands over the water the coastline leaves out (San Francisco's
             // Ferry Building, some 110 m out): a few steps from the land, never out at sea.
             for (stop in Ways.of(id).stops) {

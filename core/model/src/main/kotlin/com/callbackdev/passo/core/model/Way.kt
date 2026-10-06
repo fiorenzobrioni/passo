@@ -15,6 +15,7 @@ enum class Continent {
     EUROPE,
     AMERICAS,
     ASIA_OCEANIA,
+    AFRICA,
 }
 
 /**
@@ -60,6 +61,16 @@ enum class WayId(val kind: WayKind, val city: String? = null, val continent: Con
     KYOTO_KIYOMIZU_NISHIKI(WayKind.WALK, city = "kyoto", continent = Continent.ASIA_OCEANIA),
     HANOI_VAN_MIEU_LONG_BIEN(WayKind.WALK, city = "hanoi", continent = Continent.ASIA_OCEANIA),
     MELBOURNE_FLINDERS_EXHIBITION(WayKind.WALK, city = "melbourne", continent = Continent.ASIA_OCEANIA),
+    CAIRO_MUSEUM_CITADEL(WayKind.WALK, city = "cairo", continent = Continent.AFRICA),
+    CAPE_TOWN_LIGHTHOUSE_BO_KAAP(WayKind.WALK, city = "cape_town", continent = Continent.AFRICA),
+    MARRAKECH_MAJORELLE_SI_SAID(WayKind.WALK, city = "marrakech", continent = Continent.AFRICA),
+    TUNIS_CLOCK_BELVEDERE(WayKind.WALK, city = "tunis", continent = Continent.AFRICA),
+    ALEXANDRIA_SHOQAFA_QAITBAY(WayKind.WALK, city = "alexandria", continent = Continent.AFRICA),
+    DAKAR_MUSEUM_UNIVERSITY(WayKind.WALK, city = "dakar", continent = Continent.AFRICA),
+    ADDIS_ABABA_MESKEL_TAITU(WayKind.WALK, city = "addis_ababa", continent = Continent.AFRICA),
+    FEZ_PALACE_ANDALUSIANS(WayKind.WALK, city = "fez", continent = Continent.AFRICA),
+    ZANZIBAR_MICHENZANI_DISPENSARY(WayKind.WALK, city = "zanzibar", continent = Continent.AFRICA),
+    LUXOR_TEMPLE_KARNAK(WayKind.WALK, city = "luxor", continent = Continent.AFRICA),
 }
 
 /** Where a way the reader started stands. Stored by name. */

@@ -71,6 +71,8 @@ MINOR_STREETS = {"tertiary", "pedestrian"}
 # mapped mostly in those. The cache keeps them for every walk, so choosing them needs no fetch.
 LANES = {"residential", "unclassified", "living_street"}
 MIN_STREET_METRES = 150
+# The answers that mean slow down, not no: retried after a pause.
+THROTTLED = {429, 502, 503, 504, 509}
 MAP_MIN_ASPECT, MAP_MAX_ASPECT = 0.62, 1.2  # WayMapView's own bounds for a map box's shape
 STREET_MARGIN = 1.3  # around what the page shows: the inset, and the box a little wider
 NE = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/{}.geojson"
@@ -206,15 +208,19 @@ def fetch_streets(tile, target, classes, water_target=None, coast_target=None):
         coast_target.write_text(json.dumps(coasts))
 
 
-def read_retrying(request, attempts=4):
-    """A shared server drops a connection now and then: try again, a little later each time.
-    An HTTP error is an answer, not a drop, and is passed on."""
+def read_retrying(request, attempts=6):
+    """A shared server drops a connection now and then, or asks to slow down (OpenStreetMap's
+    API answers 509 or 429 when asked a lot): try again, a little later each time. Any other
+    HTTP error is an answer, not a drop, and is passed on."""
     for attempt in range(attempts):
         try:
             with urllib.request.urlopen(request, timeout=300) as response:
                 return response.read()
-        except urllib.error.HTTPError:
-            raise
+        except urllib.error.HTTPError as error:
+            if error.code not in THROTTLED or attempt == attempts - 1:
+                raise
+            print(f"  ({error.code}, waiting {30 * (attempt + 1)} s)")
+            time.sleep(30 * (attempt + 1))
         except (OSError, http.client.HTTPException):
             if attempt == attempts - 1:
                 raise
@@ -288,8 +294,7 @@ def download(url, target):
         return
     print(f"  {url}")
     request = urllib.request.Request(url, headers={"User-Agent": "passo-build-ways (github.com/fiorenzobrioni/passo)"})
-    with urllib.request.urlopen(request, timeout=300) as response:
-        target.write_bytes(response.read())
+    target.write_bytes(read_retrying(request))
 
 
 # --- Geometry ---------------------------------------------------------------------------------

@@ -19,7 +19,12 @@ Spanish, Tokyo in the English and Japanese (or Italian), Sydney in the English a
 Italian, French, Spanish), Seoul in the English and Korean, Beijing and Hong Kong in the English and Chinese,
 Singapore in the English and Chinese (or German, Italian), Bangkok in the English and German (or
 Italian), Kyoto in the English and Japanese, Hanoi in the English and French (or Italian), Melbourne in
-the English and German (or French).
+the English and German (or French), Cairo in the English and French (or Arabic, German, Italian), Cape
+Town in the English and German (or Dutch, French, Afrikaans), Marrakech in the English and French, Fez in
+the English and French (or Italian, Spanish, German), Tunis in the English and French (or Arabic,
+Italian), Alexandria in the English and French (or Arabic), Dakar in the English and
+French (or German), Addis Ababa in the English and French (or Italian), Zanzibar in the English and
+Italian (or German, French), Luxor in the English and French (or Italian).
 """
 
 from dataclasses import dataclass, field
@@ -2576,7 +2581,706 @@ MELBOURNE = Walk(
     ],
 )
 
-WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING, HONG_KONG, SINGAPORE, BANGKOK, KYOTO, HANOI, MELBOURNE]
+CAIRO = Walk(
+    id="CAIRO_MUSEUM_CITADEL",
+    city="cairo",
+    city_en="Cairo",
+    city_it="Il Cairo",
+    route_en="From the Egyptian Museum to the Citadel, by Al-Muizz Street and Al-Azhar",
+    route_it="Dal Museo Egizio alla Cittadella, passando per via al-Muizz e al-Azhar",
+    outing_en="A walk in Cairo",
+    outing_it="Passeggiata al Cairo",
+    country="EG",
+    continent="AFRICA",
+    # The medieval city's lanes are mapped as residential streets.
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=400,
+    # The Nile.
+    water=["relation/2063663"],
+    # Al-Azhar Park, the Ezbekiyya Garden.
+    parks=["way/24745061", "way/99842004"],
+    stops=[
+        Stop("cairo_egyptian_museum", "Egyptian Museum", "Museo Egizio", 30.0476, 31.2338,
+             note_en="Opened on Tahrir Square in 1902, the museum keeps in its garden the tomb of Auguste Mariette, its first curator.",
+             note_it="Aperto su piazza Tahrir nel 1902, il museo custodisce nel suo giardino la tomba di Auguste Mariette, il suo primo conservatore."),
+        # Source: Wikipedia, Egyptian Museum (Mariette's museum at Boulaq, 1858; his tomb moved to the garden in 1902); Wikipedia (fr), Musée égyptien du Caire (premier conservateur).
+        Stop("cairo_talaat_harb", "Talaat Harb Square", "Piazza Talaat Harb", 30.0476, 31.2385,
+             note_en="The statue in the middle of the square is of Talaat Harb, who founded Banque Misr in 1920.",
+             note_it="La statua al centro della piazza è di Talaat Harb, che nel 1920 fondò la Banque Misr."),
+        # Source: Wikipedia, Talaat Harb; Wikipedia (ar), ميدان طلعت حرب, and طلعت حرب. The square has an article in Arabic only: its old name (Suleiman Pasha) is not said.
+        Stop("cairo_abdeen", "Abdeen Palace", "Palazzo Abdeen", 30.0424, 31.2462,
+             note_en="Begun in 1863 and inaugurated in 1874 on land of Abdeen Bey, whose name it keeps, the palace replaced the Citadel as the seat of power.",
+             note_it="Iniziato nel 1863 e inaugurato nel 1874 su un terreno di Abdeen Bey, di cui porta il nome, il palazzo prese il posto della Cittadella come sede del potere."),
+        # Source: Wikipedia, Abdeen Palace; Wikipedia (fr), Palais d'Abedin.
+        Stop("cairo_islamic_art", "Museum of Islamic Art", "Museo d'arte islamica", 30.0448, 31.2527,
+             note_en="Its collection began in the ruined mosque of al-Hakim, further on; this neo-Mamluk building was finished in 1902.",
+             note_it="La sua collezione nacque nella moschea in rovina di al-Hakim, più avanti sul percorso; questo edificio neomamelucco fu finito nel 1902."),
+        # Source: Wikipedia, Museum of Islamic Art, Cairo; Wikipedia (de), Museum für Islamische Kunst (Kairo). The year it opened differs (1902 or 1903): not said.
+        Stop("cairo_qalawun", "Qalawun complex", "Complesso di Qalawun", 30.0495, 31.2610,
+             note_en="Sultan Qalawun's hospital, madrasa and mausoleum date from 1284 and 1285; the complex is said to have been built in just thirteen months.",
+             note_it="L'ospedale, la madrasa e il mausoleo del sultano Qalawun risalgono al 1284 e 1285; si dice che il complesso sia stato costruito in soli tredici mesi."),
+        # Source: Wikipedia, Qalawun complex ("reportedly"); Wikipedia (de), Grabkomplex des Qalawun ("soll").
+        Stop("cairo_aqmar", "Aqmar Mosque", "Moschea al-Aqmar", 30.0516, 31.2620,
+             note_en="Built in 1125 under the Fatimids, it was one of Cairo's first mosques whose façade follows the street, while its inside faces Mecca.",
+             note_it="Costruita nel 1125 sotto i Fatimidi, fu una delle prime moschee del Cairo con la facciata allineata alla strada, mentre l'interno è rivolto alla Mecca."),
+        # Source: Wikipedia, Aqmar Mosque (the first); Wikipedia (fr), Mosquée al-Aqmar (one of the first): the sentence says one of the first.
+        Stop("cairo_al_hakim", "Al-Hakim Mosque", "Moschea di al-Hakim", 30.0545, 31.2634,
+             note_en="Begun in 990 and finished in 1013 by the caliph al-Hakim, whose name it bears, the mosque was restored in 1980 by the Dawoodi Bohras.",
+             note_it="Iniziata nel 990 e finita nel 1013 dal califfo al-Hakim, di cui porta il nome, la moschea fu restaurata nel 1980 dai Dawoodi Bohra."),
+        # Source: Wikipedia, Al-Hakim Mosque; Wikipedia (fr), Mosquée Al-Hakim.
+        Stop("cairo_bab_al_nasr", "Bab al-Nasr", "Bab al-Nasr", 30.0542, 31.2650,
+             note_en="The Gate of Victory, built by the vizier Badr al-Jamali in 1087, has names of Napoleon's officers carved near its top.",
+             note_it="La Porta della Vittoria, costruita dal visir Badr al-Jamali nel 1087, porta incisi in alto i nomi di ufficiali di Napoleone."),
+        # Source: Wikipedia, Bab al-Nasr (Cairo); Wikipedia (fr), Bab al-Nasr (Le Caire).
+        Stop("cairo_khan_el_khalili", "Khan el-Khalili", "Khan el-Khalili", 30.0473, 31.2623,
+             note_en="The bazaar is named after a caravanserai built by the emir Jaharkas al-Khalili; Naguib Mahfouz set Midaq Alley here.",
+             note_it="Il bazar prende il nome da un caravanserraglio costruito dall'emiro Jaharkas al-Khalili; qui Nagib Mahfuz ambientò Vicolo del mortaio."),
+        # Source: Wikipedia, Khan el-Khalili; Wikipedia (it), Khan el-Khalili. The stop is on the bazaar's side of al-Hussein's square.
+        Stop("cairo_al_azhar", "Al-Azhar Mosque", "Moschea di al-Azhar", 30.0456, 31.2622,
+             note_en="Built by the Fatimid general Jawhar al-Siqilli when he founded Cairo, the mosque is the seat of Al-Azhar University.",
+             note_it="Costruita dal generale fatimide Jawhar al-Siqilli quando fondò il Cairo, la moschea è la sede dell'Università di al-Azhar."),
+        # Source: Wikipedia, Al-Azhar Mosque; Wikipedia (fr), Mosquée Al-Azhar. Which universities are older differs: not said.
+        Stop("cairo_al_ghuri", "Al-Ghuri complex", "Complesso di al-Ghuri", 30.0459, 31.2598,
+             note_en="Sultan al-Ghuri built his mosque and his mausoleum face to face across the street, but after the battle of Marj Dabiq, in 1516, his body was never found.",
+             note_it="Il sultano al-Ghuri costruì moschea e mausoleo uno di fronte all'altro sulla strada, ma dopo la battaglia di Marj Dabiq, nel 1516, il suo corpo non fu mai trovato."),
+        # Source: Wikipedia, Sultan al-Ghuri Complex; Wikipedia (ar), مجموعة السلطان الأشرف الغوري.
+        Stop("cairo_bab_zuwayla", "Bab Zuwayla", "Bab Zuwayla", 30.0428, 31.2579,
+             note_en="The southern gate of the Fatimid walls, built in 1092, bears on its towers the two minarets of the mosque of al-Mu'ayyad, added in the 15th century.",
+             note_it="Porta meridionale delle mura fatimide, costruita nel 1092, regge sulle sue torri i due minareti della moschea di al-Mu'ayyad, aggiunti nel Quattrocento."),
+        # Source: Wikipedia, Bab Zuwayla; Wikipedia (fr), Bab Zuweila.
+        Stop("cairo_blue_mosque", "Blue Mosque", "Moschea Blu", 30.0362, 31.2604,
+             note_en="Finished in 1347 for the emir Aqsunqur, it is called the Blue Mosque for the tiles a Janissary, Ibrahim Agha, added in the 17th century.",
+             note_it="Finita nel 1347 per l'emiro Aqsunqur, è detta Moschea Blu per le piastrelle che un giannizzero, Ibrahim Agha, vi aggiunse nel Seicento."),
+        # Source: Wikipedia, Aqsunqur Mosque; Wikipedia (de), Aqsunqur-Moschee. The years of the tiles differ (1652 to 1654, or to 1664): the century is said.
+        Stop("cairo_sultan_hasan", "Sultan Hasan Mosque", "Moschea del sultano Hasan", 30.0324, 31.2562,
+             note_en="Begun by Sultan Hasan in 1356, the madrasa taught the four schools of Sunni law, each, it is said, in one of the great iwans around its courtyard.",
+             note_it="Iniziata dal sultano Hasan nel 1356, la madrasa insegnava le quattro scuole del diritto sunnita, ciascuna, si dice, in uno dei grandi iwan intorno al cortile."),
+        # Source: Wikipedia, Mosque-Madrasa of Sultan Hasan ("said to have"); Wikipedia (fr), Mosquée du sultan Hassan.
+        Stop("cairo_muhammad_ali", "Muhammad Ali Mosque", "Moschea di Muhammad Ali", 30.0291, 31.2598,
+             note_en="In Saladin's Citadel, Muhammad Ali's mosque holds his tomb and a clock sent by the King of the French in return for the obelisk of Luxor, now in Paris.",
+             note_it="Nella Cittadella di Saladino, la moschea di Muhammad Ali custodisce la sua tomba e un orologio donato dal re dei Francesi in cambio dell'obelisco di Luxor, oggi a Parigi."),
+        # Source: Wikipedia, Muhammad Ali Mosque; Wikipedia (fr), Mosquée Mohammed Ali.
+    ],
+)
+
+CAPE_TOWN = Walk(
+    id="CAPE_TOWN_LIGHTHOUSE_BO_KAAP",
+    city="cape_town",
+    city_en="Cape Town",
+    city_it="Città del Capo",
+    route_en="From the Green Point Lighthouse to Bo-Kaap, by the Waterfront, the Castle and the Company's Garden",
+    route_it="Dal faro di Green Point al Bo-Kaap, passando per il Waterfront, il Castello e i Company's Garden",
+    outing_en="A walk in Cape Town",
+    outing_it="Passeggiata a Città del Capo",
+    country="ZA",
+    continent="AFRICA",
+    # Table Bay, from the coastline; the Waterfront's basins.
+    coast=True,
+    water=["relation/15602639", "relation/15602640", "relation/15602641"],
+    # Green Point, De Waterkant, Bo-Kaap and Gardens are mapped mostly as residential streets.
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=200,
+    # Table Mountain National Park, whose Signal Hill rises behind Bo-Kaap; Green Point Park and
+    # its gardens, the Company's Garden.
+    parks=["relation/338191", "way/44948367", "relation/9636593", "relation/9636594", "way/8035472"],
+    stops=[
+        Stop("cape_town_lighthouse", "Green Point Lighthouse", "Faro di Green Point", -33.9014, 18.3999,
+             note_en="First lit in 1824, South Africa's oldest lighthouse has had a foghorn since 1926.",
+             note_it="Acceso per la prima volta nel 1824, il faro più antico del Sudafrica ha una sirena da nebbia dal 1926."),
+        # Source: Wikipedia, Green Point Lighthouse, Cape Town; Wikipedia (af), Groenpunt-vuurtoring. Its cost differs: not said.
+        Stop("cape_town_stadium", "Cape Town Stadium", "Stadio di Città del Capo", -33.9045, 18.4105,
+             note_en="Built for the 2010 football World Cup, the stadium hosted one of its quarter-finals and a semi-final.",
+             note_it="Costruito per i Mondiali di calcio del 2010, lo stadio ne ospitò un quarto di finale e una semifinale."),
+        # Source: Wikipedia, Cape Town Stadium; Wikipedia (de), Kapstadt-Stadion. Its seats differ: not said.
+        Stop("cape_town_waterfront", "V&A Waterfront", "V&A Waterfront", -33.9065, 18.4222,
+             note_en="Its two basins are named after Queen Victoria and her son Prince Alfred, who began the harbour's breakwater in 1860.",
+             note_it="I suoi due bacini portano il nome della regina Vittoria e di suo figlio, il principe Alfredo, che nel 1860 diede inizio al frangiflutti del porto."),
+        # Source: Wikipedia, V&A Waterfront; Wikipedia (de), Victoria & Alfred Waterfront. The stop is the Clock Tower.
+        Stop("cape_town_nobel_square", "Nobel Square", "Nobel Square", -33.9055, 18.4195,
+             note_en="Its four statues are South Africa's Nobel Peace Prize winners, Albert Luthuli, Desmond Tutu, F. W. de Klerk and Nelson Mandela, with Table Mountain behind them.",
+             note_it="Le sue quattro statue sono i premi Nobel per la pace del Sudafrica, Albert Luthuli, Desmond Tutu, F. W. de Klerk e Nelson Mandela, con alle spalle la Montagna della Tavola."),
+        # Source: Wikipedia, Nobel Square; Wikipedia (de), Nobel Square.
+        Stop("cape_town_foreshore", "Foreshore", "Foreshore", -33.9174, 18.4232,
+             note_en="This district was built on land won from Table Bay in the 1930s and 1940s: the Castle, ahead, once stood on the shore.",
+             note_it="Questo quartiere sorge su terra strappata alla baia della Tavola negli anni Trenta e Quaranta: il Castello, più avanti, un tempo era sulla riva."),
+        # Source: Wikipedia, Foreshore, Cape Town, and Castle of Good Hope (on the coastline before the reclamation); Wikipedia (fr), Foreshore; Wikipedia (nl), Kasteel de Goede Hoop (its first gate faced the sea).
+        Stop("cape_town_castle", "Castle of Good Hope", "Castello di Buona Speranza", -33.9259, 18.4267,
+             note_en="Its first stone laid in 1666, the Dutch East India Company's fort has five bastions named after the titles of the Prince of Orange.",
+             note_it="Posata la prima pietra nel 1666, il forte della Compagnia olandese delle Indie orientali ha cinque bastioni che portano i titoli del principe d'Orange."),
+        # Source: Wikipedia, Castle of Good Hope; Wikipedia (nl), Kasteel de Goede Hoop. Whether it is the oldest building differs: not said.
+        Stop("cape_town_city_hall", "City Hall", "Municipio", -33.9254, 18.4237,
+             note_en="Hours after his release, on 11 February 1990, Nelson Mandela made his first public speech from this balcony; a statue of him has stood there since 2018.",
+             note_it="Poche ore dopo la sua liberazione, l'11 febbraio 1990, Nelson Mandela tenne da questo balcone il suo primo discorso pubblico; dal 2018 vi sorge una sua statua."),
+        # Source: Wikipedia, Cape Town City Hall; Wikipedia (de), Cape Town City Hall.
+        Stop("cape_town_district_six", "District Six Museum", "Museo di District Six", -33.9278, 18.4238,
+             note_en="Opened in 1994, the museum remembers the 60,000 people forced to leave District Six under apartheid, in the 1970s.",
+             note_it="Aperto nel 1994, il museo ricorda le 60.000 persone costrette a lasciare District Six sotto l'apartheid, negli anni Settanta."),
+        # Source: Wikipedia, District Six Museum; Wikipedia (nl), District Six Museum.
+        Stop("cape_town_south_african_museum", "South African Museum", "South African Museum", -33.9289, 18.4149,
+             note_en="Founded in 1825, the museum has stood in the Company's Garden since 1897; among its collections are whale skeletons.",
+             note_it="Fondato nel 1825, il museo è nei Company's Garden dal 1897; tra le sue collezioni ci sono scheletri di balena."),
+        # Source: Wikipedia, Iziko South African Museum; Wikipedia (de), Iziko South African Museum.
+        Stop("cape_town_company_garden", "Company's Garden", "Company's Garden", -33.9268, 18.4178,
+             note_en="Laid out by the first European settlers to grow fresh food for ships rounding the Cape, the garden keeps South Africa's oldest cultivated pear tree, from about 1652.",
+             note_it="Creato dai primi coloni europei per coltivare cibo fresco per le navi che doppiavano il Capo, il giardino conserva il più antico pero coltivato del Sudafrica, del 1652 circa."),
+        # Source: Wikipedia, Company's Garden; Wikipedia (nl), Company's Garden. When it was laid out differs (the 1650s, or 1650): not said.
+        Stop("cape_town_st_georges", "St George's Cathedral", "Cattedrale di San Giorgio", -33.9249, 18.4194,
+             note_en="Begun in 1901 to Herbert Baker's design, the cathedral holds the remains of Archbishop Desmond Tutu, before its high altar.",
+             note_it="Iniziata nel 1901 su progetto di Herbert Baker, la cattedrale custodisce davanti all'altare maggiore i resti dell'arcivescovo Desmond Tutu."),
+        # Source: Wikipedia, St. George's Cathedral, Cape Town; Wikipedia (de), St George’s Cathedral (Kapstadt).
+        Stop("cape_town_slave_lodge", "Slave Lodge", "Slave Lodge", -33.9252, 18.4208,
+             note_en="Built by the Dutch East India Company in 1679 to house the people it enslaved, the lodge served as such until 1811.",
+             note_it="Costruita nel 1679 dalla Compagnia olandese delle Indie orientali per alloggiare le persone che teneva in schiavitù, la Lodge servì a questo fino al 1811."),
+        # Source: Wikipedia, Slave Lodge, Cape Town; Wikipedia (de), Iziko Slave Lodge.
+        Stop("cape_town_greenmarket", "Greenmarket Square", "Greenmarket Square", -33.9227, 18.4201,
+             note_en="Laid out in 1696, the square was a slave market and a vegetable market; the front of its Old Town House is held to be the city's historic centre.",
+             note_it="Sorta nel 1696, la piazza fu mercato degli schiavi e mercato della verdura; lo spazio davanti all'Old Town House è considerato il centro storico della città."),
+        # Source: Wikipedia, Greenmarket Square; Wikipedia (fr), Place du Marché Vert.
+        Stop("cape_town_auwal", "Auwal Mosque", "Moschea Auwal", -33.9223, 18.4150,
+             note_en="Held to be South Africa's oldest mosque, from 1794, it had as its first imam Tuan Guru, who had written out the Qur'an from memory in prison.",
+             note_it="Considerata la più antica moschea del Sudafrica, del 1794, ebbe come primo imam Tuan Guru, che in prigione aveva trascritto il Corano a memoria."),
+        # Source: Wikipedia, Auwal Mosque (the first); Wikipedia (de), Auwal-Moschee ("gilt als" the oldest).
+        Stop("cape_town_bo_kaap", "Bo-Kaap", "Bo-Kaap", -33.9205, 18.4128,
+             note_en="Bo-Kaap, Afrikaans for above the Cape, is the old Malay Quarter on the slopes of Signal Hill, known for its brightly painted houses.",
+             note_it="Il Bo-Kaap, in afrikaans «sopra il Capo», è l'antico Quartiere malese sulle pendici del Signal Hill, noto per le sue case dai colori vivaci."),
+        # Source: Wikipedia, Bo-Kaap; Wikipedia (de), Bo-Kaap.
+    ],
+)
+
+MARRAKECH = Walk(
+    id="MARRAKECH_MAJORELLE_SI_SAID",
+    city="marrakech",
+    city_en="Marrakech",
+    city_it="Marrakech",
+    route_en="From the Majorelle Garden to Dar Si Said, by the souks, Jemaa el-Fnaa and the Bahia Palace",
+    route_it="Dal Giardino Majorelle a Dar Si Said, passando per i souk, Jemaa el-Fnaa e il Palazzo della Bahia",
+    outing_en="A walk in Marrakech",
+    outing_it="Passeggiata a Marrakech",
+    country="MA",
+    continent="AFRICA",
+    # The medina's lanes are mapped as residential streets.
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=200,
+    # The Majorelle Garden, the Cyber Park, Lalla Hasna Park, the Koutoubia Gardens.
+    parks=["way/41922120", "way/126302813", "way/364290838", "way/435129470"],
+    stops=[
+        Stop("marrakech_majorelle", "Majorelle Garden", "Giardino Majorelle", 31.6415, -8.0029,
+             note_en="Begun by the painter Jacques Majorelle in 1923, the garden is painted in the blue named after him; Yves Saint Laurent and Pierre Bergé later bought it.",
+             note_it="Iniziato dal pittore Jacques Majorelle nel 1923, il giardino è dipinto nel blu che porta il suo nome; in seguito lo comprarono Yves Saint Laurent e Pierre Bergé."),
+        # Source: Wikipedia, Majorelle Garden (in the 1980s); Wikipedia (fr), Jardin Majorelle (1980).
+        Stop("marrakech_bab_doukkala", "Bab Doukkala", "Bab Doukkala", 31.6340, -7.9990,
+             note_en="Already there under the Almoravids, the gate takes its name from the Doukkala, the region it led to.",
+             note_it="Già presente sotto gli Almoravidi, la porta prende il nome dalla Doukkala, la regione verso cui conduceva."),
+        # Source: Wikipedia, Bab Doukkala; Wikipedia (fr), Bab Doukkala (Marrakech).
+        Stop("marrakech_dar_el_bacha", "Dar el Bacha", "Dar el Bacha", 31.6315, -7.9929,
+             note_en="Built in 1910, the house of the pasha was the home of Thami El Glaoui, pasha of Marrakech; today it is the Museum of Confluences.",
+             note_it="Costruita nel 1910, la casa del pascià fu la residenza di Thami El Glaoui, pascià di Marrakech; oggi è il Museo delle Confluenze."),
+        # Source: Wikipedia, Dar el Bacha; Wikipedia (fr), Dar el Bacha.
+        Stop("marrakech_mouassine", "Mouassine Mosque", "Moschea Mouassine", 31.6299, -7.9893,
+             note_en="The Saadian sultan Abdallah al-Ghalib built this mosque, with a fountain, a hammam and a library, on land left free when the Jews were moved to the new mellah.",
+             note_it="Il sultano saadiano Abdallah al-Ghalib costruì questa moschea, con una fontana, un hammam e una biblioteca, su terreni lasciati liberi quando gli ebrei furono trasferiti nel nuovo mellah."),
+        # Source: Wikipedia, Mouassine Mosque; Wikipedia (fr), Mosquée El Mouassine. The stop is the Mouassine Fountain.
+        Stop("marrakech_almoravid_koubba", "Almoravid Koubba", "Qubba almoravide", 31.6315, -7.9872,
+             note_en="Built by the Almoravid ruler Ali ibn Yusuf, this dome housed the ablutions for the mosque nearby, of which it is all that is left.",
+             note_it="Costruita dal sovrano almoravide Ali ibn Yusuf, questa cupola ospitava le abluzioni per la moschea vicina, di cui è tutto ciò che resta."),
+        # Source: Wikipedia, Almoravid Qubba; Wikipedia (fr), Qoubba almoravide, and Médersa Ben Youssef (only the Qoubba is left of the old mosque). Its year differs (1117 or 1125): not said.
+        Stop("marrakech_ben_youssef", "Ben Youssef Madrasa", "Madrasa Ben Youssef", 31.6320, -7.9860,
+             note_en="Completed by the Saadian sultan Abdallah al-Ghalib in 1564 and 1565, the madrasa lodged its students in small rooms around its courtyard.",
+             note_it="Completata dal sultano saadiano Abdallah al-Ghalib nel 1564 e 1565, la madrasa ospitava i suoi studenti in piccole stanze intorno al cortile."),
+        # Source: Wikipedia, Ben Youssef Madrasa; Wikipedia (fr), Médersa Ben Youssef.
+        Stop("marrakech_jemaa_el_fnaa", "Jemaa el-Fnaa", "Jemaa el-Fnaa", 31.6258, -7.9889,
+             note_en="Proclaimed by UNESCO as intangible heritage in 2001, the square has snake charmers and storytellers by day, and fills with food stalls at night.",
+             note_it="Proclamata dall'UNESCO patrimonio immateriale nel 2001, la piazza ha incantatori di serpenti e cantastorie di giorno, e la sera si riempie di bancarelle di cibo."),
+        # Source: Wikipedia, Jemaa el-Fnaa; Wikipedia (fr), Place Jemaa el-Fna. What its name means differs: not said.
+        Stop("marrakech_koutoubia", "Koutoubia Mosque", "Moschea Koutoubia", 31.6238, -7.9934,
+             note_en="Its name comes from the Arabic for booksellers; its Almohad minaret likely inspired Seville's Giralda and Rabat's Hassan Tower.",
+             note_it="Il suo nome viene dalla parola araba per librai; il suo minareto almohade ispirò probabilmente la Giralda di Siviglia e la Torre Hassan di Rabat."),
+        # Source: Wikipedia, Kutubiyya Mosque; Wikipedia (fr), Mosquée Koutoubia. The years differ: not said.
+        Stop("marrakech_bab_agnaou", "Bab Agnaou", "Bab Agnaou", 31.6174, -7.9906,
+             note_en="Built under the Almohads, the gate led into the royal kasbah of Ya'qub al-Mansur; its name is thought to come from a Berber word for the mute.",
+             note_it="Costruita sotto gli Almohadi, la porta conduceva nella kasbah reale di Ya'qub al-Mansur; il suo nome verrebbe da una parola berbera che significa muto."),
+        # Source: Wikipedia, Bab Agnaou; Wikipedia (fr), Bab Agnaou.
+        Stop("marrakech_saadian_tombs", "Saadian Tombs", "Tombe saadiane", 31.6173, -7.9886,
+             note_en="Ahmad al-Mansur, the most powerful of the Saadian sultans, lies at the centre of the Chamber of the Twelve Columns, among his dynasty's tombs.",
+             note_it="Ahmad al-Mansur, il più potente dei sultani saadiani, riposa al centro della Sala delle dodici colonne, tra le tombe della sua dinastia."),
+        # Source: Wikipedia, Saadian Tombs; Wikipedia (fr), Tombeaux saadiens.
+        Stop("marrakech_el_badi", "El Badi Palace", "Palazzo El Badi", 31.6182, -7.9865,
+             note_en="Ahmad al-Mansur began the Incomparable Palace in 1578, after the battle of the Three Kings; Moulay Ismail later stripped it to build Meknes.",
+             note_it="Ahmad al-Mansur iniziò il Palazzo Incomparabile nel 1578, dopo la battaglia dei Tre Re; Moulay Ismail in seguito lo spogliò per costruire Meknès."),
+        # Source: Wikipedia, El Badi Palace; Wikipedia (fr), Palais El Badi. When it was stripped differs (1696 or 1707): not said.
+        Stop("marrakech_mellah", "Mellah", "Mellah", 31.6198, -7.9849,
+             note_en="The Saadian sultan Abdallah al-Ghalib created this Jewish quarter by decree in 1558, beside the royal kasbah.",
+             note_it="Il sultano saadiano Abdallah al-Ghalib creò per decreto questo quartiere ebraico nel 1558, accanto alla kasbah reale."),
+        # Source: Wikipedia, Mellah of Marrakesh; Wikipedia (fr), Mellah de Marrakech. The stop is the Place des Ferblantiers, at its edge.
+        Stop("marrakech_bahia", "Bahia Palace", "Palazzo della Bahia", 31.6219, -7.9822,
+             note_en="Begun in the 1860s by the grand vizier Si Musa, the palace was enlarged until 1900 by his son Ba Ahmed, grand vizier after him.",
+             note_it="Iniziato negli anni Sessanta dell'Ottocento dal gran visir Si Musa, il palazzo fu ingrandito fino al 1900 da suo figlio Ba Ahmed, gran visir dopo di lui."),
+        # Source: Wikipedia, Bahia Palace; Wikipedia (fr), Palais de la Bahia. Where its name comes from is in one only: not said.
+        Stop("marrakech_dar_si_said", "Dar Si Said", "Dar Si Said", 31.6234, -7.9839,
+             note_en="Built for Si Said, Ba Ahmed's brother, the house became a museum of Moroccan crafts in the 1930s.",
+             note_it="Costruita per Si Said, fratello di Ba Ahmed, la casa divenne negli anni Trenta un museo dell'artigianato marocchino."),
+        # Source: Wikipedia, Dar Si Said (1930 or 1932); Wikipedia (fr), Musée Dar Si Saïd (1932).
+    ],
+)
+
+TUNIS = Walk(
+    id="TUNIS_CLOCK_BELVEDERE",
+    city="tunis",
+    city_en="Tunis",
+    city_it="Tunisi",
+    route_en="From the Clock Tower to the Belvedere Park, by Avenue Habib Bourguiba and the medina",
+    route_it="Dalla Torre dell'orologio al parco del Belvedere, passando per l'avenue Habib Bourguiba e la medina",
+    outing_en="A walk in Tunis",
+    outing_it="Passeggiata a Tunisi",
+    country="TN",
+    continent="AFRICA",
+    # The medina's lanes are mapped as residential streets.
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=200,
+    # The Lake of Tunis, east of the Clock Tower.
+    water=["relation/8031768"],
+    parks=["way/48720329"],
+    stops=[
+        Stop("tunis_clock_tower", "Clock Tower", "Torre dell'orologio", 36.8002, 10.1862,
+             note_en="Named for the revolution of 14 January 2011, the square has a clock tower from 2001 and, back again, Bourguiba's statue on horseback.",
+             note_it="Intitolata alla rivoluzione del 14 gennaio 2011, la piazza ha una torre dell'orologio del 2001 e, di nuovo, la statua equestre di Bourguiba."),
+        # Source: Wikipedia (fr), Place du 14-Janvier 2011; Wikipedia (ar), ساحة 14 جانفي 2011. The square has no article in English.
+        Stop("tunis_municipal_theatre", "Municipal Theatre", "Teatro municipale", 36.7991, 10.1808,
+             note_en="Built in the Art Nouveau style, the theatre opened in 1902 as the Municipal Casino of Tunis.",
+             note_it="Costruito in stile Liberty, il teatro aprì nel 1902 come Casino municipale di Tunisi."),
+        # Source: Wikipedia, Théâtre municipal de Tunis; Wikipedia (fr), Théâtre municipal de Tunis.
+        Stop("tunis_cathedral", "Cathedral of St Vincent de Paul", "Cattedrale di San Vincenzo de' Paoli", 36.8000, 10.1790,
+             note_en="Opened at Christmas 1897 with temporary wooden bell towers, the cathedral is named after Vincent de Paul, who was sold as a slave in Tunis.",
+             note_it="Inaugurata il Natale del 1897 con campanili provvisori di legno, la cattedrale è intitolata a Vincenzo de' Paoli, che fu venduto come schiavo a Tunisi."),
+        # Source: Wikipedia (fr), Cathédrale Saint-Vincent-de-Paul de Tunis; Wikipedia (it), Cattedrale di San Vincenzo de' Paoli. The English article says neither.
+        Stop("tunis_bab_el_bhar", "Bab el Bhar", "Bab el Bhar", 36.7992, 10.1756,
+             note_en="The Sea Gate, also called the Gate of France, marks where the medina ends and the modern city begins.",
+             note_it="La Porta del Mare, detta anche Porta di Francia, segna il confine tra la medina e la città nuova."),
+        # Source: Wikipedia, Bab el Bhar; Wikipedia (fr), Bab El Bhar.
+        Stop("tunis_zitouna", "Zitouna Mosque", "Moschea Zitouna", 36.7974, 10.1715,
+             note_en="The Olive Mosque, named, the legend goes, after an olive tree on the site, was rebuilt under the Aghlabids with ancient columns from Carthage.",
+             note_it="La Moschea dell'Olivo, che secondo la leggenda prende il nome da un olivo che sorgeva qui, fu ricostruita sotto gli Aghlabidi con colonne antiche di Cartagine."),
+        # Source: Wikipedia, Al-Zaytuna Mosque; Wikipedia (fr), Mosquée Zitouna. Its founding year differs: not said.
+        Stop("tunis_tourbet_el_bey", "Tourbet el Bey", "Tourbet el Bey", 36.7937, 10.1731,
+             note_en="Built under Ali II, the largest funerary monument in Tunis holds most of the Husainid beys under its green-tiled domes.",
+             note_it="Costruito sotto Ali II, il più grande monumento funebre di Tunisi accoglie la maggior parte dei bey husseiniti sotto le sue cupole di tegole verdi."),
+        # Source: Wikipedia, Tourbet el Bey; Wikipedia (fr), Tourbet El Bey.
+        Stop("tunis_dar_el_bey", "Dar El Bey", "Dar El Bey", 36.7976, 10.1690,
+             note_en="Once a palace of the beys, Dar El Bey, in the Kasbah, is now the office of Tunisia's head of government.",
+             note_it="Un tempo palazzo dei bey, il Dar El Bey, nella Kasbah, è oggi la sede del capo del governo tunisino."),
+        # Source: Wikipedia, Dar El Bey; Wikipedia (fr), Dar El Bey. The Kasbah Mosque, nearby, has no article in French: not a place.
+        Stop("tunis_hammouda_pacha", "Hammouda Pacha Mosque", "Moschea di Hammouda Pascià", 36.7982, 10.1706,
+             note_en="Built in 1655 by the Muradid bey Hammouda Pasha, the mosque is known for its octagonal minaret, in the Ottoman style.",
+             note_it="Costruita nel 1655 dal bey muradide Hammouda Pascià, la moschea è nota per il suo minareto ottagonale, in stile ottomano."),
+        # Source: Wikipedia, Hammouda Pacha Mosque; Wikipedia (fr), Mosquée Hammouda-Pacha.
+        Stop("tunis_dar_lasram", "Dar Lasram", "Dar Lasram", 36.8021, 10.1682,
+             note_en="Built from 1812 to 1819 for Hamouda Lasram, of a family of ministers of the Pen, the palace has housed the society that looks after the medina since 1968.",
+             note_it="Costruito dal 1812 al 1819 per Hamouda Lasram, di una famiglia di ministri della Penna, il palazzo ospita dal 1968 l'associazione che tutela la medina."),
+        # Source: Wikipedia, Dar Lasram; Wikipedia (fr), Dar Lasram.
+        Stop("tunis_sidi_mahrez", "Sidi Mahrez Mosque", "Moschea di Sidi Mahrez", 36.8042, 10.1684,
+             note_en="Begun in 1692 by Mohamed Bey in honour of Sidi Mahrez, the medina's patron saint, the mosque takes its domes from the mosques of Istanbul.",
+             note_it="Iniziata nel 1692 da Mohamed Bey in onore di Sidi Mahrez, santo patrono della medina, la moschea prende le sue cupole dalle moschee di Istanbul."),
+        # Source: Wikipedia, Sidi Mahrez Mosque; Wikipedia (fr), Mosquée Sidi Mahrez. Which Istanbul mosque it follows differs: not said. Bab Souika, 150 m on, is walked through.
+        Stop("tunis_saheb_ettabaa", "Saheb Ettabaâ Mosque", "Moschea Saheb Ettabaâ", 36.8076, 10.1666,
+             note_en="Opened in 1814 by the grand vizier Youssef Saheb Ettabaâ, it was the last great mosque built in Tunis before the French protectorate.",
+             note_it="Inaugurata nel 1814 dal gran visir Youssef Saheb Ettabaâ, fu l'ultima grande moschea costruita a Tunisi prima del protettorato francese."),
+        # Source: Wikipedia, Saheb Ettabaâ Mosque; Wikipedia (fr), Mosquée Saheb Ettabaâ.
+        Stop("tunis_bab_el_khadra", "Bab el Khadra", "Bab el Khadra", 36.8104, 10.1713,
+             note_en="Called the Gate of the Green Gardens, it led out towards Carthage and Ariana, and was rebuilt in its present form in 1881.",
+             note_it="Detta Porta dei giardini verdi, conduceva verso Cartagine e Ariana, e fu ricostruita nella forma attuale nel 1881."),
+        # Source: Wikipedia, Bab el Khadra; Wikipedia (fr), Bab El Khadra.
+        Stop("tunis_great_synagogue", "Great Synagogue", "Grande Sinagoga", 36.8104, 10.1801,
+             note_en="Designed by the architect Victor Valensi, the city's Great Synagogue was inaugurated in 1937.",
+             note_it="Progettata dall'architetto Victor Valensi, la Grande Sinagoga della città fu inaugurata nel 1937."),
+        # Source: Wikipedia, Grand Synagogue of Tunis; Wikipedia (fr), Grande synagogue de Tunis.
+        Stop("tunis_belvedere", "Belvedere Park", "Parco del Belvedere", 36.8233, 10.1716,
+             note_en="Laid out from 1892 on a hill of old olive groves, the Belvedere is the largest park in Tunis; its zoo came in the 1960s.",
+             note_it="Creato dal 1892 su una collina di antichi oliveti, il Belvedere è il più grande parco di Tunisi; il suo zoo arrivò negli anni Sessanta."),
+        # Source: Wikipedia, Belvedere Park, Tunis; Wikipedia (fr), Parc du Belvédère. The stop is the top of the hill.
+    ],
+)
+
+ALEXANDRIA = Walk(
+    id="ALEXANDRIA_SHOQAFA_QAITBAY",
+    city="alexandria",
+    city_en="Alexandria",
+    city_it="Alessandria d'Egitto",
+    route_en="From the Catacombs of Kom el Shoqafa to the Citadel of Qaitbay, by the Library and the Corniche",
+    route_it="Dalle catacombe di Kom el Shoqafa alla Cittadella di Qaitbay, passando per la Biblioteca e la Corniche",
+    outing_en="A walk in Alexandria",
+    outing_it="Passeggiata ad Alessandria",
+    country="EG",
+    continent="AFRICA",
+    # The Mediterranean and the Eastern Harbour, from the coastline.
+    coast=True,
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=200,
+    # The Shallalat Gardens, Kom el-Dikka, the archaeological park of Pompey's Pillar, Khartoum Square.
+    parks=["way/25723236", "way/28817193", "way/28817044", "way/682100805"],
+    stops=[
+        Stop("alexandria_kom_el_shoqafa", "Catacombs of Kom el Shoqafa", "Catacombe di Kom el Shoqafa", 31.1784, 29.8930,
+             note_en="Used for burials from the 2nd to the 4th century, the catacombs were found again in 1900, when a donkey fell into their shaft.",
+             note_it="Usate per le sepolture dal II al IV secolo, le catacombe furono ritrovate nel 1900, quando un asino cadde nel loro pozzo d'accesso."),
+        # Source: Wikipedia, Catacombs of Kom El Shoqafa; Wikipedia (fr), Catacombes de Kom El Shoqafa.
+        Stop("alexandria_pompeys_pillar", "Pompey's Pillar", "Colonna di Pompeo", 31.1826, 29.8972,
+             note_en="Despite its name, the column was raised in honour of the emperor Diocletian, where the Serapeum stood.",
+             note_it="Nonostante il nome, la colonna fu eretta in onore dell'imperatore Diocleziano, dove sorgeva il Serapeo."),
+        # Source: Wikipedia, Pompey's Pillar; Wikipedia (fr), Colonne de Pompée.
+        Stop("alexandria_kom_el_dikka", "Kom el-Dikka", "Kom el-Dikka", 31.1965, 29.9040,
+             note_en="Excavated since 1960 with Polish archaeologists, Kom el-Dikka had Roman baths, lecture halls and a theatre.",
+             note_it="Scavata dal 1960 con archeologi polacchi, Kom el-Dikka aveva terme romane, aule per lezioni e un teatro."),
+        # Source: Wikipedia, Kom El Deka; Wikipedia (fr), Kom el-Dikka.
+        Stop("alexandria_national_museum", "National Museum", "Museo nazionale", 31.2010, 29.9120,
+             note_en="The museum is housed in an Italian-style palace that was once the consulate of the United States.",
+             note_it="Il museo ha sede in un palazzo in stile italiano che un tempo ospitava il consolato degli Stati Uniti."),
+        # Source: Wikipedia, Alexandria National Museum; Wikipedia (fr), Musée national d'Alexandrie.
+        Stop("alexandria_bibliotheca", "Bibliotheca Alexandrina", "Bibliotheca Alexandrina", 31.2087, 29.9089,
+             note_en="Designed by the Norwegian firm Snøhetta near the site of the ancient Library, the new one has shelves for eight million books.",
+             note_it="Progettata dallo studio norvegese Snøhetta vicino al luogo dell'antica Biblioteca, la nuova ha scaffali per otto milioni di libri."),
+        # Source: Wikipedia, Bibliotheca Alexandrina; Wikipedia (fr), Bibliotheca Alexandrina.
+        Stop("alexandria_cecil", "Cecil Hotel", "Hotel Cecil", 31.2010, 29.8994,
+             note_en="Built in 1929 on Saad Zaghloul Square, facing the sea front, the Cecil Hotel welcomed guests such as Winston Churchill.",
+             note_it="Costruito nel 1929 su piazza Saad Zaghloul, di fronte al lungomare, l'Hotel Cecil ebbe ospiti come Winston Churchill."),
+        # Source: Wikipedia, Cecil Hotel (Alexandria); Wikipedia (ar), فندق سيسل (الإسكندرية).
+        Stop("alexandria_eliyahu_hanavi", "Eliyahu Hanavi Synagogue", "Sinagoga Eliyahu Hanavi", 31.1992, 29.9006,
+             note_en="Destroyed by Napoleon's army in 1798, the synagogue was rebuilt in 1850 on the site of one of 1354.",
+             note_it="Distrutta dall'esercito di Napoleone nel 1798, la sinagoga fu ricostruita nel 1850 dove ne sorgeva una del 1354."),
+        # Source: Wikipedia, Eliyahu Hanavi Synagogue; Wikipedia (fr), Synagogue Éliyahu Hanavi.
+        Stop("alexandria_st_mark", "St Mark's Cathedral", "Cattedrale di San Marco", 31.1984, 29.8996,
+             note_en="The historic seat of the Coptic popes stands, by tradition, where Mark the Evangelist founded the Church of Alexandria.",
+             note_it="Sede storica dei papi copti, la cattedrale sorge, secondo la tradizione, dove Marco evangelista fondò la Chiesa di Alessandria."),
+        # Source: Wikipedia, Saint Mark's Coptic Orthodox Cathedral (Alexandria); Wikipedia (fr), Cathédrale Saint-Marc d'Alexandrie.
+        Stop("alexandria_unknown_soldier", "Unknown Soldier Memorial", "Monumento al milite ignoto", 31.2000, 29.8938,
+             note_en="Built by Alexandria's Italians as a memorial to Khedive Ismail, it was later made the memorial to the navy's unknown soldiers.",
+             note_it="Costruito dagli italiani di Alessandria come monumento al chedivè Ismail, divenne poi il monumento ai militi ignoti della marina."),
+        # Source: Wikipedia, Alexandria Naval Unknown Soldier Memorial; Wikipedia (ar), نصب الجندي المجهول (الإسكندرية). When it changed differs (after 1952, or 1964): not said.
+        Stop("alexandria_terbana", "Terbana Mosque", "Moschea Terbana", 31.2008, 29.8872,
+             note_en="Built by Hajj Ibrahim Terbana and named after him, the mosque is in the Delta style of Ottoman Egypt.",
+             note_it="Costruita da Hajj Ibrahim Terbana, di cui porta il nome, la moschea è nello stile del Delta dell'Egitto ottomano."),
+        # Source: Wikipedia, Mosque of Ibrahim Terbana; Wikipedia (ar), مسجد تربانة.
+        Stop("alexandria_abu_al_abbas", "Abu al-Abbas al-Mursi Mosque", "Moschea di Abu al-Abbas al-Mursi", 31.2054, 29.8823,
+             note_en="Built over the tomb of the Sufi saint Abu al-Abbas al-Mursi, the mosque in its present form is the work of Italian architects.",
+             note_it="Costruita sulla tomba del santo sufi Abu al-Abbas al-Mursi, la moschea nella sua forma attuale è opera di architetti italiani."),
+        # Source: Wikipedia, Abu al-Abbas al-Mursi Mosque; Wikipedia (fr), Mosquée Abu el-Abbas el-Mursi. Its first year differs (1306 or 1307): not said.
+        Stop("alexandria_qaitbay", "Citadel of Qaitbay", "Cittadella di Qaitbay", 31.2137, 29.8854,
+             note_en="Sultan Qaitbay built this fort from 1477 to 1479 where the ancient Lighthouse of Alexandria had stood.",
+             note_it="Il sultano Qaitbay costruì questo forte dal 1477 al 1479 dove sorgeva l'antico Faro di Alessandria."),
+        # Source: Wikipedia, Citadel of Qaitbay; Wikipedia (fr), Citadelle de Qaitbay.
+    ],
+)
+
+DAKAR = Walk(
+    id="DAKAR_MUSEUM_UNIVERSITY",
+    city="dakar",
+    city_en="Dakar",
+    city_it="Dakar",
+    route_en="From the Museum of Black Civilisations to the University, by the Plateau, the Médina and the Corniche",
+    route_it="Dal Museo delle civiltà nere all'Università, passando per il Plateau, la Médina e la Corniche",
+    outing_en="A walk in Dakar",
+    outing_it="Passeggiata a Dakar",
+    country="SN",
+    continent="AFRICA",
+    # The Atlantic, from the coastline.
+    coast=True,
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=200,
+    # The Place de l'Indépendance, the Institut français's gardens.
+    parks=["way/27811247", "way/116541061", "relation/7004021"],
+    stops=[
+        Stop("dakar_black_civilisations", "Museum of Black Civilisations", "Museo delle civiltà nere", 14.6768, -17.4352,
+             note_en="Imagined by Léopold Sédar Senghor, the museum tells the histories and cultures of Black people everywhere.",
+             note_it="Immaginato da Léopold Sédar Senghor, il museo racconta le storie e le culture dei popoli neri di tutto il mondo."),
+        # Source: Wikipedia, Museum of Black Civilisations; Wikipedia (fr), Musée des civilisations noires. Its opening date is a template in one: not said.
+        Stop("dakar_station", "Dakar station", "Stazione di Dakar", 14.6760, -17.4330,
+             note_en="In front of the station stand Demba and Dupont, a Senegalese tirailleur and a French soldier, statues unveiled in 1923.",
+             note_it="Davanti alla stazione stanno Demba e Dupont, un tirailleur senegalese e un soldato francese, statue inaugurate nel 1923."),
+        # Source: Wikipedia (fr), Monument aux morts Demba et Dupont; Wikipedia (de), Monument Demba et Dupont. Kermel market and the Place de l'Indépendance, walked by, have no article of their own.
+        Stop("dakar_palace", "Presidential Palace", "Palazzo presidenziale", 14.6638, -17.4335,
+             note_en="Ordered in 1902 for the governor-general of French West Africa, who until then lived in Saint-Louis, the palace is now the home of Senegal's president.",
+             note_it="Voluto nel 1902 per il governatore generale dell'Africa occidentale francese, che fino ad allora risiedeva a Saint-Louis, il palazzo è oggi la residenza del presidente del Senegal."),
+        # Source: Wikipedia, Palace of the Republic, Dakar; Wikipedia (fr), Palais de la République (Sénégal).
+        Stop("dakar_national_assembly", "National Assembly", "Assemblea nazionale", 14.6626, -17.4385,
+             note_en="Senegal's single chamber, the National Assembly, sits here; it twice had a Senate beside it, from 1999 to 2001 and from 2007 to 2012.",
+             note_it="Qui siede l'Assemblea nazionale, la camera unica del Senegal; due volte ebbe accanto un Senato, dal 1999 al 2001 e dal 2007 al 2012."),
+        # Source: Wikipedia, National Assembly (Senegal); Wikipedia (fr), Assemblée nationale (Sénégal).
+        Stop("dakar_ifan_museum", "Théodore Monod Museum", "Museo Théodore Monod", 14.6637, -17.4383,
+             note_en="Part of the IFAN institute, the museum of African art has borne the name of the naturalist Théodore Monod since 2007.",
+             note_it="Parte dell'istituto IFAN, il museo d'arte africana porta dal 2007 il nome del naturalista Théodore Monod."),
+        # Source: Wikipedia, Théodore Monod African Art Museum; Wikipedia (fr), Musée Théodore-Monod d'Art africain. When it became a museum differs: not said.
+        Stop("dakar_cathedral", "Cathedral of Our Lady of Victories", "Cattedrale di Nostra Signora delle Vittorie", 14.6654, -17.4376,
+             note_en="Seat of the archbishop of Dakar, the cathedral was consecrated by Cardinal Jean Verdier, archbishop of Paris.",
+             note_it="Sede dell'arcivescovo di Dakar, la cattedrale fu consacrata dal cardinale Jean Verdier, arcivescovo di Parigi."),
+        # Source: Wikipedia, Our Lady of Victories Cathedral, Dakar; Wikipedia (fr), Cathédrale du Souvenir africain de Dakar.
+        Stop("dakar_sorano", "Daniel Sorano Theatre", "Teatro Daniel Sorano", 14.6663, -17.4395,
+             note_en="Opened in 1965, Senegal's national theatre is named after the French-Senegalese actor Daniel Sorano.",
+             note_it="Inaugurato nel 1965, il teatro nazionale del Senegal porta il nome dell'attore franco-senegalese Daniel Sorano."),
+        # Source: Wikipedia, Daniel Sorano National Theater; Wikipedia (fr), Théâtre national Daniel-Sorano. The Sandaga market, walked by, has no article.
+        Stop("dakar_grand_mosque", "Grand Mosque", "Grande Moschea", 14.6782, -17.4425,
+             note_en="Built by Moroccan and French architects, the Grand Mosque was inaugurated in 1964 by King Hassan II of Morocco and President Senghor.",
+             note_it="Costruita da architetti marocchini e francesi, la Grande Moschea fu inaugurata nel 1964 dal re del Marocco Hassan II e dal presidente Senghor."),
+        # Source: Wikipedia, Grand Mosque of Dakar; Wikipedia (fr), Grande mosquée de Dakar.
+        Stop("dakar_iba_mar_diop", "Iba Mar Diop Stadium", "Stadio Iba Mar Diop", 14.6793, -17.4468,
+             note_en="Renovated for the 2026 Youth Olympic Games, the stadium is used by two of Dakar's football clubs, ASC Jaraaf and US Gorée.",
+             note_it="Rinnovato per i Giochi olimpici giovanili del 2026, lo stadio è usato da due squadre di calcio di Dakar, l'ASC Jaraaf e l'US Gorée."),
+        # Source: Wikipedia, Stade Iba Mar Diop; Wikipedia (fr), Stade Iba-Mar-Diop.
+        Stop("dakar_medina", "Médina", "Médina", 14.6765, -17.4520,
+             note_en="The Médina was founded by the French colonial authorities in 1914; the singer Youssou N'Dour was born here.",
+             note_it="La Médina fu fondata dalle autorità coloniali francesi nel 1914; qui è nato il cantante Youssou N'Dour."),
+        # Source: Wikipedia, Médina, Dakar; Wikipedia (fr), Médina (Dakar), which says why: a plague, the Africans of the Plateau moved out (in one only).
+        Stop("dakar_soumbedioune", "Soumbédioune", "Soumbédioune", 14.6769, -17.4578,
+             note_en="On the Corniche, beside the Médina, Soumbédioune's craft market is one of the best known in Dakar.",
+             note_it="Sulla Corniche, accanto alla Médina, il mercato artigiano di Soumbédioune è uno dei più noti di Dakar."),
+        # Source: Wikipedia, Médina, Dakar, and Wikipedia (fr), Médina (Dakar), on the market; Wikipedia (fr), Village artisanal de Soumbedioune, on the Corniche.
+        Stop("dakar_ucad", "Cheikh Anta Diop University", "Università Cheikh Anta Diop", 14.6850, -17.4625,
+             note_en="Grown from a medical school of French West Africa, the university bears the name of the historian Cheikh Anta Diop.",
+             note_it="Nata da una scuola di medicina dell'Africa occidentale francese, l'università porta il nome dello storico Cheikh Anta Diop."),
+        # Source: Wikipedia, Cheikh Anta Diop University; Wikipedia (fr), Université Cheikh-Anta-Diop.
+    ],
+)
+
+ADDIS_ABABA = Walk(
+    id="ADDIS_ABABA_MESKEL_TAITU",
+    city="addis_ababa",
+    city_en="Addis Ababa",
+    city_it="Addis Abeba",
+    route_en="From Meskel Square to the Taitu Hotel, by the palaces, Arat Kilo and St George's",
+    route_it="Da piazza Meskel all'Hotel Taitu, passando per i palazzi, Arat Kilo e San Giorgio",
+    outing_en="A walk in Addis Ababa",
+    outing_it="Passeggiata ad Addis Abeba",
+    country="ET",
+    continent="AFRICA",
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=200,
+    # Unity Park, in Menelik's palace; Sheger Park; Africa, Addis Ababa and Ethiopia parks.
+    parks=[
+        "relation/16249545", "way/906864463", "way/1049534731", "way/24254768", "way/50833472",
+        "way/50833473", "way/1534984980",
+    ],
+    stops=[
+        Stop("addis_ababa_meskel_square", "Meskel Square", "Piazza Meskel", 9.0110, 38.7605,
+             note_en="The square takes its name from Meskel, the feast of the finding of the True Cross, when a great bonfire is lit here.",
+             note_it="La piazza prende il nome da Meskel, la festa del ritrovamento della Vera Croce, quando qui si accende un grande falò."),
+        # Source: Wikipedia, Meskel Square; Wikipedia (fr), Mesqel adebabay.
+        Stop("addis_ababa_red_terror", "Red Terror Martyrs' Memorial Museum", "Museo dei martiri del Terrore rosso", 9.0102, 38.7625,
+             note_en="Opened in 2010, the museum remembers the victims of the Red Terror under the Derg, with their skulls, bones and photographs.",
+             note_it="Aperto nel 2010, il museo ricorda le vittime del Terrore rosso sotto il Derg, con i loro teschi, le ossa e le fotografie."),
+        # Source: Wikipedia, Red Terror Martyrs' Memorial Museum; Wikipedia (it), Museo memoriale dei martiri del Terrore rosso.
+        Stop("addis_ababa_africa_hall", "Africa Hall", "Africa Hall", 9.0160, 38.7632,
+             note_en="Built in 1961, Africa Hall holds Afewerk Tekle's best-known work, the stained-glass triptych Total Liberation of Africa.",
+             note_it="Costruita nel 1961, l'Africa Hall custodisce l'opera più famosa di Afewerk Tekle, il trittico di vetrate Liberazione totale dell'Africa."),
+        # Source: Wikipedia, Africa Hall; Wikipedia (fr), Africa Hall. The founding of the OAU here, in 1963, is in one only: not said.
+        Stop("addis_ababa_national_palace", "National Palace", "Palazzo nazionale", 9.0163, 38.7604,
+             note_en="Built in 1955 for the silver jubilee of Haile Selassie, the palace was his home until the coup of 1974, when he was deposed here.",
+             note_it="Costruito nel 1955 per il giubileo d'argento di Hailé Selassié, il palazzo fu la sua casa fino al colpo di stato del 1974, quando qui fu deposto."),
+        # Source: Wikipedia, National Palace, Addis Ababa; Wikipedia (fr), Palais national (Éthiopie).
+        Stop("addis_ababa_menelik_palace", "Menelik Palace", "Palazzo di Menelik", 9.0228, 38.7612,
+             note_en="The Gebbi, seat of Ethiopia's emperors, keeps the mausoleum of Menelik II, of Empress Taytu and of his daughter Empress Zewditu.",
+             note_it="Il Gebbi, sede degli imperatori d'Etiopia, custodisce il mausoleo di Menelik II, dell'imperatrice Taytu e di sua figlia, l'imperatrice Zewditu."),
+        # Source: Wikipedia, Menelik Palace; Wikipedia (fr), Palais Ménélik. Unity Park, as its grounds are called, has an article in English only.
+        Stop("addis_ababa_holy_trinity", "Holy Trinity Cathedral", "Cattedrale della Santissima Trinità", 9.0308, 38.7660,
+             note_en="Finished in 1942 after the liberation from Italian occupation, the cathedral holds, in its north transept, the tombs of Haile Selassie and Empress Menen.",
+             note_it="Finita nel 1942 dopo la liberazione dall'occupazione italiana, la cattedrale custodisce nel transetto nord le tombe di Hailé Selassié e dell'imperatrice Menen."),
+        # Source: Wikipedia, Holy Trinity Cathedral, Addis Ababa; Wikipedia (fr), Cathédrale de la Sainte-Trinité d'Addis-Abeba.
+        Stop("addis_ababa_arat_kilo", "Arat Kilo", "Arat Kilo", 9.0329, 38.7634,
+             note_en="The square's name is a date, 27 Miyazya, the 5 May on which Addis Ababa was freed in 1941; the monument in the middle celebrates the liberation.",
+             note_it="Il nome della piazza è una data, il 27 miyazya, il 5 maggio in cui Addis Abeba fu liberata nel 1941; il monumento al centro celebra la liberazione."),
+        # Source: Wikipedia, Meyazia 27 Square; Wikipedia (fr), Miyazya 27 adebabay.
+        Stop("addis_ababa_national_museum", "National Museum", "Museo nazionale", 9.0380, 38.7619,
+             note_en="Among the museum's fossils are Lucy, a partial skeleton of Australopithecus afarensis, and Selam, found between 2000 and 2004.",
+             note_it="Tra i fossili del museo ci sono Lucy, scheletro parziale di un Australopithecus afarensis, e Selam, trovata tra il 2000 e il 2004."),
+        # Source: Wikipedia, National Museum of Ethiopia; Wikipedia (it), Museo nazionale dell'Etiopia. The French says neither.
+        Stop("addis_ababa_yekatit_12", "Yekatit 12 Monument", "Monumento allo Yekatit 12", 9.0438, 38.7612,
+             note_en="The obelisk remembers the massacre that Italian forces began on Yekatit 12, 19 February 1937.",
+             note_it="L'obelisco ricorda il massacro che le forze italiane cominciarono il 12 yekatit, il 19 febbraio 1937."),
+        # Source: Wikipedia, Yekatit 12 monument; Wikipedia (fr), Yekatit 12.
+        Stop("addis_ababa_guenete_leul", "Guenete Leul Palace", "Palazzo Guenete Leul", 9.0467, 38.7576,
+             note_en="Built for Haile Selassie in the 1930s, the Paradise of Princes was the scene of the failed coup of 1960.",
+             note_it="Costruito per Hailé Selassié negli anni Trenta, il Paradiso dei principi fu teatro del tentato colpo di stato del 1960."),
+        # Source: Wikipedia, Guenete Leul Palace; Wikipedia (fr), Palais Guenete Leul. Its years differ (1930 to 1932, or 1934): the decade is said. Its Ethnological Museum has an article in English only.
+        Stop("addis_ababa_st_george", "St George's Cathedral", "Cattedrale di San Giorgio", 9.0370, 38.7520,
+             note_en="Built to celebrate the victory over the Italians at Adwa, in 1896, this octagonal cathedral is where Haile Selassie was crowned.",
+             note_it="Costruita per celebrare la vittoria sugli italiani ad Adua, nel 1896, questa cattedrale ottagonale è dove fu incoronato Hailé Selassié."),
+        # Source: Wikipedia, St. George's Cathedral, Addis Ababa; Wikipedia (fr), Cathédrale Saint-Georges d'Addis-Abeba.
+        Stop("addis_ababa_taitu_hotel", "Taitu Hotel", "Hotel Taitu", 9.0304, 38.7541,
+             note_en="Founded by Empress Taytu, Menelik II's wife, to lodge foreign guests, this is the oldest hotel in Addis Ababa.",
+             note_it="Fondato dall'imperatrice Taytu, moglie di Menelik II, per accogliere gli ospiti stranieri, è l'albergo più antico di Addis Abeba."),
+        # Source: Wikipedia, Taitu Hotel (the oldest in Ethiopia); Wikipedia (it), Taitu Hotel (in Addis Ababa). Its year differs (1905 or 1907): not said. The City Hall, nearby, has an article in English only.
+    ],
+)
+
+FEZ = Walk(
+    id="FEZ_PALACE_ANDALUSIANS",
+    city="fez",
+    city_en="Fez",
+    city_it="Fès",
+    route_en="From the Royal Palace to the Andalusian Mosque, by Bou Inania, al-Qarawiyyin and the tanneries",
+    route_it="Dal Palazzo Reale alla Moschea degli Andalusi, passando per Bou Inania, al-Qarawiyyin e le concerie",
+    outing_en="A walk in Fez",
+    outing_it="Passeggiata a Fès",
+    country="MA",
+    continent="AFRICA",
+    # The medina's lanes are mapped as residential streets.
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=200,
+    # The Oued Fès and the Oued Jawahir by Jnan Sbil; the Oued Boukhrareb, through the old city.
+    water=["way/1271557555", "way/1271557562"],
+    canals=["way/160083098", "way/486917300", "way/121766257"],
+    # Jnan Sbil, the Dar el-Beida's garden.
+    parks=["way/95233178", "way/1496105508"],
+    stops=[
+        Stop("fez_royal_palace", "Royal Palace", "Palazzo Reale", 34.0530, -4.9928,
+             note_en="The royal palace covers 80 hectares; its great ornate doors on the Place des Alaouites were made in the 20th century.",
+             note_it="Il palazzo reale si estende su 80 ettari; le sue grandi porte decorate su Place des Alaouites furono realizzate nel Novecento."),
+        # Source: Wikipedia, Royal Palace of Fez (1969 to 1971); Wikipedia (fr), Palais royal (Fès) (their designer honoured about 1972).
+        Stop("fez_mellah", "Mellah", "Mellah", 34.0533, -4.9908,
+             note_en="Moved here under the Marinids, Fez's Jewish quarter was the first in Morocco to be called a mellah, perhaps after a salt store or a salty spring.",
+             note_it="Trasferito qui sotto i Merinidi, il quartiere ebraico di Fès fu il primo del Marocco a chiamarsi mellah, forse per un magazzino di sale o una fonte salata."),
+        # Source: Wikipedia, Mellah of Fez; Wikipedia (it), Mellah di Fès.
+        Stop("fez_jnan_sbil", "Jnan Sbil Gardens", "Giardini Jnan Sbil", 34.0599, -4.9881,
+             note_en="Laid out by Sultan Hassan I between Fez's two old cities, the gardens were reserved for the royal elite until 1917.",
+             note_it="Creati dal sultano Hassan I tra le due città vecchie di Fès, i giardini furono riservati all'élite reale fino al 1917."),
+        # Source: Wikipedia, Jnan Sbil Gardens; Wikipedia (es), Jardines Jnan Sbil.
+        Stop("fez_bou_inania", "Bou Inania Madrasa", "Madrasa Bou Inania", 34.0623, -4.9827,
+             note_en="Built from 1350 to 1355 for the Marinid sultan Abu Inan, the madrasa was also a Friday mosque, with its own minaret; a water clock stands beside it.",
+             note_it="Costruita dal 1350 al 1355 per il sultano merinide Abu Inan, la madrasa era anche moschea del venerdì, con un suo minareto; accanto c'è un orologio ad acqua."),
+        # Source: Wikipedia, Bou Inania Madrasa (the clock across the street); Wikipedia (fr), Médersa Bou Inania de Fès (on its façade): the sentence says beside it. Bab Bou Jeloud, just before, has no place of its own.
+        Stop("fez_moulay_idriss", "Zawiya of Moulay Idris II", "Zawiya di Moulay Idris II", 34.0648, -4.9747,
+             note_en="The shrine holds the tomb of the Idrisid ruler Idris II, found again around 1437; Moulay Ismail later gave it its pyramidal roof.",
+             note_it="Il santuario custodisce la tomba del sovrano idriside Idris II, ritrovata intorno al 1437; Moulay Ismail le diede poi il tetto piramidale."),
+        # Source: Wikipedia, Zawiya of Moulay Idris II; Wikipedia (fr), Mausolée de Moulay Idriss II. Whether he founded the city is in one only: not said.
+        Stop("fez_qarawiyyin", "Al-Qarawiyyin", "Al-Qarawiyyin", 34.0648, -4.9733,
+             note_en="Founded as a mosque by Fatima al-Fihri, of a family from Kairouan, al-Qarawiyyin is cited by UNESCO as the oldest university still at work.",
+             note_it="Fondata come moschea da Fatima al-Fihri, di una famiglia di Kairouan, al-Qarawiyyin è citata dall'UNESCO come la più antica università ancora attiva."),
+        # Source: Wikipedia, University of al-Qarawiyyin; Wikipedia (fr), Université Al Quaraouiyine. Its year differs (857 or 859, about 859): not said.
+        Stop("fez_chouara", "Chouara Tannery", "Conceria Chouara", 34.0659, -4.9710,
+             note_en="Hides are softened in the white vats and dyed in the coloured ones; local tradition dates the tannery back to the founding of Fez.",
+             note_it="Le pelli vengono ammorbidite nelle vasche bianche e tinte in quelle colorate; la tradizione locale fa risalire la conceria alla fondazione di Fès."),
+        # Source: Wikipedia, Chouara Tannery; Wikipedia (de), Chouara-Gerberei.
+        Stop("fez_andalusian_mosque", "Andalusian Mosque", "Moschea degli Andalusi", 34.0632, -4.9681,
+             note_en="Founded in 859 and 860 by Maryam al-Fihri, Fatima's sister, the mosque is known for its tall north gate of zellij and carved wood.",
+             note_it="Fondata nell'859 e 860 da Maryam al-Fihri, sorella di Fatima, la moschea è nota per la sua alta porta nord di zellige e legno scolpito."),
+        # Source: Wikipedia, Mosque of the Andalusians; Wikipedia (fr), Mosquée des Andalous.
+    ],
+)
+
+ZANZIBAR = Walk(
+    id="ZANZIBAR_MICHENZANI_DISPENSARY",
+    city="zanzibar",
+    city_en="Zanzibar",
+    city_it="Zanzibar",
+    route_en="From Michenzani through Stone Town to the Old Dispensary, by the cathedrals, the fort and the House of Wonders",
+    route_it="Da Michenzani attraverso Stone Town al Vecchio dispensario, passando per le cattedrali, il forte e il Palazzo delle Meraviglie",
+    outing_en="A walk in Zanzibar",
+    outing_it="Passeggiata a Zanzibar",
+    country="TZ",
+    continent="AFRICA",
+    # The Indian Ocean, from the coastline.
+    coast=True,
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=200,
+    # Forodhani Park, Jamhuri Gardens.
+    parks=["way/1380038636", "way/355486731"],
+    stops=[
+        Stop("zanzibar_michenzani", "Michenzani", "Michenzani", -6.1652, 39.1989,
+             note_en="In Ng'ambo, the other side, the blocks of Michenzani were built with the help of East Germany.",
+             note_it="A Ng'ambo, «l'altra parte», i caseggiati di Michenzani furono costruiti con l'aiuto della Germania Est."),
+        # Source: Wikipedia, Ng'ambo; Wikipedia (de), Sansibar (Stadt). Their decade differs (a plan of 1968, or the 1970s): not said.
+        Stop("zanzibar_stone_town", "Stone Town", "Stone Town", -6.1622, 39.1937,
+             note_en="Across Creek Road begins Stone Town, whose buildings of the 19th century mix Arab, Persian, Indian and European elements; it is a UNESCO World Heritage Site.",
+             note_it="Oltre la Creek Road comincia Stone Town, i cui edifici dell'Ottocento uniscono elementi arabi, persiani, indiani ed europei; è patrimonio dell'umanità UNESCO."),
+        # Source: Wikipedia, Stone Town, and Ng'ambo (Creek Road between them); Wikipedia (it), Stone Town. The stop is by the Darajani market, which has an article in English only.
+        Stop("zanzibar_christ_church", "Christ Church Cathedral", "Cattedrale di Cristo", -6.1629, 39.1926,
+             note_en="Built from 1873 to 1879 where the slave market stood, the cathedral has its altar, it is said, on the spot of the whipping post.",
+             note_it="Costruita dal 1873 al 1879 dove sorgeva il mercato degli schiavi, la cattedrale ha l'altare, si dice, nel punto del palo della fustigazione."),
+        # Source: Wikipedia, Christ Church Cathedral, Zanzibar; Wikipedia (it), Cattedrale di Cristo (Zanzibar).
+        Stop("zanzibar_hamamni", "Hamamni Persian Baths", "Bagni persiani di Hamamni", -6.1622, 39.1910,
+             note_en="Built for Sultan Barghash by Shirazi architects, hence Persian, the public baths were in use until 1920.",
+             note_it="Costruiti per il sultano Barghash da architetti shirazi, da cui il nome di persiani, i bagni pubblici restarono in uso fino al 1920."),
+        # Source: Wikipedia, Hamamni Persian Baths; Wikipedia (it), Bagni persiani di Hamamni. Their years differ (1870 to 1888, or 1850): not said.
+        Stop("zanzibar_st_joseph", "St Joseph's Cathedral", "Cattedrale di San Giuseppe", -6.1628, 39.1888,
+             note_en="Built by French missionaries from 1893 to 1898, the cathedral has twin spires that recall the cathedral of Marseille.",
+             note_it="Costruita da missionari francesi dal 1893 al 1898, la cattedrale ha due campanili che ricordano la cattedrale di Marsiglia."),
+        # Source: Wikipedia, St. Joseph's Cathedral, Zanzibar; Wikipedia (fr), Cathédrale Saint-Joseph de Zanzibar.
+        Stop("zanzibar_mercury_house", "Freddie Mercury's house", "Casa di Freddie Mercury", -6.1622, 39.1878,
+             note_en="Freddie Mercury, born Farrokh Bulsara in Stone Town in 1946, spent his first years here with his family.",
+             note_it="Freddie Mercury, nato Farrokh Bulsara a Stone Town nel 1946, trascorse qui i primi anni con la sua famiglia."),
+        # Source: Wikipedia, Freddie Mercury; Wikipedia (it), Freddie Mercury (with the family's house in Stone Town).
+        Stop("zanzibar_forodhani", "Forodhani Gardens", "Giardini di Forodhani", -6.1604, 39.1888,
+             note_en="Restored by the Aga Khan, the gardens on the sea front fill every evening with a market of Zanzibari dishes.",
+             note_it="Restaurati dall'Aga Khan, i giardini sul lungomare si riempiono ogni sera di un mercato di piatti zanzibarini."),
+        # Source: Wikipedia, Forodhani Gardens; Wikipedia (it), Giardini di Forodhani.
+        Stop("zanzibar_old_fort", "Old Fort", "Forte arabo", -6.1614, 39.1893,
+             note_en="The Omani fort keeps in its courtyard the remains of earlier buildings, among them a Portuguese church.",
+             note_it="Il forte omanita conserva nel cortile i resti di edifici più antichi, tra cui una chiesa portoghese."),
+        # Source: Wikipedia, Old Fort of Zanzibar; Wikipedia (it), Forte arabo di Stone Town. Who built it first, and when, differs: not said.
+        Stop("zanzibar_house_of_wonders", "House of Wonders", "Palazzo delle Meraviglie", -6.1609, 39.1899,
+             note_en="Built in 1883 for Sultan Barghash, the House of Wonders was the first building in East Africa with a lift, and the first in Zanzibar with electricity.",
+             note_it="Costruito nel 1883 per il sultano Barghash, il Palazzo delle Meraviglie fu il primo edificio dell'Africa orientale con un ascensore e il primo di Zanzibar con l'elettricità."),
+        # Source: Wikipedia, House of Wonders; Wikipedia (it), Palazzo delle Meraviglie.
+        Stop("zanzibar_sultans_palace", "Sultan's Palace", "Palazzo del sultano", -6.1600, 39.1906,
+             note_en="The sultan's palace was shelled in the Anglo-Zanzibar War of 1896, held to be the shortest war in history: it lasted less than an hour.",
+             note_it="Il palazzo del sultano fu bombardato nella guerra anglo-zanzibariana del 1896, considerata la più breve della storia: durò meno di un'ora."),
+        # Source: Wikipedia, Anglo-Zanzibar War (38 to 45 minutes); Wikipedia (it), Guerra anglo-zanzibariana (38 minutes): the sentence says less than an hour.
+        Stop("zanzibar_old_dispensary", "Old Dispensary", "Vecchio dispensario", -6.1583, 39.1926,
+             note_en="Begun in 1887 by the merchant Tharia Topan for Queen Victoria's golden jubilee, the building, with its carved balconies, was finished in 1894.",
+             note_it="Iniziato nel 1887 dal mercante Tharia Topan per il giubileo d'oro della regina Vittoria, l'edificio, con i suoi balconi intagliati, fu finito nel 1894."),
+        # Source: Wikipedia, Old Dispensary (Zanzibar); Wikipedia (it), Vecchio dispensario.
+    ],
+)
+
+LUXOR = Walk(
+    id="LUXOR_TEMPLE_KARNAK",
+    city="luxor",
+    city_en="Luxor",
+    city_it="Luxor",
+    route_en="From Luxor Temple to Karnak, along the Avenue of Sphinxes",
+    route_it="Dal tempio di Luxor a Karnak, lungo il viale delle Sfingi",
+    outing_en="A walk in Luxor",
+    outing_it="Passeggiata a Luxor",
+    country="EG",
+    continent="AFRICA",
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=200,
+    # The Nile; Karnak's sacred lake.
+    water=["relation/2063478", "way/26083110"],
+    parks=["way/90384482"],
+    stops=[
+        Stop("luxor_temple", "Luxor Temple", "Tempio di Luxor", 25.6990, 32.6378,
+             note_en="Of the two obelisks Ramesses II raised here, one now stands in Paris; the clock France gave in return is in Cairo's Citadel.",
+             note_it="Dei due obelischi che Ramses II eresse qui, uno si trova oggi a Parigi; l'orologio che la Francia donò in cambio è nella Cittadella del Cairo."),
+        # Source: Wikipedia, Luxor Temple, and Muhammad Ali Mosque (the clock, for the obelisk); Wikipedia (fr), Temple d'Amon (Louxor) (Louis-Philippe's clock, in the mosque's court in Cairo).
+        Stop("luxor_abu_haggag", "Abu Haggag Mosque", "Moschea di Abu al-Haggag", 25.7004, 32.6398,
+             note_en="Built within the temple, the mosque holds the tomb of the sheikh Yusuf Abu al-Haggag, after whom it is named.",
+             note_it="Costruita dentro il tempio, la moschea custodisce la tomba dello sceicco Yusuf Abu al-Haggag, da cui prende il nome."),
+        # Source: Wikipedia, Abu Haggag Mosque; Wikipedia (it), Moschea di Abu al-Hajjaj.
+        Stop("luxor_mummification_museum", "Mummification Museum", "Museo della mummificazione", 25.7025, 32.6399,
+             note_en="The museum is given to the ancient art of mummification, practised not only on people but on many animals.",
+             note_it="Il museo è dedicato all'antica arte della mummificazione, praticata non solo sulle persone ma su molti animali."),
+        # Source: Wikipedia, Mummification Museum; Wikipedia (fr), Musée de la momification de Louxor.
+        Stop("luxor_museum", "Luxor Museum", "Museo di Luxor", 25.7077, 32.6445,
+             note_en="Opened in 1975, the museum shows statues found in a cache beneath Luxor Temple, and a rebuilt wall of Akhenaten's temple at Karnak.",
+             note_it="Aperto nel 1975, il museo espone le statue trovate in un nascondiglio sotto il tempio di Luxor e un muro ricostruito del tempio di Akhenaton a Karnak."),
+        # Source: Wikipedia, Luxor Museum; Wikipedia (fr), Musée de Louxor.
+        Stop("luxor_avenue_of_sphinxes", "Avenue of Sphinxes", "Viale delle Sfingi", 25.7098, 32.6501,
+             note_en="Lined with sphinxes, some with the heads of rams, this avenue joined the temples of Luxor and Karnak.",
+             note_it="Fiancheggiato da sfingi, alcune con la testa di ariete, questo viale univa i templi di Luxor e di Karnak."),
+        # Source: Wikipedia, Avenue of Sphinxes; Wikipedia (fr), Allée des sphinx. Its length and the number of statues differ: not said.
+        Stop("luxor_precinct_of_mut", "Precinct of Mut", "Recinto di Mut", 25.7128, 32.6535,
+             note_en="The precinct of the goddess Mut, south of Karnak, keeps a sacred lake around her temple.",
+             note_it="Il recinto della dea Mut, a sud di Karnak, conserva un lago sacro intorno al suo tempio."),
+        # Source: Wikipedia, Precinct of Mut; Wikipedia (fr), Temple de Mout (Karnak).
+        Stop("luxor_temple_of_khonsu", "Temple of Khonsu", "Tempio di Khonsu", 25.7160, 32.6561,
+             note_en="Built by Ramesses III on the site of an earlier temple, this is an almost complete temple of the New Kingdom.",
+             note_it="Costruito da Ramses III dove sorgeva un tempio più antico, è un tempio del Nuovo Regno quasi completo."),
+        # Source: Wikipedia, Temple of Khonsu; Wikipedia (fr), Temple de Khonsou (Karnak).
+        Stop("luxor_karnak", "Karnak", "Karnak", 25.7186, 32.6573,
+             note_en="Built and rebuilt over some two thousand years, Karnak was the main temple of Amun, at the head of the Theban triad.",
+             note_it="Costruito e ricostruito nell'arco di duemila anni, Karnak era il tempio principale di Amon, a capo della triade tebana."),
+        # Source: Wikipedia, Karnak; Wikipedia (fr), Karnak. The stop is the great hypostyle hall.
+    ],
+)
+
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING, HONG_KONG, SINGAPORE, BANGKOK, KYOTO, HANOI, MELBOURNE, CAIRO, CAPE_TOWN, MARRAKECH, TUNIS, ALEXANDRIA, DAKAR, ADDIS_ABABA, FEZ, ZANZIBAR, LUXOR]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
@@ -2605,6 +3309,13 @@ LOCATORS = {
     "SG": (1.16, 103.6, 1.48, 104.1),
     "TH": (5.6, 97.3, 20.5, 105.7),
     "VN": (8.4, 102.1, 23.4, 109.5),
+    "EG": (21.7, 24.7, 31.7, 36.9),
+    "ZA": (-34.9, 16.4, -22.1, 32.9),
+    "MA": (27.6, -13.3, 36.0, -1.0),
+    "TN": (30.2, 7.5, 37.6, 11.6),
+    "SN": (12.2, -17.6, 16.8, -11.3),
+    "ET": (3.3, 32.9, 15.0, 48.0),
+    "TZ": (-11.8, 29.3, -0.9, 40.5),
 }
 
 # The continents the Ways page groups the cities by, in its order (the Kotlin enum Continent has
@@ -2619,4 +3330,6 @@ CONTINENTS = {
     # From Mumbai and Delhi to Japan, and down to Tasmania and New Zealand: the cities a walk is
     # likely to visit, not the Middle East (Istanbul is Europe's).
     "ASIA_OCEANIA": (-47.5, 66.0, 46.0, 179.0),
+    # The whole continent, from Dakar to the Horn of Africa and from Tunis to the Cape.
+    "AFRICA": (-35.5, -18.5, 38.0, 52.0),
 }
