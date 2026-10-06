@@ -240,7 +240,7 @@ class WaysScreenTest {
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.continent(Continent.ASIA_OCEANIA)))
         compose.onNodeWithTag(WaysTags.continent(Continent.ASIA_OCEANIA)).assert(hasText("10 cities", substring = true))
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.continent(Continent.AFRICA)))
-        compose.onNodeWithTag(WaysTags.continent(Continent.AFRICA)).assert(hasText("4 cities", substring = true))
+        compose.onNodeWithTag(WaysTags.continent(Continent.AFRICA)).assert(hasText("6 cities", substring = true))
         compose.onNodeWithTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)).assertDoesNotExist()
         snapshot("ways_cities")
         compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).performClick()
@@ -311,6 +311,8 @@ class WaysScreenTest {
                 WayId.CAIRO_MUSEUM_CITADEL,
                 WayId.CAPE_TOWN_LIGHTHOUSE_BO_KAAP,
                 WayId.MARRAKECH_MAJORELLE_SI_SAID,
+                WayId.TUNIS_CLOCK_BELVEDERE,
+                WayId.ALEXANDRIA_SHOQAFA_QAITBAY,
                 WayId.FEZ_PALACE_ANDALUSIANS,
             ),
         )
@@ -365,7 +367,7 @@ class WaysScreenTest {
     @Test
     fun `Africa's map, from Cairo to Cape Town`() {
         showContinent(Continent.AFRICA)
-        compose.onNodeWithContentDescription("Africa on the map: 4 cities.").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Africa on the map: 6 cities.").assertIsDisplayed()
         snapshot("continent_africa")
     }
 
@@ -692,6 +694,27 @@ class WaysScreenTest {
         )
         compose.onNodeWithText("From the Royal Palace to the Andalusian Mosque", substring = true).assertExists()
         snapshot("walk_fez_dark")
+    }
+
+    @Test
+    fun `Tunis's walk, from the Clock Tower through the medina to the Belvedere`() {
+        showWay(WayId.TUNIS_CLOCK_BELVEDERE, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("From the Clock Tower to the Belvedere Park", substring = true).assertExists()
+        snapshot("walk_tunis")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Zitouna Mosque"))
+        compose.onNodeWithText("columns from Carthage", substring = true).assertExists()
+        snapshot("walk_tunis_places")
+    }
+
+    @Test
+    fun `Alexandria's walk, from Kom el Shoqafa along the Corniche to Qaitbay, in the dark`() {
+        showWay(
+            WayId.ALEXANDRIA_SHOQAFA_QAITBAY,
+            state = WaysSamples.state(walks = emptyList(), live = null),
+            dark = true,
+        )
+        compose.onNodeWithText("to the Citadel of Qaitbay", substring = true).assertExists()
+        snapshot("walk_alexandria_dark")
     }
 
     @Test

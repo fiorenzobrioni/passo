@@ -46,6 +46,8 @@ fun wayNameRes(id: WayId): Int = when (id) {
     WayId.CAIRO_MUSEUM_CITADEL -> R.string.way_name_cairo_museum_citadel
     WayId.CAPE_TOWN_LIGHTHOUSE_BO_KAAP -> R.string.way_name_cape_town_lighthouse_bo_kaap
     WayId.MARRAKECH_MAJORELLE_SI_SAID -> R.string.way_name_marrakech_majorelle_si_said
+    WayId.TUNIS_CLOCK_BELVEDERE -> R.string.way_name_tunis_clock_belvedere
+    WayId.ALEXANDRIA_SHOQAFA_QAITBAY -> R.string.way_name_alexandria_shoqafa_qaitbay
     WayId.FEZ_PALACE_ANDALUSIANS -> R.string.way_name_fez_palace_andalusians
 }
 
@@ -90,6 +92,8 @@ fun wayRouteRes(id: WayId): Int = when (id) {
     WayId.CAIRO_MUSEUM_CITADEL -> R.string.way_route_cairo_museum_citadel
     WayId.CAPE_TOWN_LIGHTHOUSE_BO_KAAP -> R.string.way_route_cape_town_lighthouse_bo_kaap
     WayId.MARRAKECH_MAJORELLE_SI_SAID -> R.string.way_route_marrakech_majorelle_si_said
+    WayId.TUNIS_CLOCK_BELVEDERE -> R.string.way_route_tunis_clock_belvedere
+    WayId.ALEXANDRIA_SHOQAFA_QAITBAY -> R.string.way_route_alexandria_shoqafa_qaitbay
     WayId.FEZ_PALACE_ANDALUSIANS -> R.string.way_route_fez_palace_andalusians
 }
 
@@ -129,6 +133,8 @@ fun walkOutingRes(id: WayId): Int? = when (id) {
     WayId.CAIRO_MUSEUM_CITADEL -> R.string.way_outing_cairo_museum_citadel
     WayId.CAPE_TOWN_LIGHTHOUSE_BO_KAAP -> R.string.way_outing_cape_town_lighthouse_bo_kaap
     WayId.MARRAKECH_MAJORELLE_SI_SAID -> R.string.way_outing_marrakech_majorelle_si_said
+    WayId.TUNIS_CLOCK_BELVEDERE -> R.string.way_outing_tunis_clock_belvedere
+    WayId.ALEXANDRIA_SHOQAFA_QAITBAY -> R.string.way_outing_alexandria_shoqafa_qaitbay
     WayId.FEZ_PALACE_ANDALUSIANS -> R.string.way_outing_fez_palace_andalusians
     else -> null
 }
@@ -137,6 +143,18 @@ fun walkOutingRes(id: WayId): Int? = when (id) {
 @StringRes
 fun placeNameRes(key: String): Int = when (key) {
     "acquapendente" -> R.string.way_place_acquapendente
+    "alexandria_abu_al_abbas" -> R.string.way_place_alexandria_abu_al_abbas
+    "alexandria_bibliotheca" -> R.string.way_place_alexandria_bibliotheca
+    "alexandria_cecil" -> R.string.way_place_alexandria_cecil
+    "alexandria_eliyahu_hanavi" -> R.string.way_place_alexandria_eliyahu_hanavi
+    "alexandria_kom_el_dikka" -> R.string.way_place_alexandria_kom_el_dikka
+    "alexandria_kom_el_shoqafa" -> R.string.way_place_alexandria_kom_el_shoqafa
+    "alexandria_national_museum" -> R.string.way_place_alexandria_national_museum
+    "alexandria_pompeys_pillar" -> R.string.way_place_alexandria_pompeys_pillar
+    "alexandria_qaitbay" -> R.string.way_place_alexandria_qaitbay
+    "alexandria_st_mark" -> R.string.way_place_alexandria_st_mark
+    "alexandria_terbana" -> R.string.way_place_alexandria_terbana
+    "alexandria_unknown_soldier" -> R.string.way_place_alexandria_unknown_soldier
     "altopascio" -> R.string.way_place_altopascio
     "amsterdam_begijnhof" -> R.string.way_place_amsterdam_begijnhof
     "amsterdam_bloemenmarkt" -> R.string.way_place_amsterdam_bloemenmarkt
@@ -656,6 +674,20 @@ fun placeNameRes(key: String): Int = when (key) {
     "trevi" -> R.string.way_place_trevi
     "triacastela" -> R.string.way_place_triacastela
     "tui" -> R.string.way_place_tui
+    "tunis_bab_el_bhar" -> R.string.way_place_tunis_bab_el_bhar
+    "tunis_bab_el_khadra" -> R.string.way_place_tunis_bab_el_khadra
+    "tunis_belvedere" -> R.string.way_place_tunis_belvedere
+    "tunis_cathedral" -> R.string.way_place_tunis_cathedral
+    "tunis_clock_tower" -> R.string.way_place_tunis_clock_tower
+    "tunis_dar_el_bey" -> R.string.way_place_tunis_dar_el_bey
+    "tunis_dar_lasram" -> R.string.way_place_tunis_dar_lasram
+    "tunis_great_synagogue" -> R.string.way_place_tunis_great_synagogue
+    "tunis_hammouda_pacha" -> R.string.way_place_tunis_hammouda_pacha
+    "tunis_municipal_theatre" -> R.string.way_place_tunis_municipal_theatre
+    "tunis_saheb_ettabaa" -> R.string.way_place_tunis_saheb_ettabaa
+    "tunis_sidi_mahrez" -> R.string.way_place_tunis_sidi_mahrez
+    "tunis_tourbet_el_bey" -> R.string.way_place_tunis_tourbet_el_bey
+    "tunis_zitouna" -> R.string.way_place_tunis_zitouna
     "valenca" -> R.string.way_place_valenca
     "valfabbrica" -> R.string.way_place_valfabbrica
     "vercelli" -> R.string.way_place_vercelli
@@ -685,6 +717,18 @@ fun placeNameRes(key: String): Int = when (key) {
 /** The one sentence said of a stop, if it has one. */
 @StringRes
 fun placeNoteRes(key: String): Int? = when (key) {
+    "alexandria_abu_al_abbas" -> R.string.way_note_alexandria_abu_al_abbas
+    "alexandria_bibliotheca" -> R.string.way_note_alexandria_bibliotheca
+    "alexandria_cecil" -> R.string.way_note_alexandria_cecil
+    "alexandria_eliyahu_hanavi" -> R.string.way_note_alexandria_eliyahu_hanavi
+    "alexandria_kom_el_dikka" -> R.string.way_note_alexandria_kom_el_dikka
+    "alexandria_kom_el_shoqafa" -> R.string.way_note_alexandria_kom_el_shoqafa
+    "alexandria_national_museum" -> R.string.way_note_alexandria_national_museum
+    "alexandria_pompeys_pillar" -> R.string.way_note_alexandria_pompeys_pillar
+    "alexandria_qaitbay" -> R.string.way_note_alexandria_qaitbay
+    "alexandria_st_mark" -> R.string.way_note_alexandria_st_mark
+    "alexandria_terbana" -> R.string.way_note_alexandria_terbana
+    "alexandria_unknown_soldier" -> R.string.way_note_alexandria_unknown_soldier
     "amsterdam_begijnhof" -> R.string.way_note_amsterdam_begijnhof
     "amsterdam_bloemenmarkt" -> R.string.way_note_amsterdam_bloemenmarkt
     "amsterdam_centraal" -> R.string.way_note_amsterdam_centraal
@@ -1136,6 +1180,20 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "tokyo_toshogu" -> R.string.way_note_tokyo_toshogu
     "tokyo_yushima_seido" -> R.string.way_note_tokyo_yushima_seido
     "tui" -> R.string.way_note_tui
+    "tunis_bab_el_bhar" -> R.string.way_note_tunis_bab_el_bhar
+    "tunis_bab_el_khadra" -> R.string.way_note_tunis_bab_el_khadra
+    "tunis_belvedere" -> R.string.way_note_tunis_belvedere
+    "tunis_cathedral" -> R.string.way_note_tunis_cathedral
+    "tunis_clock_tower" -> R.string.way_note_tunis_clock_tower
+    "tunis_dar_el_bey" -> R.string.way_note_tunis_dar_el_bey
+    "tunis_dar_lasram" -> R.string.way_note_tunis_dar_lasram
+    "tunis_great_synagogue" -> R.string.way_note_tunis_great_synagogue
+    "tunis_hammouda_pacha" -> R.string.way_note_tunis_hammouda_pacha
+    "tunis_municipal_theatre" -> R.string.way_note_tunis_municipal_theatre
+    "tunis_saheb_ettabaa" -> R.string.way_note_tunis_saheb_ettabaa
+    "tunis_sidi_mahrez" -> R.string.way_note_tunis_sidi_mahrez
+    "tunis_tourbet_el_bey" -> R.string.way_note_tunis_tourbet_el_bey
+    "tunis_zitouna" -> R.string.way_note_tunis_zitouna
     "valenca" -> R.string.way_note_valenca
     "vercelli" -> R.string.way_note_vercelli
     "vienna_belvedere" -> R.string.way_note_vienna_belvedere

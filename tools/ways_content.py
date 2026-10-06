@@ -21,7 +21,8 @@ Singapore in the English and Chinese (or German, Italian), Bangkok in the Englis
 Italian), Kyoto in the English and Japanese, Hanoi in the English and French (or Italian), Melbourne in
 the English and German (or French), Cairo in the English and French (or Arabic, German, Italian), Cape
 Town in the English and German (or Dutch, French, Afrikaans), Marrakech in the English and French, Fez in
-the English and French (or Italian, Spanish, German).
+the English and French (or Italian, Spanish, German), Tunis in the English and French (or Arabic,
+Italian), Alexandria in the English and French (or Arabic).
 """
 
 from dataclasses import dataclass, field
@@ -2820,6 +2821,152 @@ MARRAKECH = Walk(
     ],
 )
 
+TUNIS = Walk(
+    id="TUNIS_CLOCK_BELVEDERE",
+    city="tunis",
+    city_en="Tunis",
+    city_it="Tunisi",
+    route_en="From the Clock Tower to the Belvedere Park, by Avenue Habib Bourguiba and the medina",
+    route_it="Dalla Torre dell'orologio al parco del Belvedere, passando per l'avenue Habib Bourguiba e la medina",
+    outing_en="A walk in Tunis",
+    outing_it="Passeggiata a Tunisi",
+    country="TN",
+    continent="AFRICA",
+    # The medina's lanes are mapped as residential streets.
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=200,
+    # The Lake of Tunis, east of the Clock Tower.
+    water=["relation/8031768"],
+    parks=["way/48720329"],
+    stops=[
+        Stop("tunis_clock_tower", "Clock Tower", "Torre dell'orologio", 36.8002, 10.1862,
+             note_en="Named for the revolution of 14 January 2011, the square has a clock tower from 2001 and, back again, Bourguiba's statue on horseback.",
+             note_it="Intitolata alla rivoluzione del 14 gennaio 2011, la piazza ha una torre dell'orologio del 2001 e, di nuovo, la statua equestre di Bourguiba."),
+        # Source: Wikipedia (fr), Place du 14-Janvier 2011; Wikipedia (ar), ساحة 14 جانفي 2011. The square has no article in English.
+        Stop("tunis_municipal_theatre", "Municipal Theatre", "Teatro municipale", 36.7991, 10.1808,
+             note_en="Built in the Art Nouveau style, the theatre opened in 1902 as the Municipal Casino of Tunis.",
+             note_it="Costruito in stile Liberty, il teatro aprì nel 1902 come Casino municipale di Tunisi."),
+        # Source: Wikipedia, Théâtre municipal de Tunis; Wikipedia (fr), Théâtre municipal de Tunis.
+        Stop("tunis_cathedral", "Cathedral of St Vincent de Paul", "Cattedrale di San Vincenzo de' Paoli", 36.8000, 10.1790,
+             note_en="Opened at Christmas 1897 with temporary wooden bell towers, the cathedral is named after Vincent de Paul, who was sold as a slave in Tunis.",
+             note_it="Inaugurata il Natale del 1897 con campanili provvisori di legno, la cattedrale è intitolata a Vincenzo de' Paoli, che fu venduto come schiavo a Tunisi."),
+        # Source: Wikipedia (fr), Cathédrale Saint-Vincent-de-Paul de Tunis; Wikipedia (it), Cattedrale di San Vincenzo de' Paoli. The English article says neither.
+        Stop("tunis_bab_el_bhar", "Bab el Bhar", "Bab el Bhar", 36.7992, 10.1756,
+             note_en="The Sea Gate, also called the Gate of France, marks where the medina ends and the modern city begins.",
+             note_it="La Porta del Mare, detta anche Porta di Francia, segna il confine tra la medina e la città nuova."),
+        # Source: Wikipedia, Bab el Bhar; Wikipedia (fr), Bab El Bhar.
+        Stop("tunis_zitouna", "Zitouna Mosque", "Moschea Zitouna", 36.7974, 10.1715,
+             note_en="The Olive Mosque, named, the legend goes, after an olive tree on the site, was rebuilt under the Aghlabids with ancient columns from Carthage.",
+             note_it="La Moschea dell'Olivo, che secondo la leggenda prende il nome da un olivo che sorgeva qui, fu ricostruita sotto gli Aghlabidi con colonne antiche di Cartagine."),
+        # Source: Wikipedia, Al-Zaytuna Mosque; Wikipedia (fr), Mosquée Zitouna. Its founding year differs: not said.
+        Stop("tunis_tourbet_el_bey", "Tourbet el Bey", "Tourbet el Bey", 36.7937, 10.1731,
+             note_en="Built under Ali II, the largest funerary monument in Tunis holds most of the Husainid beys under its green-tiled domes.",
+             note_it="Costruito sotto Ali II, il più grande monumento funebre di Tunisi accoglie la maggior parte dei bey husseiniti sotto le sue cupole di tegole verdi."),
+        # Source: Wikipedia, Tourbet el Bey; Wikipedia (fr), Tourbet El Bey.
+        Stop("tunis_dar_el_bey", "Dar El Bey", "Dar El Bey", 36.7976, 10.1690,
+             note_en="Once a palace of the beys, Dar El Bey, in the Kasbah, is now the office of Tunisia's head of government.",
+             note_it="Un tempo palazzo dei bey, il Dar El Bey, nella Kasbah, è oggi la sede del capo del governo tunisino."),
+        # Source: Wikipedia, Dar El Bey; Wikipedia (fr), Dar El Bey. The Kasbah Mosque, nearby, has no article in French: not a place.
+        Stop("tunis_hammouda_pacha", "Hammouda Pacha Mosque", "Moschea di Hammouda Pascià", 36.7982, 10.1706,
+             note_en="Built in 1655 by the Muradid bey Hammouda Pasha, the mosque is known for its octagonal minaret, in the Ottoman style.",
+             note_it="Costruita nel 1655 dal bey muradide Hammouda Pascià, la moschea è nota per il suo minareto ottagonale, in stile ottomano."),
+        # Source: Wikipedia, Hammouda Pacha Mosque; Wikipedia (fr), Mosquée Hammouda-Pacha.
+        Stop("tunis_dar_lasram", "Dar Lasram", "Dar Lasram", 36.8021, 10.1682,
+             note_en="Built from 1812 to 1819 for Hamouda Lasram, of a family of ministers of the Pen, the palace has housed the society that looks after the medina since 1968.",
+             note_it="Costruito dal 1812 al 1819 per Hamouda Lasram, di una famiglia di ministri della Penna, il palazzo ospita dal 1968 l'associazione che tutela la medina."),
+        # Source: Wikipedia, Dar Lasram; Wikipedia (fr), Dar Lasram.
+        Stop("tunis_sidi_mahrez", "Sidi Mahrez Mosque", "Moschea di Sidi Mahrez", 36.8042, 10.1684,
+             note_en="Begun in 1692 by Mohamed Bey in honour of Sidi Mahrez, the medina's patron saint, the mosque takes its domes from the mosques of Istanbul.",
+             note_it="Iniziata nel 1692 da Mohamed Bey in onore di Sidi Mahrez, santo patrono della medina, la moschea prende le sue cupole dalle moschee di Istanbul."),
+        # Source: Wikipedia, Sidi Mahrez Mosque; Wikipedia (fr), Mosquée Sidi Mahrez. Which Istanbul mosque it follows differs: not said. Bab Souika, 150 m on, is walked through.
+        Stop("tunis_saheb_ettabaa", "Saheb Ettabaâ Mosque", "Moschea Saheb Ettabaâ", 36.8076, 10.1666,
+             note_en="Opened in 1814 by the grand vizier Youssef Saheb Ettabaâ, it was the last great mosque built in Tunis before the French protectorate.",
+             note_it="Inaugurata nel 1814 dal gran visir Youssef Saheb Ettabaâ, fu l'ultima grande moschea costruita a Tunisi prima del protettorato francese."),
+        # Source: Wikipedia, Saheb Ettabaâ Mosque; Wikipedia (fr), Mosquée Saheb Ettabaâ.
+        Stop("tunis_bab_el_khadra", "Bab el Khadra", "Bab el Khadra", 36.8104, 10.1713,
+             note_en="Called the Gate of the Green Gardens, it led out towards Carthage and Ariana, and was rebuilt in its present form in 1881.",
+             note_it="Detta Porta dei giardini verdi, conduceva verso Cartagine e Ariana, e fu ricostruita nella forma attuale nel 1881."),
+        # Source: Wikipedia, Bab el Khadra; Wikipedia (fr), Bab El Khadra.
+        Stop("tunis_great_synagogue", "Great Synagogue", "Grande Sinagoga", 36.8104, 10.1801,
+             note_en="Designed by the architect Victor Valensi, the city's Great Synagogue was inaugurated in 1937.",
+             note_it="Progettata dall'architetto Victor Valensi, la Grande Sinagoga della città fu inaugurata nel 1937."),
+        # Source: Wikipedia, Grand Synagogue of Tunis; Wikipedia (fr), Grande synagogue de Tunis.
+        Stop("tunis_belvedere", "Belvedere Park", "Parco del Belvedere", 36.8233, 10.1716,
+             note_en="Laid out from 1892 on a hill of old olive groves, the Belvedere is the largest park in Tunis; its zoo came in the 1960s.",
+             note_it="Creato dal 1892 su una collina di antichi oliveti, il Belvedere è il più grande parco di Tunisi; il suo zoo arrivò negli anni Sessanta."),
+        # Source: Wikipedia, Belvedere Park, Tunis; Wikipedia (fr), Parc du Belvédère. The stop is the top of the hill.
+    ],
+)
+
+ALEXANDRIA = Walk(
+    id="ALEXANDRIA_SHOQAFA_QAITBAY",
+    city="alexandria",
+    city_en="Alexandria",
+    city_it="Alessandria d'Egitto",
+    route_en="From the Catacombs of Kom el Shoqafa to the Citadel of Qaitbay, by the Library and the Corniche",
+    route_it="Dalle catacombe di Kom el Shoqafa alla Cittadella di Qaitbay, passando per la Biblioteca e la Corniche",
+    outing_en="A walk in Alexandria",
+    outing_it="Passeggiata ad Alessandria",
+    country="EG",
+    continent="AFRICA",
+    # The Mediterranean and the Eastern Harbour, from the coastline.
+    coast=True,
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=200,
+    # The Shallalat Gardens, Kom el-Dikka, the archaeological park of Pompey's Pillar, Khartoum Square.
+    parks=["way/25723236", "way/28817193", "way/28817044", "way/682100805"],
+    stops=[
+        Stop("alexandria_kom_el_shoqafa", "Catacombs of Kom el Shoqafa", "Catacombe di Kom el Shoqafa", 31.1784, 29.8930,
+             note_en="Used for burials from the 2nd to the 4th century, the catacombs were found again in 1900, when a donkey fell into their shaft.",
+             note_it="Usate per le sepolture dal II al IV secolo, le catacombe furono ritrovate nel 1900, quando un asino cadde nel loro pozzo d'accesso."),
+        # Source: Wikipedia, Catacombs of Kom El Shoqafa; Wikipedia (fr), Catacombes de Kom El Shoqafa.
+        Stop("alexandria_pompeys_pillar", "Pompey's Pillar", "Colonna di Pompeo", 31.1826, 29.8972,
+             note_en="Despite its name, the column was raised in honour of the emperor Diocletian, where the Serapeum stood.",
+             note_it="Nonostante il nome, la colonna fu eretta in onore dell'imperatore Diocleziano, dove sorgeva il Serapeo."),
+        # Source: Wikipedia, Pompey's Pillar; Wikipedia (fr), Colonne de Pompée.
+        Stop("alexandria_kom_el_dikka", "Kom el-Dikka", "Kom el-Dikka", 31.1965, 29.9040,
+             note_en="Excavated since 1960 with Polish archaeologists, Kom el-Dikka had Roman baths, lecture halls and a theatre.",
+             note_it="Scavata dal 1960 con archeologi polacchi, Kom el-Dikka aveva terme romane, aule per lezioni e un teatro."),
+        # Source: Wikipedia, Kom El Deka; Wikipedia (fr), Kom el-Dikka.
+        Stop("alexandria_national_museum", "National Museum", "Museo nazionale", 31.2010, 29.9120,
+             note_en="The museum is housed in an Italian-style palace that was once the consulate of the United States.",
+             note_it="Il museo ha sede in un palazzo in stile italiano che un tempo ospitava il consolato degli Stati Uniti."),
+        # Source: Wikipedia, Alexandria National Museum; Wikipedia (fr), Musée national d'Alexandrie.
+        Stop("alexandria_bibliotheca", "Bibliotheca Alexandrina", "Bibliotheca Alexandrina", 31.2087, 29.9089,
+             note_en="Designed by the Norwegian firm Snøhetta near the site of the ancient Library, the new one has shelves for eight million books.",
+             note_it="Progettata dallo studio norvegese Snøhetta vicino al luogo dell'antica Biblioteca, la nuova ha scaffali per otto milioni di libri."),
+        # Source: Wikipedia, Bibliotheca Alexandrina; Wikipedia (fr), Bibliotheca Alexandrina.
+        Stop("alexandria_cecil", "Cecil Hotel", "Hotel Cecil", 31.2010, 29.8994,
+             note_en="Built in 1929 on Saad Zaghloul Square, facing the sea front, the Cecil Hotel welcomed guests such as Winston Churchill.",
+             note_it="Costruito nel 1929 su piazza Saad Zaghloul, di fronte al lungomare, l'Hotel Cecil ebbe ospiti come Winston Churchill."),
+        # Source: Wikipedia, Cecil Hotel (Alexandria); Wikipedia (ar), فندق سيسل (الإسكندرية).
+        Stop("alexandria_eliyahu_hanavi", "Eliyahu Hanavi Synagogue", "Sinagoga Eliyahu Hanavi", 31.1992, 29.9006,
+             note_en="Destroyed by Napoleon's army in 1798, the synagogue was rebuilt in 1850 on the site of one of 1354.",
+             note_it="Distrutta dall'esercito di Napoleone nel 1798, la sinagoga fu ricostruita nel 1850 dove ne sorgeva una del 1354."),
+        # Source: Wikipedia, Eliyahu Hanavi Synagogue; Wikipedia (fr), Synagogue Éliyahu Hanavi.
+        Stop("alexandria_st_mark", "St Mark's Cathedral", "Cattedrale di San Marco", 31.1984, 29.8996,
+             note_en="The historic seat of the Coptic popes stands, by tradition, where Mark the Evangelist founded the Church of Alexandria.",
+             note_it="Sede storica dei papi copti, la cattedrale sorge, secondo la tradizione, dove Marco evangelista fondò la Chiesa di Alessandria."),
+        # Source: Wikipedia, Saint Mark's Coptic Orthodox Cathedral (Alexandria); Wikipedia (fr), Cathédrale Saint-Marc d'Alexandrie.
+        Stop("alexandria_unknown_soldier", "Unknown Soldier Memorial", "Monumento al milite ignoto", 31.2000, 29.8938,
+             note_en="Built by Alexandria's Italians as a memorial to Khedive Ismail, it was later made the memorial to the navy's unknown soldiers.",
+             note_it="Costruito dagli italiani di Alessandria come monumento al chedivè Ismail, divenne poi il monumento ai militi ignoti della marina."),
+        # Source: Wikipedia, Alexandria Naval Unknown Soldier Memorial; Wikipedia (ar), نصب الجندي المجهول (الإسكندرية). When it changed differs (after 1952, or 1964): not said.
+        Stop("alexandria_terbana", "Terbana Mosque", "Moschea Terbana", 31.2008, 29.8872,
+             note_en="Built by Hajj Ibrahim Terbana and named after him, the mosque is in the Delta style of Ottoman Egypt.",
+             note_it="Costruita da Hajj Ibrahim Terbana, di cui porta il nome, la moschea è nello stile del Delta dell'Egitto ottomano."),
+        # Source: Wikipedia, Mosque of Ibrahim Terbana; Wikipedia (ar), مسجد تربانة.
+        Stop("alexandria_abu_al_abbas", "Abu al-Abbas al-Mursi Mosque", "Moschea di Abu al-Abbas al-Mursi", 31.2054, 29.8823,
+             note_en="Built over the tomb of the Sufi saint Abu al-Abbas al-Mursi, the mosque in its present form is the work of Italian architects.",
+             note_it="Costruita sulla tomba del santo sufi Abu al-Abbas al-Mursi, la moschea nella sua forma attuale è opera di architetti italiani."),
+        # Source: Wikipedia, Abu al-Abbas al-Mursi Mosque; Wikipedia (fr), Mosquée Abu el-Abbas el-Mursi. Its first year differs (1306 or 1307): not said.
+        Stop("alexandria_qaitbay", "Citadel of Qaitbay", "Cittadella di Qaitbay", 31.2137, 29.8854,
+             note_en="Sultan Qaitbay built this fort from 1477 to 1479 where the ancient Lighthouse of Alexandria had stood.",
+             note_it="Il sultano Qaitbay costruì questo forte dal 1477 al 1479 dove sorgeva l'antico Faro di Alessandria."),
+        # Source: Wikipedia, Citadel of Qaitbay; Wikipedia (fr), Citadelle de Qaitbay.
+    ],
+)
+
 FEZ = Walk(
     id="FEZ_PALACE_ANDALUSIANS",
     city="fez",
@@ -2875,7 +3022,7 @@ FEZ = Walk(
     ],
 )
 
-WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING, HONG_KONG, SINGAPORE, BANGKOK, KYOTO, HANOI, MELBOURNE, CAIRO, CAPE_TOWN, MARRAKECH, FEZ]
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING, HONG_KONG, SINGAPORE, BANGKOK, KYOTO, HANOI, MELBOURNE, CAIRO, CAPE_TOWN, MARRAKECH, TUNIS, ALEXANDRIA, FEZ]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
@@ -2907,6 +3054,7 @@ LOCATORS = {
     "EG": (21.7, 24.7, 31.7, 36.9),
     "ZA": (-34.9, 16.4, -22.1, 32.9),
     "MA": (27.6, -13.3, 36.0, -1.0),
+    "TN": (30.2, 7.5, 37.6, 11.6),
 }
 
 # The continents the Ways page groups the cities by, in its order (the Kotlin enum Continent has

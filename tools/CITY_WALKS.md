@@ -145,5 +145,9 @@ On top of its first two cities:
 - A hill inside a national park (Cape Town's Signal Hill) is mapped as the park's protected area,
   which `features` does not list: find the park's relation (`locate "Table Mountain National
   Park"`) and add it to `parks`; the map cuts it to the page.
+- A long walk needs at least 12 places (`WaysDataTest`): a city whose places are few (Alexandria)
+  starts a little earlier, at a place worth its line.
+- OpenStreetMap's API answers 509 when it has been asked a lot: `fetch` waits and retries; a
+  fetch that still fails can be run again, and only the missing tiles are asked for.
 - A disambiguation page (Green Point Lighthouse) comes back from `wiki` as a short list: ask for
   the full title.

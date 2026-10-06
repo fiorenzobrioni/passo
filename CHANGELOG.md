@@ -37,7 +37,10 @@ All notable changes to Passo are documented here. The format follows
   Golden Mount, Khao San, the Grand Palace and Wat Pho, over the Memorial Bridge to Wat Arun; Cairo, from the Egyptian Museum by Al-Muizz Street, Khan el-Khalili
   and Al-Azhar to the Citadel; Cape Town, from the Green Point Lighthouse by the Waterfront, the
   Castle and the Company's Garden to Bo-Kaap; Marrakech, from the Majorelle Garden by the souks,
-  Jemaa el-Fnaa, the Koutoubia and the Saadian Tombs to the Bahia Palace and Dar Si Said; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And ten short ones, about 5 km, an hour
+  Jemaa el-Fnaa, the Koutoubia and the Saadian Tombs to the Bahia Palace and Dar Si Said; Tunis, from
+  the Clock Tower along Avenue Habib Bourguiba and through the medina to the Belvedere Park;
+  Alexandria, from the Catacombs of Kom el Shoqafa by Pompey's Pillar, the Library and the
+  Corniche to the Citadel of Qaitbay; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And ten short ones, about 5 km, an hour
   or so: Porto, from the cathedral across the Douro to the Serra do Pilar; Amsterdam, from
   Centraal Station along the canals to the Westerkerk; Prague, from the Castle over Charles
   Bridge to Wenceslas Square; Québec, from the Parliament by the Plains of Abraham and the
