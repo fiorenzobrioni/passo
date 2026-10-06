@@ -33,7 +33,8 @@ moves with the distance their steps measure.
    (10.1 km, 14); then Seoul (11.1 km, 12) and Beijing (10.6 km, 15, through the Forbidden City); then Hong Kong
    (11.0 km, 15) and Singapore (8.4 km, 14); then Bangkok (9.8 km, 12) and Kyoto, short
    (4.2 km, 10); then Hanoi (5.9 km, 8) and Melbourne (4.6 km, 9), short, which bring Asia and
-   Oceania to ten; then, opening Africa, Cairo (9.9 km, 15) and Cape Town (10.8 km, 15). `fetch` with walk ids fetches only those walks, so a city is added
+   Oceania to ten; then, opening Africa, Cairo (9.9 km, 15) and Cape Town (10.8 km, 15); then Marrakech (8.2 km, 14) and Fez, short
+   (4.1 km, 8). `fetch` with walk ids fetches only those walks, so a city is added
    without moving the others with the map's edits since.
 3. **The city behind the line is OpenStreetMap too**: the water (the Thames, the Darsena) as
    areas, the canals (the Navigli) as lines drawn as wide as they are (`riverWidthMeters`, with

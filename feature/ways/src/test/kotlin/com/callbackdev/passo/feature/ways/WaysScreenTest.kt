@@ -240,7 +240,7 @@ class WaysScreenTest {
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.continent(Continent.ASIA_OCEANIA)))
         compose.onNodeWithTag(WaysTags.continent(Continent.ASIA_OCEANIA)).assert(hasText("10 cities", substring = true))
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.continent(Continent.AFRICA)))
-        compose.onNodeWithTag(WaysTags.continent(Continent.AFRICA)).assert(hasText("2 cities", substring = true))
+        compose.onNodeWithTag(WaysTags.continent(Continent.AFRICA)).assert(hasText("4 cities", substring = true))
         compose.onNodeWithTag(WaysTags.way(WayId.LONDON_PALACE_TOWER)).assertDoesNotExist()
         snapshot("ways_cities")
         compose.onNodeWithTag(WaysTags.continent(Continent.AMERICAS)).performClick()
@@ -310,6 +310,8 @@ class WaysScreenTest {
             Continent.AFRICA to listOf(
                 WayId.CAIRO_MUSEUM_CITADEL,
                 WayId.CAPE_TOWN_LIGHTHOUSE_BO_KAAP,
+                WayId.MARRAKECH_MAJORELLE_SI_SAID,
+                WayId.FEZ_PALACE_ANDALUSIANS,
             ),
         )
         assertThat(byContinent.keys).containsExactlyElementsIn(Continent.entries)
@@ -363,7 +365,7 @@ class WaysScreenTest {
     @Test
     fun `Africa's map, from Cairo to Cape Town`() {
         showContinent(Continent.AFRICA)
-        compose.onNodeWithContentDescription("Africa on the map: 2 cities.").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Africa on the map: 4 cities.").assertIsDisplayed()
         snapshot("continent_africa")
     }
 
@@ -669,6 +671,27 @@ class WaysScreenTest {
         )
         compose.onNodeWithText("From the Green Point Lighthouse to Bo-Kaap", substring = true).assertExists()
         snapshot("walk_cape_town_dark")
+    }
+
+    @Test
+    fun `Marrakech's walk, from the Majorelle Garden by Jemaa el-Fnaa to Dar Si Said`() {
+        showWay(WayId.MARRAKECH_MAJORELLE_SI_SAID, state = WaysSamples.state(walks = emptyList(), live = null))
+        compose.onNodeWithText("From the Majorelle Garden to Dar Si Said", substring = true).assertExists()
+        snapshot("walk_marrakech")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Koutoubia Mosque"))
+        compose.onNodeWithText("Giralda", substring = true).assertExists()
+        snapshot("walk_marrakech_places")
+    }
+
+    @Test
+    fun `Fez's short walk, through the medina to the Andalusian Mosque, in the dark`() {
+        showWay(
+            WayId.FEZ_PALACE_ANDALUSIANS,
+            state = WaysSamples.state(walks = emptyList(), live = null),
+            dark = true,
+        )
+        compose.onNodeWithText("From the Royal Palace to the Andalusian Mosque", substring = true).assertExists()
+        snapshot("walk_fez_dark")
     }
 
     @Test

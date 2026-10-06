@@ -20,7 +20,8 @@ Italian, French, Spanish), Seoul in the English and Korean, Beijing and Hong Kon
 Singapore in the English and Chinese (or German, Italian), Bangkok in the English and German (or
 Italian), Kyoto in the English and Japanese, Hanoi in the English and French (or Italian), Melbourne in
 the English and German (or French), Cairo in the English and French (or Arabic, German, Italian), Cape
-Town in the English and German (or Dutch, French, Afrikaans).
+Town in the English and German (or Dutch, French, Afrikaans), Marrakech in the English and French, Fez in
+the English and French (or Italian, Spanish, German).
 """
 
 from dataclasses import dataclass, field
@@ -2739,7 +2740,138 @@ CAPE_TOWN = Walk(
     ],
 )
 
-WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING, HONG_KONG, SINGAPORE, BANGKOK, KYOTO, HANOI, MELBOURNE, CAIRO, CAPE_TOWN]
+MARRAKECH = Walk(
+    id="MARRAKECH_MAJORELLE_SI_SAID",
+    city="marrakech",
+    city_en="Marrakech",
+    city_it="Marrakech",
+    route_en="From the Majorelle Garden to Dar Si Said, by the souks, Jemaa el-Fnaa and the Bahia Palace",
+    route_it="Dal Giardino Majorelle a Dar Si Said, passando per i souk, Jemaa el-Fnaa e il Palazzo della Bahia",
+    outing_en="A walk in Marrakech",
+    outing_it="Passeggiata a Marrakech",
+    country="MA",
+    continent="AFRICA",
+    # The medina's lanes are mapped as residential streets.
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=200,
+    # The Majorelle Garden, the Cyber Park, Lalla Hasna Park, the Koutoubia Gardens.
+    parks=["way/41922120", "way/126302813", "way/364290838", "way/435129470"],
+    stops=[
+        Stop("marrakech_majorelle", "Majorelle Garden", "Giardino Majorelle", 31.6415, -8.0029,
+             note_en="Begun by the painter Jacques Majorelle in 1923, the garden is painted in the blue named after him; Yves Saint Laurent and Pierre Bergé later bought it.",
+             note_it="Iniziato dal pittore Jacques Majorelle nel 1923, il giardino è dipinto nel blu che porta il suo nome; in seguito lo comprarono Yves Saint Laurent e Pierre Bergé."),
+        # Source: Wikipedia, Majorelle Garden (in the 1980s); Wikipedia (fr), Jardin Majorelle (1980).
+        Stop("marrakech_bab_doukkala", "Bab Doukkala", "Bab Doukkala", 31.6340, -7.9990,
+             note_en="Already there under the Almoravids, the gate takes its name from the Doukkala, the region it led to.",
+             note_it="Già presente sotto gli Almoravidi, la porta prende il nome dalla Doukkala, la regione verso cui conduceva."),
+        # Source: Wikipedia, Bab Doukkala; Wikipedia (fr), Bab Doukkala (Marrakech).
+        Stop("marrakech_dar_el_bacha", "Dar el Bacha", "Dar el Bacha", 31.6315, -7.9929,
+             note_en="Built in 1910, the house of the pasha was the home of Thami El Glaoui, pasha of Marrakech; today it is the Museum of Confluences.",
+             note_it="Costruita nel 1910, la casa del pascià fu la residenza di Thami El Glaoui, pascià di Marrakech; oggi è il Museo delle Confluenze."),
+        # Source: Wikipedia, Dar el Bacha; Wikipedia (fr), Dar el Bacha.
+        Stop("marrakech_mouassine", "Mouassine Mosque", "Moschea Mouassine", 31.6299, -7.9893,
+             note_en="The Saadian sultan Abdallah al-Ghalib built this mosque, with a fountain, a hammam and a library, on land left free when the Jews were moved to the new mellah.",
+             note_it="Il sultano saadiano Abdallah al-Ghalib costruì questa moschea, con una fontana, un hammam e una biblioteca, su terreni lasciati liberi quando gli ebrei furono trasferiti nel nuovo mellah."),
+        # Source: Wikipedia, Mouassine Mosque; Wikipedia (fr), Mosquée El Mouassine. The stop is the Mouassine Fountain.
+        Stop("marrakech_almoravid_koubba", "Almoravid Koubba", "Qubba almoravide", 31.6315, -7.9872,
+             note_en="Built by the Almoravid ruler Ali ibn Yusuf, this dome housed the ablutions for the mosque nearby, of which it is all that is left.",
+             note_it="Costruita dal sovrano almoravide Ali ibn Yusuf, questa cupola ospitava le abluzioni per la moschea vicina, di cui è tutto ciò che resta."),
+        # Source: Wikipedia, Almoravid Qubba; Wikipedia (fr), Qoubba almoravide, and Médersa Ben Youssef (only the Qoubba is left of the old mosque). Its year differs (1117 or 1125): not said.
+        Stop("marrakech_ben_youssef", "Ben Youssef Madrasa", "Madrasa Ben Youssef", 31.6320, -7.9860,
+             note_en="Completed by the Saadian sultan Abdallah al-Ghalib in 1564 and 1565, the madrasa lodged its students in small rooms around its courtyard.",
+             note_it="Completata dal sultano saadiano Abdallah al-Ghalib nel 1564 e 1565, la madrasa ospitava i suoi studenti in piccole stanze intorno al cortile."),
+        # Source: Wikipedia, Ben Youssef Madrasa; Wikipedia (fr), Médersa Ben Youssef.
+        Stop("marrakech_jemaa_el_fnaa", "Jemaa el-Fnaa", "Jemaa el-Fnaa", 31.6258, -7.9889,
+             note_en="Proclaimed by UNESCO as intangible heritage in 2001, the square has snake charmers and storytellers by day, and fills with food stalls at night.",
+             note_it="Proclamata dall'UNESCO patrimonio immateriale nel 2001, la piazza ha incantatori di serpenti e cantastorie di giorno, e la sera si riempie di bancarelle di cibo."),
+        # Source: Wikipedia, Jemaa el-Fnaa; Wikipedia (fr), Place Jemaa el-Fna. What its name means differs: not said.
+        Stop("marrakech_koutoubia", "Koutoubia Mosque", "Moschea Koutoubia", 31.6238, -7.9934,
+             note_en="Its name comes from the Arabic for booksellers; its Almohad minaret likely inspired Seville's Giralda and Rabat's Hassan Tower.",
+             note_it="Il suo nome viene dalla parola araba per librai; il suo minareto almohade ispirò probabilmente la Giralda di Siviglia e la Torre Hassan di Rabat."),
+        # Source: Wikipedia, Kutubiyya Mosque; Wikipedia (fr), Mosquée Koutoubia. The years differ: not said.
+        Stop("marrakech_bab_agnaou", "Bab Agnaou", "Bab Agnaou", 31.6174, -7.9906,
+             note_en="Built under the Almohads, the gate led into the royal kasbah of Ya'qub al-Mansur; its name is thought to come from a Berber word for the mute.",
+             note_it="Costruita sotto gli Almohadi, la porta conduceva nella kasbah reale di Ya'qub al-Mansur; il suo nome verrebbe da una parola berbera che significa muto."),
+        # Source: Wikipedia, Bab Agnaou; Wikipedia (fr), Bab Agnaou.
+        Stop("marrakech_saadian_tombs", "Saadian Tombs", "Tombe saadiane", 31.6173, -7.9886,
+             note_en="Ahmad al-Mansur, the most powerful of the Saadian sultans, lies at the centre of the Chamber of the Twelve Columns, among his dynasty's tombs.",
+             note_it="Ahmad al-Mansur, il più potente dei sultani saadiani, riposa al centro della Sala delle dodici colonne, tra le tombe della sua dinastia."),
+        # Source: Wikipedia, Saadian Tombs; Wikipedia (fr), Tombeaux saadiens.
+        Stop("marrakech_el_badi", "El Badi Palace", "Palazzo El Badi", 31.6182, -7.9865,
+             note_en="Ahmad al-Mansur began the Incomparable Palace in 1578, after the battle of the Three Kings; Moulay Ismail later stripped it to build Meknes.",
+             note_it="Ahmad al-Mansur iniziò il Palazzo Incomparabile nel 1578, dopo la battaglia dei Tre Re; Moulay Ismail in seguito lo spogliò per costruire Meknès."),
+        # Source: Wikipedia, El Badi Palace; Wikipedia (fr), Palais El Badi. When it was stripped differs (1696 or 1707): not said.
+        Stop("marrakech_mellah", "Mellah", "Mellah", 31.6198, -7.9849,
+             note_en="The Saadian sultan Abdallah al-Ghalib created this Jewish quarter by decree in 1558, beside the royal kasbah.",
+             note_it="Il sultano saadiano Abdallah al-Ghalib creò per decreto questo quartiere ebraico nel 1558, accanto alla kasbah reale."),
+        # Source: Wikipedia, Mellah of Marrakesh; Wikipedia (fr), Mellah de Marrakech. The stop is the Place des Ferblantiers, at its edge.
+        Stop("marrakech_bahia", "Bahia Palace", "Palazzo della Bahia", 31.6219, -7.9822,
+             note_en="Begun in the 1860s by the grand vizier Si Musa, the palace was enlarged until 1900 by his son Ba Ahmed, grand vizier after him.",
+             note_it="Iniziato negli anni Sessanta dell'Ottocento dal gran visir Si Musa, il palazzo fu ingrandito fino al 1900 da suo figlio Ba Ahmed, gran visir dopo di lui."),
+        # Source: Wikipedia, Bahia Palace; Wikipedia (fr), Palais de la Bahia. Where its name comes from is in one only: not said.
+        Stop("marrakech_dar_si_said", "Dar Si Said", "Dar Si Said", 31.6234, -7.9839,
+             note_en="Built for Si Said, Ba Ahmed's brother, the house became a museum of Moroccan crafts in the 1930s.",
+             note_it="Costruita per Si Said, fratello di Ba Ahmed, la casa divenne negli anni Trenta un museo dell'artigianato marocchino."),
+        # Source: Wikipedia, Dar Si Said (1930 or 1932); Wikipedia (fr), Musée Dar Si Saïd (1932).
+    ],
+)
+
+FEZ = Walk(
+    id="FEZ_PALACE_ANDALUSIANS",
+    city="fez",
+    city_en="Fez",
+    city_it="Fès",
+    route_en="From the Royal Palace to the Andalusian Mosque, by Bou Inania, al-Qarawiyyin and the tanneries",
+    route_it="Dal Palazzo Reale alla Moschea degli Andalusi, passando per Bou Inania, al-Qarawiyyin e le concerie",
+    outing_en="A walk in Fez",
+    outing_it="Passeggiata a Fès",
+    country="MA",
+    continent="AFRICA",
+    # The medina's lanes are mapped as residential streets.
+    more_streets=("residential", "unclassified", "living_street"),
+    more_streets_min_metres=200,
+    # The Oued Fès and the Oued Jawahir by Jnan Sbil; the Oued Boukhrareb, through the old city.
+    water=["way/1271557555", "way/1271557562"],
+    canals=["way/160083098", "way/486917300", "way/121766257"],
+    # Jnan Sbil, the Dar el-Beida's garden.
+    parks=["way/95233178", "way/1496105508"],
+    stops=[
+        Stop("fez_royal_palace", "Royal Palace", "Palazzo Reale", 34.0530, -4.9928,
+             note_en="The royal palace covers 80 hectares; its great ornate doors on the Place des Alaouites were made in the 20th century.",
+             note_it="Il palazzo reale si estende su 80 ettari; le sue grandi porte decorate su Place des Alaouites furono realizzate nel Novecento."),
+        # Source: Wikipedia, Royal Palace of Fez (1969 to 1971); Wikipedia (fr), Palais royal (Fès) (their designer honoured about 1972).
+        Stop("fez_mellah", "Mellah", "Mellah", 34.0533, -4.9908,
+             note_en="Moved here under the Marinids, Fez's Jewish quarter was the first in Morocco to be called a mellah, perhaps after a salt store or a salty spring.",
+             note_it="Trasferito qui sotto i Merinidi, il quartiere ebraico di Fès fu il primo del Marocco a chiamarsi mellah, forse per un magazzino di sale o una fonte salata."),
+        # Source: Wikipedia, Mellah of Fez; Wikipedia (it), Mellah di Fès.
+        Stop("fez_jnan_sbil", "Jnan Sbil Gardens", "Giardini Jnan Sbil", 34.0599, -4.9881,
+             note_en="Laid out by Sultan Hassan I between Fez's two old cities, the gardens were reserved for the royal elite until 1917.",
+             note_it="Creati dal sultano Hassan I tra le due città vecchie di Fès, i giardini furono riservati all'élite reale fino al 1917."),
+        # Source: Wikipedia, Jnan Sbil Gardens; Wikipedia (es), Jardines Jnan Sbil.
+        Stop("fez_bou_inania", "Bou Inania Madrasa", "Madrasa Bou Inania", 34.0623, -4.9827,
+             note_en="Built from 1350 to 1355 for the Marinid sultan Abu Inan, the madrasa was also a Friday mosque, with its own minaret; a water clock stands beside it.",
+             note_it="Costruita dal 1350 al 1355 per il sultano merinide Abu Inan, la madrasa era anche moschea del venerdì, con un suo minareto; accanto c'è un orologio ad acqua."),
+        # Source: Wikipedia, Bou Inania Madrasa (the clock across the street); Wikipedia (fr), Médersa Bou Inania de Fès (on its façade): the sentence says beside it. Bab Bou Jeloud, just before, has no place of its own.
+        Stop("fez_moulay_idriss", "Zawiya of Moulay Idris II", "Zawiya di Moulay Idris II", 34.0648, -4.9747,
+             note_en="The shrine holds the tomb of the Idrisid ruler Idris II, found again around 1437; Moulay Ismail later gave it its pyramidal roof.",
+             note_it="Il santuario custodisce la tomba del sovrano idriside Idris II, ritrovata intorno al 1437; Moulay Ismail le diede poi il tetto piramidale."),
+        # Source: Wikipedia, Zawiya of Moulay Idris II; Wikipedia (fr), Mausolée de Moulay Idriss II. Whether he founded the city is in one only: not said.
+        Stop("fez_qarawiyyin", "Al-Qarawiyyin", "Al-Qarawiyyin", 34.0648, -4.9733,
+             note_en="Founded as a mosque by Fatima al-Fihri, of a family from Kairouan, al-Qarawiyyin is cited by UNESCO as the oldest university still at work.",
+             note_it="Fondata come moschea da Fatima al-Fihri, di una famiglia di Kairouan, al-Qarawiyyin è citata dall'UNESCO come la più antica università ancora attiva."),
+        # Source: Wikipedia, University of al-Qarawiyyin; Wikipedia (fr), Université Al Quaraouiyine. Its year differs (857 or 859, about 859): not said.
+        Stop("fez_chouara", "Chouara Tannery", "Conceria Chouara", 34.0659, -4.9710,
+             note_en="Hides are softened in the white vats and dyed in the coloured ones; local tradition dates the tannery back to the founding of Fez.",
+             note_it="Le pelli vengono ammorbidite nelle vasche bianche e tinte in quelle colorate; la tradizione locale fa risalire la conceria alla fondazione di Fès."),
+        # Source: Wikipedia, Chouara Tannery; Wikipedia (de), Chouara-Gerberei.
+        Stop("fez_andalusian_mosque", "Andalusian Mosque", "Moschea degli Andalusi", 34.0632, -4.9681,
+             note_en="Founded in 859 and 860 by Maryam al-Fihri, Fatima's sister, the mosque is known for its tall north gate of zellij and carved wood.",
+             note_it="Fondata nell'859 e 860 da Maryam al-Fihri, sorella di Fatima, la moschea è nota per la sua alta porta nord di zellige e legno scolpito."),
+        # Source: Wikipedia, Mosque of the Andalusians; Wikipedia (fr), Mosquée des Andalous.
+    ],
+)
+
+WALKS = [MILAN, ROME, PARIS, LONDON, MADRID, BERLIN, VIENNA, PORTO, AMSTERDAM, PRAGUE, LIMA, CUSCO, NEW_YORK, RIO, MEXICO_CITY, BUENOS_AIRES, SAN_FRANCISCO, QUEBEC, HAVANA, CARTAGENA, TOKYO, SYDNEY, SEOUL, BEIJING, HONG_KONG, SINGAPORE, BANGKOK, KYOTO, HANOI, MELBOURNE, CAIRO, CAPE_TOWN, MARRAKECH, FEZ]
 
 # The locator map's frame for each country (south, west, north, east), in degrees.
 LOCATORS = {
@@ -2770,6 +2902,7 @@ LOCATORS = {
     "VN": (8.4, 102.1, 23.4, 109.5),
     "EG": (21.7, 24.7, 31.7, 36.9),
     "ZA": (-34.9, 16.4, -22.1, 32.9),
+    "MA": (27.6, -13.3, 36.0, -1.0),
 }
 
 # The continents the Ways page groups the cities by, in its order (the Kotlin enum Continent has

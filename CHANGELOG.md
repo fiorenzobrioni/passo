@@ -36,7 +36,8 @@ All notable changes to Passo are documented here. The format follows
   and the Merlion to Marina Bay Sands and the Supertrees; Bangkok, from the Giant Swing by the
   Golden Mount, Khao San, the Grand Palace and Wat Pho, over the Memorial Bridge to Wat Arun; Cairo, from the Egyptian Museum by Al-Muizz Street, Khan el-Khalili
   and Al-Azhar to the Citadel; Cape Town, from the Green Point Lighthouse by the Waterfront, the
-  Castle and the Company's Garden to Bo-Kaap; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And nine short ones, about 5 km, an hour
+  Castle and the Company's Garden to Bo-Kaap; Marrakech, from the Majorelle Garden by the souks,
+  Jemaa el-Fnaa, the Koutoubia and the Saadian Tombs to the Bahia Palace and Dar Si Said; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And ten short ones, about 5 km, an hour
   or so: Porto, from the cathedral across the Douro to the Serra do Pilar; Amsterdam, from
   Centraal Station along the canals to the Westerkerk; Prague, from the Castle over Charles
   Bridge to Wenceslas Square; Québec, from the Parliament by the Plains of Abraham and the
@@ -45,7 +46,8 @@ All notable changes to Passo are documented here. The format follows
   through Getsemaní to San Felipe; Kyoto, from Kiyomizu-dera by the Yasaka pagoda, Gion and
   Pontochō to the Nishiki market; Hanoi, from the Temple of Literature round Hoàn Kiếm Lake and
   through the Old Quarter to the Long Biên Bridge; and Melbourne, from Flinders Street by the
-  State Library and Parliament to the Royal Exhibition Building. Each map has the city's
+  State Library and Parliament to the Royal Exhibition Building; and Fez, from the Royal Palace
+  through the medina by Bou Inania, al-Qarawiyyin and the tanneries to the Andalusian Mosque. Each map has the city's
   water, parks and main streets, and, for a city on the sea, its coast, so the area is
   recognisable at a glance. Walked where you are
   in one outing or a few. Each place is told as your steps reach it, with a short vibration and,
