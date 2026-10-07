@@ -780,6 +780,7 @@
     <string name="way_note_amsterdam_waag">A city gate turned weigh house in 1617; the surgeons’ guild upstairs commissioned Rembrandt’s Anatomy Lesson of Dr Tulp.</string>
     <string name="way_note_amsterdam_westerkerk">Its 87-metre tower is the tallest church tower in Amsterdam; Rembrandt was buried here in 1669, in a grave now lost.</string>
     <string name="way_note_aosta">Aosta was Augusta Praetoria, a Roman town founded in 25 BC; its Arch of Augustus still stands.</string>
+    <string name="way_note_arzua">Arzúa gives its name to Arzúa-Ulloa, a protected cheese made from cow’s milk.</string>
     <string name="way_note_assisi">Assisi is Francis’s town: his tomb lies beneath the basilica that bears his name.</string>
     <string name="way_note_astorga">In Astorga stands the Episcopal Palace designed by Antoni Gaudí.</string>
     <string name="way_note_aulla">Aulla’s abbey of San Caprasio, founded in the 9th century, is named after a hermit of the Lérins islands, off Provence.</string>
@@ -811,6 +812,7 @@
     <string name="way_note_beijing_tiananmen">Called Chengtianmen under the Ming, this gate of the Imperial City now appears on China’s national emblem.</string>
     <string name="way_note_beijing_tiananmen_square">The square lies where the Ming and the Qing had their Corridor of a Thousand Steps; it was widened in the 1950s.</string>
     <string name="way_note_beijing_white_dagoba">Raised in 1651, the White Dagoba crowns Jade Flower Island, in the middle of Beihai’s lake.</string>
+    <string name="way_note_belorado">A castle was raised above Belorado early in the Reconquest, to guard the way from the Ebro valley to the Meseta.</string>
     <string name="way_note_berceto">Berceto’s cathedral bears the name of Moderan, a bishop of Rennes who left relics here on his pilgrimage to Rome.</string>
     <string name="way_note_berlin_bebelplatz">On 10 May 1933 books were burned here; a glass pane in the square looks down on empty shelves.</string>
     <string name="way_note_berlin_brandenburg_gate">Napoleon carried the Quadriga on top of the gate off to Paris in 1806; it came back in 1814.</string>
@@ -874,6 +876,7 @@
     <string name="way_note_cape_town_st_georges">Begun in 1901 to Herbert Baker’s design, the cathedral holds the remains of Archbishop Desmond Tutu, before its high altar.</string>
     <string name="way_note_cape_town_stadium">Built for the 2010 football World Cup, the stadium hosted one of its quarter-finals and a semi-final.</string>
     <string name="way_note_cape_town_waterfront">Its two basins are named after Queen Victoria and her son Prince Alfred, who began the harbour’s breakwater in 1860.</string>
+    <string name="way_note_carrion">Carrión was home to the Infantes, El Cid’s sons-in-law in the Cantar de mio Cid.</string>
     <string name="way_note_cartagena_bovedas">Twenty-three vaults in the walls, built as storerooms and later used as prison cells.</string>
     <string name="way_note_cartagena_cathedral">In 1586, still unfinished, the cathedral was damaged in Francis Drake’s attack on the city.</string>
     <string name="way_note_cartagena_inquisicion">This palace, finished in 1770, was the seat of the Inquisition’s tribunal in Cartagena.</string>
@@ -882,6 +885,7 @@
     <string name="way_note_cartagena_santo_domingo">The church of Santo Domingo, on this square, was built between about 1565 and 1630.</string>
     <string name="way_note_cartagena_torre_reloj">The main gate of the walled city takes its name from the clock set on it in the 18th century.</string>
     <string name="way_note_cartagena_trinidad">On 11 November 1811 the people of Getsemaní, with Pedro Romero, pushed Cartagena to declare its independence.</string>
+    <string name="way_note_castrojeriz">The way crosses Castrojeriz along a single street over 1,500 metres long, the longest on the whole route.</string>
     <string name="way_note_chatillon">At Châtillon the Valtournenche opens, the valley that climbs to the Matterhorn.</string>
     <string name="way_note_cruz_de_ferro">At the iron cross, about 1,500 metres up, pilgrims leave a stone brought from home.</string>
     <string name="way_note_cusco_cathedral">In its Last Supper, attributed to Marcos Zapata, a guinea pig is on the table.</string>
@@ -908,6 +912,7 @@
     <string name="way_note_dakar_soumbedioune">On the Corniche, beside the Médina, Soumbédioune’s craft market is one of the best known in Dakar.</string>
     <string name="way_note_dakar_station">In front of the station stand Demba and Dupont, a Senegalese tirailleur and a French soldier, statues unveiled in 1923.</string>
     <string name="way_note_dakar_ucad">Grown from a medical school of French West Africa, the university bears the name of the historian Cheikh Anta Diop.</string>
+    <string name="way_note_estella">King Sancho Ramírez founded Estella around 1090 on the pilgrims’ road, and settlers came from France.</string>
     <string name="way_note_fez_andalusian_mosque">Founded in 859 and 860 by Maryam al-Fihri, Fatima’s sister, the mosque is known for its tall north gate of zellij and carved wood.</string>
     <string name="way_note_fez_bou_inania">Built from 1350 to 1355 for the Marinid sultan Abu Inan, the madrasa was also a Friday mosque, with its own minaret; a water clock stands beside it.</string>
     <string name="way_note_fez_chouara">Hides are softened in the white vats and dyed in the coloured ones; local tradition dates the tannery back to the founding of Fez.</string>
@@ -920,6 +925,7 @@
     <string name="way_note_fiesole">Fiesole is older than Florence: the Etruscans founded it, and its Roman theatre still holds summer shows.</string>
     <string name="way_note_fiorenzuola">Fiorenzuola’s name comes from the Roman Florentia; d’Arda, from the river it stands on.</string>
     <string name="way_note_firenze">The way ends in Piazza della Signoria, in front of Palazzo Vecchio.</string>
+    <string name="way_note_fromista">Frómista’s Romanesque church of San Martín was founded around 1066, paid for in part by a queen.</string>
     <string name="way_note_gambassi_terme">Glassmaking flourished in Gambassi from the 13th century.</string>
     <string name="way_note_garlasco">Garlasco’s sanctuary of the Madonna della Bozzola, a place of pilgrimage, began with a miracle that tradition dates to 1465.</string>
     <string name="way_note_gran_san_bernardo">Travellers have found a hospice at this pass since about 1050, when Bernard of Aosta founded it.</string>
@@ -957,6 +963,8 @@
     <string name="way_note_hong_kong_tai_kwun">The old Central Police Station, with the magistracy and Victoria Prison, reopened to the public in 2018 as Tai Kwun.</string>
     <string name="way_note_hong_kong_victoria_park">Opened in 1957 on land reclaimed from the old Causeway Bay typhoon shelter, the park is named after Queen Victoria.</string>
     <string name="way_note_hong_kong_western_market">Built in 1906, this was the north block of the old Western Market.</string>
+    <string name="way_note_hornillos">Hornillos is first recorded in the 9th century, on a line of watchtowers guarding early Castile.</string>
+    <string name="way_note_hospital_de_orbigo">In the holy year 1434 the knight Suero de Quiñones held this bridge, challenging every knight who would cross to a joust.</string>
     <string name="way_note_ivrea">Ivrea’s carnival is known for its battle of the oranges.</string>
     <string name="way_note_kyoto_hanamikoji">Gion is one of Japan’s best-known geisha districts; in Kyoto the geisha are called geiko.</string>
     <string name="way_note_kyoto_kenninji">This Zen temple was founded in 1202, with the monk Eisai as its first abbot.</string>
@@ -986,6 +994,7 @@
     <string name="way_note_lima_puente_de_piedra">Built in 1610, after a flood of the Rímac had carried away the bridge before it.</string>
     <string name="way_note_lima_san_francisco">Its catacombs were the city’s cemetery in colonial times; the convent is a UNESCO World Heritage Site.</string>
     <string name="way_note_lima_santo_domingo">The University of San Marcos, founded in 1551, grew out of the lessons first given in this convent.</string>
+    <string name="way_note_logrono">Logroño, where the way crosses the Ebro, is the trading centre of Rioja wine.</string>
     <string name="way_note_london_abbey">Almost every English and British monarch since 1066 has been crowned here.</string>
     <string name="way_note_london_buckingham">The monarch’s London home since Queen Victoria moved in, in 1837.</string>
     <string name="way_note_london_downing">Number 10 has been the Prime Minister’s house since Robert Walpole moved in, in 1735.</string>
@@ -1003,6 +1012,7 @@
     <string name="way_note_london_tower_bridge">Its two halves still lift to let tall ships through, as they have since 1894.</string>
     <string name="way_note_london_trafalgar">Nelson’s Column, about 52 metres tall, remembers the battle of Trafalgar of 1805.</string>
     <string name="way_note_london_westminster_bridge">Wordsworth wrote a sonnet on this bridge in 1802: earth has not anything to show more fair.</string>
+    <string name="way_note_los_arcos">The two bows on Los Arcos’s arms were granted, it is said, by Navarre’s king after the battle of Valdegón.</string>
     <string name="way_note_lucca">Lucca’s Renaissance walls, over four kilometres around, are a park on top.</string>
     <string name="way_note_luxor_abu_haggag">Built within the temple, the mosque holds the tomb of the sheikh Yusuf Abu al-Haggag, after whom it is named.</string>
     <string name="way_note_luxor_avenue_of_sphinxes">Lined with sphinxes, some with the heads of rams, this avenue joined the temples of Luxor and Karnak.</string>
@@ -1027,6 +1037,7 @@
     <string name="way_note_madrid_puerta_del_sol">On New Year’s Eve, Spain eats twelve grapes to the twelve strokes of the clock on this square.</string>
     <string name="way_note_madrid_reina_sofia">Picasso’s Guernica, painted in 1937 after the bombing of the Basque town, has hung here since 1992.</string>
     <string name="way_note_madrid_retiro_pond">The Retiro was the kings’ park until 1868; its great pond faces the monument to Alfonso XII.</string>
+    <string name="way_note_mansilla">Mansilla keeps stretches of its old walls; pilgrims leave it by the bridge over the Esla, for León.</string>
     <string name="way_note_marrakech_almoravid_koubba">Built by the Almoravid ruler Ali ibn Yusuf, this dome housed the ablutions for the mosque nearby, of which it is all that is left.</string>
     <string name="way_note_marrakech_bab_agnaou">Built under the Almohads, the gate led into the royal kasbah of Ya’qub al-Mansur; its name is thought to come from a Berber word for the mute.</string>
     <string name="way_note_marrakech_bab_doukkala">Already there under the Almoravids, the gate takes its name from the Doukkala, the region it led to.</string>
@@ -1079,6 +1090,7 @@
     <string name="way_note_montefiascone">Legend says a bishop’s wine scout, bound for Rome, wrote Est! Est!! Est!!! at an inn here.</string>
     <string name="way_note_monteriggioni">In the Inferno, Dante likened Monteriggioni’s ring of towers to giants.</string>
     <string name="way_note_mortara">Legend says Mortara is named after a battle fought here in 773 between Charlemagne and the Lombards.</string>
+    <string name="way_note_najera">Nájera’s monastery of Santa María la Real, consecrated in 1052, holds the tombs of the early kings of Navarre.</string>
     <string name="way_note_new_york_911_memorial">Two pools fill the footprints of the Twin Towers, the names of the victims around their edges.</string>
     <string name="way_note_new_york_brooklyn_bridge">Opened in 1883 across the East River, it was then the longest suspension bridge in the world.</string>
     <string name="way_note_new_york_central_park">Frederick Law Olmsted and Calvert Vaux won the competition to design the park with their Greensward Plan.</string>
@@ -1093,8 +1105,10 @@
     <string name="way_note_new_york_washington_square">Stanford White designed its arch for the centennial of George Washington’s inauguration.</string>
     <string name="way_note_new_york_woolworth">When it opened in 1913, it was the tallest building in the world.</string>
     <string name="way_note_o_cebreiro">O Cebreiro, at the gate of Galicia, keeps its round stone houses with thatched roofs, the pallozas.</string>
+    <string name="way_note_o_pedrouzo">O Pedrouzo is the seat of O Pino, whose land holds part of Santiago’s airport.</string>
     <string name="way_note_orio_litta">Near here the way crosses the Po by boat, where Archbishop Sigeric crossed in 990.</string>
     <string name="way_note_padron">Here, the legend says, the boat bearing Saint James’s body was moored to a stone, the pedrón.</string>
+    <string name="way_note_palas_de_rei">Tradition says Palas de Rei, Palatium regis, is named after the palace of the Visigothic king Witiza.</string>
     <string name="way_note_pamplona">Every July, for San Fermín, Pamplona’s bulls run through these streets.</string>
     <string name="way_note_paris_arc_de_triomphe">Napoleon ordered the arch in 1806; the Unknown Soldier of the First World War has lain beneath it since 1921.</string>
     <string name="way_note_paris_champs_elysees">The avenue climbs almost two kilometres to the Arc de Triomphe; its name means the Elysian Fields.</string>
@@ -1132,6 +1146,7 @@
     <string name="way_note_porto_sao_bento">In its hall, Jorge Colaço’s azulejos, put up from 1905, show scenes from the history of Portugal.</string>
     <string name="way_note_porto_se">Begun in the 12th century, the cathedral is where the Camino Portugués, one of the Ways, sets out for Santiago.</string>
     <string name="way_note_porto_serra_do_pilar">Its church and its cloister are both round, and of the same diameter: a convent unique of its kind.</string>
+    <string name="way_note_portomarin">When a reservoir drowned old Portomarín in the 1960s, its main church was rebuilt stone by stone up the hill.</string>
     <string name="way_note_prague_castle">By the Guinness records the largest ancient castle in the world, it has been the president’s seat since 1918.</string>
     <string name="way_note_prague_charles_bridge">Charles IV laid its first stone in 1357; 30 statues, most of them Baroque, line its 516 metres.</string>
     <string name="way_note_prague_klementinum">A Jesuit college from 1556, where the weather has been recorded since 1775, without a break to this day.</string>
@@ -1150,6 +1165,7 @@
     <string name="way_note_quebec_parlement">Statues along its façade tell the history of Québec.</string>
     <string name="way_note_quebec_place_royale">Here in 1608 Samuel de Champlain built the fortified post that became Québec.</string>
     <string name="way_note_quebec_plaines">Here in 1759 the British won the battle for Québec; both generals, Wolfe and Montcalm, died of their wounds.</string>
+    <string name="way_note_rabanal">Rabanal is the end of the ninth stage in the Codex Calixtinus, the medieval pilgrims’ guide.</string>
     <string name="way_note_radicofani">Radicofani’s fortress was held by Ghino di Tacco, the gentleman bandit of the Decameron.</string>
     <string name="way_note_redondela">In 1702, in the strait of Rande below Redondela, an English and Dutch fleet attacked the Spanish treasure fleet.</string>
     <string name="way_note_rieti">Rieti calls itself the centre of Italy: a stone in Piazza San Rufo marks the spot.</string>
@@ -1185,6 +1201,7 @@
     <string name="way_note_roncesvalles">Here, in 778, Charlemagne’s rearguard fell: the battle of the Song of Roland.</string>
     <string name="way_note_saint_jean">Many pilgrims set out from here, at the foot of the Pyrenees.</string>
     <string name="way_note_san_gimignano">San Gimignano still has 14 of its medieval towers, out of about 72.</string>
+    <string name="way_note_san_juan_de_ortega">At each equinox, at five in the afternoon, a ray of sun lights the carved Annunciation on a capital of this church.</string>
     <string name="way_note_san_luca">The climb to San Luca runs under a portico 3.8 km long, with 666 arches.</string>
     <string name="way_note_san_miniato">San Miniato was long called al Tedesco, after the German imperial vicars who ruled Tuscany from here.</string>
     <string name="way_note_san_piero_a_sieve">Above San Piero stands the fortress of San Martino, built by the Medici in the Mugello, their family’s valley.</string>
@@ -1193,6 +1210,7 @@
     <string name="way_note_santa_cristina">In 990 Santa Cristina’s monastery hosted Archbishop Sigeric of Canterbury, on his way home from Rome.</string>
     <string name="way_note_santhia">Santhià’s carnival goes back to the 14th century.</string>
     <string name="way_note_santiago">The way ends in the Praza do Obradoiro, before the cathedral of Santiago.</string>
+    <string name="way_note_santo_domingo">Santo Domingo’s cathedral always keeps a live hen and rooster, for the roast birds that by a miracle saved a pilgrim.</string>
     <string name="way_note_sarria">From Sarria, a little over 100 km from Santiago, the walk still earns the Compostela.</string>
     <string name="way_note_sarzana">Sarzana is the birthplace of Tommaso Parentucelli, who became Pope Nicholas V in 1447.</string>
     <string name="way_note_seoul_bukchon">Bukchon means north village, north of the Cheonggyecheon; its lanes keep many hanok, traditional Korean houses.</string>
@@ -1250,6 +1268,7 @@
     <string name="way_note_sydney_opera_house">Designed by the Dane Jørn Utzon, it was opened by Queen Elizabeth II in 1973, and has been a World Heritage Site since 2007.</string>
     <string name="way_note_sydney_qvb">George McRae’s market hall, finished in 1898, was nearly pulled down in 1959 and now holds shops again.</string>
     <string name="way_note_sydney_st_marys">Begun after a fire destroyed the first church in 1865, William Wardell’s cathedral was largely finished in 1928.</string>
+    <string name="way_note_terradillos">Terradillos takes its name from the Knights Templar, who held it in the Middle Ages.</string>
     <string name="way_note_tokyo_akihabara">After the war Akihabara grew from a black market into Electric Town, and later the heart of otaku culture.</string>
     <string name="way_note_tokyo_ameyoko">This market along the railway may take its name from the sweets sold here after the war, or from American army goods.</string>
     <string name="way_note_tokyo_imperial_palace">Only at the New Year and on the Emperor’s birthday may the public cross into the palace, where the imperial family greets them.</string>
@@ -1264,6 +1283,7 @@
     <string name="way_note_tokyo_station">Tatsuno Kingo’s red-brick station opened in 1914; damaged in the bombing of 1945, it was restored as it first stood in 2012.</string>
     <string name="way_note_tokyo_toshogu">A shrine to Tokugawa Ieyasu, the first Tokugawa shōgun; its buildings, renewed by Iemitsu in 1651, have come down almost intact.</string>
     <string name="way_note_tokyo_yushima_seido">The shōgun Tsunayoshi set this Confucian temple here; in 1872 it held the exhibition from which the national museum was born.</string>
+    <string name="way_note_triacastela">Triacastela’s name is the Latin tria castella, three forts.</string>
     <string name="way_note_tui">Tui’s cathedral, begun at the end of the 11th century, crowns a town that was long a frontier fortress.</string>
     <string name="way_note_tunis_bab_el_bhar">The Sea Gate, also called the Gate of France, marks where the medina ends and the modern city begins.</string>
     <string name="way_note_tunis_bab_el_khadra">Called the Gate of the Green Gardens, it led out towards Carthage and Ariana, and was rebuilt in its present form in 1881.</string>
@@ -1296,6 +1316,7 @@
     <string name="way_note_vienna_stadtpark">Opened in 1862, the park keeps the gilded statue of Johann Strauss II.</string>
     <string name="way_note_vienna_state_opera">The opera house opened in 1869 with Mozart’s Don Giovanni.</string>
     <string name="way_note_vienna_stephansdom">Its south tower rises 136 metres; its great bell, the Pummerin, was first cast from Ottoman cannons.</string>
+    <string name="way_note_villafranca">Villafranca, the town of the Franks, grew around a borough of French pilgrims who stayed.</string>
     <string name="way_note_viterbo">In Viterbo, from 1268 to 1271, the cardinals held the longest papal election in history.</string>
     <string name="way_note_viverone">Lake Viverone keeps the remains of a Bronze Age village on piles, part of a UNESCO World Heritage Site.</string>
     <string name="way_note_zanzibar_christ_church">Built from 1873 to 1879 where the slave market stood, the cathedral has its altar, it is said, on the spot of the whipping post.</string>
@@ -1309,4 +1330,5 @@
     <string name="way_note_zanzibar_st_joseph">Built by French missionaries from 1893 to 1898, the cathedral has twin spires that recall the cathedral of Marseille.</string>
     <string name="way_note_zanzibar_stone_town">Across Creek Road begins Stone Town, whose buildings of the 19th century mix Arab, Persian, Indian and European elements; it is a UNESCO World Heritage Site.</string>
     <string name="way_note_zanzibar_sultans_palace">The sultan’s palace was shelled in the Anglo-Zanzibar War of 1896, held to be the shortest war in history: it lasted less than an hour.</string>
+    <string name="way_note_zubiri">Zubiri means “village of the bridge” in Basque, after its old bridge over the Arga.</string>
 </resources>

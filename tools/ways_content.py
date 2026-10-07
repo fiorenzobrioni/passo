@@ -26,7 +26,8 @@ Italian), Alexandria in the English and French (or Arabic), Dakar in the English
 French (or German), Addis Ababa in the English and French (or Italian), Zanzibar in the English and
 Italian (or German, French), Luxor in the English and French (or Italian). The Via Francigena's
 other stages (7 Oct 2026) in the English and Italian (or French, German), Sigeric's stops in the
-English article on the Via Francigena; a stage with no second source keeps only its name.
+English article on the Via Francigena; the Camino Francés's (7 Oct 2026) in the English and
+Spanish (or French, German, Galician). A stage with no second source keeps only its name.
 """
 
 from dataclasses import dataclass, field
@@ -291,7 +292,10 @@ CAMINO_FRANCES = Way(
              note_en="Here, in 778, Charlemagne's rearguard fell: the battle of the Song of Roland.",
              note_it="Qui, nel 778, cadde la retroguardia di Carlo Magno: la battaglia della Chanson de Roland."),
         # Source: Wikipedia, Battle of Roncevaux Pass.
-        Stop("zubiri", "Zubiri", "Zubiri", 42.9306, -1.5036),
+        Stop("zubiri", "Zubiri", "Zubiri", 42.9306, -1.5036,
+             note_en="Zubiri means “village of the bridge” in Basque, after its old bridge over the Arga.",
+             note_it="Zubiri in basco vuol dire «paese del ponte», per il suo vecchio ponte sull'Arga."),
+        # Source: Wikipedia, Zubiri, Navarre; Wikipedia (es), Zubiri. The bridge's legend, la Rabia, is told in neither.
         Stop("pamplona", "Pamplona", "Pamplona", 42.8169, -1.6432,
              note_en="Every July, for San Fermín, Pamplona's bulls run through these streets.",
              note_it="Ogni luglio, per San Fermín, i tori di Pamplona corrono per queste strade."),
@@ -300,34 +304,79 @@ CAMINO_FRANCES = Way(
              note_en="The town is named after its Romanesque bridge, built for pilgrims in the 11th century.",
              note_it="Il paese prende il nome dal ponte romanico costruito per i pellegrini nell'XI secolo."),
         # Source: Wikipedia, Puente la Reina.
-        Stop("estella", "Estella", "Estella", 42.6714, -2.0306),
-        Stop("los_arcos", "Los Arcos", "Los Arcos", 42.5694, -2.1917),
-        Stop("logrono", "Logroño", "Logroño", 42.4650, -2.4456),
-        Stop("najera", "Nájera", "Nájera", 42.4161, -2.7339),
-        Stop("santo_domingo", "Santo Domingo de la Calzada", "Santo Domingo de la Calzada", 42.4408, -2.9539),
-        Stop("belorado", "Belorado", "Belorado", 42.4206, -3.1903),
-        Stop("san_juan_de_ortega", "San Juan de Ortega", "San Juan de Ortega", 42.3758, -3.4361),
+        Stop("estella", "Estella", "Estella", 42.6714, -2.0306,
+             note_en="King Sancho Ramírez founded Estella around 1090 on the pilgrims' road, and settlers came from France.",
+             note_it="Il re Sancho Ramírez fondò Estella intorno al 1090 sulla via dei pellegrini, e vi giunsero coloni dalla Francia."),
+        # Source: Wikipedia, Estella-Lizarra; Wikipedia (es), Estella-Lizarra.
+        Stop("los_arcos", "Los Arcos", "Los Arcos", 42.5694, -2.1917,
+             note_en="The two bows on Los Arcos's arms were granted, it is said, by Navarre's king after the battle of Valdegón.",
+             note_it="I due archi dello stemma di Los Arcos furono concessi, si dice, dal re di Navarra dopo la battaglia di Valdegón."),
+        # Source: Wikipedia (es), Los Arcos; Wikipedia (de), Los Arcos. The year, 1067, is in the German only.
+        Stop("logrono", "Logroño", "Logroño", 42.4650, -2.4456,
+             note_en="Logroño, where the way crosses the Ebro, is the trading centre of Rioja wine.",
+             note_it="Logroño, dove il cammino attraversa l'Ebro, è il centro del commercio del vino della Rioja."),
+        # Source: Wikipedia, Logroño; Wikipedia (es), Logroño.
+        Stop("najera", "Nájera", "Nájera", 42.4161, -2.7339,
+             note_en="Nájera's monastery of Santa María la Real, consecrated in 1052, holds the tombs of the early kings of Navarre.",
+             note_it="Il monastero di Santa María la Real a Nájera, consacrato nel 1052, custodisce le tombe dei primi re di Navarra."),
+        # Source: Wikipedia, Nájera; Wikipedia (es), Monasterio de Santa María la Real (Nájera).
+        Stop("santo_domingo", "Santo Domingo de la Calzada", "Santo Domingo de la Calzada", 42.4408, -2.9539,
+             note_en="Santo Domingo's cathedral always keeps a live hen and rooster, for the roast birds that by a miracle saved a pilgrim.",
+             note_it="Nella cattedrale di Santo Domingo vivono sempre una gallina e un gallo, per i polli arrosto che salvarono per miracolo un pellegrino."),
+        # Source: Wikipedia, Santo Domingo de la Calzada Cathedral; Wikipedia (es), Santo Domingo de la Calzada. The pilgrim's charge is left out: theft, or murder.
+        Stop("belorado", "Belorado", "Belorado", 42.4206, -3.1903,
+             note_en="A castle was raised above Belorado early in the Reconquest, to guard the way from the Ebro valley to the Meseta.",
+             note_it="Sopra Belorado sorse un castello all'inizio della Reconquista, a guardia del passaggio dalla valle dell'Ebro alla Meseta."),
+        # Source: Wikipedia (fr), Belorado; Wikipedia (de), Belorado.
+        Stop("san_juan_de_ortega", "San Juan de Ortega", "San Juan de Ortega", 42.3758, -3.4361,
+             note_en="At each equinox, at five in the afternoon, a ray of sun lights the carved Annunciation on a capital of this church.",
+             note_it="A ogni equinozio, alle cinque del pomeriggio, un raggio di sole illumina l'Annunciazione scolpita su un capitello di questa chiesa."),
+        # Source: Wikipedia, San Juan de Ortega; Wikipedia (es), San Juan de Ortega.
         Stop("burgos", "Burgos", "Burgos", 42.3408, -3.7044,
              note_en="Burgos cathedral, begun in 1221, is a UNESCO World Heritage Site.",
              note_it="La cattedrale di Burgos, iniziata nel 1221, è patrimonio dell'umanità UNESCO."),
         # Source: Wikipedia, Burgos Cathedral.
-        Stop("hornillos", "Hornillos del Camino", "Hornillos del Camino", 42.3383, -3.9253),
-        Stop("castrojeriz", "Castrojeriz", "Castrojeriz", 42.2881, -4.1386),
-        Stop("fromista", "Frómista", "Frómista", 42.2672, -4.4058),
-        Stop("carrion", "Carrión de los Condes", "Carrión de los Condes", 42.3375, -4.6025),
-        Stop("terradillos", "Terradillos de los Templarios", "Terradillos de los Templarios", 42.3628, -4.9208),
+        Stop("hornillos", "Hornillos del Camino", "Hornillos del Camino", 42.3383, -3.9253,
+             note_en="Hornillos is first recorded in the 9th century, on a line of watchtowers guarding early Castile.",
+             note_it="Hornillos compare per la prima volta nel IX secolo, su una linea di torri a difesa della prima Castiglia."),
+        # Source: Wikipedia (es), Hornillos del Camino; Wikipedia (de), Hornillos del Camino.
+        Stop("castrojeriz", "Castrojeriz", "Castrojeriz", 42.2881, -4.1386,
+             note_en="The way crosses Castrojeriz along a single street over 1,500 metres long, the longest on the whole route.",
+             note_it="Il cammino attraversa Castrojeriz lungo un'unica via di oltre 1.500 metri, la più lunga di tutto il percorso."),
+        # Source: Wikipedia, Castrojeriz; Wikipedia (es), Castrojeriz.
+        Stop("fromista", "Frómista", "Frómista", 42.2672, -4.4058,
+             note_en="Frómista's Romanesque church of San Martín was founded around 1066, paid for in part by a queen.",
+             note_it="La chiesa romanica di San Martín a Frómista fu fondata intorno al 1066, in parte con i beni di una regina."),
+        # Source: Wikipedia, Frómista; Wikipedia (es), Frómista.
+        Stop("carrion", "Carrión de los Condes", "Carrión de los Condes", 42.3375, -4.6025,
+             note_en="Carrión was home to the Infantes, El Cid's sons-in-law in the Cantar de mio Cid.",
+             note_it="Carrión era la terra degli Infantes, i generi del Cid nel Cantar de mio Cid."),
+        # Source: Wikipedia, Carrión de los Condes; Wikipedia (es), Infantes de Carrión.
+        Stop("terradillos", "Terradillos de los Templarios", "Terradillos de los Templarios", 42.3628, -4.9208,
+             note_en="Terradillos takes its name from the Knights Templar, who held it in the Middle Ages.",
+             note_it="Terradillos prende il nome dai Templari, che lo possedettero nel Medioevo."),
+        # Source: Wikipedia (es), Terradillos de los Templarios; Wikipedia (de), Terradillos de los Templarios.
         Stop("el_burgo_ranero", "El Burgo Ranero", "El Burgo Ranero", 42.4228, -5.2208),
-        Stop("mansilla", "Mansilla de las Mulas", "Mansilla de las Mulas", 42.4994, -5.4167),
+        Stop("mansilla", "Mansilla de las Mulas", "Mansilla de las Mulas", 42.4994, -5.4167,
+             note_en="Mansilla keeps stretches of its old walls; pilgrims leave it by the bridge over the Esla, for León.",
+             note_it="Mansilla conserva tratti delle sue antiche mura; i pellegrini ne escono dal ponte sull'Esla, verso León."),
+        # Source: Wikipedia, Mansilla de las Mulas (the bridge); Wikipedia (es, fr, de), Mansilla de las Mulas (the walls).
         Stop("leon", "León", "León", 42.5987, -5.5671,
              note_en="León cathedral holds nearly 1,800 square metres of medieval stained glass.",
              note_it="La cattedrale di León custodisce quasi 1.800 metri quadrati di vetrate medievali."),
         # Source: Wikipedia, León Cathedral.
-        Stop("hospital_de_orbigo", "Hospital de Órbigo", "Hospital de Órbigo", 42.4639, -5.8819),
+        Stop("hospital_de_orbigo", "Hospital de Órbigo", "Hospital de Órbigo", 42.4639, -5.8819,
+             note_en="In the holy year 1434 the knight Suero de Quiñones held this bridge, challenging every knight who would cross to a joust.",
+             note_it="Nell'anno santo 1434 il cavaliere Suero de Quiñones tenne questo ponte, sfidando a giostra ogni cavaliere che volesse passare."),
+        # Source: Wikipedia, Hospital de Órbigo; Wikipedia (es), Paso honroso.
         Stop("astorga", "Astorga", "Astorga", 42.4589, -6.0561,
              note_en="In Astorga stands the Episcopal Palace designed by Antoni Gaudí.",
              note_it="Ad Astorga c'è il Palazzo Episcopale progettato da Antoni Gaudí."),
         # Source: Wikipedia, Episcopal Palace of Astorga.
-        Stop("rabanal", "Rabanal del Camino", "Rabanal del Camino", 42.4817, -6.2847),
+        Stop("rabanal", "Rabanal del Camino", "Rabanal del Camino", 42.4817, -6.2847,
+             note_en="Rabanal is the end of the ninth stage in the Codex Calixtinus, the medieval pilgrims' guide.",
+             note_it="Rabanal è la fine della nona tappa nel Codex Calixtinus, la guida medievale dei pellegrini."),
+        # Source: Wikipedia (es), Rabanal del Camino; Wikipedia (de), Rabanal del Camino.
         Stop("cruz_de_ferro", "Cruz de Ferro", "Cruz de Ferro", 42.4886, -6.3611, stage=False,
              note_en="At the iron cross, about 1,500 metres up, pilgrims leave a stone brought from home.",
              note_it="Alla croce di ferro, a circa 1.500 metri, i pellegrini lasciano una pietra portata da casa."),
@@ -336,20 +385,38 @@ CAMINO_FRANCES = Way(
              note_en="Ponferrada's castle was held by the Knights Templar.",
              note_it="Il castello di Ponferrada appartenne ai Templari."),
         # Source: Wikipedia, Castle of the Templars, Ponferrada.
-        Stop("villafranca", "Villafranca del Bierzo", "Villafranca del Bierzo", 42.6067, -6.8111),
+        Stop("villafranca", "Villafranca del Bierzo", "Villafranca del Bierzo", 42.6067, -6.8111,
+             note_en="Villafranca, the town of the Franks, grew around a borough of French pilgrims who stayed.",
+             note_it="Villafranca, la città dei Franchi, crebbe attorno a un borgo di pellegrini francesi che vi rimasero."),
+        # Source: Wikipedia, Villafranca del Bierzo; Wikipedia (es), Villafranca del Bierzo.
         Stop("o_cebreiro", "O Cebreiro", "O Cebreiro", 42.7078, -7.0428,
              note_en="O Cebreiro, at the gate of Galicia, keeps its round stone houses with thatched roofs, the pallozas.",
              note_it="O Cebreiro, alla porta della Galizia, conserva le sue case tonde di pietra col tetto di paglia, le pallozas."),
         # Source: Wikipedia, O Cebreiro.
-        Stop("triacastela", "Triacastela", "Triacastela", 42.7556, -7.2394),
+        Stop("triacastela", "Triacastela", "Triacastela", 42.7556, -7.2394,
+             note_en="Triacastela's name is the Latin tria castella, three forts.",
+             note_it="Il nome di Triacastela è il latino tria castella, tre fortezze."),
+        # Source: Wikipedia, Triacastela; Wikipedia (gl), Triacastela. Castles in the English, hill forts (castros) in the Galician: "forts".
         Stop("sarria", "Sarria", "Sarria", 42.7806, -7.4142,
              note_en="From Sarria, a little over 100 km from Santiago, the walk still earns the Compostela.",
              note_it="Da Sarria, poco più di 100 km da Santiago, il cammino vale ancora la Compostela."),
         # Source: Wikipedia, Compostela (certificate).
-        Stop("portomarin", "Portomarín", "Portomarín", 42.8075, -7.6158),
-        Stop("palas_de_rei", "Palas de Rei", "Palas de Rei", 42.8728, -7.8689),
-        Stop("arzua", "Arzúa", "Arzúa", 42.9264, -8.1631),
-        Stop("o_pedrouzo", "O Pedrouzo", "O Pedrouzo", 42.9050, -8.3633),
+        Stop("portomarin", "Portomarín", "Portomarín", 42.8075, -7.6158,
+             note_en="When a reservoir drowned old Portomarín in the 1960s, its main church was rebuilt stone by stone up the hill.",
+             note_it="Quando un bacino sommerse la vecchia Portomarín negli anni Sessanta, la sua chiesa maggiore fu ricostruita pietra per pietra più in alto."),
+        # Source: Wikipedia, Portomarín; Wikipedia (es), Portomarín. The church is not named: San Juan in the English, San Nicolás in the Spanish.
+        Stop("palas_de_rei", "Palas de Rei", "Palas de Rei", 42.8728, -7.8689,
+             note_en="Tradition says Palas de Rei, Palatium regis, is named after the palace of the Visigothic king Witiza.",
+             note_it="Secondo la tradizione Palas de Rei, Palatium regis, prende il nome dal palazzo del re visigoto Witiza."),
+        # Source: Wikipedia, Palas de Rei; Wikipedia (es), Palas de Rei.
+        Stop("arzua", "Arzúa", "Arzúa", 42.9264, -8.1631,
+             note_en="Arzúa gives its name to Arzúa-Ulloa, a protected cheese made from cow's milk.",
+             note_it="Arzúa dà il nome all'Arzúa-Ulloa, un formaggio protetto di latte vaccino."),
+        # Source: Wikipedia, Arzúa; Wikipedia (es), Arzúa.
+        Stop("o_pedrouzo", "O Pedrouzo", "O Pedrouzo", 42.9050, -8.3633,
+             note_en="O Pedrouzo is the seat of O Pino, whose land holds part of Santiago's airport.",
+             note_it="O Pedrouzo è il capoluogo di O Pino, sulle cui terre sorge parte dell'aeroporto di Santiago."),
+        # Source: Wikipedia, O Pino; Wikipedia (es), O Pino.
         Stop("santiago", "Santiago de Compostela", "Santiago de Compostela", 42.8806, -8.5446,
              note_en="The way ends in the Praza do Obradoiro, before the cathedral of Santiago.",
              note_it="Il cammino finisce in Praza do Obradoiro, davanti alla cattedrale di Santiago."),
