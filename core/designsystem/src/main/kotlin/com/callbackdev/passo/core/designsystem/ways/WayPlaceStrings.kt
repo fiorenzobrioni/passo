@@ -813,6 +813,7 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "assisi" -> R.string.way_note_assisi
     "astorga" -> R.string.way_note_astorga
     "aulla" -> R.string.way_note_aulla
+    "badolo" -> R.string.way_note_badolo
     "bangkok_democracy_monument" -> R.string.way_note_bangkok_democracy_monument
     "bangkok_giant_swing" -> R.string.way_note_bangkok_giant_swing
     "bangkok_golden_mount" -> R.string.way_note_bangkok_golden_mount
@@ -856,6 +857,7 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "berlin_tv_tower" -> R.string.way_note_berlin_tv_tower
     "berlin_victory_column" -> R.string.way_note_berlin_victory_column
     "berlin_wall_memorial" -> R.string.way_note_berlin_wall_memorial
+    "bivigliano" -> R.string.way_note_bivigliano
     "bologna" -> R.string.way_note_bologna
     "bolsena" -> R.string.way_note_bolsena
     "buenos_aires_ateneo" -> R.string.way_note_buenos_aires_ateneo
@@ -1123,6 +1125,7 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "montelibretti" -> R.string.way_note_montelibretti
     "monteriggioni" -> R.string.way_note_monteriggioni
     "monterotondo" -> R.string.way_note_monterotondo
+    "monzuno" -> R.string.way_note_monzuno
     "mortara" -> R.string.way_note_mortara
     "najera" -> R.string.way_note_najera
     "new_york_911_memorial" -> R.string.way_note_new_york_911_memorial
@@ -1140,6 +1143,7 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "new_york_woolworth" -> R.string.way_note_new_york_woolworth
     "o_cebreiro" -> R.string.way_note_o_cebreiro
     "o_pedrouzo" -> R.string.way_note_o_pedrouzo
+    "o_porrino" -> R.string.way_note_o_porrino
     "orio_litta" -> R.string.way_note_orio_litta
     "padron" -> R.string.way_note_padron
     "palas_de_rei" -> R.string.way_note_palas_de_rei
@@ -1236,6 +1240,7 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "rome_trevi" -> R.string.way_note_rome_trevi
     "rome_vittoriano" -> R.string.way_note_rome_vittoriano
     "roncesvalles" -> R.string.way_note_roncesvalles
+    "rubiaes" -> R.string.way_note_rubiaes
     "saint_jean" -> R.string.way_note_saint_jean
     "san_gimignano" -> R.string.way_note_san_gimignano
     "san_juan_de_ortega" -> R.string.way_note_san_juan_de_ortega

@@ -28,7 +28,8 @@ Italian (or German, French), Luxor in the English and French (or Italian). The V
 other stages (7 Oct 2026) in the English and Italian (or French, German), Sigeric's stops in the
 English article on the Via Francigena; the Camino Francés's (7 Oct 2026) in the English and
 Spanish (or French, German, Galician), the Via di Francesco's in the English and Italian (or
-German). A stage with no second source keeps only its name.
+German), the Via degli Dei's and the Camino Portugués's in the English and Italian, Portuguese
+or Spanish (or Galician). A stage with no second source keeps only its name.
 """
 
 from dataclasses import dataclass, field
@@ -98,8 +99,14 @@ VIA_DEGLI_DEI = Way(
              note_en="The climb to San Luca runs under a portico 3.8 km long, with 666 arches.",
              note_it="La salita a San Luca corre sotto un portico lungo 3,8 km, con 666 archi."),
         # Source: Wikipedia, Sanctuary of the Madonna di San Luca; UNESCO, The Porticoes of Bologna.
-        Stop("badolo", "Badolo", "Badolo", 44.3667, 11.2917),
-        Stop("monzuno", "Monzuno", "Monzuno", 44.2781, 11.2667),
+        Stop("badolo", "Badolo", "Badolo", 44.3667, 11.2917,
+             note_en="At Badolo the way reaches the Contrafforte Pliocenico, a ridge of sandstone cliffs south of Bologna.",
+             note_it="A Badolo il cammino raggiunge il Contrafforte Pliocenico, una barriera di rupi di arenaria a sud di Bologna."),
+        # Source: Wikipedia, Sasso Marconi; Wikipedia (it), Riserva naturale Contrafforte Pliocenico. The Pliocene sea the sands settled in is in the Italian only.
+        Stop("monzuno", "Monzuno", "Monzuno", 44.2781, 11.2667,
+             note_en="Monzuno is the birthplace of Mario Musolesi, who led the Stella Rossa partisan brigade on Monte Sole.",
+             note_it="Monzuno ha dato i natali a Mario Musolesi, che guidò la brigata partigiana Stella Rossa sul Monte Sole."),
+        # Source: Wikipedia, Mario Musolesi; Wikipedia (it), Mario Musolesi. The way's name from Monte Venere and Monte Adone is in the Italian article on the Via degli Dei only.
         Stop("madonna_dei_fornelli", "Madonna dei Fornelli", "Madonna dei Fornelli", 44.2028, 11.2603,
              note_en="Beyond the village the way follows stretches of the Flaminia Militare, a road the Romans opened in 187 BC.",
              note_it="Oltre il paese il cammino segue tratti della Flaminia Militare, una strada aperta dai Romani nel 187 a.C."),
@@ -112,7 +119,10 @@ VIA_DEGLI_DEI = Way(
              note_en="Above San Piero stands the fortress of San Martino, built by the Medici in the Mugello, their family's valley.",
              note_it="Sopra San Piero c'è la fortezza di San Martino, voluta dai Medici nel Mugello, la valle della loro famiglia."),
         # Source: Wikipedia (it), Fortezza di San Martino.
-        Stop("bivigliano", "Bivigliano", "Bivigliano", 43.8983, 11.3236),
+        Stop("bivigliano", "Bivigliano", "Bivigliano", 43.8983, 11.3236,
+             note_en="Bivigliano lies at the foot of Monte Senario, whose monastery was built by the seven founders of the Servite order.",
+             note_it="Bivigliano sorge ai piedi del Monte Senario, il cui convento fu eretto dai sette fondatori dell'ordine dei Servi di Maria."),
+        # Source: Wikipedia, Monte Senario; Wikipedia (it), Bivigliano, Santuario di Monte Senario. The year is left out: 1245, or 1234.
         Stop("fiesole", "Fiesole", "Fiesole", 43.8066, 11.2934,
              note_en="Fiesole is older than Florence: the Etruscans founded it, and its Roman theatre still holds summer shows.",
              note_it="Fiesole è più antica di Firenze: la fondarono gli Etruschi, e il suo teatro romano ospita ancora spettacoli d'estate."),
@@ -156,7 +166,10 @@ CAMINO_PORTUGUES = Way(
              note_en="Ponte de Lima, granted its charter in 1125, is the oldest chartered town in Portugal.",
              note_it="Ponte de Lima, che ebbe il suo statuto nel 1125, è il più antico borgo del Portogallo con uno statuto."),
         # Source: Wikipedia, Ponte de Lima; Wikipedia (pt), Ponte de Lima.
-        Stop("rubiaes", "Rubiães", "Rubiães", 41.8978, -8.6249),
+        Stop("rubiaes", "Rubiães", "Rubiães", 41.8978, -8.6249,
+             note_en="Rubiães lies on the old Roman road that ran north from Braga.",
+             note_it="Rubiães si trova sull'antica strada romana che da Braga saliva verso nord."),
+        # Source: Wikipedia, Rubiães; Wikipedia (pt), Rubiães. Its bridge is left out: Roman in the English, Romanesque in the Portuguese.
         Stop("valenca", "Valença", "Valença", 42.0273, -8.6404, stage=False,
              note_en="Valença's walled fortress looks across the Minho at Tui: over the bridge, the way enters Spain.",
              note_it="La fortezza murata di Valença guarda Tui oltre il Minho: passato il ponte, il cammino entra in Spagna."),
@@ -165,7 +178,10 @@ CAMINO_PORTUGUES = Way(
              note_en="Tui's cathedral, begun at the end of the 11th century, crowns a town that was long a frontier fortress.",
              note_it="La cattedrale di Tui, iniziata alla fine dell'XI secolo, domina una città che fu a lungo una fortezza di confine."),
         # Source: Wikipedia, Tui Cathedral; Wikipedia, Tui, Pontevedra.
-        Stop("o_porrino", "O Porriño", "O Porriño", 42.1641, -8.6222),
+        Stop("o_porrino", "O Porriño", "O Porriño", 42.1641, -8.6222,
+             note_en="O Porriño is the birthplace of Antonio Palacios, the architect of its town hall and of the Madrid Metro's diamond logo.",
+             note_it="O Porriño ha dato i natali ad Antonio Palacios, l'architetto del suo municipio e del logo a rombo della metropolitana di Madrid."),
+        # Source: Wikipedia, Antonio Palacios; Wikipedia (es), Antonio Palacios, O Porriño; Wikipedia (gl), O Porriño.
         Stop("redondela", "Redondela", "Redondela", 42.2834, -8.6097,
              note_en="In 1702, in the strait of Rande below Redondela, an English and Dutch fleet attacked the Spanish treasure fleet.",
              note_it="Nel 1702, nello stretto di Rande sotto Redondela, una flotta inglese e olandese attaccò la flotta spagnola del tesoro."),

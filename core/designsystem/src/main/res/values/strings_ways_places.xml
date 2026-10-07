@@ -785,6 +785,7 @@
     <string name="way_note_assisi">Assisi is Francis’s town: his tomb lies beneath the basilica that bears his name.</string>
     <string name="way_note_astorga">In Astorga stands the Episcopal Palace designed by Antoni Gaudí.</string>
     <string name="way_note_aulla">Aulla’s abbey of San Caprasio, founded in the 9th century, is named after a hermit of the Lérins islands, off Provence.</string>
+    <string name="way_note_badolo">At Badolo the way reaches the Contrafforte Pliocenico, a ridge of sandstone cliffs south of Bologna.</string>
     <string name="way_note_bangkok_democracy_monument">Raised by Phibun’s government, the monument recalls the revolution of 1932, which gave Siam a constitution.</string>
     <string name="way_note_bangkok_giant_swing">In front of Wat Suthat, the swing served a Brahmin ceremony until 1935, when accidents brought it to an end.</string>
     <string name="way_note_bangkok_golden_mount">This artificial hill, crowned by a golden chedi, rose where a huge chedi begun under Rama III sank into the soft ground.</string>
@@ -828,6 +829,7 @@
     <string name="way_note_berlin_tv_tower">Built by East Germany between 1965 and 1969, at 368 metres it is the tallest structure in Germany.</string>
     <string name="way_note_berlin_victory_column">It first stood before the Reichstag; in 1939 it was moved here, to the Großer Stern.</string>
     <string name="way_note_berlin_wall_memorial">Here the houses stood in the East and the pavement in the West: in 1961 people jumped from their windows to flee.</string>
+    <string name="way_note_bivigliano">Bivigliano lies at the foot of Monte Senario, whose monastery was built by the seven founders of the Servite order.</string>
     <string name="way_note_bologna">The way begins in Piazza Maggiore, the heart of Bologna since the Middle Ages.</string>
     <string name="way_note_bolsena">Bolsena lies on the largest volcanic lake in Europe.</string>
     <string name="way_note_buenos_aires_ateneo">The Grand Splendid theatre of 1919 is now a bookshop, with tables on its old stage.</string>
@@ -1095,6 +1097,7 @@
     <string name="way_note_montelibretti">Montelibretti’s name comes from the Roman estate of the Bruttii, the family of Emperor Commodus’s father-in-law.</string>
     <string name="way_note_monteriggioni">In the Inferno, Dante likened Monteriggioni’s ring of towers to giants.</string>
     <string name="way_note_monterotondo">In October 1867 Garibaldi’s volunteers took Monterotondo on their march on Rome.</string>
+    <string name="way_note_monzuno">Monzuno is the birthplace of Mario Musolesi, who led the Stella Rossa partisan brigade on Monte Sole.</string>
     <string name="way_note_mortara">Legend says Mortara is named after a battle fought here in 773 between Charlemagne and the Lombards.</string>
     <string name="way_note_najera">Nájera’s monastery of Santa María la Real, consecrated in 1052, holds the tombs of the early kings of Navarre.</string>
     <string name="way_note_new_york_911_memorial">Two pools fill the footprints of the Twin Towers, the names of the victims around their edges.</string>
@@ -1112,6 +1115,7 @@
     <string name="way_note_new_york_woolworth">When it opened in 1913, it was the tallest building in the world.</string>
     <string name="way_note_o_cebreiro">O Cebreiro, at the gate of Galicia, keeps its round stone houses with thatched roofs, the pallozas.</string>
     <string name="way_note_o_pedrouzo">O Pedrouzo is the seat of O Pino, whose land holds part of Santiago’s airport.</string>
+    <string name="way_note_o_porrino">O Porriño is the birthplace of Antonio Palacios, the architect of its town hall and of the Madrid Metro’s diamond logo.</string>
     <string name="way_note_orio_litta">Near here the way crosses the Po by boat, where Archbishop Sigeric crossed in 990.</string>
     <string name="way_note_padron">Here, the legend says, the boat bearing Saint James’s body was moored to a stone, the pedrón.</string>
     <string name="way_note_palas_de_rei">Tradition says Palas de Rei, Palatium regis, is named after the palace of the Visigothic king Witiza.</string>
@@ -1208,6 +1212,7 @@
     <string name="way_note_rome_trevi">Finished in 1762, the fountain is fed by the Aqua Virgo, an aqueduct the Romans opened in 19 BC.</string>
     <string name="way_note_rome_vittoriano">The white monument to Victor Emmanuel II, first king of united Italy, holds the Tomb of the Unknown Soldier.</string>
     <string name="way_note_roncesvalles">Here, in 778, Charlemagne’s rearguard fell: the battle of the Song of Roland.</string>
+    <string name="way_note_rubiaes">Rubiães lies on the old Roman road that ran north from Braga.</string>
     <string name="way_note_saint_jean">Many pilgrims set out from here, at the foot of the Pyrenees.</string>
     <string name="way_note_san_gimignano">San Gimignano still has 14 of its medieval towers, out of about 72.</string>
     <string name="way_note_san_juan_de_ortega">At each equinox, at five in the afternoon, a ray of sun lights the carved Annunciation on a capital of this church.</string>

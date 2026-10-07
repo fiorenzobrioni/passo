@@ -785,6 +785,7 @@
     <string name="way_note_assisi">Assisi è la città di Francesco: la sua tomba è sotto la basilica che porta il suo nome.</string>
     <string name="way_note_astorga">Ad Astorga c’è il Palazzo Episcopale progettato da Antoni Gaudí.</string>
     <string name="way_note_aulla">L’abbazia di San Caprasio ad Aulla, fondata nel IX secolo, porta il nome di un eremita delle isole di Lérins, in Provenza.</string>
+    <string name="way_note_badolo">A Badolo il cammino raggiunge il Contrafforte Pliocenico, una barriera di rupi di arenaria a sud di Bologna.</string>
     <string name="way_note_bangkok_democracy_monument">Voluto dal governo di Phibun, il monumento ricorda la rivoluzione del 1932, che diede al Siam una costituzione.</string>
     <string name="way_note_bangkok_giant_swing">Davanti al Wat Suthat, l’altalena serviva a una cerimonia brahmanica fino al 1935, quando gli incidenti la fecero cessare.</string>
     <string name="way_note_bangkok_golden_mount">Questa collina artificiale, coronata da un chedi d’oro, sorse dove un enorme chedi voluto da Rama III sprofondò nel terreno molle.</string>
@@ -828,6 +829,7 @@
     <string name="way_note_berlin_tv_tower">Costruita dalla Germania Est tra il 1965 e il 1969, con 368 metri è la struttura più alta della Germania.</string>
     <string name="way_note_berlin_victory_column">Sorgeva davanti al Reichstag; nel 1939 fu spostata qui, al Großer Stern.</string>
     <string name="way_note_berlin_wall_memorial">Qui le case erano a Est e il marciapiede a Ovest: nel 1961 c’era chi saltava dalle finestre per fuggire.</string>
+    <string name="way_note_bivigliano">Bivigliano sorge ai piedi del Monte Senario, il cui convento fu eretto dai sette fondatori dell’ordine dei Servi di Maria.</string>
     <string name="way_note_bologna">Il cammino parte da Piazza Maggiore, il cuore di Bologna dal Medioevo.</string>
     <string name="way_note_bolsena">Bolsena si affaccia sul lago vulcanico più grande d’Europa.</string>
     <string name="way_note_buenos_aires_ateneo">Il teatro Grand Splendid del 1919 è oggi una libreria, con i tavoli sul vecchio palcoscenico.</string>
@@ -1095,6 +1097,7 @@
     <string name="way_note_montelibretti">Il nome di Montelibretti viene dal podere romano dei Bruzi, la famiglia del suocero dell’imperatore Commodo.</string>
     <string name="way_note_monteriggioni">Nell’Inferno, Dante paragonò la cerchia di torri di Monteriggioni a dei giganti.</string>
     <string name="way_note_monterotondo">Nell’ottobre 1867 i volontari di Garibaldi presero Monterotondo, in marcia verso Roma.</string>
+    <string name="way_note_monzuno">Monzuno ha dato i natali a Mario Musolesi, che guidò la brigata partigiana Stella Rossa sul Monte Sole.</string>
     <string name="way_note_mortara">Secondo la leggenda, Mortara prende il nome da una battaglia combattuta qui nel 773 tra Carlo Magno e i Longobardi.</string>
     <string name="way_note_najera">Il monastero di Santa María la Real a Nájera, consacrato nel 1052, custodisce le tombe dei primi re di Navarra.</string>
     <string name="way_note_new_york_911_memorial">Due vasche occupano le impronte delle Torri Gemelle, con i nomi delle vittime lungo i bordi.</string>
@@ -1112,6 +1115,7 @@
     <string name="way_note_new_york_woolworth">Quando fu inaugurato, nel 1913, era l’edificio più alto del mondo.</string>
     <string name="way_note_o_cebreiro">O Cebreiro, alla porta della Galizia, conserva le sue case tonde di pietra col tetto di paglia, le pallozas.</string>
     <string name="way_note_o_pedrouzo">O Pedrouzo è il capoluogo di O Pino, sulle cui terre sorge parte dell’aeroporto di Santiago.</string>
+    <string name="way_note_o_porrino">O Porriño ha dato i natali ad Antonio Palacios, l’architetto del suo municipio e del logo a rombo della metropolitana di Madrid.</string>
     <string name="way_note_orio_litta">Qui vicino il cammino attraversa il Po in barca, dove lo passò l’arcivescovo Sigerico nel 990.</string>
     <string name="way_note_padron">Qui, dice la leggenda, la barca col corpo di san Giacomo fu legata a una pietra, il pedrón.</string>
     <string name="way_note_palas_de_rei">Secondo la tradizione Palas de Rei, Palatium regis, prende il nome dal palazzo del re visigoto Witiza.</string>
@@ -1208,6 +1212,7 @@
     <string name="way_note_rome_trevi">Finita nel 1762, la fontana è alimentata dall’Acqua Vergine, un acquedotto aperto dai Romani nel 19 a.C.</string>
     <string name="way_note_rome_vittoriano">Il monumento bianco a Vittorio Emanuele II, primo re dell’Italia unita, custodisce la tomba del Milite Ignoto.</string>
     <string name="way_note_roncesvalles">Qui, nel 778, cadde la retroguardia di Carlo Magno: la battaglia della Chanson de Roland.</string>
+    <string name="way_note_rubiaes">Rubiães si trova sull’antica strada romana che da Braga saliva verso nord.</string>
     <string name="way_note_saint_jean">Molti pellegrini partono da qui, ai piedi dei Pirenei.</string>
     <string name="way_note_san_gimignano">San Gimignano ha ancora 14 delle sue torri medievali, su circa 72.</string>
     <string name="way_note_san_juan_de_ortega">A ogni equinozio, alle cinque del pomeriggio, un raggio di sole illumina l’Annunciazione scolpita su un capitello di questa chiesa.</string>
