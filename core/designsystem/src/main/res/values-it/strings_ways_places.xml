@@ -744,6 +744,7 @@
     <string name="way_place_zanzibar_stone_town">Stone Town</string>
     <string name="way_place_zanzibar_sultans_palace">Palazzo del sultano</string>
     <string name="way_place_zubiri">Zubiri</string>
+    <string name="way_note_acquapendente">Il duomo di Acquapendente custodisce una pietra macchiata di sangue che, per tradizione, viene dal Santo Sepolcro di Gerusalemme.</string>
     <string name="way_note_addis_ababa_africa_hall">Costruita nel 1961, l’Africa Hall custodisce l’opera più famosa di Afewerk Tekle, il trittico di vetrate Liberazione totale dell’Africa.</string>
     <string name="way_note_addis_ababa_arat_kilo">Il nome della piazza è una data, il 27 miyazya, il 5 maggio in cui Addis Abeba fu liberata nel 1941; il monumento al centro celebra la liberazione.</string>
     <string name="way_note_addis_ababa_guenete_leul">Costruito per Hailé Selassié negli anni Trenta, il Paradiso dei principi fu teatro del tentato colpo di stato del 1960.</string>
@@ -768,6 +769,7 @@
     <string name="way_note_alexandria_st_mark">Sede storica dei papi copti, la cattedrale sorge, secondo la tradizione, dove Marco evangelista fondò la Chiesa di Alessandria.</string>
     <string name="way_note_alexandria_terbana">Costruita da Hajj Ibrahim Terbana, di cui porta il nome, la moschea è nello stile del Delta dell’Egitto ottomano.</string>
     <string name="way_note_alexandria_unknown_soldier">Costruito dagli italiani di Alessandria come monumento al chedivè Ismail, divenne poi il monumento ai militi ignoti della marina.</string>
+    <string name="way_note_altopascio">Dallo Spedale di Altopascio, documentato dal 1084, nacquero i Cavalieri del Tau, che assistevano i pellegrini diretti a Roma.</string>
     <string name="way_note_amsterdam_begijnhof">Citato come cortile per la prima volta nel 1389, ospitò le beghine fino alla morte dell’ultima, nel 1971.</string>
     <string name="way_note_amsterdam_bloemenmarkt">Il mercato dei fiori è sul Singel dal 1862; un tempo i fiori si vendevano dalle barche ormeggiate nel canale.</string>
     <string name="way_note_amsterdam_centraal">Pierre Cuypers, che progettò anche il Rijksmuseum, costruì la stazione, aperta nel 1889, su tre isole artificiali e 8.687 pali di legno.</string>
@@ -778,8 +780,12 @@
     <string name="way_note_amsterdam_waag">Una porta della città diventata pesa pubblica nel 1617; la corporazione dei chirurghi, al piano di sopra, commissionò a Rembrandt la Lezione di anatomia del dottor Tulp.</string>
     <string name="way_note_amsterdam_westerkerk">La sua torre di 87 metri è il campanile più alto di Amsterdam; qui fu sepolto Rembrandt nel 1669, in una tomba oggi perduta.</string>
     <string name="way_note_aosta">Aosta era Augusta Praetoria, fondata dai Romani nel 25 a.C.; il suo Arco d’Augusto è ancora in piedi.</string>
+    <string name="way_note_arrone">Si dice che Arrone prenda il nome da un nobile romano che vi costruì un castello nel IX secolo.</string>
+    <string name="way_note_arzua">Arzúa dà il nome all’Arzúa-Ulloa, un formaggio protetto di latte vaccino.</string>
     <string name="way_note_assisi">Assisi è la città di Francesco: la sua tomba è sotto la basilica che porta il suo nome.</string>
     <string name="way_note_astorga">Ad Astorga c’è il Palazzo Episcopale progettato da Antoni Gaudí.</string>
+    <string name="way_note_aulla">L’abbazia di San Caprasio ad Aulla, fondata nel IX secolo, porta il nome di un eremita delle isole di Lérins, in Provenza.</string>
+    <string name="way_note_badolo">A Badolo il cammino raggiunge il Contrafforte Pliocenico, una barriera di rupi di arenaria a sud di Bologna.</string>
     <string name="way_note_bangkok_democracy_monument">Voluto dal governo di Phibun, il monumento ricorda la rivoluzione del 1932, che diede al Siam una costituzione.</string>
     <string name="way_note_bangkok_giant_swing">Davanti al Wat Suthat, l’altalena serviva a una cerimonia brahmanica fino al 1935, quando gli incidenti la fecero cessare.</string>
     <string name="way_note_bangkok_golden_mount">Questa collina artificiale, coronata da un chedi d’oro, sorse dove un enorme chedi voluto da Rama III sprofondò nel terreno molle.</string>
@@ -808,6 +814,8 @@
     <string name="way_note_beijing_tiananmen">Sotto i Ming si chiamava Chengtianmen; questa porta della Città imperiale compare oggi sull’emblema nazionale cinese.</string>
     <string name="way_note_beijing_tiananmen_square">La piazza sorge dove i Ming e i Qing avevano il Corridoio dei mille passi; fu allargata negli anni Cinquanta.</string>
     <string name="way_note_beijing_white_dagoba">Eretto nel 1651, il Dagoba Bianco corona l’isola dei Fiori di Giada, in mezzo al lago di Beihai.</string>
+    <string name="way_note_belorado">Sopra Belorado sorse un castello all’inizio della Reconquista, a guardia del passaggio dalla valle dell’Ebro alla Meseta.</string>
+    <string name="way_note_berceto">Il duomo di Berceto porta il nome di Moderanno, vescovo di Rennes che vi lasciò delle reliquie nel suo pellegrinaggio a Roma.</string>
     <string name="way_note_berlin_bebelplatz">Il 10 maggio 1933 qui furono bruciati i libri; una lastra di vetro nella piazza mostra scaffali vuoti.</string>
     <string name="way_note_berlin_brandenburg_gate">Napoleone portò a Parigi la Quadriga in cima alla porta nel 1806; tornò nel 1814.</string>
     <string name="way_note_berlin_cathedral">Finito nel 1905 per l’imperatore Guglielmo II, custodisce le tombe degli Hohenzollern, la casa regnante di Prussia.</string>
@@ -821,6 +829,7 @@
     <string name="way_note_berlin_tv_tower">Costruita dalla Germania Est tra il 1965 e il 1969, con 368 metri è la struttura più alta della Germania.</string>
     <string name="way_note_berlin_victory_column">Sorgeva davanti al Reichstag; nel 1939 fu spostata qui, al Großer Stern.</string>
     <string name="way_note_berlin_wall_memorial">Qui le case erano a Est e il marciapiede a Ovest: nel 1961 c’era chi saltava dalle finestre per fuggire.</string>
+    <string name="way_note_bivigliano">Bivigliano sorge ai piedi del Monte Senario, il cui convento fu eretto dai sette fondatori dell’ordine dei Servi di Maria.</string>
     <string name="way_note_bologna">Il cammino parte da Piazza Maggiore, il cuore di Bologna dal Medioevo.</string>
     <string name="way_note_bolsena">Bolsena si affaccia sul lago vulcanico più grande d’Europa.</string>
     <string name="way_note_buenos_aires_ateneo">Il teatro Grand Splendid del 1919 è oggi una libreria, con i tavoli sul vecchio palcoscenico.</string>
@@ -853,6 +862,8 @@
     <string name="way_note_cairo_sultan_hasan">Iniziata dal sultano Hasan nel 1356, la madrasa insegnava le quattro scuole del diritto sunnita, ciascuna, si dice, in uno dei grandi iwan intorno al cortile.</string>
     <string name="way_note_cairo_talaat_harb">La statua al centro della piazza è di Talaat Harb, che nel 1920 fondò la Banque Misr.</string>
     <string name="way_note_caldas_de_reis">Caldas de Reis è cresciuta intorno a sorgenti calde che usavano già i Romani.</string>
+    <string name="way_note_camaiore">Camaiore, il latino Campus Maior, crebbe nel Medioevo grazie alla Via Francigena.</string>
+    <string name="way_note_campagnano">Campagnano, documentato dal 1076, nacque da una grande tenuta che un papa riunì nell’VIII secolo.</string>
     <string name="way_note_cape_town_auwal">Considerata la più antica moschea del Sudafrica, del 1794, ebbe come primo imam Tuan Guru, che in prigione aveva trascritto il Corano a memoria.</string>
     <string name="way_note_cape_town_bo_kaap">Il Bo-Kaap, in afrikaans «sopra il Capo», è l’antico Quartiere malese sulle pendici del Signal Hill, noto per le sue case dai colori vivaci.</string>
     <string name="way_note_cape_town_castle">Posata la prima pietra nel 1666, il forte della Compagnia olandese delle Indie orientali ha cinque bastioni che portano i titoli del principe d’Orange.</string>
@@ -868,6 +879,7 @@
     <string name="way_note_cape_town_st_georges">Iniziata nel 1901 su progetto di Herbert Baker, la cattedrale custodisce davanti all’altare maggiore i resti dell’arcivescovo Desmond Tutu.</string>
     <string name="way_note_cape_town_stadium">Costruito per i Mondiali di calcio del 2010, lo stadio ne ospitò un quarto di finale e una semifinale.</string>
     <string name="way_note_cape_town_waterfront">I suoi due bacini portano il nome della regina Vittoria e di suo figlio, il principe Alfredo, che nel 1860 diede inizio al frangiflutti del porto.</string>
+    <string name="way_note_carrion">Carrión era la terra degli Infantes, i generi del Cid nel Cantar de mio Cid.</string>
     <string name="way_note_cartagena_bovedas">Ventitré volte nelle mura, costruite come magazzini e poi usate come celle di prigione.</string>
     <string name="way_note_cartagena_cathedral">Nel 1586, ancora incompiuta, la cattedrale fu danneggiata nell’attacco di Francis Drake alla città.</string>
     <string name="way_note_cartagena_inquisicion">Questo palazzo, finito nel 1770, fu la sede del tribunale dell’Inquisizione a Cartagena.</string>
@@ -876,6 +888,9 @@
     <string name="way_note_cartagena_santo_domingo">La chiesa di Santo Domingo, su questa piazza, fu costruita tra il 1565 circa e il 1630.</string>
     <string name="way_note_cartagena_torre_reloj">La porta principale della città murata prende il nome dall’orologio posto in cima nel Settecento.</string>
     <string name="way_note_cartagena_trinidad">L’11 novembre 1811 la gente di Getsemaní, con Pedro Romero, spinse Cartagena a dichiarare l’indipendenza.</string>
+    <string name="way_note_castrojeriz">Il cammino attraversa Castrojeriz lungo un’unica via di oltre 1.500 metri, la più lunga di tutto il percorso.</string>
+    <string name="way_note_chatillon">A Châtillon si apre la Valtournenche, la valle che sale fino al Cervino.</string>
+    <string name="way_note_citta_di_castello">Città di Castello era la romana Tifernum Tiberinum; Plinio aveva una villa nei dintorni e vi fece erigere un tempio.</string>
     <string name="way_note_cruz_de_ferro">Alla croce di ferro, a circa 1.500 metri, i pellegrini lasciano una pietra portata da casa.</string>
     <string name="way_note_cusco_cathedral">Nella sua Ultima Cena, attribuita a Marcos Zapata, in tavola c’è un porcellino d’India.</string>
     <string name="way_note_cusco_compania">I gesuiti costruirono la loro chiesa sull’Amarucancha, il palazzo dell’inca Huayna Cápac.</string>
@@ -901,6 +916,7 @@
     <string name="way_note_dakar_soumbedioune">Sulla Corniche, accanto alla Médina, il mercato artigiano di Soumbédioune è uno dei più noti di Dakar.</string>
     <string name="way_note_dakar_station">Davanti alla stazione stanno Demba e Dupont, un tirailleur senegalese e un soldato francese, statue inaugurate nel 1923.</string>
     <string name="way_note_dakar_ucad">Nata da una scuola di medicina dell’Africa occidentale francese, l’università porta il nome dello storico Cheikh Anta Diop.</string>
+    <string name="way_note_estella">Il re Sancho Ramírez fondò Estella intorno al 1090 sulla via dei pellegrini, e vi giunsero coloni dalla Francia.</string>
     <string name="way_note_fez_andalusian_mosque">Fondata nell’859 e 860 da Maryam al-Fihri, sorella di Fatima, la moschea è nota per la sua alta porta nord di zellige e legno scolpito.</string>
     <string name="way_note_fez_bou_inania">Costruita dal 1350 al 1355 per il sultano merinide Abu Inan, la madrasa era anche moschea del venerdì, con un suo minareto; accanto c’è un orologio ad acqua.</string>
     <string name="way_note_fez_chouara">Le pelli vengono ammorbidite nelle vasche bianche e tinte in quelle colorate; la tradizione locale fa risalire la conceria alla fondazione di Fès.</string>
@@ -909,8 +925,14 @@
     <string name="way_note_fez_moulay_idriss">Il santuario custodisce la tomba del sovrano idriside Idris II, ritrovata intorno al 1437; Moulay Ismail le diede poi il tetto piramidale.</string>
     <string name="way_note_fez_qarawiyyin">Fondata come moschea da Fatima al-Fihri, di una famiglia di Kairouan, al-Qarawiyyin è citata dall’UNESCO come la più antica università ancora attiva.</string>
     <string name="way_note_fez_royal_palace">Il palazzo reale si estende su 80 ettari; le sue grandi porte decorate su Place des Alaouites furono realizzate nel Novecento.</string>
+    <string name="way_note_fidenza">Sul duomo di Fidenza la statua di un apostolo regge una pergamena che indica ai pellegrini la via per Roma.</string>
     <string name="way_note_fiesole">Fiesole è più antica di Firenze: la fondarono gli Etruschi, e il suo teatro romano ospita ancora spettacoli d’estate.</string>
+    <string name="way_note_fiorenzuola">Il nome di Fiorenzuola viene dalla romana Florentia; «d’Arda», dal fiume su cui sorge.</string>
     <string name="way_note_firenze">Il cammino finisce in Piazza della Signoria, davanti a Palazzo Vecchio.</string>
+    <string name="way_note_foligno">La prima edizione a stampa della Divina Commedia di Dante uscì da un torchio di Foligno nel 1472.</string>
+    <string name="way_note_fromista">La chiesa romanica di San Martín a Frómista fu fondata intorno al 1066, in parte con i beni di una regina.</string>
+    <string name="way_note_gambassi_terme">Dal XIII secolo a Gambassi fiorì la lavorazione del vetro.</string>
+    <string name="way_note_garlasco">Il santuario della Madonna della Bozzola, a Garlasco, meta di pellegrinaggi, nacque da un miracolo che la tradizione colloca nel 1465.</string>
     <string name="way_note_gran_san_bernardo">Su questo colle i viaggiatori trovano un ospizio dal 1050 circa, quando lo fondò Bernardo d’Aosta.</string>
     <string name="way_note_gubbio">A Gubbio, raccontano i Fioretti, Francesco ammansì il lupo che spaventava la città.</string>
     <string name="way_note_hanoi_dong_xuan">Costruito dai francesi al posto di due mercati più antichi, fu quasi distrutto da un incendio nel 1994.</string>
@@ -946,6 +968,8 @@
     <string name="way_note_hong_kong_tai_kwun">La vecchia stazione di polizia centrale, con il tribunale e la prigione Victoria, ha riaperto al pubblico nel 2018 come Tai Kwun.</string>
     <string name="way_note_hong_kong_victoria_park">Aperto nel 1957 su terreni strappati al vecchio rifugio per tifoni di Causeway Bay, il parco porta il nome della regina Vittoria.</string>
     <string name="way_note_hong_kong_western_market">Costruito nel 1906, era il blocco nord del vecchio Western Market.</string>
+    <string name="way_note_hornillos">Hornillos compare per la prima volta nel IX secolo, su una linea di torri a difesa della prima Castiglia.</string>
+    <string name="way_note_hospital_de_orbigo">Nell’anno santo 1434 il cavaliere Suero de Quiñones tenne questo ponte, sfidando a giostra ogni cavaliere che volesse passare.</string>
     <string name="way_note_ivrea">Il carnevale di Ivrea è famoso per la sua battaglia delle arance.</string>
     <string name="way_note_kyoto_hanamikoji">Gion è uno dei quartieri delle geisha più noti del Giappone; a Kyoto le geisha si chiamano geiko.</string>
     <string name="way_note_kyoto_kenninji">Questo tempio zen fu fondato nel 1202, con il monaco Eisai come primo abate.</string>
@@ -957,6 +981,7 @@
     <string name="way_note_kyoto_sannenzaka">Sulla salita al Kiyomizu, questa via a gradini è un quartiere protetto di case tradizionali.</string>
     <string name="way_note_kyoto_yasaka_pagoda">La pagoda a cinque piani che si vede oggi fu ricostruita nel 1440, dopo essere stata distrutta più volte.</string>
     <string name="way_note_kyoto_yasaka_shrine">Dedicato al dio Susanoo, il santuario celebra ogni luglio il Gion Matsuri.</string>
+    <string name="way_note_la_storta">Qui, diretto a Roma lungo la via Cassia, Ignazio di Loyola avrebbe avuto una visione; una cappella ricorda il luogo.</string>
     <string name="way_note_la_verna">Francesco ricevette le stimmate alla Verna nel 1224, scrissero i suoi primi biografi.</string>
     <string name="way_note_leon">La cattedrale di León custodisce quasi 1.800 metri quadrati di vetrate medievali.</string>
     <string name="way_note_lima_alameda_descalzos">Tracciato nel 1611, il viale riprende l’Alameda de Hércules di Siviglia.</string>
@@ -974,6 +999,7 @@
     <string name="way_note_lima_puente_de_piedra">Costruito nel 1610, dopo che una piena del Rímac aveva portato via il ponte precedente.</string>
     <string name="way_note_lima_san_francisco">Le sue catacombe erano il cimitero della città in epoca coloniale; il convento è patrimonio dell’umanità UNESCO.</string>
     <string name="way_note_lima_santo_domingo">L’Università di San Marcos, fondata nel 1551, nacque dalle lezioni tenute in questo convento.</string>
+    <string name="way_note_logrono">Logroño, dove il cammino attraversa l’Ebro, è il centro del commercio del vino della Rioja.</string>
     <string name="way_note_london_abbey">Quasi tutti i sovrani inglesi e britannici dal 1066 sono stati incoronati qui.</string>
     <string name="way_note_london_buckingham">La casa londinese del sovrano da quando vi si trasferì la regina Vittoria, nel 1837.</string>
     <string name="way_note_london_downing">Il numero 10 è la casa del primo ministro da quando vi entrò Robert Walpole, nel 1735.</string>
@@ -991,6 +1017,7 @@
     <string name="way_note_london_tower_bridge">Le sue due metà si alzano ancora per far passare le navi alte, come dal 1894.</string>
     <string name="way_note_london_trafalgar">La colonna di Nelson, alta circa 52 metri, ricorda la battaglia di Trafalgar del 1805.</string>
     <string name="way_note_london_westminster_bridge">Wordsworth scrisse un sonetto su questo ponte nel 1802: la terra non ha nulla di più bello.</string>
+    <string name="way_note_los_arcos">I due archi dello stemma di Los Arcos furono concessi, si dice, dal re di Navarra dopo la battaglia di Valdegón.</string>
     <string name="way_note_lucca">Le mura rinascimentali di Lucca, lunghe più di quattro chilometri, in cima sono un parco.</string>
     <string name="way_note_luxor_abu_haggag">Costruita dentro il tempio, la moschea custodisce la tomba dello sceicco Yusuf Abu al-Haggag, da cui prende il nome.</string>
     <string name="way_note_luxor_avenue_of_sphinxes">Fiancheggiato da sfingi, alcune con la testa di ariete, questo viale univa i templi di Luxor e di Karnak.</string>
@@ -1015,6 +1042,7 @@
     <string name="way_note_madrid_puerta_del_sol">La notte di Capodanno la Spagna mangia dodici acini d’uva ai dodici rintocchi dell’orologio di questa piazza.</string>
     <string name="way_note_madrid_reina_sofia">Il Guernica di Picasso, dipinto nel 1937 dopo il bombardamento della città basca, è esposto qui dal 1992.</string>
     <string name="way_note_madrid_retiro_pond">Il Retiro fu il parco dei re fino al 1868; il suo grande laghetto guarda il monumento ad Alfonso XII.</string>
+    <string name="way_note_mansilla">Mansilla conserva tratti delle sue antiche mura; i pellegrini ne escono dal ponte sull’Esla, verso León.</string>
     <string name="way_note_marrakech_almoravid_koubba">Costruita dal sovrano almoravide Ali ibn Yusuf, questa cupola ospitava le abluzioni per la moschea vicina, di cui è tutto ciò che resta.</string>
     <string name="way_note_marrakech_bab_agnaou">Costruita sotto gli Almohadi, la porta conduceva nella kasbah reale di Ya’qub al-Mansur; il suo nome verrebbe da una parola berbera che significa muto.</string>
     <string name="way_note_marrakech_bab_doukkala">Già presente sotto gli Almoravidi, la porta prende il nome dalla Doukkala, la regione verso cui conduceva.</string>
@@ -1029,6 +1057,7 @@
     <string name="way_note_marrakech_mellah">Il sultano saadiano Abdallah al-Ghalib creò per decreto questo quartiere ebraico nel 1558, accanto alla kasbah reale.</string>
     <string name="way_note_marrakech_mouassine">Il sultano saadiano Abdallah al-Ghalib costruì questa moschea, con una fontana, un hammam e una biblioteca, su terreni lasciati liberi quando gli ebrei furono trasferiti nel nuovo mellah.</string>
     <string name="way_note_marrakech_saadian_tombs">Ahmad al-Mansur, il più potente dei sultani saadiani, riposa al centro della Sala delle dodici colonne, tra le tombe della sua dinastia.</string>
+    <string name="way_note_massa">Massa compare in una mappa stradale romana come «Ad Tabernas Frigidas», forse una sosta sulla via da Pisa a Luni.</string>
     <string name="way_note_melbourne_exhibition">Costruito per l’esposizione internazionale del 1880, il palazzo con i suoi giardini è patrimonio dell’umanità dal 2004.</string>
     <string name="way_note_melbourne_federation_square">Aperta nel 2002, la piazza con le sue gallerie poggia su una piattaforma di cemento sopra i binari.</string>
     <string name="way_note_melbourne_flinders_street">La prima stazione qui servì nel 1854 la prima ferrovia d’Australia; gli orologi sopra l’ingresso indicano il prossimo treno di ogni linea.</string>
@@ -1063,7 +1092,14 @@
     <string name="way_note_milan_sant_ambrogio">Sant’Ambrogio fondò questa basilica nel IV secolo, e qui è sepolto.</string>
     <string name="way_note_milan_scala">La Scala aprì nel 1778; qui debuttarono l’Otello di Verdi e la Turandot di Puccini.</string>
     <string name="way_note_milan_sempione">Il parco fu disegnato negli anni Novanta dell’Ottocento sulla vecchia piazza d’armi del castello.</string>
+    <string name="way_note_monte_sacro">Nel 494 a.C. i plebei di Roma si ritirarono su questo colle, il Mons Sacer, e ottennero i propri tribuni.</string>
+    <string name="way_note_montefiascone">Si narra che l’assaggiatore di vini di un vescovo, diretto a Roma, scrisse qui «Est! Est!! Est!!!» presso una locanda.</string>
+    <string name="way_note_montelibretti">Il nome di Montelibretti viene dal podere romano dei Bruzi, la famiglia del suocero dell’imperatore Commodo.</string>
     <string name="way_note_monteriggioni">Nell’Inferno, Dante paragonò la cerchia di torri di Monteriggioni a dei giganti.</string>
+    <string name="way_note_monterotondo">Nell’ottobre 1867 i volontari di Garibaldi presero Monterotondo, in marcia verso Roma.</string>
+    <string name="way_note_monzuno">Monzuno ha dato i natali a Mario Musolesi, che guidò la brigata partigiana Stella Rossa sul Monte Sole.</string>
+    <string name="way_note_mortara">Secondo la leggenda, Mortara prende il nome da una battaglia combattuta qui nel 773 tra Carlo Magno e i Longobardi.</string>
+    <string name="way_note_najera">Il monastero di Santa María la Real a Nájera, consacrato nel 1052, custodisce le tombe dei primi re di Navarra.</string>
     <string name="way_note_new_york_911_memorial">Due vasche occupano le impronte delle Torri Gemelle, con i nomi delle vittime lungo i bordi.</string>
     <string name="way_note_new_york_brooklyn_bridge">Aperto nel 1883 sull’East River, era allora il ponte sospeso più lungo del mondo.</string>
     <string name="way_note_new_york_central_park">Frederick Law Olmsted e Calvert Vaux vinsero il concorso per il parco con il loro Greensward Plan.</string>
@@ -1078,8 +1114,11 @@
     <string name="way_note_new_york_washington_square">Stanford White ne disegnò l’arco per il centenario dell’insediamento di George Washington.</string>
     <string name="way_note_new_york_woolworth">Quando fu inaugurato, nel 1913, era l’edificio più alto del mondo.</string>
     <string name="way_note_o_cebreiro">O Cebreiro, alla porta della Galizia, conserva le sue case tonde di pietra col tetto di paglia, le pallozas.</string>
+    <string name="way_note_o_pedrouzo">O Pedrouzo è il capoluogo di O Pino, sulle cui terre sorge parte dell’aeroporto di Santiago.</string>
+    <string name="way_note_o_porrino">O Porriño ha dato i natali ad Antonio Palacios, l’architetto del suo municipio e del logo a rombo della metropolitana di Madrid.</string>
     <string name="way_note_orio_litta">Qui vicino il cammino attraversa il Po in barca, dove lo passò l’arcivescovo Sigerico nel 990.</string>
     <string name="way_note_padron">Qui, dice la leggenda, la barca col corpo di san Giacomo fu legata a una pietra, il pedrón.</string>
+    <string name="way_note_palas_de_rei">Secondo la tradizione Palas de Rei, Palatium regis, prende il nome dal palazzo del re visigoto Witiza.</string>
     <string name="way_note_pamplona">Ogni luglio, per San Fermín, i tori di Pamplona corrono per queste strade.</string>
     <string name="way_note_paris_arc_de_triomphe">Napoleone ordinò l’arco nel 1806; sotto riposa dal 1921 il Milite Ignoto della Prima guerra mondiale.</string>
     <string name="way_note_paris_champs_elysees">Il viale sale per quasi due chilometri fino all’Arco di Trionfo; il suo nome significa Campi Elisi.</string>
@@ -1098,11 +1137,18 @@
     <string name="way_note_passo_della_cisa">Al Passo della Cisa, a 1.041 metri, il cammino supera l’Appennino ed entra in Toscana.</string>
     <string name="way_note_passo_della_futa">Al Passo della Futa, sulla vecchia Linea Gotica, c’è un cimitero militare germanico della Seconda guerra mondiale.</string>
     <string name="way_note_pavia">Sant’Agostino è sepolto a Pavia, nella chiesa di San Pietro in Ciel d’Oro.</string>
+    <string name="way_note_piacenza">I Romani fondarono Piacenza, Placentia, nel 218 a.C., mentre Annibale marciava verso l’Italia.</string>
     <string name="way_note_piediluco">Qui vicino il Velino precipita nella Cascata delle Marmore, creata dai Romani nel 271 a.C.</string>
+    <string name="way_note_pietralunga">Pietralunga un tempo si chiamava Pratalonga, per i ricchi pascoli che la circondavano.</string>
+    <string name="way_note_pieve_santo_stefano">Dal 1984 Pieve Santo Stefano custodisce l’archivio nazionale di diari, lettere e memorie.</string>
     <string name="way_note_poggio_bustone">Poggio Bustone è uno dei quattro santuari francescani della Valle Santa reatina.</string>
     <string name="way_note_ponferrada">Il castello di Ponferrada appartenne ai Templari.</string>
+    <string name="way_note_pont_saint_martin">Il ponte romano di Pont-Saint-Martin, un’unica arcata, è in piedi dal I secolo a.C.</string>
+    <string name="way_note_ponte_d_arbia">L’arcivescovo Sigerico vi sostò nel 990 e annotò la tappa semplicemente come «Arbia».</string>
     <string name="way_note_ponte_de_lima">Ponte de Lima, che ebbe il suo statuto nel 1125, è il più antico borgo del Portogallo con uno statuto.</string>
     <string name="way_note_pontevedra">A Pontevedra la cappella della Vergine Pellegrina ha la pianta di una conchiglia, il segno dei pellegrini.</string>
+    <string name="way_note_ponticelli">Vicino a Ponticelli sorge Santa Maria delle Grazie, un santuario con un convento francescano.</string>
+    <string name="way_note_pontremoli">Il castello del Piagnaro, a Pontremoli, custodisce le statue stele della Lunigiana, antiche figure umane scolpite nella pietra.</string>
     <string name="way_note_porto">Il centro storico di Porto, dalla cattedrale fino al Douro, è patrimonio dell’umanità UNESCO.</string>
     <string name="way_note_porto_aliados">Tracciato dal 1916 al posto di un intero quartiere, il viale porta il nome degli Alleati della Prima guerra mondiale.</string>
     <string name="way_note_porto_bolhao">Costruito nel 1914 in cemento armato e ferro, il mercato ha riaperto nel 2022 dopo quattro anni di restauro.</string>
@@ -1113,6 +1159,7 @@
     <string name="way_note_porto_sao_bento">Nell’atrio, gli azulejos di Jorge Colaço, posati dal 1905, raccontano scene della storia del Portogallo.</string>
     <string name="way_note_porto_se">Iniziata nel XII secolo, la cattedrale è il punto di partenza del Cammino Portoghese, uno dei Cammini, verso Santiago.</string>
     <string name="way_note_porto_serra_do_pilar">La chiesa e il chiostro sono entrambi circolari, dello stesso diametro: un convento unico nel suo genere.</string>
+    <string name="way_note_portomarin">Quando un bacino sommerse la vecchia Portomarín negli anni Sessanta, la sua chiesa maggiore fu ricostruita pietra per pietra più in alto.</string>
     <string name="way_note_prague_castle">Secondo il Guinness il più grande castello antico del mondo, è la sede del presidente dal 1918.</string>
     <string name="way_note_prague_charles_bridge">Carlo IV ne posò la prima pietra nel 1357; 30 statue, quasi tutte barocche, ne accompagnano i 516 metri.</string>
     <string name="way_note_prague_klementinum">Collegio dei gesuiti dal 1556, qui il tempo si registra dal 1775, senza interruzioni fino a oggi.</string>
@@ -1131,6 +1178,7 @@
     <string name="way_note_quebec_parlement">Le statue lungo la facciata raccontano la storia del Québec.</string>
     <string name="way_note_quebec_place_royale">Qui nel 1608 Samuel de Champlain costruì il posto fortificato da cui nacque Québec.</string>
     <string name="way_note_quebec_plaines">Qui nel 1759 gli inglesi vinsero la battaglia per il Québec; entrambi i generali, Wolfe e Montcalm, morirono per le ferite.</string>
+    <string name="way_note_rabanal">Rabanal è la fine della nona tappa nel Codex Calixtinus, la guida medievale dei pellegrini.</string>
     <string name="way_note_radicofani">La rocca di Radicofani fu di Ghino di Tacco, il brigante gentiluomo del Decameron.</string>
     <string name="way_note_redondela">Nel 1702, nello stretto di Rande sotto Redondela, una flotta inglese e olandese attaccò la flotta spagnola del tesoro.</string>
     <string name="way_note_rieti">Rieti si dice il centro d’Italia: una pietra in Piazza San Rufo segna il punto.</string>
@@ -1146,6 +1194,7 @@
     <string name="way_note_rio_selaron_steps">L’artista cileno Jorge Selarón ricoprì questi gradini di piastrelle, all’inizio nei colori della bandiera del Brasile.</string>
     <string name="way_note_rio_sugarloaf">Inaugurata nel 1912, la funivia sale da qui al Morro da Urca, poi al Pan di Zucchero.</string>
     <string name="way_note_rio_theatro_municipal">Inaugurato nel 1909, il teatro si ispira all’Opéra di Garnier a Parigi.</string>
+    <string name="way_note_robbio">Robbio ha dato i natali a Silvio Piola, che segnò due gol nella finale dei Mondiali del 1938 vinta dall’Italia.</string>
     <string name="way_note_roma_san_pietro">Il cammino finisce in Piazza San Pietro, davanti alla basilica.</string>
     <string name="way_note_rome_ara_pacis">L’Altare della Pace di Augusto fu consacrato nel 9 a.C.; lo protegge un padiglione di Richard Meier, aperto nel 2006.</string>
     <string name="way_note_rome_arch_constantine">Eretto nel 315 per la vittoria di Costantino a Ponte Milvio, riusa rilievi di monumenti più antichi.</string>
@@ -1163,13 +1212,21 @@
     <string name="way_note_rome_trevi">Finita nel 1762, la fontana è alimentata dall’Acqua Vergine, un acquedotto aperto dai Romani nel 19 a.C.</string>
     <string name="way_note_rome_vittoriano">Il monumento bianco a Vittorio Emanuele II, primo re dell’Italia unita, custodisce la tomba del Milite Ignoto.</string>
     <string name="way_note_roncesvalles">Qui, nel 778, cadde la retroguardia di Carlo Magno: la battaglia della Chanson de Roland.</string>
+    <string name="way_note_rubiaes">Rubiães si trova sull’antica strada romana che da Braga saliva verso nord.</string>
     <string name="way_note_saint_jean">Molti pellegrini partono da qui, ai piedi dei Pirenei.</string>
     <string name="way_note_san_gimignano">San Gimignano ha ancora 14 delle sue torri medievali, su circa 72.</string>
+    <string name="way_note_san_juan_de_ortega">A ogni equinozio, alle cinque del pomeriggio, un raggio di sole illumina l’Annunciazione scolpita su un capitello di questa chiesa.</string>
     <string name="way_note_san_luca">La salita a San Luca corre sotto un portico lungo 3,8 km, con 666 archi.</string>
+    <string name="way_note_san_miniato">San Miniato si chiamò a lungo «al Tedesco», per i vicari imperiali tedeschi che da qui governavano la Toscana.</string>
     <string name="way_note_san_piero_a_sieve">Sopra San Piero c’è la fortezza di San Martino, voluta dai Medici nel Mugello, la valle della loro famiglia.</string>
+    <string name="way_note_san_quirico">Dopo San Quirico, a Bagno Vignoni la piazza è una vasca d’acqua termale del Cinquecento.</string>
     <string name="way_note_sansepolcro">Sansepolcro è la città di Piero della Francesca; la sua Resurrezione è nel museo civico.</string>
+    <string name="way_note_santa_cristina">Nel 990 il monastero di Santa Cristina ospitò Sigerico, arcivescovo di Canterbury, di ritorno da Roma.</string>
+    <string name="way_note_santhia">Il carnevale di Santhià risale al XIV secolo.</string>
     <string name="way_note_santiago">Il cammino finisce in Praza do Obradoiro, davanti alla cattedrale di Santiago.</string>
+    <string name="way_note_santo_domingo">Nella cattedrale di Santo Domingo vivono sempre una gallina e un gallo, per i polli arrosto che salvarono per miracolo un pellegrino.</string>
     <string name="way_note_sarria">Da Sarria, poco più di 100 km da Santiago, il cammino vale ancora la Compostela.</string>
+    <string name="way_note_sarzana">Sarzana ha dato i natali a Tommaso Parentucelli, che nel 1447 divenne papa Niccolò V.</string>
     <string name="way_note_seoul_bukchon">Bukchon vuol dire villaggio del nord, a nord del Cheonggyecheon; i suoi vicoli conservano molti hanok, le case tradizionali coreane.</string>
     <string name="way_note_seoul_changdeokgung">Costruito nel 1405, dopo il Gyeongbokgung, questo palazzo fu per secoli la sede principale dei re ed è patrimonio dell’umanità.</string>
     <string name="way_note_seoul_cheonggyecheon">Coperto nel secolo scorso dal cemento e da una strada sopraelevata, il torrente tornò alla luce nel 2005.</string>
@@ -1209,7 +1266,9 @@
     <string name="way_note_singapore_sri_mariamman">Fondato nel 1827 da Naraina Pillai, è il più antico tempio indù di Singapore.</string>
     <string name="way_note_singapore_st_andrews">La prima chiesa qui fu colpita due volte dal fulmine; questa cattedrale, finita nel 1861, ne prese il posto.</string>
     <string name="way_note_singapore_supertree_grove">Nei Gardens by the Bay, aperti nel 2012, i Supertree sono coperti di piante e si accendono ogni sera a ritmo di musica.</string>
+    <string name="way_note_spello">Per il Corpus Domini le vie di Spello si coprono in una notte di tappeti di fiori per la processione.</string>
     <string name="way_note_spoleto">Il Ponte delle Torri di Spoleto, lungo 230 metri, nacque come acquedotto romano sopra la gola.</string>
+    <string name="way_note_sutri">L’anfiteatro romano di Sutri, come le sue tombe etrusche, è scavato nel tufo.</string>
     <string name="way_note_sydney_anzac_memorial">Questo memoriale Art déco a Hyde Park, progettato da Bruce Dellit, fu inaugurato nel 1934.</string>
     <string name="way_note_sydney_art_gallery">Nel 2022 il museo ha aperto un secondo edificio, progettato dallo studio giapponese SANAA.</string>
     <string name="way_note_sydney_botanic_garden">Fondato nel 1816 sulla Farm Cove, dove sorse la prima fattoria della colonia, è la più antica istituzione scientifica dell’Australia.</string>
@@ -1224,6 +1283,7 @@
     <string name="way_note_sydney_opera_house">Progettata dal danese Jørn Utzon, fu inaugurata dalla regina Elisabetta II nel 1973 ed è patrimonio dell’umanità dal 2007.</string>
     <string name="way_note_sydney_qvb">Il mercato coperto di George McRae, finito nel 1898, rischiò la demolizione nel 1959 e oggi ospita di nuovo negozi.</string>
     <string name="way_note_sydney_st_marys">Iniziata dopo che un incendio distrusse la prima chiesa nel 1865, la cattedrale di William Wardell fu quasi finita nel 1928.</string>
+    <string name="way_note_terradillos">Terradillos prende il nome dai Templari, che lo possedettero nel Medioevo.</string>
     <string name="way_note_tokyo_akihabara">Nel dopoguerra Akihabara passò dal mercato nero alla Città elettrica, e divenne poi il cuore della cultura otaku.</string>
     <string name="way_note_tokyo_ameyoko">Questo mercato lungo la ferrovia prenderebbe il nome dai dolci venduti qui nel dopoguerra, o dalle merci dell’esercito americano.</string>
     <string name="way_note_tokyo_imperial_palace">Solo a Capodanno e per il compleanno dell’imperatore il pubblico può entrare nel palazzo, dove la famiglia imperiale lo saluta.</string>
@@ -1238,6 +1298,8 @@
     <string name="way_note_tokyo_station">La stazione in mattoni rossi di Tatsuno Kingo aprì nel 1914; danneggiata dai bombardamenti del 1945, nel 2012 tornò com’era in origine.</string>
     <string name="way_note_tokyo_toshogu">È un santuario dedicato a Tokugawa Ieyasu, il primo shōgun Tokugawa; i suoi edifici, rinnovati da Iemitsu nel 1651, sono giunti quasi intatti.</string>
     <string name="way_note_tokyo_yushima_seido">Lo shōgun Tsunayoshi volle qui questo tempio confuciano; nel 1872 ospitò la mostra da cui nacque il museo nazionale.</string>
+    <string name="way_note_trevi">Trevi sorge su una collina di oliveti, tra Foligno e Spoleto.</string>
+    <string name="way_note_triacastela">Il nome di Triacastela è il latino tria castella, tre fortezze.</string>
     <string name="way_note_tui">La cattedrale di Tui, iniziata alla fine dell’XI secolo, domina una città che fu a lungo una fortezza di confine.</string>
     <string name="way_note_tunis_bab_el_bhar">La Porta del Mare, detta anche Porta di Francia, segna il confine tra la medina e la città nuova.</string>
     <string name="way_note_tunis_bab_el_khadra">Detta Porta dei giardini verdi, conduceva verso Cartagine e Ariana, e fu ricostruita nella forma attuale nel 1881.</string>
@@ -1254,7 +1316,10 @@
     <string name="way_note_tunis_tourbet_el_bey">Costruito sotto Ali II, il più grande monumento funebre di Tunisi accoglie la maggior parte dei bey husseiniti sotto le sue cupole di tegole verdi.</string>
     <string name="way_note_tunis_zitouna">La Moschea dell’Olivo, che secondo la leggenda prende il nome da un olivo che sorgeva qui, fu ricostruita sotto gli Aghlabidi con colonne antiche di Cartagine.</string>
     <string name="way_note_valenca">La fortezza murata di Valença guarda Tui oltre il Minho: passato il ponte, il cammino entra in Spagna.</string>
+    <string name="way_note_valfabbrica">Valfabbrica nacque presso un guado del Chiascio, tra Gubbio e Assisi, attorno a un’abbazia benedettina del IX secolo.</string>
     <string name="way_note_vercelli">Vercelli custodisce un libro di poesie in inglese antico del X secolo, forse portato da pellegrini inglesi.</string>
+    <string name="way_note_verres">Ibleto di Challant costruì il castello di Verrès nel XIV secolo: un austero cubo di trenta metri di lato.</string>
+    <string name="way_note_vetralla">Papa Eugenio III, rifugiatosi a Vetralla nel 1145 lontano dalle lotte di Roma, da qui indisse la seconda crociata.</string>
     <string name="way_note_vienna_belvedere">Costruito come residenza estiva del principe Eugenio di Savoia, oggi custodisce Il bacio di Klimt.</string>
     <string name="way_note_vienna_city_hall">Finito nel 1883, il municipio neogotico ha in cima alla torre il Rathausmann, un portabandiera.</string>
     <string name="way_note_vienna_hofburg">Gli Asburgo governarono da questo palazzo, la loro residenza invernale, fino al 1918.</string>
@@ -1268,7 +1333,9 @@
     <string name="way_note_vienna_stadtpark">Aperto nel 1862, il parco custodisce la statua dorata di Johann Strauss figlio.</string>
     <string name="way_note_vienna_state_opera">Il teatro dell’opera fu inaugurato nel 1869 con il Don Giovanni di Mozart.</string>
     <string name="way_note_vienna_stephansdom">La sua torre sud si alza per 136 metri; la sua grande campana, la Pummerin, fu fusa la prima volta con cannoni ottomani.</string>
+    <string name="way_note_villafranca">Villafranca, la città dei Franchi, crebbe attorno a un borgo di pellegrini francesi che vi rimasero.</string>
     <string name="way_note_viterbo">A Viterbo, dal 1268 al 1271, i cardinali tennero l’elezione papale più lunga della storia.</string>
+    <string name="way_note_viverone">Il lago di Viverone conserva i resti di un villaggio su palafitte dell’età del bronzo, patrimonio dell’UNESCO.</string>
     <string name="way_note_zanzibar_christ_church">Costruita dal 1873 al 1879 dove sorgeva il mercato degli schiavi, la cattedrale ha l’altare, si dice, nel punto del palo della fustigazione.</string>
     <string name="way_note_zanzibar_forodhani">Restaurati dall’Aga Khan, i giardini sul lungomare si riempiono ogni sera di un mercato di piatti zanzibarini.</string>
     <string name="way_note_zanzibar_hamamni">Costruiti per il sultano Barghash da architetti shirazi, da cui il nome di persiani, i bagni pubblici restarono in uso fino al 1920.</string>
@@ -1280,4 +1347,5 @@
     <string name="way_note_zanzibar_st_joseph">Costruita da missionari francesi dal 1893 al 1898, la cattedrale ha due campanili che ricordano la cattedrale di Marsiglia.</string>
     <string name="way_note_zanzibar_stone_town">Oltre la Creek Road comincia Stone Town, i cui edifici dell’Ottocento uniscono elementi arabi, persiani, indiani ed europei; è patrimonio dell’umanità UNESCO.</string>
     <string name="way_note_zanzibar_sultans_palace">Il palazzo del sultano fu bombardato nella guerra anglo-zanzibariana del 1896, considerata la più breve della storia: durò meno di un’ora.</string>
+    <string name="way_note_zubiri">Zubiri in basco vuol dire «paese del ponte», per il suo vecchio ponte sull’Arga.</string>
 </resources>
