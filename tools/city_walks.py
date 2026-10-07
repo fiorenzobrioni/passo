@@ -22,6 +22,9 @@ are still written by tools/build_ways.py, never by hand.
     python3 tools/city_walks.py splice WALK_ID ...
         Adds new walks to WayData.kt without rebuilding the others, or replaces walks already
         there, then rewrites the place strings and the continents' maps (see below).
+    python3 tools/city_walks.py strings
+        Rewrites only the place strings (EN, IT, WayPlaceStrings.kt), after a name or a sentence
+        changed in the content: a way's stage given a sentence needs nothing else rebuilt.
 
 Why splice: a full `build_ways.py` run rebuilds every walk from the cache, and a fresh cache
 would also move every other city's streets with OpenStreetMap's edits since, which is not part
@@ -255,6 +258,13 @@ def splice(ids):
         end = text.index("\n    )\n", start) + len("\n    )\n")
         text = text[:end] + block + text[end:]
     path.write_text(text)
+    strings()
+    build.build_continents()
+
+
+def strings(args=()):
+    sys.path.insert(0, str(HERE))
+    import build_ways as build
 
     places, notes = {}, {}
     for item in build.WAYS + build.WALKS:
@@ -263,7 +273,6 @@ def splice(ids):
             if stop.note_en:
                 notes[stop.key] = (stop.note_en, stop.note_it)
     build.write_strings(places, notes)
-    build.build_continents()
 
 
 COMMANDS = {
@@ -273,9 +282,10 @@ COMMANDS = {
     "wiki": lambda args: wiki(args[0], args[1], args[2:]),
     "wiki-find": lambda args: wiki_find(args[0], args[1:]),
     "splice": lambda args: splice(args),
+    "strings": lambda args: strings(args),
 }
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3 or sys.argv[1] not in COMMANDS:
+    if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS or (len(sys.argv) < 3 and sys.argv[1] != "strings"):
         sys.exit(__doc__)
     COMMANDS[sys.argv[1]](sys.argv[2:])

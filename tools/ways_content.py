@@ -24,7 +24,9 @@ Town in the English and German (or Dutch, French, Afrikaans), Marrakech in the E
 the English and French (or Italian, Spanish, German), Tunis in the English and French (or Arabic,
 Italian), Alexandria in the English and French (or Arabic), Dakar in the English and
 French (or German), Addis Ababa in the English and French (or Italian), Zanzibar in the English and
-Italian (or German, French), Luxor in the English and French (or Italian).
+Italian (or German, French), Luxor in the English and French (or Italian). The Via Francigena's
+other stages (7 Oct 2026) in the English and Italian (or French, German), Sigeric's stops in the
+English article on the Via Francigena; a stage with no second source keeps only its name.
 """
 
 from dataclasses import dataclass, field
@@ -394,53 +396,116 @@ VIA_FRANCIGENA = Way(
              note_en="Aosta was Augusta Praetoria, a Roman town founded in 25 BC; its Arch of Augustus still stands.",
              note_it="Aosta era Augusta Praetoria, fondata dai Romani nel 25 a.C.; il suo Arco d'Augusto è ancora in piedi."),
         # Source: Wikipedia, Aosta.
-        Stop("chatillon", "Châtillon", "Châtillon", 45.7500, 7.6167),
-        Stop("verres", "Verrès", "Verrès", 45.6667, 7.6833),
-        Stop("pont_saint_martin", "Pont-Saint-Martin", "Pont-Saint-Martin", 45.6000, 7.8000),
+        Stop("chatillon", "Châtillon", "Châtillon", 45.7500, 7.6167,
+             note_en="At Châtillon the Valtournenche opens, the valley that climbs to the Matterhorn.",
+             note_it="A Châtillon si apre la Valtournenche, la valle che sale fino al Cervino."),
+        # Source: Wikipedia, Valtournenche; Wikipedia (it), Valtournenche (valle).
+        Stop("verres", "Verrès", "Verrès", 45.6667, 7.6833,
+             note_en="Yblet of Challant built Verrès castle in the 14th century: an austere cube thirty metres on each side.",
+             note_it="Ibleto di Challant costruì il castello di Verrès nel XIV secolo: un austero cubo di trenta metri di lato."),
+        # Source: Wikipedia, Verrès Castle; Wikipedia (it), Castello di Verrès.
+        Stop("pont_saint_martin", "Pont-Saint-Martin", "Pont-Saint-Martin", 45.6000, 7.8000,
+             note_en="Pont-Saint-Martin's Roman bridge, a single arch, has stood since the 1st century BC.",
+             note_it="Il ponte romano di Pont-Saint-Martin, un'unica arcata, è in piedi dal I secolo a.C."),
+        # Source: Wikipedia, Pont-Saint-Martin Bridge; Wikipedia (it), Pont Saint-Martin. Its span is left out: the sources give 31.4 to 36.65 m.
         Stop("ivrea", "Ivrea", "Ivrea", 45.4667, 7.8833,
              note_en="Ivrea's carnival is known for its battle of the oranges.",
              note_it="Il carnevale di Ivrea è famoso per la sua battaglia delle arance."),
         # Source: Wikipedia, Battle of the Oranges.
-        Stop("viverone", "Viverone", "Viverone", 45.4272, 8.0497),
-        Stop("santhia", "Santhià", "Santhià", 45.3667, 8.1667),
+        Stop("viverone", "Viverone", "Viverone", 45.4272, 8.0497,
+             note_en="Lake Viverone keeps the remains of a Bronze Age village on piles, part of a UNESCO World Heritage Site.",
+             note_it="Il lago di Viverone conserva i resti di un villaggio su palafitte dell'età del bronzo, patrimonio dell'UNESCO."),
+        # Source: Wikipedia, Prehistoric pile dwellings around the Alps; Wikipedia (it), Lago di Viverone.
+        Stop("santhia", "Santhià", "Santhià", 45.3667, 8.1667,
+             note_en="Santhià's carnival goes back to the 14th century.",
+             note_it="Il carnevale di Santhià risale al XIV secolo."),
+        # Source: Wikipedia, Santhià; Wikipedia (it), Santhià ("the oldest in Piedmont" is in the Italian only).
         Stop("vercelli", "Vercelli", "Vercelli", 45.3256, 8.4231,
              note_en="Vercelli keeps a 10th-century book of Old English poems, probably brought by English pilgrims.",
              note_it="Vercelli custodisce un libro di poesie in inglese antico del X secolo, forse portato da pellegrini inglesi."),
         # Source: Wikipedia, Vercelli Book.
-        Stop("robbio", "Robbio", "Robbio", 45.2894, 8.5947),
-        Stop("mortara", "Mortara", "Mortara", 45.2500, 8.7333),
-        Stop("garlasco", "Garlasco", "Garlasco", 45.2000, 8.9167),
+        Stop("robbio", "Robbio", "Robbio", 45.2894, 8.5947,
+             note_en="Robbio is the birthplace of Silvio Piola, who scored twice in the 1938 World Cup final that Italy won.",
+             note_it="Robbio ha dato i natali a Silvio Piola, che segnò due gol nella finale dei Mondiali del 1938 vinta dall'Italia."),
+        # Source: Wikipedia, Silvio Piola; Wikipedia (it), Silvio Piola.
+        Stop("mortara", "Mortara", "Mortara", 45.2500, 8.7333,
+             note_en="Legend says Mortara is named after a battle fought here in 773 between Charlemagne and the Lombards.",
+             note_it="Secondo la leggenda, Mortara prende il nome da una battaglia combattuta qui nel 773 tra Carlo Magno e i Longobardi."),
+        # Source: Wikipedia, Mortara, Lombardy; Wikipedia (it), Mortara.
+        Stop("garlasco", "Garlasco", "Garlasco", 45.2000, 8.9167,
+             note_en="Garlasco's sanctuary of the Madonna della Bozzola, a place of pilgrimage, began with a miracle that tradition dates to 1465.",
+             note_it="Il santuario della Madonna della Bozzola, a Garlasco, meta di pellegrinaggi, nacque da un miracolo che la tradizione colloca nel 1465."),
+        # Source: Wikipedia (it), Garlasco; Wikipedia (fr), Garlasco. Its distance from the centre is left out: 2.5 or 4 km.
         Stop("pavia", "Pavia", "Pavia", 45.1847, 9.1582,
              note_en="Saint Augustine is buried in Pavia, in the church of San Pietro in Ciel d'Oro.",
              note_it="Sant'Agostino è sepolto a Pavia, nella chiesa di San Pietro in Ciel d'Oro."),
         # Source: Wikipedia, San Pietro in Ciel d'Oro.
-        Stop("santa_cristina", "Santa Cristina e Bissone", "Santa Cristina e Bissone", 45.1561, 9.3994),
+        Stop("santa_cristina", "Santa Cristina e Bissone", "Santa Cristina e Bissone", 45.1561, 9.3994,
+             note_en="In 990 Santa Cristina's monastery hosted Archbishop Sigeric of Canterbury, on his way home from Rome.",
+             note_it="Nel 990 il monastero di Santa Cristina ospitò Sigerico, arcivescovo di Canterbury, di ritorno da Roma."),
+        # Source: Wikipedia, Via Francigena (Sigeric's stop XL); Wikipedia (it), Monastero di Santa Cristina.
         Stop("orio_litta", "Orio Litta", "Orio Litta", 45.1606, 9.5603,
              note_en="Near here the way crosses the Po by boat, where Archbishop Sigeric crossed in 990.",
              note_it="Qui vicino il cammino attraversa il Po in barca, dove lo passò l'arcivescovo Sigerico nel 990."),
         # Source: Wikipedia (it), Guado di Sigerico.
-        Stop("piacenza", "Piacenza", "Piacenza", 45.0522, 9.6930),
-        Stop("fiorenzuola", "Fiorenzuola d'Arda", "Fiorenzuola d'Arda", 44.9264, 9.9128),
-        Stop("fidenza", "Fidenza", "Fidenza", 44.8667, 10.0667),
+        Stop("piacenza", "Piacenza", "Piacenza", 45.0522, 9.6930,
+             note_en="The Romans founded Piacenza, Placentia, in 218 BC, as Hannibal marched on Italy.",
+             note_it="I Romani fondarono Piacenza, Placentia, nel 218 a.C., mentre Annibale marciava verso l'Italia."),
+        # Source: Wikipedia, Piacenza; Wikipedia (it), Piacenza. The Primogenita is left out: the sources date its vote 1848 or 1860.
+        Stop("fiorenzuola", "Fiorenzuola d'Arda", "Fiorenzuola d'Arda", 44.9264, 9.9128,
+             note_en="Fiorenzuola's name comes from the Roman Florentia; d'Arda, from the river it stands on.",
+             note_it="Il nome di Fiorenzuola viene dalla romana Florentia; «d'Arda», dal fiume su cui sorge."),
+        # Source: Wikipedia, Fiorenzuola d'Arda; Wikipedia (it), Fiorenzuola d'Arda.
+        Stop("fidenza", "Fidenza", "Fidenza", 44.8667, 10.0667,
+             note_en="On Fidenza's cathedral a statue of an apostle holds a scroll that shows pilgrims the way to Rome.",
+             note_it="Sul duomo di Fidenza la statua di un apostolo regge una pergamena che indica ai pellegrini la via per Roma."),
+        # Source: Wikipedia, Fidenza; Wikipedia (it), Duomo di Fidenza. The apostle is not named: Simon Peter in the English, Simon in the Italian.
         Stop("medesano", "Medesano", "Medesano", 44.7553, 10.1406),
         Stop("cassio", "Cassio", "Cassio", 44.5850, 10.0650),
-        Stop("berceto", "Berceto", "Berceto", 44.5097, 10.0128),
+        Stop("berceto", "Berceto", "Berceto", 44.5097, 10.0128,
+             note_en="Berceto's cathedral bears the name of Moderan, a bishop of Rennes who left relics here on his pilgrimage to Rome.",
+             note_it="Il duomo di Berceto porta il nome di Moderanno, vescovo di Rennes che vi lasciò delle reliquie nel suo pellegrinaggio a Roma."),
+        # Source: Wikipedia, Berceto; Wikipedia (fr), Modéran de Rennes; Wikipedia (it), Moderanno di Rennes.
         Stop("passo_della_cisa", "Cisa Pass", "Passo della Cisa", 44.4708, 9.9286, stage=False,
              note_en="At the Cisa Pass, 1,041 metres up, the way crosses the Apennines into Tuscany.",
              note_it="Al Passo della Cisa, a 1.041 metri, il cammino supera l'Appennino ed entra in Toscana."),
         # Source: Wikipedia, Cisa Pass.
-        Stop("pontremoli", "Pontremoli", "Pontremoli", 44.3761, 9.8806),
-        Stop("aulla", "Aulla", "Aulla", 44.2156, 9.9725),
-        Stop("sarzana", "Sarzana", "Sarzana", 44.1131, 9.9603),
-        Stop("massa", "Massa", "Massa", 44.0353, 10.1394),
-        Stop("camaiore", "Camaiore", "Camaiore", 43.9431, 10.3022),
+        Stop("pontremoli", "Pontremoli", "Pontremoli", 44.3761, 9.8806,
+             note_en="Pontremoli's Piagnaro castle keeps the stele statues of Lunigiana, ancient human figures carved in stone.",
+             note_it="Il castello del Piagnaro, a Pontremoli, custodisce le statue stele della Lunigiana, antiche figure umane scolpite nella pietra."),
+        # Source: Wikipedia, Pontremoli; Wikipedia (it), Pontremoli. Their age is left out: the Bronze Age, or the first millennium BC.
+        Stop("aulla", "Aulla", "Aulla", 44.2156, 9.9725,
+             note_en="Aulla's abbey of San Caprasio, founded in the 9th century, is named after a hermit of the Lérins islands, off Provence.",
+             note_it="L'abbazia di San Caprasio ad Aulla, fondata nel IX secolo, porta il nome di un eremita delle isole di Lérins, in Provenza."),
+        # Source: Wikipedia, Aulla; Wikipedia (it), Abbazia di San Caprasio.
+        Stop("sarzana", "Sarzana", "Sarzana", 44.1131, 9.9603,
+             note_en="Sarzana is the birthplace of Tommaso Parentucelli, who became Pope Nicholas V in 1447.",
+             note_it="Sarzana ha dato i natali a Tommaso Parentucelli, che nel 1447 divenne papa Niccolò V."),
+        # Source: Wikipedia, Pope Nicholas V; Wikipedia (it), Sarzana, Papa Niccolò V.
+        Stop("massa", "Massa", "Massa", 44.0353, 10.1394,
+             note_en="Massa appears on a Roman road map as Ad Tabernas Frigidas, perhaps a stop on the road from Pisa to Luni.",
+             note_it="Massa compare in una mappa stradale romana come «Ad Tabernas Frigidas», forse una sosta sulla via da Pisa a Luni."),
+        # Source: Wikipedia, Massa, Tuscany; Wikipedia (it), Massa (Italia).
+        Stop("camaiore", "Camaiore", "Camaiore", 43.9431, 10.3022,
+             note_en="Camaiore, the Latin Campus Maior, grew in the Middle Ages thanks to the Via Francigena.",
+             note_it="Camaiore, il latino Campus Maior, crebbe nel Medioevo grazie alla Via Francigena."),
+        # Source: Wikipedia, Camaiore; Wikipedia (it), Camaiore.
         Stop("lucca", "Lucca", "Lucca", 43.8429, 10.5027,
              note_en="Lucca's Renaissance walls, over four kilometres around, are a park on top.",
              note_it="Le mura rinascimentali di Lucca, lunghe più di quattro chilometri, in cima sono un parco."),
         # Source: Wikipedia, Walls of Lucca.
-        Stop("altopascio", "Altopascio", "Altopascio", 43.8167, 10.6833),
-        Stop("san_miniato", "San Miniato", "San Miniato", 43.6797, 10.8506),
-        Stop("gambassi_terme", "Gambassi Terme", "Gambassi Terme", 43.5375, 10.9531),
+        Stop("altopascio", "Altopascio", "Altopascio", 43.8167, 10.6833,
+             note_en="Altopascio's hospital, recorded from 1084, gave rise to the Knights of the Tau, who cared for pilgrims bound for Rome.",
+             note_it="Dallo Spedale di Altopascio, documentato dal 1084, nacquero i Cavalieri del Tau, che assistevano i pellegrini diretti a Roma."),
+        # Source: Wikipedia, Order of Saint James of Altopascio; Wikipedia (it), Altopascio. Its bell, la Smarrita, is in the Italian only.
+        Stop("san_miniato", "San Miniato", "San Miniato", 43.6797, 10.8506,
+             note_en="San Miniato was long called al Tedesco, after the German imperial vicars who ruled Tuscany from here.",
+             note_it="San Miniato si chiamò a lungo «al Tedesco», per i vicari imperiali tedeschi che da qui governavano la Toscana."),
+        # Source: Wikipedia, San Miniato; Wikipedia (it), San Miniato.
+        Stop("gambassi_terme", "Gambassi Terme", "Gambassi Terme", 43.5375, 10.9531,
+             note_en="Glassmaking flourished in Gambassi from the 13th century.",
+             note_it="Dal XIII secolo a Gambassi fiorì la lavorazione del vetro."),
+        # Source: Wikipedia (it), Gambassi Terme; Wikipedia (de), Gambassi Terme.
         Stop("san_gimignano", "San Gimignano", "San Gimignano", 43.4677, 11.0430,
              note_en="San Gimignano still has 14 of its medieval towers, out of about 72.",
              note_it="San Gimignano ha ancora 14 delle sue torri medievali, su circa 72."),
@@ -453,26 +518,50 @@ VIA_FRANCIGENA = Way(
              note_en="Siena's Piazza del Campo holds the Palio twice each summer, on 2 July and 16 August.",
              note_it="Piazza del Campo a Siena ospita il Palio due volte ogni estate, il 2 luglio e il 16 agosto."),
         # Source: Wikipedia, Palio di Siena.
-        Stop("ponte_d_arbia", "Ponte d'Arbia", "Ponte d'Arbia", 43.1903, 11.4639),
-        Stop("san_quirico", "San Quirico d'Orcia", "San Quirico d'Orcia", 43.0581, 11.6050),
+        Stop("ponte_d_arbia", "Ponte d'Arbia", "Ponte d'Arbia", 43.1903, 11.4639,
+             note_en="Archbishop Sigeric stopped here in 990 and wrote the stop down simply as Arbia.",
+             note_it="L'arcivescovo Sigerico vi sostò nel 990 e annotò la tappa semplicemente come «Arbia»."),
+        # Source: Wikipedia, Via Francigena (Sigeric's stop XIV); Wikipedia (it), Ponte d'Arbia.
+        Stop("san_quirico", "San Quirico d'Orcia", "San Quirico d'Orcia", 43.0581, 11.6050,
+             note_en="Past San Quirico, Bagno Vignoni's square is a pool of hot spring water, laid out in the 16th century.",
+             note_it="Dopo San Quirico, a Bagno Vignoni la piazza è una vasca d'acqua termale del Cinquecento."),
+        # Source: Wikipedia, Bagno Vignoni; Wikipedia (it), Bagno Vignoni. The way passes it, 5.5 km on.
         Stop("radicofani", "Radicofani", "Radicofani", 42.8964, 11.7678,
              note_en="Radicofani's fortress was held by Ghino di Tacco, the gentleman bandit of the Decameron.",
              note_it="La rocca di Radicofani fu di Ghino di Tacco, il brigante gentiluomo del Decameron."),
         # Source: Wikipedia, Ghino di Tacco.
-        Stop("acquapendente", "Acquapendente", "Acquapendente", 42.7428, 11.8650),
+        Stop("acquapendente", "Acquapendente", "Acquapendente", 42.7428, 11.8650,
+             note_en="Acquapendente's cathedral keeps a bloodstained stone said to come from the Holy Sepulchre in Jerusalem.",
+             note_it="Il duomo di Acquapendente custodisce una pietra macchiata di sangue che, per tradizione, viene dal Santo Sepolcro di Gerusalemme."),
+        # Source: Wikipedia, Acquapendente Cathedral; Wikipedia (it), Concattedrale di Acquapendente.
         Stop("bolsena", "Bolsena", "Bolsena", 42.6447, 11.9858,
              note_en="Bolsena lies on the largest volcanic lake in Europe.",
              note_it="Bolsena si affaccia sul lago vulcanico più grande d'Europa."),
         # Source: Wikipedia, Lake Bolsena.
-        Stop("montefiascone", "Montefiascone", "Montefiascone", 42.5381, 12.0294),
+        Stop("montefiascone", "Montefiascone", "Montefiascone", 42.5381, 12.0294,
+             note_en="Legend says a bishop's wine scout, bound for Rome, wrote Est! Est!! Est!!! at an inn here.",
+             note_it="Si narra che l'assaggiatore di vini di un vescovo, diretto a Roma, scrisse qui «Est! Est!! Est!!!» presso una locanda."),
+        # Source: Wikipedia, Est! Est!! Est!!! di Montefiascone; Wikipedia (it), Est! Est!! Est!!! di Montefiascone.
         Stop("viterbo", "Viterbo", "Viterbo", 42.4207, 12.1077,
              note_en="In Viterbo, from 1268 to 1271, the cardinals held the longest papal election in history.",
              note_it="A Viterbo, dal 1268 al 1271, i cardinali tennero l'elezione papale più lunga della storia."),
         # Source: Wikipedia, 1268–1271 papal election.
-        Stop("vetralla", "Vetralla", "Vetralla", 42.3203, 12.0539),
-        Stop("sutri", "Sutri", "Sutri", 42.2453, 12.2153),
-        Stop("campagnano", "Campagnano di Roma", "Campagnano di Roma", 42.1386, 12.3833),
-        Stop("la_storta", "La Storta", "La Storta", 42.0083, 12.3653),
+        Stop("vetralla", "Vetralla", "Vetralla", 42.3203, 12.0539,
+             note_en="Pope Eugene III, who left the strife of Rome for Vetralla in 1145, called the Second Crusade from here.",
+             note_it="Papa Eugenio III, rifugiatosi a Vetralla nel 1145 lontano dalle lotte di Roma, da qui indisse la seconda crociata."),
+        # Source: Wikipedia, Vetralla; Wikipedia (it), Vetralla.
+        Stop("sutri", "Sutri", "Sutri", 42.2453, 12.2153,
+             note_en="Sutri's Roman amphitheatre, like its Etruscan tombs, is carved out of the tuff rock.",
+             note_it="L'anfiteatro romano di Sutri, come le sue tombe etrusche, è scavato nel tufo."),
+        # Source: Wikipedia, Sutri; Wikipedia (it), Sutri.
+        Stop("campagnano", "Campagnano di Roma", "Campagnano di Roma", 42.1386, 12.3833,
+             note_en="Campagnano, first recorded in 1076, grew out of a great estate that a pope assembled in the 8th century.",
+             note_it="Campagnano, documentato dal 1076, nacque da una grande tenuta che un papa riunì nell'VIII secolo."),
+        # Source: Wikipedia, Campagnano di Roma; Wikipedia (it), Campagnano di Roma.
+        Stop("la_storta", "La Storta", "La Storta", 42.0083, 12.3653,
+             note_en="On the Via Cassia to Rome, Ignatius of Loyola is said to have had a vision here; a chapel marks the place.",
+             note_it="Qui, diretto a Roma lungo la via Cassia, Ignazio di Loyola avrebbe avuto una visione; una cappella ricorda il luogo."),
+        # Source: Wikipedia, La Storta; Wikipedia (it), La Storta. The year, 1537, is in the English only.
         Stop("roma_san_pietro", "Rome", "Roma", 41.9022, 12.4568,
              note_en="The way ends in St Peter's Square, before the basilica.",
              note_it="Il cammino finisce in Piazza San Pietro, davanti alla basilica."),
