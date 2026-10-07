@@ -212,6 +212,19 @@ class WaysScreenTest {
     }
 
     @Test
+    fun `the Via di Francesco, down the Tiber's valley to Rome`() {
+        showWay(WayId.VIA_DI_FRANCESCO, state = WaysSamples.state(active = null))
+        compose.onNodeWithText("Via di Francesco").assertIsDisplayed()
+        snapshot("way_francesco")
+    }
+
+    @Test
+    fun `the French Way, across the rivers of the north of Spain, in the dark`() {
+        showWay(WayId.CAMINO_FRANCES, state = WaysSamples.state(active = null), dark = true)
+        snapshot("way_frances_dark")
+    }
+
+    @Test
     @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
     fun `at twice the text size on a small phone, every way still reads`() {
         showWay(WayId.CAMINO_FRANCES, state = WaysSamples.state(active = null))

@@ -12,7 +12,7 @@
     <string name="ways_row_walked">Walked from %1$s to %2$s</string>
     <string name="ways_row_left">Left on %1$s, %2$s</string>
     <string name="ways_footer">Distances are estimates, from your steps and your step length: measuring your step makes them truer. A day counts as Passo recorded it, so History, Insights and your way always agree.</string>
-    <string name="ways_credit">Ways and walks drawn from OpenStreetMap, © OpenStreetMap contributors (ODbL); the walks routed with BRouter. Land and water of the ways and of the continents: Natural Earth.</string>
+    <string name="ways_credit">Ways and walks drawn from OpenStreetMap, © OpenStreetMap contributors (ODbL); the walks routed with BRouter. The ways’ borders and towns and the continents’ land: Natural Earth.</string>
 
     <!-- One way's page -->
     <string name="way_start">Start this way</string>

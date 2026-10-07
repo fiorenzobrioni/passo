@@ -8,6 +8,8 @@ behind it, from OpenStreetMap and Natural Earth.
     python3 tools/build_ways.py         # writes the app's files from that cache
     python3 tools/build_ways.py continents  # writes only the continents' maps (Natural Earth's
                                             # land, fetched if missing; the walks' committed routes)
+    python3 tools/build_ways.py maps [WAY_ID ...]  # redraws only the maps behind the ways in
+                                            # WayData.kt, keeping their lines, stops and frames
 
 The content (which relations, which stops, what is said of them) is tools/ways_content.py.
 Re-running this script IS the data: its outputs are not edited by hand.
@@ -22,8 +24,10 @@ Sources and licences:
 - The lines are OpenStreetMap route relations, read through the Waymarked Trails API, which
   hands each relation over in order with its geometry. © OpenStreetMap contributors, ODbL 1.0:
   the derived data says so in its header, and the app credits it (About, the guide).
-- Land, lakes, rivers and borders are Natural Earth (public domain), 1:10m; the locator maps
-  1:50m.
+- A way's map: its land is OpenStreetMap's coastline as land polygons, simplified for small
+  scales by osmdata.openstreetmap.de (ODbL); its rivers, lakes and parks are OpenStreetMap
+  objects named by id in the content; its borders and towns are Natural Earth (public domain),
+  1:10m. The locator maps are Natural Earth's 1:50m.
 
 The line is the shortest path from the first stop to the last over the relation's main ways
 (variants and appendices left out), with the gaps where the mapping breaks joined straight and
@@ -35,10 +39,12 @@ import heapq
 import http.client
 import json
 import math
+import struct
 import sys
 import time
 import urllib.error
 import urllib.request
+import zipfile
 from pathlib import Path
 
 import xml.etree.ElementTree as ElementTree
@@ -75,12 +81,14 @@ MIN_STREET_METRES = 150
 THROTTLED = {429, 502, 503, 504, 509}
 MAP_MIN_ASPECT, MAP_MAX_ASPECT = 0.62, 1.2  # WayMapView's own bounds for a map box's shape
 STREET_MARGIN = 1.3  # around what the page shows: the inset, and the box a little wider
+# The ways' land: OpenStreetMap's coastline as land polygons, simplified for small scales by
+# osmdata.openstreetmap.de (ODbL), far closer to the shore than Natural Earth's at a way's size.
+OSM_LAND = "https://osmdata.openstreetmap.de/download/simplified-land-polygons-complete-3857.zip"
+OSM_LAND_FILE = "simplified-land-polygons-complete-3857.zip"
 NE = "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/{}.geojson"
 NE_LAYERS = [
-    "ne_10m_land",
-    "ne_10m_lakes",
-    "ne_10m_rivers_lake_centerlines",
     "ne_10m_admin_0_boundary_lines_land",
+    "ne_10m_urban_areas",
     "ne_50m_land",
 ]
 
@@ -94,7 +102,11 @@ LOCATOR_TOLERANCE_METRES = 2500
 CONTINENT_TOLERANCE = 1 / 1200  # of the frame's diagonal
 CONTINENT_MIN_ISLAND = 1 / 300  # the island's longer side, of the frame's diagonal
 CONTINENT_GROUND = 1.15  # the ground's side, of the frame's longer one: a square box finds land to its edges
-RIVER_MAX_SCALERANK = 8  # Natural Earth's rank: lower is larger; small streams left out
+# A town on a way's map: Natural Earth's urban areas, those whose area is at least a square of
+# this share of the frame's diagonal (a smaller one is a speck: a map of them reads as confetti).
+TOWN_MIN_SIDE = 1 / 40
+# A waterway relation's members drawn as the river: its own course, not its springs or mouths.
+RIVER_ROLES = {"main_stream", "side_stream", ""}
 EARTH = 6371008.8
 MERCATOR = 6378137.0
 
@@ -112,12 +124,21 @@ def fetch(only=()):
         for way in WAYS:
             for relation in way.relations:
                 download(WMT.format(relation), CACHE / f"relation-{relation}.json")
+            fetch_way_map(way)
+        download(OSM_LAND, CACHE / OSM_LAND_FILE)
     for layer in NE_LAYERS if not only else ["ne_50m_land"]:
         download(NE.format(layer), CACHE / f"{layer}.geojson")
     ROUTES.mkdir(exist_ok=True)
     for walk in WALKS:
         if not only or walk.id in only:
             fetch_walk(walk)
+
+
+def fetch_way_map(way):
+    """The OpenStreetMap objects of a way's map: its rivers, lakes and parks, by id."""
+    for ref in way.rivers + way.lakes + way.parks:
+        kind, number = ref.split("/")
+        download(OSM.format(kind, number), CACHE / f"osm-{kind}-{number}.xml")
 
 
 def fetch_walk(walk):
@@ -651,9 +672,49 @@ def polylines(layer, box, tolerance, local, keep=lambda properties: True):
     return out
 
 
-def river(properties):
-    rank = properties.get("scalerank")
-    return properties.get("featurecla") in ("River", "Lake Centerline") and rank is not None and rank <= RIVER_MAX_SCALERANK
+def osm_land(box, tolerance, local):
+    """The land polygons' outer rings in [box], cut to it and simplified. The shapefile is read
+    from the zip as it was downloaded: a record whose own box misses [box] is skipped unread."""
+    with zipfile.ZipFile(CACHE / OSM_LAND_FILE) as archive:
+        name = next(n for n in archive.namelist() if n.endswith(".shp"))
+        data = archive.read(name)
+    south, west, north, east = box
+    # The box in the file's Web Mercator metres.
+    low = (math.radians(west) * MERCATOR, math.log(math.tan(math.pi / 4 + math.radians(south) / 2)) * MERCATOR)
+    high = (math.radians(east) * MERCATOR, math.log(math.tan(math.pi / 4 + math.radians(north) / 2)) * MERCATOR)
+    out, offset = [], 100
+    while offset < len(data):
+        length = struct.unpack(">i", data[offset + 4:offset + 8])[0] * 2
+        record = offset + 8
+        offset = record + length
+        kind, x0, y0, x1, y1 = struct.unpack("<i4d", data[record:record + 36])
+        if kind != 5 or x1 < low[0] or x0 > high[0] or y1 < low[1] or y0 > high[1]:
+            continue
+        parts, count = struct.unpack("<2i", data[record + 36:record + 44])
+        starts = list(struct.unpack(f"<{parts}i", data[record + 44:record + 44 + 4 * parts])) + [count]
+        base = record + 44 + 4 * parts
+        for first, last in zip(starts, starts[1:]):
+            xy = struct.unpack(f"<{2 * (last - first)}d", data[base + 16 * first:base + 16 * last])
+            ring = [from_mercator(xy[i], xy[i + 1]) for i in range(0, len(xy), 2)]
+            # Outer rings run clockwise; a counterclockwise one is a hole, a lagoon, left to the lakes.
+            if signed_area(ring) > 0 or not intersects(bbox_of(ring), box):
+                continue
+            clipped = clip_polygon(ring, box)
+            simple = simplify(clipped, tolerance, local, closed=True) if len(clipped) >= 3 else []
+            if len(simple) >= 3:
+                out.append(simple)
+    return out
+
+
+def signed_area(ring):
+    """Positive when the ring runs counterclockwise on a map (east is x, north is y)."""
+    return sum(a[1] * b[0] - b[1] * a[0] for a, b in zip(ring, ring[1:] + ring[:1])) / 2
+
+
+def towns(box, tolerance, local, diagonal):
+    """Natural Earth's urban areas in [box], the smallest left out: the towns along a way."""
+    smallest = (diagonal * TOWN_MIN_SIDE / 1000) ** 2
+    return polygons("ne_10m_urban_areas", box, tolerance, local, lambda p: p.get("area_sqkm", 0) >= smallest)
 
 
 # --- Encoding ---------------------------------------------------------------------------------
@@ -717,19 +778,15 @@ def build():
         diagonal = math.hypot((frame[3] - frame[1]) * local.kx, (frame[2] - frame[0]) * local.ky)
         line = simplified_indices(path, diagonal * LINE_TOLERANCE, local)
         rows = [(path[i][0], path[i][1], along[i]) for i in line]
-        land = polygons("ne_10m_land", ground, diagonal * MAP_TOLERANCE, local)
-        lakes = polygons("ne_10m_lakes", ground, diagonal * MAP_TOLERANCE, local)
-        rivers = polylines("ne_10m_rivers_lake_centerlines", ground, diagonal * MAP_TOLERANCE, local, river)
-        borders = polylines("ne_10m_admin_0_boundary_lines_land", ground, diagonal * MAP_TOLERANCE, local)
+        layers = way_map(way, ground, diagonal, local)
         locator_box = LOCATORS[way.country]
         locator_local = Local((locator_box[0] + locator_box[2]) / 2)
         locator_land = polygons("ne_50m_land", locator_box, LOCATOR_TOLERANCE_METRES, locator_local)
         locator_line = simplify(path, LOCATOR_TOLERANCE_METRES, locator_local)
         print(
             f"{way.id}: {length / 1000:.1f} km, {len(path)} points -> {len(line)}, "
-            f"{len(stops)} stops, gaps joined {[round(g) for g in gaps]} m, "
-            f"land {sum(map(len, land))}, lakes {sum(map(len, lakes))}, rivers {sum(map(len, rivers))}, "
-            f"borders {sum(map(len, borders))}, locator {sum(map(len, locator_land))}",
+            f"{len(stops)} stops, gaps joined {[round(g) for g in gaps]} m, {way_map_counts(layers)}, "
+            f"locator {sum(map(len, locator_land))}",
         )
         for stop, distance, point in stops:
             print(f"    {stop.key:24s} {distance / 1000:7.1f} km")
@@ -755,13 +812,12 @@ def build():
 {stop_lines}        ),
         frame = {box_literal(frame)},
         line = {kotlin_string(encode(rows, (1e5, 1e5, 1)), 8, len('line = '))},
-        land = {kotlin_paths(land, 8)},
-        lakes = {kotlin_paths(lakes, 8)},
-        rivers = {kotlin_paths(rivers, 8)},
-        borders = {kotlin_paths(borders, 8)},
+{way_map_fields(layers)}
         locatorFrame = {box_literal(locator_box)},
         locatorLand = {kotlin_paths(locator_land, 8)},
         locatorLine = {kotlin_string(encode(locator_line, (1e5, 1e5)), 8, len('locatorLine = '))},
+        parks = {kotlin_paths(layers["parks"], 8)},
+        towns = {kotlin_paths(layers["towns"], 8)},
     )
 """)
     for walk in WALKS:
@@ -837,6 +893,106 @@ internal object ContinentData {{
 """)
 
 
+# --- The ways' maps ---------------------------------------------------------------------------
+
+def way_map(way, ground, diagonal, local):
+    """What a way's map shows behind its line, cut to the ground: the land from OpenStreetMap's
+    coastline, Natural Earth's borders and towns, and the way's own rivers, lakes and parks."""
+    tolerance = diagonal * MAP_TOLERANCE
+    return {
+        "land": osm_land(ground, tolerance, local),
+        "lakes": city_polygons(way.lakes, ground, tolerance, local),
+        "rivers": river_lines(way.rivers, ground, tolerance, local),
+        "borders": polylines("ne_10m_admin_0_boundary_lines_land", ground, tolerance, local),
+        "parks": city_polygons(way.parks, ground, tolerance, local),
+        "towns": towns(ground, tolerance, local, diagonal),
+    }
+
+
+def way_map_counts(layers):
+    return ", ".join(f"{key} {sum(map(len, paths))}" for key, paths in layers.items())
+
+
+def way_map_fields(layers):
+    """The map's fields of a way's block, in the order WaySource takes them."""
+    return "\n".join(
+        f"        {key} = {kotlin_paths(layers[key], 8)}," for key in ("land", "lakes", "rivers", "borders")
+    )
+
+
+def river_lines(refs, box, tolerance, local):
+    """Waterway relations as lines: each river's own course, joined end to end, cut to the box."""
+    out = []
+    for ref in refs:
+        kind, number = ref.split("/")
+        root = ElementTree.parse(CACHE / f"osm-{kind}-{number}.xml").getroot()
+        nodes = {n.get("id"): (float(n.get("lat")), float(n.get("lon"))) for n in root.iter("node")}
+        ways = {w.get("id"): [nodes[nd.get("ref")] for nd in w.iter("nd") if nd.get("ref") in nodes] for w in root.iter("way")}
+        if kind == "way":
+            members = [ways[number]]
+        else:
+            relation = next(r for r in root.iter("relation") if r.get("id") == number)
+            members = [
+                ways[m.get("ref")] for m in relation.iter("member")
+                if m.get("type") == "way" and m.get("ref") in ways and m.get("role") in RIVER_ROLES
+            ]
+        if not members:
+            sys.exit(f"{ref}: no course to draw")
+        # A closed member is a river's bank or an island's shore, not its course.
+        for line in join_lines([m for m in members if len(m) > 1 and m[0] != m[-1]]):
+            if len(line) < 2 or not intersects(bbox_of(line), box):
+                continue
+            for piece in clip_line(line, box):
+                simple = simplify(piece, tolerance, local)
+                if len(simple) >= 2:
+                    out.append(simple)
+    return out
+
+
+def ground_of(frame):
+    """The ground frame_of() cut around a frame: the line's box is the frame less its margins."""
+    south, west, north, east = frame
+    local = Local((south + north) / 2)
+    longer = max((east - west) * local.kx, (north - south) * local.ky) / 1.16
+    side = 1.7 * longer / 2
+    cx, cy = (west + east) / 2, (south + north) / 2
+    return (cy - side / local.ky, cx - side / local.kx, cy + side / local.ky, cx + side / local.kx), local
+
+
+def redraw_way_maps(ids):
+    """Redraws the maps behind the ways named (all, without ids) in WayData.kt, keeping each
+    way's line, stops and frame as they are: a fresh fetch of the relations would move the lines
+    with OpenStreetMap's edits since, which is not part of changing a map."""
+    unknown = set(ids) - {way.id for way in WAYS}
+    if unknown:
+        sys.exit(f"No way {', '.join(sorted(unknown))}")
+    text = DOMAIN_OUT.read_text()
+    for way in WAYS:
+        if ids and way.id not in ids:
+            continue
+        start = text.index(f"\n    private fun {camel(way.id)}() = WaySource(")
+        end = text.index("\n    )\n", start)
+        block = text[start:end]
+        numbers = block[block.index("frame = GeoBox(") + len("frame = GeoBox("):]
+        frame = tuple(float(n) for n in numbers[:numbers.index(")")].split(","))
+        ground, local = ground_of(frame)
+        diagonal = math.hypot((frame[3] - frame[1]) * local.kx, (frame[2] - frame[0]) * local.ky)
+        layers = way_map(way, ground, diagonal, local)
+        print(f"{way.id}: {way_map_counts(layers)}")
+        head = block[:block.index("\n        land = ") + 1]
+        tail = block[block.index("        locatorFrame = "):]
+        tail = tail[:tail.index("        locatorLine = ")] + tail[tail.index("        locatorLine = "):].split("\n        parks = ")[0]
+        block = (
+            head + way_map_fields(layers) + "\n" + tail
+            + f"\n        parks = {kotlin_paths(layers['parks'], 8)},"
+            + f"\n        towns = {kotlin_paths(layers['towns'], 8)},"
+        )
+        text = text[:start] + block + text[end:]
+    # The header names the map's sources, which this changes.
+    text = DOMAIN_HEADER + text[text.index("package "):]
+    DOMAIN_OUT.write_text(text)
+
+
 # --- The walks --------------------------------------------------------------------------------
 
 def walk_line(walk):
@@ -861,7 +1017,8 @@ def osm_shapes(ref):
     relation = next(r for r in root.iter("relation") if r.get("id") == number)
     tags = {t.get("k"): t.get("v") for t in relation.iter("tag")}
     members = [m for m in relation.iter("member") if m.get("type") == "way" and m.get("ref") in ways]
-    if tags.get("type") != "multipolygon":
+    # A national park is often a boundary relation, outlined as a multipolygon is.
+    if tags.get("type") not in ("multipolygon", "boundary"):
         return [], [ways[m.get("ref")] for m in members]
     return join_rings([ways[m.get("ref")] for m in members if m.get("role") in ("outer", "")]), []
 
@@ -1220,19 +1377,24 @@ def camel(constant):
 GENERATED = "Generated by tools/build_ways.py from tools/ways_content.py: do not edit, run it again."
 
 
-def write_domain(blocks):
-    cases = "".join(f"        WayId.{way.id} -> {camel(way.id)}()\n" for way in WAYS + WALKS)
-    DOMAIN_OUT.parent.mkdir(parents=True, exist_ok=True)
-    DOMAIN_OUT.write_text(f"""// {GENERATED}
+DOMAIN_HEADER = f"""// {GENERATED}
 //
-// The ways' and the walks' lines, and the cities' water and parks: © OpenStreetMap
-// contributors, under the Open Database License 1.0 (https://opendatacommons.org/licenses/odbl/1-0/);
-// this derived data is available under the same licence. The walks were routed by BRouter. The
-// ways' land, lakes, rivers and borders, and every locator: Natural Earth, public domain.
+// The ways' and the walks' lines, the ways' land (OpenStreetMap's land polygons, simplified by
+// osmdata.openstreetmap.de), rivers, lakes and parks, and the cities' water, parks and streets:
+// © OpenStreetMap contributors, under the Open Database License 1.0
+// (https://opendatacommons.org/licenses/odbl/1-0/); this derived data is available under the
+// same licence. The walks were routed by BRouter. The ways' borders and towns, and every
+// locator: Natural Earth, public domain.
 //
 // Every path is an encoded polyline (latitude and longitude at 1e-5 degrees; the line also
 // carries the metres along the way at each point), decoded by [Polyline].
-package com.callbackdev.passo.core.domain.ways
+"""
+
+
+def write_domain(blocks):
+    cases = "".join(f"        WayId.{way.id} -> {camel(way.id)}()\n" for way in WAYS + WALKS)
+    DOMAIN_OUT.parent.mkdir(parents=True, exist_ok=True)
+    DOMAIN_OUT.write_text(f"""{DOMAIN_HEADER}package com.callbackdev.passo.core.domain.ways
 
 import com.callbackdev.passo.core.model.WayId
 
@@ -1325,6 +1487,8 @@ if __name__ == "__main__":
         fetch(sys.argv[2:])
     elif not sys.argv[1:]:
         build()
+    elif sys.argv[1:2] == ["maps"]:
+        redraw_way_maps(sys.argv[2:])
     elif sys.argv[1:] == ["continents"]:
         CACHE.mkdir(exist_ok=True)
         build_continents()

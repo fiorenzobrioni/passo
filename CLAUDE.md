@@ -126,7 +126,7 @@ where Chiaro has its sun) is written by `tools/draw_launcher_icon.py`: change th
 re-run it, never the two XML layers. Likewise the Ways' and the city walks' data (`docs/adr/0014-ways.md`, `docs/adr/0015-city-walks.md`):
 `tools/build_ways.py` writes `WayData.kt` and the place strings from `tools/ways_content.py`
 (OpenStreetMap lines, ODbL, credited wherever they are read): edit the content and re-run it
-(`fetch` first, for the sources; a walk's route is fetched once and committed in `tools/walks/`), never the outputs.
+(`fetch` first, for the sources; a walk's route is fetched once and committed in `tools/walks/`; `maps` redraws only the ways' maps, keeping their lines), never the outputs.
 **To add a city walk or a continent, follow `tools/CITY_WALKS.md`**: the owner's rules (two cities
 at a time, every sentence checked in two sources), the steps, and `tools/city_walks.py`, the
 helpers that locate places, try a route, list a map's water and parks, read Wikipedia without
