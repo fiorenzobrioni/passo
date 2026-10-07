@@ -780,6 +780,7 @@
     <string name="way_note_amsterdam_waag">Una porta della città diventata pesa pubblica nel 1617; la corporazione dei chirurghi, al piano di sopra, commissionò a Rembrandt la Lezione di anatomia del dottor Tulp.</string>
     <string name="way_note_amsterdam_westerkerk">La sua torre di 87 metri è il campanile più alto di Amsterdam; qui fu sepolto Rembrandt nel 1669, in una tomba oggi perduta.</string>
     <string name="way_note_aosta">Aosta era Augusta Praetoria, fondata dai Romani nel 25 a.C.; il suo Arco d’Augusto è ancora in piedi.</string>
+    <string name="way_note_arrone">Si dice che Arrone prenda il nome da un nobile romano che vi costruì un castello nel IX secolo.</string>
     <string name="way_note_arzua">Arzúa dà il nome all’Arzúa-Ulloa, un formaggio protetto di latte vaccino.</string>
     <string name="way_note_assisi">Assisi è la città di Francesco: la sua tomba è sotto la basilica che porta il suo nome.</string>
     <string name="way_note_astorga">Ad Astorga c’è il Palazzo Episcopale progettato da Antoni Gaudí.</string>
@@ -887,6 +888,7 @@
     <string name="way_note_cartagena_trinidad">L’11 novembre 1811 la gente di Getsemaní, con Pedro Romero, spinse Cartagena a dichiarare l’indipendenza.</string>
     <string name="way_note_castrojeriz">Il cammino attraversa Castrojeriz lungo un’unica via di oltre 1.500 metri, la più lunga di tutto il percorso.</string>
     <string name="way_note_chatillon">A Châtillon si apre la Valtournenche, la valle che sale fino al Cervino.</string>
+    <string name="way_note_citta_di_castello">Città di Castello era la romana Tifernum Tiberinum; Plinio aveva una villa nei dintorni e vi fece erigere un tempio.</string>
     <string name="way_note_cruz_de_ferro">Alla croce di ferro, a circa 1.500 metri, i pellegrini lasciano una pietra portata da casa.</string>
     <string name="way_note_cusco_cathedral">Nella sua Ultima Cena, attribuita a Marcos Zapata, in tavola c’è un porcellino d’India.</string>
     <string name="way_note_cusco_compania">I gesuiti costruirono la loro chiesa sull’Amarucancha, il palazzo dell’inca Huayna Cápac.</string>
@@ -925,6 +927,7 @@
     <string name="way_note_fiesole">Fiesole è più antica di Firenze: la fondarono gli Etruschi, e il suo teatro romano ospita ancora spettacoli d’estate.</string>
     <string name="way_note_fiorenzuola">Il nome di Fiorenzuola viene dalla romana Florentia; «d’Arda», dal fiume su cui sorge.</string>
     <string name="way_note_firenze">Il cammino finisce in Piazza della Signoria, davanti a Palazzo Vecchio.</string>
+    <string name="way_note_foligno">La prima edizione a stampa della Divina Commedia di Dante uscì da un torchio di Foligno nel 1472.</string>
     <string name="way_note_fromista">La chiesa romanica di San Martín a Frómista fu fondata intorno al 1066, in parte con i beni di una regina.</string>
     <string name="way_note_gambassi_terme">Dal XIII secolo a Gambassi fiorì la lavorazione del vetro.</string>
     <string name="way_note_garlasco">Il santuario della Madonna della Bozzola, a Garlasco, meta di pellegrinaggi, nacque da un miracolo che la tradizione colloca nel 1465.</string>
@@ -1087,8 +1090,11 @@
     <string name="way_note_milan_sant_ambrogio">Sant’Ambrogio fondò questa basilica nel IV secolo, e qui è sepolto.</string>
     <string name="way_note_milan_scala">La Scala aprì nel 1778; qui debuttarono l’Otello di Verdi e la Turandot di Puccini.</string>
     <string name="way_note_milan_sempione">Il parco fu disegnato negli anni Novanta dell’Ottocento sulla vecchia piazza d’armi del castello.</string>
+    <string name="way_note_monte_sacro">Nel 494 a.C. i plebei di Roma si ritirarono su questo colle, il Mons Sacer, e ottennero i propri tribuni.</string>
     <string name="way_note_montefiascone">Si narra che l’assaggiatore di vini di un vescovo, diretto a Roma, scrisse qui «Est! Est!! Est!!!» presso una locanda.</string>
+    <string name="way_note_montelibretti">Il nome di Montelibretti viene dal podere romano dei Bruzi, la famiglia del suocero dell’imperatore Commodo.</string>
     <string name="way_note_monteriggioni">Nell’Inferno, Dante paragonò la cerchia di torri di Monteriggioni a dei giganti.</string>
+    <string name="way_note_monterotondo">Nell’ottobre 1867 i volontari di Garibaldi presero Monterotondo, in marcia verso Roma.</string>
     <string name="way_note_mortara">Secondo la leggenda, Mortara prende il nome da una battaglia combattuta qui nel 773 tra Carlo Magno e i Longobardi.</string>
     <string name="way_note_najera">Il monastero di Santa María la Real a Nájera, consacrato nel 1052, custodisce le tombe dei primi re di Navarra.</string>
     <string name="way_note_new_york_911_memorial">Due vasche occupano le impronte delle Torri Gemelle, con i nomi delle vittime lungo i bordi.</string>
@@ -1129,12 +1135,15 @@
     <string name="way_note_pavia">Sant’Agostino è sepolto a Pavia, nella chiesa di San Pietro in Ciel d’Oro.</string>
     <string name="way_note_piacenza">I Romani fondarono Piacenza, Placentia, nel 218 a.C., mentre Annibale marciava verso l’Italia.</string>
     <string name="way_note_piediluco">Qui vicino il Velino precipita nella Cascata delle Marmore, creata dai Romani nel 271 a.C.</string>
+    <string name="way_note_pietralunga">Pietralunga un tempo si chiamava Pratalonga, per i ricchi pascoli che la circondavano.</string>
+    <string name="way_note_pieve_santo_stefano">Dal 1984 Pieve Santo Stefano custodisce l’archivio nazionale di diari, lettere e memorie.</string>
     <string name="way_note_poggio_bustone">Poggio Bustone è uno dei quattro santuari francescani della Valle Santa reatina.</string>
     <string name="way_note_ponferrada">Il castello di Ponferrada appartenne ai Templari.</string>
     <string name="way_note_pont_saint_martin">Il ponte romano di Pont-Saint-Martin, un’unica arcata, è in piedi dal I secolo a.C.</string>
     <string name="way_note_ponte_d_arbia">L’arcivescovo Sigerico vi sostò nel 990 e annotò la tappa semplicemente come «Arbia».</string>
     <string name="way_note_ponte_de_lima">Ponte de Lima, che ebbe il suo statuto nel 1125, è il più antico borgo del Portogallo con uno statuto.</string>
     <string name="way_note_pontevedra">A Pontevedra la cappella della Vergine Pellegrina ha la pianta di una conchiglia, il segno dei pellegrini.</string>
+    <string name="way_note_ponticelli">Vicino a Ponticelli sorge Santa Maria delle Grazie, un santuario con un convento francescano.</string>
     <string name="way_note_pontremoli">Il castello del Piagnaro, a Pontremoli, custodisce le statue stele della Lunigiana, antiche figure umane scolpite nella pietra.</string>
     <string name="way_note_porto">Il centro storico di Porto, dalla cattedrale fino al Douro, è patrimonio dell’umanità UNESCO.</string>
     <string name="way_note_porto_aliados">Tracciato dal 1916 al posto di un intero quartiere, il viale porta il nome degli Alleati della Prima guerra mondiale.</string>
@@ -1252,6 +1261,7 @@
     <string name="way_note_singapore_sri_mariamman">Fondato nel 1827 da Naraina Pillai, è il più antico tempio indù di Singapore.</string>
     <string name="way_note_singapore_st_andrews">La prima chiesa qui fu colpita due volte dal fulmine; questa cattedrale, finita nel 1861, ne prese il posto.</string>
     <string name="way_note_singapore_supertree_grove">Nei Gardens by the Bay, aperti nel 2012, i Supertree sono coperti di piante e si accendono ogni sera a ritmo di musica.</string>
+    <string name="way_note_spello">Per il Corpus Domini le vie di Spello si coprono in una notte di tappeti di fiori per la processione.</string>
     <string name="way_note_spoleto">Il Ponte delle Torri di Spoleto, lungo 230 metri, nacque come acquedotto romano sopra la gola.</string>
     <string name="way_note_sutri">L’anfiteatro romano di Sutri, come le sue tombe etrusche, è scavato nel tufo.</string>
     <string name="way_note_sydney_anzac_memorial">Questo memoriale Art déco a Hyde Park, progettato da Bruce Dellit, fu inaugurato nel 1934.</string>
@@ -1283,6 +1293,7 @@
     <string name="way_note_tokyo_station">La stazione in mattoni rossi di Tatsuno Kingo aprì nel 1914; danneggiata dai bombardamenti del 1945, nel 2012 tornò com’era in origine.</string>
     <string name="way_note_tokyo_toshogu">È un santuario dedicato a Tokugawa Ieyasu, il primo shōgun Tokugawa; i suoi edifici, rinnovati da Iemitsu nel 1651, sono giunti quasi intatti.</string>
     <string name="way_note_tokyo_yushima_seido">Lo shōgun Tsunayoshi volle qui questo tempio confuciano; nel 1872 ospitò la mostra da cui nacque il museo nazionale.</string>
+    <string name="way_note_trevi">Trevi sorge su una collina di oliveti, tra Foligno e Spoleto.</string>
     <string name="way_note_triacastela">Il nome di Triacastela è il latino tria castella, tre fortezze.</string>
     <string name="way_note_tui">La cattedrale di Tui, iniziata alla fine dell’XI secolo, domina una città che fu a lungo una fortezza di confine.</string>
     <string name="way_note_tunis_bab_el_bhar">La Porta del Mare, detta anche Porta di Francia, segna il confine tra la medina e la città nuova.</string>
@@ -1300,6 +1311,7 @@
     <string name="way_note_tunis_tourbet_el_bey">Costruito sotto Ali II, il più grande monumento funebre di Tunisi accoglie la maggior parte dei bey husseiniti sotto le sue cupole di tegole verdi.</string>
     <string name="way_note_tunis_zitouna">La Moschea dell’Olivo, che secondo la leggenda prende il nome da un olivo che sorgeva qui, fu ricostruita sotto gli Aghlabidi con colonne antiche di Cartagine.</string>
     <string name="way_note_valenca">La fortezza murata di Valença guarda Tui oltre il Minho: passato il ponte, il cammino entra in Spagna.</string>
+    <string name="way_note_valfabbrica">Valfabbrica nacque presso un guado del Chiascio, tra Gubbio e Assisi, attorno a un’abbazia benedettina del IX secolo.</string>
     <string name="way_note_vercelli">Vercelli custodisce un libro di poesie in inglese antico del X secolo, forse portato da pellegrini inglesi.</string>
     <string name="way_note_verres">Ibleto di Challant costruì il castello di Verrès nel XIV secolo: un austero cubo di trenta metri di lato.</string>
     <string name="way_note_vetralla">Papa Eugenio III, rifugiatosi a Vetralla nel 1145 lontano dalle lotte di Roma, da qui indisse la seconda crociata.</string>

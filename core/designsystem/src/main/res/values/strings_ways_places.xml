@@ -780,6 +780,7 @@
     <string name="way_note_amsterdam_waag">A city gate turned weigh house in 1617; the surgeons’ guild upstairs commissioned Rembrandt’s Anatomy Lesson of Dr Tulp.</string>
     <string name="way_note_amsterdam_westerkerk">Its 87-metre tower is the tallest church tower in Amsterdam; Rembrandt was buried here in 1669, in a grave now lost.</string>
     <string name="way_note_aosta">Aosta was Augusta Praetoria, a Roman town founded in 25 BC; its Arch of Augustus still stands.</string>
+    <string name="way_note_arrone">Arrone is said to take its name from a Roman noble who built a castle here in the 9th century.</string>
     <string name="way_note_arzua">Arzúa gives its name to Arzúa-Ulloa, a protected cheese made from cow’s milk.</string>
     <string name="way_note_assisi">Assisi is Francis’s town: his tomb lies beneath the basilica that bears his name.</string>
     <string name="way_note_astorga">In Astorga stands the Episcopal Palace designed by Antoni Gaudí.</string>
@@ -887,6 +888,7 @@
     <string name="way_note_cartagena_trinidad">On 11 November 1811 the people of Getsemaní, with Pedro Romero, pushed Cartagena to declare its independence.</string>
     <string name="way_note_castrojeriz">The way crosses Castrojeriz along a single street over 1,500 metres long, the longest on the whole route.</string>
     <string name="way_note_chatillon">At Châtillon the Valtournenche opens, the valley that climbs to the Matterhorn.</string>
+    <string name="way_note_citta_di_castello">Città di Castello was the Roman Tifernum Tiberinum; Pliny had a villa nearby and built a temple here.</string>
     <string name="way_note_cruz_de_ferro">At the iron cross, about 1,500 metres up, pilgrims leave a stone brought from home.</string>
     <string name="way_note_cusco_cathedral">In its Last Supper, attributed to Marcos Zapata, a guinea pig is on the table.</string>
     <string name="way_note_cusco_compania">The Jesuits built their church on Amarucancha, the palace of the Inca Huayna Capac.</string>
@@ -925,6 +927,7 @@
     <string name="way_note_fiesole">Fiesole is older than Florence: the Etruscans founded it, and its Roman theatre still holds summer shows.</string>
     <string name="way_note_fiorenzuola">Fiorenzuola’s name comes from the Roman Florentia; d’Arda, from the river it stands on.</string>
     <string name="way_note_firenze">The way ends in Piazza della Signoria, in front of Palazzo Vecchio.</string>
+    <string name="way_note_foligno">The first printed edition of Dante’s Divine Comedy came off a press in Foligno in 1472.</string>
     <string name="way_note_fromista">Frómista’s Romanesque church of San Martín was founded around 1066, paid for in part by a queen.</string>
     <string name="way_note_gambassi_terme">Glassmaking flourished in Gambassi from the 13th century.</string>
     <string name="way_note_garlasco">Garlasco’s sanctuary of the Madonna della Bozzola, a place of pilgrimage, began with a miracle that tradition dates to 1465.</string>
@@ -1087,8 +1090,11 @@
     <string name="way_note_milan_sant_ambrogio">Saint Ambrose founded this basilica in the 4th century, and he is buried in it.</string>
     <string name="way_note_milan_scala">La Scala opened in 1778; Verdi’s Otello and Puccini’s Turandot had their first nights here.</string>
     <string name="way_note_milan_sempione">The park was laid out in the 1890s on the castle’s old parade ground.</string>
+    <string name="way_note_monte_sacro">In 494 BC Rome’s plebeians withdrew to this hill, the Mons Sacer, and won tribunes of their own.</string>
     <string name="way_note_montefiascone">Legend says a bishop’s wine scout, bound for Rome, wrote Est! Est!! Est!!! at an inn here.</string>
+    <string name="way_note_montelibretti">Montelibretti’s name comes from the Roman estate of the Bruttii, the family of Emperor Commodus’s father-in-law.</string>
     <string name="way_note_monteriggioni">In the Inferno, Dante likened Monteriggioni’s ring of towers to giants.</string>
+    <string name="way_note_monterotondo">In October 1867 Garibaldi’s volunteers took Monterotondo on their march on Rome.</string>
     <string name="way_note_mortara">Legend says Mortara is named after a battle fought here in 773 between Charlemagne and the Lombards.</string>
     <string name="way_note_najera">Nájera’s monastery of Santa María la Real, consecrated in 1052, holds the tombs of the early kings of Navarre.</string>
     <string name="way_note_new_york_911_memorial">Two pools fill the footprints of the Twin Towers, the names of the victims around their edges.</string>
@@ -1129,12 +1135,15 @@
     <string name="way_note_pavia">Saint Augustine is buried in Pavia, in the church of San Pietro in Ciel d’Oro.</string>
     <string name="way_note_piacenza">The Romans founded Piacenza, Placentia, in 218 BC, as Hannibal marched on Italy.</string>
     <string name="way_note_piediluco">Nearby, the Velino drops into the Marmore Falls, made by the Romans in 271 BC.</string>
+    <string name="way_note_pietralunga">Pietralunga was once Pratalonga, the long meadow, after the rich pastures around it.</string>
+    <string name="way_note_pieve_santo_stefano">Since 1984 Pieve Santo Stefano has kept Italy’s national archive of diaries, letters and memoirs.</string>
     <string name="way_note_poggio_bustone">Poggio Bustone is one of the four Franciscan sanctuaries of the Rieti valley, the Holy Valley.</string>
     <string name="way_note_ponferrada">Ponferrada’s castle was held by the Knights Templar.</string>
     <string name="way_note_pont_saint_martin">Pont-Saint-Martin’s Roman bridge, a single arch, has stood since the 1st century BC.</string>
     <string name="way_note_ponte_d_arbia">Archbishop Sigeric stopped here in 990 and wrote the stop down simply as Arbia.</string>
     <string name="way_note_ponte_de_lima">Ponte de Lima, granted its charter in 1125, is the oldest chartered town in Portugal.</string>
     <string name="way_note_pontevedra">Pontevedra’s chapel of the Pilgrim Virgin is built on the plan of a scallop shell, the pilgrims’ sign.</string>
+    <string name="way_note_ponticelli">Near Ponticelli stands Santa Maria delle Grazie, a sanctuary with a Franciscan convent.</string>
     <string name="way_note_pontremoli">Pontremoli’s Piagnaro castle keeps the stele statues of Lunigiana, ancient human figures carved in stone.</string>
     <string name="way_note_porto">Porto’s old centre, from the cathedral down to the Douro, is a UNESCO World Heritage Site.</string>
     <string name="way_note_porto_aliados">Laid out from 1916 in place of a whole neighbourhood, the avenue is named after the Allies of the First World War.</string>
@@ -1252,6 +1261,7 @@
     <string name="way_note_singapore_sri_mariamman">Founded in 1827 by Naraina Pillai, this is Singapore’s oldest Hindu temple.</string>
     <string name="way_note_singapore_st_andrews">The first church here was struck twice by lightning; this cathedral, finished in 1861, took its place.</string>
     <string name="way_note_singapore_supertree_grove">In Gardens by the Bay, opened in 2012, the Supertrees are covered in plants and light up every evening to music.</string>
+    <string name="way_note_spello">For Corpus Domini, Spello’s streets are covered overnight in carpets of flowers for the procession.</string>
     <string name="way_note_spoleto">Spoleto’s Ponte delle Torri, 230 metres long, began as a Roman aqueduct across the gorge.</string>
     <string name="way_note_sutri">Sutri’s Roman amphitheatre, like its Etruscan tombs, is carved out of the tuff rock.</string>
     <string name="way_note_sydney_anzac_memorial">This Art Deco memorial in Hyde Park, designed by Bruce Dellit, opened in 1934.</string>
@@ -1283,6 +1293,7 @@
     <string name="way_note_tokyo_station">Tatsuno Kingo’s red-brick station opened in 1914; damaged in the bombing of 1945, it was restored as it first stood in 2012.</string>
     <string name="way_note_tokyo_toshogu">A shrine to Tokugawa Ieyasu, the first Tokugawa shōgun; its buildings, renewed by Iemitsu in 1651, have come down almost intact.</string>
     <string name="way_note_tokyo_yushima_seido">The shōgun Tsunayoshi set this Confucian temple here; in 1872 it held the exhibition from which the national museum was born.</string>
+    <string name="way_note_trevi">Trevi stands on a hill of olive groves, between Foligno and Spoleto.</string>
     <string name="way_note_triacastela">Triacastela’s name is the Latin tria castella, three forts.</string>
     <string name="way_note_tui">Tui’s cathedral, begun at the end of the 11th century, crowns a town that was long a frontier fortress.</string>
     <string name="way_note_tunis_bab_el_bhar">The Sea Gate, also called the Gate of France, marks where the medina ends and the modern city begins.</string>
@@ -1300,6 +1311,7 @@
     <string name="way_note_tunis_tourbet_el_bey">Built under Ali II, the largest funerary monument in Tunis holds most of the Husainid beys under its green-tiled domes.</string>
     <string name="way_note_tunis_zitouna">The Olive Mosque, named, the legend goes, after an olive tree on the site, was rebuilt under the Aghlabids with ancient columns from Carthage.</string>
     <string name="way_note_valenca">Valença’s walled fortress looks across the Minho at Tui: over the bridge, the way enters Spain.</string>
+    <string name="way_note_valfabbrica">Valfabbrica grew by a ford of the Chiascio, between Gubbio and Assisi, around a 9th-century Benedictine abbey.</string>
     <string name="way_note_vercelli">Vercelli keeps a 10th-century book of Old English poems, probably brought by English pilgrims.</string>
     <string name="way_note_verres">Yblet of Challant built Verrès castle in the 14th century: an austere cube thirty metres on each side.</string>
     <string name="way_note_vetralla">Pope Eugene III, who left the strife of Rome for Vetralla in 1145, called the Second Crusade from here.</string>

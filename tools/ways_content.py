@@ -27,7 +27,8 @@ French (or German), Addis Ababa in the English and French (or Italian), Zanzibar
 Italian (or German, French), Luxor in the English and French (or Italian). The Via Francigena's
 other stages (7 Oct 2026) in the English and Italian (or French, German), Sigeric's stops in the
 English article on the Via Francigena; the Camino Francés's (7 Oct 2026) in the English and
-Spanish (or French, German, Galician). A stage with no second source keeps only its name.
+Spanish (or French, German, Galician), the Via di Francesco's in the English and Italian (or
+German). A stage with no second source keeps only its name.
 """
 
 from dataclasses import dataclass, field
@@ -210,30 +211,54 @@ VIA_DI_FRANCESCO = Way(
              note_en="Francis received the stigmata at La Verna in 1224, his first biographers wrote.",
              note_it="Francesco ricevette le stimmate alla Verna nel 1224, scrissero i suoi primi biografi."),
         # Source: Wikipedia, Sanctuary of La Verna.
-        Stop("pieve_santo_stefano", "Pieve Santo Stefano", "Pieve Santo Stefano", 43.6703, 12.0406),
+        Stop("pieve_santo_stefano", "Pieve Santo Stefano", "Pieve Santo Stefano", 43.6703, 12.0406,
+             note_en="Since 1984 Pieve Santo Stefano has kept Italy's national archive of diaries, letters and memoirs.",
+             note_it="Dal 1984 Pieve Santo Stefano custodisce l'archivio nazionale di diari, lettere e memorie."),
+        # Source: Wikipedia (it), Archivio Diaristico Nazionale; Wikipedia (de), Archivio Diaristico Nazionale.
         Stop("sansepolcro", "Sansepolcro", "Sansepolcro", 43.5717, 12.1386,
              note_en="Sansepolcro is Piero della Francesca's town; his Resurrection hangs in its civic museum.",
              note_it="Sansepolcro è la città di Piero della Francesca; la sua Resurrezione è nel museo civico."),
         # Source: Wikipedia, The Resurrection (Piero della Francesca).
-        Stop("citta_di_castello", "Città di Castello", "Città di Castello", 43.4573, 12.2405),
-        Stop("pietralunga", "Pietralunga", "Pietralunga", 43.4425, 12.4356),
+        Stop("citta_di_castello", "Città di Castello", "Città di Castello", 43.4573, 12.2405,
+             note_en="Città di Castello was the Roman Tifernum Tiberinum; Pliny had a villa nearby and built a temple here.",
+             note_it="Città di Castello era la romana Tifernum Tiberinum; Plinio aveva una villa nei dintorni e vi fece erigere un tempio."),
+        # Source: Wikipedia, Città di Castello; Wikipedia (it), Città di Castello. Which Pliny is left out: the Elder in the English, the Younger in the Italian.
+        Stop("pietralunga", "Pietralunga", "Pietralunga", 43.4425, 12.4356,
+             note_en="Pietralunga was once Pratalonga, the long meadow, after the rich pastures around it.",
+             note_it="Pietralunga un tempo si chiamava Pratalonga, per i ricchi pascoli che la circondavano."),
+        # Source: Wikipedia, Pietralunga; Wikipedia (it), Pietralunga.
         Stop("gubbio", "Gubbio", "Gubbio", 43.3518, 12.5772,
              note_en="In Gubbio, the Fioretti tell, Francis tamed the wolf that frightened the town.",
              note_it="A Gubbio, raccontano i Fioretti, Francesco ammansì il lupo che spaventava la città."),
         # Source: Wikipedia, Wolf of Gubbio.
-        Stop("valfabbrica", "Valfabbrica", "Valfabbrica", 43.1593, 12.6011),
+        Stop("valfabbrica", "Valfabbrica", "Valfabbrica", 43.1593, 12.6011,
+             note_en="Valfabbrica grew by a ford of the Chiascio, between Gubbio and Assisi, around a 9th-century Benedictine abbey.",
+             note_it="Valfabbrica nacque presso un guado del Chiascio, tra Gubbio e Assisi, attorno a un'abbazia benedettina del IX secolo."),
+        # Source: Wikipedia, Valfabbrica; Wikipedia (de), Valfabbrica (Santa Maria in Vado Fabricae, the abbey at the ford).
         Stop("assisi", "Assisi", "Assisi", 43.0707, 12.6196,
              note_en="Assisi is Francis's town: his tomb lies beneath the basilica that bears his name.",
              note_it="Assisi è la città di Francesco: la sua tomba è sotto la basilica che porta il suo nome."),
         # Source: Wikipedia, Basilica of Saint Francis of Assisi.
-        Stop("spello", "Spello", "Spello", 42.9893, 12.6719),
-        Stop("foligno", "Foligno", "Foligno", 42.9561, 12.7033),
-        Stop("trevi", "Trevi", "Trevi", 42.8770, 12.7476),
+        Stop("spello", "Spello", "Spello", 42.9893, 12.6719,
+             note_en="For Corpus Domini, Spello's streets are covered overnight in carpets of flowers for the procession.",
+             note_it="Per il Corpus Domini le vie di Spello si coprono in una notte di tappeti di fiori per la processione."),
+        # Source: Wikipedia, Infiorate di Spello; Wikipedia (it), Infiorate di Spello.
+        Stop("foligno", "Foligno", "Foligno", 42.9561, 12.7033,
+             note_en="The first printed edition of Dante's Divine Comedy came off a press in Foligno in 1472.",
+             note_it="La prima edizione a stampa della Divina Commedia di Dante uscì da un torchio di Foligno nel 1472."),
+        # Source: Wikipedia, Foligno; Wikipedia (it), Divina Commedia. The day is left out: 5 and 6 April, or 11 April.
+        Stop("trevi", "Trevi", "Trevi", 42.8770, 12.7476,
+             note_en="Trevi stands on a hill of olive groves, between Foligno and Spoleto.",
+             note_it="Trevi sorge su una collina di oliveti, tra Foligno e Spoleto."),
+        # Source: Wikipedia, Trevi, Umbria; Wikipedia (it), Trevi.
         Stop("spoleto", "Spoleto", "Spoleto", 42.7348, 12.7378,
              note_en="Spoleto's Ponte delle Torri, 230 metres long, began as a Roman aqueduct across the gorge.",
              note_it="Il Ponte delle Torri di Spoleto, lungo 230 metri, nacque come acquedotto romano sopra la gola."),
         # Source: Wikipedia, Ponte delle Torri.
-        Stop("arrone", "Arrone", "Arrone", 42.5833, 12.7667),
+        Stop("arrone", "Arrone", "Arrone", 42.5833, 12.7667,
+             note_en="Arrone is said to take its name from a Roman noble who built a castle here in the 9th century.",
+             note_it="Si dice che Arrone prenda il nome da un nobile romano che vi costruì un castello nel IX secolo."),
+        # Source: Wikipedia, Arrone; Wikipedia (it), Arrone.
         Stop("piediluco", "Piediluco", "Piediluco", 42.5353, 12.7498,
              note_en="Nearby, the Velino drops into the Marmore Falls, made by the Romans in 271 BC.",
              note_it="Qui vicino il Velino precipita nella Cascata delle Marmore, creata dai Romani nel 271 a.C."),
@@ -247,10 +272,22 @@ VIA_DI_FRANCESCO = Way(
              note_it="Rieti si dice il centro d'Italia: una pietra in Piazza San Rufo segna il punto."),
         # Source: Wikipedia, Rieti.
         Stop("poggio_san_lorenzo", "Poggio San Lorenzo", "Poggio San Lorenzo", 42.2525, 12.8433),
-        Stop("ponticelli", "Ponticelli", "Ponticelli", 42.1914, 12.7969),
-        Stop("montelibretti", "Montelibretti", "Montelibretti", 42.1356, 12.7375),
-        Stop("monterotondo", "Monterotondo", "Monterotondo", 42.0528, 12.6175),
-        Stop("monte_sacro", "Monte Sacro", "Monte Sacro", 41.9406, 12.5317),
+        Stop("ponticelli", "Ponticelli", "Ponticelli", 42.1914, 12.7969,
+             note_en="Near Ponticelli stands Santa Maria delle Grazie, a sanctuary with a Franciscan convent.",
+             note_it="Vicino a Ponticelli sorge Santa Maria delle Grazie, un santuario con un convento francescano."),
+        # Source: Wikipedia, Scandriglia; Wikipedia (it), Ponticelli Sabino. Its age is left out: the 15th century, or 1370.
+        Stop("montelibretti", "Montelibretti", "Montelibretti", 42.1356, 12.7375,
+             note_en="Montelibretti's name comes from the Roman estate of the Bruttii, the family of Emperor Commodus's father-in-law.",
+             note_it="Il nome di Montelibretti viene dal podere romano dei Bruzi, la famiglia del suocero dell'imperatore Commodo."),
+        # Source: Wikipedia, Montelibretti; Wikipedia (it), Montelibretti.
+        Stop("monterotondo", "Monterotondo", "Monterotondo", 42.0528, 12.6175,
+             note_en="In October 1867 Garibaldi's volunteers took Monterotondo on their march on Rome.",
+             note_it="Nell'ottobre 1867 i volontari di Garibaldi presero Monterotondo, in marcia verso Roma."),
+        # Source: Wikipedia, Battle of Mentana; Wikipedia (it), Battaglia di Monterotondo.
+        Stop("monte_sacro", "Monte Sacro", "Monte Sacro", 41.9406, 12.5317,
+             note_en="In 494 BC Rome's plebeians withdrew to this hill, the Mons Sacer, and won tribunes of their own.",
+             note_it="Nel 494 a.C. i plebei di Roma si ritirarono su questo colle, il Mons Sacer, e ottennero i propri tribuni."),
+        # Source: Wikipedia, Monte Sacro; Wikipedia (it), Monte Sacro.
         Stop("roma_san_pietro", "Rome", "Roma", 41.9022, 12.4568,
              note_en="The way ends in St Peter's Square, before the basilica.",
              note_it="Il cammino finisce in Piazza San Pietro, davanti alla basilica."),

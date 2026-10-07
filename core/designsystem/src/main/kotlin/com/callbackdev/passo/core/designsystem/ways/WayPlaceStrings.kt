@@ -808,6 +808,7 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "amsterdam_waag" -> R.string.way_note_amsterdam_waag
     "amsterdam_westerkerk" -> R.string.way_note_amsterdam_westerkerk
     "aosta" -> R.string.way_note_aosta
+    "arrone" -> R.string.way_note_arrone
     "arzua" -> R.string.way_note_arzua
     "assisi" -> R.string.way_note_assisi
     "astorga" -> R.string.way_note_astorga
@@ -915,6 +916,7 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "cartagena_trinidad" -> R.string.way_note_cartagena_trinidad
     "castrojeriz" -> R.string.way_note_castrojeriz
     "chatillon" -> R.string.way_note_chatillon
+    "citta_di_castello" -> R.string.way_note_citta_di_castello
     "cruz_de_ferro" -> R.string.way_note_cruz_de_ferro
     "cusco_cathedral" -> R.string.way_note_cusco_cathedral
     "cusco_compania" -> R.string.way_note_cusco_compania
@@ -953,6 +955,7 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "fiesole" -> R.string.way_note_fiesole
     "fiorenzuola" -> R.string.way_note_fiorenzuola
     "firenze" -> R.string.way_note_firenze
+    "foligno" -> R.string.way_note_foligno
     "fromista" -> R.string.way_note_fromista
     "gambassi_terme" -> R.string.way_note_gambassi_terme
     "garlasco" -> R.string.way_note_garlasco
@@ -1115,8 +1118,11 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "milan_sant_ambrogio" -> R.string.way_note_milan_sant_ambrogio
     "milan_scala" -> R.string.way_note_milan_scala
     "milan_sempione" -> R.string.way_note_milan_sempione
+    "monte_sacro" -> R.string.way_note_monte_sacro
     "montefiascone" -> R.string.way_note_montefiascone
+    "montelibretti" -> R.string.way_note_montelibretti
     "monteriggioni" -> R.string.way_note_monteriggioni
+    "monterotondo" -> R.string.way_note_monterotondo
     "mortara" -> R.string.way_note_mortara
     "najera" -> R.string.way_note_najera
     "new_york_911_memorial" -> R.string.way_note_new_york_911_memorial
@@ -1157,12 +1163,15 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "pavia" -> R.string.way_note_pavia
     "piacenza" -> R.string.way_note_piacenza
     "piediluco" -> R.string.way_note_piediluco
+    "pietralunga" -> R.string.way_note_pietralunga
+    "pieve_santo_stefano" -> R.string.way_note_pieve_santo_stefano
     "poggio_bustone" -> R.string.way_note_poggio_bustone
     "ponferrada" -> R.string.way_note_ponferrada
     "pont_saint_martin" -> R.string.way_note_pont_saint_martin
     "ponte_d_arbia" -> R.string.way_note_ponte_d_arbia
     "ponte_de_lima" -> R.string.way_note_ponte_de_lima
     "pontevedra" -> R.string.way_note_pontevedra
+    "ponticelli" -> R.string.way_note_ponticelli
     "pontremoli" -> R.string.way_note_pontremoli
     "porto" -> R.string.way_note_porto
     "porto_aliados" -> R.string.way_note_porto_aliados
@@ -1280,6 +1289,7 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "singapore_sri_mariamman" -> R.string.way_note_singapore_sri_mariamman
     "singapore_st_andrews" -> R.string.way_note_singapore_st_andrews
     "singapore_supertree_grove" -> R.string.way_note_singapore_supertree_grove
+    "spello" -> R.string.way_note_spello
     "spoleto" -> R.string.way_note_spoleto
     "sutri" -> R.string.way_note_sutri
     "sydney_anzac_memorial" -> R.string.way_note_sydney_anzac_memorial
@@ -1311,6 +1321,7 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "tokyo_station" -> R.string.way_note_tokyo_station
     "tokyo_toshogu" -> R.string.way_note_tokyo_toshogu
     "tokyo_yushima_seido" -> R.string.way_note_tokyo_yushima_seido
+    "trevi" -> R.string.way_note_trevi
     "triacastela" -> R.string.way_note_triacastela
     "tui" -> R.string.way_note_tui
     "tunis_bab_el_bhar" -> R.string.way_note_tunis_bab_el_bhar
@@ -1328,6 +1339,7 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "tunis_tourbet_el_bey" -> R.string.way_note_tunis_tourbet_el_bey
     "tunis_zitouna" -> R.string.way_note_tunis_zitouna
     "valenca" -> R.string.way_note_valenca
+    "valfabbrica" -> R.string.way_note_valfabbrica
     "vercelli" -> R.string.way_note_vercelli
     "verres" -> R.string.way_note_verres
     "vetralla" -> R.string.way_note_vetralla
