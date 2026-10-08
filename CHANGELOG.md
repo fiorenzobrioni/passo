@@ -101,6 +101,9 @@ All notable changes to Passo are documented here. The format follows
   measure in the home screen's own, with a little room to spare; a sentence that would not fit
   says the same thing in fewer words («Reached at 2:23 PM»), and the count is made smaller rather
   than cut, past ten thousand steps too.
+- **Removing a widget no longer closes Passo.** Taking a card off the home screen could make
+  the app crash a moment later, in the background, as it put away the card's settings. It no
+  longer does.
 - **The first-day note** on Today goes as soon as you open the guide from it, instead of
   staying until the end of the day.
 

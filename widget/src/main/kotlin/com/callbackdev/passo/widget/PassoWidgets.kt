@@ -105,12 +105,17 @@ abstract class PassoWidgetReceiver : GlanceAppWidgetReceiver() {
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
         super.onDeleted(context, appWidgetIds)
         val app = context.applicationContext
-        val pending = goAsync()
+        // Glance's own onDeleted has already held the broadcast open with goAsync, which hands its
+        // pending result out once: here it is null, and finishing it crashes the process (Tempo's
+        // card on a Galaxy S24 Ultra, 8 Oct 2026, with these same lines). The look is forgotten in
+        // the time Glance's own work keeps the broadcast open; if the process went first, a few
+        // bytes stay under an id never reused.
+        val pending: PendingResult? = goAsync()
         Cleanup.launch {
             try {
                 runCatching { app.widgetEntryPoint().looks().forget(appWidgetIds) }
             } finally {
-                pending.finish()
+                pending?.finish()
             }
         }
     }
