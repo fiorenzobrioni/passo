@@ -12,10 +12,10 @@ import com.callbackdev.passo.core.model.AppFont
 import com.callbackdev.passo.core.model.AppPalette
 
 /**
- * Passo's theme: Chiaro's design language (`docs/adr/0004-design-language.md`), so the family
- * reads as one app. The defaults are Chiaro's: the vivid dress, Google Sans, the app's own
+ * Passo's theme: the design language of `docs/adr/0004-design-language.md`. The defaults are
+ * the vivid dress, Google Sans, the app's own
  * colors. [dynamicColor] takes Material's roles from the wallpaper instead; the semantic
- * colors ([PassoColors]) keep following the dress, as in Chiaro, because a met goal must
+ * colors ([PassoColors]) keep following the dress, because a met goal must
  * not change color with a photo.
  */
 @Composable

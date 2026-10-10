@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Written by tools/draw_launcher_icon.py: change the script and run it, never this file.
 
-     The mark: Chiaro's ring (radius 21, stroke 10, the same warm white under it) in the
-     greens of a day filling up, and where Chiaro has its sun, mirrored to the upper left,
-     a shoe print in the sun's amber. The print cuts the ring with a 2.6 gap, as the sun
-     does, and walks clockwise, the way the ring fills: the step that closes the day.
+     The mark: a ring (radius 21, stroke 10, a warm white under it) in the greens of a day
+     filling up, and at the upper left a shoe print in amber. The print cuts the ring with a
+     2.6 gap, and walks clockwise, the way the ring fills: the step that closes the day.
      Everything sits inside the 33-unit safe circle of every launcher mask.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"

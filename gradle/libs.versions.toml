@@ -16,7 +16,7 @@ lifecycle = "2.11.0"
 navigation3 = "1.2.0"
 glance = "1.2.0"
 # Glance runs its sessions on WorkManager and asks only for 2.7.1 (2021), which is what resolves
-# when nothing else pins it. Pinned to Chiaro's version, the one proven under Glance widgets on
+# when nothing else pins it. Pinned to the version proven under Glance widgets on
 # the owner's phone (Phase 4, docs/adr/0005-widgets.md). Not a new dependency: a newer version
 # of one Glance already brings.
 work = "2.10.5"

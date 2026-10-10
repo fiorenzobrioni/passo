@@ -87,12 +87,12 @@ fun PassoRoot(
 }
 
 /**
- * The pages (Chiaro's shell shape, 28 Sep 2026): one `NavDisplay` over one back stack per tab
+ * The pages (28 Sep 2026): one `NavDisplay` over one back stack per tab
  * ([PassoNavigationState]), so every back, from a tab to Today included, is previewed under the
  * finger. A tap on the bar keeps Material's fade through; everything else wears the page
  * transition that predictive back seeks.
  *
- * The bar is drawn OVER the display rather than in a `Scaffold` around each tab, as in Chiaro: a
+ * The bar is drawn OVER the display rather than in a `Scaffold` around each tab: a
  * bar in the layout would reshape the pages each time it came or went. The tab pages already
  * scroll under the bar and leave its height free at the bottom ([bottomPadding]), measured from
  * the bar itself, so they are laid out to the pixel where the old `Scaffold` put them.
@@ -232,7 +232,7 @@ private const val FADE_OUT_MILLIS = 90
 private const val FADE_IN_MILLIS = 210
 
 /*
- * Chiaro's page transition, value for value (itself Saldo's): 300 ms, the incoming page sliding
+ * The page transition: 300 ms, the incoming page sliding
  * a sixth of the width and fading in, the outgoing one a sixth the other way. A tween rather
  * than a spring because predictive back seeks it with the finger, and a seek needs a curve of
  * known length. Reduced motion: the 100 ms fade.

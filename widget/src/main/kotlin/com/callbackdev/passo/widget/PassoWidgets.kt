@@ -25,14 +25,14 @@ enum class WidgetKind {
     /** «At a glance»: the ring, the number, the sentence, and the day hour by hour. */
     GLANCE,
 
-    /** «In words»: the number and the day in type, Chiaro's «In parole». */
+    /** «In words»: the number and the day in type. */
     WORDS,
 }
 
 /**
  * The widgets as one household: who is placed, and how to repaint them. Repaints go by the
- * system's own mapping of ids to providers, never by Glance's class bookkeeping (Chiaro saw every
- * widget repainted with the last-placed one's content that way), and always through
+ * system's own mapping of ids to providers, never by Glance's class bookkeeping (that way, every
+ * widget was seen repainted with the last-placed one's content), and always through
  * [WidgetRefresh] first, because `update()` alone wakes a live session without reloading it.
  */
 object PassoWidgets {
@@ -106,8 +106,8 @@ abstract class PassoWidgetReceiver : GlanceAppWidgetReceiver() {
         super.onDeleted(context, appWidgetIds)
         val app = context.applicationContext
         // Glance's own onDeleted has already held the broadcast open with goAsync, which hands its
-        // pending result out once: here it is null, and finishing it crashes the process (Tempo's
-        // card on a Galaxy S24 Ultra, 8 Oct 2026, with these same lines). The look is forgotten in
+        // pending result out once: here it is null, and finishing it crashes the process (a card
+        // on a Galaxy S24 Ultra, 8 Oct 2026, with these same lines). The look is forgotten in
         // the time Glance's own work keeps the broadcast open; if the process went first, a few
         // bytes stay under an id never reused.
         val pending: PendingResult? = goAsync()

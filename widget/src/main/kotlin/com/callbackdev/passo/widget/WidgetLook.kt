@@ -18,8 +18,7 @@ internal val Context.widgetLookDataStore by preferencesDataStore(name = "widget_
 
 /**
  * What a card is painted on: a plain card in the app's light or dark surface, or whichever the
- * phone is in, or one of the six colours of [WidgetCardColor]. Chiaro's list without its sky
- * (Passo has none to draw); [COLOR] is one value, and which colour is a second question.
+ * phone is in, or one of the six colours of [WidgetCardColor]; [COLOR] is one value, and which colour is a second question.
  */
 enum class WidgetBackground { LIGHT, DARK, SYSTEM, COLOR }
 
@@ -28,9 +27,8 @@ enum class WidgetArrangement { RING_START, RING_END }
 
 /**
  * One widget's look and content, chosen from the launcher's reconfigure flow and kept per
- * widget, so the same card can sit on a home screen twice, dressed twice. The defaults are
- * Chiaro's (a solid blue card since its 21 Sep 2026 review), so a Passo card placed beside a
- * Chiaro one matches it before anybody configures anything.
+ * widget, so the same card can sit on a home screen twice, dressed twice. The default is
+ * a solid blue card (`docs/adr/0005-widgets.md`), worn before anybody configures anything.
  *
  * @property showSentence the day's sentence (ahead of or behind a usual day, what is left, when
  *   the goal was met). Whether there is room is the grant's decision; this can only take it away.

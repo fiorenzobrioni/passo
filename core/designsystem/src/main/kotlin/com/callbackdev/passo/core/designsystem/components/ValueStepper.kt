@@ -24,7 +24,7 @@ import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 
 /**
- * A number with a range, picked, never typed (Chiaro's rule for a value with a range): the value
+ * A number with a range, picked, never typed (the rule for a value with a range): the value
  * large, a step down and a step up on either side for precision, and a slider under it for
  * distance. The caller owns the unit, the step and the rounding; [text] is the value as shown.
  */

@@ -10,7 +10,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 /**
- * The shell's back stacks (Chiaro's `ChiaroNavigationStateTest`, for Passo's three tabs). The
+ * The shell's back stacks, for Passo's three tabs. The
  * animation is a device check; what can be checked here is what back DOES: the page each gesture
  * lands on, the tab it leaves the reader in, and when the bar is drawn.
  */

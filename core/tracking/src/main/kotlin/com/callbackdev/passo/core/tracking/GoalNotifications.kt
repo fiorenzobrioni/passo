@@ -27,7 +27,7 @@ internal data class GoalReachedContent(val goalSteps: Int, val reachedAtMinute: 
  * summary. One channel, `goals`, at the default importance, because each of them is something
  * the reader asked for in Settings; the counting notification keeps its own quiet one.
  *
- * Each says one sentence first (Chiaro's rule) and the numbers after it, in the same words as
+ * Each says one sentence first and the numbers after it, in the same words as
  * Today and History, with the estimates saying they are. Tapping one opens the app.
  */
 internal class GoalNotifications(private val context: Context) {

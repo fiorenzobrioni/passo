@@ -50,7 +50,7 @@ class GlanceLayoutTest {
     }
 
     @Test
-    fun `the row's count is about Chiaro's 34 sp where it fits, smaller where the column cannot hold it`() {
+    fun `the row's count is about 34 sp where it fits, smaller where the column cannot hold it`() {
         // The reference 85 dp row pays the ink balance under the words out of the number: 33 sp.
         assertThat(rowHeroSp(85.dp, 150.dp, fiveDigits, 1f, footnote = false)).isEqualTo(33f)
         assertThat(rowHeroSp(101.dp, 150.dp, fiveDigits, 1f, footnote = false)).isEqualTo(ROW_HERO_SP)

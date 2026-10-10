@@ -19,8 +19,8 @@ import java.util.Collections
 /**
  * A card removed from the home screen, as the system delivers it: Glance's own `onDeleted` holds
  * the broadcast open with `goAsync`, which hands its pending result out once, so the receiver's
- * cleanup must not finish one it never got (Tempo's card on a Galaxy S24 Ultra, 8 Oct 2026, with
- * the same lines as this receiver's: the process crashed on a null `PendingResult` a moment after
+ * cleanup must not finish one it never got (a card on a Galaxy S24 Ultra, 8 Oct 2026, with the
+ * same lines as this receiver's: the process crashed on a null `PendingResult` a moment after
  * a card was removed).
  */
 @RunWith(AndroidJUnit4::class)

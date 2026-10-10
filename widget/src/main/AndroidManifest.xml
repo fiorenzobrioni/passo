@@ -4,7 +4,7 @@
   opens on a long press. No permission of their own: the cards read what the tracking service
   already stored, in this process. Glance brings WorkManager, with its WAKE_LOCK (held by the
   job while a card is being drawn) and ACCESS_NETWORK_STATE (which lets nothing leave the phone:
-  there is no INTERNET permission). Both are left as WorkManager declares them, as in Chiaro:
+  there is no INTERNET permission). Both are left as WorkManager declares them:
   removing the second was the one change here that nothing on a phone had ever run with.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">

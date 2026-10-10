@@ -3,10 +3,9 @@
 
     python3 tools/draw_launcher_icon.py
 
-The mark is Chiaro's ring with Passo's step on it (owner's choice, 25 Sep 2026): the same
-ring as Chiaro's badge (radius 21, stroke 10, on the same warm white), green instead of
-sky, and where Chiaro has its sun (upper right) Passo has a shoe print, mirrored to the
-upper left. The print cuts the ring the way the sun does, with a gap around it, and walks
+The mark is a ring with Passo's step on it (owner's choice, 25 Sep 2026): a ring (radius 21,
+stroke 10, on a warm white), green, and a shoe print at the upper left. The print cuts the
+ring with a gap around it, and walks
 clockwise, the way the ring fills: it is the step that closes the day.
 
 Re-running this script IS the drawing: ic_launcher_foreground.xml and
@@ -20,16 +19,16 @@ from pathlib import Path
 RES = Path(__file__).resolve().parent.parent / "app/src/main/res/drawable"
 
 CENTRE = 54.0
-RING_RADIUS = 21.0  # Chiaro's
-RING_WIDTH = 10.0  # Chiaro's
-PRINT_ANGLE = 220.0  # degrees clockwise from three o'clock: Chiaro's sun is at -40
+RING_RADIUS = 21.0
+RING_WIDTH = 10.0
+PRINT_ANGLE = 220.0  # degrees clockwise from three o'clock: the upper left
 PRINT_SCALE = 0.95
 GAP = 2.6  # the clear band around the print, where it cuts the ring
 
 # The ring's sweep, from where it starts (just past the print) to where it ends (just
 # before it): the day filling up, a fresh green to the deep green of a met goal.
 RING_STOPS = [(0.0, "74CF91"), (0.45, "2B9E56"), (1.0, "0B5B33")]
-# The print: amber, the warm light of Chiaro's sun, top to heel.
+# The print: amber, a warm light, top to heel.
 PRINT_TOP, PRINT_HEEL = "FFC658", "EF8618"
 
 # A right shoe sole in its own units, toe towards -y, about 24 long, origin mid-length:
@@ -214,10 +213,9 @@ HEADER = """<?xml version="1.0" encoding="utf-8"?>
 """
 
 FOREGROUND_NOTE = """
-     The mark: Chiaro's ring (radius 21, stroke 10, the same warm white under it) in the
-     greens of a day filling up, and where Chiaro has its sun, mirrored to the upper left,
-     a shoe print in the sun's amber. The print cuts the ring with a 2.6 gap, as the sun
-     does, and walks clockwise, the way the ring fills: the step that closes the day.
+     The mark: a ring (radius 21, stroke 10, a warm white under it) in the greens of a day
+     filling up, and at the upper left a shoe print in amber. The print cuts the ring with a
+     2.6 gap, and walks clockwise, the way the ring fills: the step that closes the day.
      Everything sits inside the 33-unit safe circle of every launcher mask.
 """
 

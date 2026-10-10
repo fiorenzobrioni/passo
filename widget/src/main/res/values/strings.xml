@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- The two cards, as the launcher's picker names them (Chiaro's names, so the family reads as one). -->
+    <!-- The two cards, as the launcher's picker names them (PLANNING.md §7). -->
     <string name="widget_glance_label">At a glance</string>
     <string name="widget_glance_desc">Today\'s steps on a ring, the day\'s sentence where there is room and, on a wide tall card, the day hour by hour</string>
     <string name="widget_words_label">In words</string>

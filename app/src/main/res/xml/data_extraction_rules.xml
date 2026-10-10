@@ -26,7 +26,7 @@
 
   NOT `android:allowBackup="false"`: on Android 12 and later some makers' phones still move the
   app's data in a device transfer anyway. An instruction whose effect depends on who made the
-  phone is not a decision (Chiaro's reasoning, the same here).
+  phone is not a decision.
 -->
 <data-extraction-rules>
     <cloud-backup>

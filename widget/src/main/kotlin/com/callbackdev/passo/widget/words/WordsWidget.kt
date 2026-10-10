@@ -70,7 +70,7 @@ import com.callbackdev.passo.widget.widgetFormatter
 import com.callbackdev.passo.widget.withSlack
 
 /**
- * «In words» (Chiaro's «In parole»): the same day as «At a glance», with no drawing on the card
+ * «In words»: the same day as «At a glance», with no drawing on the card
  * but two marks at the size of the line they belong to (a check before a goal that is met, and
  * the pause of a count that is not moving). The number is the drawing now. [WordsLayout] holds
  * the ranks, the forms and every number's reason.
@@ -244,7 +244,7 @@ private fun SentenceText(parts: WordsParts, text: String?, lines: Int, align: Te
     )
 }
 
-/** Rank 3's figures: Medium, in the strong ink, as Chiaro sets the day's range. */
+/** Rank 3's figures: Medium, in the strong ink. */
 private fun factStyle(parts: WordsParts, align: TextAlign = TextAlign.Start) = TextStyle(
     color = parts.palette.primaryInk,
     fontSize = FACT_SP.sp,
@@ -254,9 +254,8 @@ private fun factStyle(parts: WordsParts, align: TextAlign = TextAlign.Start) = T
 
 /**
  * The goal as a fact, with a check before it once it is met: a mark at the line's own size,
- * in the line's own ink, which is punctuation rather than a drawing (Chiaro's rule for the
- * range's arrows). The air after it is a wrapper's padding, never the image's own: an `Image`
- * scales its drawing into what its padding leaves (Chiaro's shrinking arrow, 20 Sep 2026).
+ * in the line's own ink, which is punctuation rather than a drawing. The air after it is a wrapper's padding, never the image's own: an `Image`
+ * scales its drawing into what its padding leaves (20 Sep 2026).
  */
 @Composable
 private fun GoalFact(parts: WordsParts, room: Dp) {

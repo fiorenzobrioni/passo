@@ -36,7 +36,7 @@ import kotlin.math.sin
  * weekday stands at this hour. Ahead of the notch is ahead of your usual self; the gap between
  * the two is the pace the headline puts in words, readable at a glance before it is read.
  *
- * The arc sweeps in from zero when the ring first appears and follows the count with Chiaro's
+ * The arc sweeps in from zero when the ring first appears and follows the count with the
  * spatial spring; a met goal turns it to the goal color, and the moment it is met (with the
  * screen on, or the first time the screen sees it that day, [celebrate]) the ring blooms once:
  * a wave out from the ring, gone in a second. None of it under reduced motion, where the ring
