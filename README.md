@@ -217,8 +217,9 @@ the wrong module.
 
 ## The family
 
-Passo is one of three focused apps with the same look and the same rules:
-[Chiaro](https://github.com/fiorenzobrioni/chiaro) (weather) and
+Passo is one of four focused apps with the same look and the same rules:
+[Chiaro](https://github.com/fiorenzobrioni/chiaro) (weather),
+[Tempo](https://github.com/fiorenzobrioni/tempo) (clock and agenda) and
 [Saldo](https://github.com/fiorenzobrioni/saldo) (personal finance).
 
 ## License
