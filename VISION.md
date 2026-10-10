@@ -1,6 +1,6 @@
 # Passo — Product Vision
 
-> **Passo** (Italian for "step") is part of a small family of focused, single-purpose apps, alongside **Chiaro** (weather) and **Saldo** (personal finance).
+> **Passo** (Italian for "step") is part of a small family of focused, single-purpose apps, alongside **Chiaro** (weather), **Tempo** (clock and agenda) and **Saldo** (personal finance).
 > Store title: "Passo – Contapassi" / "Passo – Step Counter". Repository: `fiorenzobrioni/passo`.
 > Package name: `com.callbackdev.passo`, the `callbackdev` namespace shared with the sibling apps (decided in Phase 0, see PLANNING §15).
 
