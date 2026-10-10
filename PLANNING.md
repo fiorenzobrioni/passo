@@ -1468,6 +1468,8 @@ Include:
 
 - **A removed card no longer crashes the process** (8 Oct 2026, found on Tempo, whose receiver carried these lines over: a Galaxy S24 Ultra, retraced with its mapping). `PassoWidgetReceiver.onDeleted` called `goAsync()` after Glance's own `onDeleted`, which had already taken the broadcast's pending result (Android hands it out once), and finished the `null` it got on a coroutine thread. The cleanup now finishes only a result it was given, inside the time Glance's work keeps the broadcast open; `WidgetReceiverTest` delivers a removal as the system does and failed on the same exception before the fix. The other receivers (`GoalAlarmReceiver`, the boot start, the shutdown flush) take the one result they are given and are unchanged.
 
+- **The sister apps stay out of the app and the code** (owner, 10 Oct 2026: "no reference to the family's apps in the code", after Tempo 1.0.0 joined the README's family). Chiaro, Saldo and Tempo are named in the README's «The family» and in the project's documents (VISION, PLANNING, the ADRs), never in a string the app shows or in the code. The palette note in Settings loses "The same two as Chiaro", in English and Italian; about 120 comments that said where a value came from («Chiaro's 34 sp», «as in Chiaro», «Tempo's card») keep only their reason, or point at `docs/adr/0004-design-language.md` and `docs/adr/0005-widgets.md`; two test names lose the name. `theme/Scheme.kt`'s provenance (Chiaro's `tools/gen_scheme.py`, `chiaro@309c0e3e`) moves to ADR 0004's first decision, so it is not lost. The launcher icon's note is rewritten by `tools/draw_launcher_icon.py`; its drawing does not change.
+
 ### Open
 
 - **The Ways on a widget?** Not in Phase 11; a natural line for «In words» later.

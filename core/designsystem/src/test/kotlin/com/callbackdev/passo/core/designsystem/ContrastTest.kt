@@ -16,7 +16,7 @@ import org.junit.Test
 /**
  * Every ink the app sets text in reads on every ground it stands on, in both dresses and both
  * themes (PLANNING.md §11 Phase 7, the accessibility pass): WCAG's 4.5:1 for text, the
- * Accessibility Scanner's threshold. The generated schemes are Chiaro's and never hand-edited, so
+ * Accessibility Scanner's threshold. The generated schemes are never hand-edited, so
  * this pins the pairs the screens use, and the colors Passo adds.
  */
 class ContrastTest {

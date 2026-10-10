@@ -85,7 +85,7 @@ class SessionCardActions(
 )
 
 /**
- * An outing on Today (PLANNING.md §11 Phase 10): under way, paused, or just over. Chiaro's order:
+ * An outing on Today (PLANNING.md §11 Phase 10): under way, paused, or just over. In order:
  * what it is, one sentence, the shape of it (a bar with the reader's milestones marked), then the
  * numbers each with what they mean, then the buttons.
  *

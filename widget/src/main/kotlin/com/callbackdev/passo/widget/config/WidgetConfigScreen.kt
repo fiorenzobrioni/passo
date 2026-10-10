@@ -69,8 +69,7 @@ object WidgetConfigTags {
 }
 
 /**
- * One widget's settings, reached from the launcher's reconfigure flow (Chiaro's
- * `WidgetConfigActivity`, the same groups in the same order): the card at the top, at the sizes
+ * One widget's settings, reached from the launcher's reconfigure flow: the card at the top, at the sizes
  * it can be given; then what it is painted on and how solid; then what it carries. Every choice
  * is saved as it is made and repaints this one card; «Done» only closes the door.
  *
@@ -188,7 +187,7 @@ fun WidgetConfigScreen(
     }
 }
 
-/** What the background question offers, in Chiaro's order less its sky. Every [WidgetBackground] has its row. */
+/** What the background question offers, in order. Every [WidgetBackground] has its row. */
 internal val WidgetBackgroundChoices: List<Pair<WidgetBackground, Int>> = listOf(
     WidgetBackground.LIGHT to R.string.widget_bg_light,
     WidgetBackground.DARK to R.string.widget_bg_dark,
@@ -196,7 +195,7 @@ internal val WidgetBackgroundChoices: List<Pair<WidgetBackground, Int>> = listOf
     WidgetBackground.COLOR to R.string.widget_bg_color,
 )
 
-/** Chiaro's six, in Chiaro's order. Every [WidgetCardColor] has its swatch. */
+/** The six, in their order. Every [WidgetCardColor] has its swatch. */
 internal val WidgetCardColorChoices: List<Pair<WidgetCardColor, Int>> = listOf(
     WidgetCardColor.BLUE to R.string.widget_color_blue,
     WidgetCardColor.AZURE to R.string.widget_color_azure,

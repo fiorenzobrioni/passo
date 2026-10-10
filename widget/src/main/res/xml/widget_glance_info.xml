@@ -2,7 +2,7 @@
 <!--
   «At a glance» (PLANNING.md §7). The two cards share one size spec on purpose, so they
   sit side by side and trade places on a home screen: the same default placement (four cells
-  by one, the size Chiaro's pair opens at), the same minimum (one cell: minResizeWidth and
+  by one), the same minimum (one cell: minResizeWidth and
   minResizeHeight, 40 dp by the platform's 70 × n − 30), and no maximum. A maximum in dp
   cannot mean "four cells": Launcher3 turns it into cells on every grid profile it supports and
   keeps the smallest answer, so a value that allows four cells on a portrait grid refuses them

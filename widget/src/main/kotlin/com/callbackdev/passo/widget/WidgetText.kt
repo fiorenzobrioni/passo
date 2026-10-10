@@ -27,7 +27,7 @@ internal fun widgetFormatter(context: Context, settings: UserSettings): MeasureF
     context.measureFormatter(settings.units)
 
 /**
- * The day's sentence, brief: the one sentence before any number (Chiaro's rule, Today's headline).
+ * The day's sentence, brief: the one sentence before any number (Today's headline).
  * [short] is the same thing said in fewer words, for a card where the whole sentence would be cut.
  */
 internal fun sentence(

@@ -71,13 +71,13 @@ fun GuideRoute(onBack: () -> Unit, viewModel: GuideViewModel = hiltViewModel()) 
 }
 
 /**
- * The guide, in Chiaro's shape (its VISION §5.7): a tour of the three screens and the outings,
+ * The guide: a tour of the three screens and the outings,
  * what each one answers, and the things a screen cannot say out loud (that steps arrive in
  * batches, that a day keeps its goal, that Passo wakes the phone only for an outing), closing
  * on where the numbers come from. Re-openable forever from Settings: a definition offered
  * before the reader has met the thing does not stick.
  *
- * Chiaro's two rules hold it in shape. It **never teaches a control**: it says what a screen is
+ * Two rules hold it in shape. It **never teaches a control**: it says what a screen is
  * for, never which button to press, because a control that needs explaining is a bug. And it
  * **never justifies an absence**: it says what Passo does, not what it is not. It teaches by
  * showing the app's own components (the ring, two metric tiles, History's bars), each with a
@@ -185,7 +185,7 @@ private fun GuideContent(state: GuideUiState, modifier: Modifier) {
     }
 }
 
-// The prose kit: Chiaro's, value for value.
+// The prose kit.
 
 @Composable
 private fun Chapter(icon: ImageVector?, text: String) {

@@ -15,9 +15,8 @@ import com.callbackdev.passo.widget.textLineHeight
 import com.callbackdev.passo.widget.textSizeForLine
 
 /*
- * «At a glance»: Chiaro's «Colpo d'occhio» with the ring where the weather glyph was. The
- * glyph there is the picture the card is read by across a room; here the ring is, and it says
- * the same kind of thing at a glance (how far along the day is) before any number is read.
+ * «At a glance»: the ring is the picture the card is read by across a room, and it says
+ * at a glance (how far along the day is) before any number is read.
  *
  * Five forms, picked by the grant the launcher really makes, so every size is a composition
  * and not a squeezed one:
@@ -25,9 +24,9 @@ import com.callbackdev.passo.widget.textSizeForLine
  * - [GlanceForm.DOT], one cell wide: the ring alone, with the count inside it.
  * - [GlanceForm.NARROW], one row: the ring, the number over «of 10,000 steps».
  * - [GlanceForm.WIDE], one row with room for a column more: the day's sentence at the far edge
- *   (Chiaro's split, the reference 4×1).
+ *   (the reference 4×1).
  * - [GlanceForm.TALL], two rows and up: the ring in the top trailing corner, the words hanging
- *   from the bottom leading one (Chiaro's tall form).
+ *   from the bottom leading one.
  * - [GlanceForm.PANEL], two rows and up, three cells or wider: the one-row card on top and,
  *   under it, the day hour by hour (PLANNING.md §7's 4×2 mini chart, 24 bars built from boxes).
  *
@@ -56,7 +55,7 @@ internal fun glanceForm(size: DpSize, showHours: Boolean, fontScale: Float = 1f)
 /** Under this a row has no room for the ring and a column of words beside it: the ring alone. */
 internal val DotMaxWidth = 120.dp
 
-/** Two rows, on every grid measured (Chiaro's `TallMinHeight`). */
+/** Two rows, on every grid measured. */
 internal val TallMinHeight = 150.dp
 
 /** Three cells: 24 bars need about 7 dp each to read as a day and not as a comb. */
@@ -66,7 +65,7 @@ internal val PanelMinWidth = 230.dp
 
 /**
  * The ring on a one-row card: the height the grant leaves, but never so large that the words
- * beside it lose their minimum, and never larger than [RowRingMax]. Smaller than Chiaro's
+ * beside it lose their minimum, and never larger than [RowRingMax]. Smaller than a
  * 66 dp glyph box on purpose: a Meteocons drawing keeps 9 to 12 dp of its box empty, a ring
  * inks it to the edge, so a 56 dp ring has the same weight on the card as a 66 dp glyph.
  */
@@ -79,10 +78,10 @@ internal fun rowRingSize(size: DpSize): Dp {
 internal val RowRingMin = 44.dp
 internal val RowRingMax = 56.dp
 
-/** The air between the ring and the words: Chiaro's 8 dp plus the margin a glyph brings and a ring does not. */
+/** The air between the ring and the words: 8 dp plus the margin a glyph brings and a ring does not. */
 internal val RingTextGap = 12.dp
 
-/** The narrowest the words beside the ring may be: a count and «of 10,000» still whole (Chiaro's 84). */
+/** The narrowest the words beside the ring may be: a count and «of 10,000» still whole. */
 internal val WordsColumnMin = 84.dp
 
 /** What is left of a one-row card once the insets, the ring and its gap are paid. */
@@ -92,8 +91,7 @@ internal fun rowWordsWidth(width: Dp, ring: Dp): Dp = width - WidgetCardPadding 
 internal fun rowSentenceColumn(width: Dp, ring: Dp): Dp = (rowWordsWidth(width, ring) - SentenceGap) / 2
 
 /**
- * Where the boundary between the words and the sentence falls (Chiaro's
- * `heroWordsColumnWidth`): the words take what they measured, at least the even split, and stop
+ * Where the boundary between the words and the sentence falls: the words take what they measured, at least the even split, and stop
  * the moment the sentence would lose any of what it measured.
  */
 internal fun rowWordsColumn(width: Dp, ring: Dp, wordsNeed: Dp, sentenceKeep: Dp): Dp {
@@ -104,7 +102,7 @@ internal fun rowWordsColumn(width: Dp, ring: Dp, wordsNeed: Dp, sentenceKeep: Dp
 }
 
 /**
- * The count on a one-row card: Chiaro's 34 sp hero, smaller only where the column or the height
+ * The count on a one-row card: a 34 sp hero, smaller only where the column or the height
  * cannot hold it. [heroEm] is the widest count the day may print, in ems of the bold face (the
  * caller measures it on `max(steps, goal)`, so the number does not shrink as the day goes on).
  */
@@ -128,7 +126,7 @@ internal fun rowSentenceLines(height: Dp, fontScale: Float, measured: Int): Int 
 internal const val ROW_SENTENCE_MAX_LINES = 3
 internal const val SENTENCE_LINE_SP = 16f
 
-/** The column a sentence needs before it is worth printing (Chiaro's 96). */
+/** The column a sentence needs before it is worth printing. */
 internal val SentenceColumnMin = 96.dp
 internal val SentenceGap = 12.dp
 
@@ -140,7 +138,7 @@ internal fun mirroredSentenceWidth(width: Dp, ring: Dp, countWidth: Dp): Dp =
 
 /**
  * The tall card, bottom up: the words (the number, the sentence, the goal) take what they need, and the ring takes the rest of the height in the top trailing corner, between
- * [TallRingMin] and [TallRingMax] (Chiaro's hero glyph range). When even two lines of sentence
+ * [TallRingMin] and [TallRingMax]. When even two lines of sentence
  * would leave the ring under its floor, the sentence gives a line, then the other: the ring is
  * what the card is read by. Past the ring's ceiling the number grows instead, up to [TALL_HERO_MAX].
  */

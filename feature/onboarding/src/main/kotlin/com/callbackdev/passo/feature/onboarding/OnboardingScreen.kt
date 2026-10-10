@@ -118,7 +118,7 @@ class OnboardingActions(
 
 /**
  * The first run, one page at a time: a thin progress bar on top, the page, and one obvious
- * button at the bottom. Pages slide the way the app's pages do (Chiaro's shell transition), a
+ * button at the bottom. Pages slide the way the app's pages do, a
  * fade under reduced motion; system back goes back a page.
  */
 @Composable

@@ -54,7 +54,7 @@ fun Session.zoneShare(): Double? =
     if (totals.movingMillis <= 0) null else totals.zoneMillis.toDouble() / totals.movingMillis
 
 /**
- * The sentence an outing is told with, before any of its numbers (Chiaro's rule): on Today's
+ * The sentence an outing is told with, before any of its numbers: on Today's
  * card and in the notification alike.
  */
 sealed interface SessionHeadline {
