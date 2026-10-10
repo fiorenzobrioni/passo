@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 
 /**
- * A metric (Chiaro's §8.6): its mark and label, the value as a reading, where the world has a
+ * A metric (`docs/adr/0004-design-language.md`): its mark and label, the value as a reading, where the world has a
  * scale for it that scale as a track, and always the line that says what the value means. A
  * metric with no honest second line does not get a tile.
  *
@@ -91,7 +91,7 @@ fun MetricTile(
 }
 
 /**
- * A metric's own scale (Chiaro §8.6): the whole range drawn faint, the part up to the value at
+ * A metric's own scale: the whole range drawn faint, the part up to the value at
  * full strength, the thresholds the meaning line switches at cut in as 2dp gaps, and a disc on
  * the value, ringed in the tile's ground with a hairline so the pale end of a ramp keeps an edge.
  *

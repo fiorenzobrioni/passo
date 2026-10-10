@@ -3,7 +3,7 @@ package com.callbackdev.passo.widget
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
-/** Chiaro's ink rule, carried over: `WidgetInkTest` there, the same cases here. */
+/** The ink rule (`docs/adr/0005-widgets.md`), case by case. */
 class WidgetInkTest {
     @Test
     fun `a solid card is its own ground`() {

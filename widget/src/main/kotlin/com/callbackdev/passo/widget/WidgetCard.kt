@@ -50,9 +50,7 @@ import java.util.Locale
 import kotlin.math.floor
 
 /*
- * The widgets' side of the design system: Chiaro's card (`WidgetUi.kt`), carried over so a
- * Passo card and a Chiaro card on one home screen are the same piece of furniture. The same
- * 24 dp corner, the same insets, the same grounds and the same inks, the same type scale; the
+ * The widgets' side of the design system (`docs/adr/0005-widgets.md`): the 24 dp corner, the same insets, the same grounds and the same inks, the same type scale; the
  * system face, because a launcher draws `RemoteViews` in it whatever the app's own setting is.
  */
 
@@ -69,7 +67,7 @@ fun widgetDressFor(context: Context, settings: UserSettings): WidgetDress = if (
  * @property accent the ring's arc and the current hour's bar.
  * @property track the ring's track and the hours still to come: the ink, faint, so it reads on
  *   any ground, a see-through card over a wallpaper included.
- * @property goal a met goal, Chiaro's pass ink for this ground.
+ * @property goal a met goal, the pass ink for this ground.
  * @property halo the card's own ground, opaque, drawn under a mark that crosses the arc; null on
  *   a see-through card, whose ground is the wallpaper.
  */
@@ -140,7 +138,7 @@ fun widgetCardFill(look: WidgetLook, dress: WidgetDress, night: Boolean): Color 
 /**
  * The phone's night mode at render time. Glance's day/night providers are resolved by the
  * launcher, and a host that flips the card without the words leaves dark ink on a dark card
- * (Chiaro, device report of 3 Sep 2026): every colour here is resolved against one answer.
+ * (device report of 3 Sep 2026): every colour here is resolved against one answer.
  */
 fun isNight(context: Context): Boolean =
     (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES
@@ -219,7 +217,7 @@ internal fun rememberWidgetModel(initial: WidgetModel, loadedAt: Long, reload: s
 
 /**
  * The card with nothing to count yet, or nowhere to count it: one message, centred on the card,
- * with the tap that fixes it where there is one (Chiaro's empty states).
+ * with the tap that fixes it where there is one.
  */
 @Composable
 internal fun MessageContent(title: String, hint: String?, palette: WidgetPalette) {
@@ -242,8 +240,8 @@ internal fun MessageContent(title: String, hint: String?, palette: WidgetPalette
 /**
  * The footnote that says the count is not moving, on a card with no place for a sentence: the
  * whole phrase where [room] holds it, the word alone where it does not, and the word a little
- * smaller where even it does not (Chiaro's stale marker, in the same freshness ink, on a line no
- * budget may drop, and so never cut either).
+ * smaller where even it does not (in the freshness ink, on a line no budget may drop, and so
+ * never cut either).
  */
 @Composable
 internal fun StatusFootnote(state: CountingState, palette: WidgetPalette, room: Dp) {
@@ -270,7 +268,7 @@ internal fun fontScale(context: Context): Float = context.resources.configuratio
 
 /**
  * The width one line of text really takes, measured with the face, size and weight the launcher
- * will draw it in (Chiaro's `measureWidgetText`): Glance cannot measure, this process can.
+ * will draw it in: Glance cannot measure, this process can.
  */
 internal fun measureWidgetText(
     context: Context,
@@ -285,7 +283,7 @@ internal fun measureWidgetText(
 
 /**
  * How many lines [text] takes at [width], laid out as a `TextView` would lay it out: measured,
- * where Chiaro's first budgets reserved the most a sentence could take and left the rest as air.
+ * where a budget would reserve the most a sentence could take and leave the rest as air.
  */
 internal fun measureWidgetLines(context: Context, text: String, sizeSp: Float, width: Dp, weight: TextWeight): Int {
     val metrics = context.resources.displayMetrics
@@ -344,7 +342,7 @@ internal fun Dp.withSlack(): Dp = this + RowFitSlack
 
 /**
  * The height one line of text occupies in a Glance `Text` (font padding on): about 1.32 em for
- * the system font, times the reader's font scale. An estimate, named as one (Chiaro's).
+ * the system font, times the reader's font scale. An estimate, named as one.
  */
 internal fun textLineHeight(fontSizeSp: Float, fontScale: Float): Dp = (fontSizeSp * LINE_BOX_EM * fontScale).dp
 
@@ -361,7 +359,7 @@ internal fun quarterPoint(sp: Float): Float = floor(sp * 4f) / 4f
 
 internal const val LINE_BOX_EM = 1.32f
 
-/** Chiaro's card: the corner, the words' inset, and the snug inset of a one-row card. */
+/** The card: the corner, the words' inset, and the snug inset of a one-row card. */
 internal val WidgetCorner = 24.dp
 internal val WidgetCardPadding = 14.dp
 internal val WidgetCardPaddingSnug = 6.dp
@@ -369,10 +367,10 @@ internal val WidgetCardPaddingSnug = 6.dp
 /** The air a measured width is given before it is used as one. */
 internal val RowFitSlack = 4.dp
 
-/** The household's type (Chiaro's): the hero is Bold and sized per form; a fact is 16 sp. */
+/** The household's type: the hero is Bold and sized per form; a fact is 16 sp. */
 internal const val FACT_SP = 16f
 
-/** Chiaro's stale marker is 11 sp; this one carries an action («tap to resume»), so a step up, Medium. */
+/** A stale marker is 11 sp; this one carries an action («tap to resume»), so a step up, Medium. */
 internal const val STATUS_SP = 12f
 
 private const val QUIET_ALPHA = 0.75f
@@ -390,8 +388,8 @@ private const val EM_PROBE_PX = 100f
 
 /**
  * The band of empty leading a block of words carries above its capitals, so the ring beside it
- * can balance the same band underneath (Chiaro's `textInkBalance`: centre a block against a
- * drawing and the drawing reads high by half that band).
+ * can balance the same band underneath (centre a block against a drawing and the drawing reads
+ * high by half that band).
  */
 internal fun textInkBalance(fontSizeSp: Float, fontScale: Float): Dp = (fontSizeSp * LEADING_ABOVE_CAPS * fontScale).dp
 

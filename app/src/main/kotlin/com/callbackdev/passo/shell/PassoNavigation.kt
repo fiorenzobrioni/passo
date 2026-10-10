@@ -22,8 +22,7 @@ import com.callbackdev.passo.core.model.WayId
 import kotlinx.serialization.Serializable
 
 /*
- * The shell's destinations as Navigation 3 keys, Chiaro's shape (its `ChiaroNavigation.kt`,
- * 28 Sep 2026). Until then the three tabs lived in an `AnimatedContent` behind a `BackHandler`,
+ * The shell's destinations as Navigation 3 keys (28 Sep 2026). Until then the three tabs lived in an `AnimatedContent` behind a `BackHandler`,
  * and back from History or Insights swapped the page only when the finger lifted. As keys on a
  * back stack, `NavDisplay` runs that pop while the gesture is still under the finger, like every
  * other page's. Each key is [Serializable], so the stacks survive a rotation and process death.
@@ -86,7 +85,7 @@ val ShellTab.root: NavKey
     }
 
 /**
- * One back stack per tab, Navigation 3's "multiple back stacks" recipe as Chiaro uses it. A tab
+ * One back stack per tab, Navigation 3's "multiple back stacks" recipe. A tab
  * keeps its stack, and through the per-stack decorator its saved state (the week History was on,
  * how far Insights was scrolled), while another tab is on screen: the promise the old
  * `rememberSaveableStateHolder` kept.

@@ -10,8 +10,8 @@ import java.time.Instant
  * The two alarms of the goal notifications, one each, never exact (PLANNING.md §9: no exact
  * alarm, and no permission for one).
  *
- * - The **evening reminder** is `setAndAllowWhileIdle` on the wall clock with a wakeup, as
- *   Chiaro's sky reminders: one wake a day, only for a reader who asked for it, and let through
+ * - The **evening reminder** is `setAndAllowWhileIdle` on the wall clock with a wakeup:
+ *   one wake a day, only for a reader who asked for it, and let through
  *   Doze, because a reminder to walk that Doze holds until 22:00 is worth nothing. It may come a
  *   few minutes late; it never comes early.
  * - The **weekly summary** does not wake the phone at all (`RTC`): it is posted the first time

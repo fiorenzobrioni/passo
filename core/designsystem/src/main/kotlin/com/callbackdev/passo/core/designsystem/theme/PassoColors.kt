@@ -6,21 +6,19 @@ import androidx.compose.ui.graphics.Color
 
 /**
  * The colors Material has no role for, per dress and per theme, never flipped: a dark value is
- * chosen for dark. Only three families of them, all taken from Chiaro so a meaning keeps its
- * color across the two apps:
+ * chosen for dark. A meaning keeps its color:
  *
- * - **goal**: a met goal is Chiaro's "pass" verdict pair (ink 7.7:1 on the light surface,
+ * - **goal**: a met goal is the "pass" verdict pair (ink 7.7:1 on the light surface,
  *   10.5:1 or more on the dark one; ink on container 5.6:1 or better). Like a verdict it is
  *   never the color alone: a met goal also says so in words and with a check.
  * - **effort**: a quantity from easy to hard (cadence), one hue light to dark, monotonic in
- *   luminance: Chiaro's UV ramp, the warm one, for marks only. It never paints a figure.
+ *   luminance: the warm ramp, for marks only. It never paints a figure.
  * - **attention**: an ink for "this is not live right now" (a widget whose counting is paused or
- *   stopped): Chiaro's freshness ink, which says "this data is old" in the same amber, 7:1 or
+ *   stopped): the freshness ink, which says "this data is old" in an amber, 7:1 or
  *   better on either surface. The same class of statement, so it does not learn a new color.
  * - **water**: the sea and the lakes of a way's map (Phase 11), the one ground Material has no
  *   role for: the dresses put their blue in different roles (Paper's secondary, Vivid's primary),
- *   and a sea in amber would not read as one. A pale sky in light, a deep one in dark, Chiaro's
- *   hue; a ground for marks, never for text.
+ *   and a sea in amber would not read as one. A pale sky in light, a deep one in dark; a ground for marks, never for text.
  * - **park**: a city's parks on a walk's map (Phase 11): a pale sage in light, a deep one in
  *   dark, quieter than the goal's green so the walked line stays the strongest mark on it.
  */

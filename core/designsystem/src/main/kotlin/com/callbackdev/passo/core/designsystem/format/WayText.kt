@@ -13,7 +13,7 @@ import com.callbackdev.passo.core.model.WayJourneyState
 import com.callbackdev.passo.core.model.WayKind
 
 /**
- * Where the reader stands on a way, in one line (Chiaro's rule: a sentence before a number):
+ * Where the reader stands on a way, in one line (a sentence before a number):
  * at the start, past the last stop reached, arrived, or left there.
  */
 @Composable

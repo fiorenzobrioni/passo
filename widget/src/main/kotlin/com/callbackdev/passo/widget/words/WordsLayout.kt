@@ -13,8 +13,8 @@ import com.callbackdev.passo.widget.textLineHeight
 import com.callbackdev.passo.widget.textSizeForLine
 
 /*
- * «In words» (Chiaro's «In parole»): the day with nothing drawn on it but two small marks, and
- * its whole hierarchy built out of type, in Chiaro's four ranks, each differing by size AND
+ * «In words»: the day with nothing drawn on it but two small marks, and
+ * its whole hierarchy built out of type, in four ranks, each differing by size AND
  * weight AND ink:
  *
  * | rank | what | size | weight | ink |
@@ -25,7 +25,7 @@ import com.callbackdev.passo.widget.textSizeForLine
  * | 2 | or, when the count is not moving, what a tap does about it | [WORDS_SENTENCE_SP] | Medium | attention |
  * | 4 | the same, on the one-cell card, as a footnote | 12 | Medium | attention |
  *
- * The number is sized by the grant, the way «At a glance» sizes its ring. Four forms, Chiaro's:
+ * The number is sized by the grant, the way «At a glance» sizes its ring. Four forms:
  *
  * - [WordsForm.LINE], one row too narrow for two columns: the eyebrow, the number, the goal.
  * - [WordsForm.ROW], one row with a second column: the number on the leading side, the
@@ -60,7 +60,7 @@ internal val ColumnGap = 12.dp
 /** A count at the hero's floor and «Steps today» beside nothing: the leading column's least. */
 internal val LeadingMin = 96.dp
 
-/** About eleven characters of 18 sp: the narrowest column worth a sentence (Chiaro's 104). */
+/** About eleven characters of 18 sp: the narrowest column worth a sentence. */
 internal val SentenceColumnMin = 104.dp
 
 internal const val WORDS_SENTENCE_SP = 18f
@@ -85,8 +85,8 @@ private fun rowHeroByHeight(height: Dp, fontScale: Float): Float =
     textSizeForLine(height - WidgetCardPaddingSnug * 2 - textLineHeight(FACT_SP, fontScale), fontScale)
 
 /**
- * The number on a one-row card: what the height leaves under the eyebrow, what the column holds, between [HERO_FLOOR_SP] and [ROW_HERO_MAX]. The cap is
- * Chiaro's reason: the number never outgrows the block of words beside it.
+ * The number on a one-row card: what the height leaves under the eyebrow, what the column holds, between [HERO_FLOOR_SP] and [ROW_HERO_MAX]. The cap's
+ * reason: the number never outgrows the block of words beside it.
  */
 internal fun rowHeroSp(size: DpSize, fontScale: Float, heroEm: Float, column: Dp): Float {
     val byHeight = minOf(rowHeroByHeight(size.height, fontScale), ROW_HERO_MAX).coerceAtLeast(HERO_FLOOR_SP)
@@ -256,7 +256,7 @@ internal fun panelPlan(
 }
 
 /**
- * The number and the words beside it on one baseline (Chiaro's `textPanelBaselineLift`): a line
+ * The number and the words beside it on one baseline: a line
  * box keeps the font's descent under its baseline in proportion to its size, so the big number
  * stands higher than a 16 sp line bottom-aligned with it. The difference, under the words, lands
  * their last line on the number's baseline.

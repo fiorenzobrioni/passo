@@ -80,7 +80,7 @@ import com.callbackdev.passo.widget.widgetFormatter
 import com.callbackdev.passo.widget.withSlack
 
 /**
- * «At a glance» (Chiaro's «Colpo d'occhio»): today's ring, the count, the goal, the day's
+ * «At a glance»: today's ring, the count, the goal, the day's
  * sentence where the grant has room, and on a wide tall card the day hour by hour. The forms
  * and their arithmetic are [GlanceLayout]'s; this file draws them.
  */
@@ -371,7 +371,7 @@ private fun RowContent(
             ?.let { RowSplit(column, sentenceColumn, it) }
     }
     val footnote = parts.status && split == null
-    // The words' ink and the ring's share a centre line (Chiaro's `textInkBalance`); a footnote
+    // The words' ink and the ring's share a centre line; a footnote
     // under them already fills that band.
     val balance = if (footnote) GlanceModifier else GlanceModifier.padding(bottom = textInkBalance(ROW_HERO_SP, scale))
     val column = split?.column ?: words
@@ -410,7 +410,7 @@ private fun RowContent(
 private class RowSplit(val column: Dp, val sentenceColumn: Dp, val sentence: FittedSentence)
 
 /**
- * The row the other way round (Chiaro's `ICON_END`): the count with the sentence at its
+ * The row the other way round: the count with the sentence at its
  * shoulder, the goal under both, the ring closing the row. The sentence only where it clears
  * the same minimum as the standard row's column.
  */
@@ -455,7 +455,7 @@ private fun MirroredRow(parts: CardParts, width: Dp, height: Dp, ring: Dp, wide:
 
 /**
  * Two rows and up: the ring alone in the top trailing corner, the words stacked from the bottom
- * leading one in Chiaro's order: the number, the sentence, the goal.
+ * leading one, in order: the number, the sentence, the goal.
  */
 @Composable
 private fun TallContent(parts: CardParts, size: DpSize) {

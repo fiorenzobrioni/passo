@@ -37,7 +37,7 @@ import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
 
-/** A page's sentence and the line under it: one sentence before any number (Chiaro's rule). */
+/** A page's sentence and the line under it: one sentence before any number. */
 @Composable
 internal fun PageHeadline(sentence: String, detail: String?, modifier: Modifier = Modifier) {
     Column(
@@ -202,5 +202,5 @@ internal fun HistoryTile(
     )
 }
 
-/** The unit beside a reading, set small (Chiaro's reading style). */
+/** The unit beside a reading, set small. */
 internal val UnitStyle = SpanStyle(fontSize = 15.sp, fontWeight = FontWeight.Normal)

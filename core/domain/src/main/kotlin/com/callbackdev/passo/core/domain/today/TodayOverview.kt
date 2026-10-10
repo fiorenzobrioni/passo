@@ -22,7 +22,7 @@ sealed interface Pace {
     data object OnPace : Pace
 }
 
-/** The one sentence Today opens with (Chiaro's "one sentence before any number"). */
+/** The one sentence Today opens with ("one sentence before any number"). */
 sealed interface Headline {
     /** Nothing walked yet today. */
     data object NoStepsYet : Headline

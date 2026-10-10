@@ -93,7 +93,7 @@ data class DayTrend(
  * the pinned point, or null for now.
  *
  * It **draws itself in** the first time it is shown, left to right along time, the way the day
- * went (Chiaro's rain chart, 900 ms). Never grown up from the floor, which would draw for half
+ * went (900 ms). Never grown up from the floor, which would draw for half
  * a second a day nobody walked. Not under reduced motion.
  *
  * One node for a screen reader, read as [description].

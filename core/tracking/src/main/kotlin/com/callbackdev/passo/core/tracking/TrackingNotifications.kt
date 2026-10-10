@@ -95,7 +95,7 @@ internal class TrackingNotifications(private val context: Context) {
 
     /**
      * The expanded lines: the day's sentence, the goal with the active minutes, the estimates.
-     * One sentence before any number, and the estimates say they are (Chiaro's rules).
+     * One sentence before any number, and the estimates say they are.
      */
     fun expandedText(day: TodayOverview, format: MeasureFormatter): String {
         val res = context.resources

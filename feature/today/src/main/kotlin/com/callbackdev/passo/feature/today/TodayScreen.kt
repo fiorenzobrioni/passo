@@ -182,7 +182,7 @@ private fun openAppSettings(activity: Activity, packageName: String) {
 }
 
 /**
- * Today (PLANNING.md §11 Phase 3), in Chiaro's order: the state of counting if it needs the
+ * Today (PLANNING.md §11 Phase 3), in order: the state of counting if it needs the
  * reader, then **one sentence before any number** under the ring, then the day as a shape, then
  * the metrics, each with the line that says what it means.
  */

@@ -29,7 +29,7 @@ class WidgetLookStoreTest {
     fun close() = scope.cancel()
 
     @Test
-    fun `a card nobody configured wears Chiaro's defaults`() = runTest {
+    fun `a card nobody configured wears the defaults`() = runTest {
         val look = store.lookFor(7)
         assertThat(look).isEqualTo(WidgetLook())
         assertThat(look.background).isEqualTo(WidgetBackground.COLOR)

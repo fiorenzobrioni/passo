@@ -163,7 +163,7 @@ class SettingsActions(
 )
 
 /**
- * Settings, laid out as Chiaro's (its design review of 23 set 2026): every group on one rounded
+ * Settings: every group on one rounded
  * ground under a header in the accent, a live preview of the appearance above the choices that
  * change it, the privacy note as a statement, the licence and the credits last. Only what
  * already does something is here: a switch for a feature that has not shipped would be the
@@ -740,7 +740,7 @@ private fun stepLengthValue(profile: Profile, lengths: StepLengths, format: Meas
 }
 
 /**
- * The appearance, drawn with itself (Chiaro's preview): a ring and a count in the reader's
+ * The appearance, drawn with itself: a ring and a count in the reader's
  * palette and typeface, and the pace against a usual day in the goal's color, all consistent
  * with each other (a preview must not lie either). Every choice below changes it the
  * moment it is made. A picture, silent to a screen reader: the rows say every choice in words.
@@ -959,7 +959,7 @@ private fun TileRow() {
 }
 
 /**
- * The way to the guide, first in the list as in Chiaro's Settings: the place a reader comes back
+ * The way to the guide, first in the list: the place a reader comes back
  * to the day the question arrives, which a card shown once on Today could never be.
  */
 @Composable
