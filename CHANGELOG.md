@@ -79,6 +79,12 @@ All notable changes to Passo are documented here. The format follows
 
 ### Changed
 
+- **Widgets: the family's sizes.** The line that says the count is paused, the words card's
+  figures' labels and the message a card shows before it counts now use the same sizes as the
+  family's other cards.
+- **«In words» says more**: its sentence is the size of the facts under it, and the room that
+  gives back holds the whole sentence on a one-row card and one more line on a square one.
+- **Widgets wear your launcher's corner**, so they match the widgets beside them.
 - **A signal is not lost to a phone call.** A spoken signal due while you are on the phone is
   said when the call ends; in an interval walk, as the interval you are in then and the time left
   of it («Slow, 2 minutes left»).

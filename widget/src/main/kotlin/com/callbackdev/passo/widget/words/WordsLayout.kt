@@ -7,6 +7,7 @@ import com.callbackdev.passo.widget.FACT_SP
 import com.callbackdev.passo.widget.STATUS_SP
 import com.callbackdev.passo.widget.WidgetCardPadding
 import com.callbackdev.passo.widget.WidgetCardPaddingSnug
+import com.callbackdev.passo.widget.WidgetType
 import com.callbackdev.passo.widget.quarterPoint
 import com.callbackdev.passo.widget.spThatFits
 import com.callbackdev.passo.widget.textLineHeight
@@ -14,16 +15,17 @@ import com.callbackdev.passo.widget.textSizeForLine
 
 /*
  * «In words»: the day with nothing drawn on it but two small marks, and
- * its whole hierarchy built out of type, in four ranks, each differing by size AND
- * weight AND ink:
+ * its whole hierarchy built out of type, in four ranks, each differing by weight AND ink, and
+ * by size wherever the scale has a step between them (the sentence and the facts share 16 sp
+ * since 13 Oct 2026):
  *
  * | rank | what | size | weight | ink |
  * |---|---|---|---|---|
  * | 1 | today's steps | scaled to the grant | Bold | strong |
  * | 2 | the day's sentence | [WORDS_SENTENCE_SP] | Medium | strong |
- * | 3 | «Steps today», the goal, distance and calories, the day in figures | 16 (14 for a table's words) | Regular / Medium figures | quiet / strong |
+ * | 3 | «Steps today», the goal, distance and calories, the day in figures | 16 (13 for a table's words) | Regular / Medium figures | quiet / strong |
  * | 2 | or, when the count is not moving, what a tap does about it | [WORDS_SENTENCE_SP] | Medium | attention |
- * | 4 | the same, on the one-cell card, as a footnote | 12 | Medium | attention |
+ * | 4 | the same, on the one-cell card, as a footnote | 13 | Medium | attention |
  *
  * The number is sized by the grant, the way «At a glance» sizes its ring. Four forms:
  *
@@ -63,8 +65,13 @@ internal val LeadingMin = 96.dp
 /** About eleven characters of 18 sp: the narrowest column worth a sentence. */
 internal val SentenceColumnMin = 104.dp
 
-internal const val WORDS_SENTENCE_SP = 18f
-internal const val DETAIL_LABEL_SP = 14f
+/**
+ * The sentence: the scale's [WidgetType.BODY] since 13 Oct 2026 (owner, the family's widget
+ * review: "put it on the scale"), from 18. It shares 16 sp with the facts under it and sorts
+ * from them by weight and ink, Medium and strong over Regular and quiet.
+ */
+internal const val WORDS_SENTENCE_SP = WidgetType.BODY
+internal const val DETAIL_LABEL_SP = WidgetType.LABEL
 
 // --- One row ---------------------------------------------------------------------------------
 

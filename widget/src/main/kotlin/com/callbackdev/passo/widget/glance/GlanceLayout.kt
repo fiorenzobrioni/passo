@@ -7,6 +7,7 @@ import com.callbackdev.passo.widget.FACT_SP
 import com.callbackdev.passo.widget.STATUS_SP
 import com.callbackdev.passo.widget.WidgetCardPadding
 import com.callbackdev.passo.widget.WidgetCardPaddingSnug
+import com.callbackdev.passo.widget.WidgetType
 import com.callbackdev.passo.widget.linesThatFit
 import com.callbackdev.passo.widget.quarterPoint
 import com.callbackdev.passo.widget.spThatFits
@@ -113,7 +114,7 @@ internal fun rowHeroSp(height: Dp, column: Dp, heroEm: Float, fontScale: Float, 
     return quarterPoint(minOf(byHeight, spThatFits(column, heroEm, fontScale)))
 }
 
-internal const val ROW_HERO_SP = 34f
+internal const val ROW_HERO_SP = WidgetType.HERO
 internal const val HERO_FLOOR_SP = 20f
 
 /** The sentence beside a one-row card: what it measured, what the height holds, three at most. */
@@ -124,7 +125,7 @@ internal fun rowSentenceLines(height: Dp, fontScale: Float, measured: Int): Int 
 )
 
 internal const val ROW_SENTENCE_MAX_LINES = 3
-internal const val SENTENCE_LINE_SP = 16f
+internal const val SENTENCE_LINE_SP = WidgetType.BODY
 
 /** The column a sentence needs before it is worth printing. */
 internal val SentenceColumnMin = 96.dp
@@ -200,7 +201,7 @@ internal fun barsLabelHeight(fontScale: Float): Dp = textLineHeight(BARS_LABEL_S
 
 internal val BarsGap = 12.dp
 internal val BarsLabelGap = 2.dp
-internal const val BARS_LABEL_SP = 11f
+internal const val BARS_LABEL_SP = WidgetType.CAPTION
 internal val BarsMinHeight = 28.dp
 internal val BarsMaxHeight = 112.dp
 
