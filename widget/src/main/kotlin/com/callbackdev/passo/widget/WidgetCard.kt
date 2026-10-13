@@ -228,11 +228,19 @@ internal fun MessageContent(title: String, hint: String?, palette: WidgetPalette
     ) {
         Text(
             text = title,
-            style = TextStyle(color = palette.primaryInk, fontSize = 14.sp, fontWeight = FontWeight.Medium),
+            style = TextStyle(
+                color = palette.primaryInk,
+                fontSize = WidgetType.BODY.sp,
+                fontWeight = FontWeight.Medium,
+            ),
             maxLines = 2,
         )
         if (hint != null) {
-            Text(text = hint, style = TextStyle(color = palette.secondaryInk, fontSize = 12.sp), maxLines = 2)
+            Text(
+                text = hint,
+                style = TextStyle(color = palette.secondaryInk, fontSize = WidgetType.LABEL.sp),
+                maxLines = 2,
+            )
         }
     }
 }
@@ -368,10 +376,11 @@ internal val WidgetCardPaddingSnug = 6.dp
 internal val RowFitSlack = 4.dp
 
 /** The household's type: the hero is Bold and sized per form; a fact is 16 sp. */
-internal const val FACT_SP = 16f
+internal const val FACT_SP = WidgetType.BODY
 
-/** A stale marker is 11 sp; this one carries an action («tap to resume»), so a step up, Medium. */
-internal const val STATUS_SP = 12f
+/** A stale marker is 11 sp; this one carries an action («tap to resume»), so a step up, Medium:
+ * the scale's [WidgetType.LABEL] (13 Oct 2026, from 12). */
+internal const val STATUS_SP = WidgetType.LABEL
 
 private const val QUIET_ALPHA = 0.75f
 private const val ATTENTION_ALPHA = 0.85f
