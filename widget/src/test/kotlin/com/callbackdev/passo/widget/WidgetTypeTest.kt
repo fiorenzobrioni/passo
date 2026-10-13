@@ -6,7 +6,6 @@ import com.callbackdev.passo.widget.glance.SENTENCE_LINE_SP
 import com.callbackdev.passo.widget.words.DETAIL_LABEL_SP
 import com.callbackdev.passo.widget.words.WORDS_SENTENCE_SP
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -29,8 +28,8 @@ class WidgetTypeTest {
     }
 
     @Test
-    fun `the words card's sentence is the one exception`() {
-        assertFalse(WORDS_SENTENCE_SP in WidgetType.steps)
-        assertEquals(18f, WORDS_SENTENCE_SP)
+    fun `the words card's sentence is on the scale too`() {
+        assertTrue(WORDS_SENTENCE_SP in WidgetType.steps)
+        assertEquals(WidgetType.BODY, WORDS_SENTENCE_SP)
     }
 }

@@ -1474,6 +1474,8 @@ Include:
 
 - **The launcher's corner** (owner, 13 Oct 2026, the family's widget review). A card's corner is the one the launcher gives its widgets (`system_app_widget_background_radius`), in the card, the settings screen's preview and the picker's preview, where it was a fixed 24 dp: on stock Android 16 that is the same 24 dp, so nothing moves there, and on a phone whose launcher sets its own the card now matches the widgets beside it. (ADR 0005, decision 15)
 
+- **The words card's sentence on the scale** (owner, 13 Oct 2026: "put it on the scale", after seeing it before and after). `WORDS_SENTENCE_SP` goes from 18 to the scale's body, 16, the size of the facts under it; the two sort by weight and ink (Medium and strong over Regular and quiet), the way «At a glance»'s sentence always has. The room it gives back is spent the way the budget spends it: the one-row card prints the whole sentence ("1,484 steps ahead of usual") where it printed the short one ("+1,484 on usual"), and the two-by-two adds a line of distance and calories. `WidgetTypeTest` has no exception left. (ADR 0005, decision 14)
+
 ### Open
 
 - **The Ways on a widget?** Not in Phase 11; a natural line for «In words» later.

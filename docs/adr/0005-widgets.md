@@ -95,8 +95,9 @@ part in the style of Chiaro's «Colpo d'occhio».
     16, title 22, display 30, hero 34), and the family's cards print in it so a fact or a label is
     one size on every card: `WidgetType.kt`, held by `WidgetTypeTest`. Here the status footnote
     went from 12 to 13, the words card's detail labels from 14 to 13 and the empty card's message
-    from 14 and 12 to 16 and 13; sizes the grant decides are not steps, and the words card's 18 sp
-    sentence stays off the scale for the reason in decision 1.
+    from 14 and 12 to 16 and 13; sizes the grant decides are not steps. The words card's
+    sentence stayed off the scale at 18 sp for the reason in decision 1 until the owner put it
+    on too, the same day: 16 sp, sorted from the facts by weight and ink.
 15. **The launcher's corner** (amendment of 13 Oct 2026, from the family's widget review). The card
     takes the radius the launcher gives its widgets (`system_app_widget_background_radius`, in
     `WidgetCard`, the settings preview and `widget_preview_card`) instead of decision 3's fixed

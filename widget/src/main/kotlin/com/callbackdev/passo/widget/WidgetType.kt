@@ -14,9 +14,9 @@ package com.callbackdev.passo.widget
  *   card, the words card, the figure inside the ring) the grant decides, and those sizes are
  *   not steps.
  *
- * One size stays off the scale on purpose: the words card's sentence at 18 sp
- * ([WORDS_SENTENCE_SP]). On a card with no drawing the sentence is the second thing read,
- * and 17 over a 16 sp fact is not a rank. `WidgetTypeTest` holds every fixed size to a step.
+ * Every fixed size is a step: the words card's sentence ([WORDS_SENTENCE_SP]) was the one
+ * exception, at 18 sp, until it joined the scale too (13 Oct 2026). `WidgetTypeTest` holds
+ * every fixed size to a step.
  */
 internal object WidgetType {
     const val CAPTION = 11f
