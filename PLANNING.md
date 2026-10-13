@@ -1472,6 +1472,8 @@ Include:
 
 - **The widgets' type scale** (owner, 13 Oct 2026, the family's widget review: "keep in mind that some changes may be needed in the other apps too"). The family's cards now print their fixed sizes in one scale of six steps, each a role (`WidgetType.kt`: caption 11, label 13, body 16, title 22, display 30, hero 34), so a fact, a footnote or a label is one size on every card of every app; `WidgetTypeTest` holds every fixed size to a step. Passo was already almost on it: what moved is the status footnote that carries an action, 12 to 13 (still shrunk to its room where it has to be), the words card's detail labels, 14 to 13, and the message a card shows when it has no count, 14 and 12 to 16 and 13. Sizes the grant decides (the tall and words cards' number, the figure inside the ring) are not steps. One size stays off the scale on purpose, the words card's sentence at 18 sp, for the reason that card was built on: with no drawing, the sentence is the second thing read, and 17 over a 16 sp fact is not a rank. The README's widgets picture does not change (none of its forms shows a moved size); the gallery was looked at.
 
+- **The launcher's corner** (owner, 13 Oct 2026, the family's widget review). A card's corner is the one the launcher gives its widgets (`system_app_widget_background_radius`), in the card, the settings screen's preview and the picker's preview, where it was a fixed 24 dp: on stock Android 16 that is the same 24 dp, so nothing moves there, and on a phone whose launcher sets its own the card now matches the widgets beside it. (ADR 0005, decision 15)
+
 ### Open
 
 - **The Ways on a widget?** Not in Phase 11; a natural line for «In words» later.

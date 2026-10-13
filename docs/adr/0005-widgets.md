@@ -97,6 +97,10 @@ part in the style of Chiaro's «Colpo d'occhio».
     went from 12 to 13, the words card's detail labels from 14 to 13 and the empty card's message
     from 14 and 12 to 16 and 13; sizes the grant decides are not steps, and the words card's 18 sp
     sentence stays off the scale for the reason in decision 1.
+15. **The launcher's corner** (amendment of 13 Oct 2026, from the family's widget review). The card
+    takes the radius the launcher gives its widgets (`system_app_widget_background_radius`, in
+    `WidgetCard`, the settings preview and `widget_preview_card`) instead of decision 3's fixed
+    24 dp: the same on stock Android 16, and the launcher's own wherever a phone sets another.
 
 ## Consequences
 

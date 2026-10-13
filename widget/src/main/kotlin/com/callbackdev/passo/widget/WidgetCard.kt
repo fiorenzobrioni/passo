@@ -50,7 +50,7 @@ import java.util.Locale
 import kotlin.math.floor
 
 /*
- * The widgets' side of the design system (`docs/adr/0005-widgets.md`): the 24 dp corner, the same insets, the same grounds and the same inks, the same type scale; the
+ * The widgets' side of the design system (`docs/adr/0005-widgets.md`): the launcher's corner, the same insets, the same grounds and the same inks, the same type scale; the
  * system face, because a launcher draws `RemoteViews` in it whatever the app's own setting is.
  */
 
@@ -167,7 +167,7 @@ fun widgetTapIntent(context: Context, state: CountingState): Intent? =
     }
 
 /**
- * The card every widget lives in: the 24 dp corner, the ground at the reader's opacity, the
+ * The card every widget lives in: the launcher's corner, the ground at the reader's opacity, the
  * insets for what sits against each edge, and one door into the app for the whole card.
  */
 @Composable
@@ -185,7 +185,7 @@ internal fun WidgetCard(
         modifier = GlanceModifier
             .fillMaxSize()
             .appWidgetBackground()
-            .cornerRadius(WidgetCorner)
+            .cornerRadius(WidgetCornerRes)
             .then(if (tap != null) GlanceModifier.clickable(actionStartActivity(tap)) else GlanceModifier),
     ) {
         Box(
@@ -367,8 +367,15 @@ internal fun quarterPoint(sp: Float): Float = floor(sp * 4f) / 4f
 
 internal const val LINE_BOX_EM = 1.32f
 
-/** The card: the corner, the words' inset, and the snug inset of a one-row card. */
-internal val WidgetCorner = 24.dp
+/**
+ * The card's corner: the launcher's own (13 Oct 2026, the family's widget review). It was a fixed
+ * 24 dp, and beside the launcher's other widgets (24 dp on stock Android 16, other values where a
+ * phone's launcher sets its own) the card could wear a corner of its own. The platform names the
+ * radius the home screen gives its widgets, and every card of the family takes it.
+ */
+internal val WidgetCornerRes = android.R.dimen.system_app_widget_background_radius
+
+/** The words' inset, and the snug inset of a one-row card. */
 internal val WidgetCardPadding = 14.dp
 internal val WidgetCardPaddingSnug = 6.dp
 
