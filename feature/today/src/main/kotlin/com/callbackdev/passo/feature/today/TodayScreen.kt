@@ -590,7 +590,9 @@ private fun TrendCard(state: TodayUiState, format: MeasureFormatter) {
                 )
                 Legend(hasUsual = trend.usual != null)
             }
-            val hours = listOf(0, 6, 12, 18, 24).map { it * 60 to axisHour(it) }
+            // The axis starts at five or earlier and ends at midnight: the quarters of the day
+            // inside it, and no label on the right edge, where midnight would repeat the left's.
+            val hours = listOf(6, 12, 18).map { it * 60 to axisHour(it) }
             DayTrendChart(
                 trend = trend,
                 goalLabel = format.steps(overview.goalSteps),
@@ -612,11 +614,19 @@ private fun TrendCard(state: TodayUiState, format: MeasureFormatter) {
     }
 }
 
-/** The line above the plot: now, or the minute under the finger. */
+/**
+ * The line above the plot: now, or the minute under the finger. Now, it leaves out today's count,
+ * which the ring just above says in large, and keeps a usual day's, which nothing else on the
+ * screen says; without a usual day the count stays, so the line is not a lone "Now".
+ */
 @Composable
 private fun Readout(point: TrendPoint?, stepsNow: Int, usualNow: Int?, format: MeasureFormatter) {
     val time = point?.let { clockTime(it.minuteOfDay) } ?: stringResource(R.string.today_trend_now)
-    val steps = if (point == null) stepsNow else point.steps
+    val steps = when {
+        point != null -> point.steps
+        usualNow == null -> stepsNow
+        else -> null
+    }
     val usual = if (point == null) usualNow else point.usual
     val stepsText = steps?.let { pluralStringResource(R.plurals.today_trend_steps, it, format.steps(it)) }
     val usualText = usual?.let { stringResource(R.string.today_trend_usual, format.steps(it)) }
