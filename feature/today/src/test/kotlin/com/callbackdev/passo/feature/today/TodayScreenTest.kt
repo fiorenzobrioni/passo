@@ -319,20 +319,11 @@ class TodayScreenTest {
         show(state(minutes = emptyList(), typical = false))
 
         compose.onNodeWithText("No steps yet today", substring = true).assertIsDisplayed()
-        compose.onNodeWithTag(TodayTags.SUMMARY).assertDoesNotExist()
         compose.onNodeWithTag(
             TodayTags.LIST,
         ).performScrollToNode(hasContentDescription("Brisk minutes", substring = true))
         compose.onNode(hasContentDescription("Average cadence", substring = true)).assertDoesNotExist()
         snapshot("today_empty")
-    }
-
-    @Test
-    fun `the first screen gives the day's estimates, as estimates`() {
-        show(state())
-
-        compose.onNodeWithTag(TodayTags.SUMMARY).assertIsDisplayed()
-        compose.onNode(hasContentDescription("Estimated so far: ", substring = true)).assertIsDisplayed()
     }
 
     @Test

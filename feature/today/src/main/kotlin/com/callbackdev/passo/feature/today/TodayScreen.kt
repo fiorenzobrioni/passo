@@ -308,7 +308,6 @@ private fun Hero(
         StatusBanner(state.status, askInSettings, onAllow, onResume)
         Ring(state, format, onCelebrated)
         Headline(state, format)
-        if (state.overview.steps > 0) Summary(state, format)
     }
 }
 
@@ -502,38 +501,6 @@ private fun Headline(state: TodayUiState, format: MeasureFormatter) {
 }
 
 private const val HEADLINE_MARK = "mark"
-
-/**
- * The day's estimates in one line under the sentence, so the first screen answers "how far" and
- * "how much" without a scroll; the tiles below keep what each rests on. Said as estimates, as
- * the outing's card and the notification say them.
- */
-@Composable
-private fun Summary(state: TodayUiState, format: MeasureFormatter) {
-    val metrics = state.overview.metrics
-    val distance = format.distance(metrics.distanceMeters).text()
-    val energy = format.energy(metrics.activeKcal).text()
-    val active = format.minutes(metrics.activeMinutes).text()
-    val spoken = stringResource(R.string.today_summary_spoken, distance, energy, active)
-    Surface(
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        // Not a full pill: at a large text size the line wraps, and a pill's ends would clip it.
-        shape = MaterialTheme.shapes.large,
-        modifier = Modifier
-            .padding(top = 12.dp, start = 24.dp, end = 24.dp)
-            // The tag ahead of the clearing: a semantics modifier inside it would be cleared too.
-            .testTag(TodayTags.SUMMARY)
-            .clearAndSetSemantics { contentDescription = spoken },
-    ) {
-        Text(
-            text = stringResource(R.string.today_summary, distance, energy, active),
-            style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum"),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        )
-    }
-}
 
 private fun paceIcon(pace: Pace): ImageVector = when (pace) {
     is Pace.Ahead -> PassoIcons.TrendUp
@@ -849,5 +816,4 @@ object TodayTags {
     const val METRICS = "today_metrics"
     const val WALKS = "today_walks"
     const val START_OUTING = "today_start_outing"
-    const val SUMMARY = "today_summary"
 }
