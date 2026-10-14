@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -46,7 +47,10 @@ import kotlin.math.abs
 @Immutable
 data class TrendPoint(val minuteOfDay: Int, val steps: Int?, val usual: Int?)
 
-/** The chart's data: running totals sampled every few minutes from midnight. */
+/**
+ * The chart's data: running totals sampled every few minutes from midnight. The chart shows the
+ * day from [startMinute] on.
+ */
 @Immutable
 data class DayTrend(
     /** Today's running total every [stepMinutes], from 00:00 up to now. */
@@ -58,6 +62,17 @@ data class DayTrend(
     val usualStepMinutes: Int,
     val goal: Int,
 ) {
+    /**
+     * Where the chart starts: at 05:00, the small hours before it being flat on almost every day,
+     * or on the hour of the first step, today's or a usual day's, when that comes earlier, so an
+     * early start or a night's walk is never cut off.
+     */
+    val startMinute: Int = minOf(
+        DAY_START_MINUTE,
+        firstStepMinute(today, stepMinutes),
+        usual?.let { firstStepMinute(it, usualStepMinutes) } ?: DAY_START_MINUTE,
+    ) / 60 * 60
+
     fun todayAt(minute: Float): Int? {
         if (minute > nowMinute + 0.5f || today.isEmpty()) return null
         return interpolate(today, stepMinutes, minute)
@@ -71,6 +86,12 @@ data class DayTrend(
         val upper = minOf(lower + 1, totals.size - 1)
         return (totals[lower] + (totals[upper] - totals[lower]) * (position - lower)).toInt()
     }
+
+    /** The start of the slot the first steps fell in; a day with none starts at the usual hour. */
+    private fun firstStepMinute(totals: List<Int>, step: Int): Int {
+        val first = totals.indexOfFirst { it > 0 }
+        return if (first < 0) DAY_START_MINUTE else (first - 1).coerceAtLeast(0) * step
+    }
 }
 
 /**
@@ -79,13 +100,15 @@ data class DayTrend(
  * a dashed line that goes on past now (what usually comes later), and the rest of the day
  * shaded, so the room left to walk in is visible too.
  *
- * The plot takes the card's whole width, midnight to midnight. The goal's number sits on its
- * line at the left, under it: the small hours, where no running total has climbed yet, so no
- * line ever crosses it (over it when the day has gone so far past the goal that the line is
- * near the floor).
+ * The plot takes the card's whole width, from the day's start ([DayTrend.startMinute], 05:00 on
+ * most days) to midnight: the flat small hours would take a quarter of it and squeeze the walks
+ * into the rest. A total walked before the start is not lost: the lines begin at it. The goal's
+ * number sits on its line at the left, under it: the early morning, where the running total has
+ * barely climbed, so no line crosses it (over it when the day has gone so far past the goal that
+ * the line is near the floor).
  *
- * The scale is the world's, not the data's: the whole day across, and up to the goal at least,
- * so a quiet morning looks quiet instead of filling the chart.
+ * The scale is the world's, not the data's: the whole waking day across, and up to the goal at
+ * least, so a quiet morning looks quiet instead of filling the chart.
  *
  * **Touch**: a finger on it reads it. A tap pins the readout at that minute; a horizontal drag
  * moves it, with a light tick at each hour crossed; a vertical move is left to the page's
@@ -128,6 +151,9 @@ fun DayTrendChart(
     val labelStyle = MaterialTheme.typography.labelSmall
     val colors = MaterialTheme.colorScheme
     val goalInk = PassoTheme.colors.goal
+    // On a dark ground the light primary at the light theme's strength reads as grey, not as a
+    // tint: the day walked needs more of it to stand apart from the shaded rest of the day.
+    val areaAlpha = if (colors.surface.luminance() < 0.5f) 0.45f else 0.28f
     val axisDp = chartMargins(measurer, labelStyle, goalLabel).second
 
     Column(modifier = modifier.clearAndSetSemantics { contentDescription = description }) {
@@ -136,22 +162,24 @@ fun DayTrendChart(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(plotHeight)
-                .pointerInput(trend.nowMinute) {
-                    fun minuteAt(x: Float) = (x / size.width * MINUTES_PER_DAY).coerceIn(0f, MINUTES_PER_DAY.toFloat())
+                .pointerInput(trend.nowMinute, trend.startMinute) {
+                    val start = trend.startMinute.toFloat()
+                    fun minuteAt(x: Float) =
+                        (start + x / size.width * (MINUTES_PER_DAY - start)).coerceIn(start, MINUTES_PER_DAY.toFloat())
                     awaitEachGesture {
                         val down = awaitFirstDown(requireUnconsumed = false)
-                        val start = down.position
+                        val origin = down.position
                         var scrubbing = false
                         var lastHour = -1
                         while (true) {
                             val event = awaitPointerEvent()
                             val change = event.changes.firstOrNull { it.id == down.id } ?: break
                             if (!change.pressed) {
-                                if (!scrubbing) pinned = minuteAt(start.x)
+                                if (!scrubbing) pinned = minuteAt(origin.x)
                                 break
                             }
-                            val dx = change.position.x - start.x
-                            val dy = change.position.y - start.y
+                            val dx = change.position.x - origin.x
+                            val dy = change.position.y - origin.y
                             if (!scrubbing) {
                                 if (abs(dx) > touchSlop && abs(dx) > abs(dy)) {
                                     scrubbing = true
@@ -183,11 +211,12 @@ fun DayTrendChart(
             val maxToday = trend.today.maxOrNull() ?: 0
             val maxUsual = trend.usual?.maxOrNull() ?: 0
             val yMax = maxOf(trend.goal, maxToday, maxUsual, 1) * HEADROOM
-            fun x(minute: Float) = plotW * minute / MINUTES_PER_DAY
+            val start = trend.startMinute.toFloat()
+            fun x(minute: Float) = plotW * (minute - start) / (MINUTES_PER_DAY - start)
             fun y(value: Int) = plotBottom - plotH * value / yMax
 
             // The part of the day still ahead.
-            val nowX = x(trend.nowMinute.coerceIn(0f, MINUTES_PER_DAY.toFloat()))
+            val nowX = x(trend.nowMinute.coerceIn(start, MINUTES_PER_DAY.toFloat()))
             drawRect(colors.surfaceContainerHigh.copy(alpha = 0.55f), Offset(nowX, top), Size(plotW - nowX, plotH))
             // Baseline.
             drawLine(
@@ -227,29 +256,32 @@ fun DayTrendChart(
                 lastRight = left + text.size.width
             }
 
-            // A usual day, dashed, the whole day long.
-            trend.usual?.let { usual ->
-                val path = Path()
-                usual.forEachIndexed { i, total ->
-                    val px = x((i * trend.usualStepMinutes).toFloat())
-                    if (i == 0) path.moveTo(px, y(total)) else path.lineTo(px, y(total))
+            // A usual day, dashed, the whole day long; what came before the start is cut at the edge.
+            val usual = trend.usual
+            if (usual != null) {
+                clipRect(left = 0f) {
+                    val path = Path()
+                    usual.forEachIndexed { i, total ->
+                        val px = x((i * trend.usualStepMinutes).toFloat())
+                        if (i == 0) path.moveTo(px, y(total)) else path.lineTo(px, y(total))
+                    }
+                    drawPath(
+                        path,
+                        colors.onSurfaceVariant.copy(alpha = 0.8f),
+                        style = Stroke(
+                            width = 1.5.dp.toPx(),
+                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx())),
+                            cap = StrokeCap.Round,
+                        ),
+                    )
                 }
-                drawPath(
-                    path,
-                    colors.onSurfaceVariant.copy(alpha = 0.8f),
-                    style = Stroke(
-                        width = 1.5.dp.toPx(),
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx())),
-                        cap = StrokeCap.Round,
-                    ),
-                )
             }
 
-            // Today, revealed along time.
+            // Today, revealed along time; the clip also cuts what came before the start.
             if (trend.today.isNotEmpty()) {
                 val line = Path()
                 val area = Path()
-                area.moveTo(0f, plotBottom)
+                area.moveTo(x(0f), plotBottom)
                 trend.today.forEachIndexed { i, total ->
                     val minute = (i * trend.stepMinutes).toFloat().coerceAtMost(trend.nowMinute)
                     val px = x(minute)
@@ -263,7 +295,7 @@ fun DayTrendChart(
                     drawPath(
                         area,
                         Brush.verticalGradient(
-                            listOf(colors.primary.copy(alpha = 0.28f), colors.primary.copy(alpha = 0.03f)),
+                            listOf(colors.primary.copy(alpha = areaAlpha), colors.primary.copy(alpha = 0.03f)),
                             top,
                             plotBottom,
                         ),
@@ -275,7 +307,8 @@ fun DayTrendChart(
                     )
                 }
                 if (reveal.value >= 1f) {
-                    val head = Offset(endX, y(trend.today.last()))
+                    // Before the start (the small hours, nothing walked yet) the head waits at the edge.
+                    val head = Offset(endX.coerceAtLeast(0f), y(trend.today.last()))
                     drawCircle(colors.surface, radius = 6.dp.toPx(), center = head)
                     drawCircle(colors.primary, radius = 4.dp.toPx(), center = head)
                 }
@@ -296,5 +329,8 @@ fun DayTrendChart(
 }
 
 private const val MINUTES_PER_DAY = 1_440
+
+/** The chart's start on a day with no steps before it: the small hours are flat on almost every day. */
+private const val DAY_START_MINUTE = 5 * 60
 private const val HEADROOM = 1.12f
 private const val REVEAL_MILLIS = 900

@@ -28,13 +28,13 @@
 
     <!-- Today -->
     <string name="guide_today_title">Today</string>
-    <string name="guide_today_p1">The ring is today’s steps against today’s goal. The small notch on it is where a usual day of the same weekday stands by this hour, so the ring alone says whether the day is ahead or behind.</string>
+    <string name="guide_today_p1">The ring is today’s steps against today’s goal. The small notch on it, dashed like the usual day in the chart below, is where a usual day of the same weekday stands by this hour, so the ring alone says whether the day is ahead or behind. Past the goal a thin line starts a second lap, up to twice the goal.</string>
     <string name="guide_sample_of_goal">of %1$s steps</string>
     <string name="guide_today_ring_caption">An example: a day a little ahead of the notch of a usual day.</string>
     <string name="guide_today_sentence_title">The sentence</string>
     <string name="guide_today_sentence_body">One line under the ring says how the day is going: ahead of your usual pace or behind it, how many steps are left and how long a brisk walk that is, or when the goal was reached.</string>
     <string name="guide_today_day_title">Your day</string>
-    <string name="guide_today_day_body">The chart adds up the steps from midnight: it climbs where you walked and stays flat where you sat. The dashed line is a usual day of the same weekday, the average of the last four weeks, drawn once two of them are recorded. A day with almost no steps, a phone left at home, is left out of it.</string>
+    <string name="guide_today_day_body">The chart adds up the steps from midnight: it climbs where you walked and stays flat where you sat. It is drawn from five in the morning, or from the hour of your first steps on a day that starts earlier. The dashed line is a usual day of the same weekday, the average of the last four weeks, drawn once two of them are recorded. A day with almost no steps, a phone left at home, is left out of it.</string>
     <string name="guide_today_walks_title">Walks, found for you</string>
     <string name="guide_today_walks_body">Stretches of steady walking or running, found in the steps already counted: no extra sensor and no extra battery. A pause of up to two minutes, at a light or a door, does not end one. They appear when you look, not while you walk: noticing the end of a walk as it happens would mean waking the phone.</string>
     <string name="guide_today_estimates_title">Estimates, and what they rest on</string>

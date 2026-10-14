@@ -157,10 +157,11 @@ private fun lerpRamp(colors: List<Color>, at: Float): Color {
 }
 
 /**
- * Tiles side by side, as many as it holds, each an equal share of the width; one above the other
- * once a share is too narrow for the reader's text size (Phase 7's large-text pass): at twice the
- * size, half a small phone breaks "Distance" in the middle of the word. The measure is the share
- * over the font scale, so a wide window keeps its tiles side by side at any size.
+ * Tiles side by side, as many as it holds, each an equal share of the width and all as tall as
+ * the tallest; one above the other once a share is too narrow for the reader's text size
+ * (Phase 7's large-text pass): at twice the size, half a small phone breaks "Distance" in the
+ * middle of the word. The measure is the share over the font scale, so a wide window keeps its
+ * tiles side by side at any size.
  */
 @Composable
 fun TilePair(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
@@ -171,7 +172,12 @@ fun TilePair(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
         val count = measurables.size.coerceAtLeast(1)
         val share = (width - gap * (count - 1)) / count
         if (share.toDp() / fontScale >= TILE_MIN_WIDTH) {
-            val placeables = measurables.map { it.measure(Constraints(minWidth = share, maxWidth = share)) }
+            // One height for the row: a meaning that wraps in one tile and not in the other would
+            // otherwise leave the pair's bottoms at two heights.
+            val height = measurables.maxOfOrNull { it.maxIntrinsicHeight(share) } ?: 0
+            val placeables = measurables.map {
+                it.measure(Constraints(minWidth = share, maxWidth = share, minHeight = height))
+            }
             layout(width, placeables.maxOfOrNull { it.height } ?: 0) {
                 placeables.forEachIndexed { i, placeable -> placeable.placeRelative(i * (share + gap), 0) }
             }

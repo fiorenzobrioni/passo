@@ -128,9 +128,10 @@ class ReadmeScreenshots {
         show(state(nowMinute = 15 * 60 + 40))
         compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(TodayTags.CHART))
         compose.onNodeWithTag(TodayTags.CHART).performTouchInput {
-            // A tap at 12:55, the end of the lunch walk, pins the readout there.
+            // A tap at 12:55, the end of the lunch walk, pins the readout there. The sample day's
+            // first steps come after five, so the plot runs from 05:00 to midnight.
             val plotWidth = width - 44.dp.toPx()
-            click(Offset(plotWidth * (12 * 60 + 55) / 1_440f, height - 60.dp.toPx()))
+            click(Offset(plotWidth * (12 * 60 + 55 - 5 * 60) / (1_440f - 5 * 60), height - 60.dp.toPx()))
         }
         compose.waitForIdle()
         save("today-chart")

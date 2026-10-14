@@ -70,6 +70,7 @@ import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -360,6 +361,14 @@ private fun Ring(state: TodayUiState, format: MeasureFormatter, onCelebrated: (L
         overview.usualNow?.let {
             append(' ').append(stringResource(R.string.today_ring_description_usual, format.steps(it)))
         }
+        val metrics = overview.metrics
+        append(' ').append(
+            stringResource(
+                R.string.today_ring_description_estimates,
+                format.distance(metrics.distanceMeters).text(),
+                format.energy(metrics.activeKcal).text(),
+            ),
+        )
     }
     BoxWithConstraints(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
         val diameter = minOf(maxWidth - 64.dp, 300.dp)
@@ -376,40 +385,62 @@ private fun Ring(state: TodayUiState, format: MeasureFormatter, onCelebrated: (L
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 CountUp(overview.steps, format)
-                Text(
-                    text = stringResource(R.string.today_of_goal, format.steps(overview.goalSteps)),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Spacer(Modifier.height(6.dp))
-                if (reached) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
+                // A met goal keeps its check here: the color is never the only sign of it, and
+                // the sentence under the ring says it in words.
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    if (reached) {
                         Icon(
                             PassoIcons.Check,
                             contentDescription = null,
                             tint = PassoTheme.colors.goal,
                             modifier = Modifier.size(18.dp),
                         )
-                        Text(
-                            text = stringResource(R.string.today_goal_reached),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = PassoTheme.colors.goal,
-                        )
                     }
-                } else {
                     Text(
-                        text = format.percent(overview.progress),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary,
+                        text = stringResource(R.string.today_of_goal, format.steps(overview.goalSteps)),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+                Spacer(Modifier.height(6.dp))
+                val ink = if (reached) PassoTheme.colors.goal else MaterialTheme.colorScheme.primary
+                RingEstimates(state, format, ink)
             }
         }
     }
 }
+
+/**
+ * The day's distance and active calories under the count, where a percentage only repeated what
+ * the arc and the count already say: the first screen answers "how far" without a scroll. The
+ * "≈" says they are estimates; the tiles below say what each rests on. The calories go when the
+ * pair would not fit the ring on one line (a large text size), so the distance is never cut.
+ */
+@Composable
+private fun RingEstimates(state: TodayUiState, format: MeasureFormatter, color: Color) {
+    val metrics = state.overview.metrics
+    val distance = format.distance(metrics.distanceMeters).text()
+    val both = stringResource(R.string.today_ring_estimates, distance, format.energy(metrics.activeKcal).text())
+    val style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum")
+    val measurer = rememberTextMeasurer()
+    BoxWithConstraints(contentAlignment = Alignment.Center) {
+        // The line sits below the ring's middle, where the circle is narrower than its box.
+        val room = constraints.maxWidth * RING_LINE_SHARE
+        val fits = measurer.measure(both, style, maxLines = 1).size.width <= room
+        Text(
+            text = if (fits) both else stringResource(R.string.today_ring_estimates_distance, distance),
+            style = style,
+            color = color,
+            maxLines = 1,
+        )
+    }
+}
+
+/** The share of the ring's inner box the estimates' line may take, the circle being round. */
+private const val RING_LINE_SHARE = 0.85f
 
 /**
  * The count, in the hero's voice, counting up from zero the first time the screen shows it and
@@ -453,11 +484,8 @@ private fun Headline(state: TodayUiState, format: MeasureFormatter) {
         is Headline.ToGo -> PassoIcons.Flag
         is Headline.VersusUsual -> paceIcon(headline.pace)
     }
-    val tint = when {
-        headline is Headline.GoalReached -> PassoTheme.colors.goal
-        headline is Headline.VersusUsual && headline.pace is Pace.Ahead -> PassoTheme.colors.goal
-        else -> MaterialTheme.colorScheme.primary
-    }
+    // Green is the met goal's alone: ahead of a usual day is good news, but not that one.
+    val tint = if (headline is Headline.GoalReached) PassoTheme.colors.goal else MaterialTheme.colorScheme.primary
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -562,7 +590,9 @@ private fun TrendCard(state: TodayUiState, format: MeasureFormatter) {
                 )
                 Legend(hasUsual = trend.usual != null)
             }
-            val hours = listOf(0, 6, 12, 18, 24).map { it * 60 to axisHour(it) }
+            // The axis starts at five or earlier and ends at midnight: the quarters of the day
+            // inside it, and no label on the right edge, where midnight would repeat the left's.
+            val hours = listOf(6, 12, 18).map { it * 60 to axisHour(it) }
             DayTrendChart(
                 trend = trend,
                 goalLabel = format.steps(overview.goalSteps),
@@ -584,11 +614,19 @@ private fun TrendCard(state: TodayUiState, format: MeasureFormatter) {
     }
 }
 
-/** The line above the plot: now, or the minute under the finger. */
+/**
+ * The line above the plot: now, or the minute under the finger. Now, it leaves out today's count,
+ * which the ring just above says in large, and keeps a usual day's, which nothing else on the
+ * screen says; without a usual day the count stays, so the line is not a lone "Now".
+ */
 @Composable
 private fun Readout(point: TrendPoint?, stepsNow: Int, usualNow: Int?, format: MeasureFormatter) {
     val time = point?.let { clockTime(it.minuteOfDay) } ?: stringResource(R.string.today_trend_now)
-    val steps = if (point == null) stepsNow else point.steps
+    val steps = when {
+        point != null -> point.steps
+        usualNow == null -> stepsNow
+        else -> null
+    }
     val usual = if (point == null) usualNow else point.usual
     val stepsText = steps?.let { pluralStringResource(R.plurals.today_trend_steps, it, format.steps(it)) }
     val usualText = usual?.let { stringResource(R.string.today_trend_usual, format.steps(it)) }
@@ -656,7 +694,15 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawSwatch(color: C
 @Composable
 private fun StartOuting(onOpenSessions: () -> Unit) {
     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
-        FilledTonalButton(onClick = onOpenSessions, modifier = Modifier.testTag(TodayTags.START_OUTING)) {
+        // In the page's own primary, so a quiet way to an outing does not outshout the day.
+        FilledTonalButton(
+            onClick = onOpenSessions,
+            colors = ButtonDefaults.filledTonalButtonColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            ),
+            modifier = Modifier.testTag(TodayTags.START_OUTING),
+        ) {
             Icon(PassoIcons.Outing, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
             Text(stringResource(R.string.today_start_outing))
