@@ -741,8 +741,8 @@ private fun stepLengthValue(profile: Profile, lengths: StepLengths, format: Meas
 
 /**
  * The appearance, drawn with itself: a ring and a count in the reader's
- * palette and typeface, and the pace against a usual day in the goal's color, all consistent
- * with each other (a preview must not lie either). Every choice below changes it the
+ * palette and typeface, and the pace against a usual day in the primary, as Today draws it: green
+ * is the met goal's alone (a preview must not lie either). Every choice below changes it the
  * moment it is made. A picture, silent to a screen reader: the rows say every choice in words.
  */
 @Composable
@@ -780,8 +780,8 @@ private fun AppearancePreview(format: MeasureFormatter) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Surface(
-                    color = PassoTheme.colors.goalContainer,
-                    contentColor = PassoTheme.colors.goal,
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     shape = MaterialTheme.shapes.small,
                     modifier = Modifier.padding(top = 6.dp),
                 ) {
