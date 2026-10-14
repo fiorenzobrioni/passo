@@ -4,10 +4,13 @@
 
     <!-- L'anello -->
     <string name="today_of_goal">su %1$s passi</string>
-    <string name="today_goal_reached">Obiettivo raggiunto</string>
     <string name="today_ring_description">%1$s passi su %2$s, %3$s dell’obiettivo</string>
     <string name="today_ring_description_reached">Obiettivo raggiunto.</string>
     <string name="today_ring_description_usual">Una giornata tipica a quest’ora è a %1$s.</string>
+    <string name="today_ring_description_estimates">Stima finora: %1$s e %2$s.</string>
+    <!-- Sotto il conteggio nell’anello: distanza e calorie attive del giorno, «≈» perché sono stime. -->
+    <string name="today_ring_estimates">≈ %1$s · %2$s</string>
+    <string name="today_ring_estimates_distance">≈ %1$s</string>
 
     <!-- La frase che apre la schermata -->
     <string name="today_headline_no_steps">Ancora nessun passo, oggi</string>

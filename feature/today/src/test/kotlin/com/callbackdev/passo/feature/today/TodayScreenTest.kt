@@ -246,6 +246,7 @@ class TodayScreenTest {
             hasContentDescription("${us(state.overview.steps)} steps of 8,000", substring = true),
         ).assertIsDisplayed()
         compose.onNode(hasContentDescription("A usual day is at", substring = true)).assertExists()
+        compose.onNode(hasContentDescription("Estimated so far: ", substring = true)).assertExists()
         snapshot("today_light")
     }
 

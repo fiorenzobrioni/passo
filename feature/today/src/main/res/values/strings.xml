@@ -4,10 +4,13 @@
 
     <!-- The ring -->
     <string name="today_of_goal">of %1$s steps</string>
-    <string name="today_goal_reached">Goal reached</string>
     <string name="today_ring_description">%1$s steps of %2$s, %3$s of the goal</string>
     <string name="today_ring_description_reached">Goal reached.</string>
     <string name="today_ring_description_usual">A usual day is at %1$s by now.</string>
+    <string name="today_ring_description_estimates">Estimated so far: %1$s and %2$s.</string>
+    <!-- Under the count in the ring: the day's distance and active calories, "≈" for estimates. -->
+    <string name="today_ring_estimates">≈ %1$s · %2$s</string>
+    <string name="today_ring_estimates_distance">≈ %1$s</string>
 
     <!-- The headline: one sentence before any number -->
     <string name="today_headline_no_steps">No steps yet today</string>

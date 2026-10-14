@@ -79,8 +79,10 @@ All notable changes to Passo are documented here. The format follows
 
 ### Changed
 
-- **Today, tidied after a design review.** The ring's usual-day notch is dashed like the
-  usual day in the chart, and a day past its goal starts a second lap. Green now only means a
+- **Today, tidied after a design review.** The ring shows the day's distance and calories
+  where it showed a percentage, so they are there as soon as the app opens. The ring's
+  usual-day notch is dashed like the usual day in the chart, and a day past its goal starts a
+  second lap. Green now only means a
   met goal, and the tiles side by side are always the same height.
 - **Widgets: the family's sizes.** The line that says the count is paused, the words card's
   figures' labels and the message a card shows before it counts now use the same sizes as the
