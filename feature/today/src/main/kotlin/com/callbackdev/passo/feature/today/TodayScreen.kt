@@ -308,6 +308,7 @@ private fun Hero(
         StatusBanner(state.status, askInSettings, onAllow, onResume)
         Ring(state, format, onCelebrated)
         Headline(state, format)
+        if (state.overview.steps > 0) Summary(state, format)
     }
 }
 
@@ -453,11 +454,8 @@ private fun Headline(state: TodayUiState, format: MeasureFormatter) {
         is Headline.ToGo -> PassoIcons.Flag
         is Headline.VersusUsual -> paceIcon(headline.pace)
     }
-    val tint = when {
-        headline is Headline.GoalReached -> PassoTheme.colors.goal
-        headline is Headline.VersusUsual && headline.pace is Pace.Ahead -> PassoTheme.colors.goal
-        else -> MaterialTheme.colorScheme.primary
-    }
+    // Green is the met goal's alone: ahead of a usual day is good news, but not that one.
+    val tint = if (headline is Headline.GoalReached) PassoTheme.colors.goal else MaterialTheme.colorScheme.primary
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -504,6 +502,37 @@ private fun Headline(state: TodayUiState, format: MeasureFormatter) {
 }
 
 private const val HEADLINE_MARK = "mark"
+
+/**
+ * The day's estimates in one line under the sentence, so the first screen answers "how far" and
+ * "how much" without a scroll; the tiles below keep what each rests on. Said as estimates, as
+ * the outing's card and the notification say them.
+ */
+@Composable
+private fun Summary(state: TodayUiState, format: MeasureFormatter) {
+    val metrics = state.overview.metrics
+    val distance = format.distance(metrics.distanceMeters).text()
+    val energy = format.energy(metrics.activeKcal).text()
+    val active = format.minutes(metrics.activeMinutes).text()
+    val spoken = stringResource(R.string.today_summary_spoken, distance, energy, active)
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        // Not a full pill: at a large text size the line wraps, and a pill's ends would clip it.
+        shape = MaterialTheme.shapes.large,
+        modifier = Modifier
+            .padding(top = 12.dp, start = 24.dp, end = 24.dp)
+            .clearAndSetSemantics { contentDescription = spoken }
+            .testTag(TodayTags.SUMMARY),
+    ) {
+        Text(
+            text = stringResource(R.string.today_summary, distance, energy, active),
+            style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum"),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        )
+    }
+}
 
 private fun paceIcon(pace: Pace): ImageVector = when (pace) {
     is Pace.Ahead -> PassoIcons.TrendUp
@@ -656,7 +685,15 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawSwatch(color: C
 @Composable
 private fun StartOuting(onOpenSessions: () -> Unit) {
     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
-        FilledTonalButton(onClick = onOpenSessions, modifier = Modifier.testTag(TodayTags.START_OUTING)) {
+        // In the page's own primary, so a quiet way to an outing does not outshout the day.
+        FilledTonalButton(
+            onClick = onOpenSessions,
+            colors = ButtonDefaults.filledTonalButtonColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            ),
+            modifier = Modifier.testTag(TodayTags.START_OUTING),
+        ) {
             Icon(PassoIcons.Outing, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
             Spacer(Modifier.size(ButtonDefaults.IconSpacing))
             Text(stringResource(R.string.today_start_outing))
@@ -811,4 +848,5 @@ object TodayTags {
     const val METRICS = "today_metrics"
     const val WALKS = "today_walks"
     const val START_OUTING = "today_start_outing"
+    const val SUMMARY = "today_summary"
 }

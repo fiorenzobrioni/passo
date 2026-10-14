@@ -28,7 +28,7 @@
 
     <!-- Oggi -->
     <string name="guide_today_title">Oggi</string>
-    <string name="guide_today_p1">L’anello sono i passi di oggi rispetto all’obiettivo di oggi. La piccola tacca è dove si trova a quest’ora un giorno tipico dello stesso giorno della settimana: basta l’anello per sapere se la giornata è avanti o indietro.</string>
+    <string name="guide_today_p1">L’anello sono i passi di oggi rispetto all’obiettivo di oggi. La piccola tacca tratteggiata, come il giorno tipico nel grafico più sotto, è dove si trova a quest’ora un giorno tipico dello stesso giorno della settimana: basta l’anello per sapere se la giornata è avanti o indietro. Oltre l’obiettivo una linea sottile comincia un secondo giro, fino al doppio.</string>
     <string name="guide_sample_of_goal">su %1$s passi</string>
     <string name="guide_today_ring_caption">Un esempio: una giornata un po’ oltre la tacca del giorno tipico.</string>
     <string name="guide_today_sentence_title">La frase</string>

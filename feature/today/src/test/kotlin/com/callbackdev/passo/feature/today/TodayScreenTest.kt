@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertLeftPositionInRootIsEqualTo
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.captureToImage
+import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -318,11 +319,32 @@ class TodayScreenTest {
         show(state(minutes = emptyList(), typical = false))
 
         compose.onNodeWithText("No steps yet today", substring = true).assertIsDisplayed()
+        compose.onNodeWithTag(TodayTags.SUMMARY).assertDoesNotExist()
         compose.onNodeWithTag(
             TodayTags.LIST,
         ).performScrollToNode(hasContentDescription("Brisk minutes", substring = true))
         compose.onNode(hasContentDescription("Average cadence", substring = true)).assertDoesNotExist()
         snapshot("today_empty")
+    }
+
+    @Test
+    fun `the first screen gives the day's estimates, as estimates`() {
+        show(state())
+
+        compose.onNodeWithTag(TodayTags.SUMMARY).assertIsDisplayed()
+        compose.onNode(hasContentDescription("Estimated so far: ", substring = true)).assertIsDisplayed()
+    }
+
+    @Test
+    fun `the tiles of a pair stand as tall as each other`() {
+        show(state())
+
+        // The calories' meaning wraps to one line more than the distance's at this width.
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(TodayTags.METRICS))
+        val distance = compose.onNode(hasContentDescription("Distance:", substring = true)).getBoundsInRoot()
+        val calories = compose.onNode(hasContentDescription("Active calories:", substring = true)).getBoundsInRoot()
+        assertThat(distance.top).isEqualTo(calories.top)
+        assertThat(distance.bottom).isEqualTo(calories.bottom)
     }
 
     @Test

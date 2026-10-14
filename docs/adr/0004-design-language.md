@@ -36,7 +36,9 @@ default typeface. Phase 3 is the first real screen, so this is where the visual 
    weight of Material Symbols' outlined set. Twenty shapes did not justify a new dependency.
 7. **The Today screen's one "wow", chosen for use**: the ring carries a **notch where a usual
    day of the same weekday stands at this hour**, so ahead or behind is visible before the
-   headline says it; the day chart can be **read with a finger** (tap to pin, drag to scrub, a
+   headline says it, dashed in the ink of the chart's usual day so the two read as one thing,
+   and a day past its goal starts a **second lap**, a narrow line inside the full ring, up to
+   twice the goal (owner, 14 Oct 2026, the Today review); the day chart can be **read with a finger** (tap to pin, drag to scrub, a
    haptic tick per hour, a vertical move left to the page); the chart **draws itself in along
    time** and the count counts up the first time; a met goal **blooms once**. All of it is off
    under reduced motion, and none of it gates information.

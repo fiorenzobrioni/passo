@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -34,7 +35,13 @@ import kotlin.math.sin
 /**
  * Today's ring: the day's steps against the goal, and a notch where a usual day of the same
  * weekday stands at this hour. Ahead of the notch is ahead of your usual self; the gap between
- * the two is the pace the headline puts in words, readable at a glance before it is read.
+ * the two is the pace the headline puts in words, readable at a glance before it is read. The
+ * notch is drawn as the chart draws a usual day, dashed in the same ink, so the two read as one
+ * thing.
+ *
+ * Past the goal the ring starts a second lap, a narrower line in the goal's container color
+ * running inside the full ring, so a day well past its goal still looks different from one
+ * that just met it. It stops at twice the goal.
  *
  * The arc sweeps in from zero when the ring first appears and follows the count with the
  * spatial spring; a met goal turns it to the goal color, and the moment it is met (with the
@@ -59,13 +66,13 @@ fun ProgressRing(
     content: @Composable BoxScope.() -> Unit,
 ) {
     val reduced = reducedMotion()
-    val sweep = remember { Animatable(if (reduced) progress.coerceIn(0f, 1f) else 0f) }
+    val sweep = remember { Animatable(if (reduced) progress.coerceIn(0f, MAX_LAPS) else 0f) }
     val tint = remember { Animatable(if (reached) 1f else 0f) }
     val bloom = remember { Animatable(0f) }
     val currentOnCelebrated = rememberUpdatedState(onCelebrated)
 
     LaunchedEffect(progress, reduced) {
-        val target = progress.coerceIn(0f, 1f)
+        val target = progress.coerceIn(0f, MAX_LAPS)
         if (reduced) sweep.snapTo(target) else sweep.animateTo(target, spring(dampingRatio = 0.85f, stiffness = 120f))
     }
     LaunchedEffect(reached, reduced) {
@@ -88,7 +95,7 @@ fun ProgressRing(
     val accent = MaterialTheme.colorScheme.primary
     val goal = PassoTheme.colors.goal
     val goalTrack = PassoTheme.colors.goalContainer
-    val notch = MaterialTheme.colorScheme.onSurface
+    val notch = MaterialTheme.colorScheme.onSurfaceVariant
     val ground = MaterialTheme.colorScheme.surface
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
@@ -106,13 +113,28 @@ fun ProgressRing(
                 drawArc(
                     arcColor,
                     -90f,
-                    360f * sweep.value,
+                    360f * sweep.value.coerceAtMost(1f),
                     false,
                     topLeft,
                     arcSize,
                     style = Stroke(stroke, cap = StrokeCap.Round),
                 )
-                drawHead(center, diameter / 2, sweep.value, stroke, ground)
+                // Only on a ring still filling: on a closed one the dot would sit at the top as a
+                // leftover.
+                if (progress < 1f) drawHead(center, diameter / 2, sweep.value, stroke, ground)
+            }
+            // Keyed on the target, not the sweep: the spring overshoots 1 on its way to a met goal,
+            // and that must not flash a second lap.
+            if (progress > 1f && sweep.value > 1f) {
+                drawArc(
+                    goalTrack,
+                    -90f,
+                    360f * (sweep.value - 1f),
+                    false,
+                    topLeft,
+                    arcSize,
+                    style = Stroke(stroke * SECOND_LAP_WIDTH, cap = StrokeCap.Round),
+                )
             }
             if (usualProgress != null && usualProgress > 0f && usualProgress <= 1f && t < 1f) {
                 drawNotch(center, diameter / 2, usualProgress, stroke, notch.copy(alpha = 1f - t), ground)
@@ -142,7 +164,10 @@ private fun DrawScope.drawHead(center: Offset, radius: Float, share: Float, stro
     drawCircle(ground.copy(alpha = 0.9f), radius = stroke * 0.18f, center = at)
 }
 
-/** The usual-day notch: a bar across the track, on a halo of the ground so it reads over any arc. */
+/**
+ * The usual-day notch: a dashed bar across the track, in the ink and the dash of the chart's usual
+ * day, on a halo of the ground so it reads over any arc.
+ */
 private fun DrawScope.drawNotch(center: Offset, radius: Float, share: Float, stroke: Float, ink: Color, ground: Color) {
     val angle = (share * 360f - 90f) * DEG
     val direction = Offset(cos(angle), sin(angle))
@@ -150,9 +175,21 @@ private fun DrawScope.drawNotch(center: Offset, radius: Float, share: Float, str
     val from = center + direction * (radius - reach)
     val to = center + direction * (radius + reach)
     drawLine(ground, from, to, strokeWidth = 7.dp.toPx(), cap = StrokeCap.Round)
-    drawLine(ink, from, to, strokeWidth = 3.dp.toPx(), cap = StrokeCap.Round)
+    drawLine(
+        ink,
+        from,
+        to,
+        strokeWidth = 3.dp.toPx(),
+        pathEffect = PathEffect.dashPathEffect(floatArrayOf(3.dp.toPx(), 2.5.dp.toPx())),
+    )
 }
 
 private const val DEG = (PI / 180).toFloat()
 private const val BLOOM_MILLIS = 1_100
 private const val BLOOM_REACH_DP = 14
+
+/** The second lap ends at twice the goal: past that the ring has nothing more to say. */
+private const val MAX_LAPS = 2f
+
+/** The second lap's width, as a share of the ring's: narrow enough to read as a line inside it. */
+private const val SECOND_LAP_WIDTH = 0.4f
