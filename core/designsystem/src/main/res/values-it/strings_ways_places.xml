@@ -888,6 +888,7 @@
     <string name="way_note_cartagena_santo_domingo">La chiesa di Santo Domingo, su questa piazza, fu costruita tra il 1565 circa e il 1630.</string>
     <string name="way_note_cartagena_torre_reloj">La porta principale della città murata prende il nome dall’orologio posto in cima nel Settecento.</string>
     <string name="way_note_cartagena_trinidad">L’11 novembre 1811 la gente di Getsemaní, con Pedro Romero, spinse Cartagena a dichiarare l’indipendenza.</string>
+    <string name="way_note_cassio">Tra Cassio e Chiastre i Salti del Diavolo, una fascia di roccia conglomerata, tagliano la val Baganza.</string>
     <string name="way_note_castrojeriz">Il cammino attraversa Castrojeriz lungo un’unica via di oltre 1.500 metri, la più lunga di tutto il percorso.</string>
     <string name="way_note_chatillon">A Châtillon si apre la Valtournenche, la valle che sale fino al Cervino.</string>
     <string name="way_note_citta_di_castello">Città di Castello era la romana Tifernum Tiberinum; Plinio aveva una villa nei dintorni e vi fece erigere un tempio.</string>
@@ -916,6 +917,8 @@
     <string name="way_note_dakar_soumbedioune">Sulla Corniche, accanto alla Médina, il mercato artigiano di Soumbédioune è uno dei più noti di Dakar.</string>
     <string name="way_note_dakar_station">Davanti alla stazione stanno Demba e Dupont, un tirailleur senegalese e un soldato francese, statue inaugurate nel 1923.</string>
     <string name="way_note_dakar_ucad">Nata da una scuola di medicina dell’Africa occidentale francese, l’università porta il nome dello storico Cheikh Anta Diop.</string>
+    <string name="way_note_echevennoz">Echevennoz è una frazione di Étroubles, la romana Restapolis, allora il centro principale della valle del Gran San Bernardo.</string>
+    <string name="way_note_el_burgo_ranero">Nel Seicento il pellegrino Domenico Laffi descrisse le capanne di El Burgo Ranero, col tetto di paglia.</string>
     <string name="way_note_estella">Il re Sancho Ramírez fondò Estella intorno al 1090 sulla via dei pellegrini, e vi giunsero coloni dalla Francia.</string>
     <string name="way_note_fez_andalusian_mosque">Fondata nell’859 e 860 da Maryam al-Fihri, sorella di Fatima, la moschea è nota per la sua alta porta nord di zellige e legno scolpito.</string>
     <string name="way_note_fez_bou_inania">Costruita dal 1350 al 1355 per il sultano merinide Abu Inan, la madrasa era anche moschea del venerdì, con un suo minareto; accanto c’è un orologio ad acqua.</string>
@@ -1058,6 +1061,7 @@
     <string name="way_note_marrakech_mouassine">Il sultano saadiano Abdallah al-Ghalib costruì questa moschea, con una fontana, un hammam e una biblioteca, su terreni lasciati liberi quando gli ebrei furono trasferiti nel nuovo mellah.</string>
     <string name="way_note_marrakech_saadian_tombs">Ahmad al-Mansur, il più potente dei sultani saadiani, riposa al centro della Sala delle dodici colonne, tra le tombe della sua dinastia.</string>
     <string name="way_note_massa">Massa compare in una mappa stradale romana come «Ad Tabernas Frigidas», forse una sosta sulla via da Pisa a Luni.</string>
+    <string name="way_note_medesano">Medesano, o un borgo lì vicino, era Metane, una tappa che l’arcivescovo Sigerico di Canterbury annotò nel suo viaggio del 990.</string>
     <string name="way_note_melbourne_exhibition">Costruito per l’esposizione internazionale del 1880, il palazzo con i suoi giardini è patrimonio dell’umanità dal 2004.</string>
     <string name="way_note_melbourne_federation_square">Aperta nel 2002, la piazza con le sue gallerie poggia su una piattaforma di cemento sopra i binari.</string>
     <string name="way_note_melbourne_flinders_street">La prima stazione qui servì nel 1854 la prima ferrovia d’Australia; gli orologi sopra l’ingresso indicano il prossimo treno di ogni linea.</string>
@@ -1142,6 +1146,7 @@
     <string name="way_note_pietralunga">Pietralunga un tempo si chiamava Pratalonga, per i ricchi pascoli che la circondavano.</string>
     <string name="way_note_pieve_santo_stefano">Dal 1984 Pieve Santo Stefano custodisce l’archivio nazionale di diari, lettere e memorie.</string>
     <string name="way_note_poggio_bustone">Poggio Bustone è uno dei quattro santuari francescani della Valle Santa reatina.</string>
+    <string name="way_note_poggio_san_lorenzo">La chiesa di San Lorenzo, a Poggio San Lorenzo, custodisce un dipinto di fine Cinquecento con il martirio del santo.</string>
     <string name="way_note_ponferrada">Il castello di Ponferrada appartenne ai Templari.</string>
     <string name="way_note_pont_saint_martin">Il ponte romano di Pont-Saint-Martin, un’unica arcata, è in piedi dal I secolo a.C.</string>
     <string name="way_note_ponte_d_arbia">L’arcivescovo Sigerico vi sostò nel 990 e annotò la tappa semplicemente come «Arbia».</string>

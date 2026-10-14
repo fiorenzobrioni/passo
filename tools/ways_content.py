@@ -287,7 +287,10 @@ VIA_DI_FRANCESCO = Way(
              note_en="Rieti calls itself the centre of Italy: a stone in Piazza San Rufo marks the spot.",
              note_it="Rieti si dice il centro d'Italia: una pietra in Piazza San Rufo segna il punto."),
         # Source: Wikipedia, Rieti.
-        Stop("poggio_san_lorenzo", "Poggio San Lorenzo", "Poggio San Lorenzo", 42.2525, 12.8433),
+        Stop("poggio_san_lorenzo", "Poggio San Lorenzo", "Poggio San Lorenzo", 42.2525, 12.8433,
+             note_en="Poggio San Lorenzo's church of Saint Lawrence keeps a late-16th-century painting of the saint's martyrdom.",
+             note_it="La chiesa di San Lorenzo, a Poggio San Lorenzo, custodisce un dipinto di fine Cinquecento con il martirio del santo."),
+        # Source: Wikipedia (de), Poggio San Lorenzo (late Renaissance); italia.it, Poggio San Lorenzo (Ministero del Turismo: late 16th century). Its Roman walls are left out: the two place them differently.
         Stop("ponticelli", "Ponticelli", "Ponticelli", 42.1914, 12.7969,
              note_en="Near Ponticelli stands Santa Maria delle Grazie, a sanctuary with a Franciscan convent.",
              note_it="Vicino a Ponticelli sorge Santa Maria delle Grazie, un santuario con un convento francescano."),
@@ -409,7 +412,10 @@ CAMINO_FRANCES = Way(
              note_en="Terradillos takes its name from the Knights Templar, who held it in the Middle Ages.",
              note_it="Terradillos prende il nome dai Templari, che lo possedettero nel Medioevo."),
         # Source: Wikipedia (es), Terradillos de los Templarios; Wikipedia (de), Terradillos de los Templarios.
-        Stop("el_burgo_ranero", "El Burgo Ranero", "El Burgo Ranero", 42.4228, -5.2208),
+        Stop("el_burgo_ranero", "El Burgo Ranero", "El Burgo Ranero", 42.4228, -5.2208,
+             note_en="In the 17th century the pilgrim Domenico Laffi described El Burgo Ranero's huts, roofed with straw.",
+             note_it="Nel Seicento il pellegrino Domenico Laffi descrisse le capanne di El Burgo Ranero, col tetto di paglia."),
+        # Source: Wikipedia (de), El Burgo Ranero (Laffi, 1673, its pallozas); Asociación de Municipios del Camino de Santiago, El Burgo Ranero (amcsantiago.com: Laffi's "cabañas cubiertas de paja"; a palloza is thatched by definition). The year is left out: the German only. So is the frogs of its name, a "soll" in the German alone.
         Stop("mansilla", "Mansilla de las Mulas", "Mansilla de las Mulas", 42.4994, -5.4167,
              note_en="Mansilla keeps stretches of its old walls; pilgrims leave it by the bridge over the Esla, for León.",
              note_it="Mansilla conserva tratti delle sue antiche mura; i pellegrini ne escono dal ponte sull'Esla, verso León."),
@@ -511,7 +517,10 @@ VIA_FRANCIGENA = Way(
              note_en="Travellers have found a hospice at this pass since about 1050, when Bernard of Aosta founded it.",
              note_it="Su questo colle i viaggiatori trovano un ospizio dal 1050 circa, quando lo fondò Bernardo d'Aosta."),
         # Source: Wikipedia, Great St Bernard Hospice.
-        Stop("echevennoz", "Echevennoz", "Echevennoz", 45.8122, 7.2522),
+        Stop("echevennoz", "Echevennoz", "Echevennoz", 45.8122, 7.2522,
+             note_en="Echevennoz belongs to Étroubles, the Roman Restapolis, then the main centre of the Great St Bernard valley.",
+             note_it="Echevennoz è una frazione di Étroubles, la romana Restapolis, allora il centro principale della valle del Gran San Bernardo."),
+        # Source: Wikipedia, Étroubles; Wikipedia (fr), Étroubles (both list Échevennoz among its hamlets); Wikipedia (it), Étroubles. Its Roman garrison is left out: a "perhaps" in the English, a "probably" in the Italian, absent from the French.
         Stop("aosta", "Aosta", "Aosta", 45.7372, 7.3201,
              note_en="Aosta was Augusta Praetoria, a Roman town founded in 25 BC; its Arch of Augustus still stands.",
              note_it="Aosta era Augusta Praetoria, fondata dai Romani nel 25 a.C.; il suo Arco d'Augusto è ancora in piedi."),
@@ -580,8 +589,14 @@ VIA_FRANCIGENA = Way(
              note_en="On Fidenza's cathedral a statue of an apostle holds a scroll that shows pilgrims the way to Rome.",
              note_it="Sul duomo di Fidenza la statua di un apostolo regge una pergamena che indica ai pellegrini la via per Roma."),
         # Source: Wikipedia, Fidenza; Wikipedia (it), Duomo di Fidenza. The apostle is not named: Simon Peter in the English, Simon in the Italian.
-        Stop("medesano", "Medesano", "Medesano", 44.7553, 10.1406),
-        Stop("cassio", "Cassio", "Cassio", 44.5850, 10.0650),
+        Stop("medesano", "Medesano", "Medesano", 44.7553, 10.1406,
+             note_en="Medesano, or a village close by, was Metane, a stop that Archbishop Sigeric of Canterbury listed on his journey of 990.",
+             note_it="Medesano, o un borgo lì vicino, era Metane, una tappa che l'arcivescovo Sigerico di Canterbury annotò nel suo viaggio del 990."),
+        # Source: Wikipedia, Via Francigena (Metane as Costamezzana, Medesano); Wikipedia (it), Medesano (Medesano itself, in 990): hence "or a village close by". Charles VIII's night in its castle after Fornovo is in the Italian only.
+        Stop("cassio", "Cassio", "Cassio", 44.5850, 10.0650,
+             note_en="Between Cassio and Chiastre the Salti del Diavolo, the Devil's Leaps, a band of conglomerate rock, cut across the Baganza valley.",
+             note_it="Tra Cassio e Chiastre i Salti del Diavolo, una fascia di roccia conglomerata, tagliano la val Baganza."),
+        # Source: Wikipedia (it), Salti del Diavolo; Regione Emilia-Romagna, Museo-giardino geologico, "Conglomerati" (ambiente.regione.emilia-romagna.it). Their height (up to 10 m, or tens of metres), their age and the hermit's legend are left out: one source each.
         Stop("berceto", "Berceto", "Berceto", 44.5097, 10.0128,
              note_en="Berceto's cathedral bears the name of Moderan, a bishop of Rennes who left relics here on his pilgrimage to Rome.",
              note_it="Il duomo di Berceto porta il nome di Moderanno, vescovo di Rennes che vi lasciò delle reliquie nel suo pellegrinaggio a Roma."),
