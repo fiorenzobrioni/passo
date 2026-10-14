@@ -294,6 +294,14 @@ private fun RingSample(format: MeasureFormatter) {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                Text(
+                    stringResource(
+                        R.string.guide_sample_ring_distance,
+                        format.distance(SAMPLE_STEPS * SAMPLE_STEP_LENGTH_M).text(),
+                    ),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
             }
         }
     }
