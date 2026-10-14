@@ -521,8 +521,9 @@ private fun Summary(state: TodayUiState, format: MeasureFormatter) {
         shape = MaterialTheme.shapes.large,
         modifier = Modifier
             .padding(top = 12.dp, start = 24.dp, end = 24.dp)
-            .clearAndSetSemantics { contentDescription = spoken }
-            .testTag(TodayTags.SUMMARY),
+            // The tag ahead of the clearing: a semantics modifier inside it would be cleared too.
+            .testTag(TodayTags.SUMMARY)
+            .clearAndSetSemantics { contentDescription = spoken },
     ) {
         Text(
             text = stringResource(R.string.today_summary, distance, energy, active),
