@@ -888,6 +888,7 @@
     <string name="way_note_cartagena_santo_domingo">The church of Santo Domingo, on this square, was built between about 1565 and 1630.</string>
     <string name="way_note_cartagena_torre_reloj">The main gate of the walled city takes its name from the clock set on it in the 18th century.</string>
     <string name="way_note_cartagena_trinidad">On 11 November 1811 the people of Getsemaní, with Pedro Romero, pushed Cartagena to declare its independence.</string>
+    <string name="way_note_cassio">Between Cassio and Chiastre the Salti del Diavolo, the Devil’s Leaps, a band of conglomerate rock, cut across the Baganza valley.</string>
     <string name="way_note_castrojeriz">The way crosses Castrojeriz along a single street over 1,500 metres long, the longest on the whole route.</string>
     <string name="way_note_chatillon">At Châtillon the Valtournenche opens, the valley that climbs to the Matterhorn.</string>
     <string name="way_note_citta_di_castello">Città di Castello was the Roman Tifernum Tiberinum; Pliny had a villa nearby and built a temple here.</string>
@@ -916,6 +917,8 @@
     <string name="way_note_dakar_soumbedioune">On the Corniche, beside the Médina, Soumbédioune’s craft market is one of the best known in Dakar.</string>
     <string name="way_note_dakar_station">In front of the station stand Demba and Dupont, a Senegalese tirailleur and a French soldier, statues unveiled in 1923.</string>
     <string name="way_note_dakar_ucad">Grown from a medical school of French West Africa, the university bears the name of the historian Cheikh Anta Diop.</string>
+    <string name="way_note_echevennoz">Echevennoz belongs to Étroubles, the Roman Restapolis, then the main centre of the Great St Bernard valley.</string>
+    <string name="way_note_el_burgo_ranero">In the 17th century the pilgrim Domenico Laffi described El Burgo Ranero’s huts, roofed with straw.</string>
     <string name="way_note_estella">King Sancho Ramírez founded Estella around 1090 on the pilgrims’ road, and settlers came from France.</string>
     <string name="way_note_fez_andalusian_mosque">Founded in 859 and 860 by Maryam al-Fihri, Fatima’s sister, the mosque is known for its tall north gate of zellij and carved wood.</string>
     <string name="way_note_fez_bou_inania">Built from 1350 to 1355 for the Marinid sultan Abu Inan, the madrasa was also a Friday mosque, with its own minaret; a water clock stands beside it.</string>
@@ -1058,6 +1061,7 @@
     <string name="way_note_marrakech_mouassine">The Saadian sultan Abdallah al-Ghalib built this mosque, with a fountain, a hammam and a library, on land left free when the Jews were moved to the new mellah.</string>
     <string name="way_note_marrakech_saadian_tombs">Ahmad al-Mansur, the most powerful of the Saadian sultans, lies at the centre of the Chamber of the Twelve Columns, among his dynasty’s tombs.</string>
     <string name="way_note_massa">Massa appears on a Roman road map as Ad Tabernas Frigidas, perhaps a stop on the road from Pisa to Luni.</string>
+    <string name="way_note_medesano">Medesano, or a village close by, was Metane, a stop that Archbishop Sigeric of Canterbury listed on his journey of 990.</string>
     <string name="way_note_melbourne_exhibition">Built for the international exhibition of 1880, the hall and its gardens have been a World Heritage Site since 2004.</string>
     <string name="way_note_melbourne_federation_square">Opened in 2002, the square and its galleries stand on a concrete deck above the railway lines.</string>
     <string name="way_note_melbourne_flinders_street">The first station here served Australia’s first railway in 1854; the clocks over the entrance show each line’s next train.</string>
@@ -1142,6 +1146,7 @@
     <string name="way_note_pietralunga">Pietralunga was once Pratalonga, the long meadow, after the rich pastures around it.</string>
     <string name="way_note_pieve_santo_stefano">Since 1984 Pieve Santo Stefano has kept Italy’s national archive of diaries, letters and memoirs.</string>
     <string name="way_note_poggio_bustone">Poggio Bustone is one of the four Franciscan sanctuaries of the Rieti valley, the Holy Valley.</string>
+    <string name="way_note_poggio_san_lorenzo">Poggio San Lorenzo’s church of Saint Lawrence keeps a late-16th-century painting of the saint’s martyrdom.</string>
     <string name="way_note_ponferrada">Ponferrada’s castle was held by the Knights Templar.</string>
     <string name="way_note_pont_saint_martin">Pont-Saint-Martin’s Roman bridge, a single arch, has stood since the 1st century BC.</string>
     <string name="way_note_ponte_d_arbia">Archbishop Sigeric stopped here in 990 and wrote the stop down simply as Arbia.</string>

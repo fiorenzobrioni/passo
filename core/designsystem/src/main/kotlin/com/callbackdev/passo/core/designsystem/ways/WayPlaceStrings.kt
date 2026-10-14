@@ -916,6 +916,7 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "cartagena_santo_domingo" -> R.string.way_note_cartagena_santo_domingo
     "cartagena_torre_reloj" -> R.string.way_note_cartagena_torre_reloj
     "cartagena_trinidad" -> R.string.way_note_cartagena_trinidad
+    "cassio" -> R.string.way_note_cassio
     "castrojeriz" -> R.string.way_note_castrojeriz
     "chatillon" -> R.string.way_note_chatillon
     "citta_di_castello" -> R.string.way_note_citta_di_castello
@@ -944,6 +945,8 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "dakar_soumbedioune" -> R.string.way_note_dakar_soumbedioune
     "dakar_station" -> R.string.way_note_dakar_station
     "dakar_ucad" -> R.string.way_note_dakar_ucad
+    "echevennoz" -> R.string.way_note_echevennoz
+    "el_burgo_ranero" -> R.string.way_note_el_burgo_ranero
     "estella" -> R.string.way_note_estella
     "fez_andalusian_mosque" -> R.string.way_note_fez_andalusian_mosque
     "fez_bou_inania" -> R.string.way_note_fez_bou_inania
@@ -1086,6 +1089,7 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "marrakech_mouassine" -> R.string.way_note_marrakech_mouassine
     "marrakech_saadian_tombs" -> R.string.way_note_marrakech_saadian_tombs
     "massa" -> R.string.way_note_massa
+    "medesano" -> R.string.way_note_medesano
     "melbourne_exhibition" -> R.string.way_note_melbourne_exhibition
     "melbourne_federation_square" -> R.string.way_note_melbourne_federation_square
     "melbourne_flinders_street" -> R.string.way_note_melbourne_flinders_street
@@ -1170,6 +1174,7 @@ fun placeNoteRes(key: String): Int? = when (key) {
     "pietralunga" -> R.string.way_note_pietralunga
     "pieve_santo_stefano" -> R.string.way_note_pieve_santo_stefano
     "poggio_bustone" -> R.string.way_note_poggio_bustone
+    "poggio_san_lorenzo" -> R.string.way_note_poggio_san_lorenzo
     "ponferrada" -> R.string.way_note_ponferrada
     "pont_saint_martin" -> R.string.way_note_pont_saint_martin
     "ponte_d_arbia" -> R.string.way_note_ponte_d_arbia
