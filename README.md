@@ -49,8 +49,8 @@ calories are estimates, and Passo says so.
     <td align="center"><img src="docs/screenshots/outing-editor.png" width="250" alt="Editing an outing: the signals at 25, 50 and 75 percent, the vibrations to try, and the voice through headphones"><br><sub><b>Signals</b> you can feel or hear</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/way.png" width="250" alt="The Via Francigena under way: the map from the Great St Bernard Pass to Rome with the part walked, past Monteriggioni, 280 km to Rome"><br><sub><b>Ways</b>: a pilgrim route, walked from home</sub></td>
-    <td align="center"><img src="docs/screenshots/way-credential.png" width="250" alt="The credential: a stamp for each stage reached, from the Great St Bernard Pass to Cassio, each with its day"><br><sub><b>The credential</b>, a stamp a stage</sub></td>
+    <td align="center"><img src="docs/screenshots/way.png" width="250" alt="The Via Francigena under way: the map from the Great St Bernard Pass to Rome with the part walked, past Monteriggioni, 280 km to Rome"><br><sub><b>Ways</b>: a long way, walked from home</sub></td>
+    <td align="center"><img src="docs/screenshots/way-stamps.png" width="250" alt="The stamps: one for each stage reached, from the Great St Bernard Pass to Cassio, each with its day"><br><sub><b>The stamps</b>, one a stage</sub></td>
     <td align="center"><img src="docs/screenshots/way-start.png" width="250" alt="Starting a way: from today, from 1 January (you would already be past Vetralla), or from your first day with Passo"><br><sub><b>A start in the past</b> places you at once</sub></td>
   </tr>
   <tr>
@@ -92,7 +92,7 @@ Italian). The phone's status bar is not in the pictures. The command that redraw
 - 🎯 **Outings**: a walk or run with a goal, with vibrations or a voice at the milestones you choose.
 - ⏱️ **Japanese interval walk**: 3 slow minutes and 3 fast ones, five sets or more, each change told with a vibration of its own so the phone stays in your pocket; at the end, how many fast intervals were at pace.
 - 🏆 **Insights**: your streak, your best day, week and month, and the averages.
-- 🗺️ **Ways**: five pilgrim ways (Via degli Dei, Camino Portugués, Via di Francesco, Camino de Santiago, Via Francigena) walked from home, stage by stage, with a stamp for each. No location: only your distance.
+- 🗺️ **Ways**: five long ways (Via degli Dei, Camino Portugués, Via di Francesco, Camino de Santiago, Via Francigena) walked from home, stage by stage, with a stamp for each. No location: only your distance.
 - 🏛️ **City walks**: Milan, Rome, Paris, London, Madrid, Berlin, Vienna, Porto, Amsterdam and Prague in Europe, Lima, Cusco, New York, Rio de Janeiro, Mexico City, Buenos Aires, San Francisco, Québec, Havana and Cartagena in the Americas, Tokyo, Sydney, Seoul, Beijing, Hong Kong, Singapore, Bangkok, Kyoto, Hanoi and Melbourne in Asia and Oceania, Cairo, Cape Town, Marrakech, Tunis, Alexandria, Dakar, Addis Ababa, Fez, Zanzibar and Luxor in Africa, walked where you are in one outing or a few, about 5 km or about 10. Each continent has its page, with a map of where its cities are and which you have walked. Each place is told as your steps reach it, with a short vibration and, if you like, a line about it in your headphones.
 - 📏 **Measure your step**: walk a distance you know and Passo works out your step length. No GPS.
 - 🏠 **Two widgets**: At a glance and In words, resizable, in six colours and any opacity.

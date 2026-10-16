@@ -5,7 +5,7 @@ import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.model.WayKind
 
 /**
- * A stop on a way: a stage (a stamp in the credential, a notification when reached) or, when
+ * A stop on a way: a stage (a stamp, a notification when reached) or, when
  * [stage] is false, a place on the way worth its line (the sanctuary of San Luca, the Cisa
  * Pass). [key] names its strings; [distanceMeters] is where it falls along the way's line.
  */
@@ -50,7 +50,7 @@ class Way internal constructor(private val source: WaySource) {
     val lengthMeters: Int get() = source.lengthMeters
     val stops: List<WayStop> get() = source.stops
 
-    /** The stops that are stages: the credential's stamps. */
+    /** The stops that are stages: the stamps. */
     val stages: List<WayStop> by lazy { stops.filter { it.stage } }
 
     /** The map, decoded the first time it is asked for (a few thousand points). */
@@ -105,7 +105,7 @@ class WayMap(
     val towns: List<GeoPath> = emptyList(),
 )
 
-/** The five ways, shortest first, as the Ways page lists them; and the city walks. */
+/** The ways, and the city walks. */
 object Ways {
     private val everything: List<Way> by lazy { WayId.entries.map { Way(WayData.source(it)) } }
 
@@ -114,6 +114,13 @@ object Ways {
 
     /** The city walks, walked in outings, grouped by city in the order they are listed. */
     val walks: List<Way> by lazy { everything.filter { it.kind == WayKind.WALK } }
+
+    /**
+     * The ways of [continent], shortest first, as the Ways page lists them under it (PLANNING.md
+     * §11 Phase 14): empty for a continent with no way yet, which the page leaves out.
+     */
+    fun waysIn(continent: Continent): List<Way> =
+        all.filter { it.id.continent == continent }.sortedBy { it.lengthMeters }
 
     /** The walks of [continent]'s cities, in the order they are listed. */
     fun walksIn(continent: Continent): List<Way> = walks.filter { it.id.continent == continent }

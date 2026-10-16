@@ -44,7 +44,7 @@ class WayProgress(
     /** The next stage, skipping the places between; null once the way is finished. */
     val nextStage: WayStop? get() = way.stops.drop(reached.size).firstOrNull { it.stage }
 
-    /** The stages reached: the stamps in the credential. */
+    /** The stages reached: the stamps. */
     val stamps: List<StopReached> get() = reached.filter { it.stop.stage }
 
     fun metersTo(stop: WayStop): Double = (stop.distanceMeters - walkedMeters).coerceAtLeast(0.0)

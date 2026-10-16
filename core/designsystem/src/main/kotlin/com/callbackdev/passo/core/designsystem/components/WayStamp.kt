@@ -36,10 +36,10 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * One stamp of a way's credential (PLANNING.md §11 Phase 11): the stage's name and the day it
+ * One of a way's stamps (PLANNING.md §11 Phase 11): the stage's name and the day it
  * was reached, inside a double ring, set down a little askew as a stamp is. A generic stamp,
  * drawn in code, never an official one. Each stage keeps its own tilt and ink ([seed]), so a
- * credential reads the same every time it is opened.
+ * way's stamps read the same every time they are opened.
  *
  * A stage not reached yet is its place on the page: a dotted ring and its name, no ink.
  *

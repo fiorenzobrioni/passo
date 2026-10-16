@@ -192,7 +192,7 @@ internal fun DeleteJourney(walk: Boolean, onDelete: () -> Unit) {
 
 /**
  * One way (PLANNING.md §11 Phase 11). Its map first, then one sentence of where the reader
- * stands (or, for a way not started, what it would take), the credential with a stamp for
+ * stands (or, for a way not started, what it would take), the stamps, one for
  * each stage reached, and the stages in words: the map's equivalent for TalkBack, each place
  * said once it is near. A journey opened from "Your ways" shows that journey; the way opened
  * from the list shows the journey under way on it, or the way itself, ready to start.
@@ -280,19 +280,19 @@ private fun WayPage(state: WaysUiState, way: Way, view: JourneyView?, actions: W
             }
         }
         if (progress != null) {
-            item(key = "credential-header") {
+            item(key = "stamps-header") {
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Header(stringResource(R.string.way_group_credential))
+                    Header(stringResource(R.string.way_group_stamps))
                     Text(
-                        text = stringResource(R.string.way_credential_caption),
+                        text = stringResource(R.string.way_stamps_caption),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 20.dp),
                     )
                 }
             }
-            item(key = "credential") {
-                Credential(state, way, progress)
+            item(key = "stamps") {
+                Stamps(state, way, progress)
             }
         }
         item(key = "stages-header") { Header(stringResource(R.string.way_group_stages)) }
@@ -474,10 +474,10 @@ private fun Standing(state: WaysUiState, view: JourneyView, format: MeasureForma
     }
 }
 
-/** The credential: a stamp for each stage reached, then the stages ahead as their places. */
+/** The stamps: one for each stage reached, then the stages ahead as their places. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun Credential(state: WaysUiState, way: Way, progress: WayProgress) {
+internal fun Stamps(state: WaysUiState, way: Way, progress: WayProgress) {
     val reached = progress.reached.associateBy { it.stop.key }
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),

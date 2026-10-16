@@ -3,7 +3,7 @@
     <!-- La pagina dei Cammini (PLANNING.md §11 Fase 11) -->
     <string name="ways_title">Cammini</string>
     <string name="ways_back">Indietro</string>
-    <string name="ways_intro">Percorri un cammino dei pellegrini o una città da dove sei, portato avanti dai tuoi passi: un cammino dalla distanza dei tuoi giorni, una città dalle tue uscite. Nessuna posizione, solo i tuoi passi.</string>
+    <string name="ways_intro">Percorri un lungo cammino o una città da dove sei, portato avanti dai tuoi passi: un cammino dalla distanza dei tuoi giorni, una città dalle tue uscite. Nessuna posizione, solo i tuoi passi.</string>
     <string name="ways_group_ways">I cammini</string>
     <string name="ways_group_yours">I tuoi cammini</string>
     <string name="ways_under_way">In corso</string>
@@ -33,8 +33,8 @@
         <item quantity="other">%1$s in %2$d giorni, dal %3$s al %4$s.</item>
     </plurals>
     <string name="way_left_detail">%1$s, dal %2$s al %3$s.</string>
-    <string name="way_group_credential">Credenziale</string>
-    <string name="way_credential_caption">Un timbro per ogni tappa raggiunta, con il suo giorno.</string>
+    <string name="way_group_stamps">Timbri</string>
+    <string name="way_stamps_caption">Un timbro per ogni tappa raggiunta, con il suo giorno.</string>
     <string name="way_group_stages">Tappe</string>
     <string name="way_stop_mark">%1$s dalla partenza</string>
     <string name="way_stop_reached">Raggiunta il %1$s</string>
@@ -123,7 +123,7 @@
     <string name="walk_voice_install">Installa una voce</string>
     <string name="walk_voice_no_engine">Questo telefono non ha un motore di sintesi vocale: ogni luogo è solo una vibrazione.</string>
     <string name="walk_group_places">Luoghi</string>
-    <string name="walk_credential_caption">Un timbro per ogni luogo raggiunto, con il suo giorno.</string>
+    <string name="walk_stamps_caption">Un timbro per ogni luogo raggiunto, con il suo giorno.</string>
     <string name="walk_walked_on">Percorsa il %1$s: %2$s.</string>
     <string name="walk_walk_again">Percorrila di nuovo</string>
 </resources>

@@ -3,7 +3,7 @@
     <!-- The Ways page (PLANNING.md §11 Phase 11) -->
     <string name="ways_title">Ways</string>
     <string name="ways_back">Back</string>
-    <string name="ways_intro">Walk a pilgrim way or a city from wherever you are, carried along it by your steps: a way by the distance of your days, a city by your outings. No location, only your steps.</string>
+    <string name="ways_intro">Walk a long way or a city from wherever you are, carried along it by your steps: a way by the distance of your days, a city by your outings. No location, only your steps.</string>
     <string name="ways_group_ways">The ways</string>
     <string name="ways_group_yours">Your ways</string>
     <string name="ways_under_way">Under way</string>
@@ -31,8 +31,8 @@
         <item quantity="other">%1$s in %2$d days, from %3$s to %4$s.</item>
     </plurals>
     <string name="way_left_detail">%1$s, from %2$s to %3$s.</string>
-    <string name="way_group_credential">Credential</string>
-    <string name="way_credential_caption">A stamp for each stage reached, with its day.</string>
+    <string name="way_group_stamps">Stamps</string>
+    <string name="way_stamps_caption">A stamp for each stage reached, with its day.</string>
     <string name="way_group_stages">Stages</string>
     <string name="way_stop_mark">%1$s from the start</string>
     <string name="way_stop_reached">Reached on %1$s</string>
@@ -118,7 +118,7 @@
     <string name="walk_voice_install">Install a voice</string>
     <string name="walk_voice_no_engine">This phone has no text-to-speech engine: each place is a vibration only.</string>
     <string name="walk_group_places">Places</string>
-    <string name="walk_credential_caption">A stamp for each place reached, with its day.</string>
+    <string name="walk_stamps_caption">A stamp for each place reached, with its day.</string>
     <string name="walk_walked_on">Walked on %1$s: %2$s.</string>
     <string name="walk_walk_again">Walk it again</string>
 </resources>

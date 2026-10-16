@@ -80,9 +80,9 @@ fun WaysRoute(
 
 /**
  * The Ways page (PLANNING.md §11 Phase 11): what a way is, in one sentence; the way under way,
- * with its map; the five ways, each with what it would take at the reader's pace; the cities,
- * by continent, each with its map and where its walks stand; and the ways finished or left, the
- * cities walked. Each opens its own page.
+ * with its map; the ways by continent, each by length with what it would take at the reader's
+ * pace; the cities, by continent, each with its map and where its walks stand; and the ways
+ * finished or left, the cities walked. Each opens its own page.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -141,11 +141,20 @@ private fun WaysList(
             }
         }
         item(key = "ways-header") { Header(stringResource(R.string.ways_group_ways)) }
-        item(key = "ways") {
-            SettingsGroup(modifier = Modifier.testTag(WaysTags.CATALOGUE)) {
-                Ways.all.forEachIndexed { index, way ->
-                    if (index > 0) GroupDivider()
-                    WayRow(way, state.pace, format) { onOpenWay(way.id, null) }
+        // By continent, as the cities are, each by length: one list of every way would hide the
+        // ones beyond Europe under the first five (PLANNING.md §11 Phase 14).
+        for (continent in Continent.entries) {
+            val ways = Ways.waysIn(continent)
+            if (ways.isEmpty()) continue
+            item(key = "ways-${continent.name}") {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    SubHeader(stringResource(continentNameRes(continent)))
+                    SettingsGroup(modifier = Modifier.testTag(WaysTags.catalogue(continent))) {
+                        ways.forEachIndexed { index, way ->
+                            if (index > 0) GroupDivider()
+                            WayRow(way, state.pace, format) { onOpenWay(way.id, null) }
+                        }
+                    }
                 }
             }
         }
@@ -247,7 +256,7 @@ internal fun WayProgressBar(view: JourneyView, format: MeasureFormatter, modifie
     }
 }
 
-/** One of the five: its small map, its name and route, its length, and its time at the reader's pace. */
+/** A way: its small map, its name and route, its length, and its time at the reader's pace. */
 @Composable
 private fun WayRow(way: Way, pace: Double?, format: MeasureFormatter, onClick: () -> Unit) {
     Row(
@@ -469,6 +478,17 @@ internal fun Header(text: String) {
     )
 }
 
+/** A group's name inside a section: a continent under the ways. */
+@Composable
+private fun SubHeader(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(horizontal = 20.dp).semantics { heading() },
+    )
+}
+
 /** What the numbers are, and where the lines come from (ODbL asks for the credit). */
 @Composable
 internal fun Footer() {
@@ -497,7 +517,6 @@ object WaysTags {
     const val WALK_AWAKE = "ways_walk_awake"
     const val LIST = "ways_list"
     const val ACTIVE = "ways_active"
-    const val CATALOGUE = "ways_catalogue"
     const val YOURS = "ways_yours"
     const val CITIES = "ways_cities"
     const val CONTINENT_PAGE = "ways_continent_page"
@@ -516,6 +535,8 @@ object WaysTags {
     const val START_DIALOG = "way_start_dialog"
 
     fun way(id: WayId) = "ways_way_${id.name.lowercase()}"
+
+    fun catalogue(continent: Continent) = "ways_catalogue_${continent.name.lowercase()}"
 
     fun continent(continent: Continent) = "ways_continent_${continent.name.lowercase()}"
 }

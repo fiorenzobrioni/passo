@@ -9,9 +9,11 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isHeading
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -128,6 +130,34 @@ class WaysScreenTest {
     }
 
     @Test
+    fun `the ways are grouped by continent, each by its length`() {
+        showList(state = WaysSamples.state(active = null))
+        compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.catalogue(Continent.EUROPE)))
+        compose.onNode(hasText("Europe") and isHeading()).assertIsDisplayed()
+        val tops = Ways.waysIn(Continent.EUROPE).map {
+            compose.onNode(
+                hasTestTag(WaysTags.way(it.id)) and hasAnyAncestor(hasTestTag(WaysTags.catalogue(Continent.EUROPE))),
+            )
+                .getBoundsInRoot().top.value
+        }
+        assertThat(tops).hasSize(Ways.all.size)
+        assertThat(tops).isInStrictOrder()
+        assertThat(Ways.waysIn(Continent.EUROPE).first().id).isEqualTo(WayId.VIA_DEGLI_DEI)
+        // A continent with no way yet has no group.
+        for (continent in Continent.entries.filter { Ways.waysIn(it).isEmpty() }) {
+            compose.onNodeWithTag(WaysTags.catalogue(continent)).assertDoesNotExist()
+        }
+        snapshot("ways_by_continent")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
+    fun `at twice the text size on a small phone, the ways' groups still read`() {
+        showList(state = WaysSamples.state(active = null))
+        compose.walkPage(hasTestTag(WaysTags.LIST), "ways_large_text", maxScreens = 10)
+    }
+
+    @Test
     fun `the Camino Portugués, the fifth way, is listed by its length`() {
         var opened: Pair<WayId, Long?>? = null
         showList(onOpen = { way, journey -> opened = way to journey })
@@ -148,12 +178,12 @@ class WaysScreenTest {
     }
 
     @Test
-    fun `a way under way shows the map, the credential and the stages`() {
+    fun `a way under way shows the map, the stamps and the stages`() {
         showWay(WayId.VIA_FRANCIGENA)
         compose.onNodeWithText("Past Monteriggioni").assertIsDisplayed()
         snapshot("way")
         compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasTestTag(WaysTags.STAMPS))
-        snapshot("way_credential")
+        snapshot("way_stamps")
         compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Siena"))
         compose.onNodeWithText("Siena’s Piazza del Campo", substring = true).assertExists()
         snapshot("way_stages")
