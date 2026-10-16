@@ -23,8 +23,8 @@ import java.io.File
 
 /**
  * The README's pictures of the Ways (docs/screenshots), from the sample days of the tests: the
- * Francigena under way since March, past Monteriggioni; London walked today, past the London
- * Eye. Run with `-PupdateScreenshots`;
+ * Francigena under way since March, past Monteriggioni; the Kumano Kodō two weeks in; London
+ * walked today, past the London Eye. Run with `-PupdateScreenshots`;
  * skipped otherwise.
  */
 @RunWith(AndroidJUnit4::class)
@@ -67,6 +67,27 @@ class ReadmeScreenshots {
         }
         compose.onNodeWithTag(WaysTags.START).performClick()
         save("way-start")
+    }
+
+    /** A way beyond Europe (Phase 14): the Kumano Kodō, two weeks in. */
+    @Test
+    fun kumano() {
+        val state = WaysSamples.state(active = WaysSamples.kumano)
+        compose.setContent {
+            PassoTheme { WayScreen(state, WayId.KUMANO_KODO, null, onBack = {}, actions = WayActions()) }
+        }
+        save("way-kumano")
+    }
+
+    /** The Ways page beyond Europe: the ways under their continents, each by its length. */
+    @Test
+    fun continents() {
+        val state = WaysSamples.state(active = null)
+        compose.setContent {
+            PassoTheme { WaysScreen(state, onBack = {}, onOpenWay = { _, _ -> }, onOpenContinent = {}) }
+        }
+        compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.way(WayId.KILIMANJARO)))
+        save("ways-continents")
     }
 
     /** London during a walk: the map with the reader's point past the London Eye, the outing's card. */

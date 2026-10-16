@@ -58,6 +58,17 @@ internal object WaysSamples {
         toldMeters = 0,
     )
 
+    /** The Kumano Kodō, begun two weeks ago: past Yunomine Onsen, on the way to Nachi. */
+    val kumano = WayJourney(
+        id = 5,
+        way = WayId.KUMANO_KODO,
+        startEpochDay = today.minusDays(13).toEpochDay(),
+        startedAtMillis = 5_000,
+        state = WayJourneyState.ACTIVE,
+        endedEpochDay = null,
+        toldMeters = 0,
+    )
+
     val dei: WayJourney = WayJourney(
         id = 1,
         way = WayId.VIA_DEGLI_DEI,

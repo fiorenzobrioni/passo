@@ -1272,18 +1272,20 @@ reader (owner).
   Oceania,
   each by length. Done with the cities' own four groups (Asia and Oceania together; §15). Ten ways in one list would hide the new ones under the five old ones; the
   groups show at a glance that the ways are no longer European only.
-- [ ] **The script**, only if a new way needs it: a way whose relation is incomplete or missing
+- [x] **The script**, only if a new way needs it: a way whose relation is incomplete or missing
   is routed by BRouter between its stops, as a walk is (likely the Inca Trail; to be checked on
-  Waymarked Trails first). Not needed for the Kumano Kodō nor the Great Ocean Walk, whose
-  relations are whole (§15). What the first two did need is in: `fetch` and `splice` take a way's
-  id as they take a walk's, so a way is added without fetching or moving the others.
-- [ ] **The data, two ways at a time**, each drawn and checked on its own, added to `WayData.kt`
+  Waymarked Trails first). Not needed for any of the five: every relation was whole (§15), so
+  BRouter routing for a way was never built. What the ways did need is in: `fetch` and `splice`
+  take a way's id as they take a walk's, so a way is added without fetching or moving the others;
+  and a way may name stops its line goes `through` (Kilimanjaro's summit, up one route and down
+  another; ADR 0014 decision 18).
+- [x] **The data, two ways at a time**, each drawn and checked on its own, added to `WayData.kt`
   without moving the other ways (`fetch` and the splice, as for the cities):
   1. [x] Kumano Kodō and the Great Ocean Walk (short, well mapped, sources easy to find): 70.6 and
      96.4 km, nine stages each;
   2. [x] the Inca Trail and the John Muir Trail: 33.2 and 335.7 km, eight and twelve stages;
-  3. Kilimanjaro (its camps as the stages: Machame, Shira, Lava Tower, Barranco, Karanga,
-     Barafu, the summit).
+  3. [x] Kilimanjaro (its camps as the stages: Machame, Shira, Barranco, Karanga, Barafu, the
+     summit, Mweka; Lava Tower a place on the way): 56.9 km, up by Machame and down by Mweka.
   Each: its relation (or route), stops snapped within 2 km and in order, rivers, lakes and parks
   for its map, the locator (JP, PE, US, AU, TZ already exist),
   names and sentences in English and Italian. Japanese names in Hepburn romanisation, with
@@ -1292,11 +1294,12 @@ reader (owner).
   and Wikipedia; the cloud environment must allow them (the default one does not). Reached from
   the cloud sandbox on 16 Oct 2026 (Wikipedia and OpenStreetMap's API throttle: the scripts
   wait and retry).
-- [ ] Tests: the data tests count the new ways and stops; `WayMapView`'s gallery draws each new
+- [x] Tests: the data tests count the new ways and stops; `WayMapView`'s gallery draws each new
   map in both themes; the page's UI test with the continent groups (`assertAccessible()`,
   `walkPage()`).
-- [ ] README: the feature line and the caption without "pilgrim"; one new screenshot if a new
-  way is worth showing (proposal: the Kumano Kodō under way). CHANGELOG.
+- [x] README: the feature line and the caption without "pilgrim"; one new screenshot if a new
+  way is worth showing (proposal: the Kumano Kodō under way). CHANGELOG. Done: `way-kumano.png`,
+  the Kumano Kodō two weeks in, and `ways-continents.png`, the Ways page by continent.
 - [ ] On a device (owner): the new maps in both themes and on an open foldable; the Ways page
   with its groups at twice the text size.
 
@@ -1610,6 +1613,26 @@ Include:
   Warmiwañusqa's 4,200 m (one article), Machu Picchu's century, Muir Pass's hut, Mount Whitney's
   height (4,421 or 4,417 m). Peru's locator for a way is its south (`PE_SOUTH`): the whole country
   in the map's corner covered the Inca Trail's line, as Japan's did the Kumano Kodō's.
+
+- **Kilimanjaro, and the phase's end** (16 Oct 2026; Phase 14, the fifth way beyond Europe,
+  under Africa). Up by the Machame route and down by the Mweka, two relations, each whole on
+  Waymarked Trails, which meet at Barafu below the summit: the shortest path from Machame Gate to
+  Mweka Gate cut across there and left the summit out, so a way may now name stops its line goes
+  `through` (ADR 0014 decision 18), and the line turns back at Uhuru Peak. 56.9 km, against about
+  62 in the guides. Its stages are the gates and the camps where the climb is usually broken
+  (Machame, Shira, Barranco, Karanga, Barafu, the summit, Mweka); Lava Tower, which the plan
+  listed as a stage, is a place on the way: the climb reaches it in the day and comes down to
+  sleep at Barranco. Sentences in the English and German, French or Spanish Wikipedias; Machame
+  Camp, Karanga Camp, Mweka Camp and Mweka Gate keep their names only. Left out as one source's
+  or disputed: the summit's height (5,895 m in the English and the German, 5,891.8 in the French
+  and the Spanish), Barafu's (4,673 or 4,600 m), the age of Lava Tower's rock (482,000 or 500,000
+  years), Shira as the oldest of the three volcanoes (the Italian only). The map has the national
+  park, the forest belt and three rivers; Tanzania's locator for a way is its north (`TZ_NORTH`): the whole country in the map's corner covered the line below Shira. With it every
+  continent of the cities has a way, as the owner asked: ten ways, five in Europe and five
+  beyond. The README gains `way-kumano.png`, the Kumano Kodō two weeks in, and `ways-continents.png`, the
+  ways beyond Europe under their continents (two, so the table keeps its rows of three; the
+  foldable picture now spans the last row). BRouter routing for a
+  way, step 4's fallback, was never needed.
 
 ### Open
 

@@ -115,7 +115,9 @@ BRouter:
 
 - Find its relations on Waymarked Trails (`hiking.waymarkedtrails.org/api/v1/list/search?query=`):
   one, or several end to end (the Kumano Kodō's five). The line is the shortest path over them
-  from the first stop to the last; breaks under 3 km are joined straight and reported.
+  from the first stop to the last; breaks under 3 km are joined straight and reported. A way up
+  one route and down another, which meet below the top (Kilimanjaro: Machame up, Mweka down),
+  names its summit in `through`, or the shortest path cuts across where they meet.
 - `locate` its stops in order; each must lie within 2 km of the line. Stages are where the way
   is usually broken; a place with `stage=False` is one worth its sentence.
 - Its map: `rivers` (waterway relations, drawn as lines), `lakes` and `parks` (areas, by id).
@@ -172,5 +174,7 @@ BRouter:
   starts a little earlier, at a place worth its line.
 - OpenStreetMap's API answers 509 when it has been asked a lot: `fetch` waits and retries; a
   fetch that still fails can be run again, and only the missing tiles are asked for.
+- `features` over a wide radius on a mapped mountainside (Kilimanjaro, 9 km) is refused by
+  OpenStreetMap's API (400: too many nodes): ask for a few points 3 km wide instead.
 - A disambiguation page (Green Point Lighthouse) comes back from `wiki` as a short list: ask for
   the full title.

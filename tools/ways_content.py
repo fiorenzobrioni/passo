@@ -32,7 +32,8 @@ German), the Via degli Dei's and the Camino Portugués's in the English and Ital
 or Spanish (or Galician). The Kumano Kodō (16 Oct 2026) in the English and Japanese (or German),
 the Great Ocean Walk in the English and German (or Italian), the Inca Trail in the English and
 Spanish (or French, German, Italian), the John Muir Trail in the English and French (or German,
-Spanish, Italian). A stage with no second source keeps only its name.
+Spanish, Italian), Kilimanjaro in the English and German, French or Spanish. A stage with no
+second source keeps only its name.
 """
 
 from dataclasses import dataclass, field
@@ -63,6 +64,10 @@ class Way:
     # Where the relation stops short of the way's traditional end, the last stretch is joined
     # straight (a few hundred metres to a couple of kilometres inside a city).
     join_end: bool = False
+    # The keys of the stops the line must go through, in order, where the shortest path from the
+    # first stop to the last would leave them out: a summit climbed by one route and left by
+    # another (Kilimanjaro, up by Machame and down by Mweka, which meet below the top).
+    through: list = field(default_factory=list)
     # The map behind the line, from OpenStreetMap objects named by id, as a city's are: the
     # rivers the way crosses or follows and the larger ones in view (waterway relations, drawn
     # as lines), its lakes and reservoirs, and the parks it passes through. The land, the
@@ -932,9 +937,70 @@ JOHN_MUIR_TRAIL = Way(
     ],
 )
 
+KILIMANJARO = Way(
+    id="KILIMANJARO",
+    # The Machame route up, from Machame Gate by Shira, Lava Tower, Barranco, Karanga and Barafu to
+    # Uhuru Peak, and the Mweka route down, by Barafu and Mweka Camp to Mweka Gate: two relations,
+    # each whole. They meet below the summit, so the line goes through it on purpose.
+    relations=[8737224, 8737225],
+    through=["uhuru_peak"],
+    name_en="Kilimanjaro",
+    name_it="Kilimangiaro",
+    route_en="Machame Gate to Uhuru Peak, and down to Mweka Gate",
+    route_it="Dal Machame Gate all'Uhuru Peak, e giù fino al Mweka Gate",
+    country="TZ_NORTH",
+    # The Semira it climbs beside to Machame Camp, the Karanga it crosses below the camp of that
+    # name, and the Rau it comes down beside.
+    rivers=["way/24278971", "way/24278943", "way/1151362512"],
+    # Kilimanjaro National Park, which it climbs into at Machame Gate and leaves at Mweka Gate, and
+    # the forest belt it climbs through and comes down through.
+    parks=["relation/20640966", "relation/7327560"],
+    stops=[
+        Stop("machame_gate", "Machame Gate", "Machame Gate", -3.1737, 37.2390,
+             note_en="The way enters Kilimanjaro National Park, a national park since 1973 and a UNESCO World Heritage Site since 1987.",
+             note_it="Il cammino entra nel parco nazionale del Kilimangiaro, parco nazionale dal 1973 e patrimonio dell'umanità dell'UNESCO dal 1987."),
+        # Source: Wikipedia, Kilimanjaro National Park; Wikipedia (fr), Parc national du
+        # Kilimandjaro; Wikipedia (de), Kilimandscharo-Nationalpark.
+        Stop("machame_camp", "Machame Camp", "Machame Camp", -3.0955, 37.2664),
+        Stop("shira_camp", "Shira Camp", "Shira Camp", -3.0545, 37.2762,
+             note_en="Shira, the extinct volcano to the west of Kibo, has a broad, flat top.",
+             note_it="Lo Shira, il vulcano spento a ovest del Kibo, ha una cima ampia e piatta."),
+        # Source: Wikipedia, Mount Kilimanjaro (extinct, a broad high plain); Wikipedia (de),
+        # Kilimandscharo (west of the Kibo, extinct, a flat summit). Its being the oldest of the
+        # three is in the Italian only; the plain's height (3,800 m) in the English only.
+        Stop("lava_tower", "Lava Tower", "Lava Tower", -3.0684, 37.3266, stage=False,
+             note_en="Lava Tower stands about 4,600 m up, to the west of the summit.",
+             note_it="La Lava Tower si alza a circa 4.600 m, a ovest della vetta."),
+        # Source: Wikipedia, Mount Kilimanjaro (4,630 m); Wikipedia (de), Kilimandscharo (4,600 m);
+        # Wikipedia (fr), Kilimandjaro (west of the summit). The age of its lava is left out: 482,000
+        # years in the English, 500,000 in the French. A place, not a stage: the way climbs to it in
+        # the day and comes down to sleep at Barranco.
+        Stop("barranco_camp", "Barranco Camp", "Barranco Camp", -3.0951, 37.3296,
+             note_en="Barranco lies below the Western Breach, opened when part of Kibo's crater rim collapsed about 100,000 years ago.",
+             note_it="Barranco si trova sotto la Western Breach, aperta quando una parte dell'orlo del cratere del Kibo crollò, circa 100.000 anni fa."),
+        # Source: Wikipedia, Mount Kilimanjaro; Wikipedia (fr), Kilimandjaro (the slide, 100,000
+        # years ago, and the Western Breach above the Barranco Valley).
+        Stop("karanga_camp", "Karanga Camp", "Karanga Camp", -3.1130, 37.3549),
+        Stop("barafu_camp", "Barafu Camp", "Barafu Camp", -3.1000, 37.3787,
+             note_en="Barafu Camp stands on a ridge, on the Mweka route the way will come down by.",
+             note_it="Il Barafu Camp sta su una cresta, sulla via Mweka da cui il cammino scenderà."),
+        # Source: Wikipedia (fr), Kilimandjaro; Wikipedia (es), Kilimanjaro (the huts on the ridge,
+        # on the Mweka route). Its height is left out: 4,673 m in the French and the Spanish, 4,600
+        # in the German.
+        Stop("uhuru_peak", "Uhuru Peak", "Uhuru Peak", -3.0764, 37.3540,
+             note_en="Uhuru Peak, on Kibo's crater rim, is the highest point in Africa; its name, given in 1964, means «freedom» in Swahili.",
+             note_it="L'Uhuru Peak, sull'orlo del cratere del Kibo, è il punto più alto dell'Africa; il nome, dato nel 1964, significa «libertà» in swahili."),
+        # Source: Wikipedia, Mount Kilimanjaro; Wikipedia (de), Kilimandscharo; Wikipedia (fr),
+        # Kilimandjaro (the crater rim, freedom). Its height is left out: 5,895 m in the English and
+        # the German, 5,891.8 in the French and the Spanish.
+        Stop("mweka_camp", "Mweka Camp", "Mweka Camp", -3.1569, 37.3670),
+        Stop("mweka_gate", "Mweka Gate", "Mweka Gate", -3.2197, 37.3412),
+    ],
+)
+
 WAYS = [
     VIA_DEGLI_DEI, CAMINO_PORTUGUES, VIA_DI_FRANCESCO, CAMINO_FRANCES, VIA_FRANCIGENA, KUMANO_KODO, GREAT_OCEAN_WALK,
-    INCA_TRAIL, JOHN_MUIR_TRAIL,
+    INCA_TRAIL, JOHN_MUIR_TRAIL, KILIMANJARO,
 ]
 
 
@@ -3855,6 +3921,9 @@ LOCATORS = {
     "SN": (12.2, -17.6, 16.8, -11.3),
     "ET": (3.3, 32.9, 15.0, 48.0),
     "TZ": (-11.8, 29.3, -0.9, 40.5),
+    # Northern Tanzania, for a way: the whole country is a square box, which in the map's corner
+    # covered Kilimanjaro's line below Shira; a box this flat clears it.
+    "TZ_NORTH": (-7.5, 29.3, -0.9, 40.5),
 }
 
 # The continents the Ways page groups the cities by, in its order (the Kotlin enum Continent has
