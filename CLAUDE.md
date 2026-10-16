@@ -113,6 +113,13 @@ Kotlin official style (ktlint `intellij_idea` via Spotless), no `!!`, `Flow` ove
 immutable UI state, MVVM with unidirectional data flow. Code and documentation in English.
 Comments explain *why*, not what.
 
+**A page's ViewModel lives as long as the activity** (the pages are `NavDisplay` entries with no
+ViewModel store of their own): its state is a `stateIn(WhileSubscribed)` that stops when no page
+collects it, and nothing in it collects in `init` or keeps a flow running on its own, or that
+state never stops, screen off included (PLANNING.md §9, §15 «Phase 11's device checks done, and
+the Ways reviewed»). Work that must run without a page belongs with the process (a notifier, the
+service), not in a ViewModel.
+
 ## Design
 
 Passo keeps the same visual language as Chiaro, for the app screens and for the widget, so the

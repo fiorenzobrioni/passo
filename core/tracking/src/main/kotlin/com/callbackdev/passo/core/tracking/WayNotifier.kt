@@ -78,14 +78,21 @@ constructor(
         }
     }
 
-    private suspend fun check(journey: WayJourney, days: Map<Long, Double>) {
+    /**
+     * Tells the stage [days] bring [journey] to, if one is untold, then finishes the way if they
+     * bring it to its end: in that order, so the arrival is told before the way stops being
+     * under way.
+     */
+    internal suspend fun check(journey: WayJourney, days: Map<Long, Double>) {
         val way = Ways.of(journey.way)
         val today = LocalDate.now(ZoneId.systemDefault()).toEpochDay()
         val progress = WayProgress.of(way, journey, days, today)
         val stage = WayAnnouncement.next(way, progress.walkedMeters, journey.toldMeters)
         // Claimed before it is told: two writes close together cannot tell it twice.
         if (stage != null && ways.claimTold(journey.id, stage.distanceMeters)) {
-            notifications.post(notifications.stage(stage, progress, preferences.current().settings.units))
+            // Guarded on its own: a notification that fails must not leave the way unfinished
+            // until the service next writes.
+            guarded { notifications.post(notifications.stage(stage, progress, preferences.current().settings.units)) }
         }
         progress.finishedEpochDay?.let { ways.finish(journey.id, it) }
     }
