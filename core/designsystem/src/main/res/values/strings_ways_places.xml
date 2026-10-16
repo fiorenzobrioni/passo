@@ -20,6 +20,8 @@
     <string name="way_route_inca_trail">Km 82 to Machu Picchu, by the Sun Gate</string>
     <string name="way_name_john_muir_trail">John Muir Trail</string>
     <string name="way_route_john_muir_trail">Yosemite Valley to the summit of Mount Whitney</string>
+    <string name="way_name_kilimanjaro">Kilimanjaro</string>
+    <string name="way_route_kilimanjaro">Machame Gate to Uhuru Peak, and down to Mweka Gate</string>
     <string name="way_name_milan_duomo_navigli">Milan</string>
     <string name="way_route_milan_duomo_navigli">From the Duomo to the Navigli, by the Castello</string>
     <string name="way_outing_milan_duomo_navigli">A walk in Milan</string>
@@ -196,7 +198,9 @@
     <string name="way_place_bangkok_wat_mahathat">Wat Mahathat</string>
     <string name="way_place_bangkok_wat_pho">Wat Pho</string>
     <string name="way_place_bangkok_wat_phra_kaew">Wat Phra Kaew</string>
+    <string name="way_place_barafu_camp">Barafu Camp</string>
     <string name="way_place_barcelos">Barcelos</string>
+    <string name="way_place_barranco_camp">Barranco Camp</string>
     <string name="way_place_beijing_bell_tower">Bell Tower</string>
     <string name="way_place_beijing_divine_might">Gate of Divine Might</string>
     <string name="way_place_beijing_drum_tower">Drum Tower</string>
@@ -384,6 +388,7 @@
     <string name="way_place_inti_punku">Inti Punku, the Sun Gate</string>
     <string name="way_place_ivrea">Ivrea</string>
     <string name="way_place_johanna_beach">Johanna Beach</string>
+    <string name="way_place_karanga_camp">Karanga Camp</string>
     <string name="way_place_km_82">Km 82</string>
     <string name="way_place_koguchi">Koguchi</string>
     <string name="way_place_kumano_hongu_taisha">Kumano Hongū Taisha</string>
@@ -400,6 +405,7 @@
     <string name="way_place_kyoto_yasaka_shrine">Yasaka Shrine</string>
     <string name="way_place_la_storta">La Storta</string>
     <string name="way_place_la_verna">La Verna</string>
+    <string name="way_place_lava_tower">Lava Tower</string>
     <string name="way_place_leon">León</string>
     <string name="way_place_lima_alameda_descalzos">Alameda de los Descalzos</string>
     <string name="way_place_lima_barrio_chino">Chinatown</string>
@@ -444,6 +450,8 @@
     <string name="way_place_luxor_precinct_of_mut">Precinct of Mut</string>
     <string name="way_place_luxor_temple">Luxor Temple</string>
     <string name="way_place_luxor_temple_of_khonsu">Temple of Khonsu</string>
+    <string name="way_place_machame_camp">Machame Camp</string>
+    <string name="way_place_machame_gate">Machame Gate</string>
     <string name="way_place_machu_picchu">Machu Picchu</string>
     <string name="way_place_madonna_dei_fornelli">Madonna dei Fornelli</string>
     <string name="way_place_madrid_almudena">Almudena Cathedral</string>
@@ -522,6 +530,8 @@
     <string name="way_place_mortara">Mortara</string>
     <string name="way_place_mount_whitney">Mount Whitney</string>
     <string name="way_place_muir_pass">Muir Pass</string>
+    <string name="way_place_mweka_camp">Mweka Camp</string>
+    <string name="way_place_mweka_gate">Mweka Gate</string>
     <string name="way_place_najera">Nájera</string>
     <string name="way_place_nevada_fall">Nevada Fall</string>
     <string name="way_place_new_york_911_memorial">9/11 Memorial</string>
@@ -685,6 +695,7 @@
     <string name="way_place_sf_pier_39">Pier 39</string>
     <string name="way_place_sf_saints_peter_paul">Saints Peter and Paul Church</string>
     <string name="way_place_sf_transamerica">Transamerica Pyramid</string>
+    <string name="way_place_shira_camp">Shira Camp</string>
     <string name="way_place_siena">Siena</string>
     <string name="way_place_silver_pass">Silver Pass</string>
     <string name="way_place_singapore_buddha_tooth">Buddha Tooth Relic Temple</string>
@@ -756,6 +767,7 @@
     <string name="way_place_tunis_zitouna">Zitouna Mosque</string>
     <string name="way_place_tuolumne_meadows">Tuolumne Meadows</string>
     <string name="way_place_twelve_apostles">Twelve Apostles</string>
+    <string name="way_place_uhuru_peak">Uhuru Peak</string>
     <string name="way_place_valenca">Valença</string>
     <string name="way_place_valfabbrica">Valfabbrica</string>
     <string name="way_place_vercelli">Vercelli</string>
@@ -849,7 +861,9 @@
     <string name="way_note_bangkok_wat_mahathat">Older than Bangkok, when it was called Wat Salak, the temple now holds a Buddhist university for monks.</string>
     <string name="way_note_bangkok_wat_pho">Its reclining Buddha is 46 metres long, and the temple is a home of traditional Thai massage.</string>
     <string name="way_note_bangkok_wat_phra_kaew">In the grounds of the Grand Palace, this is the temple of the Emerald Buddha, the kings’ own.</string>
+    <string name="way_note_barafu_camp">Barafu Camp stands on a ridge, on the Mweka route the way will come down by.</string>
     <string name="way_note_barcelos">In Barcelos, the legend goes, a roast cock stood up and crowed to save a pilgrim condemned to hang.</string>
+    <string name="way_note_barranco_camp">Barranco lies below the Western Breach, opened when part of Kibo’s crater rim collapsed about 100,000 years ago.</string>
     <string name="way_note_beijing_bell_tower">Just behind the Drum Tower, the Bell Tower kept the city’s official time with it until 1924.</string>
     <string name="way_note_beijing_divine_might">Past the Imperial Garden, you leave the Forbidden City by its north gate, first named for the Black Tortoise of the north.</string>
     <string name="way_note_beijing_drum_tower">First built in 1272, under the Yuan, the Drum Tower was rebuilt here under the Ming.</string>
@@ -1047,6 +1061,7 @@
     <string name="way_note_kyoto_yasaka_shrine">Dedicated to the god Susanoo, the shrine holds the Gion Matsuri every July.</string>
     <string name="way_note_la_storta">On the Via Cassia to Rome, Ignatius of Loyola is said to have had a vision here; a chapel marks the place.</string>
     <string name="way_note_la_verna">Francis received the stigmata at La Verna in 1224, his first biographers wrote.</string>
+    <string name="way_note_lava_tower">Lava Tower stands about 4,600 m up, to the west of the summit.</string>
     <string name="way_note_leon">León cathedral holds nearly 1,800 square metres of medieval stained glass.</string>
     <string name="way_note_lima_alameda_descalzos">Laid out in 1611, the avenue copies the Alameda de Hércules of Seville.</string>
     <string name="way_note_lima_barrio_chino">Lima’s Chinatown made the chifas famous, as Peru calls its Chinese restaurants.</string>
@@ -1091,6 +1106,7 @@
     <string name="way_note_luxor_precinct_of_mut">The precinct of the goddess Mut, south of Karnak, keeps a sacred lake around her temple.</string>
     <string name="way_note_luxor_temple">Of the two obelisks Ramesses II raised here, one now stands in Paris; the clock France gave in return is in Cairo’s Citadel.</string>
     <string name="way_note_luxor_temple_of_khonsu">Built by Ramesses III on the site of an earlier temple, this is an almost complete temple of the New Kingdom.</string>
+    <string name="way_note_machame_gate">The way enters Kilimanjaro National Park, a national park since 1973 and a UNESCO World Heritage Site since 1987.</string>
     <string name="way_note_machu_picchu">The way ends at Machu Picchu, an Inca citadel on UNESCO’s World Heritage List since 1983.</string>
     <string name="way_note_madonna_dei_fornelli">Beyond the village the way follows stretches of the Flaminia Militare, a road the Romans opened in 187 BC.</string>
     <string name="way_note_madrid_almudena">Begun in 1883, the cathedral was consecrated by Pope John Paul II in 1993.</string>
@@ -1326,6 +1342,7 @@
     <string name="way_note_sf_pier_39">Since 1989 a colony of sea lions has rested on the docks of this pier’s marina.</string>
     <string name="way_note_sf_saints_peter_paul">Marilyn Monroe and Joe DiMaggio posed for photographs on the steps of this church.</string>
     <string name="way_note_sf_transamerica">On its completion in 1972 the pyramid became the tallest building in San Francisco.</string>
+    <string name="way_note_shira_camp">Shira, the extinct volcano to the west of Kibo, has a broad, flat top.</string>
     <string name="way_note_siena">Siena’s Piazza del Campo holds the Palio twice each summer, on 2 July and 16 August.</string>
     <string name="way_note_singapore_buddha_tooth">In the heart of Chinatown, this temple keeps a relic held to be a tooth of the Buddha.</string>
     <string name="way_note_singapore_clarke_quay">Named after the governor Sir Andrew Clarke, the quay’s old warehouses are now restaurants and bars.</string>
@@ -1394,6 +1411,7 @@
     <string name="way_note_tunis_zitouna">The Olive Mosque, named, the legend goes, after an olive tree on the site, was rebuilt under the Aghlabids with ancient columns from Carthage.</string>
     <string name="way_note_tuolumne_meadows">Tuolumne Meadows, at about 2,600 m, lies along the Tuolumne River in Yosemite’s high country.</string>
     <string name="way_note_twelve_apostles">The way ends at the Twelve Apostles, stacks of limestone that the Southern Ocean wore out of the cliffs.</string>
+    <string name="way_note_uhuru_peak">Uhuru Peak, on Kibo’s crater rim, is the highest point in Africa; its name, given in 1964, means «freedom» in Swahili.</string>
     <string name="way_note_valenca">Valença’s walled fortress looks across the Minho at Tui: over the bridge, the way enters Spain.</string>
     <string name="way_note_valfabbrica">Valfabbrica grew by a ford of the Chiascio, between Gubbio and Assisi, around a 9th-century Benedictine abbey.</string>
     <string name="way_note_vercelli">Vercelli keeps a 10th-century book of Old English poems, probably brought by English pilgrims.</string>

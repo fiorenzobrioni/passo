@@ -20,6 +20,8 @@
     <string name="way_route_inca_trail">Dal km 82 a Machu Picchu, per la Porta del Sole</string>
     <string name="way_name_john_muir_trail">John Muir Trail</string>
     <string name="way_route_john_muir_trail">Dalla Yosemite Valley alla cima del Monte Whitney</string>
+    <string name="way_name_kilimanjaro">Kilimangiaro</string>
+    <string name="way_route_kilimanjaro">Dal Machame Gate all’Uhuru Peak, e giù fino al Mweka Gate</string>
     <string name="way_name_milan_duomo_navigli">Milano</string>
     <string name="way_route_milan_duomo_navigli">Dal Duomo ai Navigli, passando per il Castello</string>
     <string name="way_outing_milan_duomo_navigli">Passeggiata a Milano</string>
@@ -196,7 +198,9 @@
     <string name="way_place_bangkok_wat_mahathat">Wat Mahathat</string>
     <string name="way_place_bangkok_wat_pho">Wat Pho</string>
     <string name="way_place_bangkok_wat_phra_kaew">Wat Phra Kaew</string>
+    <string name="way_place_barafu_camp">Barafu Camp</string>
     <string name="way_place_barcelos">Barcelos</string>
+    <string name="way_place_barranco_camp">Barranco Camp</string>
     <string name="way_place_beijing_bell_tower">Torre della Campana</string>
     <string name="way_place_beijing_divine_might">Porta del Vigore Divino</string>
     <string name="way_place_beijing_drum_tower">Torre del Tamburo</string>
@@ -384,6 +388,7 @@
     <string name="way_place_inti_punku">Inti Punku, la Porta del Sole</string>
     <string name="way_place_ivrea">Ivrea</string>
     <string name="way_place_johanna_beach">Johanna Beach</string>
+    <string name="way_place_karanga_camp">Karanga Camp</string>
     <string name="way_place_km_82">Km 82</string>
     <string name="way_place_koguchi">Koguchi</string>
     <string name="way_place_kumano_hongu_taisha">Kumano Hongū Taisha</string>
@@ -400,6 +405,7 @@
     <string name="way_place_kyoto_yasaka_shrine">Santuario di Yasaka</string>
     <string name="way_place_la_storta">La Storta</string>
     <string name="way_place_la_verna">La Verna</string>
+    <string name="way_place_lava_tower">Lava Tower</string>
     <string name="way_place_leon">León</string>
     <string name="way_place_lima_alameda_descalzos">Alameda de los Descalzos</string>
     <string name="way_place_lima_barrio_chino">Quartiere cinese</string>
@@ -444,6 +450,8 @@
     <string name="way_place_luxor_precinct_of_mut">Recinto di Mut</string>
     <string name="way_place_luxor_temple">Tempio di Luxor</string>
     <string name="way_place_luxor_temple_of_khonsu">Tempio di Khonsu</string>
+    <string name="way_place_machame_camp">Machame Camp</string>
+    <string name="way_place_machame_gate">Machame Gate</string>
     <string name="way_place_machu_picchu">Machu Picchu</string>
     <string name="way_place_madonna_dei_fornelli">Madonna dei Fornelli</string>
     <string name="way_place_madrid_almudena">Cattedrale dell’Almudena</string>
@@ -522,6 +530,8 @@
     <string name="way_place_mortara">Mortara</string>
     <string name="way_place_mount_whitney">Monte Whitney</string>
     <string name="way_place_muir_pass">Muir Pass</string>
+    <string name="way_place_mweka_camp">Mweka Camp</string>
+    <string name="way_place_mweka_gate">Mweka Gate</string>
     <string name="way_place_najera">Nájera</string>
     <string name="way_place_nevada_fall">Nevada Fall</string>
     <string name="way_place_new_york_911_memorial">Memoriale dell’11 settembre</string>
@@ -685,6 +695,7 @@
     <string name="way_place_sf_pier_39">Pier 39</string>
     <string name="way_place_sf_saints_peter_paul">Chiesa dei Santi Pietro e Paolo</string>
     <string name="way_place_sf_transamerica">Transamerica Pyramid</string>
+    <string name="way_place_shira_camp">Shira Camp</string>
     <string name="way_place_siena">Siena</string>
     <string name="way_place_silver_pass">Silver Pass</string>
     <string name="way_place_singapore_buddha_tooth">Tempio della Reliquia del Dente di Buddha</string>
@@ -756,6 +767,7 @@
     <string name="way_place_tunis_zitouna">Moschea Zitouna</string>
     <string name="way_place_tuolumne_meadows">Tuolumne Meadows</string>
     <string name="way_place_twelve_apostles">Dodici Apostoli</string>
+    <string name="way_place_uhuru_peak">Uhuru Peak</string>
     <string name="way_place_valenca">Valença</string>
     <string name="way_place_valfabbrica">Valfabbrica</string>
     <string name="way_place_vercelli">Vercelli</string>
@@ -849,7 +861,9 @@
     <string name="way_note_bangkok_wat_mahathat">Più antico di Bangkok, quando si chiamava Wat Salak, il tempio ospita oggi un’università buddhista per monaci.</string>
     <string name="way_note_bangkok_wat_pho">Il suo Buddha disteso è lungo 46 metri, e il tempio è una casa del massaggio tradizionale thailandese.</string>
     <string name="way_note_bangkok_wat_phra_kaew">Nel recinto del Grande Palazzo, è il tempio del Buddha di Smeraldo, il tempio dei re.</string>
+    <string name="way_note_barafu_camp">Il Barafu Camp sta su una cresta, sulla via Mweka da cui il cammino scenderà.</string>
     <string name="way_note_barcelos">A Barcelos, dice la leggenda, un gallo arrosto si alzò e cantò per salvare un pellegrino condannato all’impiccagione.</string>
+    <string name="way_note_barranco_camp">Barranco si trova sotto la Western Breach, aperta quando una parte dell’orlo del cratere del Kibo crollò, circa 100.000 anni fa.</string>
     <string name="way_note_beijing_bell_tower">Subito dietro la Torre del Tamburo, la Torre della Campana scandì con lei l’ora ufficiale della città fino al 1924.</string>
     <string name="way_note_beijing_divine_might">Passato il Giardino Imperiale, si esce dalla Città Proibita dalla sua porta nord, che in origine prendeva il nome dalla Tartaruga Nera del nord.</string>
     <string name="way_note_beijing_drum_tower">Costruita per la prima volta nel 1272, sotto gli Yuan, la Torre del Tamburo fu ricostruita qui sotto i Ming.</string>
@@ -1047,6 +1061,7 @@
     <string name="way_note_kyoto_yasaka_shrine">Dedicato al dio Susanoo, il santuario celebra ogni luglio il Gion Matsuri.</string>
     <string name="way_note_la_storta">Qui, diretto a Roma lungo la via Cassia, Ignazio di Loyola avrebbe avuto una visione; una cappella ricorda il luogo.</string>
     <string name="way_note_la_verna">Francesco ricevette le stimmate alla Verna nel 1224, scrissero i suoi primi biografi.</string>
+    <string name="way_note_lava_tower">La Lava Tower si alza a circa 4.600 m, a ovest della vetta.</string>
     <string name="way_note_leon">La cattedrale di León custodisce quasi 1.800 metri quadrati di vetrate medievali.</string>
     <string name="way_note_lima_alameda_descalzos">Tracciato nel 1611, il viale riprende l’Alameda de Hércules di Siviglia.</string>
     <string name="way_note_lima_barrio_chino">Il quartiere cinese di Lima ha reso famosi i chifa, come in Perù si chiamano i ristoranti cinesi.</string>
@@ -1091,6 +1106,7 @@
     <string name="way_note_luxor_precinct_of_mut">Il recinto della dea Mut, a sud di Karnak, conserva un lago sacro intorno al suo tempio.</string>
     <string name="way_note_luxor_temple">Dei due obelischi che Ramses II eresse qui, uno si trova oggi a Parigi; l’orologio che la Francia donò in cambio è nella Cittadella del Cairo.</string>
     <string name="way_note_luxor_temple_of_khonsu">Costruito da Ramses III dove sorgeva un tempio più antico, è un tempio del Nuovo Regno quasi completo.</string>
+    <string name="way_note_machame_gate">Il cammino entra nel parco nazionale del Kilimangiaro, parco nazionale dal 1973 e patrimonio dell’umanità dell’UNESCO dal 1987.</string>
     <string name="way_note_machu_picchu">Il cammino finisce a Machu Picchu, cittadella inca nel patrimonio dell’umanità dell’UNESCO dal 1983.</string>
     <string name="way_note_madonna_dei_fornelli">Oltre il paese il cammino segue tratti della Flaminia Militare, una strada aperta dai Romani nel 187 a.C.</string>
     <string name="way_note_madrid_almudena">Iniziata nel 1883, la cattedrale fu consacrata da papa Giovanni Paolo II nel 1993.</string>
@@ -1326,6 +1342,7 @@
     <string name="way_note_sf_pier_39">Dal 1989 una colonia di leoni marini riposa sui pontili del porticciolo di questo molo.</string>
     <string name="way_note_sf_saints_peter_paul">Marilyn Monroe e Joe DiMaggio posarono per i fotografi sui gradini di questa chiesa.</string>
     <string name="way_note_sf_transamerica">Completata nel 1972, la piramide divenne l’edificio più alto di San Francisco.</string>
+    <string name="way_note_shira_camp">Lo Shira, il vulcano spento a ovest del Kibo, ha una cima ampia e piatta.</string>
     <string name="way_note_siena">Piazza del Campo a Siena ospita il Palio due volte ogni estate, il 2 luglio e il 16 agosto.</string>
     <string name="way_note_singapore_buddha_tooth">Nel cuore di Chinatown, questo tempio custodisce una reliquia ritenuta un dente del Buddha.</string>
     <string name="way_note_singapore_clarke_quay">Intitolato al governatore Sir Andrew Clarke, il molo ha i vecchi magazzini trasformati in ristoranti e locali.</string>
@@ -1394,6 +1411,7 @@
     <string name="way_note_tunis_zitouna">La Moschea dell’Olivo, che secondo la leggenda prende il nome da un olivo che sorgeva qui, fu ricostruita sotto gli Aghlabidi con colonne antiche di Cartagine.</string>
     <string name="way_note_tuolumne_meadows">Tuolumne Meadows, a circa 2.600 m, si stende lungo il fiume Tuolumne, in alta quota nello Yosemite.</string>
     <string name="way_note_twelve_apostles">Il cammino finisce ai Dodici Apostoli, faraglioni di calcare che l’Oceano Meridionale ha staccato dalle scogliere.</string>
+    <string name="way_note_uhuru_peak">L’Uhuru Peak, sull’orlo del cratere del Kibo, è il punto più alto dell’Africa; il nome, dato nel 1964, significa «libertà» in swahili.</string>
     <string name="way_note_valenca">La fortezza murata di Valença guarda Tui oltre il Minho: passato il ponte, il cammino entra in Spagna.</string>
     <string name="way_note_valfabbrica">Valfabbrica nacque presso un guado del Chiascio, tra Gubbio e Assisi, attorno a un’abbazia benedettina del IX secolo.</string>
     <string name="way_note_vercelli">Vercelli custodisce un libro di poesie in inglese antico del X secolo, forse portato da pellegrini inglesi.</string>

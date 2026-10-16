@@ -145,8 +145,8 @@ class WaysScreenTest {
         assertThat(europe).isInStrictOrder()
         assertThat(Ways.waysIn(Continent.EUROPE).first().id).isEqualTo(WayId.VIA_DEGLI_DEI)
         snapshot("ways_by_continent")
-        // Beyond Europe (Phase 14): the Inca Trail and the John Muir Trail under the Americas, then
-        // the Kumano Kodō and the Great Ocean Walk under Asia and Oceania.
+        // Beyond Europe (Phase 14): the Inca Trail and the John Muir Trail under the Americas, the
+        // Kumano Kodō and the Great Ocean Walk under Asia and Oceania, Kilimanjaro under Africa.
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.catalogue(Continent.AMERICAS)))
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.way(WayId.JOHN_MUIR_TRAIL)))
         compose.onNode(hasText("The Americas") and isHeading()).assertIsDisplayed()
@@ -161,12 +161,20 @@ class WaysScreenTest {
         val beyond = tops(Continent.ASIA_OCEANIA)
         assertThat(beyond).hasSize(2)
         assertThat(beyond).isInStrictOrder()
-        assertThat(europe.size + americas.size + beyond.size).isEqualTo(Ways.all.size)
-        // A continent with no way yet has no group.
-        for (continent in Continent.entries.filter { Ways.waysIn(it).isEmpty() }) {
-            compose.onNodeWithTag(WaysTags.catalogue(continent)).assertDoesNotExist()
-        }
         snapshot("ways_beyond_europe")
+        compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.catalogue(Continent.AFRICA)))
+        compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.way(WayId.KILIMANJARO)))
+        compose.onNode(hasText("Africa") and isHeading()).assertIsDisplayed()
+        val africa = tops(Continent.AFRICA)
+        assertThat(africa).hasSize(1)
+        // Every continent of the cities now has its group, in the cities' order, and every way is in one.
+        assertThat(europe.size + americas.size + beyond.size + africa.size).isEqualTo(Ways.all.size)
+        val groups = Continent.entries.map {
+            compose.onNodeWithTag(WaysTags.catalogue(it)).assertExists()
+            tops(it).first()
+        }
+        assertThat(groups).isInStrictOrder()
+        snapshot("ways_africa")
     }
 
     @Test
@@ -335,6 +343,24 @@ class WaysScreenTest {
     fun `the John Muir Trail in the dark`() {
         showWay(WayId.JOHN_MUIR_TRAIL, state = WaysSamples.state(active = null), dark = true)
         snapshot("way_john_muir_dark")
+    }
+
+    @Test
+    fun `Kilimanjaro, up by Machame to Uhuru Peak and down by Mweka`() {
+        showWay(WayId.KILIMANJARO, state = WaysSamples.state(active = null))
+        compose.onNodeWithText("Kilimanjaro").assertIsDisplayed()
+        snapshot("way_kilimanjaro")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Uhuru Peak"))
+        compose.onNodeWithText("the highest point in Africa", substring = true).assertExists()
+        snapshot("way_kilimanjaro_stages")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Mweka Gate"))
+        snapshot("way_kilimanjaro_down")
+    }
+
+    @Test
+    fun `Kilimanjaro in the dark`() {
+        showWay(WayId.KILIMANJARO, state = WaysSamples.state(active = null), dark = true)
+        snapshot("way_kilimanjaro_dark")
     }
 
     @Test

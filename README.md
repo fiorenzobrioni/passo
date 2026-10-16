@@ -54,28 +54,32 @@ calories are estimates, and Passo says so.
     <td align="center"><img src="docs/screenshots/way-start.png" width="250" alt="Starting a way: from today, from 1 January (you would already be past Vetralla), or from your first day with Passo"><br><sub><b>A start in the past</b> places you at once</sub></td>
   </tr>
   <tr>
+    <td align="center"><img src="docs/screenshots/way-kumano.png" width="250" alt="The Kumano Kodō in Japan, two weeks in: the map from Takijiri-ōji with the part walked, past Yunomine Onsen, 23.3 km to Kumano Nachi Taisha, and the first stamps"><br><sub><b>Beyond Europe</b>: the Kumano Kodō, in Japan</sub></td>
+    <td align="center"><img src="docs/screenshots/ways-continents.png" width="250" alt="The Ways page by continent: the Inca Trail and the John Muir Trail under the Americas, the Kumano Kodō and the Great Ocean Walk under Asia and Oceania, Kilimanjaro under Africa, each with its length and how long at your pace"><br><sub><b>Ten ways</b>, by continent</sub></td>
     <td align="center"><img src="docs/screenshots/walk.png" width="250" alt="A walk in London under way: the map from Buckingham Palace along the Thames with the part walked, past the London Eye, and the outing's card: next, the Royal Festival Hall, 230 m"><br><sub><b>City walks</b>: London place by place, walked where you are</sub></td>
+  </tr>
+  <tr>
     <td align="center"><img src="docs/screenshots/intervals.png" width="250" alt="Editing the Japanese interval walk: what it is, then 3 slow minutes, 3 fast minutes and 5 sets, with the outing's shape in slow and fast blocks"><br><sub><b>Japanese interval walk</b>: slow and fast in turns</sub></td>
     <td align="center"><img src="docs/screenshots/intervals-done.png" width="250" alt="An interval walk just over: goal reached, each fast interval's cadence against the pace line, 4 fast intervals of 5 at pace"><br><sub><b>Each fast interval</b>, against its pace</sub></td>
+    <td align="center"><img src="docs/screenshots/widgets.png" width="250" alt="The two widgets on a home screen: At a glance with its ring, In words, a terracotta pair side by side, and the day hour by hour"><br><sub><b>Two widgets</b>: At a glance and In words</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/widgets.png" width="250" alt="The two widgets on a home screen: At a glance with its ring, In words, a terracotta pair side by side, and the day hour by hour"><br><sub><b>Two widgets</b>: At a glance and In words</sub></td>
     <td align="center"><img src="docs/screenshots/widget-settings.png" width="250" alt="One widget's settings: the card as it will look, its sizes, the background colour, the opacity and the content"><br><sub><b>Widget settings</b>, with a live preview</sub></td>
     <td align="center"><img src="docs/screenshots/settings-notifications.png" width="250" alt="Settings, notifications: goal reached, the evening reminder with its time and threshold, the weekly summary"><br><sub><b>Notifications</b>, each one optional</sub></td>
+    <td align="center"><img src="docs/screenshots/onboarding-welcome.png" width="250" alt="The first run: welcome"><br><sub><b>First run</b>: under a minute to counting</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/onboarding-welcome.png" width="250" alt="The first run: welcome"><br><sub><b>First run</b>: under a minute to counting</sub></td>
     <td align="center"><img src="docs/screenshots/onboarding-goal.png" width="250" alt="The first run: the daily goal, with what it means in distance and time"><br><sub><b>A goal</b> in kilometres and minutes</sub></td>
     <td align="center"><img src="docs/screenshots/settings-appearance.png" width="250" alt="Settings: appearance, with a live preview"><br><sub><b>Appearance</b>: palettes and typefaces</sub></td>
+    <td align="center"><img src="docs/screenshots/calibration.png" width="250" alt="Measure your step: 131 steps over 100 m make a walking step of 76 cm, against 74 cm estimated from the height, so distances read 3% longer"><br><sub><b>Measure your step</b>, no GPS</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/calibration.png" width="250" alt="Measure your step: 131 steps over 100 m make a walking step of 76 cm, against 74 cm estimated from the height, so distances read 3% longer"><br><sub><b>Measure your step</b>, no GPS</sub></td>
     <td align="center"><img src="docs/screenshots/settings-data.png" width="250" alt="Settings, your data: a backup saved with 412 days and 38 outings, and the rows to back up, import and export for a spreadsheet"><br><sub><b>Your data</b>, in a file you keep</sub></td>
     <td align="center"><img src="docs/screenshots/data-import.png" width="250" alt="Importing a backup: when it was written, 413 days of steps and 38 outings, how it joins this phone's days, and the choice to take its profile and settings"><br><sub><b>Import</b>: shown first, nothing deleted</sub></td>
+    <td align="center"><img src="docs/screenshots/guide.png" width="250" alt="The guide: what Passo does, the three screens with their icons, and how Passo counts"><br><sub><b>The guide</b>, in the app</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/guide.png" width="250" alt="The guide: what Passo does, the three screens with their icons, and how Passo counts"><br><sub><b>The guide</b>, in the app</sub></td>
-    <td align="center" colspan="2"><img src="docs/screenshots/today-foldable.png" width="510" alt="Today on the inner screen of an open foldable: the date, the ring, the sentence and the day's chart in a column in the middle, the glow behind them across the whole screen"><br><sub><b>On an open foldable</b>: a centred column</sub></td>
+    <td align="center" colspan="3"><img src="docs/screenshots/today-foldable.png" width="510" alt="Today on the inner screen of an open foldable: the date, the ring, the sentence and the day's chart in a column in the middle, the glow behind them across the whole screen"><br><sub><b>On an open foldable</b>: a centred column</sub></td>
   </tr>
 </table>
 
@@ -92,7 +96,7 @@ Italian). The phone's status bar is not in the pictures. The command that redraw
 - 🎯 **Outings**: a walk or run with a goal, with vibrations or a voice at the milestones you choose.
 - ⏱️ **Japanese interval walk**: 3 slow minutes and 3 fast ones, five sets or more, each change told with a vibration of its own so the phone stays in your pocket; at the end, how many fast intervals were at pace.
 - 🏆 **Insights**: your streak, your best day, week and month, and the averages.
-- 🗺️ **Ways**: long ways (Via degli Dei, Camino Portugués, Via di Francesco, Camino de Santiago, Via Francigena, Kumano Kodō, Great Ocean Walk, Inca Trail, John Muir Trail) walked from home, stage by stage, with a stamp for each. No location: only your distance.
+- 🗺️ **Ways**: long ways (Via degli Dei, Camino Portugués, Via di Francesco, Camino de Santiago, Via Francigena, Kumano Kodō, Great Ocean Walk, Inca Trail, John Muir Trail, Kilimanjaro), listed by continent and walked from home, stage by stage, with a stamp for each. No location: only your distance.
 - 🏛️ **City walks**: Milan, Rome, Paris, London, Madrid, Berlin, Vienna, Porto, Amsterdam and Prague in Europe, Lima, Cusco, New York, Rio de Janeiro, Mexico City, Buenos Aires, San Francisco, Québec, Havana and Cartagena in the Americas, Tokyo, Sydney, Seoul, Beijing, Hong Kong, Singapore, Bangkok, Kyoto, Hanoi and Melbourne in Asia and Oceania, Cairo, Cape Town, Marrakech, Tunis, Alexandria, Dakar, Addis Ababa, Fez, Zanzibar and Luxor in Africa, walked where you are in one outing or a few, about 5 km or about 10. Each continent has its page, with a map of where its cities are and which you have walked. Each place is told as your steps reach it, with a short vibration and, if you like, a line about it in your headphones.
 - 📏 **Measure your step**: walk a distance you know and Passo works out your step length. No GPS.
 - 🏠 **Two widgets**: At a glance and In words, resizable, in six colours and any opacity.

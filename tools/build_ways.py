@@ -30,7 +30,7 @@ Sources and licences:
   1:10m. The locator maps are Natural Earth's 1:50m.
 
 The line is the shortest path from the first stop to the last over the relation's main ways
-(variants and appendices left out), with the gaps where the mapping breaks joined straight and
+(variants and appendices left out), through the stops a way names in `through`, with the gaps where the mapping breaks joined straight and
 reported. The build fails if a stop is far from the line or out of order. Only the standard
 library is used, so any Python 3.10+ runs it.
 """
@@ -508,9 +508,13 @@ def way_line(way):
             previous = key
     gaps = join_gaps(nodes, edges)
     first, last = way.stops[0], way.stops[-1]
-    start = min(nodes, key=lambda k: haversine(nodes[k], (first.lat, first.lon)))
-    end = min(nodes, key=lambda k: haversine(nodes[k], (last.lat, last.lon)))
-    path = [nodes[k] for k in shortest_path(edges, start, end)]
+    keys = {stop.key: stop for stop in way.stops}
+    targets = [first] + [keys[key] for key in way.through] + [last]
+    ends = [min(nodes, key=lambda k: haversine(nodes[k], (t.lat, t.lon))) for t in targets]
+    route = [ends[0]]
+    for start, end in zip(ends, ends[1:]):
+        route += shortest_path(edges, start, end)[1:]
+    path = [nodes[k] for k in route]
     if way.join_end:
         path.append((last.lat, last.lon))
     return path, gaps
@@ -579,15 +583,21 @@ def cumulative(path):
 
 
 def snap(way, path, along):
-    """Each stop's distance along the line, at the nearest point of it; checked in order."""
+    """Each stop's distance along the line, at the nearest point of it; checked in order.
+
+    A line that turns back on itself (a way with stops `through`) passes some places twice, going
+    up and coming down: there a stop is looked for only after the one before it."""
     stops = []
+    previous = 0
     for index, stop in enumerate(way.stops):
         if index == 0:
             i = 0
         elif index == len(way.stops) - 1:
             i = len(path) - 1
         else:
-            i = min(range(len(path)), key=lambda j: haversine(path[j], (stop.lat, stop.lon)))
+            first = previous + 1 if way.through else 0
+            i = min(range(first, len(path)), key=lambda j: haversine(path[j], (stop.lat, stop.lon)))
+        previous = i
         off = haversine(path[i], (stop.lat, stop.lon))
         if off > MAX_SNAP_METRES:
             sys.exit(f"{way.id}: {stop.key} is {off:.0f} m from the line")

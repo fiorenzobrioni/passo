@@ -24,6 +24,7 @@ class WaysDataTest {
                 WayId.GREAT_OCEAN_WALK,
                 WayId.INCA_TRAIL,
                 WayId.JOHN_MUIR_TRAIL,
+                WayId.KILIMANJARO,
             )
             .inOrder()
         assertThat(Ways.waysIn(Continent.EUROPE).map { it.id })
@@ -41,6 +42,7 @@ class WaysDataTest {
         assertThat(Ways.waysIn(Continent.AMERICAS).map { it.id })
             .containsExactly(WayId.INCA_TRAIL, WayId.JOHN_MUIR_TRAIL)
             .inOrder()
+        assertThat(Ways.waysIn(Continent.AFRICA).map { it.id }).containsExactly(WayId.KILIMANJARO)
         assertThat(Ways.walks.map { it.id })
             .containsExactly(
                 WayId.MILAN_DUOMO_NAVIGLI,
@@ -126,6 +128,8 @@ class WaysDataTest {
         // John Muir Trail from Happy Isles to the summit of Mount Whitney.
         assertThat(km(WayId.INCA_TRAIL)).isIn(30..40)
         assertThat(km(WayId.JOHN_MUIR_TRAIL)).isIn(330..345)
+        // Kilimanjaro up by Machame and down by Mweka (the sources give about 62 km).
+        assertThat(km(WayId.KILIMANJARO)).isIn(55..62)
         // The short walks.
         assertThat(Ways.walks.filter { it.lengthMeters < 7_000 }.map { it.id })
             .containsExactly(
@@ -246,6 +250,36 @@ class WaysDataTest {
         assertThat(way.stops.filterNot { it.stage }.map { it.key }).containsExactly("nevada_fall")
         assertThat(way.map.lakes).isNotEmpty()
         assertThat(way.map.parks).isNotEmpty()
+    }
+
+    @Test
+    fun `Kilimanjaro climbs by Machame to Uhuru Peak, and comes down by Mweka`() {
+        val way = Ways.of(WayId.KILIMANJARO)
+        assertThat(way.stops.map { it.key })
+            .containsExactly(
+                "machame_gate", "machame_camp", "shira_camp", "lava_tower", "barranco_camp", "karanga_camp",
+                "barafu_camp", "uhuru_peak", "mweka_camp", "mweka_gate",
+            )
+            .inOrder()
+        assertThat(way.stops.filterNot { it.stage }.map { it.key }).containsExactly("lava_tower")
+        // The two routes meet at Barafu, below the summit: the line goes up through it to the
+        // summit and comes back down through it, rather than cutting across at the meeting point.
+        val line = way.map.line
+        val barafu = way.stops.first { it.key == "barafu_camp" }
+        val summit = way.stops.first { it.key == "uhuru_peak" }.distanceMeters
+        val nearBarafu = (0 until line.size).filter {
+            abs(line.latitudes[it] - barafu.latitude) < 0.01 && abs(line.longitudes[it] - barafu.longitude) < 0.01
+        }
+        assertThat(nearBarafu.any { line.meters[it] < summit }).isTrue()
+        assertThat(nearBarafu.any { line.meters[it] > summit }).isTrue()
+        assertThat(summit - barafu.distanceMeters).isIn(3_000..6_000)
+        assertThat(way.map.rivers).isNotEmpty()
+        assertThat(way.map.parks).isNotEmpty()
+    }
+
+    @Test
+    fun `every continent of the cities has a way`() {
+        for (continent in Continent.entries) assertThat(Ways.waysIn(continent)).isNotEmpty()
     }
 
     @Test
