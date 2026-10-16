@@ -166,6 +166,7 @@ Asked for by the owner after the v1.0.0 release (1 Oct 2026); the phases are in 
 - **City walks** («Passeggiate in città», Phase 11, second part): an outing through a city (Milan, Rome, Paris, London, Madrid, Porto, Amsterdam, Prague, Lima and Cusco; about 5 km or about 10), its places told as the reader reaches them, by a vibration and, if the outing speaks, the voice. Imaginary and said so: the route moves with the steps, never with a location.
 - **Your year on foot** («Il tuo anno a piedi», Phase 12): a year told in full-screen pages, from the days already stored, reachable by hand at any time and offered in December; a page can be shared as an image, through an app the reader picks.
 - **The interval walk** («Camminata a intervalli», Phase 13): the Japanese Interval Walking Training as an outing, in minutes, with each change of interval felt in the pocket (`docs/adr/0013-interval-walks.md`).
+- **More ways, beyond Europe** («Altri cammini», Phase 14, planned): the Kumano Kodō, the Inca Trail, the Great Ocean Walk, the John Muir Trail and Kilimanjaro, so that the ways reach every continent the cities do; "pilgrim" leaves the words that describe the feature as a whole.
 
 ### Possible post-1.0 ideas (not committed)
 

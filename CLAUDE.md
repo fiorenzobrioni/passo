@@ -134,6 +134,11 @@ helpers that locate places, try a route, list a map's water and parks, read Wiki
 being throttled, and splice new walks into `WayData.kt` without moving the other cities. The Compose UI tests write screenshots to each module's
 `build/screenshots`: look at them after changing a screen.
 
+**The Ways' words** (owner, 16 Oct 2026; PLANNING.md §11 Phase 14): nothing that describes the
+Ways names a religion, calls a way devotional or the reader a pilgrim, in English or Italian, in
+the app, the README, VISION or the CHANGELOG. A place's own sentence may say what the place is (a
+cathedral, a temple, a shrine) and a fact of its history, as a guidebook does.
+
 **Accessibility and foldables** (`docs/adr/0012-foldables-and-accessibility.md`): a screen's
 tests call `assertAccessible()` on what they draw, and walk the page at twice the text size and
 on an open foldable (`walkPage()`); text inks are pinned at 4.5:1 by `ContrastTest`. A page
