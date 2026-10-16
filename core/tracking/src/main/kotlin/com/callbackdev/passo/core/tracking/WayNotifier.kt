@@ -46,6 +46,8 @@ import javax.inject.Singleton
  * service writes anyway (in batches, PLANNING.md §4.5), and only while a way is under way. So
  * a stage reached on a walk is told with the batch that wrote it, a few minutes later at most
  * with the screen off, and a stage reached while the phone was off is told when it next writes.
+ * It is the only place a way is marked finished, after its arrival is told: were a page to mark
+ * it first, the way would stop being under way here and the arrival would go untold.
  */
 @Singleton
 class WayNotifier
