@@ -1252,11 +1252,19 @@ Henro (1,200 km and 88 temples) nor the Kailash kora (a loop, at the edge of a d
 (owner, 16 Oct 2026); nor a "lifetime" way for heavy walkers: Passo is not made for that
 reader (owner).
 
-- [ ] **Words.** "Pilgrim" leaves the sentences about the feature as a whole: the Ways page's
-  intro, the guide's first paragraph (which no longer lists the ways by name, so a new one
-  does not make it wrong, as was done for the cities), Insights' door, the README's feature
-  line and screenshot caption, VISION's entry. A way's own sentences keep their pilgrims where
-  that is what the place is about. The ADRs and §15 are history and stay as written.
+- [ ] **Words: no faith named** (owner, 16 Oct 2026, a standing rule, also in CLAUDE.md). What
+  describes the Ways never names a religion nor calls a way devotional or the reader a pilgrim:
+  no "pilgrim", "pilgrimage", "sacred", "holy", "religious" or a faith's name, in English or in
+  Italian («pellegrino», «pellegrinaggio», «sacro»...). The phase rewrites the ones already
+  there: the app's strings about the Ways (the Ways page's intro, the guide's chapter, whose
+  first paragraph no longer lists the ways by name, so a new one does not make it wrong, as was
+  done for the cities; Insights' door; the notifications), the README (feature line and
+  screenshot caption), VISION, CHANGELOG's unreleased entries, PLANNING's Phase 11 introduction
+  and CLAUDE.md. A grep for those words over the strings and these documents comes back empty
+  but for the places' sentences. A place's own sentence may say what the place is (a cathedral,
+  a temple, a shrine) and a fact of its history, as a guidebook does, including the pilgrims of
+  the past where that is what the place is known for; the new ways' sentences follow the same
+  rule. The ADRs and §15 are records and stay as written.
 - [ ] **The stamps' group.** «Credenziale» / "Credential" is a pilgrim's word and reads oddly on
   a trek: it becomes «Timbri» / "Stamps" for every way (owner, 16 Oct 2026), in the page, the
   guide and the strings that name it.
