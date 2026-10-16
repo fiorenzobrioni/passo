@@ -19,9 +19,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
@@ -71,7 +73,8 @@ object WidgetConfigTags {
 /**
  * One widget's settings, reached from the launcher's reconfigure flow: the card at the top, at the sizes
  * it can be given; then what it is painted on and how solid; then what it carries. Every choice
- * is saved as it is made and repaints this one card; «Done» only closes the door.
+ * is saved as it is made and repaints this one card; «Reset this widget» puts the card back as it
+ * was placed, «Done» only closes the door.
  *
  * Only the switches that change something on [kind] are offered: a switch that changes nothing
  * is the screen lying about the card.
@@ -177,9 +180,17 @@ fun WidgetConfigScreen(
                 }
             }
 
+            // The one control that undoes the others: outlined, in the error colour, at the foot.
+            OutlinedButton(
+                onClick = { onLook(WidgetLook()) },
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
+                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 24.dp),
+            ) {
+                Text(stringResource(R.string.widget_config_reset))
+            }
             Button(
                 onClick = onDone,
-                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 24.dp),
+                modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, top = 12.dp),
             ) {
                 Text(stringResource(R.string.widget_config_done))
             }

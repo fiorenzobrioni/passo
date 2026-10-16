@@ -105,6 +105,7 @@
     <string name="widget_config_arrangement">Disposizione</string>
     <string name="widget_arrangement_ring_start">Anello a sinistra, frase al bordo opposto</string>
     <string name="widget_arrangement_ring_end">Anello a destra, frase accanto al numero</string>
+    <string name="widget_config_reset">Ripristina questo widget</string>
     <string name="widget_config_done">Fatto</string>
 
     <string name="glance_form_dot">Una cella: l\'anello, con dentro i passi di oggi.</string>
