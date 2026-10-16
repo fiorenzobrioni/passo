@@ -107,6 +107,7 @@
     <string name="widget_config_arrangement">Arrangement</string>
     <string name="widget_arrangement_ring_start">Ring on the left, sentence at the far edge</string>
     <string name="widget_arrangement_ring_end">Ring on the right, sentence beside the number</string>
+    <string name="widget_config_reset">Reset this widget</string>
     <string name="widget_config_done">Done</string>
 
     <!-- What the card carries at the size shown in the preview -->
