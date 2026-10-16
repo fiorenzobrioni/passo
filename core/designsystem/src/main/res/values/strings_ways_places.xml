@@ -16,6 +16,10 @@
     <string name="way_route_kumano_kodo">The Nakahechi, from Takijiri-ōji to Nachi by Hongū</string>
     <string name="way_name_great_ocean_walk">Great Ocean Walk</string>
     <string name="way_route_great_ocean_walk">Apollo Bay to the Twelve Apostles, round Cape Otway</string>
+    <string name="way_name_inca_trail">Inca Trail</string>
+    <string name="way_route_inca_trail">Km 82 to Machu Picchu, by the Sun Gate</string>
+    <string name="way_name_john_muir_trail">John Muir Trail</string>
+    <string name="way_route_john_muir_trail">Yosemite Valley to the summit of Mount Whitney</string>
     <string name="way_name_milan_duomo_navigli">Milan</string>
     <string name="way_route_milan_duomo_navigli">From the Duomo to the Navigli, by the Castello</string>
     <string name="way_outing_milan_duomo_navigli">A walk in Milan</string>
@@ -314,6 +318,8 @@
     <string name="way_place_dakar_soumbedioune">Soumbédioune</string>
     <string name="way_place_dakar_station">Dakar station</string>
     <string name="way_place_dakar_ucad">Cheikh Anta Diop University</string>
+    <string name="way_place_devils_postpile">Devils Postpile</string>
+    <string name="way_place_donohue_pass">Donohue Pass</string>
     <string name="way_place_echevennoz">Echevennoz</string>
     <string name="way_place_el_burgo_ranero">El Burgo Ranero</string>
     <string name="way_place_elliot_ridge">Elliot Ridge</string>
@@ -331,9 +337,11 @@
     <string name="way_place_fiorenzuola">Fiorenzuola d’Arda</string>
     <string name="way_place_firenze">Florence</string>
     <string name="way_place_foligno">Foligno</string>
+    <string name="way_place_forester_pass">Forester Pass</string>
     <string name="way_place_fromista">Frómista</string>
     <string name="way_place_gambassi_terme">Gambassi Terme</string>
     <string name="way_place_garlasco">Garlasco</string>
+    <string name="way_place_glen_pass">Glen Pass</string>
     <string name="way_place_gran_san_bernardo">Great St Bernard Pass</string>
     <string name="way_place_gubbio">Gubbio</string>
     <string name="way_place_hanoi_dong_xuan">Đồng Xuân Market</string>
@@ -344,6 +352,7 @@
     <string name="way_place_hanoi_old_quarter">Old Quarter</string>
     <string name="way_place_hanoi_st_joseph">St Joseph’s Cathedral</string>
     <string name="way_place_hanoi_van_mieu">Temple of Literature</string>
+    <string name="way_place_happy_isles">Happy Isles</string>
     <string name="way_place_havana_alameda_paula">Alameda de Paula</string>
     <string name="way_place_havana_capitolio">Capitolio</string>
     <string name="way_place_havana_cathedral">Havana Cathedral</string>
@@ -372,8 +381,10 @@
     <string name="way_place_hornillos">Hornillos del Camino</string>
     <string name="way_place_hospital_de_orbigo">Hospital de Órbigo</string>
     <string name="way_place_hosshinmon_oji">Hosshinmon-ōji</string>
+    <string name="way_place_inti_punku">Inti Punku, the Sun Gate</string>
     <string name="way_place_ivrea">Ivrea</string>
     <string name="way_place_johanna_beach">Johanna Beach</string>
+    <string name="way_place_km_82">Km 82</string>
     <string name="way_place_koguchi">Koguchi</string>
     <string name="way_place_kumano_hongu_taisha">Kumano Hongū Taisha</string>
     <string name="way_place_kumano_nachi_taisha">Kumano Nachi Taisha</string>
@@ -433,6 +444,7 @@
     <string name="way_place_luxor_precinct_of_mut">Precinct of Mut</string>
     <string name="way_place_luxor_temple">Luxor Temple</string>
     <string name="way_place_luxor_temple_of_khonsu">Temple of Khonsu</string>
+    <string name="way_place_machu_picchu">Machu Picchu</string>
     <string name="way_place_madonna_dei_fornelli">Madonna dei Fornelli</string>
     <string name="way_place_madrid_almudena">Almudena Cathedral</string>
     <string name="way_place_madrid_angel_caido">Fountain of the Fallen Angel</string>
@@ -464,6 +476,7 @@
     <string name="way_place_marrakech_mouassine">Mouassine Mosque</string>
     <string name="way_place_marrakech_saadian_tombs">Saadian Tombs</string>
     <string name="way_place_massa">Massa</string>
+    <string name="way_place_mather_pass">Mather Pass</string>
     <string name="way_place_medesano">Medesano</string>
     <string name="way_place_melbourne_exhibition">Royal Exhibition Building</string>
     <string name="way_place_melbourne_federation_square">Federation Square</string>
@@ -507,7 +520,10 @@
     <string name="way_place_monterotondo">Monterotondo</string>
     <string name="way_place_monzuno">Monzuno</string>
     <string name="way_place_mortara">Mortara</string>
+    <string name="way_place_mount_whitney">Mount Whitney</string>
+    <string name="way_place_muir_pass">Muir Pass</string>
     <string name="way_place_najera">Nájera</string>
+    <string name="way_place_nevada_fall">Nevada Fall</string>
     <string name="way_place_new_york_911_memorial">9/11 Memorial</string>
     <string name="way_place_new_york_brooklyn_bridge">Brooklyn Bridge</string>
     <string name="way_place_new_york_central_park">Central Park</string>
@@ -525,6 +541,7 @@
     <string name="way_place_o_pedrouzo">O Pedrouzo</string>
     <string name="way_place_o_porrino">O Porriño</string>
     <string name="way_place_orio_litta">Orio Litta</string>
+    <string name="way_place_pacaymayo">Pacaymayo</string>
     <string name="way_place_padron">Padrón</string>
     <string name="way_place_palas_de_rei">Palas de Rei</string>
     <string name="way_place_pamplona">Pamplona</string>
@@ -544,7 +561,9 @@
     <string name="way_place_paris_vosges">Place des Vosges</string>
     <string name="way_place_passo_della_cisa">Cisa Pass</string>
     <string name="way_place_passo_della_futa">Futa Pass</string>
+    <string name="way_place_patallacta">Patallacta</string>
     <string name="way_place_pavia">Pavia</string>
+    <string name="way_place_phuyupatamarca">Phuyupatamarca</string>
     <string name="way_place_piacenza">Piacenza</string>
     <string name="way_place_piediluco">Piediluco</string>
     <string name="way_place_pietralunga">Pietralunga</string>
@@ -624,6 +643,7 @@
     <string name="way_place_rome_vittoriano">The Vittoriano</string>
     <string name="way_place_roncesvalles">Roncesvalles</string>
     <string name="way_place_rubiaes">Rubiães</string>
+    <string name="way_place_runkuraqay">Runkuraqay</string>
     <string name="way_place_ryans_den">Ryans Den</string>
     <string name="way_place_saint_jean">Saint-Jean-Pied-de-Port</string>
     <string name="way_place_san_gimignano">San Gimignano</string>
@@ -639,6 +659,8 @@
     <string name="way_place_santo_domingo">Santo Domingo de la Calzada</string>
     <string name="way_place_sarria">Sarria</string>
     <string name="way_place_sarzana">Sarzana</string>
+    <string name="way_place_sayacmarca">Sayacmarca</string>
+    <string name="way_place_selden_pass">Selden Pass</string>
     <string name="way_place_seoul_bukchon">Bukchon Hanok Village</string>
     <string name="way_place_seoul_changdeokgung">Changdeokgung</string>
     <string name="way_place_seoul_cheonggyecheon">Cheonggyecheon</string>
@@ -664,6 +686,7 @@
     <string name="way_place_sf_saints_peter_paul">Saints Peter and Paul Church</string>
     <string name="way_place_sf_transamerica">Transamerica Pyramid</string>
     <string name="way_place_siena">Siena</string>
+    <string name="way_place_silver_pass">Silver Pass</string>
     <string name="way_place_singapore_buddha_tooth">Buddha Tooth Relic Temple</string>
     <string name="way_place_singapore_clarke_quay">Clarke Quay</string>
     <string name="way_place_singapore_esplanade">Esplanade</string>
@@ -698,6 +721,7 @@
     <string name="way_place_takahara">Takahara</string>
     <string name="way_place_takijiri_oji">Takijiri-ōji</string>
     <string name="way_place_terradillos">Terradillos de los Templarios</string>
+    <string name="way_place_thousand_island_lake">Thousand Island Lake</string>
     <string name="way_place_tokyo_akihabara">Akihabara</string>
     <string name="way_place_tokyo_ameyoko">Ameyoko</string>
     <string name="way_place_tokyo_imperial_palace">Imperial Palace</string>
@@ -730,6 +754,7 @@
     <string name="way_place_tunis_sidi_mahrez">Sidi Mahrez Mosque</string>
     <string name="way_place_tunis_tourbet_el_bey">Tourbet el Bey</string>
     <string name="way_place_tunis_zitouna">Zitouna Mosque</string>
+    <string name="way_place_tuolumne_meadows">Tuolumne Meadows</string>
     <string name="way_place_twelve_apostles">Twelve Apostles</string>
     <string name="way_place_valenca">Valença</string>
     <string name="way_place_valfabbrica">Valfabbrica</string>
@@ -753,6 +778,9 @@
     <string name="way_place_villafranca">Villafranca del Bierzo</string>
     <string name="way_place_viterbo">Viterbo</string>
     <string name="way_place_viverone">Viverone</string>
+    <string name="way_place_warmiwanusqa">Warmiwañusqa</string>
+    <string name="way_place_wayllabamba">Wayllabamba</string>
+    <string name="way_place_winay_wayna">Wiñay Wayna</string>
     <string name="way_place_yunomine_onsen">Yunomine Onsen</string>
     <string name="way_place_zanzibar_christ_church">Christ Church Cathedral</string>
     <string name="way_place_zanzibar_forodhani">Forodhani Gardens</string>
@@ -942,6 +970,8 @@
     <string name="way_note_dakar_soumbedioune">On the Corniche, beside the Médina, Soumbédioune’s craft market is one of the best known in Dakar.</string>
     <string name="way_note_dakar_station">In front of the station stand Demba and Dupont, a Senegalese tirailleur and a French soldier, statues unveiled in 1923.</string>
     <string name="way_note_dakar_ucad">Grown from a medical school of French West Africa, the university bears the name of the historian Cheikh Anta Diop.</string>
+    <string name="way_note_devils_postpile">Devils Postpile, a cliff of basalt columns, has been protected as a national monument since 1911.</string>
+    <string name="way_note_donohue_pass">At Donohue Pass, 3,373 m up between Mount Lyell and Donohue Peak, the way leaves Yosemite National Park.</string>
     <string name="way_note_echevennoz">Echevennoz belongs to Étroubles, the Roman Restapolis, then the main centre of the Great St Bernard valley.</string>
     <string name="way_note_el_burgo_ranero">In the 17th century the pilgrim Domenico Laffi described El Burgo Ranero’s huts, roofed with straw.</string>
     <string name="way_note_estella">King Sancho Ramírez founded Estella around 1090 on the pilgrims’ road, and settlers came from France.</string>
@@ -958,6 +988,7 @@
     <string name="way_note_fiorenzuola">Fiorenzuola’s name comes from the Roman Florentia; d’Arda, from the river it stands on.</string>
     <string name="way_note_firenze">The way ends in Piazza della Signoria, in front of Palazzo Vecchio.</string>
     <string name="way_note_foligno">The first printed edition of Dante’s Divine Comedy came off a press in Foligno in 1472.</string>
+    <string name="way_note_forester_pass">Forester Pass, 4,009 m up between Kings Canyon and Sequoia national parks, is the highest point of the Pacific Crest Trail.</string>
     <string name="way_note_fromista">Frómista’s Romanesque church of San Martín was founded around 1066, paid for in part by a queen.</string>
     <string name="way_note_gambassi_terme">Glassmaking flourished in Gambassi from the 13th century.</string>
     <string name="way_note_garlasco">Garlasco’s sanctuary of the Madonna della Bozzola, a place of pilgrimage, began with a miracle that tradition dates to 1465.</string>
@@ -971,6 +1002,7 @@
     <string name="way_note_hanoi_old_quarter">Known as the 36 streets, the Old Quarter once gave each street its own trade.</string>
     <string name="way_note_hanoi_st_joseph">Finished in 1886 in the Gothic Revival style, the cathedral is said to resemble Notre-Dame de Paris.</string>
     <string name="way_note_hanoi_van_mieu">Founded in 1070 for Confucius, the temple keeps stelae on stone turtles with the names of the scholars who passed the royal exams.</string>
+    <string name="way_note_happy_isles">The way begins at Happy Isles, a group of small islands in the Merced River, in Yosemite Valley.</string>
     <string name="way_note_havana_alameda_paula">Built in 1777, it was the city’s first promenade.</string>
     <string name="way_note_havana_capitolio">A replica diamond set in the floor of its hall marks kilometre zero of Cuba’s roads.</string>
     <string name="way_note_havana_cathedral">Columbus’s remains lay in this cathedral until 1898, when they were taken to Seville.</string>
@@ -998,7 +1030,9 @@
     <string name="way_note_hong_kong_western_market">Built in 1906, this was the north block of the old Western Market.</string>
     <string name="way_note_hornillos">Hornillos is first recorded in the 9th century, on a line of watchtowers guarding early Castile.</string>
     <string name="way_note_hospital_de_orbigo">In the holy year 1434 the knight Suero de Quiñones held this bridge, challenging every knight who would cross to a joust.</string>
+    <string name="way_note_inti_punku">Inti Punku, the Sun Gate, was once the main way into Machu Picchu from Cusco.</string>
     <string name="way_note_ivrea">Ivrea’s carnival is known for its battle of the oranges.</string>
+    <string name="way_note_km_82">The way begins at kilometre 82, counted from Cusco, in the valley of the Urubamba.</string>
     <string name="way_note_kumano_hongu_taisha">The shrine stood on the Ōyunohara sandbank until the flood of 1889; at the sandbank’s entrance now stands the largest torii in the world, 33.9 m tall.</string>
     <string name="way_note_kumano_nachi_taisha">The way ends at Kumano Nachi Taisha, near Nachi Falls and its drop of 133 m.</string>
     <string name="way_note_kyoto_hanamikoji">Gion is one of Japan’s best-known geisha districts; in Kyoto the geisha are called geiko.</string>
@@ -1057,6 +1091,7 @@
     <string name="way_note_luxor_precinct_of_mut">The precinct of the goddess Mut, south of Karnak, keeps a sacred lake around her temple.</string>
     <string name="way_note_luxor_temple">Of the two obelisks Ramesses II raised here, one now stands in Paris; the clock France gave in return is in Cairo’s Citadel.</string>
     <string name="way_note_luxor_temple_of_khonsu">Built by Ramesses III on the site of an earlier temple, this is an almost complete temple of the New Kingdom.</string>
+    <string name="way_note_machu_picchu">The way ends at Machu Picchu, an Inca citadel on UNESCO’s World Heritage List since 1983.</string>
     <string name="way_note_madonna_dei_fornelli">Beyond the village the way follows stretches of the Flaminia Militare, a road the Romans opened in 187 BC.</string>
     <string name="way_note_madrid_almudena">Begun in 1883, the cathedral was consecrated by Pope John Paul II in 1993.</string>
     <string name="way_note_madrid_angel_caido">Ricardo Bellver’s statue shows Lucifer at the moment of his fall from heaven.</string>
@@ -1130,7 +1165,10 @@
     <string name="way_note_monterotondo">In October 1867 Garibaldi’s volunteers took Monterotondo on their march on Rome.</string>
     <string name="way_note_monzuno">Monzuno is the birthplace of Mario Musolesi, who led the Stella Rossa partisan brigade on Monte Sole.</string>
     <string name="way_note_mortara">Legend says Mortara is named after a battle fought here in 773 between Charlemagne and the Lombards.</string>
+    <string name="way_note_mount_whitney">The way ends on Mount Whitney, the highest mountain in the contiguous United States, named after the geologist Josiah Whitney.</string>
+    <string name="way_note_muir_pass">Muir Pass is one of the six passes on the way above 3,350 m, from Donohue in the north to Forester in the south.</string>
     <string name="way_note_najera">Nájera’s monastery of Santa María la Real, consecrated in 1052, holds the tombs of the early kings of Navarre.</string>
+    <string name="way_note_nevada_fall">Nevada Fall drops 181 m; the mist it makes gave it its name, Spanish for snowy.</string>
     <string name="way_note_new_york_911_memorial">Two pools fill the footprints of the Twin Towers, the names of the victims around their edges.</string>
     <string name="way_note_new_york_brooklyn_bridge">Opened in 1883 across the East River, it was then the longest suspension bridge in the world.</string>
     <string name="way_note_new_york_central_park">Frederick Law Olmsted and Calvert Vaux won the competition to design the park with their Greensward Plan.</string>
@@ -1167,7 +1205,9 @@
     <string name="way_note_paris_vosges">The oldest planned square in Paris, inaugurated in 1612; Victor Hugo lived at number 6.</string>
     <string name="way_note_passo_della_cisa">At the Cisa Pass, 1,041 metres up, the way crosses the Apennines into Tuscany.</string>
     <string name="way_note_passo_della_futa">At the Futa Pass, on the old Gothic Line, lies a German war cemetery of the Second World War.</string>
+    <string name="way_note_patallacta">Patallacta, also called Llactapata, is an Inca settlement by the Urubamba.</string>
     <string name="way_note_pavia">Saint Augustine is buried in Pavia, in the church of San Pietro in Ciel d’Oro.</string>
+    <string name="way_note_phuyupatamarca">Phuyupatamarca, «the city above the clouds», has five small stone baths of running water.</string>
     <string name="way_note_piacenza">The Romans founded Piacenza, Placentia, in 218 BC, as Hannibal marched on Italy.</string>
     <string name="way_note_piediluco">Nearby, the Velino drops into the Marmore Falls, made by the Romans in 271 BC.</string>
     <string name="way_note_pietralunga">Pietralunga was once Pratalonga, the long meadow, after the rich pastures around it.</string>
@@ -1246,6 +1286,7 @@
     <string name="way_note_rome_vittoriano">The white monument to Victor Emmanuel II, first king of united Italy, holds the Tomb of the Unknown Soldier.</string>
     <string name="way_note_roncesvalles">Here, in 778, Charlemagne’s rearguard fell: the battle of the Song of Roland.</string>
     <string name="way_note_rubiaes">Rubiães lies on the old Roman road that ran north from Braga.</string>
+    <string name="way_note_runkuraqay">Runkuraqay, an Inca ruin with curved walls, stands near the pass of the same name.</string>
     <string name="way_note_saint_jean">Many pilgrims set out from here, at the foot of the Pyrenees.</string>
     <string name="way_note_san_gimignano">San Gimignano still has 14 of its medieval towers, out of about 72.</string>
     <string name="way_note_san_juan_de_ortega">At each equinox, at five in the afternoon, a ray of sun lights the carved Annunciation on a capital of this church.</string>
@@ -1260,6 +1301,7 @@
     <string name="way_note_santo_domingo">Santo Domingo’s cathedral always keeps a live hen and rooster, for the roast birds that by a miracle saved a pilgrim.</string>
     <string name="way_note_sarria">From Sarria, a little over 100 km from Santiago, the walk still earns the Compostela.</string>
     <string name="way_note_sarzana">Sarzana is the birthplace of Tommaso Parentucelli, who became Pope Nicholas V in 1447.</string>
+    <string name="way_note_sayacmarca">Hiram Bingham reached Sayacmarca in 1915 and called it Cedrobamba.</string>
     <string name="way_note_seoul_bukchon">Bukchon means north village, north of the Cheonggyecheon; its lanes keep many hanok, traditional Korean houses.</string>
     <string name="way_note_seoul_changdeokgung">Built in 1405, after Gyeongbokgung, this palace was for centuries the kings’ main seat, and is a World Heritage Site.</string>
     <string name="way_note_seoul_cheonggyecheon">Covered last century by concrete and an elevated road, the stream was brought back to light in 2005.</string>
@@ -1318,6 +1360,7 @@
     <string name="way_note_sydney_st_marys">Begun after a fire destroyed the first church in 1865, William Wardell’s cathedral was largely finished in 1928.</string>
     <string name="way_note_takijiri_oji">Takijiri-ōji has long been held to be the entrance to Kumano: from here the way climbs into the mountains.</string>
     <string name="way_note_terradillos">Terradillos takes its name from the Knights Templar, who held it in the Middle Ages.</string>
+    <string name="way_note_thousand_island_lake">Thousand Island Lake is named for the many small rocks that dot its surface.</string>
     <string name="way_note_tokyo_akihabara">After the war Akihabara grew from a black market into Electric Town, and later the heart of otaku culture.</string>
     <string name="way_note_tokyo_ameyoko">This market along the railway may take its name from the sweets sold here after the war, or from American army goods.</string>
     <string name="way_note_tokyo_imperial_palace">Only at the New Year and on the Emperor’s birthday may the public cross into the palace, where the imperial family greets them.</string>
@@ -1349,6 +1392,7 @@
     <string name="way_note_tunis_sidi_mahrez">Begun in 1692 by Mohamed Bey in honour of Sidi Mahrez, the medina’s patron saint, the mosque takes its domes from the mosques of Istanbul.</string>
     <string name="way_note_tunis_tourbet_el_bey">Built under Ali II, the largest funerary monument in Tunis holds most of the Husainid beys under its green-tiled domes.</string>
     <string name="way_note_tunis_zitouna">The Olive Mosque, named, the legend goes, after an olive tree on the site, was rebuilt under the Aghlabids with ancient columns from Carthage.</string>
+    <string name="way_note_tuolumne_meadows">Tuolumne Meadows, at about 2,600 m, lies along the Tuolumne River in Yosemite’s high country.</string>
     <string name="way_note_twelve_apostles">The way ends at the Twelve Apostles, stacks of limestone that the Southern Ocean wore out of the cliffs.</string>
     <string name="way_note_valenca">Valença’s walled fortress looks across the Minho at Tui: over the bridge, the way enters Spain.</string>
     <string name="way_note_valfabbrica">Valfabbrica grew by a ford of the Chiascio, between Gubbio and Assisi, around a 9th-century Benedictine abbey.</string>
@@ -1371,6 +1415,8 @@
     <string name="way_note_villafranca">Villafranca, the town of the Franks, grew around a borough of French pilgrims who stayed.</string>
     <string name="way_note_viterbo">In Viterbo, from 1268 to 1271, the cardinals held the longest papal election in history.</string>
     <string name="way_note_viverone">Lake Viverone keeps the remains of a Bronze Age village on piles, part of a UNESCO World Heritage Site.</string>
+    <string name="way_note_warmiwanusqa">The way climbs to Warmiwañusqa, a pass whose name means «dead woman».</string>
+    <string name="way_note_winay_wayna">Wiñay Wayna, «forever young» in Quechua, is an Inca site of terraces above the Urubamba.</string>
     <string name="way_note_yunomine_onsen">Tsuboyu, Yunomine’s stone bath, is part of the World Heritage Site; its water, the story goes, changes colour seven times a day.</string>
     <string name="way_note_zanzibar_christ_church">Built from 1873 to 1879 where the slave market stood, the cathedral has its altar, it is said, on the spot of the whipping post.</string>
     <string name="way_note_zanzibar_forodhani">Restored by the Aga Khan, the gardens on the sea front fill every evening with a market of Zanzibari dishes.</string>

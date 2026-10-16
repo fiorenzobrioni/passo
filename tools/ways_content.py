@@ -30,8 +30,9 @@ English article on the Via Francigena; the Camino Francés's (7 Oct 2026) in the
 Spanish (or French, German, Galician), the Via di Francesco's in the English and Italian (or
 German), the Via degli Dei's and the Camino Portugués's in the English and Italian, Portuguese
 or Spanish (or Galician). The Kumano Kodō (16 Oct 2026) in the English and Japanese (or German),
-the Great Ocean Walk in the English and German (or Italian). A stage with no second source keeps
-only its name.
+the Great Ocean Walk in the English and German (or Italian), the Inca Trail in the English and
+Spanish (or French, German, Italian), the John Muir Trail in the English and French (or German,
+Spanish, Italian). A stage with no second source keeps only its name.
 """
 
 from dataclasses import dataclass, field
@@ -797,7 +798,144 @@ GREAT_OCEAN_WALK = Way(
     ],
 )
 
-WAYS = [VIA_DEGLI_DEI, CAMINO_PORTUGUES, VIA_DI_FRANCESCO, CAMINO_FRANCES, VIA_FRANCIGENA, KUMANO_KODO, GREAT_OCEAN_WALK]
+INCA_TRAIL = Way(
+    id="INCA_TRAIL",
+    # The classic route, from the railway's kilometre 82 over Warmiwañusqa to Machu Picchu by the
+    # Sun Gate: one relation, whole, 33 km as mapped of the 38 to 43 the sources give (they count
+    # from different starts and to the citadel's gate).
+    relations=[15703494],
+    name_en="Inca Trail",
+    name_it="Cammino Inca",
+    route_en="Km 82 to Machu Picchu, by the Sun Gate",
+    route_it="Dal km 82 a Machu Picchu, per la Porta del Sole",
+    country="PE_SOUTH",
+    # The Vilcanota (the Urubamba) it starts and ends by, and the Cusichaca it follows up to
+    # Wayllabamba.
+    rivers=["relation/2248566", "relation/14377668"],
+    # The protected area around Machu Picchu, which it lies in from start to end.
+    parks=["relation/3891114"],
+    stops=[
+        Stop("km_82", "Km 82", "Km 82", -13.2149, -72.3825,
+             note_en="The way begins at kilometre 82, counted from Cusco, in the valley of the Urubamba.",
+             note_it="Il cammino parte dal chilometro 82, contato da Cusco, nella valle dell'Urubamba."),
+        # Source: Wikipedia, Inca Trail to Machu Picchu; Wikipedia (fr), Chemin de l'Inca au Machu
+        # Picchu; Wikipedia (de), Inka-Pfad (the railway's kilometre). Its height is left out: 2,600
+        # m in the English and the French, which give the two starts' heights in opposite orders.
+        Stop("patallacta", "Patallacta", "Patallacta", -13.2312, -72.4248, stage=False,
+             note_en="Patallacta, also called Llactapata, is an Inca settlement by the Urubamba.",
+             note_it="Patallacta, detta anche Llactapata, è un insediamento inca sulle rive dell'Urubamba."),
+        # Source: Wikipedia, Patallacta; Wikipedia (de), Llactapata; Wikipedia (es), Patallacta.
+        # Its 112 rooms (Spanish) and its hundred houses (English) are left out, as is its burning
+        # in 1536 (English), against the German's town the conquest did not destroy.
+        Stop("wayllabamba", "Wayllabamba", "Wayllabamba", -13.2643, -72.4470),
+        Stop("warmiwanusqa", "Warmiwañusqa", "Warmiwañusqa", -13.2430, -72.4840,
+             note_en="The way climbs to Warmiwañusqa, a pass whose name means «dead woman».",
+             note_it="Il cammino sale a Warmiwañusqa, un passo il cui nome significa «donna morta»."),
+        # Source: Wikipedia, Inca Trail to Machu Picchu, Warmi Wañusqa; Wikipedia (es), Camino Inca a
+        # Machu Picchu. Its height, 4,200 m, is in the English article on the pass only.
+        Stop("pacaymayo", "Pacaymayo", "Pacaymayo", -13.2337, -72.4981),
+        Stop("runkuraqay", "Runkuraqay", "Runkuraqay", -13.2285, -72.5015, stage=False,
+             note_en="Runkuraqay, an Inca ruin with curved walls, stands near the pass of the same name.",
+             note_it="Runkuraqay, una rovina inca dai muri curvi, sorge vicino al passo che porta lo stesso nome."),
+        # Source: Wikipedia, Runkuraqay; Wikipedia (de), Runkurakay (its concentric walls, near the
+        # pass); Wikipedia (es), Runkurakay (its semicircular rooms). A rest stop in the German only.
+        Stop("sayacmarca", "Sayacmarca", "Sayacmarca", -13.2280, -72.5170,
+             note_en="Hiram Bingham reached Sayacmarca in 1915 and called it Cedrobamba.",
+             note_it="Hiram Bingham arrivò a Sayacmarca nel 1915 e la chiamò Cedrobamba."),
+        # Source: Wikipedia, Sayacmarca; Wikipedia (es), Sayacmarca.
+        Stop("phuyupatamarca", "Phuyupatamarca", "Phuyupatamarca", -13.2068, -72.5303,
+             note_en="Phuyupatamarca, «the city above the clouds», has five small stone baths of running water.",
+             note_it="Phuyupatamarca, «la città sopra le nuvole», ha cinque piccole vasche di pietra con acqua corrente."),
+        # Source: Wikipedia, Puyupatamarca; Wikipedia (fr), Puyupatamarca (the baths); Wikipedia
+        # (es), Puyupatamarca (its name).
+        Stop("winay_wayna", "Wiñay Wayna", "Wiñay Wayna", -13.1929, -72.5365,
+             note_en="Wiñay Wayna, «forever young» in Quechua, is an Inca site of terraces above the Urubamba.",
+             note_it="Wiñay Wayna, «per sempre giovane» in quechua, è un sito inca a terrazze sopra l'Urubamba."),
+        # Source: Wikipedia, Wiñay Wayna; Wikipedia (de, it), Wiñay Wayna. Its last camp of the way
+        # is in the English only.
+        Stop("inti_punku", "Inti Punku, the Sun Gate", "Inti Punku, la Porta del Sole", -13.1698, -72.5339, stage=False,
+             note_en="Inti Punku, the Sun Gate, was once the main way into Machu Picchu from Cusco.",
+             note_it="Inti Punku, la Porta del Sole, era un tempo il principale accesso a Machu Picchu da Cusco."),
+        # Source: Wikipedia, Inti Punku; Wikipedia (es), Inti Punku.
+        Stop("machu_picchu", "Machu Picchu", "Machu Picchu", -13.1643, -72.5450,
+             note_en="The way ends at Machu Picchu, an Inca citadel on UNESCO's World Heritage List since 1983.",
+             note_it="Il cammino finisce a Machu Picchu, cittadella inca nel patrimonio dell'umanità dell'UNESCO dal 1983."),
+        # Source: Wikipedia, Machu Picchu; Wikipedia (es), Machu Picchu. Its century is left out: the
+        # Spanish dates parts of it before Pachacuti.
+    ],
+)
+
+JOHN_MUIR_TRAIL = Way(
+    id="JOHN_MUIR_TRAIL",
+    # Happy Isles in Yosemite Valley to the summit of Mount Whitney: one relation, whole, 336 km
+    # (the sources give 338 to 344).
+    relations=[1244828],
+    name_en="John Muir Trail",
+    name_it="John Muir Trail",
+    route_en="Yosemite Valley to the summit of Mount Whitney",
+    route_it="Dalla Yosemite Valley alla cima del Monte Whitney",
+    country="US",
+    # The Merced it leaves Yosemite Valley by, the Tuolumne's Lyell Fork, the San Joaquin and its
+    # South Fork, the Kings and Bubbs Creek, and the Kern below Mount Whitney.
+    rivers=["relation/6688257", "relation/12795800", "way/856033994", "relation/6704812", "relation/11700440",
+            "relation/15957530", "relation/12771982", "relation/11213203"],
+    lakes=["relation/207450", "relation/207453", "relation/12501393"],
+    # Yosemite, Devils Postpile, Kings Canyon and Sequoia.
+    parks=["relation/1643367", "relation/6171345", "relation/175059", "relation/175060"],
+    stops=[
+        Stop("happy_isles", "Happy Isles", "Happy Isles", 37.7325, -119.5577,
+             note_en="The way begins at Happy Isles, a group of small islands in the Merced River, in Yosemite Valley.",
+             note_it="Il cammino parte da Happy Isles, un gruppo di isolotti nel fiume Merced, nella Yosemite Valley."),
+        # Source: Wikipedia, Happy Isles, John Muir Trail; Wikipedia (fr), Îles Happy.
+        Stop("nevada_fall", "Nevada Fall", "Nevada Fall", 37.7249, -119.5334, stage=False,
+             note_en="Nevada Fall drops 181 m; the mist it makes gave it its name, Spanish for snowy.",
+             note_it="La Nevada Fall fa un salto di 181 m; la nebbia che solleva le ha dato il nome, «nevosa» in spagnolo."),
+        # Source: Wikipedia, Nevada Fall; Wikipedia (fr), Chute Nevada (its height); Wikipedia (es),
+        # Cascada Nevada (its mist and its name).
+        Stop("tuolumne_meadows", "Tuolumne Meadows", "Tuolumne Meadows", 37.8795, -119.3866,
+             note_en="Tuolumne Meadows, at about 2,600 m, lies along the Tuolumne River in Yosemite's high country.",
+             note_it="Tuolumne Meadows, a circa 2.600 m, si stende lungo il fiume Tuolumne, in alta quota nello Yosemite."),
+        # Source: Wikipedia, Tuolumne Meadows; Wikipedia (fr), Tuolumne Meadows.
+        Stop("donohue_pass", "Donohue Pass", "Donohue Pass", 37.7610, -119.2487,
+             note_en="At Donohue Pass, 3,373 m up between Mount Lyell and Donohue Peak, the way leaves Yosemite National Park.",
+             note_it="Al Donohue Pass, a 3.373 m tra il Monte Lyell e il Donohue Peak, il cammino esce dal parco nazionale di Yosemite."),
+        # Source: Wikipedia, Donohue Pass, John Muir Trail; Wikipedia (fr), Col Donohue.
+        Stop("thousand_island_lake", "Thousand Island Lake", "Thousand Island Lake", 37.7199, -119.1867,
+             note_en="Thousand Island Lake is named for the many small rocks that dot its surface.",
+             note_it="Il Thousand Island Lake prende il nome dai tanti piccoli scogli che ne punteggiano la superficie."),
+        # Source: Wikipedia, Thousand Island Lake; Wikipedia (fr), Lac Thousand Island.
+        Stop("devils_postpile", "Devils Postpile", "Devils Postpile", 37.6252, -119.0848,
+             note_en="Devils Postpile, a cliff of basalt columns, has been protected as a national monument since 1911.",
+             note_it="Il Devils Postpile, una parete di colonne di basalto, è protetto come monumento nazionale dal 1911."),
+        # Source: Wikipedia, Devils Postpile National Monument; Wikipedia (de, fr), Devils Postpile
+        # National Monument. The columns' age is in the French only.
+        Stop("silver_pass", "Silver Pass", "Silver Pass", 37.4677, -118.9231),
+        Stop("selden_pass", "Selden Pass", "Selden Pass", 37.2899, -118.8729),
+        Stop("muir_pass", "Muir Pass", "Muir Pass", 37.1120, -118.6705,
+             note_en="Muir Pass is one of the six passes on the way above 3,350 m, from Donohue in the north to Forester in the south.",
+             note_it="Il Muir Pass è uno dei sei passi del cammino sopra i 3.350 m, dal Donohue a nord al Forester a sud."),
+        # Source: Wikipedia, John Muir Trail; Wikipedia (de), John Muir Trail. Its hut, the only
+        # shelter on the way, is in the English only.
+        Stop("mather_pass", "Mather Pass", "Mather Pass", 37.0313, -118.4601),
+        Stop("glen_pass", "Glen Pass", "Glen Pass", 36.7896, -118.4121),
+        Stop("forester_pass", "Forester Pass", "Forester Pass", 36.6945, -118.3736,
+             note_en="Forester Pass, 4,009 m up between Kings Canyon and Sequoia national parks, is the highest point of the Pacific Crest Trail.",
+             note_it="Il Forester Pass, a 4.009 m tra i parchi nazionali di Kings Canyon e di Sequoia, è il punto più alto del Pacific Crest Trail."),
+        # Source: Wikipedia, Forester Pass; Wikipedia (fr), Col Forester; Wikipedia (it), Forester
+        # Pass. The English article on the trail gives it 13,117 ft once, against 13,153 elsewhere.
+        Stop("mount_whitney", "Mount Whitney", "Monte Whitney", 36.5786, -118.2921,
+             note_en="The way ends on Mount Whitney, the highest mountain in the contiguous United States, named after the geologist Josiah Whitney.",
+             note_it="Il cammino finisce sul Monte Whitney, la montagna più alta degli Stati Uniti contigui, che porta il nome del geologo Josiah Whitney."),
+        # Source: Wikipedia, Mount Whitney; Wikipedia (it), Monte Whitney; Wikipedia (fr), Mont
+        # Whitney (its name). Its height is left out: 4,421 m in the English and the Italian, 4,417 in
+        # the French.
+    ],
+)
+
+WAYS = [
+    VIA_DEGLI_DEI, CAMINO_PORTUGUES, VIA_DI_FRANCESCO, CAMINO_FRANCES, VIA_FRANCIGENA, KUMANO_KODO, GREAT_OCEAN_WALK,
+    INCA_TRAIL, JOHN_MUIR_TRAIL,
+]
 
 
 @dataclass(frozen=True)
@@ -3684,6 +3822,9 @@ LOCATORS = {
     "GB": (49.8, -8.4, 59.0, 2.2),
     "FR": (41.3, -5.2, 51.1, 9.6),
     "PE": (-18.6, -81.6, 0.2, -68.4),
+    # Southern Peru, for a way: the whole country is a tall box, which in the map's corner covered
+    # the Inca Trail's line between Phuyupatamarca and Machu Picchu; a box this flat fits under it.
+    "PE_SOUTH": (-18.6, -79.5, -11.0, -68.4),
     "NL": (50.7, 3.3, 53.6, 7.3),
     "CZ": (48.5, 12.0, 51.1, 18.9),
     "DE": (47.2, 5.8, 55.1, 15.1),
