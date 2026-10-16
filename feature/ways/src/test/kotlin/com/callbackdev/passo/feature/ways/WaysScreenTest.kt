@@ -241,6 +241,34 @@ class WaysScreenTest {
     // --- City walks (Phase 11, second part) ---------------------------------------------------
 
     @Test
+    @Config(qualifiers = "it-rIT-w384dp-h832dp-xxhdpi")
+    fun `a walk started on its page shows its card where Start was, whole`() {
+        var current by mutableStateOf(WaysSamples.state(walks = emptyList(), live = null))
+        compose.setContent {
+            PassoTheme {
+                WayScreen(
+                    current,
+                    WayId.LONDON_PALACE_TOWER,
+                    null,
+                    onBack = {},
+                    actions = WayActions(
+                        walk = WalkActions(start = {
+                            current = WaysSamples.state(
+                                walks = listOf(WaysSamples.london),
+                                live = WaysSamples.live(WaysSamples.londonNow),
+                            )
+                        }),
+                    ),
+                )
+            }
+        }
+        compose.onNodeWithTag(WaysTags.WALK_START).performClick()
+
+        compose.onNodeWithTag(SessionCardTags.CARD).assertIsDisplayed()
+        compose.onNodeWithTag(SessionCardTags.PAUSE).assertIsDisplayed()
+    }
+
+    @Test
     fun `the cities are listed by continent, with where their walks stand`() {
         var continent: Continent? = null
         showList(onOpenContinent = { continent = it })

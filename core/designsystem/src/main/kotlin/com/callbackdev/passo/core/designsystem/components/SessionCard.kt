@@ -38,6 +38,7 @@ import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.drawText
@@ -129,10 +130,22 @@ fun SessionCard(
     }
     val sentence = res.sessionHeadline(session, format, now)
     val interval = session.intervalAt(now)
+    val stateLabel = when (session.state) {
+        SessionState.ACTIVE -> stringResource(R.string.session_card_under_way)
+        SessionState.PAUSED -> stringResource(R.string.session_card_paused)
+        SessionState.FINISHED -> finishedWhen(session)
+    }
+    // An outing that starts or pauses is said once by TalkBack, wherever its card appears: a pane
+    // title is announced when it comes and when it changes. Not a finished one, which would be
+    // said again each time Today opens.
+    val pane = if (finished) null else stringResource(R.string.session_card_pane, name, stateLabel)
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         shape = GroupShape,
-        modifier = modifier.fillMaxWidth().testTag(SessionCardTags.CARD),
+        modifier = modifier
+            .fillMaxWidth()
+            .then(if (pane != null) Modifier.semantics { paneTitle = pane } else Modifier)
+            .testTag(SessionCardTags.CARD),
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -155,11 +168,7 @@ fun SessionCard(
                         },
                     )
                     Text(
-                        text = when (session.state) {
-                            SessionState.ACTIVE -> stringResource(R.string.session_card_under_way)
-                            SessionState.PAUSED -> stringResource(R.string.session_card_paused)
-                            SessionState.FINISHED -> finishedWhen(session)
-                        },
+                        text = stateLabel,
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                         color = accent,
                     )

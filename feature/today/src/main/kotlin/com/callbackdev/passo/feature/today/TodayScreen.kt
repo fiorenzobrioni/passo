@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.ButtonDefaults
@@ -71,6 +72,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -92,6 +94,7 @@ import com.callbackdev.passo.core.designsystem.components.StatusCard
 import com.callbackdev.passo.core.designsystem.components.StatusTone
 import com.callbackdev.passo.core.designsystem.components.TilePair
 import com.callbackdev.passo.core.designsystem.components.TrendPoint
+import com.callbackdev.passo.core.designsystem.components.reveal
 import com.callbackdev.passo.core.designsystem.format.annotated
 import com.callbackdev.passo.core.designsystem.format.axisHour
 import com.callbackdev.passo.core.designsystem.format.clockTime
@@ -207,9 +210,21 @@ fun TodayScreen(
     // reaches both edges of an open foldable.
     val gutter = pageGutter()
     val inColumn = Modifier.padding(gutter)
+    val list = rememberLazyListState()
+    val reduced = reducedMotion()
+    // An outing that begins while the page is open (a launcher's shortcut brings it forward) is
+    // brought into view: its card stands under the sentence, and the page may be scrolled down
+    // to the tiles. Not one already under way when the page opens: it is where it always is.
+    val sessionId = state.session?.session?.id
+    var seenSession by rememberSaveable { mutableStateOf(sessionId) }
+    LaunchedEffect(sessionId) {
+        if (sessionId != null && sessionId != seenSession) list.reveal(key = SESSION_KEY, index = 0, reduced = reduced)
+        seenSession = sessionId
+    }
     // Its own ground and ink, so the page reads right wherever it is drawn.
     Surface(modifier = modifier.fillMaxSize()) {
         LazyColumn(
+            state = list,
             modifier = Modifier.fillMaxSize().testTag(TodayTags.LIST),
             contentPadding = PaddingValues(bottom = bottom + 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -219,7 +234,7 @@ fun TodayScreen(
             }
             val session = state.session
             if (session != null) {
-                item(key = "session") {
+                item(key = SESSION_KEY) {
                     SessionCard(
                         session = session.session,
                         cadence = session.cadence,
@@ -229,8 +244,6 @@ fun TodayScreen(
                         modifier = inColumn.padding(horizontal = ScreenMargin),
                     )
                 }
-            } else if (state.status == TrackingStatus.COUNTING && state.startOutingButton) {
-                item(key = "start-outing") { StartOuting(onOpenSessions) }
             }
             if (state.firstDay && state.status == TrackingStatus.COUNTING) {
                 item(key = "first-day") {
@@ -248,6 +261,11 @@ fun TodayScreen(
                 }
             }
             item(key = "trend") { Box(inColumn) { TrendCard(state, format) } }
+            // Under the day rather than above it: the sentence's evidence comes first, so the
+            // chart is whole on the first screen of a tall phone, and the way out after it.
+            if (session == null && state.status == TrackingStatus.COUNTING && state.startOutingButton) {
+                item(key = "start-outing") { StartOuting(onOpenSessions) }
+            }
             if (state.outings.isNotEmpty()) item(key = "walks") { Box(inColumn) { WalksCard(state.outings, format) } }
             item(key = "metrics") { Box(inColumn) { Metrics(state, format) } }
         }
@@ -508,7 +526,8 @@ private fun Headline(state: TodayUiState, format: MeasureFormatter) {
                     Placeholder(1.1.em, 1.em, PlaceholderVerticalAlign.TextCenter),
                 ) { Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.fillMaxSize()) },
             ),
-            style = MaterialTheme.typography.titleLarge,
+            // Balanced lines: two of a like length, never a lone word under a full line.
+            style = MaterialTheme.typography.titleLarge.copy(lineBreak = LineBreak.Heading),
             textAlign = TextAlign.Center,
         )
         val detail = overview.detail
@@ -523,7 +542,7 @@ private fun Headline(state: TodayUiState, format: MeasureFormatter) {
         if (detailText != null) {
             Text(
                 text = detailText,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyLarge.copy(lineBreak = LineBreak.Heading),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
@@ -586,7 +605,7 @@ private fun TrendCard(state: TodayUiState, format: MeasureFormatter) {
                 Text(
                     text = stringResource(R.string.today_trend_title),
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(end = 12.dp).semantics { heading() },
+                    modifier = Modifier.padding(end = 8.dp).semantics { heading() },
                 )
                 Legend(hasUsual = trend.usual != null)
             }
@@ -653,7 +672,7 @@ private fun Legend(hasUsual: Boolean) {
     val today = MaterialTheme.colorScheme.primary
     val usual = MaterialTheme.colorScheme.onSurfaceVariant
     val goal = PassoTheme.colors.goal
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         LegendItem(stringResource(R.string.today_trend_legend_today)) {
             drawSwatch(today, dashed = false, width = 2.5f)
         }
@@ -669,19 +688,25 @@ private fun Legend(hasUsual: Boolean) {
 @Composable
 private fun LegendItem(label: String, swatch: androidx.compose.ui.graphics.drawscope.DrawScope.() -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        Canvas(Modifier.width(14.dp).height(8.dp)) { swatch() }
+        Canvas(Modifier.width(12.dp).height(8.dp)) { swatch() }
         Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawSwatch(color: Color, dashed: Boolean, width: Float) {
+    val stroke = width * density
+    // The round caps reach half a stroke past each end, so the line is inset by that much and
+    // every swatch, solid or dashed, is exactly the canvas wide.
+    val length = size.width - stroke
+    // Three whole dashes, the gaps twice their length, so the last one is never cut at the edge.
+    val dash = length / 7
     drawLine(
         color = color,
-        start = Offset(0f, size.height / 2),
-        end = Offset(size.width, size.height / 2),
-        strokeWidth = width * density,
+        start = Offset(stroke / 2, size.height / 2),
+        end = Offset(size.width - stroke / 2, size.height / 2),
+        strokeWidth = stroke,
         cap = StrokeCap.Round,
-        pathEffect = if (dashed) PathEffect.dashPathEffect(floatArrayOf(3 * density, 2.5f * density)) else null,
+        pathEffect = if (dashed) PathEffect.dashPathEffect(floatArrayOf(dash, dash * 2)) else null,
     )
 }
 
@@ -845,6 +870,9 @@ private fun Tile(
 
 /** Cadence drawn from a stroll to a run, so brisk and vigorous sit where a reader expects them. */
 private val CADENCE_SCALE = 60f..160f
+
+/** The outing's card in the list, brought into view when an outing begins. */
+private const val SESSION_KEY = "session"
 
 /** Hooks for the UI tests. */
 object TodayTags {

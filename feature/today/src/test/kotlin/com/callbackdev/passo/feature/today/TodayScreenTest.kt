@@ -1,8 +1,12 @@
 package com.callbackdev.passo.feature.today
 
 import android.graphics.Bitmap
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertLeftPositionInRootIsEqualTo
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.captureToImage
@@ -186,6 +190,28 @@ class TodayScreenTest {
     }
 
     @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 1.5f)
+    fun `an outing begun while the page is open is brought into view`() {
+        var current by mutableStateOf(state())
+        compose.setContent {
+            PassoTheme {
+                TodayScreen(current, askInSettings = false, onOpenSettings = {
+                }, onAllow = {}, onResume = {}, onCelebrated = {})
+            }
+        }
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(TodayTags.METRICS))
+        compose.onNodeWithTag(TodayTags.RING).assertIsNotDisplayed()
+
+        // A launcher's shortcut: the outing starts, and Today is on screen, scrolled to its tiles.
+        current = current.copy(
+            session = LiveSessionState(outing, cadence = 108, canKeepGoing = false, alertsWhileScreenOff = true),
+        )
+
+        compose.onNodeWithTag(SessionCardTags.CARD).assertIsDisplayed()
+        compose.onNodeWithTag(SessionCardTags.PAUSE).assertIsDisplayed()
+    }
+
+    @Test
     fun `a walk through a city carries its small map, and the place ahead`() {
         val walk = checkNotNull(
             SessionPlans.startWalk(
@@ -363,6 +389,21 @@ class TodayScreenTest {
     }
 
     @Test
+    @Config(qualifiers = "it-rIT-w384dp-h832dp-xxhdpi")
+    fun `on a tall phone the day's chart is whole on the first screen, under two sentences of two lines`() {
+        // Behind a usual day with the goal far: in Italian, both sentences take two lines.
+        show(state(minutes = List(30) { DayMinute(8 * 60 + it, 29) }))
+
+        compose.onNodeWithText("indietro rispetto al solito", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("Ne mancano", substring = true).assertIsDisplayed()
+        // The owner's phone at its default display size: a 38dp status bar and a 95dp bottom bar,
+        // neither drawn here, so the first screen ends 133dp above the window's bottom.
+        val chart = compose.onNodeWithTag(TodayTags.CHART).getBoundsInRoot()
+        assertThat(chart.bottom).isAtMost(832.dp - 38.dp - 95.dp)
+        snapshot("today_first_screen")
+    }
+
+    @Test
     fun `on a phone the cards keep the screen margin`() {
         show(state())
 
@@ -390,7 +431,7 @@ class TodayScreenTest {
      */
     private fun toGo(state: TodayUiState): String {
         val left = state.overview.remaining
-        return "${us(left)} steps to go: about ${TodayOverview.minutesToWalk(left)} minutes of brisk walking"
+        return "${us(left)} steps to go: about\u00A0${TodayOverview.minutesToWalk(left)}\u00A0minutes of brisk walking"
     }
 
     private fun snapshot(name: String) {

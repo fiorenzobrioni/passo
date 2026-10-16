@@ -71,6 +71,8 @@
     <string name="session_card_keep_going">Continua</string>
     <string name="session_card_close">Chiudi</string>
     <string name="session_card_under_way">In corso</string>
+    <!-- Ciò che TalkBack dice quando la scheda di un’uscita compare o cambia: il nome, poi lo stato. -->
+    <string name="session_card_pane">%1$s, %2$s</string>
     <string name="session_card_paused">In pausa</string>
     <string name="session_card_progress_description">%1$s, %2$s</string>
     <string name="session_card_when">%1$s · %2$s</string>

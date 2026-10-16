@@ -27,9 +27,9 @@
     </plurals>
     <string name="today_headline_on_pace">In linea con il tuo solito ritmo</string>
     <plurals name="today_headline_to_go">
-        <item quantity="one">Ne manca %1$s: circa %2$s a passo svelto</item>
-        <item quantity="many">Ne mancano %1$s: circa %2$s a passo svelto</item>
-        <item quantity="other">Ne mancano %1$s: circa %2$s a passo svelto</item>
+        <item quantity="one">Ne manca %1$s: circa\u00A0%2$s a passo svelto</item>
+        <item quantity="many">Ne mancano %1$s: circa\u00A0%2$s a passo svelto</item>
+        <item quantity="other">Ne mancano %1$s: circa\u00A0%2$s a passo svelto</item>
     </plurals>
     <plurals name="today_headline_over">
         <item quantity="one">%1$s passo oltre l’obiettivo</item>
@@ -37,11 +37,11 @@
         <item quantity="other">%1$s passi oltre l’obiettivo</item>
     </plurals>
     <plurals name="today_duration_minutes">
-        <item quantity="one">%1$d minuto</item>
-        <item quantity="many">%1$d minuti</item>
-        <item quantity="other">%1$d minuti</item>
+        <item quantity="one">%1$d\u00A0minuto</item>
+        <item quantity="many">%1$d\u00A0minuti</item>
+        <item quantity="other">%1$d\u00A0minuti</item>
     </plurals>
-    <string name="today_duration_hours_minutes">%1$d h %2$d min</string>
+    <string name="today_duration_hours_minutes">%1$d\u00A0h\u00A0%2$d\u00A0min</string>
 
     <!-- Le schede di stato -->
     <string name="today_status_permission_title">Passo non sta contando</string>

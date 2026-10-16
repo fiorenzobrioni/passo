@@ -52,6 +52,8 @@ class MainActivity : ComponentActivity() {
 
     private var openWays by mutableStateOf(false)
 
+    private var openToday by mutableStateOf(false)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -88,6 +90,8 @@ class MainActivity : ComponentActivity() {
                     onboardingCompleted = settings?.onboardingCompleted,
                     openWays = openWays,
                     onWaysOpened = { openWays = false },
+                    openToday = openToday,
+                    onTodayOpened = { openToday = false },
                 )
             }
         }
@@ -115,12 +119,14 @@ class MainActivity : ComponentActivity() {
 
     /**
      * A launcher shortcut's outing, once per touch. Only while counting: an outing is measured
-     * from the steps, and a paused count has none; Today then says why, with its button.
+     * from the steps, and a paused count has none; Today then says why, with its button. Either
+     * way Today comes forward, wherever the app was left: the card, or the reason, is there.
      */
     private fun startOutingIfAsked(intent: Intent?) {
         val planId = intent?.getLongExtra(SessionControl.EXTRA_START_PLAN, 0L) ?: 0L
         if (planId == 0L) return
         intent?.removeExtra(SessionControl.EXTRA_START_PLAN)
+        openToday = true
         lifecycleScope.launch {
             if (settingsRepository.settings.first().trackingEnabled) SessionControl.start(this@MainActivity, planId)
         }

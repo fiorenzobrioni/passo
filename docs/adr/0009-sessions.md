@@ -74,14 +74,17 @@ while one is under way.
    batch that moved it, so the counter state and the outing never disagree after a crash; a
    process the system restarts picks it up from there. The goal and the estimates are copied
    into the outing: past outings are frozen like past days.
-8. **Where it shows.** Today: a "Start an outing" button, or the outing's card (under way,
-   paused, or just over, until put away); the button is the reader's to take away in Settings,
-   the card is not. The Outings page (from Today, and from Settings) keeps the plans, three
+8. **Where it shows.** Today: a "Start an outing" button under the day's chart, or the
+   outing's card above it (under way, paused, or just over, until put away); the button is
+   the reader's to take away in Settings, the card is not. The Outings page (from Today, and from Settings) keeps the plans, three
    presets to start with. History and Today list an outing in place of the walk found in its
    minutes, with its goal and how much of it was done. The launcher's long press offers the
    three last started. The evening reminder has "Walk now", which starts the rest of the day.
    Both widgets and the Quick Settings tile say the outing in the sentence's place while it is
    under way («Brisk walk: 12 of 20 min»), repainted when it starts, pauses or ends.
+   Started from a page of the app, the outing's card is brought into view there, with a
+   confirming tick, and TalkBack says it; started from a launcher's shortcut, Today comes
+   forward with the card (PLANNING.md §15, 16 Oct 2026).
 
 ## Why the sensor change is acceptable
 

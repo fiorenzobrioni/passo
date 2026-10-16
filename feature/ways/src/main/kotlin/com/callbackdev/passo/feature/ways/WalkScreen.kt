@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -29,6 +30,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -39,6 +42,7 @@ import com.callbackdev.passo.core.designsystem.components.SessionCard
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
 import com.callbackdev.passo.core.designsystem.components.WayMapView
+import com.callbackdev.passo.core.designsystem.components.reveal
 import com.callbackdev.passo.core.designsystem.format.rememberMeasureFormatter
 import com.callbackdev.passo.core.designsystem.format.text
 import com.callbackdev.passo.core.designsystem.format.wayDetail
@@ -48,6 +52,7 @@ import com.callbackdev.passo.core.designsystem.format.wayStages
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
 import com.callbackdev.passo.core.designsystem.theme.pageGutter
+import com.callbackdev.passo.core.designsystem.theme.reducedMotion
 import com.callbackdev.passo.core.designsystem.ways.placeNameRes
 import com.callbackdev.passo.core.designsystem.ways.wayRouteRes
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
@@ -100,7 +105,25 @@ internal fun WalkPage(
     var leaving by rememberSaveable { mutableStateOf(false) }
     // With the voice on, the engine is asked once whether it can speak: the page says so first.
     LaunchedEffect(state.walkVoice) { if (state.walkVoice != SessionVoice.OFF) actions.prepareVoice() }
+    val list = rememberLazyListState()
+    val reduced = reducedMotion()
+    val haptics = LocalHapticFeedback.current
+    // Started here, the outing's card takes Start's place, under the map: a tick says it began,
+    // and the page moves up only if the card, taller than the button, runs past the screen.
+    var startedHere by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(live != null) {
+        if (live != null && startedHere) {
+            startedHere = false
+            haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+            list.reveal(key = STATUS_KEY, index = STATUS_INDEX, reduced = reduced)
+        }
+    }
+    val start = { again: Boolean ->
+        startedHere = true
+        actions.start(again)
+    }
     LazyColumn(
+        state = list,
         modifier = modifier.testTag(WaysTags.PAGE),
         contentPadding = pageGutter(sideInsets = false).contentPadding(bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -122,7 +145,7 @@ internal fun WalkPage(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenMargin),
             )
         }
-        item(key = "status") {
+        item(key = STATUS_KEY) {
             when {
                 live != null -> SessionCard(
                     session = live.session,
@@ -135,13 +158,13 @@ internal fun WalkPage(
                 )
 
                 view != null && view.journey.state == WayJourneyState.FINISHED ->
-                    Walked(state, walk, view, format, onAgain = { actions.start(false) })
+                    Walked(state, walk, view, format, onAgain = { start(false) })
 
-                view != null -> UnderWay(state, view, format, onContinue = { actions.start(false) }, onAgain = {
+                view != null -> UnderWay(state, view, format, onContinue = { start(false) }, onAgain = {
                     again = true
                 })
 
-                else -> NotBegun(state, walk, format, onStart = { actions.start(false) })
+                else -> NotBegun(state, walk, format, onStart = { start(false) })
             }
         }
         if (live == null && view?.journey?.state != WayJourneyState.FINISHED) {
@@ -199,7 +222,7 @@ internal fun WalkPage(
             confirmButton = {
                 TextButton(onClick = {
                     again = false
-                    actions.start(true)
+                    start(true)
                 }) { Text(stringResource(R.string.walk_again)) }
             },
             dismissButton = { TextButton(onClick = { again = false }) { Text(stringResource(R.string.way_cancel)) } },
@@ -220,6 +243,10 @@ internal fun WalkPage(
         )
     }
 }
+
+/** The status item: Start, the walk as it stands, or the outing's card. Third, after the route and the map. */
+private const val STATUS_KEY = "status"
+private const val STATUS_INDEX = 2
 
 /** Not begun: its length and places, its steps at the reader's step, and Start (or why not now). */
 @Composable

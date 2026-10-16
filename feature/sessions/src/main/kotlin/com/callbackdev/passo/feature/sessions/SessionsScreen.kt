@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.FiniteAnimationSpec
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +35,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,8 +44,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -50,6 +55,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -61,6 +67,7 @@ import com.callbackdev.passo.core.designsystem.components.SessionCardActions
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
 import com.callbackdev.passo.core.designsystem.components.StatusCard
 import com.callbackdev.passo.core.designsystem.components.StatusTone
+import com.callbackdev.passo.core.designsystem.components.reveal
 import com.callbackdev.passo.core.designsystem.components.sessionIcon
 import com.callbackdev.passo.core.designsystem.format.format
 import com.callbackdev.passo.core.designsystem.format.planDescription
@@ -68,9 +75,11 @@ import com.callbackdev.passo.core.designsystem.format.rememberMeasureFormatter
 import com.callbackdev.passo.core.designsystem.format.sessionName
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.GroupShape
+import com.callbackdev.passo.core.designsystem.theme.PassoMotion
 import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
 import com.callbackdev.passo.core.designsystem.theme.padding
 import com.callbackdev.passo.core.designsystem.theme.pageGutter
+import com.callbackdev.passo.core.designsystem.theme.reducedMotion
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.sessions.SessionConstants
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
@@ -193,7 +202,28 @@ private fun SessionsList(
     val live = state.live
     val busy = live?.session?.live == true
     val canStart = state.status == SessionsStatus.READY && !busy
+    val list = rememberLazyListState()
+    val reduced = reducedMotion()
+    val haptics = LocalHapticFeedback.current
+    // Started from this page, the outing's card comes in at the top, often far above the Start
+    // that was touched: the page glides to it, so the reader sees what Start did. Only then: a
+    // page opened on an outing under way is already at its top.
+    var startedHere by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(busy) {
+        if (busy && startedHere) {
+            startedHere = false
+            haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+            list.reveal(key = LIVE_KEY, index = 0, reduced = reduced)
+        }
+    }
+    val start = { id: Long ->
+        startedHere = true
+        actions.start(id)
+    }
+    // Cards that move when the outing's card comes or goes do so on the page's springs.
+    val placement: FiniteAnimationSpec<IntOffset>? = if (reduced) null else PassoMotion.spatial()
     LazyColumn(
+        state = list,
         modifier = modifier.testTag(SessionsTags.LIST),
         contentPadding = pageGutter(sideInsets = false).contentPadding(bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -251,14 +281,20 @@ private fun SessionsList(
             }
         }
         if (live != null) {
-            item(key = "live") {
+            item(key = LIVE_KEY) {
                 SessionCard(
                     session = live.session,
                     cadence = live.cadence,
                     canKeepGoing = live.canKeepGoing,
                     format = format,
                     actions = actions.card,
-                    modifier = Modifier.padding(horizontal = ScreenMargin),
+                    modifier = Modifier
+                        .animateItem(
+                            fadeInSpec = PassoMotion.effects(reduced),
+                            placementSpec = placement,
+                            fadeOutSpec = PassoMotion.effects(reduced),
+                        )
+                        .padding(horizontal = ScreenMargin),
                 )
             }
         }
@@ -267,7 +303,10 @@ private fun SessionsList(
                 text = stringResource(R.string.sessions_yours),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 20.dp, end = ScreenMargin, top = 8.dp).semantics { heading() },
+                modifier = Modifier
+                    .animateItem(placementSpec = placement)
+                    .padding(start = 20.dp, end = ScreenMargin, top = 8.dp)
+                    .semantics { heading() },
             )
         }
         if (busy) {
@@ -276,7 +315,13 @@ private fun SessionsList(
                     text = stringResource(R.string.sessions_live_busy),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 20.dp),
+                    modifier = Modifier
+                        .animateItem(
+                            fadeInSpec = PassoMotion.effects(reduced),
+                            placementSpec = placement,
+                            fadeOutSpec = PassoMotion.effects(reduced),
+                        )
+                        .padding(horizontal = 20.dp),
                 )
             }
         }
@@ -298,8 +343,9 @@ private fun SessionsList(
                 state = state,
                 format = format,
                 canStart = canStart && !restMet,
-                onStart = { actions.start(plan.id) },
+                onStart = { start(plan.id) },
                 onEdit = { onEdit(plan.id) },
+                modifier = Modifier.animateItem(placementSpec = placement),
             )
         }
         item(key = "new") {
@@ -344,12 +390,13 @@ private fun PlanCard(
     canStart: Boolean,
     onStart: () -> Unit,
     onEdit: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val res = LocalResources.current
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         shape = GroupShape,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = ScreenMargin)
             .testTag("${SessionsTags.PLAN}-${plan.id}"),
@@ -473,6 +520,9 @@ private fun signalsLine(plan: SessionPlan, format: MeasureFormatter): String {
         else -> signals
     }
 }
+
+/** The outing under way's item in the list: the page glides to it when an outing starts here. */
+private const val LIVE_KEY = "live"
 
 /** Hooks for the UI tests. */
 object SessionsTags {
