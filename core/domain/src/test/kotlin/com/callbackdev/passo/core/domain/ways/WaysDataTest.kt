@@ -22,6 +22,8 @@ class WaysDataTest {
                 WayId.VIA_FRANCIGENA,
                 WayId.KUMANO_KODO,
                 WayId.GREAT_OCEAN_WALK,
+                WayId.INCA_TRAIL,
+                WayId.JOHN_MUIR_TRAIL,
             )
             .inOrder()
         assertThat(Ways.waysIn(Continent.EUROPE).map { it.id })
@@ -35,6 +37,9 @@ class WaysDataTest {
             .inOrder()
         assertThat(Ways.waysIn(Continent.ASIA_OCEANIA).map { it.id })
             .containsExactly(WayId.KUMANO_KODO, WayId.GREAT_OCEAN_WALK)
+            .inOrder()
+        assertThat(Ways.waysIn(Continent.AMERICAS).map { it.id })
+            .containsExactly(WayId.INCA_TRAIL, WayId.JOHN_MUIR_TRAIL)
             .inOrder()
         assertThat(Ways.walks.map { it.id })
             .containsExactly(
@@ -117,6 +122,10 @@ class WaysDataTest {
         // The Nakahechi by Yunomine to Nachi, and the Great Ocean Walk as mapped (96 of 104 km).
         assertThat(km(WayId.KUMANO_KODO)).isIn(65..75)
         assertThat(km(WayId.GREAT_OCEAN_WALK)).isIn(90..105)
+        // The Inca Trail as mapped from Km 82 (33 of the 38 to 43 km the sources count), and the
+        // John Muir Trail from Happy Isles to the summit of Mount Whitney.
+        assertThat(km(WayId.INCA_TRAIL)).isIn(30..40)
+        assertThat(km(WayId.JOHN_MUIR_TRAIL)).isIn(330..345)
         // The short walks.
         assertThat(Ways.walks.filter { it.lengthMeters < 7_000 }.map { it.id })
             .containsExactly(
@@ -207,6 +216,35 @@ class WaysDataTest {
                 "ryans_den", "princetown", "twelve_apostles",
             )
             .inOrder()
+        assertThat(way.map.parks).isNotEmpty()
+    }
+
+    @Test
+    fun `the Inca Trail runs from Km 82 over Warmiwañusqa to Machu Picchu, by the Sun Gate`() {
+        val way = Ways.of(WayId.INCA_TRAIL)
+        assertThat(way.stops.map { it.key })
+            .containsExactly(
+                "km_82", "patallacta", "wayllabamba", "warmiwanusqa", "pacaymayo", "runkuraqay", "sayacmarca",
+                "phuyupatamarca", "winay_wayna", "inti_punku", "machu_picchu",
+            )
+            .inOrder()
+        assertThat(way.stops.filterNot { it.stage }.map { it.key })
+            .containsExactly("patallacta", "runkuraqay", "inti_punku")
+        assertThat(way.map.parks).isNotEmpty()
+    }
+
+    @Test
+    fun `the John Muir Trail runs from Yosemite Valley over six high passes to Mount Whitney`() {
+        val way = Ways.of(WayId.JOHN_MUIR_TRAIL)
+        assertThat(way.stops.map { it.key })
+            .containsExactly(
+                "happy_isles", "nevada_fall", "tuolumne_meadows", "donohue_pass", "thousand_island_lake",
+                "devils_postpile", "silver_pass", "selden_pass", "muir_pass", "mather_pass", "glen_pass",
+                "forester_pass", "mount_whitney",
+            )
+            .inOrder()
+        assertThat(way.stops.filterNot { it.stage }.map { it.key }).containsExactly("nevada_fall")
+        assertThat(way.map.lakes).isNotEmpty()
         assertThat(way.map.parks).isNotEmpty()
     }
 

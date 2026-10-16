@@ -1281,7 +1281,7 @@ reader (owner).
   without moving the other ways (`fetch` and the splice, as for the cities):
   1. [x] Kumano Kodō and the Great Ocean Walk (short, well mapped, sources easy to find): 70.6 and
      96.4 km, nine stages each;
-  2. the Inca Trail and the John Muir Trail;
+  2. [x] the Inca Trail and the John Muir Trail: 33.2 and 335.7 km, eight and twelve stages;
   3. Kilimanjaro (its camps as the stages: Machame, Shira, Lava Tower, Barranco, Karanga,
      Barafu, the summit).
   Each: its relation (or route), stops snapped within 2 km and in order, rivers, lakes and parks
@@ -1593,6 +1593,23 @@ Include:
   the whole of Japan is too tall a box for a corner of a way's map, and covered the line between
   Hongū and Koguchi wherever it went; the flatter box fits under the start. The two ways are
   listed under Asia and Oceania. `fetch` and `splice` now take a way's id, as a walk's.
+
+- **The Inca Trail and the John Muir Trail** (16 Oct 2026; Phase 14, the second two ways beyond
+  Europe, under the Americas). Both relations are whole on Waymarked Trails, so BRouter is still
+  not needed for any way. The Inca Trail is the classic route, one relation from Km 82 over
+  Warmiwañusqa to Machu Picchu by the Sun Gate: 33.2 km as mapped, against 38 to 43 in the
+  sources, which count from different starts and to the citadel's gate. Its stages are the start,
+  the three camps (Wayllabamba, Pacaymayo, Wiñay Wayna), the pass, Sayacmarca, Phuyupatamarca and
+  Machu Picchu; Patallacta, Runkuraqay and Inti Punku are places on the way. The John Muir Trail is
+  one relation from Happy Isles to the summit of Mount Whitney, 335.7 km; its stages are the passes
+  and the places where it is usually broken, Nevada Fall a place on the way. Sentences in the
+  English and Spanish (or French, German, Italian) Wikipedias for the Inca Trail, the English and
+  French (or German, Spanish, Italian) for the John Muir Trail; Wayllabamba, Pacaymayo, Silver,
+  Selden, Mather and Glen Pass keep their names only. Left out as one source's or disputed: the
+  Km 82's height (the English and French give the two starts' heights in opposite orders),
+  Warmiwañusqa's 4,200 m (one article), Machu Picchu's century, Muir Pass's hut, Mount Whitney's
+  height (4,421 or 4,417 m). Peru's locator for a way is its south (`PE_SOUTH`): the whole country
+  in the map's corner covered the Inca Trail's line, as Japan's did the Kumano Kodō's.
 
 ### Open
 

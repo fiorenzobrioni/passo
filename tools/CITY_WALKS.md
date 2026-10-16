@@ -120,8 +120,8 @@ BRouter:
   is usually broken; a place with `stage=False` is one worth its sentence.
 - Its map: `rivers` (waterway relations, drawn as lines), `lakes` and `parks` (areas, by id).
   `locate` finds a river's or a park's relation; check that a "lake" is an area, not a river line.
-- `country`: a `LOCATORS` box. A tall country (Japan) gets a flatter part of it for a way, or
-  the locator covers the line in every corner.
+- `country`: a `LOCATORS` box. A tall country (Japan, Peru) gets a flatter part of it for a
+  way, or the locator covers the line in every corner.
 - A `Way(...)` in `tools/ways_content.py`, appended to `WAYS`; its id appended to the ways in
   `WayId` (`core/model/.../Way.kt`) with its continent.
 - `python3 tools/build_ways.py fetch ID` (its relations and map, and the land the ways share),

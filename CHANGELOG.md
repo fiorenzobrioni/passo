@@ -15,8 +15,9 @@ All notable changes to Passo are documented here. The format follows
 - **Ways**: long ways walked from wherever you are. In Europe the Via degli Dei, the Camino
   Portugués from Porto, the Via di Francesco, the Camino de Santiago (the French Way) and the
   Italian part of the Via Francigena; beyond it the Kumano Kodō in Japan, from Takijiri-ōji by
-  Hongū to Nachi, and the Great Ocean Walk in Australia, from Apollo Bay round Cape Otway to the
-  Twelve Apostles. Each is drawn from OpenStreetMap, on maps with the rivers they
+  Hongū to Nachi, the Great Ocean Walk in Australia, from Apollo Bay round Cape Otway to the
+  Twelve Apostles, the Inca Trail in Peru, from Km 82 to Machu Picchu by the Sun Gate, and the
+  John Muir Trail in California, from Yosemite Valley to the summit of Mount Whitney. Each is drawn from OpenStreetMap, on maps with the rivers they
   cross, their lakes, parks and towns. The distance of your days
   carries you along, stage by stage, with a stamp for each and a notification
   when you reach one. Start today or in the past, and find yourself already on the way. No

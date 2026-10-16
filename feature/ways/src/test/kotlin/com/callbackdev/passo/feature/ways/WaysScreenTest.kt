@@ -145,7 +145,15 @@ class WaysScreenTest {
         assertThat(europe).isInStrictOrder()
         assertThat(Ways.waysIn(Continent.EUROPE).first().id).isEqualTo(WayId.VIA_DEGLI_DEI)
         snapshot("ways_by_continent")
-        // Beyond Europe (Phase 14): the Kumano Kodō and the Great Ocean Walk, under Asia and Oceania.
+        // Beyond Europe (Phase 14): the Inca Trail and the John Muir Trail under the Americas, then
+        // the Kumano Kodō and the Great Ocean Walk under Asia and Oceania.
+        compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.catalogue(Continent.AMERICAS)))
+        compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.way(WayId.JOHN_MUIR_TRAIL)))
+        compose.onNode(hasText("The Americas") and isHeading()).assertIsDisplayed()
+        val americas = tops(Continent.AMERICAS)
+        assertThat(americas).hasSize(2)
+        assertThat(americas).isInStrictOrder()
+        snapshot("ways_americas")
         compose.onNodeWithTag(WaysTags.LIST)
             .performScrollToNode(hasTestTag(WaysTags.catalogue(Continent.ASIA_OCEANIA)))
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.way(WayId.GREAT_OCEAN_WALK)))
@@ -153,7 +161,7 @@ class WaysScreenTest {
         val beyond = tops(Continent.ASIA_OCEANIA)
         assertThat(beyond).hasSize(2)
         assertThat(beyond).isInStrictOrder()
-        assertThat(europe.size + beyond.size).isEqualTo(Ways.all.size)
+        assertThat(europe.size + americas.size + beyond.size).isEqualTo(Ways.all.size)
         // A continent with no way yet has no group.
         for (continent in Continent.entries.filter { Ways.waysIn(it).isEmpty() }) {
             compose.onNodeWithTag(WaysTags.catalogue(continent)).assertDoesNotExist()
@@ -295,6 +303,38 @@ class WaysScreenTest {
     fun `the Great Ocean Walk in the dark`() {
         showWay(WayId.GREAT_OCEAN_WALK, state = WaysSamples.state(active = null), dark = true)
         snapshot("way_great_ocean_dark")
+    }
+
+    @Test
+    fun `the Inca Trail, from Km 82 over the pass to Machu Picchu`() {
+        showWay(WayId.INCA_TRAIL, state = WaysSamples.state(active = null))
+        compose.onNodeWithText("Inca Trail").assertIsDisplayed()
+        snapshot("way_inca")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Warmiwañusqa"))
+        compose.onNodeWithText("whose name means «dead woman»", substring = true).assertExists()
+        snapshot("way_inca_stages")
+    }
+
+    @Test
+    fun `the Inca Trail in the dark`() {
+        showWay(WayId.INCA_TRAIL, state = WaysSamples.state(active = null), dark = true)
+        snapshot("way_inca_dark")
+    }
+
+    @Test
+    fun `the John Muir Trail, from Yosemite Valley to Mount Whitney`() {
+        showWay(WayId.JOHN_MUIR_TRAIL, state = WaysSamples.state(active = null))
+        compose.onNodeWithText("John Muir Trail").assertIsDisplayed()
+        snapshot("way_john_muir")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Forester Pass"))
+        compose.onNodeWithText("the highest point of the Pacific Crest Trail", substring = true).assertExists()
+        snapshot("way_john_muir_stages")
+    }
+
+    @Test
+    fun `the John Muir Trail in the dark`() {
+        showWay(WayId.JOHN_MUIR_TRAIL, state = WaysSamples.state(active = null), dark = true)
+        snapshot("way_john_muir_dark")
     }
 
     @Test
