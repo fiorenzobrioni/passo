@@ -33,6 +33,8 @@ enum class WayId(val kind: WayKind, val city: String? = null, val continent: Con
     VIA_DI_FRANCESCO(WayKind.WAY, continent = Continent.EUROPE),
     CAMINO_FRANCES(WayKind.WAY, continent = Continent.EUROPE),
     VIA_FRANCIGENA(WayKind.WAY, continent = Continent.EUROPE),
+    KUMANO_KODO(WayKind.WAY, continent = Continent.ASIA_OCEANIA),
+    GREAT_OCEAN_WALK(WayKind.WAY, continent = Continent.ASIA_OCEANIA),
     MILAN_DUOMO_NAVIGLI(WayKind.WALK, city = "milan", continent = Continent.EUROPE),
     ROME_COLOSSEUM_VATICAN(WayKind.WALK, city = "rome", continent = Continent.EUROPE),
     PARIS_VOSGES_EIFFEL(WayKind.WALK, city = "paris", continent = Continent.EUROPE),

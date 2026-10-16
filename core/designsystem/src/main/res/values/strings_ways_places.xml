@@ -12,6 +12,10 @@
     <string name="way_route_camino_frances">The French Way, Saint-Jean-Pied-de-Port to Santiago de Compostela</string>
     <string name="way_name_via_francigena">Via Francigena</string>
     <string name="way_route_via_francigena">The Great St Bernard Pass to Rome</string>
+    <string name="way_name_kumano_kodo">Kumano Kodō</string>
+    <string name="way_route_kumano_kodo">The Nakahechi, from Takijiri-ōji to Nachi by Hongū</string>
+    <string name="way_name_great_ocean_walk">Great Ocean Walk</string>
+    <string name="way_route_great_ocean_walk">Apollo Bay to the Twelve Apostles, round Cape Otway</string>
     <string name="way_name_milan_duomo_navigli">Milan</string>
     <string name="way_route_milan_duomo_navigli">From the Duomo to the Navigli, by the Castello</string>
     <string name="way_outing_milan_duomo_navigli">A walk in Milan</string>
@@ -145,6 +149,7 @@
     <string name="way_place_addis_ababa_st_george">St George’s Cathedral</string>
     <string name="way_place_addis_ababa_taitu_hotel">Taitu Hotel</string>
     <string name="way_place_addis_ababa_yekatit_12">Yekatit 12 Monument</string>
+    <string name="way_place_aire_river">Aire River</string>
     <string name="way_place_alexandria_abu_al_abbas">Abu al-Abbas al-Mursi Mosque</string>
     <string name="way_place_alexandria_bibliotheca">Bibliotheca Alexandrina</string>
     <string name="way_place_alexandria_cecil">Cecil Hotel</string>
@@ -168,6 +173,7 @@
     <string name="way_place_amsterdam_waag">De Waag</string>
     <string name="way_place_amsterdam_westerkerk">Westerkerk</string>
     <string name="way_place_aosta">Aosta</string>
+    <string name="way_place_apollo_bay">Apollo Bay</string>
     <string name="way_place_arrone">Arrone</string>
     <string name="way_place_arzua">Arzúa</string>
     <string name="way_place_assisi">Assisi</string>
@@ -218,6 +224,7 @@
     <string name="way_place_berlin_victory_column">Victory Column</string>
     <string name="way_place_berlin_wall_memorial">Berlin Wall Memorial</string>
     <string name="way_place_bivigliano">Bivigliano</string>
+    <string name="way_place_blanket_bay">Blanket Bay</string>
     <string name="way_place_bologna">Bologna</string>
     <string name="way_place_bolsena">Bolsena</string>
     <string name="way_place_buenos_aires_ateneo">El Ateneo Grand Splendid</string>
@@ -252,6 +259,7 @@
     <string name="way_place_caldas_de_reis">Caldas de Reis</string>
     <string name="way_place_camaiore">Camaiore</string>
     <string name="way_place_campagnano">Campagnano di Roma</string>
+    <string name="way_place_cape_otway">Cape Otway</string>
     <string name="way_place_cape_town_auwal">Auwal Mosque</string>
     <string name="way_place_cape_town_bo_kaap">Bo-Kaap</string>
     <string name="way_place_cape_town_castle">Castle of Good Hope</string>
@@ -279,6 +287,7 @@
     <string name="way_place_cassio">Cassio</string>
     <string name="way_place_castrojeriz">Castrojeriz</string>
     <string name="way_place_chatillon">Châtillon</string>
+    <string name="way_place_chikatsuyu">Chikatsuyu</string>
     <string name="way_place_citta_di_castello">Città di Castello</string>
     <string name="way_place_cruz_de_ferro">Cruz de Ferro</string>
     <string name="way_place_cusco_cathedral">Cathedral of Cusco</string>
@@ -307,6 +316,7 @@
     <string name="way_place_dakar_ucad">Cheikh Anta Diop University</string>
     <string name="way_place_echevennoz">Echevennoz</string>
     <string name="way_place_el_burgo_ranero">El Burgo Ranero</string>
+    <string name="way_place_elliot_ridge">Elliot Ridge</string>
     <string name="way_place_estella">Estella</string>
     <string name="way_place_fez_andalusian_mosque">Andalusian Mosque</string>
     <string name="way_place_fez_bou_inania">Bou Inania Madrasa</string>
@@ -361,7 +371,12 @@
     <string name="way_place_hong_kong_western_market">Western Market</string>
     <string name="way_place_hornillos">Hornillos del Camino</string>
     <string name="way_place_hospital_de_orbigo">Hospital de Órbigo</string>
+    <string name="way_place_hosshinmon_oji">Hosshinmon-ōji</string>
     <string name="way_place_ivrea">Ivrea</string>
+    <string name="way_place_johanna_beach">Johanna Beach</string>
+    <string name="way_place_koguchi">Koguchi</string>
+    <string name="way_place_kumano_hongu_taisha">Kumano Hongū Taisha</string>
+    <string name="way_place_kumano_nachi_taisha">Kumano Nachi Taisha</string>
     <string name="way_place_kyoto_hanamikoji">Hanamikōji</string>
     <string name="way_place_kyoto_kenninji">Kennin-ji</string>
     <string name="way_place_kyoto_kiyomizu">Kiyomizu-dera</string>
@@ -564,6 +579,7 @@
     <string name="way_place_prague_st_nicholas">St Nicholas Church</string>
     <string name="way_place_prague_st_vitus">St Vitus Cathedral</string>
     <string name="way_place_prague_wenceslas">Wenceslas Square</string>
+    <string name="way_place_princetown">Princetown</string>
     <string name="way_place_puente_la_reina">Puente la Reina</string>
     <string name="way_place_quebec_casse_cou">Breakneck Stairs</string>
     <string name="way_place_quebec_citadelle">Citadelle</string>
@@ -608,6 +624,7 @@
     <string name="way_place_rome_vittoriano">The Vittoriano</string>
     <string name="way_place_roncesvalles">Roncesvalles</string>
     <string name="way_place_rubiaes">Rubiães</string>
+    <string name="way_place_ryans_den">Ryans Den</string>
     <string name="way_place_saint_jean">Saint-Jean-Pied-de-Port</string>
     <string name="way_place_san_gimignano">San Gimignano</string>
     <string name="way_place_san_juan_de_ortega">San Juan de Ortega</string>
@@ -678,6 +695,8 @@
     <string name="way_place_sydney_opera_house">Sydney Opera House</string>
     <string name="way_place_sydney_qvb">Queen Victoria Building</string>
     <string name="way_place_sydney_st_marys">St Mary’s Cathedral</string>
+    <string name="way_place_takahara">Takahara</string>
+    <string name="way_place_takijiri_oji">Takijiri-ōji</string>
     <string name="way_place_terradillos">Terradillos de los Templarios</string>
     <string name="way_place_tokyo_akihabara">Akihabara</string>
     <string name="way_place_tokyo_ameyoko">Ameyoko</string>
@@ -695,6 +714,7 @@
     <string name="way_place_tokyo_yushima_seido">Yushima Seidō</string>
     <string name="way_place_trevi">Trevi</string>
     <string name="way_place_triacastela">Triacastela</string>
+    <string name="way_place_tsugizakura_oji">Tsugizakura-ōji</string>
     <string name="way_place_tui">Tui</string>
     <string name="way_place_tunis_bab_el_bhar">Bab el Bhar</string>
     <string name="way_place_tunis_bab_el_khadra">Bab el Khadra</string>
@@ -710,6 +730,7 @@
     <string name="way_place_tunis_sidi_mahrez">Sidi Mahrez Mosque</string>
     <string name="way_place_tunis_tourbet_el_bey">Tourbet el Bey</string>
     <string name="way_place_tunis_zitouna">Zitouna Mosque</string>
+    <string name="way_place_twelve_apostles">Twelve Apostles</string>
     <string name="way_place_valenca">Valença</string>
     <string name="way_place_valfabbrica">Valfabbrica</string>
     <string name="way_place_vercelli">Vercelli</string>
@@ -732,6 +753,7 @@
     <string name="way_place_villafranca">Villafranca del Bierzo</string>
     <string name="way_place_viterbo">Viterbo</string>
     <string name="way_place_viverone">Viverone</string>
+    <string name="way_place_yunomine_onsen">Yunomine Onsen</string>
     <string name="way_place_zanzibar_christ_church">Christ Church Cathedral</string>
     <string name="way_place_zanzibar_forodhani">Forodhani Gardens</string>
     <string name="way_place_zanzibar_hamamni">Hamamni Persian Baths</string>
@@ -780,6 +802,7 @@
     <string name="way_note_amsterdam_waag">A city gate turned weigh house in 1617; the surgeons’ guild upstairs commissioned Rembrandt’s Anatomy Lesson of Dr Tulp.</string>
     <string name="way_note_amsterdam_westerkerk">Its 87-metre tower is the tallest church tower in Amsterdam; Rembrandt was buried here in 1669, in a grave now lost.</string>
     <string name="way_note_aosta">Aosta was Augusta Praetoria, a Roman town founded in 25 BC; its Arch of Augustus still stands.</string>
+    <string name="way_note_apollo_bay">The way begins at Apollo Bay, a town named after a ship, the Apollo.</string>
     <string name="way_note_arrone">Arrone is said to take its name from a Roman noble who built a castle here in the 9th century.</string>
     <string name="way_note_arzua">Arzúa gives its name to Arzúa-Ulloa, a protected cheese made from cow’s milk.</string>
     <string name="way_note_assisi">Assisi is Francis’s town: his tomb lies beneath the basilica that bears his name.</string>
@@ -864,6 +887,7 @@
     <string name="way_note_caldas_de_reis">Caldas de Reis grew around hot springs that the Romans already used.</string>
     <string name="way_note_camaiore">Camaiore, the Latin Campus Maior, grew in the Middle Ages thanks to the Via Francigena.</string>
     <string name="way_note_campagnano">Campagnano, first recorded in 1076, grew out of a great estate that a pope assembled in the 8th century.</string>
+    <string name="way_note_cape_otway">Cape Otway’s lighthouse, from 1848, was the second built on the Australian mainland, of stone from the Parker River.</string>
     <string name="way_note_cape_town_auwal">Held to be South Africa’s oldest mosque, from 1794, it had as its first imam Tuan Guru, who had written out the Qur’an from memory in prison.</string>
     <string name="way_note_cape_town_bo_kaap">Bo-Kaap, Afrikaans for above the Cape, is the old Malay Quarter on the slopes of Signal Hill, known for its brightly painted houses.</string>
     <string name="way_note_cape_town_castle">Its first stone laid in 1666, the Dutch East India Company’s fort has five bastions named after the titles of the Prince of Orange.</string>
@@ -891,6 +915,7 @@
     <string name="way_note_cassio">Between Cassio and Chiastre the Salti del Diavolo, the Devil’s Leaps, a band of conglomerate rock, cut across the Baganza valley.</string>
     <string name="way_note_castrojeriz">The way crosses Castrojeriz along a single street over 1,500 metres long, the longest on the whole route.</string>
     <string name="way_note_chatillon">At Châtillon the Valtournenche opens, the valley that climbs to the Matterhorn.</string>
+    <string name="way_note_chikatsuyu">Chikatsuyu’s name, the story goes, comes from an emperor who broke a reed and asked whether what dripped from it was blood or dew.</string>
     <string name="way_note_citta_di_castello">Città di Castello was the Roman Tifernum Tiberinum; Pliny had a villa nearby and built a temple here.</string>
     <string name="way_note_cruz_de_ferro">At the iron cross, about 1,500 metres up, pilgrims leave a stone brought from home.</string>
     <string name="way_note_cusco_cathedral">In its Last Supper, attributed to Marcos Zapata, a guinea pig is on the table.</string>
@@ -974,6 +999,8 @@
     <string name="way_note_hornillos">Hornillos is first recorded in the 9th century, on a line of watchtowers guarding early Castile.</string>
     <string name="way_note_hospital_de_orbigo">In the holy year 1434 the knight Suero de Quiñones held this bridge, challenging every knight who would cross to a joust.</string>
     <string name="way_note_ivrea">Ivrea’s carnival is known for its battle of the oranges.</string>
+    <string name="way_note_kumano_hongu_taisha">The shrine stood on the Ōyunohara sandbank until the flood of 1889; at the sandbank’s entrance now stands the largest torii in the world, 33.9 m tall.</string>
+    <string name="way_note_kumano_nachi_taisha">The way ends at Kumano Nachi Taisha, near Nachi Falls and its drop of 133 m.</string>
     <string name="way_note_kyoto_hanamikoji">Gion is one of Japan’s best-known geisha districts; in Kyoto the geisha are called geiko.</string>
     <string name="way_note_kyoto_kenninji">This Zen temple was founded in 1202, with the monk Eisai as its first abbot.</string>
     <string name="way_note_kyoto_kiyomizu">The temple’s great wooden stage, built without a single nail, gave Japan the saying: to jump off the stage at Kiyomizu, to take the plunge.</string>
@@ -1174,6 +1201,7 @@
     <string name="way_note_prague_st_nicholas">Mozart played its organ, of over 4,000 pipes, in 1787; under communism its tower was a secret police post watching the embassies.</string>
     <string name="way_note_prague_st_vitus">Begun in 1344 and finished only in 1929, the cathedral keeps the Bohemian crown jewels behind a door with seven locks.</string>
     <string name="way_note_prague_wenceslas">Founded as the Horse Market in 1348, the square filled with the crowds of the Velvet Revolution in November 1989.</string>
+    <string name="way_note_princetown">Princetown, by the mouth of the Gellibrand River, lies between the Great Otway and Port Campbell national parks.</string>
     <string name="way_note_puente_la_reina">The town is named after its Romanesque bridge, built for pilgrims in the 11th century.</string>
     <string name="way_note_quebec_casse_cou">Québec’s oldest stairway joins the Upper Town to the Lower; it was already here in 1660.</string>
     <string name="way_note_quebec_citadelle">The British built this star-shaped fortress from 1820, under the engineer Elias Walker Durnford.</string>
@@ -1288,6 +1316,7 @@
     <string name="way_note_sydney_opera_house">Designed by the Dane Jørn Utzon, it was opened by Queen Elizabeth II in 1973, and has been a World Heritage Site since 2007.</string>
     <string name="way_note_sydney_qvb">George McRae’s market hall, finished in 1898, was nearly pulled down in 1959 and now holds shops again.</string>
     <string name="way_note_sydney_st_marys">Begun after a fire destroyed the first church in 1865, William Wardell’s cathedral was largely finished in 1928.</string>
+    <string name="way_note_takijiri_oji">Takijiri-ōji has long been held to be the entrance to Kumano: from here the way climbs into the mountains.</string>
     <string name="way_note_terradillos">Terradillos takes its name from the Knights Templar, who held it in the Middle Ages.</string>
     <string name="way_note_tokyo_akihabara">After the war Akihabara grew from a black market into Electric Town, and later the heart of otaku culture.</string>
     <string name="way_note_tokyo_ameyoko">This market along the railway may take its name from the sweets sold here after the war, or from American army goods.</string>
@@ -1320,6 +1349,7 @@
     <string name="way_note_tunis_sidi_mahrez">Begun in 1692 by Mohamed Bey in honour of Sidi Mahrez, the medina’s patron saint, the mosque takes its domes from the mosques of Istanbul.</string>
     <string name="way_note_tunis_tourbet_el_bey">Built under Ali II, the largest funerary monument in Tunis holds most of the Husainid beys under its green-tiled domes.</string>
     <string name="way_note_tunis_zitouna">The Olive Mosque, named, the legend goes, after an olive tree on the site, was rebuilt under the Aghlabids with ancient columns from Carthage.</string>
+    <string name="way_note_twelve_apostles">The way ends at the Twelve Apostles, stacks of limestone that the Southern Ocean wore out of the cliffs.</string>
     <string name="way_note_valenca">Valença’s walled fortress looks across the Minho at Tui: over the bridge, the way enters Spain.</string>
     <string name="way_note_valfabbrica">Valfabbrica grew by a ford of the Chiascio, between Gubbio and Assisi, around a 9th-century Benedictine abbey.</string>
     <string name="way_note_vercelli">Vercelli keeps a 10th-century book of Old English poems, probably brought by English pilgrims.</string>
@@ -1341,6 +1371,7 @@
     <string name="way_note_villafranca">Villafranca, the town of the Franks, grew around a borough of French pilgrims who stayed.</string>
     <string name="way_note_viterbo">In Viterbo, from 1268 to 1271, the cardinals held the longest papal election in history.</string>
     <string name="way_note_viverone">Lake Viverone keeps the remains of a Bronze Age village on piles, part of a UNESCO World Heritage Site.</string>
+    <string name="way_note_yunomine_onsen">Tsuboyu, Yunomine’s stone bath, is part of the World Heritage Site; its water, the story goes, changes colour seven times a day.</string>
     <string name="way_note_zanzibar_christ_church">Built from 1873 to 1879 where the slave market stood, the cathedral has its altar, it is said, on the spot of the whipping post.</string>
     <string name="way_note_zanzibar_forodhani">Restored by the Aga Khan, the gardens on the sea front fill every evening with a market of Zanzibari dishes.</string>
     <string name="way_note_zanzibar_hamamni">Built for Sultan Barghash by Shirazi architects, hence Persian, the public baths were in use until 1920.</string>

@@ -107,6 +107,29 @@ On top of its first two cities:
 - The tests that list the continents and their cities, and a snapshot of the new continent's
   page and map.
 
+## A new way
+
+A way (PLANNING.md §11 Phase 14) takes the same rules (two at a time, every sentence in two
+sources) and the same helpers, with its line from OpenStreetMap's route relations instead of
+BRouter:
+
+- Find its relations on Waymarked Trails (`hiking.waymarkedtrails.org/api/v1/list/search?query=`):
+  one, or several end to end (the Kumano Kodō's five). The line is the shortest path over them
+  from the first stop to the last; breaks under 3 km are joined straight and reported.
+- `locate` its stops in order; each must lie within 2 km of the line. Stages are where the way
+  is usually broken; a place with `stage=False` is one worth its sentence.
+- Its map: `rivers` (waterway relations, drawn as lines), `lakes` and `parks` (areas, by id).
+  `locate` finds a river's or a park's relation; check that a "lake" is an area, not a river line.
+- `country`: a `LOCATORS` box. A tall country (Japan) gets a flatter part of it for a way, or
+  the locator covers the line in every corner.
+- A `Way(...)` in `tools/ways_content.py`, appended to `WAYS`; its id appended to the ways in
+  `WayId` (`core/model/.../Way.kt`) with its continent.
+- `python3 tools/build_ways.py fetch ID` (its relations and map, and the land the ways share),
+  then `python3 tools/city_walks.py splice ID`: it prints the length, the gaps joined, each
+  stop's distance and the map's counts. Never a full fetch and build: the other ways would move.
+- The tests: `WaysDataTest` (the ways, per continent, lengths, stops) and `WaysScreenTest` (its
+  page in both themes, the continent's group); look at the screenshots.
+
 ## Things learned
 
 - **Wikipedia throttles** (HTTP 429) when asked fast: the helper waits and retries, and caches

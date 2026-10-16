@@ -134,20 +134,31 @@ class WaysScreenTest {
         showList(state = WaysSamples.state(active = null))
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.catalogue(Continent.EUROPE)))
         compose.onNode(hasText("Europe") and isHeading()).assertIsDisplayed()
-        val tops = Ways.waysIn(Continent.EUROPE).map {
+        fun tops(continent: Continent) = Ways.waysIn(continent).map {
             compose.onNode(
-                hasTestTag(WaysTags.way(it.id)) and hasAnyAncestor(hasTestTag(WaysTags.catalogue(Continent.EUROPE))),
+                hasTestTag(WaysTags.way(it.id)) and hasAnyAncestor(hasTestTag(WaysTags.catalogue(continent))),
             )
                 .getBoundsInRoot().top.value
         }
-        assertThat(tops).hasSize(Ways.all.size)
-        assertThat(tops).isInStrictOrder()
+        val europe = tops(Continent.EUROPE)
+        assertThat(europe).hasSize(5)
+        assertThat(europe).isInStrictOrder()
         assertThat(Ways.waysIn(Continent.EUROPE).first().id).isEqualTo(WayId.VIA_DEGLI_DEI)
+        snapshot("ways_by_continent")
+        // Beyond Europe (Phase 14): the Kumano Kodō and the Great Ocean Walk, under Asia and Oceania.
+        compose.onNodeWithTag(WaysTags.LIST)
+            .performScrollToNode(hasTestTag(WaysTags.catalogue(Continent.ASIA_OCEANIA)))
+        compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.way(WayId.GREAT_OCEAN_WALK)))
+        compose.onNode(hasText("Asia and Oceania") and isHeading()).assertIsDisplayed()
+        val beyond = tops(Continent.ASIA_OCEANIA)
+        assertThat(beyond).hasSize(2)
+        assertThat(beyond).isInStrictOrder()
+        assertThat(europe.size + beyond.size).isEqualTo(Ways.all.size)
         // A continent with no way yet has no group.
         for (continent in Continent.entries.filter { Ways.waysIn(it).isEmpty() }) {
             compose.onNodeWithTag(WaysTags.catalogue(continent)).assertDoesNotExist()
         }
-        snapshot("ways_by_continent")
+        snapshot("ways_beyond_europe")
     }
 
     @Test
@@ -252,6 +263,38 @@ class WaysScreenTest {
     fun `the French Way, across the rivers of the north of Spain, in the dark`() {
         showWay(WayId.CAMINO_FRANCES, state = WaysSamples.state(active = null), dark = true)
         snapshot("way_frances_dark")
+    }
+
+    @Test
+    fun `the Kumano Kodō, from Takijiri-ōji over the mountains to Nachi`() {
+        showWay(WayId.KUMANO_KODO, state = WaysSamples.state(active = null))
+        compose.onNodeWithText("Kumano Kodō").assertIsDisplayed()
+        snapshot("way_kumano")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Kumano Hongū Taisha"))
+        compose.onNodeWithText("the largest torii in the world", substring = true).assertExists()
+        snapshot("way_kumano_stages")
+    }
+
+    @Test
+    fun `the Kumano Kodō in the dark`() {
+        showWay(WayId.KUMANO_KODO, state = WaysSamples.state(active = null), dark = true)
+        snapshot("way_kumano_dark")
+    }
+
+    @Test
+    fun `the Great Ocean Walk, along the coast to the Twelve Apostles`() {
+        showWay(WayId.GREAT_OCEAN_WALK, state = WaysSamples.state(active = null))
+        compose.onNodeWithText("Great Ocean Walk").assertIsDisplayed()
+        snapshot("way_great_ocean")
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Cape Otway"))
+        compose.onNodeWithText("the second built on the Australian mainland", substring = true).assertExists()
+        snapshot("way_great_ocean_stages")
+    }
+
+    @Test
+    fun `the Great Ocean Walk in the dark`() {
+        showWay(WayId.GREAT_OCEAN_WALK, state = WaysSamples.state(active = null), dark = true)
+        snapshot("way_great_ocean_dark")
     }
 
     @Test

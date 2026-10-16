@@ -12,8 +12,19 @@ import kotlin.math.hypot
 /** The generated data (`tools/build_ways.py`) decodes, and holds what the screens rely on. */
 class WaysDataTest {
     @Test
-    fun `the five ways, shortest first, and the city walks apart`() {
+    fun `the ways, each continent's shortest first, and the city walks apart`() {
         assertThat(Ways.all.map { it.id })
+            .containsExactly(
+                WayId.VIA_DEGLI_DEI,
+                WayId.CAMINO_PORTUGUES,
+                WayId.VIA_DI_FRANCESCO,
+                WayId.CAMINO_FRANCES,
+                WayId.VIA_FRANCIGENA,
+                WayId.KUMANO_KODO,
+                WayId.GREAT_OCEAN_WALK,
+            )
+            .inOrder()
+        assertThat(Ways.waysIn(Continent.EUROPE).map { it.id })
             .containsExactly(
                 WayId.VIA_DEGLI_DEI,
                 WayId.CAMINO_PORTUGUES,
@@ -22,7 +33,9 @@ class WaysDataTest {
                 WayId.VIA_FRANCIGENA,
             )
             .inOrder()
-        assertThat(Ways.all.map { it.lengthMeters }).isInOrder()
+        assertThat(Ways.waysIn(Continent.ASIA_OCEANIA).map { it.id })
+            .containsExactly(WayId.KUMANO_KODO, WayId.GREAT_OCEAN_WALK)
+            .inOrder()
         assertThat(Ways.walks.map { it.id })
             .containsExactly(
                 WayId.MILAN_DUOMO_NAVIGLI,
@@ -101,6 +114,9 @@ class WaysDataTest {
         assertThat(km(WayId.VIA_DI_FRANCESCO)).isIn(400..560)
         assertThat(km(WayId.CAMINO_FRANCES)).isIn(740..800)
         assertThat(km(WayId.VIA_FRANCIGENA)).isIn(950..1_050)
+        // The Nakahechi by Yunomine to Nachi, and the Great Ocean Walk as mapped (96 of 104 km).
+        assertThat(km(WayId.KUMANO_KODO)).isIn(65..75)
+        assertThat(km(WayId.GREAT_OCEAN_WALK)).isIn(90..105)
         // The short walks.
         assertThat(Ways.walks.filter { it.lengthMeters < 7_000 }.map { it.id })
             .containsExactly(
@@ -168,6 +184,30 @@ class WaysDataTest {
         val way = Ways.of(WayId.VIA_FRANCIGENA)
         assertThat(way.stops.first().key).isEqualTo("gran_san_bernardo")
         assertThat(way.stops.last().key).isEqualTo("roma_san_pietro")
+    }
+
+    @Test
+    fun `the Kumano Kodō runs from Takijiri-ōji by Hongū to Nachi`() {
+        val way = Ways.of(WayId.KUMANO_KODO)
+        assertThat(way.stops.map { it.key })
+            .containsExactly(
+                "takijiri_oji", "takahara", "chikatsuyu", "tsugizakura_oji", "hosshinmon_oji",
+                "kumano_hongu_taisha", "yunomine_onsen", "koguchi", "kumano_nachi_taisha",
+            )
+            .inOrder()
+        assertThat(way.stops.all { it.stage }).isTrue()
+    }
+
+    @Test
+    fun `the Great Ocean Walk runs from Apollo Bay round Cape Otway to the Twelve Apostles, by its camps`() {
+        val way = Ways.of(WayId.GREAT_OCEAN_WALK)
+        assertThat(way.stops.map { it.key })
+            .containsExactly(
+                "apollo_bay", "elliot_ridge", "blanket_bay", "cape_otway", "aire_river", "johanna_beach",
+                "ryans_den", "princetown", "twelve_apostles",
+            )
+            .inOrder()
+        assertThat(way.map.parks).isNotEmpty()
     }
 
     @Test

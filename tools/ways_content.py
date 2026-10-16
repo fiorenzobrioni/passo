@@ -29,7 +29,9 @@ other stages (7 Oct 2026) in the English and Italian (or French, German), Sigeri
 English article on the Via Francigena; the Camino Francés's (7 Oct 2026) in the English and
 Spanish (or French, German, Galician), the Via di Francesco's in the English and Italian (or
 German), the Via degli Dei's and the Camino Portugués's in the English and Italian, Portuguese
-or Spanish (or Galician). A stage with no second source keeps only its name.
+or Spanish (or Galician). The Kumano Kodō (16 Oct 2026) in the English and Japanese (or German),
+the Great Ocean Walk in the English and German (or Italian). A stage with no second source keeps
+only its name.
 """
 
 from dataclasses import dataclass, field
@@ -703,7 +705,99 @@ VIA_FRANCIGENA = Way(
     ],
 )
 
-WAYS = [VIA_DEGLI_DEI, CAMINO_PORTUGUES, VIA_DI_FRANCESCO, CAMINO_FRANCES, VIA_FRANCIGENA]
+KUMANO_KODO = Way(
+    id="KUMANO_KODO",
+    # The Nakahechi as most walk it today (PLANNING.md §11 Phase 14): its main route from
+    # Takijiri-ōji to Hongū, the Dainichi-goe to Yunomine, the road to Ukegawa, then the
+    # Kogumotori-goe and the Ōkumotori-goe over the mountains to Nachi. Each is a relation of its own.
+    relations=[17094646, 17130940, 17097762, 17097854, 17095001],
+    name_en="Kumano Kodō",
+    name_it="Kumano Kodō",
+    route_en="The Nakahechi, from Takijiri-ōji to Nachi by Hongū",
+    route_it="Il Nakahechi, da Takijiri-ōji a Nachi passando per Hongū",
+    country="JP_SOUTH",
+    # The Tonda it leaves at Takijiri, the Hiki at Chikatsuyu, the Otonashi down to Hongū and the
+    # Kumano, the Ōtō and the Akagi it crosses on its way to the Nachi; the Kitayama and the Koza
+    # in view.
+    rivers=["relation/17253589", "relation/17253603", "relation/17253577", "relation/13374556",
+            "relation/17253600", "relation/17253597", "relation/16818833", "relation/13367592",
+            "relation/16779660"],
+    stops=[
+        Stop("takijiri_oji", "Takijiri-ōji", "Takijiri-ōji", 33.7755, 135.5037,
+             note_en="Takijiri-ōji has long been held to be the entrance to Kumano: from here the way climbs into the mountains.",
+             note_it="Takijiri-ōji è considerato da secoli l'ingresso a Kumano: da qui il cammino sale tra le montagne."),
+        # Source: Wikipedia, Kumano Kodō; Wikipedia (ja), 滝尻王子, 中辺路. Where the Tonda and the
+        # Ishifuri meet, and the Nakahechi's World Heritage stretch beginning here, are each in one only.
+        Stop("takahara", "Takahara", "Takahara", 33.7943, 135.5293),
+        Stop("chikatsuyu", "Chikatsuyu", "Chikatsuyu", 33.8144, 135.6057,
+             note_en="Chikatsuyu's name, the story goes, comes from an emperor who broke a reed and asked whether what dripped from it was blood or dew.",
+             note_it="Il nome di Chikatsuyu, si racconta, viene da un imperatore che spezzò una canna e chiese se ciò che ne gocciolava fosse sangue o rugiada."),
+        # Source: Wikipedia, Chikatsuyu, Kumano Kodō (Emperor Kazan); Wikipedia (ja), 近露王子. The
+        # English calls him a boy emperor, which the Japanese does not.
+        Stop("tsugizakura_oji", "Tsugizakura-ōji", "Tsugizakura-ōji", 33.8285, 135.6341),
+        Stop("hosshinmon_oji", "Hosshinmon-ōji", "Hosshinmon-ōji", 33.8617, 135.7206),
+        Stop("kumano_hongu_taisha", "Kumano Hongū Taisha", "Kumano Hongū Taisha", 33.8404, 135.7736,
+             note_en="The shrine stood on the Ōyunohara sandbank until the flood of 1889; at the sandbank's entrance now stands the largest torii in the world, 33.9 m tall.",
+             note_it="Il santuario sorgeva sul banco di sabbia di Ōyunohara fino all'alluvione del 1889; al suo ingresso oggi c'è il torii più grande del mondo, alto 33,9 m."),
+        # Source: Wikipedia, Kumano Hongū Taisha; Wikipedia (de), Kumano Hongū-Taisha.
+        Stop("yunomine_onsen", "Yunomine Onsen", "Yunomine Onsen", 33.8287, 135.7574,
+             note_en="Tsuboyu, Yunomine's stone bath, is part of the World Heritage Site; its water, the story goes, changes colour seven times a day.",
+             note_it="La Tsuboyu, la vasca di pietra di Yunomine, fa parte del patrimonio dell'umanità; la sua acqua, si racconta, cambia colore sette volte al giorno."),
+        # Source: Wikipedia, Yunomine Onsen; Wikipedia (ja), 湯の峰温泉. "The only hot spring" is
+        # left out: of the way in the English, of the world in the Japanese.
+        Stop("koguchi", "Koguchi", "Koguchi", 33.7587, 135.8418),
+        Stop("kumano_nachi_taisha", "Kumano Nachi Taisha", "Kumano Nachi Taisha", 33.6684, 135.8904,
+             note_en="The way ends at Kumano Nachi Taisha, near Nachi Falls and its drop of 133 m.",
+             note_it="Il cammino finisce al Kumano Nachi Taisha, vicino alla cascata di Nachi e al suo salto di 133 m."),
+        # Source: Wikipedia, Kumano Nachi Taisha, Nachi Falls; Wikipedia (ja), 那智滝. Japan's
+        # tallest single drop is left out: both hedge it over Iturup's falls.
+    ],
+)
+
+GREAT_OCEAN_WALK = Way(
+    id="GREAT_OCEAN_WALK",
+    # Mapped from Apollo Bay to the Twelve Apostles' visitor centre: about 96 km of the 104 the
+    # sources give, the rest being the walks off the line to its camps.
+    relations=[1951913],
+    name_en="Great Ocean Walk",
+    name_it="Great Ocean Walk",
+    route_en="Apollo Bay to the Twelve Apostles, round Cape Otway",
+    route_it="Da Apollo Bay ai Dodici Apostoli, doppiando Cape Otway",
+    country="AU",
+    # The Barham at Apollo Bay, the Parker below the lighthouse, the Calder and the Aire, the Ford,
+    # the Johanna and the Gellibrand at Princetown.
+    rivers=["relation/4713461", "way/130407427", "relation/20151795", "relation/20151786", "way/742175672",
+            "relation/20155815", "relation/2723370"],
+    # The Great Otway National Park it runs through, and Port Campbell's, where it ends.
+    parks=["relation/9212144", "relation/9212138"],
+    stops=[
+        Stop("apollo_bay", "Apollo Bay", "Apollo Bay", -38.7568, 143.6704,
+             note_en="The way begins at Apollo Bay, a town named after a ship, the Apollo.",
+             note_it="Il cammino parte da Apollo Bay, un paese che prende il nome da una nave, l'Apollo."),
+        # Source: Wikipedia, Apollo Bay; Wikipedia (de), Apollo Bay. How the ship gave its name is
+        # left out: it sheltered there in 1845 in the English, it was wrecked in 1846 in the German.
+        Stop("elliot_ridge", "Elliot Ridge", "Elliot Ridge", -38.7905, 143.6126),
+        Stop("blanket_bay", "Blanket Bay", "Blanket Bay", -38.8281, 143.5828),
+        Stop("cape_otway", "Cape Otway", "Cape Otway", -38.8513, 143.5145,
+             note_en="Cape Otway's lighthouse, from 1848, was the second built on the Australian mainland, of stone from the Parker River.",
+             note_it="Il faro di Cape Otway, del 1848, fu il secondo costruito sulla terraferma australiana, con pietra del fiume Parker."),
+        # Source: Wikipedia, Cape Otway Lighthouse; Wikipedia (de), Cape Otway Lighthouse.
+        Stop("aire_river", "Aire River", "Aire River", -38.8019, 143.4772),
+        Stop("johanna_beach", "Johanna Beach", "Johanna Beach", -38.7612, 143.3795),
+        Stop("ryans_den", "Ryans Den", "Ryans Den", -38.7595, 143.2776),
+        Stop("princetown", "Princetown", "Princetown", -38.6934, 143.1556,
+             note_en="Princetown, by the mouth of the Gellibrand River, lies between the Great Otway and Port Campbell national parks.",
+             note_it="Princetown, vicino alla foce del Gellibrand, sta tra i parchi nazionali di Great Otway e di Port Campbell."),
+        # Source: Wikipedia, Princetown, Victoria; Wikipedia (de), Princetown (Victoria).
+        Stop("twelve_apostles", "Twelve Apostles", "Dodici Apostoli", -38.6622, 143.1050,
+             note_en="The way ends at the Twelve Apostles, stacks of limestone that the Southern Ocean wore out of the cliffs.",
+             note_it="Il cammino finisce ai Dodici Apostoli, faraglioni di calcare che l'Oceano Meridionale ha staccato dalle scogliere."),
+        # Source: Wikipedia, The Twelve Apostles (Victoria); Wikipedia (it), Dodici Apostoli (Victoria).
+        # How many there ever were is left out: the sources count nine, eight or seven.
+    ],
+)
+
+WAYS = [VIA_DEGLI_DEI, CAMINO_PORTUGUES, VIA_DI_FRANCESCO, CAMINO_FRANCES, VIA_FRANCIGENA, KUMANO_KODO, GREAT_OCEAN_WALK]
 
 
 @dataclass(frozen=True)
@@ -3602,6 +3696,10 @@ LOCATORS = {
     "CU": (19.8, -85.0, 23.3, -74.1),
     "CO": (-4.3, -79.1, 12.5, -66.8),
     "JP": (24.0, 122.9, 45.6, 146.0),
+    # Japan from Kyushu to Tokyo, for a way: the whole country is too tall a box for a corner of
+    # the way's map. The Kumano Kodō's line crosses the map from its start, on the left, to its top
+    # right; a box this flat fits under the start, where the line never goes.
+    "JP_SOUTH": (31.2, 128.8, 38.4, 141.8),
     "AU": (-43.7, 112.9, -10.6, 153.7),
     "KR": (33.1, 124.6, 38.6, 131.9),
     "CN": (18.2, 73.5, 53.6, 134.8),
