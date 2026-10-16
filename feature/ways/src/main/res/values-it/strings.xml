@@ -3,8 +3,9 @@
     <!-- La pagina dei Cammini (PLANNING.md §11 Fase 11) -->
     <string name="ways_title">Cammini</string>
     <string name="ways_back">Indietro</string>
-    <string name="ways_intro">Percorri un lungo cammino o una città da dove sei, portato avanti dai tuoi passi: un cammino dalla distanza dei tuoi giorni, una città dalle tue uscite. Nessuna posizione, solo i tuoi passi.</string>
+    <string name="ways_intro">Percorri un lungo cammino o una città da dove sei, portato avanti dai tuoi passi. Nessuna posizione, solo i tuoi passi.</string>
     <string name="ways_group_ways">I cammini</string>
+    <string name="ways_ways_intro">Un lungo cammino, percorso con la distanza di tutti i tuoi giorni, uscite o no: ogni tappa che raggiungi ti dà un timbro.</string>
     <string name="ways_group_yours">I tuoi cammini</string>
     <string name="ways_under_way">In corso</string>
     <string name="ways_row_facts">%1$s · %2$s</string>

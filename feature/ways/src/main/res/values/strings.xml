@@ -3,8 +3,9 @@
     <!-- The Ways page (PLANNING.md §11 Phase 11) -->
     <string name="ways_title">Ways</string>
     <string name="ways_back">Back</string>
-    <string name="ways_intro">Walk a long way or a city from wherever you are, carried along it by your steps: a way by the distance of your days, a city by your outings. No location, only your steps.</string>
+    <string name="ways_intro">Walk a long way or a city from wherever you are, carried along it by your steps. No location, only your steps.</string>
     <string name="ways_group_ways">The ways</string>
+    <string name="ways_ways_intro">A long way, walked by the distance of all your days, outings or not: each stage you reach earns a stamp.</string>
     <string name="ways_group_yours">Your ways</string>
     <string name="ways_under_way">Under way</string>
     <string name="ways_row_facts">%1$s · %2$s</string>

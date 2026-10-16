@@ -189,7 +189,7 @@ class WaysScreenTest {
         var opened: Pair<WayId, Long?>? = null
         showList(onOpen = { way, journey -> opened = way to journey })
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.way(WayId.CAMINO_PORTUGUES)))
-        compose.onNodeWithText("Porto to Santiago de Compostela", substring = true).assertExists()
+        compose.onNodeWithText("One of the Caminos de Santiago, from Porto", substring = true).assertExists()
         compose.onNodeWithTag(WaysTags.way(WayId.CAMINO_PORTUGUES)).performClick()
         assertThat(opened).isEqualTo(WayId.CAMINO_PORTUGUES to null)
     }

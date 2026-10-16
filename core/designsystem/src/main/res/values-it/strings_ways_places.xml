@@ -5,11 +5,11 @@
     <string name="way_name_via_degli_dei">Via degli Dei</string>
     <string name="way_route_via_degli_dei">Da Bologna a Firenze, attraverso l’Appennino</string>
     <string name="way_name_camino_portugues">Cammino Portoghese</string>
-    <string name="way_route_camino_portugues">Da Porto a Santiago de Compostela, passando per Tui e Pontevedra</string>
+    <string name="way_route_camino_portugues">Uno dei Cammini di Santiago, da Porto passando per Tui e Pontevedra</string>
     <string name="way_name_via_di_francesco">Via di Francesco</string>
     <string name="way_route_via_di_francesco">Da La Verna a Roma, passando per Assisi</string>
-    <string name="way_name_camino_frances">Cammino di Santiago</string>
-    <string name="way_route_camino_frances">Il Cammino Francese, da Saint-Jean-Pied-de-Port a Santiago de Compostela</string>
+    <string name="way_name_camino_frances">Cammino Francese</string>
+    <string name="way_route_camino_frances">Uno dei Cammini di Santiago, da Saint-Jean-Pied-de-Port</string>
     <string name="way_name_via_francigena">Via Francigena</string>
     <string name="way_route_via_francigena">Dal Gran San Bernardo a Roma</string>
     <string name="way_name_kumano_kodo">Kumano Kodō</string>

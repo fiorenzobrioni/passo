@@ -5,11 +5,11 @@
     <string name="way_name_via_degli_dei">Via degli Dei</string>
     <string name="way_route_via_degli_dei">Bologna to Florence, over the Apennines</string>
     <string name="way_name_camino_portugues">Camino Portugués</string>
-    <string name="way_route_camino_portugues">Porto to Santiago de Compostela, by Tui and Pontevedra</string>
+    <string name="way_route_camino_portugues">One of the Caminos de Santiago, from Porto by Tui and Pontevedra</string>
     <string name="way_name_via_di_francesco">Via di Francesco</string>
     <string name="way_route_via_di_francesco">La Verna to Rome, by way of Assisi</string>
-    <string name="way_name_camino_frances">Camino de Santiago</string>
-    <string name="way_route_camino_frances">The French Way, Saint-Jean-Pied-de-Port to Santiago de Compostela</string>
+    <string name="way_name_camino_frances">Camino Francés</string>
+    <string name="way_route_camino_frances">One of the Caminos de Santiago, from Saint-Jean-Pied-de-Port</string>
     <string name="way_name_via_francigena">Via Francigena</string>
     <string name="way_route_via_francigena">The Great St Bernard Pass to Rome</string>
     <string name="way_name_kumano_kodo">Kumano Kodō</string>
