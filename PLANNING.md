@@ -797,7 +797,8 @@ Three phases asked for by the owner after the v1.0.0 release (1 Oct 2026). They 
 now so that the order can be chosen; the owner decides which comes first, and each becomes a
 minor release (`1.x.0`). None needs a new permission or a new dependency, and none touches the
 everyday tracking path. What was weighed and dropped is in §15 (route maps with GPS, the peak
-cadence, the weekly rhythm).
+cadence, the weekly rhythm). A fourth, Phase 14 (more ways, beyond Europe), was asked for
+on 16 Oct 2026 and built the same day.
 
 ### Phase 11 — The Ways («I Cammini»)
 
@@ -840,7 +841,7 @@ them later as the fifth (below, «Phase 11, later»):
   - [x] The Via degli Dei (3 of 3) and the Camino Portugués (2 of 3).
 - [x] The guide: a chapter (a way moves with the estimated distance; measuring the step makes it truer; what moves it back).
 - [x] Strings in English and Italian; UI tests with `assertAccessible()` and `walkPage()`; README screenshots (the map, the credential), CHANGELOG.
-- [ ] On a device (owner): a backdated start, a stage notification on a walk, the four ways drawn in both themes and on an open foldable.
+- [x] On a device (owner): a backdated start, a stage notification on a walk, the four ways drawn in both themes and on an open foldable. Done by the owner in the week of 5 Oct 2026.
 
 **Acceptance:** starting a way from 1 January places the reader at once with every stamp
 behind; a stage reached on a walk is told once, during the walk; History, Insights and the way
@@ -883,9 +884,9 @@ two. The first release has one walk a city.
 - [x] Storage: the Ways' table with a kind (way or walk), and on `session` a nullable walk key and the distance the outing started from; the backup carries both. A walk's progress is computed from its outings, never kept apart.
 - [x] The outing: a new goal kind, a walk, its goal the distance left; the 25, 50 and 75% signals off (the places are the signals: one short pulse and the voice); the notification's line is the next place («Next: the Duomo, 600 m»); the goal is the walk's end. Stopped halfway, the walk waits: "Continue from Piazza Navona" starts the next outing where the last one ended; starting again from the beginning asks first; leaving it asks too, and puts it back to its start, its outings kept (owner, 2 Oct 2026; ADR 0015 decision 11).
 - [x] Screens: the Ways page in two parts, «Cammini» and «Città»; a city's walk with its map (the water, the parks, the route, the places, the point), its places with the day each was reached, Start or Continue. During the outing, its card on Today and the Outings page carries the small map (drawn only while the screen is on). A finished walk stays in "Your ways" with its places and its day.
-- [ ] Your year on foot (Phase 12) names the cities walked that year.
+- [ ] Your year on foot (Phase 12) names the cities walked that year. Built with Phase 12, whose pages read the ways (§11 Phase 12).
 - [x] Strings in English and Italian; tests (`CityWalkProgressTest`: a walk over three outings, several places in one batch, the end, a restart); UI tests; a README screenshot (London's map during a walk); CHANGELOG.
-- [ ] On a device (owner): Milan walked in one outing and London over two, with the voice through headphones and with the screen off; on a treadmill once.
+- [x] On a device (owner): Milan walked in one outing and London over two, with the voice through headphones and with the screen off; on a treadmill once. Done by the owner in the week of 5 Oct 2026.
 
 Built as `docs/adr/0015-city-walks.md` records: a walk is a `WayId` of kind `WALK`; the routes
 come from BRouter and are committed in `tools/walks/`; progress is `WalkDays` over the walk's
@@ -962,8 +963,9 @@ a city for now.
   and the Prado to La Punta, then through the old squares to the Alameda de Paula (4.5 km, 10
   places); Cartagena's from the Clock Tower through the walled city and along its walls, then
   through Getsemaní to the Castillo San Felipe (5.5 km, 8 places).
-- [ ] **About ten cities a continent** (owner; the continents proposed, to be confirmed): about
-  seven of 10 km and three of 5 km, the city choosing its length. The Americas, proposed (5 Oct
+- [x] **About ten cities a continent** (owner): about
+  seven of 10 km and three of 5 km, the city choosing its length. Done: four continents of ten
+  cities each, 40 in all. The Americas, proposed (5 Oct
   2026): all ten done: New York, Rio, Mexico City, Buenos Aires and San Francisco, long;
   Québec, Havana and Cartagena, short (Washington, Montréal, Boston's Freedom Trail and Valparaíso if
   one does not work out). Then Asia and Oceania (all ten done), and Africa (all ten done), each
@@ -1067,10 +1069,10 @@ a city for now.
     Dispensary (4.3 km, 11 places), on the coast; Luxor's from Luxor Temple by the Abu Haggag
     Mosque, the Mummification Museum and the Luxor Museum, along the Avenue of Sphinxes by the
     Precinct of Mut and the Temple of Khonsu, to Karnak (4.2 km, 8 places).
-- [ ] On a device (owner): the Camino Portugués drawn in both themes; Rome, Paris, Madrid,
+- [x] On a device (owner): the Camino Portugués drawn in both themes; Rome, Paris, Madrid,
   Berlin, Vienna, Lima, Cusco, New York, Rio, Mexico City, Buenos Aires, San Francisco, Québec,
   Havana, Cartagena, Tokyo, Sydney, Seoul, Beijing, Hong Kong, Singapore, Bangkok, Kyoto, Hanoi, Melbourne, Cairo, Cape Town, Marrakech, Tunis, Alexandria, Dakar, Addis Ababa, Fez, Zanzibar, Luxor, Porto, Amsterdam and Prague each walked once, with the voice; the continents' maps and the coastal cities in both
-  themes.
+  themes. Done by the owner in the week of 5 Oct 2026.
 
 Built as the content of the first two parts, with nothing new in the code: the fifth way is the
 Caminho Português's main relation (12786090), whose line the script takes from Porto's
@@ -1507,7 +1509,8 @@ Include:
 
 - **The Camino named as readers know it** (owner, 1 Oct 2026): «Cammino di Santiago» / «Camino de Santiago», with its variant, the French Way (the classic one and the most walked), in the route line. Its stored id stays `CAMINO_FRANCES`.
 
-- **Five ways and five cities, then stop** (owner, 2 Oct 2026): the Camino Portugués from Porto becomes the fifth way, in a later step of Phase 11; the cities stay Milan, London, Rome, Paris and Madrid. More could be added one day, but none is planned.
+- **Five ways and five cities, then stop** (owner, 2 Oct 2026): the Camino Portugués from Porto becomes the fifth way, in a later step of Phase 11; the cities stay Milan, London, Rome, Paris and Madrid. More could be added one day, but none is planned. *Superseded* the same day: the owner lifted
+the limit on the cities (Phase 11, later), and Phase 14 brought the ways to ten.
 - **No limit on ways and cities; one walk a city for now** (owner, 2 Oct 2026, replacing the decision above): Lima (its historic centre) and Cusco are the sixth and seventh cities. Lima's coast (Miraflores, Barranco, the Costa Verde) would be a second walk, which needs the city's second level on the Ways page and a sea built from the coastline in the script; left for later.
 - **The fifth way and the other cities, built** (Phase 11, later, 2 Oct 2026; ADRs 0014 and 0015 updated): data only, through the same script. The Camino Portugués is listed second, by its length (245 km), with the French Way's locator, now named for the peninsula. Rome, Paris and Madrid come together rather than one a release (owner's confirmation), since none of Phase 11 is released yet; each was drawn and checked on its own, and one can be held back by removing its data. France gains a locator frame (unused by the city maps, which have none, but every walk carries one). Where two sources disagree on a number, the sentence does without it. A city's walk starts and ends at a place a reader would name (the Colosseum and St Peter's, Place des Vosges and the Eiffel Tower, the Temple of Debod and the Puerta de Alcalá); Rome's ends where the Francigena and the Via di Francesco end, under its own key, since a walk's place and a way's stage are named differently.
 - **The main streets on a city's map** (owner, 2 Oct 2026, after a trial on Milan: "Milan is recognisable now"): ADR 0015's "never a street grid" is revised to the arteries and the streets that shape a centre, faint under the route, on the walk's own page only; every city has them. Details and the reasons in ADR 0015, decision 3.
@@ -1635,6 +1638,8 @@ Include:
   way, step 4's fallback, was never needed.
 
 - **The two Caminos named alike, and each list of the Ways page introduced** (owner, 16 Oct 2026, replacing «The Camino named as readers know it»): the French Way is now «Camino Francés» / «Cammino Francese», as the Portuguese is «Camino Portugués» / «Cammino Portoghese», so the two are told apart where a name stands alone (the way under way, the way's page, Your ways, Insights); both route lines open with «One of the Caminos de Santiago» / «Uno dei Cammini di Santiago». The stored ids do not change. The ways' list gains its own line under its header, as the cities' has; the page's opening sentence keeps only what is common to both.
+
+- **Phase 11's device checks done, and the Ways reviewed** (owner, 16 Oct 2026): the owner ran every device check of Phase 11 (the ways, the city walks, the later cities) in the week of 5 Oct, so those boxes are ticked; Phase 14's stay open. A review of the Ways' code found one fault: the Ways page's ViewModel, scoped to the activity, marked a way finished from an `init` collector, which kept its whole state (a minute ticker, a recomputation of every journey at each batch the service wrote) alive for as long as the activity lived, screen off included, against §9; and, finishing the way before `WayNotifier` had read the same days, it could leave the arrival untold. The page no longer marks it: `WayProgress` already stops a way at its arrival day, so nothing after it counts on screen, and `WayNotifier`, which runs with the process, tells the arrival and then marks it finished. Following the same review: the notification is guarded on its own, so one that fails no longer leaves the way unfinished until the next batch; `WayNotifierTest` pins the order (told, then finished; finished without the permission, or with the arrival already told); and the rule that a page's ViewModel must not collect in `init` is written in CLAUDE.md, since every page's ViewModel is scoped to the activity. Giving each page its own ViewModel store (Navigation 3's ViewModel entry decorator) would be the structural fix, but it is a new dependency and would split the one `WaysViewModel` the Ways pages share; not taken without the owner's word.
 
 ### Open
 

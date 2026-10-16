@@ -263,17 +263,6 @@ constructor(
     }.flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), null)
 
-    init {
-        // A way walked to its end is finished here too, should the page see it before the
-        // notifier does: the days after it must not count.
-        viewModelScope.launch {
-            state.collect { current ->
-                val active = current?.active ?: return@collect
-                active.progress.finishedEpochDay?.let { ways.finish(active.journey.id, it) }
-            }
-        }
-    }
-
     /** Starts [way] from the day [choice] means ([chosen] for a day the reader picked). */
     fun start(way: WayId, choice: WayStartChoice, chosen: LocalDate?) {
         val current = state.value ?: return

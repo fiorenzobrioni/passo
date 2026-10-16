@@ -46,6 +46,8 @@ import javax.inject.Singleton
  * service writes anyway (in batches, PLANNING.md §4.5), and only while a way is under way. So
  * a stage reached on a walk is told with the batch that wrote it, a few minutes later at most
  * with the screen off, and a stage reached while the phone was off is told when it next writes.
+ * It is the only place a way is marked finished, after its arrival is told: were a page to mark
+ * it first, the way would stop being under way here and the arrival would go untold.
  */
 @Singleton
 class WayNotifier
@@ -76,14 +78,21 @@ constructor(
         }
     }
 
-    private suspend fun check(journey: WayJourney, days: Map<Long, Double>) {
+    /**
+     * Tells the stage [days] bring [journey] to, if one is untold, then finishes the way if they
+     * bring it to its end: in that order, so the arrival is told before the way stops being
+     * under way.
+     */
+    internal suspend fun check(journey: WayJourney, days: Map<Long, Double>) {
         val way = Ways.of(journey.way)
         val today = LocalDate.now(ZoneId.systemDefault()).toEpochDay()
         val progress = WayProgress.of(way, journey, days, today)
         val stage = WayAnnouncement.next(way, progress.walkedMeters, journey.toldMeters)
         // Claimed before it is told: two writes close together cannot tell it twice.
         if (stage != null && ways.claimTold(journey.id, stage.distanceMeters)) {
-            notifications.post(notifications.stage(stage, progress, preferences.current().settings.units))
+            // Guarded on its own: a notification that fails must not leave the way unfinished
+            // until the service next writes.
+            guarded { notifications.post(notifications.stage(stage, progress, preferences.current().settings.units)) }
         }
         progress.finishedEpochDay?.let { ways.finish(journey.id, it) }
     }
