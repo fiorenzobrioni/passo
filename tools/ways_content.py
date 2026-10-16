@@ -148,8 +148,8 @@ CAMINO_PORTUGUES = Way(
     relations=[12786090],
     name_en="Camino Portugués",
     name_it="Cammino Portoghese",
-    route_en="Porto to Santiago de Compostela, by Tui and Pontevedra",
-    route_it="Da Porto a Santiago de Compostela, passando per Tui e Pontevedra",
+    route_en="One of the Caminos de Santiago, from Porto by Tui and Pontevedra",
+    route_it="Uno dei Cammini di Santiago, da Porto passando per Tui e Pontevedra",
     country="IBERIA",
     # The rivers it crosses on its way north, from the Douro to the Sar, and the others in view.
     rivers=["relation/2566210", "relation/2579329", "relation/2566010", "relation/2474015", "relation/2383409",
@@ -324,12 +324,12 @@ VIA_DI_FRANCESCO = Way(
 CAMINO_FRANCES = Way(
     id="CAMINO_FRANCES",
     relations=[2163573],
-    # Named as readers know it; the variant, the French Way (the classic one, and the most
-    # walked), is said in the route line (owner, 1 Oct 2026).
-    name_en="Camino de Santiago",
-    name_it="Cammino di Santiago",
-    route_en="The French Way, Saint-Jean-Pied-de-Port to Santiago de Compostela",
-    route_it="Il Cammino Francese, da Saint-Jean-Pied-de-Port a Santiago de Compostela",
+    # Named by its variant, as the Camino Portugués is, so the two are told apart wherever the
+    # name stands alone; the route line says both are Caminos de Santiago (owner, 16 Oct 2026).
+    name_en="Camino Francés",
+    name_it="Cammino Francese",
+    route_en="One of the Caminos de Santiago, from Saint-Jean-Pied-de-Port",
+    route_it="Uno dei Cammini di Santiago, da Saint-Jean-Pied-de-Port",
     country="IBERIA",
     # The rivers it crosses from the Nive to the Sar (the Ebro at Logroño, the Pisuerga, the Esla,
     # the Órbigo at its long bridge, the Sil at Ponferrada, the Miño at Portomarín), and the larger

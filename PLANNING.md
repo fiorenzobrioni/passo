@@ -1634,6 +1634,8 @@ Include:
   foldable picture now spans the last row). BRouter routing for a
   way, step 4's fallback, was never needed.
 
+- **The two Caminos named alike, and each list of the Ways page introduced** (owner, 16 Oct 2026, replacing «The Camino named as readers know it»): the French Way is now «Camino Francés» / «Cammino Francese», as the Portuguese is «Camino Portugués» / «Cammino Portoghese», so the two are told apart where a name stands alone (the way under way, the way's page, Your ways, Insights); both route lines open with «One of the Caminos de Santiago» / «Uno dei Cammini di Santiago». The stored ids do not change. The ways' list gains its own line under its header, as the cities' has; the page's opening sentence keeps only what is common to both.
+
 ### Open
 
 - **The Ways on a widget?** Not in Phase 11; a natural line for «In words» later.

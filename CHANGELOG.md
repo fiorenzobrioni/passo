@@ -13,7 +13,7 @@ All notable changes to Passo are documented here. The format follows
 ### Added
 
 - **Ways**: long ways walked from wherever you are. In Europe the Via degli Dei, the Camino
-  Portugués from Porto, the Via di Francesco, the Camino de Santiago (the French Way) and the
+  Portugués from Porto, the Via di Francesco, the Camino Francés and the
   Italian part of the Via Francigena; beyond it the Kumano Kodō in Japan, from Takijiri-ōji by
   Hongū to Nachi, the Great Ocean Walk in Australia, from Apollo Bay round Cape Otway to the
   Twelve Apostles, the Inca Trail in Peru, from Km 82 to Machu Picchu by the Sun Gate, the

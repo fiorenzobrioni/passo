@@ -140,7 +140,9 @@ private fun WaysList(
                 ActiveCard(active, format) { onOpenWay(active.journey.way, active.journey.id) }
             }
         }
-        item(key = "ways-header") { Header(stringResource(R.string.ways_group_ways)) }
+        item(key = "ways-header") {
+            IntroducedHeader(stringResource(R.string.ways_group_ways), stringResource(R.string.ways_ways_intro))
+        }
         // By continent, as the cities are, each by length: one list of every way would hide the
         // ones beyond Europe under the first five (PLANNING.md §11 Phase 14).
         for (continent in Continent.entries) {
@@ -159,15 +161,7 @@ private fun WaysList(
             }
         }
         item(key = "cities-header") {
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Header(stringResource(R.string.ways_group_cities))
-                Text(
-                    text = stringResource(R.string.ways_cities_intro),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                )
-            }
+            IntroducedHeader(stringResource(R.string.ways_group_cities), stringResource(R.string.ways_cities_intro))
         }
         item(key = "cities") {
             // Ten cities was the ceiling of one flat list: past it, a row a continent, each
@@ -191,6 +185,20 @@ private fun WaysList(
             }
         }
         item(key = "footer") { Footer() }
+    }
+}
+
+/** A group's header with the line under it that says what the group holds. */
+@Composable
+private fun IntroducedHeader(title: String, intro: String) {
+    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Header(title)
+        Text(
+            text = intro,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 20.dp),
+        )
     }
 }
 
