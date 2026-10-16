@@ -1274,10 +1274,13 @@ reader (owner).
   groups show at a glance that the ways are no longer European only.
 - [ ] **The script**, only if a new way needs it: a way whose relation is incomplete or missing
   is routed by BRouter between its stops, as a walk is (likely the Inca Trail; to be checked on
-  Waymarked Trails first).
+  Waymarked Trails first). Not needed for the Kumano Kodō nor the Great Ocean Walk, whose
+  relations are whole (§15). What the first two did need is in: `fetch` and `splice` take a way's
+  id as they take a walk's, so a way is added without fetching or moving the others.
 - [ ] **The data, two ways at a time**, each drawn and checked on its own, added to `WayData.kt`
   without moving the other ways (`fetch` and the splice, as for the cities):
-  1. Kumano Kodō and the Great Ocean Walk (short, well mapped, sources easy to find);
+  1. [x] Kumano Kodō and the Great Ocean Walk (short, well mapped, sources easy to find): 70.6 and
+     96.4 km, nine stages each;
   2. the Inca Trail and the John Muir Trail;
   3. Kilimanjaro (its camps as the stages: Machame, Shira, Lava Tower, Barranco, Karanga,
      Barafu, the summit).
@@ -1285,8 +1288,10 @@ reader (owner).
   for its map, the locator (JP, PE, US, AU, TZ already exist),
   names and sentences in English and Italian. Japanese names in Hepburn romanisation, with
   macrons, as the English Wikipedia writes them.
-- [ ] Network: the build's `fetch` needs OpenStreetMap, Waymarked Trails, BRouter, Natural Earth
-  and Wikipedia; the cloud environment must allow them (the default one does not).
+- [x] Network: the build's `fetch` needs OpenStreetMap, Waymarked Trails, BRouter, Natural Earth
+  and Wikipedia; the cloud environment must allow them (the default one does not). Reached from
+  the cloud sandbox on 16 Oct 2026 (Wikipedia and OpenStreetMap's API throttle: the scripts
+  wait and retry).
 - [ ] Tests: the data tests count the new ways and stops; `WayMapView`'s gallery draws each new
   map in both themes; the page's UI test with the continent groups (`assertAccessible()`,
   `walkPage()`).
@@ -1567,6 +1572,27 @@ Include:
 - **More ways, beyond Europe** (owner, 16 Oct 2026: the five ways are all pilgrimages in Italy, Spain and Portugal). Phase 14, planned: the Kumano Kodō, the Inca Trail, the Great Ocean Walk, the John Muir Trail and Kilimanjaro, so that the ways reach every continent the cities do, five in Europe and five beyond. The name «Cammini» / "Ways" stays (it is already neutral; a louder one does not fit Passo's voice); "pilgrim" leaves the sentences about the feature as a whole, and the credential becomes «Timbri» / "Stamps". Left out: the Appalachian and the whole Pacific Crest Trail (about two years at 5 km a day, twice what the Francigena was cut to avoid), the Shikoku Henro (88 temples, the work of a phase for one way), the Kailash kora (a loop, at the edge of a disputed border), and any "lifetime" way: Passo is a step counter with ways, not for that reader.
 
 - **Phase 14's words, stamps and groups** (owner, 16 Oct 2026; steps 1 to 3, before any new way). The Ways page's intro, the guide's first paragraph (no longer listing the ways by name, so a new one cannot make it wrong), Insights' door, the README, VISION, the unreleased CHANGELOG and Phase 11's introduction no longer call a way a pilgrim route: "long ways" / «lunghi cammini», "a real long-distance route" / «un vero itinerario di più giorni». The notifications already named none. «Credenziale» / "Credential" is «Timbri» / "Stamps" on the way's and the walk's pages and in the guide; the README picture is `way-stamps.png`. The Ways page lists the ways under their continent, each group by length (`Ways.waysIn`), with the cities' own groups (`Continent`: Europe, the Americas, Asia and Oceania, Africa) rather than five: one set of continents on one page, and splitting Asia from Oceania would change the cities' pages too, for two ways (the Kumano Kodō and the Great Ocean Walk) that sit in one group as Tokyo and Sydney do. A way's `WayId` now carries its continent, as a walk's does; a continent with no way yet has no group, so until the new ways are drawn the page shows Europe alone.
+
+- **The Kumano Kodō and the Great Ocean Walk** (16 Oct 2026; Phase 14, the first two ways
+  beyond Europe). Both relations are whole on Waymarked Trails, so no way is routed by BRouter
+  yet. The Kumano Kodō is the Nakahechi as most walk it: five relations (the main route from
+  Takijiri-ōji to Hongū, the Dainichi-goe to Yunomine, the road to Ukegawa, the Kogumotori-goe to
+  Koguchi and the Ōkumotori-goe to Nachi), 70.6 km with four small breaks joined (the widest
+  481 m); its stages are the villages and shrines where it is usually broken. The Great Ocean
+  Walk is one relation, 96.4 km of the 104 the sources give (its camps lie off the line), with
+  its seven camps as stages but Princetown for the Devils Kitchen camp, which has no source;
+  Gibson Steps and Moonlight Head were left out, with one source each. Sentences in the English
+  and Japanese (or German) Wikipedias for the Kumano Kodō, the English and German (or Italian)
+  for the Great Ocean Walk; four Kumano stages (Takahara, Tsugizakura-ōji, Hosshinmon-ōji,
+  Koguchi) and four on the coast keep their names only, the Japanese articles on the ōji being
+  the only source. Left out as one source's or disputed: Japan's tallest single drop (both
+  hedge it over Iturup's falls), Tsuboyu as "the only hot spring" (of the way in English, of
+  the world in Japanese), how many Apostles there ever were, how the Apollo gave Apollo Bay its
+  name. Kumano has no national park mapped as an area along the line, so its map has rivers and
+  towns only. Its locator is Japan from Kyushu to Tokyo (`JP_SOUTH`), not the whole country:
+  the whole of Japan is too tall a box for a corner of a way's map, and covered the line between
+  Hongū and Koguchi wherever it went; the flatter box fits under the start. The two ways are
+  listed under Asia and Oceania. `fetch` and `splice` now take a way's id, as a walk's.
 
 ### Open
 

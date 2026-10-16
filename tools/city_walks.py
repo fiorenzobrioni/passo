@@ -19,9 +19,9 @@ are still written by tools/build_ways.py, never by hand.
     python3 tools/city_walks.py wiki-find LANG "query" ...
         Wikipedia's article for a query, and the same article's title in en, es, fr, it, pt,
         de, nl, ja, zh, ko and ar, so a place can be checked in a second language.
-    python3 tools/city_walks.py splice WALK_ID ...
-        Adds new walks to WayData.kt without rebuilding the others, or replaces walks already
-        there, then rewrites the place strings and the continents' maps (see below).
+    python3 tools/city_walks.py splice ID ...
+        Adds new walks or ways to WayData.kt without rebuilding the others, or replaces ones
+        already there, then rewrites the place strings and the continents' maps (see below).
     python3 tools/city_walks.py strings
         Rewrites only the place strings (EN, IT, WayPlaceStrings.kt), after a name or a sentence
         changed in the content: a way's stage given a sentence needs nothing else rebuilt.
@@ -30,7 +30,9 @@ Why splice: a full `build_ways.py` run rebuilds every walk from the cache, and a
 would also move every other city's streets with OpenStreetMap's edits since, which is not part
 of adding a city. `splice` builds only the walks named and puts each block and its case where a
 full run would write them (after the walk before it in WALKS). A walk already in WayData.kt is
-replaced, so a city's map can be redrawn after changing its content, committed or not.
+replaced, so a city's map can be redrawn after changing its content, committed or not. A way is
+spliced the same way, after the way before it in WAYS: its relations are read through Waymarked
+Trails at the time of its own `fetch`, and the other ways' lines stay as they were drawn.
 
 The servers are shared and some throttle (Wikipedia answers 429 when asked too fast; Nominatim
 allows one request a second): every call here waits between requests, retries with a growing
@@ -234,25 +236,26 @@ def splice(ids):
     import build_ways as build
     import ways_content as content
 
-    known = {walk.id for walk in content.WALKS}
+    known = {walk.id for walk in content.WALKS} | {way.id for way in content.WAYS}
     if set(ids) - known:
-        sys.exit(f"No walk {', '.join(sorted(set(ids) - known))} in WALKS")
+        sys.exit(f"No walk or way {', '.join(sorted(set(ids) - known))} in WALKS or WAYS")
     path = build.DOMAIN_OUT
     text = path.read_text()
     order = [item.id for item in build.WAYS + build.WALKS]
-    for walk in [w for w in content.WALKS if w.id in ids]:
-        block, _, _ = build.build_walk(walk)
-        case = f"        WayId.{walk.id} -> {build.camel(walk.id)}()\n"
+    for item in [i for i in content.WAYS + content.WALKS if i.id in ids]:
+        is_way = item in content.WAYS
+        block, _, _ = build.build_way(item) if is_way else build.build_walk(item)
+        case = f"        WayId.{item.id} -> {build.camel(item.id)}()\n"
         if case in text:
             # Already spliced (a walk committed before its map was changed): replaced in place.
             text = text.replace(case, "", 1)
-            start = text.index(f"\n    private fun {build.camel(walk.id)}() = WaySource(")
+            start = text.index(f"\n    private fun {build.camel(item.id)}() = WaySource(")
             end = text.index("\n    )\n", start) + len("\n    )\n")
             text = text[:start] + text[end:]
-        before = order[order.index(walk.id) - 1]
+        before = order[order.index(item.id) - 1]
         previous = f"        WayId.{before} -> {build.camel(before)}()\n"
         if previous not in text:
-            sys.exit(f"{before}, the walk before {walk.id} in WALKS, is not in WayData.kt yet")
+            sys.exit(f"{before}, the one before {item.id} in WAYS and WALKS, is not in WayData.kt yet")
         text = text.replace(previous, previous + case, 1)
         start = text.index(f"\n    private fun {build.camel(before)}() = WaySource(")
         end = text.index("\n    )\n", start) + len("\n    )\n")

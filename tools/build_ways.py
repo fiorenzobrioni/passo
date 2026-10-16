@@ -114,19 +114,20 @@ MERCATOR = 6378137.0
 # --- Fetch ------------------------------------------------------------------------------------
 
 def fetch(only=()):
-    """Downloads what is missing. With [only] (walk ids), only what those walks need (their
-    sources and the locators' land), for a city added without fetching the world again."""
-    unknown = set(only) - {walk.id for walk in WALKS}
+    """Downloads what is missing. With [only] (walk or way ids), only what those need (their
+    sources and the locators' land), for a city or a way added without fetching the world again."""
+    unknown = set(only) - {walk.id for walk in WALKS} - {way.id for way in WAYS}
     if unknown:
-        sys.exit(f"No walk {', '.join(sorted(unknown))}")
+        sys.exit(f"No walk or way {', '.join(sorted(unknown))}")
     CACHE.mkdir(exist_ok=True)
-    if not only:
-        for way in WAYS:
-            for relation in way.relations:
-                download(WMT.format(relation), CACHE / f"relation-{relation}.json")
-            fetch_way_map(way)
+    ways = [way for way in WAYS if not only or way.id in only]
+    for way in ways:
+        for relation in way.relations:
+            download(WMT.format(relation), CACHE / f"relation-{relation}.json")
+        fetch_way_map(way)
+    if ways:
         download(OSM_LAND, CACHE / OSM_LAND_FILE)
-    for layer in NE_LAYERS if not only else ["ne_50m_land"]:
+    for layer in NE_LAYERS if ways else ["ne_50m_land"]:
         download(NE.format(layer), CACHE / f"{layer}.geojson")
     ROUTES.mkdir(exist_ok=True)
     for walk in WALKS:
@@ -767,44 +768,38 @@ def box_literal(box):
 
 # --- Outputs ----------------------------------------------------------------------------------
 
-def build():
-    blocks, places, notes = [], {}, {}
-    for way in WAYS:
-        path, gaps = way_line(way)
-        along = cumulative(path)
-        length = along[-1]
-        stops = snap(way, path, along)
-        frame, ground, local = frame_of(path)
-        diagonal = math.hypot((frame[3] - frame[1]) * local.kx, (frame[2] - frame[0]) * local.ky)
-        line = simplified_indices(path, diagonal * LINE_TOLERANCE, local)
-        rows = [(path[i][0], path[i][1], along[i]) for i in line]
-        layers = way_map(way, ground, diagonal, local)
-        locator_box = LOCATORS[way.country]
-        locator_local = Local((locator_box[0] + locator_box[2]) / 2)
-        locator_land = polygons("ne_50m_land", locator_box, LOCATOR_TOLERANCE_METRES, locator_local)
-        locator_line = simplify(path, LOCATOR_TOLERANCE_METRES, locator_local)
-        print(
-            f"{way.id}: {length / 1000:.1f} km, {len(path)} points -> {len(line)}, "
-            f"{len(stops)} stops, gaps joined {[round(g) for g in gaps]} m, {way_map_counts(layers)}, "
-            f"locator {sum(map(len, locator_land))}",
-        )
-        for stop, distance, point in stops:
-            print(f"    {stop.key:24s} {distance / 1000:7.1f} km")
-            name = (stop.en, stop.it)
-            if places.get(stop.key, name) != name:
-                sys.exit(f"{stop.key} has two different names")
-            places[stop.key] = name
-            if stop.note_en:
-                note = (stop.note_en, stop.note_it)
-                if notes.get(stop.key, note) != note:
-                    sys.exit(f"{stop.key} has two different notes")
-                notes[stop.key] = note
-        stop_lines = "".join(
-            f'            WayStop("{stop.key}", {round(distance)}, {point[0]:.5f}, {point[1]:.5f}, '
-            f"stage = {'true' if stop.stage else 'false'}),\n"
-            for stop, distance, point in stops
-        )
-        blocks.append(f"""
+def build_way(way):
+    """A way's block of WayData.kt, with its places' names and notes."""
+    path, gaps = way_line(way)
+    along = cumulative(path)
+    length = along[-1]
+    stops = snap(way, path, along)
+    frame, ground, local = frame_of(path)
+    diagonal = math.hypot((frame[3] - frame[1]) * local.kx, (frame[2] - frame[0]) * local.ky)
+    line = simplified_indices(path, diagonal * LINE_TOLERANCE, local)
+    rows = [(path[i][0], path[i][1], along[i]) for i in line]
+    layers = way_map(way, ground, diagonal, local)
+    locator_box = LOCATORS[way.country]
+    locator_local = Local((locator_box[0] + locator_box[2]) / 2)
+    locator_land = polygons("ne_50m_land", locator_box, LOCATOR_TOLERANCE_METRES, locator_local)
+    locator_line = simplify(path, LOCATOR_TOLERANCE_METRES, locator_local)
+    print(
+        f"{way.id}: {length / 1000:.1f} km, {len(path)} points -> {len(line)}, "
+        f"{len(stops)} stops, gaps joined {[round(g) for g in gaps]} m, {way_map_counts(layers)}, "
+        f"locator {sum(map(len, locator_land))}",
+    )
+    places, notes = {}, {}
+    for stop, distance, point in stops:
+        print(f"    {stop.key:24s} {distance / 1000:7.1f} km")
+        places[stop.key] = (stop.en, stop.it)
+        if stop.note_en:
+            notes[stop.key] = (stop.note_en, stop.note_it)
+    stop_lines = "".join(
+        f'            WayStop("{stop.key}", {round(distance)}, {point[0]:.5f}, {point[1]:.5f}, '
+        f"stage = {'true' if stop.stage else 'false'}),\n"
+        for stop, distance, point in stops
+    )
+    block = f"""
     private fun {camel(way.id)}() = WaySource(
         id = WayId.{way.id},
         lengthMeters = {round(length)},
@@ -819,7 +814,23 @@ def build():
         parks = {kotlin_paths(layers["parks"], 8)},
         towns = {kotlin_paths(layers["towns"], 8)},
     )
-""")
+"""
+    return block, places, notes
+
+
+def build():
+    blocks, places, notes = [], {}, {}
+    for way in WAYS:
+        block, way_places, way_notes = build_way(way)
+        blocks.append(block)
+        for key, name in way_places.items():
+            if places.get(key, name) != name:
+                sys.exit(f"{key} has two different names")
+            places[key] = name
+        for key, note in way_notes.items():
+            if notes.get(key, note) != note:
+                sys.exit(f"{key} has two different notes")
+            notes[key] = note
     for walk in WALKS:
         block, walk_places, walk_notes = build_walk(walk)
         blocks.append(block)
