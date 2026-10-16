@@ -1218,6 +1218,75 @@ is measured and within the ADR's estimate.
 | A fast interval below its pace | Counted, said as below pace, never hidden |
 | The screen turned on mid-interval | The countdown appears at the right value |
 
+### Phase 14 — More ways, beyond Europe («Altri cammini»)
+
+The owner (16 Oct 2026): the five ways are all Christian pilgrimages in Italy, Spain and
+Portugal, while the city walks already cover five continents. This phase widens the ways to
+other traditions and to treks walked for the mountains and the sea, and takes "pilgrim" out of
+the words that describe the whole feature. Data first, through the same script and the same
+rules (`tools/CITY_WALKS.md`: two at a time, every sentence checked in two sources); the code
+changes are small. Decisions in `docs/adr/0014-ways.md` (decision 16 onward).
+
+**The name stays.** «Cammini» / "Ways" already says nothing of faith, and it is the page, the
+notification channel and the guide's chapter. A louder name ("Epic Trails") does not fit
+Passo's voice (a sentence before a number, estimates that say so). What changes is the
+sentences that call every way a pilgrim route.
+
+**The new ways** (lengths approximate, the line's own once drawn; at an ordinary 5 km a day):
+
+| Way | From, to | About | At 5 km a day | Kind |
+|---|---|---|---|---|
+| Kumano Kodō, the Nakahechi | Takijiri-ōji, Kumano Hongū Taisha, Kumano Nachi Taisha | 70 km | 2 weeks | Shinto and Buddhist pilgrimage; twinned with the Camino de Santiago |
+| Inca Trail, the classic route | Km 82 (Piscacucho), Machu Picchu by the Sun Gate | 42 km | 9 days | historic; ties to the Cusco walk |
+| Great Ocean Walk | Apollo Bay, the Twelve Apostles | 105 km | 3 weeks | coastal trek |
+| John Muir Trail | Yosemite Valley, Mount Whitney | 340 km | 2½ months | mountain trek, the heart of the Pacific Crest Trail |
+| Kilimanjaro, the Machame route | Machame Gate, Uhuru Peak, Mweka Gate | 60 km | 2 weeks | mountain trek, Africa's highest summit |
+
+Not the Appalachian Trail (3,500 km) nor the whole Pacific Crest Trail (4,265 km): about two
+years at 5 km a day, twice what the Francigena was cut to avoid (§15, 1 Oct 2026). The John
+Muir Trail is the PCT's most walked stretch at a length a reader finishes. Kilimanjaro is the
+one more the owner chose (16 Oct 2026) so that every continent of the cities has a way: ten
+ways, five in Europe and five beyond, and no more, since each costs its sentences in two
+sources and Passo is a step counter, not an atlas of the world's faiths. Not the Shikoku
+Henro (1,200 km and 88 temples) nor the Kailash kora (a loop, at the edge of a disputed border)
+(owner, 16 Oct 2026); nor a "lifetime" way for heavy walkers: Passo is not made for that
+reader (owner).
+
+- [ ] **Words.** "Pilgrim" leaves the sentences about the feature as a whole: the Ways page's
+  intro, the guide's first paragraph (which no longer lists the ways by name, so a new one
+  does not make it wrong, as was done for the cities), Insights' door, the README's feature
+  line and screenshot caption, VISION's entry. A way's own sentences keep their pilgrims where
+  that is what the place is about. The ADRs and §15 are history and stay as written.
+- [ ] **The stamps' group.** «Credenziale» / "Credential" is a pilgrim's word and reads oddly on
+  a trek: it becomes «Timbri» / "Stamps" for every way (owner, 16 Oct 2026), in the page, the
+  guide and the strings that name it.
+- [ ] **The Ways page by continent**, as the cities are: Europe, Asia, Africa, the Americas,
+  Oceania,
+  each by length. Ten ways in one list would hide the new ones under the five old ones; the
+  groups show at a glance that the ways are no longer European only.
+- [ ] **The script**, only if a new way needs it: a way whose relation is incomplete or missing
+  is routed by BRouter between its stops, as a walk is (likely the Inca Trail; to be checked on
+  Waymarked Trails first).
+- [ ] **The data, two ways at a time**, each drawn and checked on its own, added to `WayData.kt`
+  without moving the other ways (`fetch` and the splice, as for the cities):
+  1. Kumano Kodō and the Great Ocean Walk (short, well mapped, sources easy to find);
+  2. the Inca Trail and the John Muir Trail;
+  3. Kilimanjaro (its camps as the stages: Machame, Shira, Lava Tower, Barranco, Karanga,
+     Barafu, the summit).
+  Each: its relation (or route), stops snapped within 2 km and in order, rivers, lakes and parks
+  for its map, the locator (JP, PE, US, AU, TZ already exist),
+  names and sentences in English and Italian. Japanese names in Hepburn romanisation, with
+  macrons, as the English Wikipedia writes them.
+- [ ] Network: the build's `fetch` needs OpenStreetMap, Waymarked Trails, BRouter, Natural Earth
+  and Wikipedia; the cloud environment must allow them (the default one does not).
+- [ ] Tests: the data tests count the new ways and stops; `WayMapView`'s gallery draws each new
+  map in both themes; the page's UI test with the continent groups (`assertAccessible()`,
+  `walkPage()`).
+- [ ] README: the feature line and the caption without "pilgrim"; one new screenshot if a new
+  way is worth showing (proposal: the Kumano Kodō under way). CHANGELOG.
+- [ ] On a device (owner): the new maps in both themes and on an open foldable; the Ways page
+  with its groups at twice the text size.
+
 ---
 
 ## 12. Testing strategy
@@ -1486,6 +1555,8 @@ Include:
 - **Today's chart whole on the first screen** (owner, 16 Oct 2026, from a Samsung S24 Ultra at its default display size, 384×832dp: «Your day» was cut in the middle of its plot when both sentences under the ring took two lines). Four changes, none of them a smaller ring or a shorter sentence. (1) «Start an outing» moves from under the sentence to under «Your day»: the sentence's evidence comes before the way out, and the button's 56dp were what the chart lacked. On that phone the button is now one scroll away; an outing under way still shows its card above the chart, and the first day's note stays where it was. (2) The two sentences break into balanced lines (`LineBreak.Heading`), so a second line never holds one word («607 passi indietro / rispetto al solito»). (3) A non-breaking space after «about»/«circa» and inside a duration («1 h 12 min», «22 minutes»), so the to-go line breaks before the time, never inside it. (4) The chart's key keeps to its title's line in Italian at the default text size (2dp less around the title and between the items, swatches of 12dp whose dashes are fitted whole to the swatch), where it fell under the title by one dp; at a larger text size it still goes under it. Measured on the owner's screen: the chart's last hour label now ends 13dp above the bottom bar, where it was 67dp under it; `TodayScreenTest` holds it there at that size. Rejected: a smaller ring (the hero would lose a sixth, and the chart would still barely fit), an extended FAB (it would cover the chart, and starting an outing is not the screen's main action), an icon in the header (the label would go), shorter sentences (a telegram, and their length moves with the numbers anyway).
 
 - **An outing's start is seen where it was touched** (owner, 16 Oct 2026: "I press Start on the Japanese walk and nothing seems to happen"). On the Outings page the card of an outing under way comes in at the top, above the plans, while the Start touched is often three or four cards down: the page stayed where it was and only greyed its buttons. Checked by kind: the Outings page (every plan, the interval walk the worst, fourth in the list) had it; a city walk's page did not (the card takes Start's place under the map); a way is not an outing (its journey takes the Start's place too). Now: (1) started from the Outings page, the page glides to its top, where the card is (`LazyListState.reveal`: the least scroll that shows the item whole, on the spatial spring of `PassoMotion`, a jump under reduced motion); the card fades in and the cards under it move down on the same springs (`animateItem`). A city walk's page moves only if the card, taller than the button, runs past the screen's edge. (2) A confirming tick (`HapticFeedbackType.Confirm`) when the outing is under way, on both pages: when it has begun, not when the button was touched, so a notification permission asked first does not tick before it starts. (3) TalkBack says it, wherever the card appears: the card of an outing under way or paused carries a pane title («Japanese walking, Under way»), announced when it comes and when it changes; not a finished one, which Today would say again each time it opens. (4) A launcher's shortcut brings Today's own page forward (`PassoNavigationState.showToday`, the other tabs' stacks kept), and Today brings a card that appears while it is open into view, where the app could be left on any page and the outing begin unseen. Not chosen: going back to Today after every Start (the owner's first idea). The Outings page is opened from Today, from Settings and from a city's page under Insights; a jump to Today from there loses the page the reader was on (a walk's map, the voice they meant to change next), and an action's result belongs where the action was. A page of its own for the outing under way, as running apps have, stays a later idea: the phone is in a pocket, the signals are vibrations and a voice, and the card already holds what such a page would.
+
+- **More ways, beyond Europe** (owner, 16 Oct 2026: the five ways are all Christian pilgrimages in Italy, Spain and Portugal). Phase 14, planned: the Kumano Kodō, the Inca Trail, the Great Ocean Walk, the John Muir Trail and Kilimanjaro, so that the ways reach every continent the cities do, five in Europe and five beyond. The name «Cammini» / "Ways" stays (it says nothing of faith; a louder one does not fit Passo's voice); "pilgrim" leaves the sentences about the feature as a whole, and the credential becomes «Timbri» / "Stamps". Left out: the Appalachian and the whole Pacific Crest Trail (about two years at 5 km a day, twice what the Francigena was cut to avoid), the Shikoku Henro (88 temples, the work of a phase for one way), the Kailash kora (a loop, at the edge of a disputed border), and any "lifetime" way: Passo is a step counter with ways, not for that reader, and not a tour of the world's religions.
 
 ### Open
 
