@@ -145,6 +145,18 @@ class PassoNavigationState(
     }
 
     /**
+     * Today's own page, from wherever the reader was: an outing begun from outside the app (a
+     * launcher's shortcut) shows there, with no page of the app to keep in view. Every other
+     * tab's stack is kept, as a tap on the bar keeps it.
+     */
+    fun showToday() {
+        val today = backStacks.getValue(ShellTab.TODAY)
+        lastMoveWasTabTap = selected != ShellTab.TODAY
+        while (today.size > 1) today.removeAt(today.lastIndex)
+        selected = ShellTab.TODAY
+    }
+
+    /**
      * Back: pops the selected tab's stack, or from a tab's root returns to Today. At Today's root
      * there is nothing to pop, and the system's back leaves the app.
      */

@@ -117,4 +117,19 @@ class PassoNavigationStateTest {
         nav.navigate(SettingsKey)
         assertThat(nav.onScreen()).containsExactly(TodayKey, SettingsKey).inOrder()
     }
+
+    @Test
+    fun `a shortcut's outing brings Today's own page forward, keeping the other tabs' stacks`() {
+        val nav = state()
+        nav.navigate(SessionsKey)
+        nav.switchTab(ShellTab.INSIGHTS)
+        nav.navigate(WaysKey)
+
+        nav.showToday()
+
+        assertThat(nav.onScreen()).containsExactly(TodayKey)
+        assertThat(nav.showsBottomBar).isTrue()
+        nav.switchTab(ShellTab.INSIGHTS)
+        assertThat(nav.onScreen()).containsExactly(TodayKey, InsightsKey, WaysKey).inOrder()
+    }
 }

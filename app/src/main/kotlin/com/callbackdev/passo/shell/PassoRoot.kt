@@ -70,6 +70,8 @@ import com.callbackdev.passo.feature.ways.WaysRoute
  * @param onboardingCompleted null until the settings are read: a bare surface for that frame,
  *   because flashing the wrong screen at the reader is worse than one blank frame.
  * @param openWays a stage's notification was touched: the Ways page opens, once ([onWaysOpened]).
+ * @param openToday a launcher's shortcut started an outing: Today comes forward, with its card,
+ *   once ([onTodayOpened]).
  */
 @Composable
 fun PassoRoot(
@@ -77,12 +79,14 @@ fun PassoRoot(
     onboardingCompleted: Boolean?,
     openWays: Boolean = false,
     onWaysOpened: () -> Unit = {},
+    openToday: Boolean = false,
+    onTodayOpened: () -> Unit = {},
 ) {
     when {
         readiness == TrackingReadiness.NO_SENSOR -> NoSensorScreen()
         onboardingCompleted == null -> Surface(Modifier.fillMaxSize()) { }
         !onboardingCompleted -> OnboardingRoute()
-        else -> MainPages(openWays, onWaysOpened)
+        else -> MainPages(openWays, onWaysOpened, openToday, onTodayOpened)
     }
 }
 
@@ -98,12 +102,18 @@ fun PassoRoot(
  * the bar itself, so they are laid out to the pixel where the old `Scaffold` put them.
  */
 @Composable
-private fun MainPages(openWays: Boolean, onWaysOpened: () -> Unit) {
+private fun MainPages(openWays: Boolean, onWaysOpened: () -> Unit, openToday: Boolean, onTodayOpened: () -> Unit) {
     val nav = rememberPassoNavigationState()
     LaunchedEffect(openWays) {
         if (openWays) {
             nav.navigate(WaysKey)
             onWaysOpened()
+        }
+    }
+    LaunchedEffect(openToday) {
+        if (openToday) {
+            nav.showToday()
+            onTodayOpened()
         }
     }
     val reduced = reducedMotion()

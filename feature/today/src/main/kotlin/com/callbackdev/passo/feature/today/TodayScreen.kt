@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material3.ButtonDefaults
@@ -93,6 +94,7 @@ import com.callbackdev.passo.core.designsystem.components.StatusCard
 import com.callbackdev.passo.core.designsystem.components.StatusTone
 import com.callbackdev.passo.core.designsystem.components.TilePair
 import com.callbackdev.passo.core.designsystem.components.TrendPoint
+import com.callbackdev.passo.core.designsystem.components.reveal
 import com.callbackdev.passo.core.designsystem.format.annotated
 import com.callbackdev.passo.core.designsystem.format.axisHour
 import com.callbackdev.passo.core.designsystem.format.clockTime
@@ -208,9 +210,21 @@ fun TodayScreen(
     // reaches both edges of an open foldable.
     val gutter = pageGutter()
     val inColumn = Modifier.padding(gutter)
+    val list = rememberLazyListState()
+    val reduced = reducedMotion()
+    // An outing that begins while the page is open (a launcher's shortcut brings it forward) is
+    // brought into view: its card stands under the sentence, and the page may be scrolled down
+    // to the tiles. Not one already under way when the page opens: it is where it always is.
+    val sessionId = state.session?.session?.id
+    var seenSession by rememberSaveable { mutableStateOf(sessionId) }
+    LaunchedEffect(sessionId) {
+        if (sessionId != null && sessionId != seenSession) list.reveal(key = SESSION_KEY, index = 0, reduced = reduced)
+        seenSession = sessionId
+    }
     // Its own ground and ink, so the page reads right wherever it is drawn.
     Surface(modifier = modifier.fillMaxSize()) {
         LazyColumn(
+            state = list,
             modifier = Modifier.fillMaxSize().testTag(TodayTags.LIST),
             contentPadding = PaddingValues(bottom = bottom + 24.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -220,7 +234,7 @@ fun TodayScreen(
             }
             val session = state.session
             if (session != null) {
-                item(key = "session") {
+                item(key = SESSION_KEY) {
                     SessionCard(
                         session = session.session,
                         cadence = session.cadence,
@@ -856,6 +870,9 @@ private fun Tile(
 
 /** Cadence drawn from a stroll to a run, so brisk and vigorous sit where a reader expects them. */
 private val CADENCE_SCALE = 60f..160f
+
+/** The outing's card in the list, brought into view when an outing begins. */
+private const val SESSION_KEY = "session"
 
 /** Hooks for the UI tests. */
 object TodayTags {

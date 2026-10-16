@@ -1,8 +1,12 @@
 package com.callbackdev.passo.feature.today
 
 import android.graphics.Bitmap
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertLeftPositionInRootIsEqualTo
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.captureToImage
@@ -183,6 +187,28 @@ class TodayScreenTest {
         compose.onNodeWithTag(SessionCardTags.PAUSE).performClick()
         assertThat(paused).isTrue()
         snapshot("today_outing")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 1.5f)
+    fun `an outing begun while the page is open is brought into view`() {
+        var current by mutableStateOf(state())
+        compose.setContent {
+            PassoTheme {
+                TodayScreen(current, askInSettings = false, onOpenSettings = {
+                }, onAllow = {}, onResume = {}, onCelebrated = {})
+            }
+        }
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(TodayTags.METRICS))
+        compose.onNodeWithTag(TodayTags.RING).assertIsNotDisplayed()
+
+        // A launcher's shortcut: the outing starts, and Today is on screen, scrolled to its tiles.
+        current = current.copy(
+            session = LiveSessionState(outing, cadence = 108, canKeepGoing = false, alertsWhileScreenOff = true),
+        )
+
+        compose.onNodeWithTag(SessionCardTags.CARD).assertIsDisplayed()
+        compose.onNodeWithTag(SessionCardTags.PAUSE).assertIsDisplayed()
     }
 
     @Test

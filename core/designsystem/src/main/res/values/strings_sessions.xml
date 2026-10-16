@@ -75,6 +75,8 @@
     <string name="session_card_keep_going">Keep going</string>
     <string name="session_card_close">Close</string>
     <string name="session_card_under_way">Under way</string>
+    <!-- What TalkBack says when an outing's card appears or changes: its name, then its state. -->
+    <string name="session_card_pane">%1$s, %2$s</string>
     <string name="session_card_paused">Paused</string>
     <!-- «Brisk walk, 12 of 20 min: past halfway, 8 min to go». -->
     <string name="session_card_progress_description">%1$s, %2$s</string>

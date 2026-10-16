@@ -1,6 +1,9 @@
 package com.callbackdev.passo.feature.sessions
 
 import android.graphics.Bitmap
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
@@ -124,6 +127,40 @@ class SessionsScreenTest {
 
         compose.onNodeWithTag("${SessionsTags.START}-2").performClick()
         assertThat(started).isEqualTo(2L)
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT-w384dp-h832dp-xxhdpi")
+    fun `an outing started far down the list brings its card into view`() {
+        var current by mutableStateOf(state())
+        val japanese = walking.copy(planId = 4, goalKind = plans[3].goalKind, goalValue = plans[3].goalValue)
+        compose.setContent {
+            PassoTheme {
+                SessionsScreen(
+                    state = current,
+                    signalsBlock = GoalNotificationsBlock.NONE,
+                    onBack = {},
+                    onEdit = {},
+                    actions = SessionsActions(start = {
+                        current =
+                            state(
+                                live = LiveSessionState(
+                                    japanese,
+                                    112,
+                                    canKeepGoing = false,
+                                    alertsWhileScreenOff = true,
+                                ),
+                            )
+                    }),
+                )
+            }
+        }
+        compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag("${SessionsTags.START}-4"))
+        compose.onNodeWithTag("${SessionsTags.START}-4").performClick()
+
+        compose.onNodeWithTag(SessionCardTags.CARD).assertIsDisplayed()
+        compose.onNodeWithTag(SessionCardTags.STOP).assertIsDisplayed()
+        snapshot("sessions_started")
     }
 
     @Test
