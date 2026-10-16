@@ -71,6 +71,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -229,8 +230,6 @@ fun TodayScreen(
                         modifier = inColumn.padding(horizontal = ScreenMargin),
                     )
                 }
-            } else if (state.status == TrackingStatus.COUNTING && state.startOutingButton) {
-                item(key = "start-outing") { StartOuting(onOpenSessions) }
             }
             if (state.firstDay && state.status == TrackingStatus.COUNTING) {
                 item(key = "first-day") {
@@ -248,6 +247,11 @@ fun TodayScreen(
                 }
             }
             item(key = "trend") { Box(inColumn) { TrendCard(state, format) } }
+            // Under the day rather than above it: the sentence's evidence comes first, so the
+            // chart is whole on the first screen of a tall phone, and the way out after it.
+            if (session == null && state.status == TrackingStatus.COUNTING && state.startOutingButton) {
+                item(key = "start-outing") { StartOuting(onOpenSessions) }
+            }
             if (state.outings.isNotEmpty()) item(key = "walks") { Box(inColumn) { WalksCard(state.outings, format) } }
             item(key = "metrics") { Box(inColumn) { Metrics(state, format) } }
         }
@@ -508,7 +512,8 @@ private fun Headline(state: TodayUiState, format: MeasureFormatter) {
                     Placeholder(1.1.em, 1.em, PlaceholderVerticalAlign.TextCenter),
                 ) { Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.fillMaxSize()) },
             ),
-            style = MaterialTheme.typography.titleLarge,
+            // Balanced lines: two of a like length, never a lone word under a full line.
+            style = MaterialTheme.typography.titleLarge.copy(lineBreak = LineBreak.Heading),
             textAlign = TextAlign.Center,
         )
         val detail = overview.detail
@@ -523,7 +528,7 @@ private fun Headline(state: TodayUiState, format: MeasureFormatter) {
         if (detailText != null) {
             Text(
                 text = detailText,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyLarge.copy(lineBreak = LineBreak.Heading),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
@@ -586,7 +591,7 @@ private fun TrendCard(state: TodayUiState, format: MeasureFormatter) {
                 Text(
                     text = stringResource(R.string.today_trend_title),
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(end = 12.dp).semantics { heading() },
+                    modifier = Modifier.padding(end = 8.dp).semantics { heading() },
                 )
                 Legend(hasUsual = trend.usual != null)
             }
@@ -653,7 +658,7 @@ private fun Legend(hasUsual: Boolean) {
     val today = MaterialTheme.colorScheme.primary
     val usual = MaterialTheme.colorScheme.onSurfaceVariant
     val goal = PassoTheme.colors.goal
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         LegendItem(stringResource(R.string.today_trend_legend_today)) {
             drawSwatch(today, dashed = false, width = 2.5f)
         }
@@ -669,19 +674,25 @@ private fun Legend(hasUsual: Boolean) {
 @Composable
 private fun LegendItem(label: String, swatch: androidx.compose.ui.graphics.drawscope.DrawScope.() -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-        Canvas(Modifier.width(14.dp).height(8.dp)) { swatch() }
+        Canvas(Modifier.width(12.dp).height(8.dp)) { swatch() }
         Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawSwatch(color: Color, dashed: Boolean, width: Float) {
+    val stroke = width * density
+    // The round caps reach half a stroke past each end, so the line is inset by that much and
+    // every swatch, solid or dashed, is exactly the canvas wide.
+    val length = size.width - stroke
+    // Three whole dashes, the gaps twice their length, so the last one is never cut at the edge.
+    val dash = length / 7
     drawLine(
         color = color,
-        start = Offset(0f, size.height / 2),
-        end = Offset(size.width, size.height / 2),
-        strokeWidth = width * density,
+        start = Offset(stroke / 2, size.height / 2),
+        end = Offset(size.width - stroke / 2, size.height / 2),
+        strokeWidth = stroke,
         cap = StrokeCap.Round,
-        pathEffect = if (dashed) PathEffect.dashPathEffect(floatArrayOf(3 * density, 2.5f * density)) else null,
+        pathEffect = if (dashed) PathEffect.dashPathEffect(floatArrayOf(dash, dash * 2)) else null,
     )
 }
 

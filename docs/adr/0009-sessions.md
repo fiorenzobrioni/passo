@@ -74,8 +74,8 @@ while one is under way.
    batch that moved it, so the counter state and the outing never disagree after a crash; a
    process the system restarts picks it up from there. The goal and the estimates are copied
    into the outing: past outings are frozen like past days.
-8. **Where it shows.** Today: a "Start an outing" button, or the outing's card (under way,
-   paused, or just over, until put away); the button is the reader's to take away in Settings,
+8. **Where it shows.** Today: a "Start an outing" button under the day's chart, or the
+   outing's card above it (under way, paused, or just over, until put away); the button is the reader's to take away in Settings,
    the card is not. The Outings page (from Today, and from Settings) keeps the plans, three
    presets to start with. History and Today list an outing in place of the walk found in its
    minutes, with its goal and how much of it was done. The launcher's long press offers the

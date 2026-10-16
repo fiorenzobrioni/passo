@@ -363,6 +363,21 @@ class TodayScreenTest {
     }
 
     @Test
+    @Config(qualifiers = "it-rIT-w384dp-h832dp-xxhdpi")
+    fun `on a tall phone the day's chart is whole on the first screen, under two sentences of two lines`() {
+        // Behind a usual day with the goal far: in Italian, both sentences take two lines.
+        show(state(minutes = List(30) { DayMinute(8 * 60 + it, 29) }))
+
+        compose.onNodeWithText("indietro rispetto al solito", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("Ne mancano", substring = true).assertIsDisplayed()
+        // The owner's phone at its default display size: a 38dp status bar and a 95dp bottom bar,
+        // neither drawn here, so the first screen ends 133dp above the window's bottom.
+        val chart = compose.onNodeWithTag(TodayTags.CHART).getBoundsInRoot()
+        assertThat(chart.bottom).isAtMost(832.dp - 38.dp - 95.dp)
+        snapshot("today_first_screen")
+    }
+
+    @Test
     fun `on a phone the cards keep the screen margin`() {
         show(state())
 
@@ -390,7 +405,7 @@ class TodayScreenTest {
      */
     private fun toGo(state: TodayUiState): String {
         val left = state.overview.remaining
-        return "${us(left)} steps to go: about ${TodayOverview.minutesToWalk(left)} minutes of brisk walking"
+        return "${us(left)} steps to go: about\u00A0${TodayOverview.minutesToWalk(left)}\u00A0minutes of brisk walking"
     }
 
     private fun snapshot(name: String) {
