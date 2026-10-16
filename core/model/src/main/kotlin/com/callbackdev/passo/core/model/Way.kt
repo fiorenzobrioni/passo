@@ -7,9 +7,10 @@ enum class WayKind {
 }
 
 /**
- * The continents the city walks are grouped by, in the order the Ways page lists them
- * (docs/adr/0015-city-walks.md, decision 12). Never stored: a walk's continent is its [WayId]'s.
- * One is added with its first city, never before: the page has no empty group.
+ * The continents the ways and the city walks are grouped by, in the order the Ways page lists
+ * them (docs/adr/0015-city-walks.md, decision 12; PLANNING.md §11 Phase 14). Never stored: a
+ * way's or a walk's continent is its [WayId]'s. One is added with its first city, never before:
+ * the page has no empty group, and the ways show only the continents that have one.
  */
 enum class Continent {
     EUROPE,
@@ -19,18 +20,19 @@ enum class Continent {
 }
 
 /**
- * The ways and the city walks (PLANNING.md §11 Phase 11), in the order the Ways page lists them:
- * the ways shortest first, then the walks. Stored by name: the order may change, a name may not.
+ * The ways and the city walks (PLANNING.md §11 Phase 11): the ways, then the walks in the order
+ * the Ways page lists them (the page sorts the ways by length within their continent). Stored by
+ * name: the order may change, a name may not.
  *
  * @property city for a walk, its city's key: the walks of one city are listed together.
- * @property continent for a walk, the continent its city is listed under.
+ * @property continent the continent a way, or a walk's city, is listed under.
  */
 enum class WayId(val kind: WayKind, val city: String? = null, val continent: Continent? = null) {
-    VIA_DEGLI_DEI(WayKind.WAY),
-    CAMINO_PORTUGUES(WayKind.WAY),
-    VIA_DI_FRANCESCO(WayKind.WAY),
-    CAMINO_FRANCES(WayKind.WAY),
-    VIA_FRANCIGENA(WayKind.WAY),
+    VIA_DEGLI_DEI(WayKind.WAY, continent = Continent.EUROPE),
+    CAMINO_PORTUGUES(WayKind.WAY, continent = Continent.EUROPE),
+    VIA_DI_FRANCESCO(WayKind.WAY, continent = Continent.EUROPE),
+    CAMINO_FRANCES(WayKind.WAY, continent = Continent.EUROPE),
+    VIA_FRANCIGENA(WayKind.WAY, continent = Continent.EUROPE),
     MILAN_DUOMO_NAVIGLI(WayKind.WALK, city = "milan", continent = Continent.EUROPE),
     ROME_COLOSSEUM_VATICAN(WayKind.WALK, city = "rome", continent = Continent.EUROPE),
     PARIS_VOSGES_EIFFEL(WayKind.WALK, city = "paris", continent = Continent.EUROPE),

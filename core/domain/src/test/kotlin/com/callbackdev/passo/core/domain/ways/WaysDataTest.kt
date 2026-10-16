@@ -181,8 +181,19 @@ class WaysDataTest {
     // --- Continents (ADR 0015 decision 12) ------------------------------------------------------
 
     @Test
-    fun `every walk has its continent, a way none, and each continent its cities`() {
-        for (way in Ways.all) assertThat(way.id.continent).isNull()
+    fun `the ways are listed under their continent, each by its length`() {
+        val listed = Continent.entries.flatMap { Ways.waysIn(it) }
+        assertThat(listed.map { it.id }).containsExactlyElementsIn(Ways.all.map { it.id })
+        for (continent in Continent.entries) {
+            val ways = Ways.waysIn(continent)
+            for (way in ways) assertThat(way.id.continent).isEqualTo(continent)
+            assertThat(ways.map { it.lengthMeters }).isInOrder()
+        }
+    }
+
+    @Test
+    fun `every way and walk has its continent, and each continent its cities`() {
+        for (way in Ways.all) assertThat(way.id.continent).isNotNull()
         for (walk in Ways.walks) assertThat(walk.id.continent).isNotNull()
         assertThat(WayId.entries.filter { it.kind == WayKind.WALK }.map { it.continent }.toSet())
             .containsExactlyElementsIn(Continent.entries)

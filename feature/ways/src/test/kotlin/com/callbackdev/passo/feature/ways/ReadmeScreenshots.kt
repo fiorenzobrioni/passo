@@ -49,14 +49,14 @@ class ReadmeScreenshots {
     }
 
     @Test
-    fun credential() {
+    fun stamps() {
         compose.setContent {
             PassoTheme {
                 WayScreen(WaysSamples.state(), WayId.VIA_FRANCIGENA, null, onBack = {}, actions = WayActions())
             }
         }
         compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasTestTag(WaysTags.STAMPS))
-        save("way-credential")
+        save("way-stamps")
     }
 
     @Test

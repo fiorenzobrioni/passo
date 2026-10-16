@@ -801,9 +801,9 @@ cadence, the weekly rhythm).
 
 ### Phase 11 — The Ways («I Cammini»)
 
-VISION.md's "virtual journeys", in the shape of the pilgrim ways: the reader picks one of four
-ways and the day to count from, and the estimated distance walked since then moves a point
-along it. Each stage reached is a stamp in a credential, with the day it was reached. **A map
+VISION.md's "virtual journeys", in the shape of the long ways walked in stages: the reader picks
+one of four ways and the day to count from, and the estimated distance walked since then moves
+a point along it. Each stage reached is a stamp, with the day it was reached. **A map
 with no location:** the way is drawn, and the reader's place on it is their distance, never
 where they are. Everything is computed on read from the days already stored; nothing new runs
 while the screen is off. Name: «Cammini» / "Ways". Decisions in `docs/adr/0014-ways.md`.
@@ -1252,7 +1252,7 @@ Henro (1,200 km and 88 temples) nor the Kailash kora (a loop, at the edge of a d
 (owner, 16 Oct 2026); nor a "lifetime" way for heavy walkers: Passo is not made for that
 reader (owner).
 
-- [ ] **Words: no faith named** (owner, 16 Oct 2026, a standing rule, also in CLAUDE.md). What
+- [x] **Words: no faith named** (owner, 16 Oct 2026, a standing rule, also in CLAUDE.md). What
   describes the Ways never names a religion nor calls a way devotional or the reader a pilgrim:
   no "pilgrim", "pilgrimage", "sacred", "holy", "religious" or a faith's name, in English or in
   Italian («pellegrino», «pellegrinaggio», «sacro»...). The phase rewrites the ones already
@@ -1265,12 +1265,12 @@ reader (owner).
   a temple, a shrine) and a fact of its history, as a guidebook does, including the pilgrims of
   the past where that is what the place is known for; the new ways' sentences follow the same
   rule. The ADRs and §15 are records and stay as written.
-- [ ] **The stamps' group.** «Credenziale» / "Credential" is a pilgrim's word and reads oddly on
+- [x] **The stamps' group.** «Credenziale» / "Credential" is a pilgrim's word and reads oddly on
   a trek: it becomes «Timbri» / "Stamps" for every way (owner, 16 Oct 2026), in the page, the
   guide and the strings that name it.
-- [ ] **The Ways page by continent**, as the cities are: Europe, Asia, Africa, the Americas,
+- [x] **The Ways page by continent**, as the cities are: Europe, Asia, Africa, the Americas,
   Oceania,
-  each by length. Ten ways in one list would hide the new ones under the five old ones; the
+  each by length. Done with the cities' own four groups (Asia and Oceania together; §15). Ten ways in one list would hide the new ones under the five old ones; the
   groups show at a glance that the ways are no longer European only.
 - [ ] **The script**, only if a new way needs it: a way whose relation is incomplete or missing
   is routed by BRouter between its stops, as a walk is (likely the Inca Trail; to be checked on
@@ -1565,6 +1565,8 @@ Include:
 - **An outing's start is seen where it was touched** (owner, 16 Oct 2026: "I press Start on the Japanese walk and nothing seems to happen"). On the Outings page the card of an outing under way comes in at the top, above the plans, while the Start touched is often three or four cards down: the page stayed where it was and only greyed its buttons. Checked by kind: the Outings page (every plan, the interval walk the worst, fourth in the list) had it; a city walk's page did not (the card takes Start's place under the map); a way is not an outing (its journey takes the Start's place too). Now: (1) started from the Outings page, the page glides to its top, where the card is (`LazyListState.reveal`: the least scroll that shows the item whole, on the spatial spring of `PassoMotion`, a jump under reduced motion); the card fades in and the cards under it move down on the same springs (`animateItem`). A city walk's page moves only if the card, taller than the button, runs past the screen's edge. (2) A confirming tick (`HapticFeedbackType.Confirm`) when the outing is under way, on both pages: when it has begun, not when the button was touched, so a notification permission asked first does not tick before it starts. (3) TalkBack says it, wherever the card appears: the card of an outing under way or paused carries a pane title («Japanese walking, Under way»), announced when it comes and when it changes; not a finished one, which Today would say again each time it opens. (4) A launcher's shortcut brings Today's own page forward (`PassoNavigationState.showToday`, the other tabs' stacks kept), and Today brings a card that appears while it is open into view, where the app could be left on any page and the outing begin unseen. Not chosen: going back to Today after every Start (the owner's first idea). The Outings page is opened from Today, from Settings and from a city's page under Insights; a jump to Today from there loses the page the reader was on (a walk's map, the voice they meant to change next), and an action's result belongs where the action was. A page of its own for the outing under way, as running apps have, stays a later idea: the phone is in a pocket, the signals are vibrations and a voice, and the card already holds what such a page would.
 
 - **More ways, beyond Europe** (owner, 16 Oct 2026: the five ways are all pilgrimages in Italy, Spain and Portugal). Phase 14, planned: the Kumano Kodō, the Inca Trail, the Great Ocean Walk, the John Muir Trail and Kilimanjaro, so that the ways reach every continent the cities do, five in Europe and five beyond. The name «Cammini» / "Ways" stays (it is already neutral; a louder one does not fit Passo's voice); "pilgrim" leaves the sentences about the feature as a whole, and the credential becomes «Timbri» / "Stamps". Left out: the Appalachian and the whole Pacific Crest Trail (about two years at 5 km a day, twice what the Francigena was cut to avoid), the Shikoku Henro (88 temples, the work of a phase for one way), the Kailash kora (a loop, at the edge of a disputed border), and any "lifetime" way: Passo is a step counter with ways, not for that reader.
+
+- **Phase 14's words, stamps and groups** (owner, 16 Oct 2026; steps 1 to 3, before any new way). The Ways page's intro, the guide's first paragraph (no longer listing the ways by name, so a new one cannot make it wrong), Insights' door, the README, VISION, the unreleased CHANGELOG and Phase 11's introduction no longer call a way a pilgrim route: "long ways" / «lunghi cammini», "a real long-distance route" / «un vero itinerario di più giorni». The notifications already named none. «Credenziale» / "Credential" is «Timbri» / "Stamps" on the way's and the walk's pages and in the guide; the README picture is `way-stamps.png`. The Ways page lists the ways under their continent, each group by length (`Ways.waysIn`), with the cities' own groups (`Continent`: Europe, the Americas, Asia and Oceania, Africa) rather than five: one set of continents on one page, and splitting Asia from Oceania would change the cities' pages too, for two ways (the Kumano Kodō and the Great Ocean Walk) that sit in one group as Tokyo and Sydney do. A way's `WayId` now carries its continent, as a walk's does; a continent with no way yet has no group, so until the new ways are drawn the page shows Europe alone.
 
 ### Open
 

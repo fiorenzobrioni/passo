@@ -182,18 +182,18 @@ internal fun WalkPage(
             }
         }
         if (progress != null) {
-            item(key = "credential-header") {
+            item(key = "stamps-header") {
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Header(stringResource(R.string.way_group_credential))
+                    Header(stringResource(R.string.way_group_stamps))
                     Text(
-                        text = stringResource(R.string.walk_credential_caption),
+                        text = stringResource(R.string.walk_stamps_caption),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 20.dp),
                     )
                 }
             }
-            item(key = "credential") { Credential(state, way, progress) }
+            item(key = "stamps") { Stamps(state, way, progress) }
         }
         item(key = "places-header") { Header(stringResource(R.string.walk_group_places)) }
         item(key = "places") { Stages(state, way, progress, format) }
