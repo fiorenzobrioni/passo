@@ -20,6 +20,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -185,6 +186,16 @@ class TodayScreenTest {
         snapshot("today_way")
         compose.onNodeWithTag(TodayTags.WAY).performClick()
         assertThat(opened).isEqualTo(WayId.CAMINO_PORTUGUES to 7L)
+    }
+
+    @Test
+    fun `in the dark the way's card reads as in the light`() {
+        show(state().copy(way = way()), dark = true)
+
+        // To the foot of the page: the card is the last item, the bar its last line.
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToKey("way")
+        compose.onNodeWithTag(TodayTags.WAY_BAR, useUnmergedTree = true).assertIsDisplayed()
+        snapshot("today_way_dark")
     }
 
     @Test

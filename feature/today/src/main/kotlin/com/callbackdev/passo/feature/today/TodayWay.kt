@@ -43,7 +43,7 @@ import com.callbackdev.passo.core.model.WayId
  * The way under way, at the foot of the page (PLANNING.md §15 «The way under way on Today»): not
  * where the reader stands, which Insights and the way's page say, but what today did for it.
  * The sentence is today's stretch; the bar ends with it, in the day's own primary (the ring's,
- * the chart's line) after the days before in the goal's green. The whole card opens the way.
+ * the chart's line), set apart from the days before in the goal's green. The whole card opens the way.
  */
 @Composable
 internal fun WayCard(way: WayToday, format: MeasureFormatter, onOpen: (WayId, Long) -> Unit) {
@@ -112,8 +112,11 @@ internal fun WayCard(way: WayToday, format: MeasureFormatter, onOpen: (WayId, Lo
 
 /**
  * The way's length as a bar: the days before today in the goal's green, today's stretch after
- * them in primary. A stretch too short to see on a long way is drawn a few dp long, since the
- * sentence above already gives its figure.
+ * them in primary, set apart by a small gap on each side. The gap, not the colour, is what tells
+ * the piece apart: the two are about as light, and with the system's colours primary may be a
+ * green itself (owner, 17 Oct 2026, from a phone where the blue piece was barely seen). A
+ * stretch too short to see on a long way is drawn a few dp long, since the sentence above already
+ * gives its figure.
  */
 @Composable
 private fun WayBar(way: WayToday) {
@@ -134,13 +137,30 @@ private fun WayBar(way: WayToday) {
         val start = stroke / 2
         val end = size.width - stroke / 2
         fun x(meters: Double): Float = start + (end - start) * (meters / length).coerceIn(0.0, 1.0).toFloat()
-        fun bar(color: Color, to: Float) =
-            drawLine(color, Offset(start, y), Offset(to, y), strokeWidth = stroke, cap = StrokeCap.Round)
+        fun bar(color: Color, from: Float, to: Float) =
+            drawLine(color, Offset(from, y), Offset(to, y), strokeWidth = stroke, cap = StrokeCap.Round)
 
-        bar(track, end)
-        val past = x(way.beforeTodayMeters)
-        if (way.movedToday) bar(today, maxOf(x(way.progress.walkedMeters), past + MIN_TODAY.toPx()).coerceAtMost(end))
-        if (way.beforeTodayMeters > 0.0) bar(before, past)
+        val walkedBefore = way.beforeTodayMeters > 0.0
+        var past = x(way.beforeTodayMeters)
+        // From one line's end to the next one's start: both caps and the gap between them.
+        val step = stroke + PIECE_GAP.toPx()
+        if (way.movedToday) {
+            val least = MIN_TODAY.toPx()
+            var from = if (walkedBefore) past + step else start
+            var to = maxOf(x(way.progress.walkedMeters), from + least)
+            // At the end of the way (the day of arrival) the days before give way to today's
+            // piece, so it keeps its length and its gap there too.
+            if (to > end) {
+                to = end
+                from = minOf(from, end - least).coerceAtLeast(start)
+                if (walkedBefore) past = minOf(past, from - step)
+            }
+            if (to + step <= end) bar(track, to + step, end)
+            bar(today, from, to)
+        } else {
+            bar(track, start, end)
+        }
+        if (walkedBefore && past >= start) bar(before, start, past)
     }
 }
 
@@ -148,3 +168,4 @@ private const val DETAIL_SEPARATOR = " · "
 private val MAP_SIZE = 72.dp
 private val BAR_HEIGHT = 6.dp
 private val MIN_TODAY = 4.dp
+private val PIECE_GAP = 2.dp
