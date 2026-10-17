@@ -38,7 +38,7 @@ fun wayDetail(progress: WayProgress, format: MeasureFormatter): String? {
     val end = progress.way.stops.last()
     val toEnd = stringResource(
         R.string.way_to_end,
-        format.distance(progress.metersLeft).text(),
+        format.distance(progress.metersLeft).unbrokenText(),
         stringResource(placeNameRes(end.key)),
     )
     if (next == end) return toEnd
@@ -46,7 +46,7 @@ fun wayDetail(progress: WayProgress, format: MeasureFormatter): String? {
         val toNext = stringResource(
             R.string.walk_next,
             stringResource(placeNameRes(next.key)),
-            format.aheadDistance(progress.metersTo(next)).text(),
+            format.aheadDistance(progress.metersTo(next)).unbrokenText(),
         )
         return "$toEnd. $toNext"
     }
@@ -64,14 +64,14 @@ fun wayNextStage(progress: WayProgress, format: MeasureFormatter): String? {
     return if (next == end) {
         stringResource(
             R.string.way_to_end,
-            format.distance(progress.metersLeft).text(),
+            format.distance(progress.metersLeft).unbrokenText(),
             stringResource(placeNameRes(end.key)),
         )
     } else {
         stringResource(
             R.string.way_next_stage,
             stringResource(placeNameRes(next.key)),
-            format.distance(progress.metersTo(next)).text(),
+            format.distance(progress.metersTo(next)).unbrokenText(),
         )
     }
 }
@@ -85,8 +85,8 @@ fun wayProgressText(progress: WayProgress, format: MeasureFormatter): String =
 @Composable
 fun wayProgressText(way: Way, walkedMeters: Double, format: MeasureFormatter): String = stringResource(
     R.string.way_progress,
-    format.distance(walkedMeters).text(),
-    format.distance(way.lengthMeters.toDouble()).text(),
+    format.distance(walkedMeters).unbrokenText(),
+    format.distance(way.lengthMeters.toDouble()).unbrokenText(),
 )
 
 /** "47 stages"; for a city walk, "14 places". */
@@ -126,8 +126,8 @@ fun wayMapSpoken(way: Way, progress: WayProgress?, format: MeasureFormatter): St
         stringResource(
             R.string.way_map_spoken_walked,
             name,
-            format.distance(progress.walkedMeters).text(),
-            format.distance(way.lengthMeters.toDouble()).text(),
+            format.distance(progress.walkedMeters).unbrokenText(),
+            format.distance(way.lengthMeters.toDouble()).unbrokenText(),
             stringResource(placeNameRes(progress.last.stop.key)),
         )
     }

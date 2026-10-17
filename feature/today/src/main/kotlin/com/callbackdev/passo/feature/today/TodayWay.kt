@@ -26,7 +26,7 @@ import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.callbackdev.passo.core.designsystem.components.WayMapView
-import com.callbackdev.passo.core.designsystem.format.text
+import com.callbackdev.passo.core.designsystem.format.unbrokenText
 import com.callbackdev.passo.core.designsystem.format.wayHeadline
 import com.callbackdev.passo.core.designsystem.format.wayNextStage
 import com.callbackdev.passo.core.designsystem.format.wayProgressText
@@ -48,7 +48,7 @@ import com.callbackdev.passo.core.model.WayId
 internal fun WayCard(way: WayToday, format: MeasureFormatter, onOpen: (WayId, Long) -> Unit) {
     val progress = way.progress
     val headline = wayHeadline(progress)
-    val today = format.distance(way.todayMeters).text()
+    val today = format.distance(way.todayMeters).unbrokenText()
     val sentence = when {
         way.movedToday && !progress.finished -> stringResource(R.string.today_way_moved, today)
         else -> headline

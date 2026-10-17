@@ -42,7 +42,7 @@ import com.callbackdev.passo.core.designsystem.components.GroupDivider
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
 import com.callbackdev.passo.core.designsystem.components.WayMapView
 import com.callbackdev.passo.core.designsystem.format.rememberMeasureFormatter
-import com.callbackdev.passo.core.designsystem.format.text
+import com.callbackdev.passo.core.designsystem.format.unbrokenText
 import com.callbackdev.passo.core.designsystem.format.wayDetail
 import com.callbackdev.passo.core.designsystem.format.wayDuration
 import com.callbackdev.passo.core.designsystem.format.wayHeadline
@@ -295,7 +295,7 @@ private fun WayRow(way: Way, pace: Double?, format: MeasureFormatter, onClick: (
             Text(
                 text = stringResource(
                     R.string.ways_row_facts,
-                    format.distance(way.lengthMeters.toDouble()).text(),
+                    format.distance(way.lengthMeters.toDouble()).unbrokenText(),
                     wayStages(way),
                 ),
                 style = MaterialTheme.typography.bodySmall.copy(fontFeatureSettings = "tnum"),
@@ -366,7 +366,7 @@ internal fun WalkRow(walk: WalkView, state: WaysUiState, format: MeasureFormatte
             Text(
                 text = stringResource(
                     R.string.ways_row_facts,
-                    format.distance(way.lengthMeters.toDouble()).text(),
+                    format.distance(way.lengthMeters.toDouble()).unbrokenText(),
                     wayStages(way),
                 ),
                 style = MaterialTheme.typography.bodySmall.copy(fontFeatureSettings = "tnum"),

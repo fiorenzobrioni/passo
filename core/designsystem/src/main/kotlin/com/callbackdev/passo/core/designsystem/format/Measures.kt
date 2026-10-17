@@ -36,6 +36,14 @@ fun Context.measureFormatter(units: UnitPreference): MeasureFormatter =
 @Composable
 fun Measure.text(): String = stringResource(unit.formatRes, number)
 
+/**
+ * A measure that never breaks between its number and its unit («17,5 km», never «17,5» at the
+ * end of a line and «km» at the start of the next): for a measure inside a sentence that wraps.
+ * TalkBack reads it as it reads [text].
+ */
+@Composable
+fun Measure.unbrokenText(): String = text().replace(' ', '\u00A0')
+
 /** Measures side by side, e.g. "5 ft 9 in". */
 @Composable
 fun List<Measure>.text(): String {

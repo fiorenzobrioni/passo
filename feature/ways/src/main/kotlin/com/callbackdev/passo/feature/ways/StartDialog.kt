@@ -32,7 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.callbackdev.passo.core.designsystem.format.rememberMeasureFormatter
-import com.callbackdev.passo.core.designsystem.format.text
+import com.callbackdev.passo.core.designsystem.format.unbrokenText
 import com.callbackdev.passo.core.designsystem.ways.placeNameRes
 import com.callbackdev.passo.core.domain.ways.Way
 import com.callbackdev.passo.core.domain.ways.WayProgress
@@ -178,7 +178,7 @@ private fun preview(state: WaysUiState, way: Way, day: LocalDate): String {
     return when {
         progress.finished -> stringResource(R.string.way_start_arrived, last)
         progress.reached.size == 1 -> stringResource(R.string.way_start_at_start, last)
-        else -> stringResource(R.string.way_start_past, last, format.distance(progress.walkedMeters).text())
+        else -> stringResource(R.string.way_start_past, last, format.distance(progress.walkedMeters).unbrokenText())
     }
 }
 

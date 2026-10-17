@@ -44,7 +44,7 @@ import com.callbackdev.passo.core.designsystem.components.SettingsGroup
 import com.callbackdev.passo.core.designsystem.components.WayMapView
 import com.callbackdev.passo.core.designsystem.components.reveal
 import com.callbackdev.passo.core.designsystem.format.rememberMeasureFormatter
-import com.callbackdev.passo.core.designsystem.format.text
+import com.callbackdev.passo.core.designsystem.format.unbrokenText
 import com.callbackdev.passo.core.designsystem.format.wayDetail
 import com.callbackdev.passo.core.designsystem.format.wayHeadline
 import com.callbackdev.passo.core.designsystem.format.wayMapSpoken
@@ -265,7 +265,7 @@ private fun NotBegun(state: WaysUiState, walk: WalkView, format: MeasureFormatte
             Text(
                 text = stringResource(
                     R.string.ways_row_facts,
-                    format.distance(way.lengthMeters.toDouble()).text(),
+                    format.distance(way.lengthMeters.toDouble()).unbrokenText(),
                     wayStages(way),
                 ),
                 style = MaterialTheme.typography.titleLarge,
@@ -347,7 +347,7 @@ private fun Walked(
     val journey = view.journey
     val end = journey.endedEpochDay ?: state.today.toEpochDay()
     val days = (end - journey.startEpochDay + 1).toInt()
-    val length = format.distance(walk.way.lengthMeters.toDouble()).text()
+    val length = format.distance(walk.way.lengthMeters.toDouble()).unbrokenText()
     val detail = if (days <= 1) {
         stringResource(R.string.walk_walked_on, dayText(end, state.today), length)
     } else {

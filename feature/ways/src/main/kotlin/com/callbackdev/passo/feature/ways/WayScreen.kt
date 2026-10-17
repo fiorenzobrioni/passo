@@ -62,7 +62,7 @@ import com.callbackdev.passo.core.designsystem.components.stampSeed
 import com.callbackdev.passo.core.designsystem.format.rememberMeasureFormatter
 import com.callbackdev.passo.core.designsystem.format.shortDate
 import com.callbackdev.passo.core.designsystem.format.shortDateWithYear
-import com.callbackdev.passo.core.designsystem.format.text
+import com.callbackdev.passo.core.designsystem.format.unbrokenText
 import com.callbackdev.passo.core.designsystem.format.wayDetail
 import com.callbackdev.passo.core.designsystem.format.wayDuration
 import com.callbackdev.passo.core.designsystem.format.wayHeadline
@@ -365,7 +365,7 @@ private fun NotStarted(state: WaysUiState, way: Way, format: MeasureFormatter, o
             Text(
                 text = stringResource(
                     R.string.ways_row_facts,
-                    format.distance(way.lengthMeters.toDouble()).text(),
+                    format.distance(way.lengthMeters.toDouble()).unbrokenText(),
                     wayStages(way),
                 ),
                 style = MaterialTheme.typography.titleLarge,
@@ -411,7 +411,7 @@ private fun Standing(state: WaysUiState, view: JourneyView, format: MeasureForma
             pluralStringResource(
                 R.plurals.way_finished_detail,
                 days,
-                format.distance(progress.way.lengthMeters.toDouble()).text(),
+                format.distance(progress.way.lengthMeters.toDouble()).unbrokenText(),
                 days,
                 start,
                 dayText(end, state.today),
@@ -545,12 +545,12 @@ private fun StopRow(
 
         isNext && progress != null -> stringResource(
             R.string.way_stop_ahead,
-            format.distance(progress.metersTo(stop)).text(),
+            format.distance(progress.metersTo(stop)).unbrokenText(),
         )
 
         stop.distanceMeters == 0 -> stringResource(R.string.way_stop_start)
 
-        else -> stringResource(R.string.way_stop_mark, format.distance(stop.distanceMeters.toDouble()).text())
+        else -> stringResource(R.string.way_stop_mark, format.distance(stop.distanceMeters.toDouble()).unbrokenText())
     }
     Row(
         verticalAlignment = Alignment.Top,

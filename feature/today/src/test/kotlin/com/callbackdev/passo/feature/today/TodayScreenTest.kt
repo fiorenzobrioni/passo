@@ -179,7 +179,7 @@ class TodayScreenTest {
 
         compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(TodayTags.WAY))
         compose.onNodeWithText("Camino Portugués").assertIsDisplayed()
-        compose.onNodeWithText("Today, 4.39 km further along").assertIsDisplayed()
+        compose.onNodeWithText("Today, 4.39\u00A0km further along").assertIsDisplayed()
         compose.onNodeWithText("Past Ponte de Lima", substring = true).assertIsDisplayed()
         compose.onNodeWithText("Next stage:", substring = true).assertIsDisplayed()
         snapshot("today_way")
@@ -203,7 +203,7 @@ class TodayScreenTest {
 
         compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(TodayTags.WAY))
         compose.onNodeWithText("Arrived in Santiago de Compostela").assertIsDisplayed()
-        compose.onNodeWithText("The last 1.00 km today").assertIsDisplayed()
+        compose.onNodeWithText("The last 1.00\u00A0km today").assertIsDisplayed()
         compose.onNodeWithText("Next stage:", substring = true).assertDoesNotExist()
         snapshot("today_way_arrived")
     }

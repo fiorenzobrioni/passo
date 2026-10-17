@@ -984,7 +984,7 @@ class WaysScreenTest {
             actions = WayActions(walk = WalkActions(start = { started = it })),
         )
         compose.onNodeWithText("Past Houses of Parliament").assertIsDisplayed()
-        compose.onNodeWithText("Next: Westminster Bridge, 200 m", substring = true).assertExists()
+        compose.onNodeWithText("Next: Westminster Bridge, 200\u00A0m", substring = true).assertExists()
         snapshot("walk_under_way")
         compose.onNodeWithText("Continue from Houses of Parliament").performClick()
         assertThat(started).isFalse()
@@ -1028,7 +1028,7 @@ class WaysScreenTest {
             state = WaysSamples.state(walks = listOf(WaysSamples.london), live = null),
             actions = WayActions(walk = WalkActions(start = { started = it }, voice = { voice = it })),
         )
-        compose.onNodeWithText("9.32 km · 14 places").assertIsDisplayed()
+        compose.onNodeWithText("9.32\u00A0km · 14 places").assertIsDisplayed()
         compose.onNodeWithText("About 13,300 steps, in one outing or a few.").assertExists()
         // Nothing begun, nothing to leave.
         compose.onNodeWithTag(WaysTags.LEAVE).assertDoesNotExist()
@@ -1062,7 +1062,7 @@ class WaysScreenTest {
     fun `a walk walked to its end says when, and can be walked again`() {
         showWay(WayId.MILAN_DUOMO_NAVIGLI, journeyId = WaysSamples.milan.id)
         compose.onNodeWithText("The walk is done: Naviglio Grande.").assertIsDisplayed()
-        compose.onNodeWithText("Walked on Sep 12: 9.32 km.").assertExists()
+        compose.onNodeWithText("Walked on Sep 12: 9.32\u00A0km.").assertExists()
         compose.onNodeWithText("Walk it again").assertExists()
         snapshot("walk_finished")
     }
