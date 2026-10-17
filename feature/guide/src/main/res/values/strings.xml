@@ -92,7 +92,7 @@
 
     <!-- Widgets and the tile -->
     <string name="guide_ways_title">Ways</string>
-    <string name="guide_ways_p1">A way is a real long-distance route, as mapped on OpenStreetMap, walked from wherever you are. The distance of your days carries you along it. From Insights.</string>
+    <string name="guide_ways_p1">A way is a real long-distance route, as mapped on OpenStreetMap, walked from wherever you are. The distance of your days carries you along it. From Insights; while you walk one, the foot of Today says how far the day has carried you.</string>
     <string name="guide_ways_distance_title">Your distance, not your position</string>
     <string name="guide_ways_distance_body">Passo never knows where you are. Your place on the way is the estimated distance of every day since you started it, the same as in History: measuring your step makes it truer, and applying a new profile to past days moves it too. A way you finished stays finished.</string>
     <string name="guide_ways_start_title">A start in the past</string>

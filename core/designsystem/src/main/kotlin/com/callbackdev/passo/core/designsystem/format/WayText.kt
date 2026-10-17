@@ -50,12 +50,30 @@ fun wayDetail(progress: WayProgress, format: MeasureFormatter): String? {
         )
         return "$toEnd. $toNext"
     }
-    val toNext = stringResource(
-        R.string.way_next_stage,
-        stringResource(placeNameRes(next.key)),
-        format.distance(progress.metersTo(next)).text(),
-    )
-    return "$toEnd. $toNext"
+    return "$toEnd. ${wayNextStage(progress, format)}"
+}
+
+/**
+ * A way's next stage and how far it is, or its end once that is the next stage: the one line of
+ * [wayDetail] that Today's card keeps. Null once the way is finished.
+ */
+@Composable
+fun wayNextStage(progress: WayProgress, format: MeasureFormatter): String? {
+    val next = progress.nextStage ?: return null
+    val end = progress.way.stops.last()
+    return if (next == end) {
+        stringResource(
+            R.string.way_to_end,
+            format.distance(progress.metersLeft).text(),
+            stringResource(placeNameRes(end.key)),
+        )
+    } else {
+        stringResource(
+            R.string.way_next_stage,
+            stringResource(placeNameRes(next.key)),
+            format.distance(progress.metersTo(next)).text(),
+        )
+    }
 }
 
 /** "741 of 1,020 km". */

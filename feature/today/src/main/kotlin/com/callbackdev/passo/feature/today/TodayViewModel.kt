@@ -11,6 +11,7 @@ import com.callbackdev.passo.core.data.tracking.LiveSteps
 import com.callbackdev.passo.core.data.tracking.LiveToday
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.data.tracking.withPending
+import com.callbackdev.passo.core.data.ways.WayRepository
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.sessions.DayOutings
 import com.callbackdev.passo.core.domain.sessions.Outing
@@ -19,10 +20,13 @@ import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.today.TypicalDay
 import com.callbackdev.passo.core.domain.today.minuteOfDay
 import com.callbackdev.passo.core.domain.walks.WalkDetector
+import com.callbackdev.passo.core.domain.ways.WayToday
+import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.UserSettings
+import com.callbackdev.passo.core.model.WayJourney
 import com.callbackdev.passo.core.tracking.SessionControl
 import com.callbackdev.passo.core.tracking.StepTracking
 import com.callbackdev.passo.core.tracking.TrackingControl
@@ -39,6 +43,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
@@ -63,6 +68,7 @@ constructor(
     private val settingsRepository: SettingsRepository,
     private val control: TrackingControl,
     private val sessions: SessionRepository,
+    ways: WayRepository,
     liveSteps: LiveSteps,
     liveSession: LiveSession,
 ) : ViewModel() {
@@ -122,7 +128,22 @@ constructor(
         Outings(today, card)
     }
 
-    val state: StateFlow<TodayUiState?> = combine(inputs, preferences, outings, ::build)
+    /**
+     * The way under way (or arrived today) and its days since it began; today's distance is
+     * taken from the live count in [build], so the card moves with the ring.
+     */
+    private val way: Flow<WayDays?> = combine(day, ways.journeys) { date, all ->
+        WayToday.journeyOn(all, date.toEpochDay())
+    }.distinctUntilChanged()
+        .flatMapLatest { journey ->
+            if (journey == null) {
+                flowOf(null)
+            } else {
+                ways.observeDaysFrom(journey.startEpochDay).map { WayDays(journey, it) }
+            }
+        }
+
+    val state: StateFlow<TodayUiState?> = combine(inputs, preferences, outings, way, ::build)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), null)
 
     /** On every return to the screen: a permission can change in the system's settings. */
@@ -176,7 +197,7 @@ constructor(
         viewModelScope.launch { sessions.setSummarySeen(id) }
     }
 
-    private fun build(inputs: Inputs, prefs: Preferences, outings: Outings): TodayUiState {
+    private fun build(inputs: Inputs, prefs: Preferences, outings: Outings, way: WayDays?): TodayUiState {
         val zone = ZoneId.systemDefault()
         val date = inputs.moment.date
         val epochDay = date.toEpochDay()
@@ -219,6 +240,14 @@ constructor(
             outings = DayOutings.of(walks, outings.today, zone, System.currentTimeMillis())
                 .filterNot { it is Outing.Planned && it.session.live },
             startOutingButton = prefs.settings.startOutingButton,
+            way = way?.let {
+                WayToday.of(
+                    Ways.of(it.journey.way),
+                    it.journey,
+                    it.days + (epochDay to overview.metrics.distanceMeters),
+                    epochDay,
+                )
+            },
         )
     }
 
@@ -241,6 +270,8 @@ constructor(
         val live: LiveToday?,
         val typical: TypicalDay?,
     )
+
+    private data class WayDays(val journey: WayJourney, val days: Map<Long, Double>)
 
     private data class Outings(val today: List<Session>, val card: LiveSessionState?)
 

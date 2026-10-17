@@ -7,6 +7,7 @@ import com.callbackdev.passo.core.model.SessionTotals
 import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.model.WayJourney
 import com.callbackdev.passo.core.model.WayJourneyState
+import com.callbackdev.passo.core.model.WayKind
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.time.LocalDate
@@ -154,6 +155,57 @@ class WayProgressTest {
         assertThat(WayStarts.dayOf(WayStartChoice.CHOSEN, today, first, LocalDate.of(2027, 1, 1))).isEqualTo(today)
         assertThat(WayStarts.dayOf(WayStartChoice.CHOSEN, today, first, LocalDate.of(2026, 1, 1))).isEqualTo(first)
         assertThat(WayStarts.dayOf(WayStartChoice.FIRST_DAY, today, null, null)).isEqualTo(today)
+    }
+
+    @Test
+    fun `today's stretch is today's distance, from the first day of the journey`() {
+        val first = WayToday.of(way, journey(), mapOf(start - 1 to 900.0, start to 700.0), start)
+        assertThat(first.todayMeters).isEqualTo(700.0)
+        assertThat(first.beforeTodayMeters).isEqualTo(0.0)
+
+        val later = WayToday.of(way, journey(), mapOf(start to 1_200.0, start + 1 to 800.0), start + 1)
+        assertThat(later.progress.walkedMeters).isEqualTo(2_000.0)
+        assertThat(later.todayMeters).isEqualTo(800.0)
+        assertThat(later.beforeTodayMeters).isEqualTo(1_200.0)
+        assertThat(later.movedToday).isTrue()
+    }
+
+    @Test
+    fun `a day not yet walked, or barely, has moved nothing to tell`() {
+        val none = WayToday.of(way, journey(), mapOf(start to 1_200.0), start + 1)
+        assertThat(none.todayMeters).isEqualTo(0.0)
+        assertThat(none.movedToday).isFalse()
+        val barely = WayToday.of(way, journey(), mapOf(start to 1_200.0, start + 1 to 15.0), start + 1)
+        assertThat(barely.movedToday).isFalse()
+    }
+
+    @Test
+    fun `on the day of arrival today's stretch ends at the end of the way`() {
+        val distances = mapOf(start to 4_000.0, start + 1 to 5_000.0)
+        val active = WayToday.of(way, journey(), distances, start + 1)
+        assertThat(active.progress.finished).isTrue()
+        assertThat(active.todayMeters).isEqualTo(2_000.0)
+        // Marked finished by the notifier the same day: read the same.
+        val finished = WayToday.of(way, journey(WayJourneyState.FINISHED, ended = start + 1), distances, start + 1)
+        assertThat(finished.todayMeters).isEqualTo(2_000.0)
+        assertThat(finished.beforeTodayMeters).isEqualTo(4_000.0)
+    }
+
+    @Test
+    fun `Today shows the way under way, or one that arrived today, never a walk or a way left`() {
+        val today = start + 10
+        fun journey(id: Long, way: WayId, state: WayJourneyState, ended: Long? = null) =
+            WayJourney(id, way, start, 0, state, ended, toldMeters = 0)
+        val walk = journey(1, WayId.entries.first { it.kind == WayKind.WALK }, WayJourneyState.ACTIVE)
+        val active = journey(2, WayId.VIA_DEGLI_DEI, WayJourneyState.ACTIVE)
+        val arrivedToday = journey(3, WayId.CAMINO_FRANCES, WayJourneyState.FINISHED, today)
+        val arrivedBefore = journey(4, WayId.CAMINO_FRANCES, WayJourneyState.FINISHED, today - 1)
+        val left = journey(5, WayId.VIA_FRANCIGENA, WayJourneyState.LEFT, today)
+
+        assertThat(WayToday.journeyOn(listOf(walk, arrivedToday, active), today)).isEqualTo(active)
+        assertThat(WayToday.journeyOn(listOf(walk, left, arrivedToday), today)).isEqualTo(arrivedToday)
+        assertThat(WayToday.journeyOn(listOf(walk, left, arrivedBefore), today)).isNull()
+        assertThat(WayToday.journeyOn(listOf(arrivedToday), today + 1)).isNull()
     }
 
     @Test

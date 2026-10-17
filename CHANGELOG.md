@@ -23,7 +23,8 @@ All notable changes to Passo are documented here. The format follows
   cross, their lakes, parks and towns. The distance of your days
   carries you along, stage by stage, with a stamp for each and a notification
   when you reach one. Start today or in the past, and find yourself already on the way. No
-  location: only your distance. From Insights.
+  location: only your distance. From Insights; while you walk one, the foot of Today says how
+  far the day has carried you along it.
 - **City walks**: Milan, from the Duomo to the Navigli; Rome, from the Colosseum to St Peter's;
   Paris, from Place des Vosges to the Eiffel Tower; London, from Buckingham Palace to Tower
   Bridge; Madrid, from the Temple of Debod to the Puerta de Alcalá; Berlin, from the Wall to

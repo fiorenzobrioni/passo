@@ -3,6 +3,7 @@ package com.callbackdev.passo.core.domain.ways
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.WayJourney
 import com.callbackdev.passo.core.model.WayJourneyState
+import com.callbackdev.passo.core.model.WayKind
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import kotlin.math.ceil
@@ -91,6 +92,49 @@ class WayProgress(
                 reached = reached,
                 finishedEpochDay = finishedOn,
             )
+        }
+    }
+}
+
+/**
+ * The way on Today's page (PLANNING.md §15 «The way under way on Today»): where the reader
+ * stands, and how far today's own distance carried them along it: today's distance, cut where
+ * the way ends.
+ *
+ * @property todayMeters the stretch walked today, the last part of [WayProgress.walkedMeters].
+ */
+class WayToday(val progress: WayProgress, val todayMeters: Double) {
+    val beforeTodayMeters: Double get() = progress.walkedMeters - todayMeters
+
+    /** Today's stretch, once it is long enough to read as more than nothing in figures. */
+    val movedToday: Boolean get() = todayMeters >= MIN_TODAY_METERS
+
+    companion object {
+        /** Under 20 m the figure would read 0.00 km or 0.01 mi: no sentence for it. */
+        const val MIN_TODAY_METERS = 20.0
+
+        /**
+         * The journey Today shows: the way under way, or one that arrived today (the arrival is
+         * that day's news, until midnight). A city walk is walked in outings, which have their
+         * own card; a way left is the reader's choice, not news.
+         */
+        fun journeyOn(journeys: List<WayJourney>, today: Long): WayJourney? {
+            val ways = journeys.filter { it.way.kind == WayKind.WAY }
+            return ways.firstOrNull { it.state == WayJourneyState.ACTIVE }
+                ?: ways.firstOrNull { it.state == WayJourneyState.FINISHED && it.endedEpochDay == today }
+        }
+
+        fun of(way: Way, journey: WayJourney, distances: Map<Long, Double>, today: Long): WayToday {
+            val progress = WayProgress.of(way, journey, distances, today)
+            // Up to yesterday as if still under way: a finished journey read on an earlier day
+            // would otherwise be taken as arrived already.
+            val before = WayProgress.of(
+                way,
+                journey.copy(state = WayJourneyState.ACTIVE, endedEpochDay = null),
+                distances,
+                today - 1,
+            ).walkedMeters
+            return WayToday(progress, (progress.walkedMeters - before).coerceAtLeast(0.0))
         }
     }
 }

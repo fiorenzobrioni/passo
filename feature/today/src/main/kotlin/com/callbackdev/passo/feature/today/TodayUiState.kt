@@ -5,6 +5,7 @@ import com.callbackdev.passo.core.data.sessions.LiveSessionState
 import com.callbackdev.passo.core.domain.sessions.Outing
 import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.walks.Walk
+import com.callbackdev.passo.core.domain.ways.WayToday
 import com.callbackdev.passo.core.model.UnitPreference
 import java.time.LocalDate
 
@@ -32,6 +33,7 @@ enum class TrackingStatus {
  *   under the date (PLANNING.md §11 Phase 10).
  * @property outings today's walks and finished outings in one list, by start.
  * @property startOutingButton the reader keeps the way to the Outings page on Today (Settings).
+ * @property way the way under way, or arrived today, and today's stretch of it; null with none.
  */
 @Immutable
 data class TodayUiState(
@@ -47,4 +49,5 @@ data class TodayUiState(
     val session: LiveSessionState? = null,
     val outings: List<Outing> = emptyList(),
     val startOutingButton: Boolean = true,
+    val way: WayToday? = null,
 )

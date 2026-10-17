@@ -115,6 +115,7 @@ import com.callbackdev.passo.core.domain.sessions.Outing
 import com.callbackdev.passo.core.domain.today.CadenceBand
 import com.callbackdev.passo.core.domain.today.Headline
 import com.callbackdev.passo.core.domain.today.Pace
+import com.callbackdev.passo.core.model.WayId
 import java.time.LocalDate
 
 /** Today, with its state from [TodayViewModel] and the permission request it may need. */
@@ -123,6 +124,7 @@ fun TodayRoute(
     onOpenSettings: () -> Unit,
     onOpenSessions: () -> Unit = {},
     onOpenGuide: () -> Unit = {},
+    onOpenWay: (WayId, Long) -> Unit = { _, _ -> },
     bottomPadding: Dp = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
     viewModel: TodayViewModel = hiltViewModel(),
 ) {
@@ -168,6 +170,7 @@ fun TodayRoute(
             viewModel.firstDayNoteRead()
             onOpenGuide()
         },
+        onOpenWay = onOpenWay,
         sessionActions = { id ->
             SessionCardActions(
                 onPause = viewModel::pauseSession,
@@ -202,6 +205,7 @@ fun TodayScreen(
     bottomPadding: Dp = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
     onOpenSessions: () -> Unit = {},
     onOpenGuide: () -> Unit = {},
+    onOpenWay: (WayId, Long) -> Unit = { _, _ -> },
     sessionActions: (Long) -> SessionCardActions = { SessionCardActions() },
 ) {
     val format = rememberMeasureFormatter(state.units)
@@ -268,6 +272,8 @@ fun TodayScreen(
             }
             if (state.outings.isNotEmpty()) item(key = "walks") { Box(inColumn) { WalksCard(state.outings, format) } }
             item(key = "metrics") { Box(inColumn) { Metrics(state, format) } }
+            // Last: a way lasts weeks, and today's share of it is news only after the day's own.
+            state.way?.let { way -> item(key = "way") { Box(inColumn) { WayCard(way, format, onOpenWay) } } }
         }
     }
 }
@@ -885,4 +891,6 @@ object TodayTags {
     const val METRICS = "today_metrics"
     const val WALKS = "today_walks"
     const val START_OUTING = "today_start_outing"
+    const val WAY = "today_way"
+    const val WAY_BAR = "today_way_bar"
 }
