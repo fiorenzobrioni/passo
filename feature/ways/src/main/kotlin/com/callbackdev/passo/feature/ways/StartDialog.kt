@@ -59,13 +59,7 @@ internal fun StartDialog(
 ) {
     val today = state.today
     val first = state.firstCounted
-    val choices = buildList {
-        val seen = HashSet<LocalDate>()
-        for (choice in listOf(WayStartChoice.TODAY, WayStartChoice.THIS_YEAR, WayStartChoice.FIRST_DAY)) {
-            if (seen.add(WayStarts.dayOf(choice, today, first, null))) add(choice)
-        }
-        if (first != null && first.isBefore(today)) add(WayStartChoice.CHOSEN)
-    }
+    val choices = WayStarts.choices(today, first)
     var selected by rememberSaveable { mutableStateOf(WayStartChoice.TODAY) }
     var chosenDay by rememberSaveable { mutableStateOf<Long?>(null) }
     var picking by rememberSaveable { mutableStateOf(false) }

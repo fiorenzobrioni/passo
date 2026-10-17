@@ -172,6 +172,21 @@ object WayStarts {
         val earliest = firstCounted ?: today
         return day.coerceIn(minOf(earliest, today), today)
     }
+
+    /**
+     * The choices the start sheet offers: only those that mean different days, and 1 January
+     * only when it is the day it names. Before the first day counted it would start on that
+     * day instead, under a label that says otherwise: that day is offered as the first day.
+     */
+    fun choices(today: LocalDate, firstCounted: LocalDate?): List<WayStartChoice> = buildList {
+        val seen = HashSet<LocalDate>()
+        for (choice in listOf(WayStartChoice.TODAY, WayStartChoice.THIS_YEAR, WayStartChoice.FIRST_DAY)) {
+            val day = dayOf(choice, today, firstCounted, null)
+            if (choice == WayStartChoice.THIS_YEAR && day != today.withDayOfYear(1)) continue
+            if (seen.add(day)) add(choice)
+        }
+        if (firstCounted != null && firstCounted.isBefore(today)) add(WayStartChoice.CHOSEN)
+    }
 }
 
 /**

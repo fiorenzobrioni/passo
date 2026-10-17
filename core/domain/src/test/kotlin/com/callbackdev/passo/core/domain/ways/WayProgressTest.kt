@@ -157,6 +157,34 @@ class WayProgressTest {
     }
 
     @Test
+    fun `1 January is offered only when a start on it would begin on it`() {
+        val today = LocalDate.of(2026, 10, 1)
+        assertThat(WayStarts.choices(today, LocalDate.of(2026, 3, 15))).containsExactly(
+            WayStartChoice.TODAY,
+            WayStartChoice.FIRST_DAY,
+            WayStartChoice.CHOSEN,
+        ).inOrder()
+        assertThat(WayStarts.choices(today, LocalDate.of(2025, 6, 1))).containsExactly(
+            WayStartChoice.TODAY,
+            WayStartChoice.THIS_YEAR,
+            WayStartChoice.FIRST_DAY,
+            WayStartChoice.CHOSEN,
+        ).inOrder()
+        assertThat(WayStarts.choices(today, LocalDate.of(2026, 1, 1))).containsExactly(
+            WayStartChoice.TODAY,
+            WayStartChoice.THIS_YEAR,
+            WayStartChoice.CHOSEN,
+        ).inOrder()
+        assertThat(WayStarts.choices(today, today)).containsExactly(WayStartChoice.TODAY)
+        assertThat(WayStarts.choices(today, null)).containsExactly(WayStartChoice.TODAY)
+        assertThat(WayStarts.choices(LocalDate.of(2026, 1, 1), LocalDate.of(2025, 6, 1))).containsExactly(
+            WayStartChoice.TODAY,
+            WayStartChoice.FIRST_DAY,
+            WayStartChoice.CHOSEN,
+        ).inOrder()
+    }
+
+    @Test
     fun `the projection fits the frame and keeps its proportions`() {
         val frame = GeoBox(44.0, 11.0, 45.0, 12.0)
         val projection = WayProjection(frame, width = 400f, height = 400f)
