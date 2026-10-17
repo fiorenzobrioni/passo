@@ -17,20 +17,20 @@
         <item quantity="other">%1$d places</item>
     </plurals>
     <plurals name="way_duration_days">
-        <item quantity="one">about %1$d day</item>
-        <item quantity="other">about %1$d days</item>
+        <item quantity="one">about\u00A0%1$d\u00A0day</item>
+        <item quantity="other">about\u00A0%1$d\u00A0days</item>
     </plurals>
     <plurals name="way_duration_weeks">
-        <item quantity="one">about %1$d week</item>
-        <item quantity="other">about %1$d weeks</item>
+        <item quantity="one">about\u00A0%1$d\u00A0week</item>
+        <item quantity="other">about\u00A0%1$d\u00A0weeks</item>
     </plurals>
     <plurals name="way_duration_months">
-        <item quantity="one">about %1$d month</item>
-        <item quantity="other">about %1$d months</item>
+        <item quantity="one">about\u00A0%1$d\u00A0month</item>
+        <item quantity="other">about\u00A0%1$d\u00A0months</item>
     </plurals>
     <plurals name="way_duration_years">
-        <item quantity="one">about %1$d year</item>
-        <item quantity="other">about %1$d years</item>
+        <item quantity="one">about\u00A0%1$d\u00A0year</item>
+        <item quantity="other">about\u00A0%1$d\u00A0years</item>
     </plurals>
     <string name="way_map_spoken">Map: %1$s, %2$s.</string>
     <string name="way_map_spoken_walked">Map: %1$s. %2$s walked of %3$s, past %4$s.</string>

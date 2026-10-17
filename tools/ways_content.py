@@ -350,8 +350,10 @@ CAMINO_FRANCES = Way(
            "relation/6594547", "relation/11087864", "relation/7358257"],
     stops=[
         Stop("saint_jean", "Saint-Jean-Pied-de-Port", "Saint-Jean-Pied-de-Port", 43.1631, -1.2376,
-             note_en="Many pilgrims set out from here, at the foot of the Pyrenees.",
-             note_it="Molti pellegrini partono da qui, ai piedi dei Pirenei."),
+             note_en="Pied-de-Port means “foot of the pass”: the town lies below the pass over the Pyrenees to Roncesvalles.",
+             note_it="Pied-de-Port vuol dire «ai piedi del passo»: la città sta sotto il passo dei Pirenei che porta a Roncisvalle."),
+        # Source: Wikipedia, Saint-Jean-Pied-de-Port; Wikipedia (fr), Saint-Jean-Pied-de-Port. Replaces
+        # "Many pilgrims set out from here", a sentence about who walks the way (owner, 17 Oct 2026).
         Stop("roncesvalles", "Roncesvalles", "Roncisvalle", 43.0093, -1.3195,
              note_en="Here, in 778, Charlemagne's rearguard fell: the battle of the Song of Roland.",
              note_it="Qui, nel 778, cadde la retroguardia di Carlo Magno: la battaglia della Chanson de Roland."),

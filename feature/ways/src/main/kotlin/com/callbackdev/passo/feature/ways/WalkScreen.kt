@@ -37,6 +37,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.callbackdev.passo.core.designsystem.components.PlaceText
 import com.callbackdev.passo.core.designsystem.components.SegmentLabel
 import com.callbackdev.passo.core.designsystem.components.SessionCard
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
@@ -44,7 +45,7 @@ import com.callbackdev.passo.core.designsystem.components.SettingsGroup
 import com.callbackdev.passo.core.designsystem.components.WayMapView
 import com.callbackdev.passo.core.designsystem.components.reveal
 import com.callbackdev.passo.core.designsystem.format.rememberMeasureFormatter
-import com.callbackdev.passo.core.designsystem.format.text
+import com.callbackdev.passo.core.designsystem.format.unbrokenText
 import com.callbackdev.passo.core.designsystem.format.wayDetail
 import com.callbackdev.passo.core.designsystem.format.wayHeadline
 import com.callbackdev.passo.core.designsystem.format.wayMapSpoken
@@ -129,7 +130,7 @@ internal fun WalkPage(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item(key = "route") {
-            Text(
+            PlaceText(
                 text = stringResource(wayRouteRes(way.id)),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -265,7 +266,7 @@ private fun NotBegun(state: WaysUiState, walk: WalkView, format: MeasureFormatte
             Text(
                 text = stringResource(
                     R.string.ways_row_facts,
-                    format.distance(way.lengthMeters.toDouble()).text(),
+                    format.distance(way.lengthMeters.toDouble()).unbrokenText(),
                     wayStages(way),
                 ),
                 style = MaterialTheme.typography.titleLarge,
@@ -307,9 +308,9 @@ private fun UnderWay(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.semantics(mergeDescendants = true) { },
         ) {
-            Text(wayHeadline(progress), style = MaterialTheme.typography.titleLarge)
+            PlaceText(wayHeadline(progress), style = MaterialTheme.typography.titleLarge)
             wayDetail(progress, format)?.let {
-                Text(
+                PlaceText(
                     it,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -347,7 +348,7 @@ private fun Walked(
     val journey = view.journey
     val end = journey.endedEpochDay ?: state.today.toEpochDay()
     val days = (end - journey.startEpochDay + 1).toInt()
-    val length = format.distance(walk.way.lengthMeters.toDouble()).text()
+    val length = format.distance(walk.way.lengthMeters.toDouble()).unbrokenText()
     val detail = if (days <= 1) {
         stringResource(R.string.walk_walked_on, dayText(end, state.today), length)
     } else {
@@ -368,8 +369,8 @@ private fun Walked(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.semantics(mergeDescendants = true) { },
         ) {
-            Text(wayHeadline(view.progress), style = MaterialTheme.typography.titleLarge)
-            Text(
+            PlaceText(wayHeadline(view.progress), style = MaterialTheme.typography.titleLarge)
+            PlaceText(
                 detail,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

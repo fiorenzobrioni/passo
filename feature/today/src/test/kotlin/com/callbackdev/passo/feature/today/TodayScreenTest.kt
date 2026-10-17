@@ -20,6 +20,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
+import androidx.compose.ui.test.performScrollToKey
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -31,6 +32,7 @@ import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.today.DayMinute
 import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.today.TypicalDayCalculator
+import com.callbackdev.passo.core.domain.ways.WayToday
 import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.Session
@@ -43,6 +45,8 @@ import com.callbackdev.passo.core.model.SessionTotals
 import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.WayId
+import com.callbackdev.passo.core.model.WayJourney
+import com.callbackdev.passo.core.model.WayJourneyState
 import com.callbackdev.passo.core.testing.assertAccessible
 import com.callbackdev.passo.core.testing.walkPage
 import com.google.common.truth.Truth.assertThat
@@ -111,6 +115,7 @@ class TodayScreenTest {
         onAllow: () -> Unit = {},
         onOpenSessions: () -> Unit = {},
         onOpenGuide: () -> Unit = {},
+        onOpenWay: (WayId, Long) -> Unit = { _, _ -> },
         sessionActions: SessionCardActions = SessionCardActions(),
     ) {
         compose.setContent {
@@ -124,6 +129,7 @@ class TodayScreenTest {
                     onCelebrated = {},
                     onOpenSessions = onOpenSessions,
                     onOpenGuide = onOpenGuide,
+                    onOpenWay = onOpenWay,
                     sessionActions = { sessionActions },
                 )
             }
@@ -149,6 +155,76 @@ class TodayScreenTest {
             activeKcal = 33.0,
         ),
     )
+
+    /**
+     * The Camino Portugués begun 20 days ago, 4.2 km a day since (84 km, past Barcelos), and
+     * [today] metres today: by default the day's own distance, as the ViewModel takes it, which
+     * carries the reader past Ponte de Lima. [arrived] stands 1 km from Santiago since yesterday.
+     */
+    private fun way(today: Double = state().overview.metrics.distanceMeters, arrived: Boolean = false): WayToday {
+        val start = date.toEpochDay() - 20
+        val way = Ways.of(WayId.CAMINO_PORTUGUES)
+        val before = if (arrived) {
+            mapOf(start to (way.lengthMeters - 1_000).toDouble())
+        } else {
+            (start until date.toEpochDay()).associateWith { 4_200.0 }
+        }
+        val journey = WayJourney(7, WayId.CAMINO_PORTUGUES, start, 0, WayJourneyState.ACTIVE, null, 0)
+        return WayToday.of(way, journey, before + (date.toEpochDay() to today), date.toEpochDay())
+    }
+
+    @Test
+    fun `a way under way closes the page with what today did for it`() {
+        var opened: Pair<WayId, Long>? = null
+        show(state().copy(way = way()), onOpenWay = { id, journey -> opened = id to journey })
+
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(TodayTags.WAY))
+        compose.onNodeWithText("Camino Portugués").assertIsDisplayed()
+        compose.onNodeWithText("Today, 4.39\u00A0km further along").assertIsDisplayed()
+        compose.onNodeWithText("Past Ponte de Lima", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("Next stage:", substring = true).assertIsDisplayed()
+        snapshot("today_way")
+        compose.onNodeWithTag(TodayTags.WAY).performClick()
+        assertThat(opened).isEqualTo(WayId.CAMINO_PORTUGUES to 7L)
+    }
+
+    @Test
+    fun `in the dark the way's card reads as in the light`() {
+        show(state().copy(way = way()), dark = true)
+
+        // To the foot of the page: the card is the last item, the bar its last line.
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToKey("way")
+        compose.onNodeWithTag(TodayTags.WAY_BAR, useUnmergedTree = true).assertIsDisplayed()
+        snapshot("today_way_dark")
+    }
+
+    @Test
+    fun `before the day's first steps the way's card says where the reader stands`() {
+        show(state().copy(way = way(today = 0.0)))
+
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(TodayTags.WAY))
+        compose.onNodeWithText("further along", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("Past Barcelos").assertIsDisplayed()
+        compose.onNodeWithText("Next stage:", substring = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun `on the day of arrival the card says so, with today's last stretch`() {
+        show(state().copy(way = way(today = 3_000.0, arrived = true)))
+
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(TodayTags.WAY))
+        compose.onNodeWithText("Arrived in Santiago de Compostela").assertIsDisplayed()
+        compose.onNodeWithText("The last 1.00\u00A0km today").assertIsDisplayed()
+        compose.onNodeWithText("Next stage:", substring = true).assertDoesNotExist()
+        snapshot("today_way_arrived")
+    }
+
+    @Test
+    fun `with no way under way there is no card`() {
+        show(state())
+
+        compose.onNodeWithTag(TodayTags.WAY).assertDoesNotExist()
+    }
 
     @Test
     fun `counting, Today offers an outing`() {
@@ -382,7 +458,7 @@ class TodayScreenTest {
     @Test
     @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
     fun `at twice the text size on a small phone, the whole day still reads`() {
-        show(state(firstDay = true))
+        show(state(firstDay = true).copy(way = way()))
 
         compose.onNodeWithTag(TodayTags.HEADLINE).assertIsDisplayed()
         compose.walkPage(hasTestTag(TodayTags.LIST), "today_large_text")
@@ -414,7 +490,7 @@ class TodayScreenTest {
     @Test
     @Config(qualifiers = "en-rUS-w841dp-h701dp-xhdpi")
     fun `on an open foldable the day is a column in the middle, under a glow that spans the screen`() {
-        show(state())
+        show(state().copy(way = way()))
 
         // (841 - 640) / 2 on each side, then the cards' own 16dp margin.
         compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(TodayTags.METRICS))

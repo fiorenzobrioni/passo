@@ -109,4 +109,7 @@
     <string name="today_metric_cadence_vigorous">Passo molto svelto: intensità vigorosa</string>
     <string name="today_metric_spoken">%1$s: %2$s. %3$s</string>
     <string name="today_start_outing">Inizia un’uscita</string>
+    <!-- Il cammino in corso, in fondo a Oggi: che cosa ha fatto oggi per lui. -->
+    <string name="today_way_moved">Oggi %1$s più avanti</string>
+    <string name="today_way_last">Oggi gli ultimi %1$s</string>
 </resources>

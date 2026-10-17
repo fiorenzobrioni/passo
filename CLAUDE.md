@@ -144,7 +144,11 @@ being throttled, and splice new walks into `WayData.kt` without moving the other
 **The Ways' words** (owner, 16 Oct 2026; PLANNING.md §11 Phase 14): nothing that describes the
 Ways names a religion, calls a way devotional or the reader a pilgrim, in English or Italian, in
 the app, the README, VISION or the CHANGELOG. A place's own sentence may say what the place is (a
-cathedral, a temple, a shrine) and a fact of its history, as a guidebook does.
+cathedral, a temple, a shrine) and a fact of its history, as a guidebook does. It may also name
+the pilgrims who walked or walk by the place, «pellegrini» / "pilgrims", then or today («i
+pellegrini lasciano una pietra portata da casa», "a bridge built for pilgrims") (owner, 17 Oct
+2026). That is the one exception: never the reader, and no other religious word beyond the
+place's own sentence.
 
 **Accessibility and foldables** (`docs/adr/0012-foldables-and-accessibility.md`): a screen's
 tests call `assertAccessible()` on what they draw, and walk the page at twice the text size and

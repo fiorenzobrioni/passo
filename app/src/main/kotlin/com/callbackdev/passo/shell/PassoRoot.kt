@@ -131,6 +131,7 @@ private fun MainPages(openWays: Boolean, onWaysOpened: () -> Unit, openToday: Bo
                 onOpenSettings = { open(SettingsKey) },
                 onOpenSessions = { open(SessionsKey) },
                 onOpenGuide = { open(GuideKey) },
+                onOpenWay = { way, journey -> open(WayKey(way, journey)) },
                 bottomPadding = barHeight,
             )
         }

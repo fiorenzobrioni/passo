@@ -54,6 +54,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.callbackdev.passo.core.designsystem.components.GroupDivider
+import com.callbackdev.passo.core.designsystem.components.PlaceText
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
 import com.callbackdev.passo.core.designsystem.components.WayMapView
@@ -62,7 +63,7 @@ import com.callbackdev.passo.core.designsystem.components.stampSeed
 import com.callbackdev.passo.core.designsystem.format.rememberMeasureFormatter
 import com.callbackdev.passo.core.designsystem.format.shortDate
 import com.callbackdev.passo.core.designsystem.format.shortDateWithYear
-import com.callbackdev.passo.core.designsystem.format.text
+import com.callbackdev.passo.core.designsystem.format.unbrokenText
 import com.callbackdev.passo.core.designsystem.format.wayDetail
 import com.callbackdev.passo.core.designsystem.format.wayDuration
 import com.callbackdev.passo.core.designsystem.format.wayHeadline
@@ -256,7 +257,7 @@ private fun WayPage(state: WaysUiState, way: Way, view: JourneyView?, actions: W
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item(key = "route") {
-            Text(
+            PlaceText(
                 text = stringResource(wayRouteRes(way.id)),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -365,7 +366,7 @@ private fun NotStarted(state: WaysUiState, way: Way, format: MeasureFormatter, o
             Text(
                 text = stringResource(
                     R.string.ways_row_facts,
-                    format.distance(way.lengthMeters.toDouble()).text(),
+                    format.distance(way.lengthMeters.toDouble()).unbrokenText(),
                     wayStages(way),
                 ),
                 style = MaterialTheme.typography.titleLarge,
@@ -411,7 +412,7 @@ private fun Standing(state: WaysUiState, view: JourneyView, format: MeasureForma
             pluralStringResource(
                 R.plurals.way_finished_detail,
                 days,
-                format.distance(progress.way.lengthMeters.toDouble()).text(),
+                format.distance(progress.way.lengthMeters.toDouble()).unbrokenText(),
                 days,
                 start,
                 dayText(end, state.today),
@@ -435,9 +436,9 @@ private fun Standing(state: WaysUiState, view: JourneyView, format: MeasureForma
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.semantics(mergeDescendants = true) { },
         ) {
-            Text(wayHeadline(progress), style = MaterialTheme.typography.titleLarge)
+            PlaceText(wayHeadline(progress), style = MaterialTheme.typography.titleLarge)
             detail?.let {
-                Text(
+                PlaceText(
                     it,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -545,12 +546,12 @@ private fun StopRow(
 
         isNext && progress != null -> stringResource(
             R.string.way_stop_ahead,
-            format.distance(progress.metersTo(stop)).text(),
+            format.distance(progress.metersTo(stop)).unbrokenText(),
         )
 
         stop.distanceMeters == 0 -> stringResource(R.string.way_stop_start)
 
-        else -> stringResource(R.string.way_stop_mark, format.distance(stop.distanceMeters.toDouble()).text())
+        else -> stringResource(R.string.way_stop_mark, format.distance(stop.distanceMeters.toDouble()).unbrokenText())
     }
     Row(
         verticalAlignment = Alignment.Top,
@@ -572,7 +573,7 @@ private fun StopRow(
             )
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
+            PlaceText(
                 text = stringResource(placeNameRes(stop.key)),
                 style = if (stop.stage) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodyMedium,
             )

@@ -31,8 +31,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import com.callbackdev.passo.core.designsystem.components.PlaceText
 import com.callbackdev.passo.core.designsystem.format.rememberMeasureFormatter
-import com.callbackdev.passo.core.designsystem.format.text
+import com.callbackdev.passo.core.designsystem.format.unbrokenText
 import com.callbackdev.passo.core.designsystem.ways.placeNameRes
 import com.callbackdev.passo.core.domain.ways.Way
 import com.callbackdev.passo.core.domain.ways.WayProgress
@@ -59,13 +60,7 @@ internal fun StartDialog(
 ) {
     val today = state.today
     val first = state.firstCounted
-    val choices = buildList {
-        val seen = HashSet<LocalDate>()
-        for (choice in listOf(WayStartChoice.TODAY, WayStartChoice.THIS_YEAR, WayStartChoice.FIRST_DAY)) {
-            if (seen.add(WayStarts.dayOf(choice, today, first, null))) add(choice)
-        }
-        if (first != null && first.isBefore(today)) add(WayStartChoice.CHOSEN)
-    }
+    val choices = WayStarts.choices(today, first)
     var selected by rememberSaveable { mutableStateOf(WayStartChoice.TODAY) }
     var chosenDay by rememberSaveable { mutableStateOf<Long?>(null) }
     var picking by rememberSaveable { mutableStateOf(false) }
@@ -164,7 +159,7 @@ private fun ChoiceRow(label: String, preview: String?, selected: Boolean, onSele
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(label, style = MaterialTheme.typography.bodyLarge)
             if (preview != null) {
-                Text(
+                PlaceText(
                     preview,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -184,7 +179,7 @@ private fun preview(state: WaysUiState, way: Way, day: LocalDate): String {
     return when {
         progress.finished -> stringResource(R.string.way_start_arrived, last)
         progress.reached.size == 1 -> stringResource(R.string.way_start_at_start, last)
-        else -> stringResource(R.string.way_start_past, last, format.distance(progress.walkedMeters).text())
+        else -> stringResource(R.string.way_start_past, last, format.distance(progress.walkedMeters).unbrokenText())
     }
 }
 

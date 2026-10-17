@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
+import com.callbackdev.passo.core.designsystem.components.PlaceText
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
 import com.callbackdev.passo.core.designsystem.components.WayMapView
 import com.callbackdev.passo.core.designsystem.format.wayDetail
@@ -61,9 +62,9 @@ internal fun WayCard(progress: WayProgress, format: MeasureFormatter, onOpen: ()
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
                     )
-                    Text(wayHeadline(progress), style = MaterialTheme.typography.titleMedium)
+                    PlaceText(wayHeadline(progress), style = MaterialTheme.typography.titleMedium)
                     wayDetail(progress, format)?.let {
-                        Text(
+                        PlaceText(
                             it,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,

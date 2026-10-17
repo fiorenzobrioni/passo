@@ -99,4 +99,7 @@
     <string name="today_metric_cadence_vigorous">A very brisk pace: vigorous intensity</string>
     <string name="today_metric_spoken">%1$s: %2$s. %3$s</string>
     <string name="today_start_outing">Start an outing</string>
+    <!-- The way under way, at the foot of Today: what today did for it. -->
+    <string name="today_way_moved">Today, %1$s further along</string>
+    <string name="today_way_last">The last %1$s today</string>
 </resources>
