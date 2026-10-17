@@ -54,6 +54,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.callbackdev.passo.core.designsystem.components.GroupDivider
+import com.callbackdev.passo.core.designsystem.components.PlaceText
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
 import com.callbackdev.passo.core.designsystem.components.WayMapView
@@ -256,7 +257,7 @@ private fun WayPage(state: WaysUiState, way: Way, view: JourneyView?, actions: W
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item(key = "route") {
-            Text(
+            PlaceText(
                 text = stringResource(wayRouteRes(way.id)),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -435,9 +436,9 @@ private fun Standing(state: WaysUiState, view: JourneyView, format: MeasureForma
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.semantics(mergeDescendants = true) { },
         ) {
-            Text(wayHeadline(progress), style = MaterialTheme.typography.titleLarge)
+            PlaceText(wayHeadline(progress), style = MaterialTheme.typography.titleLarge)
             detail?.let {
-                Text(
+                PlaceText(
                     it,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -572,7 +573,7 @@ private fun StopRow(
             )
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
+            PlaceText(
                 text = stringResource(placeNameRes(stop.key)),
                 style = if (stop.stage) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodyMedium,
             )

@@ -364,6 +364,22 @@ class WaysScreenTest {
     }
 
     @Test
+    fun `a hyphenated name that fits its line keeps its hyphens whole`() {
+        showWay(WayId.CAMINO_FRANCES, state = WaysSamples.state(active = null))
+        compose.onNodeWithText("One of the Caminos de Santiago, from Saint-Jean-Pied-de-Port").assertIsDisplayed()
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
+    fun `a hyphenated name wider than its line breaks at a hyphen, never inside a word`() {
+        showWay(WayId.CAMINO_FRANCES, state = WaysSamples.state(active = null))
+        compose.onNodeWithText(
+            "from Saint-\u200BJean-\u200BPied-\u200Bde-\u200BPort",
+            substring = true,
+        ).assertIsDisplayed()
+    }
+
+    @Test
     @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
     fun `at twice the text size on a small phone, every way still reads`() {
         showWay(WayId.CAMINO_FRANCES, state = WaysSamples.state(active = null))

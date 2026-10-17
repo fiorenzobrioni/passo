@@ -25,6 +25,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.callbackdev.passo.core.designsystem.components.PlaceText
 import com.callbackdev.passo.core.designsystem.components.WayMapView
 import com.callbackdev.passo.core.designsystem.format.unbrokenText
 import com.callbackdev.passo.core.designsystem.format.wayHeadline
@@ -89,9 +90,9 @@ internal fun WayCard(way: WayToday, format: MeasureFormatter, onOpen: (WayId, Lo
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
                     )
-                    Text(sentence, style = MaterialTheme.typography.titleMedium)
+                    PlaceText(sentence, style = MaterialTheme.typography.titleMedium)
                     detail?.let {
-                        Text(
+                        PlaceText(
                             it,
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,

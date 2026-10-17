@@ -37,6 +37,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import com.callbackdev.passo.core.designsystem.components.PlaceText
 import com.callbackdev.passo.core.designsystem.components.SegmentLabel
 import com.callbackdev.passo.core.designsystem.components.SessionCard
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
@@ -129,7 +130,7 @@ internal fun WalkPage(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item(key = "route") {
-            Text(
+            PlaceText(
                 text = stringResource(wayRouteRes(way.id)),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -307,9 +308,9 @@ private fun UnderWay(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.semantics(mergeDescendants = true) { },
         ) {
-            Text(wayHeadline(progress), style = MaterialTheme.typography.titleLarge)
+            PlaceText(wayHeadline(progress), style = MaterialTheme.typography.titleLarge)
             wayDetail(progress, format)?.let {
-                Text(
+                PlaceText(
                     it,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -368,8 +369,8 @@ private fun Walked(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier.semantics(mergeDescendants = true) { },
         ) {
-            Text(wayHeadline(view.progress), style = MaterialTheme.typography.titleLarge)
-            Text(
+            PlaceText(wayHeadline(view.progress), style = MaterialTheme.typography.titleLarge)
+            PlaceText(
                 detail,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

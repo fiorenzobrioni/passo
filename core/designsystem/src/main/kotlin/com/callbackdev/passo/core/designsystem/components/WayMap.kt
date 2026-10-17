@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -98,7 +99,19 @@ fun WayMapView(
         ink = scheme.onSurface,
     )
     val measurer = rememberTextMeasurer()
-    val labelStyle = MaterialTheme.typography.labelMedium
+    // The map is a picture of places: its names grow with the text size up to half again, past
+    // which they would cover the way they name. The stages under the map, and the map's own
+    // description, carry them at any size.
+    val labelStyle = MaterialTheme.typography.labelMedium.let { style ->
+        with(LocalDensity.current) {
+            val most = style.fontSize.value * MAX_LABEL_SCALE
+            if (style.fontSize.toPx() <= most.dp.toPx()) {
+                style
+            } else {
+                style.copy(fontSize = most.dp.toSp(), lineHeight = (style.lineHeight.value * MAX_LABEL_SCALE).dp.toSp())
+            }
+        }
+    }
     val resources = LocalResources.current
     val names = remember(way.id, resources) { way.stops.map { resources.getString(placeNameRes(it.key)) } }
     var touched by remember(way.id) { mutableStateOf<Int?>(null) }
@@ -307,25 +320,34 @@ private fun WayLine.toPath(projection: WayProjection, upTo: Double?): Path = Pat
 /**
  * The locator's box: in the corner the way's line leaves most free, away from the start and
  * clear of the ends' names ([names], where [placeLabels] puts them), a third of the map's width at
- * most. "Free" is measured on the line itself ([along], points at even steps along it), then on
+ * most. It never covers a name: at a large text size it is drawn smaller, or left out (null). "Free" is measured on the line itself ([along], points at even steps along it), then on
  * its bounds: a way that runs across the whole map (the French Way) has no corner clear of its
  * bounds, yet one its line does not pass through.
  */
-private fun Density.locatorBox(size: Size, start: Offset, along: List<Offset>, frame: GeoBox, names: List<Rect>): Rect {
-    val width = (size.width * LOCATOR_SHARE).coerceAtMost(LOCATOR_MAX.toPx())
-    val height = width * frame.aspect.toFloat()
+internal fun Density.locatorBox(
+    size: Size,
+    start: Offset,
+    along: List<Offset>,
+    frame: GeoBox,
+    names: List<Rect>,
+): Rect? {
+    val full = (size.width * LOCATOR_SHARE).coerceAtMost(LOCATOR_MAX.toPx())
     val margin = 8.dp.toPx()
-    val corners = listOf(
-        Rect(Offset(size.width - width - margin, margin), Size(width, height)),
-        Rect(Offset(margin, size.height - height - margin), Size(width, height)),
-        Rect(Offset(margin, margin), Size(width, height)),
-        Rect(Offset(size.width - width - margin, size.height - height - margin), Size(width, height)),
-    )
+    val corners = LOCATOR_SIZES.asSequence().map { share ->
+        val width = full * share
+        val height = width * frame.aspect.toFloat()
+        listOf(
+            Rect(Offset(size.width - width - margin, margin), Size(width, height)),
+            Rect(Offset(margin, size.height - height - margin), Size(width, height)),
+            Rect(Offset(margin, margin), Size(width, height)),
+            Rect(Offset(size.width - width - margin, size.height - height - margin), Size(width, height)),
+        ).filter { corner -> names.none { it.overlaps(corner) } }
+    }.firstOrNull { it.isNotEmpty() } ?: return null
     val bounds = Rect(along.minOf { it.x }, along.minOf { it.y }, along.maxOf { it.x }, along.maxOf { it.y })
     val room = LOCATOR_CLEARANCE.toPx()
     return corners.minWith(
         compareBy<Rect> { corner ->
-            corner.inflate(LABEL_ROOM.toPx()).contains(start) || names.any { it.overlaps(corner) }
+            corner.inflate(LABEL_ROOM.toPx()).contains(start)
         }.thenBy { corner ->
             corner.inflate(room).let { clear -> along.count { clear.contains(it) } }
         }.thenBy { corner ->
@@ -408,6 +430,12 @@ private const val HALO_ALPHA = 0.22f
 private const val PILL_ALPHA = 0.88f
 private const val LOCATOR_SHARE = 0.3f
 private val LOCATOR_MAX = 120.dp
+
+/** The locator's sizes, as a share of its full size, tried in turn before it is left out. */
+private val LOCATOR_SIZES = listOf(1f, 0.75f)
+
+/** How far the map's names grow with the text size. */
+private const val MAX_LABEL_SCALE = 1.5f
 private val LOCATOR_DOT = 3.5.dp
 private val LOCATOR_CLEARANCE = 6.dp
 private const val LOCATOR_SAMPLES = 200

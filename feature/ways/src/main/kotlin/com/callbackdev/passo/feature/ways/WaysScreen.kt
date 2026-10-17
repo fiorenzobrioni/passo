@@ -39,6 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.callbackdev.passo.core.designsystem.components.CityMark
 import com.callbackdev.passo.core.designsystem.components.ContinentMapView
 import com.callbackdev.passo.core.designsystem.components.GroupDivider
+import com.callbackdev.passo.core.designsystem.components.PlaceText
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
 import com.callbackdev.passo.core.designsystem.components.WayMapView
 import com.callbackdev.passo.core.designsystem.format.rememberMeasureFormatter
@@ -232,9 +233,9 @@ private fun ActiveCard(view: JourneyView, format: MeasureFormatter, onOpen: () -
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.primary,
                 )
-                Text(wayHeadline(progress), style = MaterialTheme.typography.titleLarge)
+                PlaceText(wayHeadline(progress), style = MaterialTheme.typography.titleLarge)
                 wayDetail(progress, format)?.let {
-                    Text(
+                    PlaceText(
                         it,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -287,7 +288,7 @@ private fun WayRow(way: Way, pace: Double?, format: MeasureFormatter, onClick: (
         )
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(stringResource(wayNameRes(way.id)), style = MaterialTheme.typography.bodyLarge)
-            Text(
+            PlaceText(
                 stringResource(wayRouteRes(way.id)),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -358,7 +359,7 @@ internal fun WalkRow(walk: WalkView, state: WaysUiState, format: MeasureFormatte
         )
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(stringResource(wayNameRes(way.id)), style = MaterialTheme.typography.bodyLarge)
-            Text(
+            PlaceText(
                 stringResource(wayRouteRes(way.id)),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

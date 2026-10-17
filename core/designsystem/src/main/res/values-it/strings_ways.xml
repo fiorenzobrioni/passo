@@ -19,24 +19,24 @@
         <item quantity="other">%1$d luoghi</item>
     </plurals>
     <plurals name="way_duration_days">
-        <item quantity="one">circa %1$d giorno</item>
-        <item quantity="many">circa %1$d giorni</item>
-        <item quantity="other">circa %1$d giorni</item>
+        <item quantity="one">circa\u00A0%1$d\u00A0giorno</item>
+        <item quantity="many">circa\u00A0%1$d\u00A0giorni</item>
+        <item quantity="other">circa\u00A0%1$d\u00A0giorni</item>
     </plurals>
     <plurals name="way_duration_weeks">
-        <item quantity="one">circa %1$d settimana</item>
-        <item quantity="many">circa %1$d settimane</item>
-        <item quantity="other">circa %1$d settimane</item>
+        <item quantity="one">circa\u00A0%1$d\u00A0settimana</item>
+        <item quantity="many">circa\u00A0%1$d\u00A0settimane</item>
+        <item quantity="other">circa\u00A0%1$d\u00A0settimane</item>
     </plurals>
     <plurals name="way_duration_months">
-        <item quantity="one">circa %1$d mese</item>
-        <item quantity="many">circa %1$d mesi</item>
-        <item quantity="other">circa %1$d mesi</item>
+        <item quantity="one">circa\u00A0%1$d\u00A0mese</item>
+        <item quantity="many">circa\u00A0%1$d\u00A0mesi</item>
+        <item quantity="other">circa\u00A0%1$d\u00A0mesi</item>
     </plurals>
     <plurals name="way_duration_years">
-        <item quantity="one">circa %1$d anno</item>
-        <item quantity="many">circa %1$d anni</item>
-        <item quantity="other">circa %1$d anni</item>
+        <item quantity="one">circa\u00A0%1$d\u00A0anno</item>
+        <item quantity="many">circa\u00A0%1$d\u00A0anni</item>
+        <item quantity="other">circa\u00A0%1$d\u00A0anni</item>
     </plurals>
     <string name="way_map_spoken">Mappa: %1$s, %2$s.</string>
     <string name="way_map_spoken_walked">Mappa: %1$s. %2$s percorsi su %3$s, oltre %4$s.</string>
