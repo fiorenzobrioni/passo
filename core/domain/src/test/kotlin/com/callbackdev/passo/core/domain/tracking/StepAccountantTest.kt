@@ -355,6 +355,37 @@ class StepAccountantTest {
     }
 
     @Test
+    fun `the hour the clocks repeat keeps each minute it was walked`() {
+        // Rome, 25 October 2026: 03:00 CEST becomes 02:00 CET. A walk from the first 02:55 to
+        // the second 02:05 is ten minutes long, not fifty minutes back in time.
+        val last = wallOf("2026-10-25T02:55:00")
+        val at = last + 10 * MINUTE
+        val night = Device(bootWall = wallOf("2026-10-24T20:00:00"))
+
+        val result = StepAccountant.account(night.stateAt(0, last), night.sample(1_000, at), night.snapshotAt(at))
+
+        assertThat(result.increments.sumOf { it.steps }).isEqualTo(1_000)
+        assertThat(result.increments.map { it.localEpochDay }.toSet()).containsExactly(dayOf("2026-10-25T00:00:00"))
+        assertThat(result.increments.first().epochMinute).isAtLeast(minuteOf(last))
+        assertThat(result.increments.last().epochMinute).isLessThan(minuteOf(at))
+        assertThat(result.increments.map { it.epochMinute }).isInStrictOrder()
+    }
+
+    @Test
+    fun `the hour the clocks skip is not walked`() {
+        // Rome, 28 March 2027: 02:00 CET becomes 03:00 CEST. 01:55 to 03:05 is ten minutes.
+        val last = wallOf("2027-03-28T01:55:00")
+        val at = wallOf("2027-03-28T03:05:00")
+        val night = Device(bootWall = wallOf("2027-03-27T20:00:00"))
+
+        val result = StepAccountant.account(night.stateAt(0, last), night.sample(1_000, at), night.snapshotAt(at))
+
+        assertThat(at - last).isEqualTo(10 * MINUTE)
+        assertThat(result.increments.sumOf { it.steps }).isEqualTo(1_000)
+        assertThat(result.increments.size).isAtMost(11)
+    }
+
+    @Test
     fun `setting the clock back does not cap real steps`() {
         val last = wallOf("2026-09-24T10:00:00")
         val state = device.stateAt(1_000, last)

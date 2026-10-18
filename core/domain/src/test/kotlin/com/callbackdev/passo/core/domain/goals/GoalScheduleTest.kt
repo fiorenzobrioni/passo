@@ -3,6 +3,7 @@ package com.callbackdev.passo.core.domain.goals
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.time.DayOfWeek
+import java.time.Duration
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -54,6 +55,28 @@ class GoalScheduleTest {
         // 29 March 2026, Rome: 02:00 becomes 03:00.
         val next = GoalSchedule.nextReminder(at("2026-03-28T23:00"), rome, LocalTime.of(2, 30))
         assertThat(local(next)).isEqualTo(LocalDateTime.parse("2026-03-29T03:30"))
+    }
+
+    @Test
+    fun `a time the clocks repeat is the first of the two, and comes once`() {
+        // 25 October 2026, Rome: 03:00 CEST becomes 02:00 CET, so 02:30 happens twice.
+        val half = LocalTime.of(2, 30)
+        val first = GoalSchedule.nextReminder(at("2026-10-24T23:00"), rome, half)
+        assertThat(first).isEqualTo(Instant.parse("2026-10-25T00:30:00Z"))
+        // Armed again as it fires: the second 02:30 is not a second reminder, tomorrow's is next.
+        val next = GoalSchedule.nextReminder(first.plusSeconds(1), rome, half)
+        assertThat(local(next)).isEqualTo(LocalDateTime.parse("2026-10-26T02:30"))
+    }
+
+    @Test
+    fun `the next reminder is the same local time the day after the clocks change, not 24 hours on`() {
+        val after = GoalSchedule.nextReminder(at("2026-10-24T20:00"), rome, eight)
+        assertThat(local(after)).isEqualTo(LocalDateTime.parse("2026-10-25T20:00"))
+        assertThat(Duration.between(at("2026-10-24T20:00"), after)).isEqualTo(Duration.ofHours(25))
+        val newYork = ZoneId.of("America/New_York")
+        val spring = GoalSchedule.nextReminder(at("2027-03-13T20:00", newYork), newYork, eight)
+        assertThat(local(spring, newYork)).isEqualTo(LocalDateTime.parse("2027-03-14T20:00"))
+        assertThat(Duration.between(at("2027-03-13T20:00", newYork), spring)).isEqualTo(Duration.ofHours(23))
     }
 
     @Test
