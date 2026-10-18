@@ -10,16 +10,15 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -27,12 +26,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
@@ -50,15 +48,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -117,9 +113,11 @@ class OnboardingActions(
 )
 
 /**
- * The first run, one page at a time: a thin progress bar on top, the page, and one obvious
- * button at the bottom. Pages slide the way the app's pages do, a
- * fade under reduced motion; system back goes back a page.
+ * The first run, one page at a time (the family's frame, owner, 18 Oct 2026): the page's words
+ * centered in the room above the buttons, and the buttons at the bottom, in the same place on every
+ * page. No picture and no progress bar; a screen reader hears where the run stands on each page's
+ * heading. Pages slide the way the app's pages do, a fade under reduced motion; the way back is
+ * the system's.
  */
 @Composable
 fun OnboardingScreen(state: OnboardingState, actions: OnboardingActions, modifier: Modifier = Modifier) {
@@ -132,7 +130,6 @@ fun OnboardingScreen(state: OnboardingState, actions: OnboardingActions, modifie
 
     Surface(modifier = modifier.fillMaxSize().testTag(OnboardingTags.ROOT)) {
         Column(modifier = Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
-            if (state.step != OnboardingStep.WELCOME) Box(Modifier.padding(gutter)) { Progress(index, order.size) }
             AnimatedContent(
                 targetState = state.step,
                 transitionSpec = {
@@ -152,20 +149,28 @@ fun OnboardingScreen(state: OnboardingState, actions: OnboardingActions, modifie
                 label = "onboarding",
                 modifier = Modifier.weight(1f),
             ) { step ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(gutter)
-                        .padding(horizontal = 24.dp, vertical = 16.dp)
-                        .testTag(OnboardingTags.PAGE),
-                ) {
-                    when (step) {
-                        OnboardingStep.WELCOME -> WelcomePage()
-                        OnboardingStep.PROFILE -> ProfilePage(state, actions)
-                        OnboardingStep.GOAL -> GoalPage(state, actions)
-                        OnboardingStep.PERMISSIONS -> PermissionsPage(state)
-                        OnboardingStep.BATTERY -> BatteryPage(state)
+                // Centered in the room above the buttons; a page taller than the room scrolls from its top.
+                BoxWithConstraints(Modifier.fillMaxSize()) {
+                    val room = maxHeight
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                            .heightIn(min = room)
+                            .padding(gutter)
+                            .padding(horizontal = 24.dp, vertical = 24.dp)
+                            .testTag(OnboardingTags.PAGE),
+                    ) {
+                        val where = stringResource(R.string.onboarding_progress, order.indexOf(step) + 1, order.size)
+                        when (step) {
+                            OnboardingStep.WELCOME -> WelcomePage(where)
+                            OnboardingStep.PROFILE -> ProfilePage(state, actions, where)
+                            OnboardingStep.GOAL -> GoalPage(state, actions, where)
+                            OnboardingStep.PERMISSIONS -> PermissionsPage(state, where)
+                            OnboardingStep.BATTERY -> BatteryPage(state, where)
+                        }
                     }
                 }
             }
@@ -175,38 +180,11 @@ fun OnboardingScreen(state: OnboardingState, actions: OnboardingActions, modifie
 }
 
 @Composable
-private fun Progress(index: Int, count: Int) {
-    val reduced = reducedMotion()
-    val fraction by animateFloatAsState(
-        targetValue = (index + 1f) / count,
-        animationSpec = if (reduced) tween(100) else tween(400, easing = FastOutSlowInEasing),
-        label = "progress",
-    )
-    val description = stringResource(R.string.onboarding_progress, index + 1, count)
-    Box(
-        modifier = Modifier
-            .padding(horizontal = 24.dp, vertical = 12.dp)
-            .fillMaxWidth()
-            .height(4.dp)
-            .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-            .semantics { contentDescription = description },
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(fraction)
-                .height(4.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary),
-        )
-    }
-}
-
-@Composable
 private fun BottomBar(state: OnboardingState, last: Boolean, actions: OnboardingActions) {
+    val context = LocalContext.current
     Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         val primaryLabel = when {
@@ -214,40 +192,47 @@ private fun BottomBar(state: OnboardingState, last: Boolean, actions: Onboarding
             last -> stringResource(R.string.onboarding_done)
             else -> stringResource(R.string.onboarding_continue)
         }
-        // On the permissions page the button asks; the page moves on once it is answered.
+        // On the permissions page the button asks; the page moves on once it is granted.
         if (state.step != OnboardingStep.PERMISSIONS || state.activityGranted) {
             Button(
                 onClick = if (last) actions.finish else actions.next,
-                modifier = Modifier.fillMaxWidth().height(52.dp).testTag(OnboardingTags.PRIMARY),
+                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag(OnboardingTags.PRIMARY),
             ) {
                 Text(primaryLabel)
             }
         } else {
             PermissionButton(actions)
         }
-        Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-            if (state.step != OnboardingStep.WELCOME) {
-                TextButton(onClick = actions.back) { Text(stringResource(R.string.onboarding_back)) }
-            } else {
-                Spacer(Modifier.height(48.dp))
-            }
-            when {
-                state.step == OnboardingStep.PROFILE -> TextButton(
-                    onClick = actions.skipProfile,
-                    modifier = Modifier.testTag(OnboardingTags.SKIP),
-                ) {
-                    Text(stringResource(R.string.onboarding_skip))
-                }
+        when {
+            state.step == OnboardingStep.PROFILE -> QuietButton(
+                text = stringResource(R.string.onboarding_skip),
+                onClick = actions.skipProfile,
+                modifier = Modifier.testTag(OnboardingTags.SKIP),
+            )
 
-                state.step == OnboardingStep.PERMISSIONS && !state.activityGranted -> TextButton(
-                    onClick = if (last) actions.finish else actions.next,
-                ) {
-                    Text(stringResource(R.string.onboarding_permissions_later))
-                }
+            state.step == OnboardingStep.PERMISSIONS && !state.activityGranted -> QuietButton(
+                text = stringResource(R.string.onboarding_permissions_later),
+                onClick = if (last) actions.finish else actions.next,
+            )
+
+            // The tip's own road, under the button that ends the run: an alternative, not a step.
+            state.step == OnboardingStep.BATTERY -> OutlinedButton(
+                onClick = { context.startActivity(appDetails(context.packageName)) },
+                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp),
+            ) {
+                Text(stringResource(R.string.onboarding_battery_settings))
             }
         }
     }
 }
+
+@Composable
+private fun QuietButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+    TextButton(onClick = onClick, modifier = modifier.heightIn(min = 48.dp)) { Text(text) }
+}
+
+private fun appDetails(packageName: String) =
+    Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageName, null))
 
 @Composable
 private fun PermissionButton(actions: OnboardingActions) {
@@ -262,19 +247,14 @@ private fun PermissionButton(actions: OnboardingActions) {
     Button(
         onClick = {
             if (refused) {
-                context.startActivity(
-                    Intent(
-                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                        Uri.fromParts("package", context.packageName, null),
-                    ),
-                )
+                context.startActivity(appDetails(context.packageName))
             } else {
                 request.launch(
                     arrayOf(Manifest.permission.ACTIVITY_RECOGNITION, Manifest.permission.POST_NOTIFICATIONS),
                 )
             }
         },
-        modifier = Modifier.fillMaxWidth().height(52.dp).testTag(OnboardingTags.PRIMARY),
+        modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag(OnboardingTags.PRIMARY),
     ) {
         Text(
             stringResource(
@@ -284,90 +264,80 @@ private fun PermissionButton(actions: OnboardingActions) {
     }
 }
 
+/** A page's heading, announced with where the run stands ([where]). */
+private fun Modifier.stepHeading(where: String): Modifier = semantics {
+    heading()
+    stateDescription = where
+}
+
 @Composable
-private fun PageTitle(text: String) {
+private fun PageTitle(text: String, where: String) {
     Text(
         text = text,
-        style = MaterialTheme.typography.headlineSmall,
-        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp).semantics { heading() },
+        style = MaterialTheme.typography.headlineMedium,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.stepHeading(where),
     )
 }
 
 @Composable
 private fun PageBody(text: String) {
-    Text(text = text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Spacer(Modifier.height(12.dp))
+    Text(
+        text = text,
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+    )
+}
+
+/** The name and its sentence, then the three promises in words only: no picture, no badges. */
+@Composable
+private fun WelcomePage(where: String) {
+    Text(
+        text = stringResource(R.string.onboarding_app_name),
+        style = MaterialTheme.typography.displaySmall,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.stepHeading(where),
+    )
+    Spacer(Modifier.height(8.dp))
+    Text(
+        text = stringResource(R.string.onboarding_welcome_tagline),
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+    )
+    Spacer(Modifier.height(36.dp))
+    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        Promise(R.string.onboarding_welcome_counts_title, R.string.onboarding_welcome_counts_body)
+        Promise(R.string.onboarding_welcome_private_title, R.string.onboarding_welcome_private_body)
+        Promise(R.string.onboarding_welcome_battery_title, R.string.onboarding_welcome_battery_body)
+    }
 }
 
 @Composable
-private fun WelcomePage() {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-        Spacer(Modifier.height(40.dp))
-        Surface(
-            color = MaterialTheme.colorScheme.primaryContainer,
-            shape = CircleShape,
-            modifier = Modifier.size(112.dp),
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    PassoIcons.Steps,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.size(56.dp),
-                )
-            }
-        }
-        Spacer(Modifier.height(24.dp))
+private fun Promise(title: Int, body: Int) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text(stringResource(title), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
         Text(
-            text = stringResource(R.string.onboarding_app_name),
-            style = MaterialTheme.typography.displaySmall,
-            modifier = Modifier.semantics { heading() },
-        )
-        Spacer(Modifier.height(8.dp))
-        Text(
-            text = stringResource(R.string.onboarding_welcome_tagline),
-            style = MaterialTheme.typography.titleMedium,
+            stringResource(body),
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
-        Spacer(Modifier.height(36.dp))
-        Promise(PassoIcons.Steps, R.string.onboarding_welcome_counts_title, R.string.onboarding_welcome_counts_body)
-        Promise(PassoIcons.Shield, R.string.onboarding_welcome_private_title, R.string.onboarding_welcome_private_body)
-        Promise(PassoIcons.Battery, R.string.onboarding_welcome_battery_title, R.string.onboarding_welcome_battery_body)
     }
 }
 
 @Composable
-private fun Promise(icon: ImageVector, title: Int, body: Int) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
-    ) {
-        Surface(
-            color = MaterialTheme.colorScheme.secondaryContainer,
-            shape = CircleShape,
-            modifier = Modifier.size(40.dp),
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
-            }
-        }
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp), modifier = Modifier.weight(1f)) {
-            Text(stringResource(title), style = MaterialTheme.typography.titleMedium)
-            Text(
-                stringResource(body),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
-
-@Composable
-private fun ProfilePage(state: OnboardingState, actions: OnboardingActions) {
+private fun ProfilePage(state: OnboardingState, actions: OnboardingActions, where: String) {
     val format = rememberMeasureFormatter(state.units)
-    PageTitle(stringResource(R.string.onboarding_profile_title))
+    PageTitle(stringResource(R.string.onboarding_profile_title), where)
     PageBody(stringResource(R.string.onboarding_profile_body))
-    Spacer(Modifier.height(20.dp))
+    Spacer(Modifier.height(24.dp))
     val stepLength = StepLengths.estimatedWalkingStepLength(state.heightMeters, state.sex)
     PickerCard(
         title = stringResource(R.string.onboarding_height),
@@ -387,8 +357,15 @@ private fun ProfilePage(state: OnboardingState, actions: OnboardingActions) {
         onChange = actions.setWeight,
     )
     Spacer(Modifier.height(16.dp))
-    Text(stringResource(R.string.onboarding_sex), style = MaterialTheme.typography.titleSmall)
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
+    Text(
+        stringResource(R.string.onboarding_sex),
+        style = MaterialTheme.typography.titleSmall,
+        textAlign = TextAlign.Center,
+    )
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+    ) {
         SexChip(state.sex, Sex.FEMALE, R.string.onboarding_sex_female, actions.setSex)
         SexChip(state.sex, Sex.MALE, R.string.onboarding_sex_male, actions.setSex)
         SexChip(state.sex, null, R.string.onboarding_sex_unsaid, actions.setSex)
@@ -438,10 +415,10 @@ private fun PickerCard(
 }
 
 @Composable
-private fun GoalPage(state: OnboardingState, actions: OnboardingActions) {
+private fun GoalPage(state: OnboardingState, actions: OnboardingActions, where: String) {
     val format = rememberMeasureFormatter(state.units)
-    PageTitle(stringResource(R.string.onboarding_goal_title))
-    Spacer(Modifier.height(12.dp))
+    PageTitle(stringResource(R.string.onboarding_goal_title), where)
+    Spacer(Modifier.height(24.dp))
     val profile = com.callbackdev.passo.core.model.Profile(
         heightMeters = state.heightMeters.takeUnless { state.profileSkipped },
         sex = state.sex,
@@ -469,7 +446,10 @@ private fun GoalPage(state: OnboardingState, actions: OnboardingActions) {
     }
     Spacer(Modifier.height(12.dp))
     // Quick picks: the goals people actually choose, one tap each.
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
         for (preset in GOAL_PRESETS) {
             FilterChip(
                 selected = state.goalSteps == preset,
@@ -480,19 +460,12 @@ private fun GoalPage(state: OnboardingState, actions: OnboardingActions) {
         }
     }
     Spacer(Modifier.height(16.dp))
-    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Icon(
-            PassoIcons.Info,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp),
-        )
-        Text(
-            text = stringResource(R.string.onboarding_goal_note),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-    }
+    Text(
+        text = stringResource(R.string.onboarding_goal_note),
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+    )
 }
 
 /** A picked chip in the accent, like the stepper beside it (Material's default is the amber secondary). */
@@ -512,21 +485,15 @@ private fun duration(minutes: Int): String = if (minutes < 60) {
 }
 
 @Composable
-private fun PermissionsPage(state: OnboardingState) {
-    PageTitle(stringResource(R.string.onboarding_permissions_title))
-    Spacer(Modifier.height(12.dp))
-    Promise(
-        PassoIcons.Steps,
-        R.string.onboarding_permissions_activity_title,
-        R.string.onboarding_permissions_activity_body,
-    )
-    Promise(
-        PassoIcons.Bell,
-        R.string.onboarding_permissions_notifications_title,
-        R.string.onboarding_permissions_notifications_body,
-    )
-    Spacer(Modifier.height(16.dp))
+private fun PermissionsPage(state: OnboardingState, where: String) {
+    PageTitle(stringResource(R.string.onboarding_permissions_title), where)
+    Spacer(Modifier.height(24.dp))
+    Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+        Promise(R.string.onboarding_permissions_activity_title, R.string.onboarding_permissions_activity_body)
+        Promise(R.string.onboarding_permissions_notifications_title, R.string.onboarding_permissions_notifications_body)
+    }
     if (state.activityGranted) {
+        Spacer(Modifier.height(24.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(PassoIcons.Check, contentDescription = null, tint = PassoTheme.colors.goal)
             Text(
@@ -537,36 +504,22 @@ private fun PermissionsPage(state: OnboardingState) {
             )
         }
     }
+    // A refusal is the reader's answer, not a fault: said in the page's quiet ink, with the way on.
     if (!state.activityGranted && state.permissionAsked) {
+        Spacer(Modifier.height(24.dp))
         Text(
             text = stringResource(R.string.onboarding_permissions_denied),
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.error,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
         )
     }
 }
 
 @Composable
-private fun BatteryPage(state: OnboardingState) {
-    val context = LocalContext.current
-    PageTitle(stringResource(R.string.onboarding_battery_title, state.manufacturer))
+private fun BatteryPage(state: OnboardingState, where: String) {
+    PageTitle(stringResource(R.string.onboarding_battery_title, state.manufacturer), where)
     PageBody(stringResource(R.string.onboarding_battery_body))
-    Spacer(Modifier.height(20.dp))
-    OutlinedButton(
-        onClick = {
-            context.startActivity(
-                Intent(
-                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                    Uri.fromParts("package", context.packageName, null),
-                ),
-            )
-        },
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Icon(PassoIcons.Battery, contentDescription = null, modifier = Modifier.size(20.dp))
-        Spacer(Modifier.size(8.dp))
-        Text(stringResource(R.string.onboarding_battery_settings))
-    }
 }
 
 /** Hooks for the UI tests. */

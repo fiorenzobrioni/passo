@@ -48,9 +48,13 @@ data class OnboardingState(
     val permissionAsked: Boolean = false,
     val batteryTip: Boolean = false,
     val manufacturer: String = "",
+    /** Whether the permission was still to be asked when the run began (a reinstall may keep it). */
+    val permissionsNeeded: Boolean = true,
 ) {
     val steps: List<OnboardingStep>
-        get() = OnboardingStep.entries.filter { it != OnboardingStep.BATTERY || batteryTip }
+        get() = OnboardingStep.entries.filter {
+            (it != OnboardingStep.BATTERY || batteryTip) && (it != OnboardingStep.PERMISSIONS || permissionsNeeded)
+        }
 }
 
 /**
@@ -69,6 +73,8 @@ constructor(
     private val mutableState = MutableStateFlow(
         OnboardingState(
             activityGranted = StepTracking.hasActivityRecognition(context),
+            // Already allowed, there is nothing to ask, so the page is not shown at all.
+            permissionsNeeded = !StepTracking.hasActivityRecognition(context),
             batteryTip = OemTips.needsTip(manufacturer),
             manufacturer = manufacturer.replaceFirstChar { it.uppercase() },
         ),
@@ -103,9 +109,19 @@ constructor(
         it.copy(activityGranted = StepTracking.hasActivityRecognition(context))
     }
 
-    /** The system dialog was answered: a refusal is then said on the page, with the way on. */
-    fun permissionAnswered() = mutableState.update {
-        it.copy(activityGranted = StepTracking.hasActivityRecognition(context), permissionAsked = true)
+    /**
+     * The system dialog was answered. Granted, the page has nothing left to say and the run moves
+     * on by itself (or ends, when the permission was its last page); refused, the refusal is said
+     * on the page, with the way on.
+     */
+    fun permissionAnswered() {
+        mutableState.update {
+            it.copy(activityGranted = StepTracking.hasActivityRecognition(context), permissionAsked = true)
+        }
+        val now = mutableState.value
+        if (now.activityGranted && now.step == OnboardingStep.PERMISSIONS) {
+            if (now.steps.last() == OnboardingStep.PERMISSIONS) finish() else next()
+        }
     }
 
     /** Stores what was chosen and marks the first run done; the shell then shows Today. */

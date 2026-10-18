@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Draws Passo's launcher mark: the two adaptive-icon layers in app/src/main/res/drawable.
+"""Draws Passo's mark: the two adaptive-icon layers in app/src/main/res/drawable, and the
+status-bar icon (core/tracking/src/main/res/drawable/ic_stat_steps.xml).
 
     python3 tools/draw_launcher_icon.py
 
@@ -8,28 +9,43 @@ stroke 10, on a warm white), green, and a shoe print at the upper left. The prin
 ring with a gap around it, and walks
 clockwise, the way the ring fills: it is the step that closes the day.
 
-Re-running this script IS the drawing: ic_launcher_foreground.xml and
-ic_launcher_monochrome.xml are its output and are not edited by hand. Only the standard
+Since 18 Oct 2026 (owner, the family's icon review) the print weighs what the sisters' emblems
+weigh: scaled 0.95 to 1.12, its area matches theirs (222 units against the coin's and the clock's
+211) and its heel and toe reach past the ring's edge as theirs do; its gap is theirs (3.0), and its
+amber is lit from the upper left, as theirs is, where it ran along the sole from the toe.
+
+The status-bar icon is two prints, a left and a right, drawn from the same sole: the walk, where
+the old icon was two pairs of ellipses. It is also the Quick Settings tile's icon.
+
+Re-running this script IS the drawing: ic_launcher_foreground.xml, ic_launcher_monochrome.xml
+and ic_stat_steps.xml are its output and are not edited by hand. Only the standard
 library is used, so any Python 3 runs it.
 """
 
 import math
 from pathlib import Path
 
-RES = Path(__file__).resolve().parent.parent / "app/src/main/res/drawable"
+ROOT = Path(__file__).resolve().parent.parent
+RES = ROOT / "app/src/main/res/drawable"
+STAT = ROOT / "core/tracking/src/main/res/drawable/ic_stat_steps.xml"
 
 CENTRE = 54.0
 RING_RADIUS = 21.0
 RING_WIDTH = 10.0
 PRINT_ANGLE = 220.0  # degrees clockwise from three o'clock: the upper left
-PRINT_SCALE = 0.95
-GAP = 2.6  # the clear band around the print, where it cuts the ring
+PRINT_SCALE = 1.12
+GAP = 3.0  # the clear band around the print, where it cuts the ring: the sisters' gap
 
 # The ring's sweep, from where it starts (just past the print) to where it ends (just
 # before it): the day filling up, a fresh green to the deep green of a met goal.
 RING_STOPS = [(0.0, "74CF91"), (0.45, "2B9E56"), (1.0, "0B5B33")]
-# The print: amber, a warm light, top to heel.
+# The print: the family's amber, light at the upper left.
 PRINT_TOP, PRINT_HEEL = "FFC658", "EF8618"
+AMBER_REACH = 8.0  # how far from the print's middle the amber runs, along the diagonal
+
+# The status-bar icon, on the 24-unit grid: (middle, scale, turn in degrees, mirrored). A left
+# print behind and a right one ahead, each turned a little out, as feet walk.
+STAT_PRINTS = [((8.4, 14.8), 0.46, -10.0, True), ((15.6, 9.2), 0.46, 10.0, False)]
 
 # A right shoe sole in its own units, toe towards -y, about 24 long, origin mid-length:
 # a long forefoot with a flat back edge, and a D-shaped heel with a flat front. Each is a
@@ -76,12 +92,24 @@ def place(p):
     return ox + x * math.cos(rho) - y * math.sin(rho), oy + x * math.sin(rho) + y * math.cos(rho)
 
 
-def path_data(segments):
+def path_data(segments, at=None):
+    at = at or place
     out = []
     for seg in segments:
         kind, *points = seg
-        out.append(kind + " " + " ".join(pt(place(p)) for p in points))
+        out.append(kind + " " + " ".join(pt(at(p)) for p in points))
     return " ".join(out) + " Z"
+
+
+def placed_at(middle, scale, turn, mirrored):
+    """From the sole's units to the status-bar grid: scaled, mirrored for a left foot, turned."""
+    rho = math.radians(turn)
+
+    def at(p):
+        x, y = p[0] * scale * (-1 if mirrored else 1), p[1] * scale
+        return middle[0] + x * math.cos(rho) - y * math.sin(rho), middle[1] + x * math.sin(rho) + y * math.cos(rho)
+
+    return at
 
 
 def outline(segments, per_curve=24):
@@ -215,7 +243,7 @@ HEADER = """<?xml version="1.0" encoding="utf-8"?>
 FOREGROUND_NOTE = """
      The mark: a ring (radius 21, stroke 10, a warm white under it) in the greens of a day
      filling up, and at the upper left a shoe print in amber. The print cuts the ring with a
-     2.6 gap, and walks clockwise, the way the ring fills: the step that closes the day.
+     3.0 gap, and walks clockwise, the way the ring fills: the step that closes the day.
      Everything sits inside the 33-unit safe circle of every launcher mask.
 """
 
@@ -231,10 +259,10 @@ def sole(fill):
 
 
 def foreground():
-    top, heel = place((0, -12.4)), place((0, 12.2))
+    ox, oy = print_origin()
     gradient_fill = f""">
     <aapt:attr name="android:fillColor">
-        <gradient android:type="linear" android:startX="{f(top[0])}" android:startY="{f(top[1])}" android:endX="{f(heel[0])}" android:endY="{f(heel[1])}">
+        <gradient android:type="linear" android:startX="{f(ox - AMBER_REACH)}" android:startY="{f(oy - AMBER_REACH)}" android:endX="{f(ox + AMBER_REACH)}" android:endY="{f(oy + AMBER_REACH)}">
             <item android:offset="0" android:color="#FF{PRINT_TOP}"/>
             <item android:offset="1" android:color="#FF{PRINT_HEEL}"/>
         </gradient>
@@ -272,7 +300,31 @@ def monochrome():
     )
 
 
+def status_bar():
+    prints = "\n".join(
+        f'    <path android:fillColor="#FFFFFFFF" android:pathData="{path_data(piece, placed_at(*where))}" />'
+        for where in STAT_PRINTS
+        for piece in (FOREFOOT, HEEL)
+    )
+    return f"""<?xml version="1.0" encoding="utf-8"?>
+<!-- Written by tools/draw_launcher_icon.py: change the script and run it, never this file.
+
+     Two shoe prints, a left and a right, the launcher mark's sole: the status-bar mark of the
+     notifications and the Quick Settings tile. White on transparent, as status-bar icons must
+     be; the system tints it.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+{prints}
+</vector>
+"""
+
+
 if __name__ == "__main__":
     (RES / "ic_launcher_foreground.xml").write_text(foreground())
     (RES / "ic_launcher_monochrome.xml").write_text(monochrome())
-    print("wrote", RES / "ic_launcher_foreground.xml", "and", RES / "ic_launcher_monochrome.xml")
+    STAT.write_text(status_bar())
+    print("wrote", RES / "ic_launcher_foreground.xml", RES / "ic_launcher_monochrome.xml", "and", STAT)

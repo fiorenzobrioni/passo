@@ -1,21 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Two footprints, a sole and a heel each: the status-bar mark of the tracking notification.
-     White on transparent, as status-bar icons must be; the system tints it. -->
+<!-- Written by tools/draw_launcher_icon.py: change the script and run it, never this file.
+
+     Two shoe prints, a left and a right, the launcher mark's sole: the status-bar mark of the
+     notifications and the Quick Settings tile. White on transparent, as status-bar icons must
+     be; the system tints it.
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M4.8,11.5a3,4.8 0,1 0,6 0a3,4.8 0,1 0,-6 0z" />
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M5.8,19a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z" />
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M13.2,6.5a3,4.8 0,1 0,6 0a3,4.8 0,1 0,-6 0z" />
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M14.2,14a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M 7.32,9.20 C 5.40,9.44 4.96,11.20 5.40,12.90 C 5.70,14.06 6.19,15.00 6.61,15.77 L 9.84,15.29 C 10.10,14.13 10.21,12.89 10.00,11.71 C 9.72,10.08 8.88,9.02 7.32,9.20 Z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M 10.03,16.38 L 6.94,16.83 C 6.90,17.40 7.02,18.13 7.24,18.83 C 7.59,19.99 8.42,20.49 9.19,20.36 C 10.01,20.21 10.63,19.50 10.57,18.34 C 10.53,17.60 10.36,16.93 10.03,16.38 Z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M 16.68,3.60 C 18.60,3.84 19.04,5.60 18.60,7.30 C 18.30,8.46 17.81,9.40 17.39,10.17 L 14.16,9.69 C 13.90,8.53 13.79,7.29 14.00,6.11 C 14.28,4.48 15.12,3.42 16.68,3.60 Z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M 13.97,10.78 L 17.06,11.23 C 17.10,11.80 16.98,12.53 16.76,13.23 C 16.41,14.39 15.58,14.89 14.81,14.76 C 13.99,14.61 13.37,13.90 13.43,12.74 C 13.47,12.00 13.64,11.33 13.97,10.78 Z" />
 </vector>

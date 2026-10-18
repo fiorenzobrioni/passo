@@ -5,6 +5,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasTestTag
@@ -108,12 +110,28 @@ class OnboardingScreenTest {
         snapshot("onboarding_permissions")
 
         state = state.copy(permissionAsked = true)
-        compose.onAllNodesWithText("Turned down", substring = true).onFirst().assertIsDisplayed()
+        compose.onAllNodesWithText("Passo cannot count without it", substring = true).onFirst().assertIsDisplayed()
 
         state = state.copy(activityGranted = true)
         compose.onNodeWithText("Allowed: Passo is counting.").assertIsDisplayed()
         compose.onNodeWithText("Start counting").performClick()
         assertThat(finished).isTrue()
+    }
+
+    @Test
+    fun `already allowed, the permissions page is not in the run`() {
+        assertThat(OnboardingState(permissionsNeeded = false).steps).doesNotContain(OnboardingStep.PERMISSIONS)
+        assertThat(OnboardingState().steps).contains(OnboardingStep.PERMISSIONS)
+    }
+
+    @Test
+    fun `no bar and no back button, the step is said to a screen reader on the heading`() {
+        state = state.copy(step = OnboardingStep.GOAL)
+        show()
+        compose.onNode(SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, "Step 3 of 4"))
+            .assertIsDisplayed()
+        compose.onNodeWithContentDescription("Step 3 of 4").assertDoesNotExist()
+        compose.onNodeWithText("Back").assertDoesNotExist()
     }
 
     @Test

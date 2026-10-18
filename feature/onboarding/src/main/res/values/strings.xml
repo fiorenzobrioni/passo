@@ -6,7 +6,6 @@
     <string name="onboarding_app_name" translatable="false">Passo</string>
     <string name="onboarding_progress">Step %1$d of %2$d</string>
     <string name="onboarding_continue">Continue</string>
-    <string name="onboarding_back">Back</string>
     <string name="onboarding_skip">Skip</string>
     <string name="onboarding_done">Start counting</string>
 
@@ -47,7 +46,7 @@
     <string name="onboarding_permissions_notifications_body">Android shows a fixed notification while an app counts in the background; with notifications allowed it carries today’s steps. Turned down, counting goes on all the same.</string>
     <string name="onboarding_permissions_allow">Allow</string>
     <string name="onboarding_permissions_granted">Allowed: Passo is counting.</string>
-    <string name="onboarding_permissions_denied">Turned down. Passo cannot count without it: you can allow it now or later, from Today.</string>
+    <string name="onboarding_permissions_denied">Passo cannot count without it: you can allow it now or later, from Today.</string>
     <string name="onboarding_permissions_open_settings">Open settings</string>
     <string name="onboarding_permissions_later">Later</string>
 

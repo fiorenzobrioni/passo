@@ -130,8 +130,8 @@ shapes and springs, and every animation collapses to a fade under reduced motion
 hold here too: one sentence before any number, every number with the line that says what it
 means, estimates that say so, no dead tab and no switch for a feature that has not shipped.
 Icons are `PassoIcons`, drawn in code. The launcher icon (Chiaro's ring, with a shoe print
-where Chiaro has its sun) is written by `tools/draw_launcher_icon.py`: change the script and
-re-run it, never the two XML layers. Likewise the Ways' and the city walks' data (`docs/adr/0014-ways.md`, `docs/adr/0015-city-walks.md`):
+where Chiaro has its sun) and the status-bar icon (two of its prints, `ic_stat_steps`) are
+written by `tools/draw_launcher_icon.py`: change the script and re-run it, never the XML. Likewise the Ways' and the city walks' data (`docs/adr/0014-ways.md`, `docs/adr/0015-city-walks.md`):
 `tools/build_ways.py` writes `WayData.kt` and the place strings from `tools/ways_content.py`
 (OpenStreetMap lines, ODbL, credited wherever they are read): edit the content and re-run it
 (`fetch` first, for the sources; a walk's route is fetched once and committed in `tools/walks/`; `maps` redraws only the ways' maps, keeping their lines), never the outputs.
