@@ -40,7 +40,7 @@ fun NoSensorScreen(modifier: Modifier = Modifier) {
             )
             Text(
                 text = stringResource(R.string.setup_no_sensor_title),
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.headlineMedium,
                 textAlign = TextAlign.Center,
             )
             Text(

@@ -66,7 +66,7 @@ calories are estimates, and Passo says so.
   <tr>
     <td align="center"><img src="docs/screenshots/widget-settings.png" width="250" alt="One widget's settings: the card as it will look, its sizes, the background colour, the opacity and the content"><br><sub><b>Widget settings</b>, with a live preview</sub></td>
     <td align="center"><img src="docs/screenshots/settings-notifications.png" width="250" alt="Settings, notifications: goal reached, the evening reminder with its time and threshold, the weekly summary"><br><sub><b>Notifications</b>, each one optional</sub></td>
-    <td align="center"><img src="docs/screenshots/onboarding-welcome.png" width="250" alt="The first run: welcome"><br><sub><b>First run</b>: under a minute to counting</sub></td>
+    <td align="center"><img src="docs/screenshots/onboarding-welcome.png" width="250" alt="The first run: the name Passo and its sentence, every step even with the app closed, then three promises in words (it counts by itself, it stays on your phone, it is light on the battery) and the Get started button at the bottom"><br><sub><b>First run</b>: under a minute to counting</sub></td>
   </tr>
   <tr>
     <td align="center"><img src="docs/screenshots/onboarding-goal.png" width="250" alt="The first run: the daily goal, with what it means in distance and time"><br><sub><b>A goal</b> in kilometres and minutes</sub></td>

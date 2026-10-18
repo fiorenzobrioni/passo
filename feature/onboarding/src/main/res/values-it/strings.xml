@@ -5,7 +5,6 @@
 
     <string name="onboarding_progress">Passaggio %1$d di %2$d</string>
     <string name="onboarding_continue">Continua</string>
-    <string name="onboarding_back">Indietro</string>
     <string name="onboarding_skip">Salta</string>
     <string name="onboarding_done">Inizia a contare</string>
 
@@ -47,7 +46,7 @@
     <string name="onboarding_permissions_notifications_body">Android mostra una notifica fissa mentre un’app conta in background; con le notifiche consentite riporta i passi di oggi. Se le neghi, il conteggio continua lo stesso.</string>
     <string name="onboarding_permissions_allow">Consenti</string>
     <string name="onboarding_permissions_granted">Consentito: Passo sta contando.</string>
-    <string name="onboarding_permissions_denied">Negato. Senza questo permesso Passo non può contare: puoi consentirlo adesso o più tardi, da Oggi.</string>
+    <string name="onboarding_permissions_denied">Senza questo permesso Passo non può contare: puoi consentirlo adesso o più tardi, da Oggi.</string>
     <string name="onboarding_permissions_open_settings">Apri impostazioni</string>
     <string name="onboarding_permissions_later">Più tardi</string>
 
