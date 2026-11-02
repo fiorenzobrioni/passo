@@ -31,12 +31,12 @@ so they are uniform"):
 
 ## State
 
-- **Released**: 1.0.0 (1 Oct 2026, `v1.0.0`). **1.1.0 prepared** (2 Nov 2026): `passo.versionName`
-  1.1.0, its notes in `CHANGELOG.md` and its record in `docs/CHANGELOG-1.1.0.md`; tagged `v1.1.0`
-  by the owner once the branch is on `main` and the install and update path (below) is checked.
+- **Released**: 1.0.0 (1 Oct 2026, `v1.0.0`) and **1.1.0** (2 Nov 2026, `v1.1.0`, tagged by the
+  owner on `main` after the device checks below): its notes in `CHANGELOG.md`, its record in
+  `docs/CHANGELOG-1.1.0.md`. What comes after it goes in `CHANGELOG.md`, `[Unreleased]`.
 - **Done since 1.0.0**: Phase 11 (the Ways and the city walks), Phase 13 (the interval walk), Phase
   14 (more ways, beyond Europe), in archive 01 with Phases 0 to 8 and 10; Phase 12 in archive 03.
-- **Done on 2 Nov 2026**: Phase 12, Your year on foot (archive 03), its device check open in «Open».
+- **Done on 2 Nov 2026**: Phase 12, Your year on foot (archive 03), checked on a device by the owner.
 - **Not started**: Phase 9, Google Play (optional, later; §11, below).
 
 ## Open
@@ -46,25 +46,27 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
 
 - [ ] **Baseline Profiles; R8 full mode; startup check** (archive 01, «Phase 7»).
 - [ ] **The accessibility scanner reports no critical issues** (archive 01, «Phase 7»).
-- [ ] **The full install and update path**: install the last release, then update to the next
-  over it, with the data kept (archive 01, «Phase 8»). Before tagging 1.1.0: install `v1.0.0`'s
-  APK, walk a little, then install 1.1.0's over it. The database's road from 1.0.0 (schema 3) to
-  1.1.0 (6) is tested (`UpgradeFromFirstReleaseTest`); the device check is the owner's.
+- [x] **The full install and update path**: install the last release, then update to the next
+  over it, with the data kept (archive 01, «Phase 8»). Done by the owner on 2 Nov 2026, 1.0.0 to
+  1.1.0, before the tag («I did the tests and everything works»); the database's road from schema
+  3 to 6 is also tested (`UpgradeFromFirstReleaseTest`).
 - [ ] **On a device (owner): a 30-minute interval outing with the screen off**: each change
   felt, its delay read from the log, the battery check of §9, numbers in `docs/battery/`
   (archive 01, «Phase 13»).
 - [ ] **On a device (owner): the new ways' maps** in both themes and on an open foldable; the
   Ways page with its groups at twice the text size (archive 01, «Phase 14»).
-- [ ] **On a device (owner): an outing left still on a phone with no wake-up step counter**: the
+- [x] **On a device (owner): an outing left still on a phone with no wake-up step counter**: the
   log's `SIGNAL_WAKE` row says it was let go about 15 minutes after the last step (archive 03, «2 Nov
-  2026. A review of the wakes»).
+  2026. A review of the wakes»). Done by the owner on 2 Nov 2026, before the tag.
 - [x] **Your year on foot names the cities walked that year** (archive 01, «Phase 11»): done
   with Phase 12, on its ways' page (archive 03, «Your year on foot»).
-- [ ] **On a device (owner): Your year on foot**: the share sheet with two or three apps, the
-  image in both themes, a page saved (archive 03, «Phase 12»).
+- [x] **On a device (owner): Your year on foot**: the share sheet with two or three apps, the
+  image in both themes, a page saved (archive 03, «Phase 12»). Done by the owner on 2 Nov 2026,
+  before the tag.
 
 Read again on 2 Nov 2026, at archive 01 and 02: the boxes above are the ones the phases done had
-left open, and the review's device check; the open questions are in §15, «Open».
+left open, and the review's device check. Read again at 1.1.0's tag: the owner's checks of the
+update, the outing let go and Your year on foot are done; §15 has no open question.
 
 ---
 
@@ -685,7 +687,15 @@ those of 2 Nov 2026 (the review, Your year on foot, 1.1.0 prepared) in
 
 This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written below.
 
+- **No way on a widget** (owner, 2 Nov 2026, after 1.1.0's tag: "the Ways on a widget seems noise
+  to me"; the question had stood open since Phase 11). Not built, and no longer asked. A way moves
+  a few kilometres a day, so a line about it on a home screen would say the same thing all day,
+  every day, beside a count that does move: the reason the way's card on Today shows only what
+  the day did for it (archive 02, «The way under way on Today»). Where the reader stands is
+  Insights' to say, and the way's page's; a stage reached is a notification already. The widgets
+  stay about today.
+
 ### Open
 
-- **The Ways on a widget?** Not in Phase 11; a natural line for «In words» later.
+Nothing open.
 
