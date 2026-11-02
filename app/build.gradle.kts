@@ -112,6 +112,7 @@ dependencies {
     implementation(project(":feature:sessions"))
     implementation(project(":feature:guide"))
     implementation(project(":feature:ways"))
+    implementation(project(":feature:year"))
     implementation(project(":widget"))
 
     implementation(libs.androidx.core.ktx)

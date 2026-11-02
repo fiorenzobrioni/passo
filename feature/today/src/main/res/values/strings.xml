@@ -49,6 +49,10 @@
     <string name="today_first_day_title">Counting starts today</string>
     <string name="today_first_day_body">Passo counts from the moment it was set up, so steps taken earlier today are not here. From tomorrow every day is complete.</string>
     <string name="today_first_day_guide">How Passo works</string>
+    <string name="today_year_title">Your %1$d on foot</string>
+    <string name="today_year_body">Your year told in pages, from your own days: the steps, the months, your best day.</string>
+    <string name="today_year_open">Open</string>
+    <string name="today_year_close">Close</string>
 
     <!-- The day's chart -->
     <string name="today_trend_title">Your day</string>

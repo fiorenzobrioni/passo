@@ -12,6 +12,15 @@ All notable changes to Passo are documented here. The format follows
 
 ### Added
 
+- **Your year on foot**: a year told in pages, made from the days already on your phone. How
+  many steps and how far, measured against a whole way («A whole way, 2 times over: Via
+  Francigena»); the months, with the best one named; your best day and the outing or walk that
+  made it; your day of the week and your hour; the days at your goal, with the year as twelve
+  small months; your outings; the ways walked and the cities; and the year against the one
+  before, by steps a day. A touch goes on, a swipe goes back. From Insights for the year so far
+  and every past year with thirty days counted, and from History's year view; from 1 December
+  to 31 January it is also the first card of Insights, and one card on Today until you close
+  it. Share or save a page as an image: it shows only what the page shows. Nothing is sent.
 - **Ways**: long ways walked from wherever you are. In Europe the Via degli Dei, the Camino
   Portugués from Porto, the Via di Francesco, the Camino Francés and the
   Italian part of the Via Francigena; beyond it the Kumano Kodō in Japan, from Takijiri-ōji by

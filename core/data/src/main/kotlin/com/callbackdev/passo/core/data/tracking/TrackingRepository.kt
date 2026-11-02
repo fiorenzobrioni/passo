@@ -216,6 +216,20 @@ constructor(
     fun observeMinutesOn(localEpochDay: Long): Flow<List<MinuteSteps>> = dao.observeMinutesOn(localEpochDay)
         .map { rows -> rows.map { MinuteSteps(it.epochMinute, it.localEpochDay, it.steps) } }
 
+    /**
+     * The steps of the days from [fromDay] to [toDay] in each hour of the clock, midnight first:
+     * a year's rhythm (Your year on foot), read once when its pages open. A year is about a
+     * hundred thousand rows, summed here rather than kept.
+     */
+    suspend fun stepsByHour(fromDay: Long, toDay: Long, zone: ZoneId): List<Long> {
+        val hours = LongArray(HOURS)
+        for (row in dao.minutesBetween(fromDay, toDay)) {
+            hours[(minuteOfDay(row.epochMinute, row.localEpochDay, zone) / MINUTES_PER_HOUR).coerceIn(0, HOURS - 1)] +=
+                row.steps.toLong()
+        }
+        return hours.toList()
+    }
+
     /** The minutes of several days, grouped by day; a day without steps is absent. */
     suspend fun minutesOn(days: List<Long>): Map<Long, List<MinuteSteps>> = dao.minutesOnDays(days)
         .map { MinuteSteps(it.epochMinute, it.localEpochDay, it.steps) }
@@ -263,5 +277,7 @@ constructor(
 
     private companion object {
         const val QUERY_CHUNK = 500
+        const val HOURS = 24
+        const val MINUTES_PER_HOUR = 60
     }
 }

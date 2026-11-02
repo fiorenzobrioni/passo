@@ -79,7 +79,8 @@ calories are estimates, and Passo says so.
     <td align="center"><img src="docs/screenshots/guide.png" width="250" alt="The guide: what Passo does, the three screens with their icons, and how Passo counts"><br><sub><b>The guide</b>, in the app</sub></td>
   </tr>
   <tr>
-    <td align="center" colspan="3"><img src="docs/screenshots/today-foldable.png" width="510" alt="Today on the inner screen of an open foldable: the date, the ring, the sentence and the day's chart in a column in the middle, the glow behind them across the whole screen"><br><sub><b>On an open foldable</b>: a centred column</sub></td>
+    <td align="center"><img src="docs/screenshots/year.png" width="250" alt="Your year on foot, the goal's page: at the goal on 182 of 365 days, the longest streak, and the year as twelve small months coloured by how close each day came"><br><sub><b>Your year on foot</b>: a year told in pages</sub></td>
+    <td align="center" colspan="2"><img src="docs/screenshots/today-foldable.png" width="510" alt="Today on the inner screen of an open foldable: the date, the ring, the sentence and the day's chart in a column in the middle, the glow behind them across the whole screen"><br><sub><b>On an open foldable</b>: a centred column</sub></td>
   </tr>
 </table>
 
@@ -96,6 +97,7 @@ Italian). The phone's status bar is not in the pictures. The command that redraw
 - 🎯 **Outings**: a walk or run with a goal, with vibrations or a voice at the milestones you choose.
 - ⏱️ **Japanese interval walk**: 3 slow minutes and 3 fast ones, five sets or more, each change told with a vibration of its own so the phone stays in your pocket; at the end, how many fast intervals were at pace.
 - 🏆 **Insights**: your streak, your best day, week and month, and the averages.
+- 🗓️ **Your year on foot**: a year told in pages, from your own days: the steps and how far they went, the months, your best day, your day of the week and your hour, the goal, the outings and the ways, against the year before. Open it from Insights or History any time; in December it waits for you on Today. Share a page as an image, through an app you pick.
 - 🗺️ **Ways**: long ways (Via degli Dei, Camino Portugués, Via di Francesco, Camino Francés, Via Francigena, Kumano Kodō, Great Ocean Walk, Inca Trail, John Muir Trail, Kilimanjaro), listed by continent and walked from home, stage by stage, with a stamp for each. No location: only your distance.
 - 🏛️ **City walks**: Milan, Rome, Paris, London, Madrid, Berlin, Vienna, Porto, Amsterdam and Prague in Europe, Lima, Cusco, New York, Rio de Janeiro, Mexico City, Buenos Aires, San Francisco, Québec, Havana and Cartagena in the Americas, Tokyo, Sydney, Seoul, Beijing, Hong Kong, Singapore, Bangkok, Kyoto, Hanoi and Melbourne in Asia and Oceania, Cairo, Cape Town, Marrakech, Tunis, Alexandria, Dakar, Addis Ababa, Fez, Zanzibar and Luxor in Africa, walked where you are in one outing or a few, about 5 km or about 10. Each continent has its page, with a map of where its cities are and which you have walked. Each place is told as your steps reach it, with a short vibration and, if you like, a line about it in your headphones.
 - 📏 **Measure your step**: walk a distance you know and Passo works out your step length. No GPS.

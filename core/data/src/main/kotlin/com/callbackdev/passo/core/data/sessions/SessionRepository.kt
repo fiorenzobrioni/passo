@@ -81,6 +81,10 @@ constructor(
 
     fun observeLatestFinished(): Flow<Session?> = dao.observeLatestFinished().map { it?.toModel() }
 
+    /** The outings over from [fromDay] to [toDay] included, oldest first: a year's (Your year on foot). */
+    suspend fun finishedBetween(fromDay: Long, toDay: Long): List<Session> =
+        dao.finishedBetween(fromDay, toDay).mapNotNull { it.toModel() }
+
     /** A new outing; returns it with its id. */
     suspend fun insert(session: Session): Session = session.copy(id = dao.insertSession(session.toEntity()))
 

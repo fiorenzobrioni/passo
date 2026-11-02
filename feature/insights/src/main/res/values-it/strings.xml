@@ -116,4 +116,12 @@
     <string name="insights_group_way">Il tuo cammino</string>
     <string name="insights_ways_door_title">Percorri un cammino o una città</string>
     <string name="insights_ways_door_body">Lunghi cammini, dalla Via degli Dei al Cammino di Santiago, e passeggiate in città d’Europa, delle Americhe, dell’Asia, dell’Oceania e dell’Africa, da Milano a Città del Capo, con i passi che fai comunque.</string>
+    <!-- Il tuo anno a piedi (Fase 12) -->
+    <string name="insights_group_year">Il tuo anno a piedi</string>
+    <string name="insights_year_so_far">%1$d finora</string>
+    <string name="insights_year_full">%1$d</string>
+    <string name="insights_year_body">Raccontato in pagine: i passi, i mesi, il giorno migliore</string>
+    <string name="insights_year_season_title">Il tuo %1$d a piedi</string>
+    <string name="insights_year_season_body">Il tuo anno raccontato in pagine, dai tuoi giorni.</string>
+    <string name="insights_year_open">Apri</string>
 </resources>

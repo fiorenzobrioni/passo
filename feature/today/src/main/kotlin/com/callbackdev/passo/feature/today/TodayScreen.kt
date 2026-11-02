@@ -125,6 +125,7 @@ fun TodayRoute(
     onOpenSessions: () -> Unit = {},
     onOpenGuide: () -> Unit = {},
     onOpenWay: (WayId, Long) -> Unit = { _, _ -> },
+    onOpenYear: (Int) -> Unit = {},
     bottomPadding: Dp = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
     viewModel: TodayViewModel = hiltViewModel(),
 ) {
@@ -171,6 +172,8 @@ fun TodayRoute(
             onOpenGuide()
         },
         onOpenWay = onOpenWay,
+        onOpenYear = onOpenYear,
+        onCloseYear = viewModel::closeYearCard,
         sessionActions = { id ->
             SessionCardActions(
                 onPause = viewModel::pauseSession,
@@ -206,6 +209,8 @@ fun TodayScreen(
     onOpenSessions: () -> Unit = {},
     onOpenGuide: () -> Unit = {},
     onOpenWay: (WayId, Long) -> Unit = { _, _ -> },
+    onOpenYear: (Int) -> Unit = {},
+    onCloseYear: (Int) -> Unit = {},
     sessionActions: (Long) -> SessionCardActions = { SessionCardActions() },
 ) {
     val format = rememberMeasureFormatter(state.units)
@@ -261,6 +266,22 @@ fun TodayScreen(
                         action = stringResource(R.string.today_first_day_guide),
                         onAction = onOpenGuide,
                         modifier = inColumn.padding(horizontal = ScreenMargin),
+                    )
+                }
+            }
+            state.yearCard?.let { year ->
+                item(key = "year") {
+                    // In season, once (owner, 1 Oct 2026): the year ending, told in pages.
+                    StatusCard(
+                        icon = PassoIcons.Calendar,
+                        title = stringResource(R.string.today_year_title, year),
+                        body = stringResource(R.string.today_year_body),
+                        tone = StatusTone.NOTE,
+                        action = stringResource(R.string.today_year_open),
+                        onAction = { onOpenYear(year) },
+                        dismiss = stringResource(R.string.today_year_close),
+                        onDismiss = { onCloseYear(year) },
+                        modifier = inColumn.padding(horizontal = ScreenMargin).testTag(TodayTags.YEAR),
                     )
                 }
             }
@@ -882,6 +903,7 @@ private const val SESSION_KEY = "session"
 
 /** Hooks for the UI tests. */
 object TodayTags {
+    const val YEAR = "today_year"
     const val LIST = "today_list"
     const val RING = "today_ring"
     const val HEADLINE = "today_headline"

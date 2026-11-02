@@ -45,6 +45,29 @@ object PassoIcons {
         }
     }
 
+    /** A cross: closes a full-screen page (Your year on foot). */
+    val Close: ImageVector by lazy {
+        icon("close") {
+            moveTo(6f, 6f)
+            lineTo(18f, 18f)
+            moveTo(18f, 6f)
+            lineTo(6f, 18f)
+        }
+    }
+
+    /** Three dots joined: hands a page to another app (Your year on foot). */
+    val Share: ImageVector by lazy {
+        icon("share") {
+            circle(17.5f, 5.5f, 2.5f)
+            circle(6.5f, 12f, 2.5f)
+            circle(17.5f, 18.5f, 2.5f)
+            moveTo(8.7f, 10.7f)
+            lineTo(15.3f, 6.8f)
+            moveTo(8.7f, 13.3f)
+            lineTo(15.3f, 17.2f)
+        }
+    }
+
     val ChevronRight: ImageVector by lazy {
         icon("chevron_right", autoMirror = true) {
             moveTo(9.5f, 6f)

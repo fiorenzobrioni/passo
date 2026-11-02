@@ -53,10 +53,17 @@ class InsightsScreenTest {
         dark: Boolean = false,
         onOpen: (PeriodScale, LocalDate) -> Unit = { _, _ -> },
         onOpenWays: () -> Unit = {},
+        onOpenYear: (Int) -> Unit = {},
     ) {
         compose.setContent {
             PassoTheme(darkTheme = dark) {
-                InsightsScreen(state = state, onOpenSettings = {}, onOpenPeriod = onOpen, onOpenWays = onOpenWays)
+                InsightsScreen(
+                    state = state,
+                    onOpenSettings = {},
+                    onOpenPeriod = onOpen,
+                    onOpenWays = onOpenWays,
+                    onOpenYear = onOpenYear,
+                )
             }
         }
         compose.waitForIdle()
@@ -72,6 +79,20 @@ class InsightsScreenTest {
         compose.onNodeWithText("days in a row at your goal").assertDoesNotExist()
         compose.onNode(hasContentDescription("Thursday, September 24: under way")).assertExists()
         snapshot("insights")
+    }
+
+    @Test
+    fun `your year opens by hand, and in season it is the first card`() {
+        var opened: Int? = null
+        show(state().copy(offeredYears = listOf(2026, 2025), seasonYear = 2025), onOpenYear = { opened = it })
+
+        compose.onNodeWithTag(InsightsTags.YEAR_SEASON).assertIsDisplayed()
+        compose.onNodeWithText("Your 2025 on foot").assertIsDisplayed()
+        compose.onNodeWithTag(InsightsTags.LIST).performScrollToNode(hasTestTag(InsightsTags.YEARS))
+        compose.onNodeWithText("2026 so far").assertIsDisplayed()
+        snapshot("insights_years")
+        compose.onNodeWithText("2026 so far").performClick()
+        assertThat(opened).isEqualTo(2026)
     }
 
     @Test

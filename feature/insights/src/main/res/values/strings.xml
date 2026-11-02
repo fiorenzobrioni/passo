@@ -110,4 +110,12 @@
     <string name="insights_group_way">Your way</string>
     <string name="insights_ways_door_title">Walk a way or a city</string>
     <string name="insights_ways_door_body">Long ways, from the Via degli Dei to the Camino de Santiago, and walks through cities of Europe, the Americas, Asia, Oceania and Africa, from Milan to Cape Town, with the steps you take anyway.</string>
+    <!-- Your year on foot (Phase 12) -->
+    <string name="insights_group_year">Your year on foot</string>
+    <string name="insights_year_so_far">%1$d so far</string>
+    <string name="insights_year_full">%1$d</string>
+    <string name="insights_year_body">Told in pages: the steps, the months, your best day</string>
+    <string name="insights_year_season_title">Your %1$d on foot</string>
+    <string name="insights_year_season_body">Your year told in pages, from your own days.</string>
+    <string name="insights_year_open">Open</string>
 </resources>

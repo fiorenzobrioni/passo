@@ -108,6 +108,21 @@ class TodayScreenTest {
         celebrate = false,
     )
 
+    @Test
+    fun `in season the year's card opens its pages, and closes for good`() {
+        var opened: Int? = null
+        var closed: Int? = null
+        show(state().copy(yearCard = 2026), onOpenYear = { opened = it }, onCloseYear = { closed = it })
+
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(TodayTags.YEAR))
+        compose.onNodeWithText("Your 2026 on foot").assertIsDisplayed()
+        compose.assertAccessible()
+        compose.onNodeWithText("Open").performClick()
+        compose.onNodeWithText("Close").performClick()
+        assertThat(opened).isEqualTo(2026)
+        assertThat(closed).isEqualTo(2026)
+    }
+
     private fun show(
         state: TodayUiState,
         dark: Boolean = false,
@@ -117,6 +132,8 @@ class TodayScreenTest {
         onOpenGuide: () -> Unit = {},
         onOpenWay: (WayId, Long) -> Unit = { _, _ -> },
         sessionActions: SessionCardActions = SessionCardActions(),
+        onOpenYear: (Int) -> Unit = {},
+        onCloseYear: (Int) -> Unit = {},
     ) {
         compose.setContent {
             PassoTheme(darkTheme = dark) {
@@ -130,6 +147,8 @@ class TodayScreenTest {
                     onOpenSessions = onOpenSessions,
                     onOpenGuide = onOpenGuide,
                     onOpenWay = onOpenWay,
+                    onOpenYear = onOpenYear,
+                    onCloseYear = onCloseYear,
                     sessionActions = { sessionActions },
                 )
             }

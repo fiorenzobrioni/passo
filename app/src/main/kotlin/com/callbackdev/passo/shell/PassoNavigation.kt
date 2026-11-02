@@ -76,6 +76,10 @@ data class ContinentKey(val continent: Continent) : NavKey
 @Serializable
 data class WayKey(val way: WayId, val journeyId: Long?) : NavKey
 
+/** Your year on foot (PLANNING.md §11 Phase 12): from Insights, History's year, or Today in season. */
+@Serializable
+data class YearKey(val year: Int) : NavKey
+
 /** The root of [this] tab's stack. */
 val ShellTab.root: NavKey
     get() = when (this) {

@@ -145,6 +145,19 @@ constructor(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it[Keys.SESSION_SUMMARY_SEEN] = sessionId }
     }
 
+    /**
+     * The year whose card the reader closed on Today (Your year on foot, PLANNING.md §11
+     * Phase 12): shown once a season, and not again once closed. Not a setting: not in the backup's
+     * settings, and no screen changes it but that card.
+     */
+    val yearCardClosed: Flow<Int?> = dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { it[Keys.YEAR_CARD_CLOSED] }
+
+    suspend fun setYearCardClosed(year: Int) {
+        dataStore.edit { it[Keys.YEAR_CARD_CLOSED] = year }
+    }
+
     private fun readProfile(prefs: Preferences) = Profile(
         heightMeters = prefs[Keys.HEIGHT_M],
         weightKg = prefs[Keys.WEIGHT_KG],
@@ -280,6 +293,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
         val SESSION_PLANS_SEEDED = booleanPreferencesKey("session_plans_seeded")
         val INTERVAL_PRESET_SEEDED = booleanPreferencesKey("interval_preset_seeded")
         val SESSION_SUMMARY_SEEN = longPreferencesKey("session_summary_seen")
+        val YEAR_CARD_CLOSED = intPreferencesKey("year_card_closed")
     }
 
     companion object {

@@ -50,4 +50,6 @@ data class TodayUiState(
     val outings: List<Outing> = emptyList(),
     val startOutingButton: Boolean = true,
     val way: WayToday? = null,
+    /** The year whose pages Today offers, in season and until the reader closes the card (Phase 12). */
+    val yearCard: Int? = null,
 )

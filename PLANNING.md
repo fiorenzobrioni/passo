@@ -34,7 +34,7 @@ so they are uniform"):
 - **Released**: 1.0.0 (1 Oct 2026, `v1.0.0`). What came after is in `CHANGELOG.md`, `[Unreleased]`.
 - **Done since**: Phase 11 (the Ways and the city walks), Phase 13 (the interval walk), Phase 14
   (more ways, beyond Europe); in `docs/planning/01-phases-0-14.md`, with Phases 0 to 8 and 10.
-- **Under way**: Phase 12, Your year on foot (§11, below), from 2 Nov 2026.
+- **Done on 2 Nov 2026**: Phase 12, Your year on foot (§11, below), its device check open in «Open».
 - **Not started**: Phase 9, Google Play (optional, later; §11, below).
 
 ## Open
@@ -54,8 +54,10 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
 - [ ] **On a device (owner): an outing left still on a phone with no wake-up step counter**: the
   log's `SIGNAL_WAKE` row says it was let go about 15 minutes after the last step (§15, «2 Nov
   2026. A review of the wakes»).
-- [ ] **Your year on foot names the cities walked that year** (archive 01, «Phase 11»): built
-  with Phase 12.
+- [x] **Your year on foot names the cities walked that year** (archive 01, «Phase 11»): done
+  with Phase 12, on its ways' page (§15, «Your year on foot», 2 Nov 2026).
+- [ ] **On a device (owner): Your year on foot**: the share sheet with two or three apps, the
+  image in both themes, a page saved (§11 Phase 12).
 
 Read again on 2 Nov 2026, at archive 01 and 02: the boxes above are the ones the phases done had
 left open, and the review's device check; the open questions are in §15, «Open».
@@ -108,7 +110,7 @@ passo/
 │   ├── onboarding/
 │   ├── sessions/           # the Outings page and the outing editor (Phase 10)
 │   ├── ways/               # the Ways and the city walks (Phase 11)
-│   ├── year/               # Your year on foot (Phase 12, planned)
+│   ├── year/               # Your year on foot (Phase 12)
 │   └── guide/              # the guide, in Chiaro's shape
 ├── widget/                 # Glance widget(s), receiver, update coordinator
 ├── docs/                   # ADRs, formulas, battery test notes
@@ -601,9 +603,9 @@ A year told as a story: full-screen pages, one thing each, made from the days al
 Private: computed on the phone, shared only if the reader shares a page, through an app they
 pick. Name: «Il tuo anno a piedi» / "Your year on foot".
 
-- [ ] **When.** By hand at any time: Insights has a "Your year" row for the year so far and for every past year with 30 or more days counted, and History's year view opens its own year. In season, from 1 December to 31 January, it is the first card of Insights, and Today shows one card, once, that the reader closes (owner, 1 Oct 2026). No notification.
-- [ ] Domain (`:core:domain/year`, pure, tested): `YearInReview`, the pages and what each says, from the day summaries, the minutes (for the hour), the outings and the ways. A page with nothing to say is left out (no outings, no outings page). A year counted in part says so («Since 1 October») and compares averages per day counted, never totals.
-- [ ] The pages, in order:
+- [x] **When.** By hand at any time: Insights has a "Your year" row for the year so far and for every past year with 30 or more days counted, and History's year view opens its own year. In season, from 1 December to 31 January, it is the first card of Insights, and Today shows one card, once, that the reader closes (owner, 1 Oct 2026). No notification.
+- [x] Domain (`:core:domain/year`, pure, tested): `YearInReview`, the pages and what each says, from the day summaries, the minutes (for the hour), the outings and the ways. A page with nothing to say is left out (no outings, no outings page). A year counted in part says so («Since 1 October») and compares averages per day counted, never totals.
+- [x] The pages, in order:
   1. The year in steps and in distance (estimated), and that distance as a way (the Ways' data: «more than the Camino de Santiago», or «half of the Via Francigena»).
   2. The months: twelve bars (`BarChart`), the best one named.
   3. The best day: its date and weekday, its steps, and the outing or the walk that made it.
@@ -613,10 +615,12 @@ pick. Name: «Il tuo anno a piedi» / "Your year on foot".
   7. The way: the distance walked on it this year, the stamps earned.
   8. Against the year before, when both have 30 days or more counted.
   9. The close: one sentence chosen from what happened (ADR 0010's rule: variety from the facts, never a phrase at random).
-- [ ] `:feature:year`: a full-screen pager (Compose foundation, no new dependency): touch to go on, swipe back, the progress marks at the top, a fade under reduced motion. TalkBack reads each page as one sentence; at twice the text size a page scrolls.
-- [ ] Share or save a page: drawn into an image (Compose's `GraphicsLayer` to a bitmap, 1080 by 1920, the reader's theme and palette, Passo's name small at the foot), handed to the share sheet through a `FileProvider` in the cache (androidx.core, already in), or saved through the Storage Access Framework. The image holds no name, no place, and nothing the page does not show.
-- [ ] Strings in English and Italian (plurals for every count); UI tests (`assertAccessible()`, `walkPage()`); a README screenshot; CHANGELOG.
+- [x] `:feature:year`: a full-screen pager (Compose foundation, no new dependency): touch to go on, swipe back, the progress marks at the top, a fade under reduced motion. TalkBack reads each page as one sentence; at twice the text size a page scrolls.
+- [x] Share or save a page: drawn into an image (Compose's `GraphicsLayer` to a bitmap, 1080 by 1920, the reader's theme and palette, Passo's name small at the foot), handed to the share sheet through a `FileProvider` in the cache (androidx.core, already in), or saved through the Storage Access Framework. The image holds no name, no place, and nothing the page does not show.
+- [x] Strings in English and Italian (plurals for every count); UI tests (`assertAccessible()`, `walkPage()`); a README screenshot; CHANGELOG.
 - [ ] On a device (owner): the share sheet with two or three apps, the image in both themes.
+
+Done on 2 Nov 2026 (§15, «Your year on foot»), the device check left to the owner.
 
 **Acceptance:** a year with data opens by hand from Insights and from History; every number on
 a page matches History for the same period; a page shared as an image reads alone.
@@ -716,6 +720,19 @@ This log starts on 2 Nov 2026.
 - **Insights' streak card says since when; the interval walk has a mark of its own** (owner, 2 Nov 2026, from the review: "the two interface improvements"). (1) With the streak as the page's sentence, the card under it said the same words again («4 days in a row at your goal», twice in the first screen): it now says what the sentence does not, «days in a row, since Sep 20» («giorni di fila, dal 20 set»); under any other sentence it says it in full, as before. (2) The interval walk wore the brisk walk's mark (the way to a flag) on the Outings page, its card and the walk list, three plans alike in one column: it now has its own, `PassoIcons.Intervals`, the line low and high in turns from a dot, as the editor draws its blocks; the editor's explanation wears it too. A run keeps the bolt, every other walk the flag. README pictures `insights.png`, `outings.png`, `intervals.png` and `intervals-done.png` redrawn.
 - **A crash page in test builds** (owner, 2 Nov 2026: "the crash page as in the clock app"). Debug builds and the debug-signed release (`-PsignReleaseWithDebugKey`) carry `app/src/crashpage`: `CrashCatcher`, a provider installed before the Application and Hilt, and `CrashReportActivity`, plain views in a process of its own, with the stack trace to copy or share; never in a release signed with the release key. One difference from the sister's, because Passo mostly runs with nothing on screen (the service, the receivers, the widgets) and Android opens no activity from the background: there the report is a notification that opens the page, and the crash goes on to the system as usual, which records it; on screen the page opens at once. The report is also kept in `noBackupFilesDir`, outside the backup's allowlist. Nothing is sent.
 - **The plan archived as the family's** (owner, 2 Nov 2026: "the same rules and mechanism, so they are uniform"). `PLANNING.md` keeps how it is made, the state, «Open», the architecture (§1 to §10, §12 to §14, which the code cites by number), the phases not done (9 and 12) and this log; the phases done went to `docs/planning/01-phases-0-14.md` and the log up to 1 Nov 2026 to `docs/planning/02-decisions-to-1-nov-2026.md`, frozen, both moved without changing a line (checked: every line of the old file is in one of the three). `tools/planning_index.py` writes `docs/planning/README.md`, the index of every archived title and, since Passo's log entries are bullets rather than headings, of every entry by its bold title. The open boxes of the phases done are carried in «Open». The rules are in «How it is made» and in CLAUDE.md.
+
+- **Your year on foot** (owner, 2 Nov 2026: "implement Phase 12"; §11 Phase 12, done but its device check). `YearInReview` (`:core:domain/year`, 17 tests on the plan's edge cases) makes the pages from the days, a year's steps by hour of the clock (`TrackingRepository.stepsByHour`, the year's minutes summed once when the pages open), the outings over (`SessionRepository.finishedBetween`) and the journeys; `:feature:year` draws them; Insights, History's year and Today in season open them. Decided on the way:
+  - **Counted days are Insights'**, within the year; a year is offered from its thirtieth, the current one "so far". The first page says whose year and since when; TalkBack hears it there.
+  - **The distance as a way**: the longest of the ten the year covers («A whole way, 2 times over: Via Francigena»), or a quarter, half or three quarters of the shortest; written with a colon, as the app writes a way's name elsewhere, so no article is needed in either language.
+  - **The rhythm** is «Your day: Saturday. Your hour: 6:00 PM.» (the weekday with the most steps on average over its counted days, the hour of the clock with the most steps): a weekday's article changes with it in Italian, so the sentence names it without one.
+  - **The goal's calendar is twelve small months**, each a strip of seven from its 1st (not a weekday grid, so twelve fit a phone's width), in the ramp of History's calendar (`HeatLevel`, `heatColor`): `CalendarHeatmap` draws one month. Drawn, not read: TalkBack hears the page's sentence, not 365 days.
+  - **The ways' page** gives each way the year's share of it (its progress at the year's end less its progress at the year's start), its stamps reached that year (not the start's) and whether it arrived; and names the cities walked that year (the box Phase 11 had left open).
+  - **The close** is chosen from the facts in this order: an arrival, the goal on half the days or more, more steps a day than the year before, a streak of seven days or more, ten outings or more, and otherwise every step of the year counted.
+  - **A page's sentence never carries its number** (the goal page said 182 in both, the same repetition the review removed from Insights): the number follows, large, with what it is under it.
+  - **Charts on a page are still**: a touch on a page goes on and a swipe goes back, and a chart that took both would hold the reader; their words are the page's.
+  - **The image** is the page as drawn (its eyebrow included, the bars and the buttons left out), fitted into 1080 by 1920 on the page's ground with "Passo" small at the foot: rather than drawing each page again off screen at that size. One image at a time in the cache's `year/`, handed out by a `FileProvider` (androidx.core, already in); saved through the Storage Access Framework.
+  - **Today's card** is remembered as closed for its year in a preference outside the settings (`yearCardClosed`), like the outing summary seen: not in the backup's settings, nothing else to change it.
+  README picture `year.png` (the goal's page), beside the foldable in the table's last row.
 
 ### Open
 

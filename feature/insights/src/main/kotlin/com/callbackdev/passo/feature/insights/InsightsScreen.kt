@@ -79,10 +79,18 @@ fun InsightsRoute(
     onOpenPeriod: (PeriodScale, LocalDate) -> Unit,
     onOpenWays: () -> Unit,
     bottomPadding: Dp,
+    onOpenYear: (Int) -> Unit = {},
     viewModel: InsightsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    InsightsScreen(state, onOpenSettings, onOpenPeriod, onOpenWays = onOpenWays, bottomPadding = bottomPadding)
+    InsightsScreen(
+        state,
+        onOpenSettings,
+        onOpenPeriod,
+        onOpenWays = onOpenWays,
+        bottomPadding = bottomPadding,
+        onOpenYear = onOpenYear,
+    )
 }
 
 /**
@@ -99,6 +107,7 @@ fun InsightsScreen(
     modifier: Modifier = Modifier,
     onOpenWays: () -> Unit = {},
     bottomPadding: Dp = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+    onOpenYear: (Int) -> Unit = {},
 ) {
     Surface(modifier = modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize().statusBarsPadding()) {
@@ -115,7 +124,7 @@ fun InsightsScreen(
                     Icon(PassoIcons.Settings, contentDescription = stringResource(R.string.insights_settings))
                 }
             }
-            if (state != null) InsightsList(state, onOpenPeriod, onOpenWays, bottomPadding)
+            if (state != null) InsightsList(state, onOpenPeriod, onOpenWays, onOpenYear, bottomPadding)
         }
     }
 }
@@ -125,6 +134,7 @@ private fun InsightsList(
     state: InsightsUiState,
     onOpenPeriod: (PeriodScale, LocalDate) -> Unit,
     onOpenWays: () -> Unit,
+    onOpenYear: (Int) -> Unit,
     bottomPadding: Dp,
 ) {
     val format = rememberMeasureFormatter(state.units)
@@ -135,6 +145,7 @@ private fun InsightsList(
     ) {
         item(key = "headline") { Headline(state, format) }
         val firstDay = insights.firstDay ?: return@LazyColumn
+        state.seasonYear?.let { year -> item(key = "year-season") { YearSeasonCard(year, onOpenYear) } }
         item(key = "streak") { StreakCard(state) }
         state.way?.let { way ->
             item(key = "way-header") { GroupHeader(stringResource(R.string.insights_group_way)) }
@@ -146,6 +157,11 @@ private fun InsightsList(
 
         item(key = "averages-header") { GroupHeader(stringResource(R.string.insights_group_averages)) }
         item(key = "averages") { Averages(state, format) }
+
+        if (state.offeredYears.isNotEmpty()) {
+            item(key = "years-header") { GroupHeader(stringResource(R.string.insights_group_year)) }
+            item(key = "years") { YearDoors(state.offeredYears, state.today.year, onOpenYear) }
+        }
 
         item(key = "totals-header") {
             GroupHeader(stringResource(R.string.insights_group_totals, shortDateWithYear(firstDay)))
@@ -627,4 +643,6 @@ object InsightsTags {
     const val TOTALS = "insights_totals"
     const val WAY = "insights_way"
     const val WAYS_DOOR = "insights_ways_door"
+    const val YEARS = "insights_years"
+    const val YEAR_SEASON = "insights_year_season"
 }
