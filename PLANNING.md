@@ -53,8 +53,9 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
 - [ ] **On a device (owner): a 30-minute interval outing with the screen off**: each change
   felt, its delay read from the log, the battery check of §9, numbers in `docs/battery/`
   (archive 01, «Phase 13»).
-- [ ] **On a device (owner): the new ways' maps** in both themes and on an open foldable; the
-  Ways page with its groups at twice the text size (archive 01, «Phase 14»).
+- [x] **On a device (owner): the new ways' maps** in both themes and on an open foldable; the
+  Ways page with its groups at twice the text size (archive 01, «Phase 14»). Done by the owner
+  (confirmed on 2 Nov 2026).
 - [x] **On a device (owner): an outing left still on a phone with no wake-up step counter**: the
   log's `SIGNAL_WAKE` row says it was let go about 15 minutes after the last step (archive 03, «2 Nov
   2026. A review of the wakes»). Done by the owner on 2 Nov 2026, before the tag.
@@ -66,7 +67,8 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
 
 Read again on 2 Nov 2026, at archive 01 and 02: the boxes above are the ones the phases done had
 left open, and the review's device check. Read again at 1.1.0's tag: the owner's checks of the
-update, the outing let go and Your year on foot are done; §15 has no open question.
+update, the outing let go, Your year on foot and the new ways' maps are done; §15 has no open
+question.
 
 ---
 
