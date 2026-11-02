@@ -96,8 +96,8 @@
     <string name="widget_config_content">Content</string>
     <string name="widget_config_show_sentence">The day\'s sentence</string>
     <string name="widget_config_show_sentence_note">Ahead of or behind a usual day, the steps still to go, or when the goal was met. Shown where the card has room for it.</string>
-    <string name="widget_config_show_hours">The day hour by hour</string>
-    <string name="widget_config_show_hours_note">Today\'s steps in 24 bars, the hour under way highlighted. On cards at least three cells wide and two rows tall.</string>
+    <string name="widget_config_show_hours">Bars under the count</string>
+    <string name="widget_config_show_hours_note">Today hour by hour, or the last 7 days. On cards at least three cells wide and two rows tall.</string>
     <string name="widget_config_show_goal">The goal</string>
     <string name="widget_config_show_goal_note">How much of today\'s goal is walked, under the sentence, with a check once it is met.</string>
     <string name="widget_config_show_metrics">Distance and calories</string>
@@ -125,4 +125,12 @@
     <string name="widget_preview_goal">of 10,000 steps</string>
     <string name="widget_preview_sentence">1,484 steps ahead of usual</string>
     <string name="widget_preview_share">78% of 10,000</string>
+    <plurals name="widget_week_description">
+        <item quantity="one">The last 7 days: %1$d at the goal. The best: %2$s, with %3$s steps.</item>
+        <item quantity="other">The last 7 days: %1$d at the goal. The best: %2$s, with %3$s steps.</item>
+    </plurals>
+    <string name="widget_week_description_empty">The last 7 days: no steps yet.</string>
+    <string name="widget_config_panel">The bars</string>
+    <string name="widget_panel_hours">Today, hour by hour</string>
+    <string name="widget_panel_week">The last 7 days, against the goal</string>
 </resources>

@@ -26,6 +26,12 @@ enum class WidgetBackground { LIGHT, DARK, SYSTEM, COLOR }
 enum class WidgetArrangement { RING_START, RING_END }
 
 /**
+ * What «At a glance»'s bars show on a wide, tall card: today hour by hour, or the last seven
+ * days against their goals (PLANNING.md §15, «The last seven days on At a glance»).
+ */
+enum class WidgetPanel { HOURS, WEEK }
+
+/**
  * One widget's look and content, chosen from the launcher's reconfigure flow and kept per
  * widget, so the same card can sit on a home screen twice, dressed twice. The default is
  * a solid blue card (`docs/adr/0005-widgets.md`), worn before anybody configures anything.
@@ -35,7 +41,8 @@ enum class WidgetArrangement { RING_START, RING_END }
  * @property showGoal «In words»: the share of the goal walked, with the goal.
  * @property showMetrics «In words»: distance and active calories, estimated, on one line.
  * @property showDetails «In words», tall cards: the day in figures, one quantity per line.
- * @property showHours «At a glance», wide and tall cards: the day hour by hour, in 24 bars.
+ * @property showHours «At a glance», wide and tall cards: the bars under the count ([panel]).
+ * @property panel what those bars show: today hour by hour, or the last seven days.
  * @property cardColor kept while another background is picked, so coming back finds it.
  */
 data class WidgetLook(
@@ -48,6 +55,7 @@ data class WidgetLook(
     val showDetails: Boolean = true,
     val showHours: Boolean = true,
     val arrangement: WidgetArrangement = WidgetArrangement.RING_START,
+    val panel: WidgetPanel = WidgetPanel.HOURS,
 ) {
     companion object {
         /** Solid: below [INK_TRUST_FLOOR_PCT] the ink has to ask the wallpaper, a different conversation. */
@@ -83,6 +91,9 @@ class WidgetLookStore internal constructor(private val dataStore: DataStore<Pref
             arrangement = prefs[arrangementKey(appWidgetId)]
                 ?.let { name -> WidgetArrangement.entries.firstOrNull { it.name == name } }
                 ?: default.arrangement,
+            panel = prefs[panelKey(appWidgetId)]
+                ?.let { name -> WidgetPanel.entries.firstOrNull { it.name == name } }
+                ?: default.panel,
         )
     }
 
@@ -97,6 +108,7 @@ class WidgetLookStore internal constructor(private val dataStore: DataStore<Pref
             prefs[detailsKey(appWidgetId)] = look.showDetails
             prefs[hoursKey(appWidgetId)] = look.showHours
             prefs[arrangementKey(appWidgetId)] = look.arrangement.name
+            prefs[panelKey(appWidgetId)] = look.panel.name
         }
     }
 
@@ -111,7 +123,7 @@ class WidgetLookStore internal constructor(private val dataStore: DataStore<Pref
 
     private fun keysOf(id: Int): List<Preferences.Key<*>> = listOf(
         backgroundKey(id), opacityKey(id), colorKey(id), sentenceKey(id), goalKey(id),
-        metricsKey(id), detailsKey(id), hoursKey(id), arrangementKey(id),
+        metricsKey(id), detailsKey(id), hoursKey(id), arrangementKey(id), panelKey(id),
     )
 
     private fun backgroundKey(id: Int) = stringPreferencesKey("bg_$id")
@@ -123,4 +135,5 @@ class WidgetLookStore internal constructor(private val dataStore: DataStore<Pref
     private fun detailsKey(id: Int) = booleanPreferencesKey("details_$id")
     private fun hoursKey(id: Int) = booleanPreferencesKey("hours_$id")
     private fun arrangementKey(id: Int) = stringPreferencesKey("arrangement_$id")
+    private fun panelKey(id: Int) = stringPreferencesKey("panel_$id")
 }

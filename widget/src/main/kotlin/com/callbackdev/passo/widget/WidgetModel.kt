@@ -20,9 +20,11 @@ import com.callbackdev.passo.core.tracking.StepTracking
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import javax.inject.Inject
@@ -55,7 +57,18 @@ data class WidgetModel(
  *
  * @property nowMinute the minute of the day the model was read at: the hour the bars highlight.
  */
-data class WidgetDay(val overview: TodayOverview, val hourly: HourlySteps, val nowMinute: Int)
+data class WidgetDay(
+    val overview: TodayOverview,
+    val hourly: HourlySteps,
+    val nowMinute: Int,
+    val week: List<WeekDay> = emptyList(),
+)
+
+/**
+ * One of the last seven days on «At a glance»'s bars, today last: its steps (today's live
+ * count), null before counting began, against its own goal.
+ */
+data class WeekDay(val date: LocalDate, val steps: Int?, val goalSteps: Int)
 
 /**
  * Reads a [WidgetModel]. The typical day is computed once per day and zone (it rests on past
@@ -109,11 +122,17 @@ constructor(
         )
         // The service's outing when it runs (ahead of what it wrote); the stored one otherwise.
         val session = liveSession.current.value?.session?.takeIf { it.live } ?: sessions.liveSession()
+        // The last seven days, read only for a card that shows them: six stored rows and today.
+        val week = if (look.showHours && look.panel == WidgetPanel.WEEK) {
+            lastWeek(day, overview.steps, settings.dailyGoalSteps)
+        } else {
+            emptyList()
+        }
         return WidgetModel(
             look,
             settings,
             state,
-            WidgetDay(overview, HourlySteps.of(minutes), nowMinute),
+            WidgetDay(overview, HourlySteps.of(minutes), nowMinute, week),
             session = session?.takeIf { state == CountingState.COUNTING },
         )
     }
@@ -127,6 +146,23 @@ constructor(
      */
     suspend fun loadForCard(appWidgetId: Int): WidgetModel =
         guardedLoad(LOAD_TIMEOUT_MILLIS, "widget $appWidgetId") { load(appWidgetId) }
+
+    private suspend fun lastWeek(today: Long, todaySteps: Int, goalSteps: Int): List<WeekDay> {
+        val rows = tracking.observeSummaries(today - WEEK_DAYS + 1, today).first().associateBy { it.localEpochDay }
+        val first = tracking.observeFirstRecordedDay().first()
+        return (today - WEEK_DAYS + 1..today).map { day ->
+            val row = rows[day]
+            WeekDay(
+                date = LocalDate.ofEpochDay(day),
+                steps = when {
+                    day == today -> todaySteps
+                    first == null || day < first -> null
+                    else -> row?.steps ?: 0
+                },
+                goalSteps = row?.goalSteps ?: goalSteps,
+            )
+        }
+    }
 
     private suspend fun typicalFor(day: Long, zone: ZoneId): TypicalDay? = typicalLock.withLock {
         val key = day to zone
@@ -144,6 +180,7 @@ constructor(
         /** A read is a few queries on the phone's own storage; ten seconds is something wrong. */
         const val LOAD_TIMEOUT_MILLIS: Long = 10_000L
         private const val MINUTES_PER_HOUR = 60
+        private const val WEEK_DAYS = 7L
     }
 }
 

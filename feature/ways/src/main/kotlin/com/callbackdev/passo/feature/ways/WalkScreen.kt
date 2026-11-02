@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -37,6 +38,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.LifecycleStartEffect
 import com.callbackdev.passo.core.designsystem.components.PlaceText
 import com.callbackdev.passo.core.designsystem.components.SegmentLabel
 import com.callbackdev.passo.core.designsystem.components.SessionCard
@@ -70,6 +72,7 @@ class WalkActions(
     val delete: (Long) -> Unit = {},
     val leave: (Long) -> Unit = {},
     val prepareVoice: () -> Unit = {},
+    val releaseVoice: () -> Unit = {},
     val tryVoice: () -> Unit = {},
     val openVoiceSettings: () -> Unit = {},
 )
@@ -106,6 +109,13 @@ internal fun WalkPage(
     var leaving by rememberSaveable { mutableStateOf(false) }
     // With the voice on, the engine is asked once whether it can speak: the page says so first.
     LaunchedEffect(state.walkVoice) { if (state.walkVoice != SessionVoice.OFF) actions.prepareVoice() }
+    // Bound only while the page is on screen: its ViewModel lives as long as the activity, and kept
+    // the engine bound with the app in the background (owner's review, 2 Nov 2026).
+    val voiceOn by rememberUpdatedState(state.walkVoice != SessionVoice.OFF)
+    LifecycleStartEffect(Unit) {
+        if (voiceOn) actions.prepareVoice()
+        onStopOrDispose { actions.releaseVoice() }
+    }
     val list = rememberLazyListState()
     val reduced = reducedMotion()
     val haptics = LocalHapticFeedback.current

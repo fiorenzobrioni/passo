@@ -1,5 +1,6 @@
 package com.callbackdev.passo.core.tracking
 
+import android.app.NotificationManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -14,7 +15,9 @@ import java.time.Instant
  * The goal alarms going off, and the clock moving under them (PLANNING.md §8). An alarm is an
  * instant, so a new time zone or a clock set by hand would leave 20:00 at the old 20:00: both
  * broadcasts arm the alarms again for the new local time. They reach a manifest receiver
- * because Android exempts them from the background limits on implicit broadcasts.
+ * because Android exempts them from the background limits on implicit broadcasts. And Passo's
+ * notifications, or the goals' channel, turned off or on in the system's settings, which the
+ * system tells this package alone: the evening reminder is not armed while it could not show.
  */
 class GoalAlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -27,8 +30,14 @@ class GoalAlarmReceiver : BroadcastReceiver() {
             try {
                 when (action) {
                     GoalAlarms.ACTION_EVENING_REMINDER -> goals.eveningReminder(dueAt)
+
                     GoalAlarms.ACTION_WEEKLY_SUMMARY -> goals.weeklySummary(dueAt)
+
                     Intent.ACTION_TIME_CHANGED, Intent.ACTION_TIMEZONE_CHANGED -> goals.reschedule()
+
+                    NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED,
+                    NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED,
+                    -> goals.accessMayHaveChanged()
                 }
             } finally {
                 pending.finish()

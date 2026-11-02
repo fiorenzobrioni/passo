@@ -141,4 +141,5 @@
 
     <string name="history_empty_title">Lo storico parte dal tuo primo giorno</string>
     <string name="history_empty_body">Ogni giorno contato da Passo resta qui, sul telefono. Torna domani per il tuo primo giorno completo.</string>
+    <string name="history_year_pages">Il tuo %1$d a piedi, in pagine</string>
 </resources>

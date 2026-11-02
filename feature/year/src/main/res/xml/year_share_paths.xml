@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only the cache's "year" folder, where the shared page's image is written. -->
+<paths>
+    <cache-path
+        name="year"
+        path="year/" />
+</paths>

@@ -3,13 +3,18 @@ package com.callbackdev.passo.feature.history
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,6 +53,7 @@ import com.callbackdev.passo.core.domain.history.PeriodBar
 import com.callbackdev.passo.core.domain.history.PeriodOverview
 import com.callbackdev.passo.core.domain.history.PeriodScale
 import com.callbackdev.passo.core.domain.metrics.MetricsConstants
+import com.callbackdev.passo.core.domain.year.YearInReview
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.TextStyle
@@ -65,6 +71,7 @@ internal fun PeriodPage(
     format: MeasureFormatter,
     onOpen: (PeriodScale, LocalDate) -> Unit,
     bottomPadding: Dp,
+    onOpenYear: (Int) -> Unit = {},
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize().testTag(HistoryTags.PAGE),
@@ -72,6 +79,22 @@ internal fun PeriodPage(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item(key = "headline") { PageHeadline(periodHeadline(overview), periodDetailLine(overview, format)) }
+        // A year with its thirty days counted opens as pages too (Your year on foot, Phase 12).
+        if (overview.period.scale == PeriodScale.YEAR && overview.countedDays >= YearInReview.MIN_COUNTED_DAYS) {
+            item(key = "year-pages") {
+                val year = overview.period.start.year
+                TextButton(
+                    onClick = { onOpenYear(year) },
+                    modifier = Modifier.padding(
+                        horizontal = 8.dp,
+                    ).heightIn(min = 48.dp).testTag(HistoryTags.YEAR_PAGES),
+                ) {
+                    Icon(PassoIcons.Calendar, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.size(8.dp))
+                    Text(stringResource(R.string.history_year_pages, year))
+                }
+            }
+        }
         item(key = "bars") { BarsCard(overview, format, onOpen) }
         if (overview.period.scale == PeriodScale.MONTH && overview.countedDays > 0) {
             item(key = "calendar") { CalendarCard(overview, today, firstDayOfWeek, format, onOpen) }

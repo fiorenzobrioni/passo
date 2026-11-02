@@ -82,6 +82,7 @@ fun HistoryRoute(
     target: HistoryTarget?,
     onTargetShown: () -> Unit,
     bottomPadding: Dp,
+    onOpenYear: (Int) -> Unit = {},
     viewModel: HistoryViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -95,6 +96,7 @@ fun HistoryRoute(
         target = target,
         onTargetShown = onTargetShown,
         bottomPadding = bottomPadding,
+        onOpenYear = onOpenYear,
     )
 }
 
@@ -116,6 +118,7 @@ fun HistoryScreen(
     target: HistoryTarget? = null,
     onTargetShown: () -> Unit = {},
     bottomPadding: Dp = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+    onOpenYear: (Int) -> Unit = {},
 ) {
     var scale by rememberSaveable { mutableStateOf(PeriodScale.WEEK) }
     // The day the reader is looking at: it survives a change of scale, so a week opens on
@@ -193,6 +196,7 @@ fun HistoryScreen(
                                 anchorDay = date.toEpochDay()
                                 scale = newScale
                             },
+                            onOpenYear = onOpenYear,
                         )
                     }
                 }
@@ -316,6 +320,7 @@ private fun Pages(
     dayDetail: @Composable (LocalDate) -> DayDetail?,
     bottomPadding: Dp,
     onOpen: (PeriodScale, LocalDate) -> Unit,
+    onOpenYear: (Int) -> Unit,
 ) {
     val format = rememberMeasureFormatter(state.units)
     HorizontalPager(
@@ -331,7 +336,7 @@ private fun Pages(
                 val overview = remember(period, state.days, state.today, state.firstDay, state.goalSteps) {
                     PeriodOverview.of(period, state.days, state.today, state.firstDay, state.goalSteps)
                 }
-                PeriodPage(overview, state.today, state.firstDayOfWeek, format, onOpen, bottomPadding)
+                PeriodPage(overview, state.today, state.firstDayOfWeek, format, onOpen, bottomPadding, onOpenYear)
             }
         }
     }
@@ -339,6 +344,7 @@ private fun Pages(
 
 /** Hooks for the UI tests. */
 object HistoryTags {
+    const val YEAR_PAGES = "history_year_pages"
     const val SCALES = "history_scales"
     const val NAVIGATOR = "history_navigator"
     const val LATEST = "history_latest"

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Your year on foot (PLANNING.md §11 Phase 12): one thing a page, one sentence before any number. -->
+<resources>
+    <string name="year_title_full">Your %1$d on foot</string>
+    <string name="year_title_so_far">Your %1$d so far</string>
+    <string name="year_since">Since %1$s</string>
+    <string name="year_close">Close</string>
+    <string name="year_share">Share</string>
+    <string name="year_save">Save</string>
+    <string name="year_saved">Saved</string>
+    <string name="year_save_failed">The image could not be saved</string>
+    <string name="year_share_chooser">Share this page</string>
+    <string name="year_next">Next page</string>
+    <string name="year_previous">Previous page</string>
+    <string name="year_progress">Page %1$d of %2$d</string>
+    <string name="year_hint">Touch to go on, swipe back</string>
+    <string name="year_not_offered">Not enough days yet: a year is told from its thirtieth day counted.</string>
+    <string name="year_signature">Passo</string>
+
+    <plurals name="year_steps_unit">
+        <item quantity="one">step</item>
+        <item quantity="other">steps</item>
+    </plurals>
+    <plurals name="year_steps_count">
+        <item quantity="one">%1$s step</item>
+        <item quantity="other">%1$s steps</item>
+    </plurals>
+    <plurals name="year_steps_a_day">
+        <item quantity="one">%1$s step a day</item>
+        <item quantity="other">%1$s steps a day</item>
+    </plurals>
+    <plurals name="year_steps_a_day_unit">
+        <item quantity="one">step a day</item>
+        <item quantity="other">steps a day</item>
+    </plurals>
+    <string name="year_hours_minutes">%1$d h %2$d min</string>
+    <string name="year_minutes">%1$d min</string>
+
+    <!-- 1. The year in steps and in distance -->
+    <string name="year_distance_more">Farther than a whole way: %1$s</string>
+    <plurals name="year_distance_times">
+        <item quantity="one">A whole way, %1$d time over: %2$s</item>
+        <item quantity="other">A whole way, %1$d times over: %2$s</item>
+    </plurals>
+    <string name="year_distance_quarter">A quarter of a way: %1$s</string>
+    <string name="year_distance_half">Half of a way: %1$s</string>
+    <string name="year_distance_three_quarters">Three quarters of a way: %1$s</string>
+    <string name="year_distance_plain">Your year in steps</string>
+    <string name="year_distance_detail">About %1$s, an estimate · %2$s</string>
+
+    <!-- 2. The months -->
+    <string name="year_months_title">%1$s was your best month</string>
+    <string name="year_months_chart">Your steps month by month in %1$d</string>
+    <string name="year_months_bar">%1$s: %2$s</string>
+    <string name="year_months_detail">Each bar is a month\'s steps.</string>
+
+    <!-- 3. The best day -->
+    <string name="year_best_title">Your best day: %1$s</string>
+    <string name="year_best_outing">With an outing: %1$s, %2$s</string>
+    <string name="year_best_walk">With a walk of %1$s, %2$s</string>
+
+    <!-- 4. The rhythm -->
+    <string name="year_rhythm_title">Your day: %1$s. Your hour: %2$s.</string>
+    <string name="year_rhythm_detail">%1$s, on average: %2$s</string>
+    <string name="year_rhythm_chart">Your average steps by day of the week</string>
+
+    <!-- 5. The goal -->
+    <string name="year_goal_title">Your days at the goal</string>
+    <string name="year_goal_none">No day at your goal this year</string>
+    <plurals name="year_goal_unit">
+        <item quantity="one">of %1$d days</item>
+        <item quantity="other">of %1$d days</item>
+    </plurals>
+    <plurals name="year_goal_streak">
+        <item quantity="one">Longest streak: %1$d day, %2$s</item>
+        <item quantity="other">Longest streak: %1$d days, %2$s</item>
+    </plurals>
+    <string name="year_range">%1$s – %2$s</string>
+    <string name="year_goal_calendar">Each day\'s ground says how close it came to its goal.</string>
+
+    <!-- 6. The outings -->
+    <plurals name="year_outings_title">
+        <item quantity="one">%1$d outing</item>
+        <item quantity="other">%1$d outings</item>
+    </plurals>
+    <string name="year_outings_detail">%1$s in motion. The longest: %2$s, %3$s.</string>
+    <plurals name="year_outings_intervals">
+        <item quantity="one">Of them, %1$d Japanese interval walk.</item>
+        <item quantity="other">Of them, %1$d Japanese interval walks.</item>
+    </plurals>
+
+    <!-- 7. The ways and the cities -->
+    <string name="year_ways_title">%1$s along the ways</string>
+    <plurals name="year_cities_title">
+        <item quantity="one">%1$d city walked</item>
+        <item quantity="other">%1$d cities walked</item>
+    </plurals>
+    <string name="year_way_line">%1$s: %2$s</string>
+    <plurals name="year_way_stamps">
+        <item quantity="one">%1$d stamp</item>
+        <item quantity="other">%1$d stamps</item>
+    </plurals>
+    <string name="year_way_arrived">walked to its end</string>
+    <string name="year_cities">Cities walked: %1$s</string>
+
+    <!-- 8. Against the year before -->
+    <string name="year_versus_up">More steps a day than in %1$d</string>
+    <string name="year_versus_down">Fewer steps a day than in %1$d</string>
+    <string name="year_versus_steady">Much like %1$d</string>
+    <string name="year_versus_detail_up">Against %1$s in %2$d: %3$s more.</string>
+    <string name="year_versus_detail_down">Against %1$s in %2$d: %3$s fewer.</string>
+    <string name="year_versus_detail_steady">Against %1$s in %2$d.</string>
+
+    <!-- 9. The close -->
+    <string name="year_close_arrived">A year that took you to the end of a way: %1$s.</string>
+    <plurals name="year_close_goal">
+        <item quantity="one">%1$d day at your goal: half the year or more.</item>
+        <item quantity="other">%1$d days at your goal: half the year or more.</item>
+    </plurals>
+    <string name="year_close_more">A year with more steps a day than %1$d.</string>
+    <plurals name="year_close_streak">
+        <item quantity="one">%1$d day in a row at your goal, this year.</item>
+        <item quantity="other">%1$d days in a row at your goal, this year.</item>
+    </plurals>
+    <plurals name="year_close_outings">
+        <item quantity="one">%1$d time out with a goal, this year.</item>
+        <item quantity="other">%1$d times out with a goal, this year.</item>
+    </plurals>
+    <plurals name="year_close_steps">
+        <item quantity="one">%1$s step, counted on your phone.</item>
+        <item quantity="other">%1$s steps, each one counted on your phone.</item>
+    </plurals>
+</resources>

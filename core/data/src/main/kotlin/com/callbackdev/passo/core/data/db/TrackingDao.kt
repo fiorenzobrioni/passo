@@ -41,6 +41,10 @@ abstract class TrackingDao {
     @Query("SELECT * FROM minute_steps WHERE localEpochDay IN (:days) ORDER BY epochMinute")
     abstract suspend fun minutesOnDays(days: List<Long>): List<MinuteStepsEntity>
 
+    /** The minutes of the days from [fromDay] to [toDay] included: a year's, for its rhythm. */
+    @Query("SELECT * FROM minute_steps WHERE localEpochDay BETWEEN :fromDay AND :toDay")
+    abstract suspend fun minutesBetween(fromDay: Long, toDay: Long): List<MinuteStepsEntity>
+
     /** The first day with steps recorded; null before the first. */
     @Query("SELECT MIN(localEpochDay) FROM daily_summary")
     abstract fun observeFirstRecordedDay(): Flow<Long?>

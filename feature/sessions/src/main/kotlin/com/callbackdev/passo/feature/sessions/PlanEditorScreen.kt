@@ -785,7 +785,7 @@ private fun IntervalsAbout() {
     ) {
         Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
             Icon(
-                PassoIcons.Outing,
+                PassoIcons.Intervals,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSecondaryContainer,
                 modifier = Modifier.size(24.dp),

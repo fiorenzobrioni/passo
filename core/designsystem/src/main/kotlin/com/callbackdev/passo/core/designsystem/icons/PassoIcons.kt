@@ -45,6 +45,29 @@ object PassoIcons {
         }
     }
 
+    /** A cross: closes a full-screen page (Your year on foot). */
+    val Close: ImageVector by lazy {
+        icon("close") {
+            moveTo(6f, 6f)
+            lineTo(18f, 18f)
+            moveTo(18f, 6f)
+            lineTo(6f, 18f)
+        }
+    }
+
+    /** Three dots joined: hands a page to another app (Your year on foot). */
+    val Share: ImageVector by lazy {
+        icon("share") {
+            circle(17.5f, 5.5f, 2.5f)
+            circle(6.5f, 12f, 2.5f)
+            circle(17.5f, 18.5f, 2.5f)
+            moveTo(8.7f, 10.7f)
+            lineTo(15.3f, 6.8f)
+            moveTo(8.7f, 13.3f)
+            lineTo(15.3f, 17.2f)
+        }
+    }
+
     val ChevronRight: ImageVector by lazy {
         icon("chevron_right", autoMirror = true) {
             moveTo(9.5f, 6f)
@@ -499,6 +522,24 @@ object PassoIcons {
             lineTo(16f, 3f)
             lineTo(20.5f, 5f)
             lineTo(16f, 7f)
+        }
+    }
+
+    /**
+     * The interval walk (Phase 13): from a dot, slow and fast in turns, the line low and high, as
+     * the editor draws its blocks. Set apart from [Outing], which every other walk wears.
+     */
+    val Intervals: ImageVector by lazy {
+        icon("intervals") {
+            circle(4f, 17f, 1.8f)
+            moveTo(5.8f, 17f)
+            lineTo(8f, 17f)
+            lineTo(8f, 8f)
+            lineTo(12.5f, 8f)
+            lineTo(12.5f, 17f)
+            lineTo(16f, 17f)
+            lineTo(16f, 8f)
+            lineTo(20.5f, 8f)
         }
     }
 

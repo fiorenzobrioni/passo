@@ -111,3 +111,8 @@ part in the style of Chiaro's «Colpo d'occhio».
   25 Sep 2026.
 - Chiaro's card colours and ink rule are copied, not shared: a change there is carried here by
   hand, as the schemes are (ADR 0004).
+
+**Amended 2 Nov 2026** (owner): «At a glance»'s bars can show the last seven days instead of
+today's hours, chosen per card (`WidgetLook.panel`): seven boxes on the world's scale with a
+hairline at today's goal, under the same ink rule (PLANNING.md §15, «The last seven days on At a
+glance»).

@@ -122,6 +122,8 @@ class HistoryScreenTest {
         compose.onNodeWithText("Daily average by month").assertExists()
         // Before counting began, a month is not counted.
         compose.onNode(hasContentDescription("January 2026: not counted")).assertExists()
+        // A year with thirty days counted opens as Your year on foot (Phase 12).
+        compose.onNodeWithText("Your 2026 on foot, in pages").assertExists()
         snapshot("history_year")
     }
 

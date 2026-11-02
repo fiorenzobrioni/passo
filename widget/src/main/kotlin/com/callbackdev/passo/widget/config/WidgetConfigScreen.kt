@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -60,6 +61,7 @@ import com.callbackdev.passo.widget.WidgetBackground
 import com.callbackdev.passo.widget.WidgetKind
 import com.callbackdev.passo.widget.WidgetLook
 import com.callbackdev.passo.widget.WidgetModel
+import com.callbackdev.passo.widget.WidgetPanel
 import com.callbackdev.passo.widget.isNight
 import com.callbackdev.passo.widget.widgetCardFill
 import com.callbackdev.passo.widget.widgetDressFor
@@ -158,6 +160,25 @@ fun WidgetConfigScreen(
                             checked = look.showDetails,
                             onChange = { onLook(look.copy(showDetails = it)) },
                         )
+                    }
+                }
+            }
+
+            // What the bars show, once there are bars: today hour by hour, or the last seven days.
+            if (kind == WidgetKind.GLANCE && look.showHours) {
+                GroupHeader(stringResource(R.string.widget_config_panel))
+                SettingsGroup {
+                    Column(Modifier.selectableGroup()) {
+                        listOf(
+                            WidgetPanel.HOURS to R.string.widget_panel_hours,
+                            WidgetPanel.WEEK to R.string.widget_panel_week,
+                        ).forEach { (panel, label) ->
+                            ChoiceRow(
+                                label = stringResource(label),
+                                selected = look.panel == panel,
+                                onPick = { onLook(look.copy(panel = panel)) },
+                            )
+                        }
                     }
                 }
             }
@@ -327,6 +348,8 @@ private fun ChoiceRow(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
+            // A finger's 48dp even for a label on one line, which the padding alone left at 46.
+            .heightIn(min = 48.dp)
             .selectable(selected = selected, onClick = onPick, role = Role.RadioButton)
             .padding(horizontal = 16.dp, vertical = 10.dp),
     ) {

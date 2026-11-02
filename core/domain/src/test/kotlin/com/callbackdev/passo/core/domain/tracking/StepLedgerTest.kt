@@ -53,6 +53,43 @@ class StepLedgerTest {
     }
 
     @Test
+    fun `a write asked for is asked once, until the buffer is drained`() {
+        val ledger = StepLedger(device.stateAt(1_000, start))
+        assertThat(ledger.recordAt(1_100, start + 45 * SECOND)).isTrue()
+
+        // The write is under way: what comes meanwhile rides on it, past a minute or not.
+        assertThat(ledger.recordAt(1_150, start + 50 * SECOND)).isFalse()
+        assertThat(ledger.recordAt(1_260, start + 70 * SECOND)).isFalse()
+
+        ledger.drain()
+        assertThat(ledger.recordAt(1_360, start + 100 * SECOND)).isTrue()
+    }
+
+    @Test
+    fun `a burst handed over at once asks for one write`() {
+        val ledger = StepLedger(device.stateAt(1_000, start))
+        val delivered = start + 600 * SECOND
+
+        // Ten minutes of walking held in the FIFO, one step every half second.
+        val asks = (1..1_200).count { i ->
+            ledger.record(device.sample(1_000L + i, start + i * 500L), device.snapshotAt(delivered))
+        }
+
+        assertThat(asks).isEqualTo(1)
+        assertThat(ledger.drain()?.increments?.sumOf { it.steps }).isEqualTo(1_200)
+    }
+
+    @Test
+    fun `after a failed write, the next trigger asks again`() {
+        val ledger = StepLedger(device.stateAt(1_000, start))
+        assertThat(ledger.recordAt(1_100, start + 45 * SECOND)).isTrue()
+        val failed = checkNotNull(ledger.drain())
+        ledger.restore(failed)
+
+        assertThat(ledger.recordAt(1_110, start + 50 * SECOND)).isTrue()
+    }
+
+    @Test
     fun `a new boot session is written at once and logged`() {
         val ledger = StepLedger(device.stateAt(5_000, start))
         val nextBoot = Device(bootWall = start + 3_600 * SECOND, bootCount = 2)

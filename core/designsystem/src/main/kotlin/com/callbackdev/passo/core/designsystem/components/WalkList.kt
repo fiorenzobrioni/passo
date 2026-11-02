@@ -115,7 +115,7 @@ private fun SessionRow(outing: Outing.Planned, format: MeasureFormatter) {
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
-                    imageVector = sessionIcon(session.intensity),
+                    imageVector = sessionIcon(session.intensity, session.goalKind),
                     contentDescription = null,
                     tint = if (reached) PassoTheme.colors.goal else MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(20.dp),

@@ -2,8 +2,15 @@ package com.callbackdev.passo.core.domain.widget
 
 /** What can make a home-screen widget worth repainting (PLANNING.md §7, update strategy). */
 enum class WidgetEvent {
-    /** The screen came on, or the phone was unlocked: the sensor has just been flushed. */
+    /** The screen came on: the sensor has just been flushed. */
     SCREEN_ON,
+
+    /**
+     * The phone was unlocked with the screen already on: the cards were drawn when it came on,
+     * seconds ago, and are drawn again only if the count moved since (the sensor has just been
+     * flushed again).
+     */
+    UNLOCKED,
 
     /** The screen went off: nothing is repainted until it comes back. */
     SCREEN_OFF,
@@ -57,7 +64,8 @@ class WidgetUpdatePolicy(private val intervalMillis: Long = MIN_INTERVAL_MILLIS,
 
     /**
      * @param nowElapsed the monotonic clock, in milliseconds.
-     * @param steps today's count as it stands now; only [WidgetEvent.STEPS] reads it.
+     * @param steps today's count as it stands now; only [WidgetEvent.STEPS] and
+     *   [WidgetEvent.UNLOCKED] read it.
      * @param goalSteps today's goal, to repaint at once the moment it is reached.
      */
     fun decide(event: WidgetEvent, nowElapsed: Long, steps: Int = 0, goalSteps: Int = Int.MAX_VALUE): WidgetDecision =
@@ -70,6 +78,11 @@ class WidgetUpdatePolicy(private val intervalMillis: Long = MIN_INTERVAL_MILLIS,
             WidgetEvent.SCREEN_ON -> {
                 interactive = true
                 WidgetDecision.Now
+            }
+
+            WidgetEvent.UNLOCKED -> {
+                interactive = true
+                if (lastPushedSteps == null || steps != lastPushedSteps) WidgetDecision.Now else WidgetDecision.Skip
             }
 
             WidgetEvent.TRACKING_STATE, WidgetEvent.SETTINGS -> WidgetDecision.Now

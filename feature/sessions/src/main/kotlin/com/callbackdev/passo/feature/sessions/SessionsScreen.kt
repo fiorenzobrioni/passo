@@ -408,7 +408,7 @@ private fun PlanCard(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                PlanMark(sessionIcon(plan.intensity))
+                PlanMark(sessionIcon(plan.intensity, plan.goalKind))
                 Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(res.sessionName(plan), style = MaterialTheme.typography.titleMedium)
                     Text(

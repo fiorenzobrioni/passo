@@ -94,8 +94,8 @@
     <string name="widget_config_content">Contenuto</string>
     <string name="widget_config_show_sentence">La frase del giorno</string>
     <string name="widget_config_show_sentence_note">Avanti o indietro rispetto a un giorno come tanti, i passi che mancano, o quando hai raggiunto l\'obiettivo. Compare dove la card ha spazio.</string>
-    <string name="widget_config_show_hours">La giornata ora per ora</string>
-    <string name="widget_config_show_hours_note">I passi di oggi in 24 barre, con l\'ora in corso in evidenza. Sulle card larghe almeno tre celle e alte due righe.</string>
+    <string name="widget_config_show_hours">Barre sotto il conteggio</string>
+    <string name="widget_config_show_hours_note">Oggi ora per ora, o gli ultimi 7 giorni. Sulle card larghe almeno tre celle e alte due righe.</string>
     <string name="widget_config_show_goal">L\'obiettivo</string>
     <string name="widget_config_show_goal_note">Quanto dell\'obiettivo di oggi hai già camminato, sotto la frase, con una spunta quando è raggiunto.</string>
     <string name="widget_config_show_metrics">Distanza e calorie</string>
@@ -122,4 +122,13 @@
     <string name="widget_preview_goal">di 10.000 passi</string>
     <string name="widget_preview_sentence">1.484 passi in più del solito</string>
     <string name="widget_preview_share">78% di 10.000</string>
+    <plurals name="widget_week_description">
+        <item quantity="one">Gli ultimi 7 giorni: %1$d all\'obiettivo. Il migliore: %2$s, con %3$s passi.</item>
+        <item quantity="many">Gli ultimi 7 giorni: %1$d all\'obiettivo. Il migliore: %2$s, con %3$s passi.</item>
+        <item quantity="other">Gli ultimi 7 giorni: %1$d all\'obiettivo. Il migliore: %2$s, con %3$s passi.</item>
+    </plurals>
+    <string name="widget_week_description_empty">Gli ultimi 7 giorni: ancora nessun passo.</string>
+    <string name="widget_config_panel">Le barre</string>
+    <string name="widget_panel_hours">Oggi, ora per ora</string>
+    <string name="widget_panel_week">Gli ultimi 7 giorni, contro l\'obiettivo</string>
 </resources>

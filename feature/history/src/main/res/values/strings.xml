@@ -141,4 +141,5 @@
     <!-- Nothing yet -->
     <string name="history_empty_title">History starts with your first day</string>
     <string name="history_empty_body">Every day Passo counts is kept here, on the phone. Come back tomorrow for your first full day.</string>
+    <string name="history_year_pages">Your %1$d on foot, in pages</string>
 </resources>

@@ -305,6 +305,9 @@ constructor(
     /** A walk's page with its voice on: the engine is bound, to say whether it can speak. */
     fun prepareVoice() = speech.prepare()
 
+    /** The walk's page left the screen: the engine is let go, once it has finished a sample. */
+    fun releaseVoice() = speech.release()
+
     /** The next place of [walk] as it would be told on reaching it: the reader's own walk. */
     fun tryWalkVoice(walk: WayId) {
         val current = state.value ?: return

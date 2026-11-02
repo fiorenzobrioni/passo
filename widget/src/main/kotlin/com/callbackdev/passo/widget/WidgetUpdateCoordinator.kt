@@ -64,7 +64,7 @@ constructor(
 
     override fun notify(event: WidgetEvent, steps: Int) {
         scope.launch {
-            if (event == WidgetEvent.STEPS) latestSteps = steps
+            if (event == WidgetEvent.STEPS || event == WidgetEvent.UNLOCKED) latestSteps = steps
             handle(event)
         }
     }

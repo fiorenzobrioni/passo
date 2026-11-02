@@ -177,6 +177,14 @@ Decided with the owner:
   take too, until 5 Oct 2026); an interval outing's delays are one row when it ends; the cost is to be read with `batterystats` on the owner's phone and written to
   `docs/battery/`.
 
+**Amended 2 Nov 2026** (owner, after a review): the lock is also let go once the outing has been
+still for 15 minutes (`SignalWake.letGoAt`, the longest outing at the latest). From then the outing
+is over and has nothing to tell on time; it is closed at the next step or look, as on every phone.
+Without it a forgotten outing kept the processor awake until the screen came on, up to the 4 h 10
+min bound. The moment is kept by a timer in the service, which exists only while the lock is held:
+the processor is awake anyway, so it shortens a wake and never makes one. It is the one timer of
+Passo's that runs with the screen off, and only under this lock.
+
 The cost, an estimate until measured: a processor kept awake with little to do draws in the order
 of 0.1 to 0.5 W above sleep, so about 0.5 to 1.5% of a 17 Wh battery for half an hour, 1 to 3%
 for an hour, 2 to 6% for two. A phone with GPS on for a run uses several times that.

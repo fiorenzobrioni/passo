@@ -3,6 +3,7 @@ package com.callbackdev.passo.feature.today
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
 import com.callbackdev.passo.core.data.sessions.LiveSession
 import com.callbackdev.passo.core.data.sessions.LiveSessionState
 import com.callbackdev.passo.core.data.sessions.SessionRepository
@@ -22,6 +23,7 @@ import com.callbackdev.passo.core.domain.today.minuteOfDay
 import com.callbackdev.passo.core.domain.walks.WalkDetector
 import com.callbackdev.passo.core.domain.ways.WayToday
 import com.callbackdev.passo.core.domain.ways.Ways
+import com.callbackdev.passo.core.domain.year.YearInReview
 import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.Session
@@ -68,6 +70,7 @@ constructor(
     private val settingsRepository: SettingsRepository,
     private val control: TrackingControl,
     private val sessions: SessionRepository,
+    private val userPreferences: UserPreferencesDataSource,
     ways: WayRepository,
     liveSteps: LiveSteps,
     liveSession: LiveSession,
@@ -143,8 +146,30 @@ constructor(
             }
         }
 
-    val state: StateFlow<TodayUiState?> = combine(inputs, preferences, outings, way, ::build)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), null)
+    /**
+     * Your year on foot in season (PLANNING.md §11 Phase 12): one card, from 1 December to 31
+     * January, for the year ending, until the reader closes it; never a notification.
+     */
+    private val yearCard: Flow<Int?> = combine(
+        day,
+        tracking.observeFirstRecordedDay(),
+        userPreferences.yearCardClosed,
+    ) {
+            date,
+            first,
+            closed,
+        ->
+        YearInReview.inSeason(first?.let(LocalDate::ofEpochDay), date)?.takeIf { it != closed }
+    }.distinctUntilChanged()
+
+    val state: StateFlow<TodayUiState?> = combine(inputs, preferences, outings, way, yearCard) { i, p, o, w, y ->
+        build(i, p, o, w).copy(yearCard = y)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), null)
+
+    /** The year's card closed: not shown again for that year. */
+    fun closeYearCard(year: Int) {
+        viewModelScope.launch { userPreferences.setYearCardClosed(year) }
+    }
 
     /** On every return to the screen: a permission can change in the system's settings. */
     fun refreshReadiness() {

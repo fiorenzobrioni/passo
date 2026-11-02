@@ -60,6 +60,7 @@ import com.callbackdev.passo.feature.today.TodayRoute
 import com.callbackdev.passo.feature.ways.ContinentRoute
 import com.callbackdev.passo.feature.ways.WayRoute
 import com.callbackdev.passo.feature.ways.WaysRoute
+import com.callbackdev.passo.feature.year.YearRoute
 
 /**
  * The shell (PLANNING.md §11 Phase 3). Three questions before a page: can this phone count at
@@ -132,6 +133,7 @@ private fun MainPages(openWays: Boolean, onWaysOpened: () -> Unit, openToday: Bo
                 onOpenSessions = { open(SessionsKey) },
                 onOpenGuide = { open(GuideKey) },
                 onOpenWay = { way, journey -> open(WayKey(way, journey)) },
+                onOpenYear = { open(YearKey(it)) },
                 bottomPadding = barHeight,
             )
         }
@@ -141,6 +143,7 @@ private fun MainPages(openWays: Boolean, onWaysOpened: () -> Unit, openToday: Bo
                 target = historyTarget,
                 onTargetShown = { historyTarget = null },
                 bottomPadding = barHeight,
+                onOpenYear = { open(YearKey(it)) },
             )
         }
         entry<InsightsKey> {
@@ -152,6 +155,7 @@ private fun MainPages(openWays: Boolean, onWaysOpened: () -> Unit, openToday: Bo
                 },
                 onOpenWays = { open(WaysKey) },
                 bottomPadding = barHeight,
+                onOpenYear = { open(YearKey(it)) },
             )
         }
         entry<SettingsKey> {
@@ -183,6 +187,7 @@ private fun MainPages(openWays: Boolean, onWaysOpened: () -> Unit, openToday: Bo
             )
         }
         entry<WayKey> { key -> WayRoute(way = key.way, journeyId = key.journeyId, onBack = nav::goBack) }
+        entry<YearKey> { key -> YearRoute(year = key.year, onBack = nav::goBack) }
     }
 
     Surface(modifier = Modifier.fillMaxSize()) {

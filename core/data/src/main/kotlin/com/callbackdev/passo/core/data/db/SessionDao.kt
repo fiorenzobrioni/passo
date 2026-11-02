@@ -60,6 +60,14 @@ abstract class SessionDao {
     @Query("SELECT * FROM session WHERE localEpochDay = :localEpochDay ORDER BY startedAtMillis")
     abstract fun observeSessionsOn(localEpochDay: Long): Flow<List<SessionRow>>
 
+    /** The outings over, of the days from [fromDay] to [toDay] included. */
+    @Transaction
+    @Query(
+        "SELECT * FROM session WHERE state = 'FINISHED' AND localEpochDay BETWEEN :fromDay AND :toDay " +
+            "ORDER BY startedAtMillis",
+    )
+    abstract suspend fun finishedBetween(fromDay: Long, toDay: Long): List<SessionRow>
+
     /** The last outing to have ended, for the summary Today shows once. */
     @Transaction
     @Query("SELECT * FROM session WHERE state = 'FINISHED' ORDER BY endedAtMillis DESC LIMIT 1")

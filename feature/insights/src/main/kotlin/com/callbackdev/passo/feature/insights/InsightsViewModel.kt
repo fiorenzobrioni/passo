@@ -14,6 +14,7 @@ import com.callbackdev.passo.core.domain.insights.Insights
 import com.callbackdev.passo.core.domain.settings.firstDayOfWeek
 import com.callbackdev.passo.core.domain.ways.WayProgress
 import com.callbackdev.passo.core.domain.ways.Ways
+import com.callbackdev.passo.core.domain.year.YearInReview
 import com.callbackdev.passo.core.model.UnitPreference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -47,6 +48,10 @@ data class InsightsUiState(
     val units: UnitPreference,
     val firstDayOfWeek: DayOfWeek,
     val way: WayProgress? = null,
+    /** The years Your year on foot can tell, newest first (Phase 12). */
+    val offeredYears: List<Int> = emptyList(),
+    /** The year in season, December and January: Insights' first card. */
+    val seasonYear: Int? = null,
 )
 
 /** One day of the streak's row: [counted] false before counting began. */
@@ -105,6 +110,8 @@ constructor(
             units = settings.units,
             firstDayOfWeek = weekStart,
             way = journey?.let { WayProgress.of(Ways.of(it.way), it, summaries.distances(), today.toEpochDay()) },
+            offeredYears = YearInReview.offeredYears(insights.firstDay, today),
+            seasonYear = YearInReview.inSeason(insights.firstDay, today),
         )
     }.flowOn(Dispatchers.Default)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), null)

@@ -22,6 +22,7 @@ import com.callbackdev.passo.widget.WidgetArrangement
 import com.callbackdev.passo.widget.WidgetBackground
 import com.callbackdev.passo.widget.WidgetKind
 import com.callbackdev.passo.widget.WidgetLook
+import com.callbackdev.passo.widget.WidgetPanel
 import com.callbackdev.passo.widget.WidgetSamples
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -60,9 +61,13 @@ class WidgetConfigScreenTest {
     @Test
     fun `at a glance offers its own switches and the arrangement, and nothing it would ignore`() {
         show(WidgetKind.GLANCE)
-        scrollTo("The day hour by hour")
-        compose.onNodeWithText("The day hour by hour").assertExists()
+        scrollTo("Bars under the count")
+        compose.onNodeWithText("Bars under the count").assertExists()
         compose.onNodeWithText("Distance and calories").assertDoesNotExist()
+        // What the bars show: today hour by hour, or the last seven days.
+        scrollTo("The last 7 days, against the goal")
+        compose.onNodeWithText("The last 7 days, against the goal").performClick()
+        assertThat(look.panel).isEqualTo(WidgetPanel.WEEK)
         compose.onNodeWithText("The day in figures").assertDoesNotExist()
         scrollTo("Ring on the right, sentence beside the number")
         compose.onNodeWithText("Ring on the right, sentence beside the number").performClick()
@@ -76,7 +81,8 @@ class WidgetConfigScreenTest {
         scrollTo("The day in figures")
         compose.onNodeWithText("The goal").assertExists()
         compose.onNodeWithText("Distance and calories").assertExists()
-        compose.onNodeWithText("The day hour by hour").assertDoesNotExist()
+        compose.onNodeWithText("Bars under the count").assertDoesNotExist()
+        compose.onNodeWithText("The bars").assertDoesNotExist()
         compose.onNodeWithText("Arrangement").assertDoesNotExist()
         compose.onNodeWithText("The day in figures").performClick()
         assertThat(look.showDetails).isFalse()

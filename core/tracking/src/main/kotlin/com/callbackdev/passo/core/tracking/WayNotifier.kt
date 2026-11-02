@@ -164,7 +164,7 @@ internal class WayNotifications(private val context: Context) {
             .setSmallIcon(R.drawable.ic_stat_steps)
             .setContentIntent(context.openAppIntent(REQUEST_WAY) { putExtra(WayIntents.EXTRA_OPEN_WAYS, true) })
             .setAutoCancel(true)
-            .setOnlyAlertOnce(true)
+            // Not "only alert once": a new stage is news, even with the last one still in the shade.
             .setCategory(NotificationCompat.CATEGORY_EVENT)
             .setContentTitle(title)
             .setContentText(text)
