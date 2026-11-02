@@ -70,6 +70,7 @@ import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
+import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionState
 import kotlinx.coroutines.delay
@@ -152,7 +153,7 @@ fun SessionCard(
                 Surface(color = container, shape = CircleShape, modifier = Modifier.size(36.dp)) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
-                            imageVector = sessionIcon(session.intensity),
+                            imageVector = sessionIcon(session.intensity, session.goalKind),
                             contentDescription = null,
                             tint = mark,
                             modifier = Modifier.size(20.dp),
@@ -322,9 +323,16 @@ internal fun minuteOfDay(millis: Long): Int {
     return time.hour * 60 + time.minute
 }
 
-/** The mark of an outing: a run is a bolt, as in the walk list; a walk is the way to a flag. */
-fun sessionIcon(intensity: SessionIntensity): ImageVector =
-    if (intensity == SessionIntensity.RUN) PassoIcons.Bolt else PassoIcons.Outing
+/**
+ * The mark of an outing: an interval walk is its slow and fast line, a run is a bolt, as in the
+ * walk list; any other walk is the way to a flag. On the Outings page the interval walk no longer
+ * wore the same mark as the brisk walk above it (owner's review, 2 Nov 2026).
+ */
+fun sessionIcon(intensity: SessionIntensity, goalKind: SessionGoalKind? = null): ImageVector = when {
+    goalKind == SessionGoalKind.INTERVALS -> PassoIcons.Intervals
+    intensity == SessionIntensity.RUN -> PassoIcons.Bolt
+    else -> PassoIcons.Outing
+}
 
 /**
  * The way to the goal as a bar: the part walked in the accent, the reader's milestones as gaps

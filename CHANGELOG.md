@@ -85,6 +85,10 @@ All notable changes to Passo are documented here. The format follows
 
 ### Changed
 
+- **Insights' streak card says since when.** With the streak as the page's sentence, the card
+  under it no longer repeats it: «4 / days in a row, since Sep 20».
+- **The Japanese interval walk has a mark of its own** on the Outings page, its card and the day's
+  list: slow and fast in turns, instead of the brisk walk's flag.
 - **Today, tidied after a design review.** The ring shows the day's distance and calories
   where it showed a percentage, so they are there as soon as the app opens. The ring's
   usual-day notch is dashed like the usual day in the chart, and a day past its goal starts a

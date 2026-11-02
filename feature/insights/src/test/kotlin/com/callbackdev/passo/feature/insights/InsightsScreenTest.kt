@@ -67,6 +67,9 @@ class InsightsScreenTest {
         show(state())
         compose.onNodeWithText("4 days in a row at your goal").assertIsDisplayed()
         compose.onNodeWithText("Reach 8,000 steps today to make it 5.").assertIsDisplayed()
+        // The card under the sentence says since when, not the sentence again.
+        compose.onNodeWithText("days in a row, since Sep 20").assertIsDisplayed()
+        compose.onNodeWithText("days in a row at your goal").assertDoesNotExist()
         compose.onNode(hasContentDescription("Thursday, September 24: under way")).assertExists()
         snapshot("insights")
     }

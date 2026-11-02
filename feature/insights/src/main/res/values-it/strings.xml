@@ -43,6 +43,11 @@
         <item quantity="many">giorni di fila all’obiettivo</item>
         <item quantity="other">giorni di fila all’obiettivo</item>
     </plurals>
+    <plurals name="insights_streak_days_since">
+        <item quantity="one">giorno di fila, dal %1$s</item>
+        <item quantity="many">giorni di fila, dal %1$s</item>
+        <item quantity="other">giorni di fila, dal %1$s</item>
+    </plurals>
     <string name="insights_streak_none">Nessuna serie in corso: un giorno all’obiettivo ne comincia una.</string>
     <plurals name="insights_streak_longest">
         <item quantity="one">La più lunga: %1$d giorno, %2$s</item>

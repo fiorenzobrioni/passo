@@ -502,6 +502,24 @@ object PassoIcons {
         }
     }
 
+    /**
+     * The interval walk (Phase 13): from a dot, slow and fast in turns, the line low and high, as
+     * the editor draws its blocks. Set apart from [Outing], which every other walk wears.
+     */
+    val Intervals: ImageVector by lazy {
+        icon("intervals") {
+            circle(4f, 17f, 1.8f)
+            moveTo(5.8f, 17f)
+            lineTo(8f, 17f)
+            lineTo(8f, 8f)
+            lineTo(12.5f, 8f)
+            lineTo(12.5f, 17f)
+            lineTo(16f, 17f)
+            lineTo(16f, 8f)
+            lineTo(20.5f, 8f)
+        }
+    }
+
     /** A folded map with a way across it: the Ways (Phase 11). */
     val Way: ImageVector by lazy {
         icon("way") {

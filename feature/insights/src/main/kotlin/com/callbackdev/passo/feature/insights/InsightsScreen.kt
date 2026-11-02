@@ -239,10 +239,21 @@ private fun StreakCard(state: InsightsUiState) {
             streakRange(longest, state.today),
         )
     }
-    val words = if (running) {
-        pluralStringResource(R.plurals.insights_streak_days, streak.days)
-    } else {
-        stringResource(R.string.insights_streak_none)
+    // The page's sentence above already says "4 days in a row at your goal" when the streak is
+    // its news: the card then says what the sentence does not, since when (owner's review,
+    // 2 Nov 2026). With another sentence above, the card says it in full.
+    val headlineSaysIt = insights.headline is InsightsHeadline.OnAStreak
+    val start = streak.start
+    val words = when {
+        !running -> stringResource(R.string.insights_streak_none)
+
+        headlineSaysIt && start != null -> pluralStringResource(
+            R.plurals.insights_streak_days_since,
+            streak.days,
+            dateText(start, state.today),
+        )
+
+        else -> pluralStringResource(R.plurals.insights_streak_days, streak.days)
     }
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
