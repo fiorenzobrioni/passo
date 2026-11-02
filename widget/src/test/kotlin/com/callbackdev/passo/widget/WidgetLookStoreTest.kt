@@ -39,7 +39,7 @@ class WidgetLookStoreTest {
 
     @Test
     fun `each card keeps its own look`() = runTest {
-        val clay = WidgetLook(cardColor = WidgetCardColor.CLAY, opacityPct = 40, showHours = false)
+        val clay = WidgetLook(cardColor = WidgetCardColor.CLAY, opacityPct = 40, panel = WidgetPanel.WEEK)
         val light =
             WidgetLook(
                 background = WidgetBackground.LIGHT,

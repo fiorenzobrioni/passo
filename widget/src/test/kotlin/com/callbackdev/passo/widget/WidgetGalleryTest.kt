@@ -87,6 +87,16 @@ class WidgetGalleryTest {
     }
 
     @Test
+    fun `the last seven days under the count`() {
+        val look = WidgetLook(panel = WidgetPanel.WEEK)
+        val board = HomeBoard(context, widthDp = 380)
+        listOf(Grants.ThreeByTwo, Grants.FourByTwo, Grants.FourByThree).forEach { size ->
+            board.row(size to renderCard(context, size) { GlanceWidgetContent(WidgetSamples.model(look)) })
+        }
+        board.draw().saveTo(out, "widget-glance-week")
+    }
+
+    @Test
     fun `the ring on the right`() {
         val look = WidgetLook(arrangement = WidgetArrangement.RING_END)
         val board = HomeBoard(context, widthDp = 380)

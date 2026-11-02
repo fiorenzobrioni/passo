@@ -94,6 +94,9 @@ All notable changes to Passo are documented here. The format follows
 
 ### Changed
 
+- **At a glance can show your week.** On a card three cells wide and two rows tall, the bars
+  under the count can be the last 7 days against the goal instead of today hour by hour: choose
+  in the card's settings, «The bars».
 - **Insights' streak card says since when.** With the streak as the page's sentence, the card
   under it no longer repeats it: «4 / days in a row, since Sep 20».
 - **The Japanese interval walk has a mark of its own** on the Outings page, its card and the day's

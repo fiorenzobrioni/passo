@@ -58,6 +58,7 @@ import com.callbackdev.passo.widget.WidgetCardPaddingSnug
 import com.callbackdev.passo.widget.WidgetDay
 import com.callbackdev.passo.widget.WidgetModel
 import com.callbackdev.passo.widget.WidgetPalette
+import com.callbackdev.passo.widget.WidgetPanel
 import com.callbackdev.passo.widget.WidgetRefresh
 import com.callbackdev.passo.widget.WidgetSamples
 import com.callbackdev.passo.widget.axisHour
@@ -498,9 +499,100 @@ private fun PanelContent(parts: CardParts, size: DpSize) {
             RowContent(parts, size.width, rowHeight, wide, ring = RowRingMax)
         }
         Spacer(modifier = GlanceModifier.defaultWeight())
-        HourBars(parts, bars, inner)
+        if (parts.model.look.panel == WidgetPanel.WEEK && parts.day.week.size == WEEK_DAYS) {
+            WeekBarsView(parts, bars, inner)
+        } else {
+            HourBars(parts, bars, inner)
+        }
     }
 }
+
+// --- The last seven days ---------------------------------------------------------------------
+
+/**
+ * The last seven days in seven bars, today last (PLANNING.md §15, «The last seven days on At a
+ * glance»): boxes, as the hours are, on the world's scale ([weekBars]), today in the ring's ink and
+ * the days before in the same ink, lighter; a thin line where today's goal stands. Seven children
+ * a row, under Glance's ten.
+ */
+@Composable
+private fun WeekBarsView(parts: CardParts, height: Dp, width: Dp) {
+    val context = parts.context
+    val palette = parts.palette
+    val week = parts.day.week
+    val shape = weekBars(week, height)
+    val current = if (parts.live) palette.accent else palette.secondary
+    val past = current.copy(alpha = PAST_ALPHA)
+    val locale = context.resources.configuration.locales[0]
+    val met = week.count { (it.steps ?: 0) >= it.goalSteps && it.goalSteps > 0 }
+    val best = week.filter { (it.steps ?: 0) > 0 }.maxByOrNull { it.steps ?: 0 }
+    val description = if (best != null) {
+        context.resources.getQuantityString(
+            R.plurals.widget_week_description,
+            met,
+            met,
+            best.date.dayOfWeek.getDisplayName(java.time.format.TextStyle.FULL, locale),
+            parts.format.steps(best.steps ?: 0),
+        )
+    } else {
+        context.getString(R.string.widget_week_description_empty)
+    }
+    val gap = (width / WEEK_DAYS / 6).coerceIn(2.dp, 8.dp)
+    Column(modifier = GlanceModifier.fillMaxWidth().semantics { contentDescription = description }) {
+        Box(modifier = GlanceModifier.fillMaxWidth().height(height)) {
+            Row(modifier = GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.Bottom) {
+                shape.bars.forEach { bar ->
+                    val color = when (bar.kind) {
+                        BarKind.NOW -> current
+                        BarKind.PAST -> past
+                        BarKind.EMPTY -> palette.track
+                    }
+                    Box(
+                        modifier = GlanceModifier.defaultWeight().fillMaxHeight().padding(horizontal = gap / 2),
+                        contentAlignment = Alignment.BottomCenter,
+                    ) {
+                        Box(
+                            modifier = GlanceModifier
+                                .fillMaxWidth()
+                                .height(bar.height)
+                                .cornerRadius(BarCorner)
+                                .background(ColorProvider(color)),
+                        ) {}
+                    }
+                }
+            }
+            // Today's goal, a hairline over the bars: the days that crossed it read at a glance.
+            Column(modifier = GlanceModifier.fillMaxSize()) {
+                Spacer(modifier = GlanceModifier.defaultWeight())
+                Box(
+                    modifier = GlanceModifier
+                        .fillMaxWidth()
+                        .height(GoalLine)
+                        .background(ColorProvider(palette.secondary.copy(alpha = GOAL_LINE_ALPHA))),
+                ) {}
+                Spacer(modifier = GlanceModifier.height((shape.goalHeight - GoalLine).coerceAtLeast(0.dp)))
+            }
+        }
+        Row(modifier = GlanceModifier.fillMaxWidth().padding(top = BarsLabelGap)) {
+            week.forEachIndexed { index, day ->
+                Text(
+                    text = day.date.dayOfWeek.getDisplayName(java.time.format.TextStyle.NARROW, locale),
+                    style = TextStyle(
+                        color = palette.secondaryInk,
+                        fontSize = BARS_LABEL_SP.sp,
+                        textAlign = TextAlign.Center,
+                        fontWeight = if (index == week.lastIndex) FontWeight.Bold else FontWeight.Normal,
+                    ),
+                    maxLines = 1,
+                    modifier = GlanceModifier.defaultWeight(),
+                )
+            }
+        }
+    }
+}
+
+private val GoalLine = 1.dp
+private const val GOAL_LINE_ALPHA = 0.6f
 
 // --- The day hour by hour --------------------------------------------------------------------
 

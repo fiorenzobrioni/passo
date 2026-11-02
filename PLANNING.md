@@ -485,7 +485,7 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
 | NARROW | one row | Ring, count, «of 10,000 steps» |
 | WIDE | one row with a sentence column (4 cells) | The same, and the day's sentence at the far edge; or mirrored, the ring on the right |
 | TALL | two rows and up | Ring in the top corner; count, sentence and goal from the bottom |
-| PANEL | two rows and up, three cells or wider | The row on top, today's steps by hour under it: 24 bars built from boxes, current hour highlighted |
+| PANEL | two rows and up, three cells or wider | The row on top, and under it today's steps by hour (24 bars built from boxes, current hour highlighted) or, as the reader chooses, the last 7 days against the goal (7 bars, today highlighted, a line at today's goal; §15, 2 Nov 2026) |
 
 | «In words» form | When | Content |
 |---|---|---|
@@ -734,8 +734,9 @@ This log starts on 2 Nov 2026.
   - **Today's card** is remembered as closed for its year in a preference outside the settings (`yearCardClosed`), like the outing summary seen: not in the backup's settings, nothing else to change it.
   README picture `year.png` (the goal's page), beside the foldable in the table's last row.
 
+- **The last seven days on At a glance** (owner, 2 Nov 2026: "the 7-day option", the question that stood open in this list since Phase 4). «At a glance»'s bars, on a card three cells wide and two rows tall or more, show today hour by hour or, chosen per card in its settings, the last seven days: seven bars on the world's scale (from zero to the busiest day or the highest goal, `weekBars`), today last in the ring's ink and the days before lighter, a hairline at today's goal, the weekdays under them, today's letter bold; TalkBack hears how many were at the goal and the best. Read only for a card that shows them (six stored rows and today's live count); a day before counting began is the track's baseline. The switch that turned the bars off is now «Bars under the count», and «The bars» asks which (`WidgetLook.panel`, stored per card, a new card's default the hours as before). The settings screen's one-line choices were 46 dp tall: now 48 (`assertAccessible` found it with the new rows). The other open question, the Ways on a widget, stays open: a way moves a few kilometres a day, which is Today's to say (§15 «The way under way on Today», archive 02).
+
 ### Open
 
 - **The Ways on a widget?** Not in Phase 11; a natural line for «In words» later.
 
-- Should a 7-day mini chart be offered in the 4x2 widget as an alternative to today's hourly bars (widget configuration)? Now a natural option on «At a glance»'s settings screen, once Phase 5 has the week.

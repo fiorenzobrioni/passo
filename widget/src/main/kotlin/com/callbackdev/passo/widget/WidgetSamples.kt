@@ -9,6 +9,7 @@ import com.callbackdev.passo.core.domain.today.TypicalDayCalculator
 import com.callbackdev.passo.core.domain.widget.CountingState
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.UserSettings
+import java.time.LocalDate
 import java.util.Random
 
 /**
@@ -38,8 +39,17 @@ internal object WidgetSamples {
             look = look,
             settings = UserSettings(dailyGoalSteps = GOAL_STEPS, onboardingCompleted = true),
             state = state,
-            day = WidgetDay(overview, HourlySteps.of(minutes), NOW_MINUTE),
+            day = WidgetDay(overview, HourlySteps.of(minutes), NOW_MINUTE, week(overview.steps)),
         )
+    }
+
+    /** Six days before the sample day, two of them at the goal, and today with [today]'s steps. */
+    fun week(today: Int): List<WeekDay> {
+        val days = listOf(8_420, 11_300, 6_150, 9_870, 12_640, 4_900)
+        val date = LocalDate.of(2026, 9, 24)
+        return (days + today).mapIndexed { index, steps ->
+            WeekDay(date.minusDays((days.size - index).toLong()), steps, GOAL_STEPS)
+        }
     }
 
     /** The README's sample day (`feature/today`'s `SampleDays`), the same generator. */
