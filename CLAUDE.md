@@ -18,11 +18,24 @@ Source of truth:
 
 - `VISION.md`: the product. Principles, v1.0 scope, non-goals, key decisions, success criteria,
   glossary.
-- `PLANNING.md`: the architecture, the tracking engine design (§4), the data model (§5), the
-  metrics (§6), widget (§7), battery rules (§9), permissions (§10), and the phased plan with
-  checkable steps (§11). **Keep it updated as work progresses**: tick the boxes, and record
-  every decision and deviation with its reason in §15 (and as an ADR in `docs/adr/` when it
-  is architectural).
+- `PLANNING.md`: the live plan. How it is made, the state, what is open, the architecture,
+  the tracking engine design (§4), the data model (§5), the metrics (§6), widget (§7), battery
+  rules (§9), permissions (§10), the phases not done yet with checkable steps (§11), and the log
+  of the current period (§15). **Keep it updated as work progresses**, recording every decision
+  and deviation with its reason (and as an ADR in `docs/adr/` when it is architectural). Since
+  2 Nov 2026 it is split, as the family's other plans are:
+  - **Write only in `PLANNING.md`**: a new entry at the end of §15's log, dated, with who asked.
+    A box opened or ticked goes in its «Open» list (a phase's own boxes stay in its section).
+  - **`docs/planning/NN-<period>.md` is the archive**, the phases done and the log's past
+    periods, **frozen**: never edit it. A decision that changes an archived one is written in
+    `PLANNING.md`, naming the archived file and the entry it changes.
+  - **To find a section** cited by name in the code («§11 Phase 10», «§15 "Phase 11's device
+    checks done"»), grep `PLANNING.md` first, then `docs/planning/README.md`, the index of every
+    archived title and log entry with its file and line, and read from that line. Never load an
+    archive file whole.
+  - **Archive** when §15's log passes ~1,000 lines or at a release, whichever first, as
+    `PLANNING.md` «How it is made» says, then run `python3 tools/planning_index.py` (`--check`
+    tells if the index is behind).
 
 Work one phase at a time, starting from the phase's section in PLANNING.md §11.
 
@@ -176,7 +189,11 @@ sandbox). Two standing rules (owner's):
 
 - **Debug signing**: `keystore/debug.keystore` is intentionally committed (alias `passo-debug`,
   passwords `android`) so debug APKs from CI and any machine share one signature. Do not
-  regenerate it. Debug builds carry `applicationIdSuffix ".debug"`.
+  regenerate it. Debug builds carry `applicationIdSuffix ".debug"`. Debug builds and the
+  debug-signed release carry a crash page (`app/src/crashpage`): an uncaught exception shows its
+  stack trace, to copy or share, so a test device can report a crash without adb; from the
+  background, where no page can open, a notification opens it (the minified one's trace is
+  retraced with that run's `mapping.txt`). Never in a release signed with the release key.
 - **Release signing**: the real keystore lives OUTSIDE the repo; the `release` signingConfig is
   created only when the four `PASSO_KEYSTORE*` / `PASSO_KEY_*` properties are all set (from
   `~/.gradle/gradle.properties` locally, from `ORG_GRADLE_PROJECT_*` env vars in CI). Without
