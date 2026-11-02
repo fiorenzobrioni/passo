@@ -32,7 +32,8 @@ object SessionConstants {
     /**
      * An outing with no step for this long is over: it ends at its last step, as if it had been
      * stopped there. A forgotten outing then costs nothing more (the next step, or the screen,
-     * closes it) and never counts the evening as part of the afternoon's walk.
+     * closes it; a processor kept awake for its signals is let go at this moment, [SignalWake.letGoAt])
+     * and never counts the evening as part of the afternoon's walk.
      */
     const val IDLE_END_MILLIS: Long = 15 * 60_000L
 

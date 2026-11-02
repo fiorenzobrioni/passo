@@ -124,6 +124,22 @@ All notable changes to Passo are documented here. The format follows
   longer does.
 - **The first-day note** on Today goes as soon as you open the guide from it, instead of
   staying until the end of the day.
+- **An outing left running no longer keeps the phone awake.** On the phones that keep the
+  processor awake for an outing's signals, an outing forgotten on the table kept it so until the
+  screen came on, for up to four hours. After 15 minutes without a step the outing is over, and
+  the phone sleeps again; the outing is closed as before, at the next step or when you look.
+- **The goal notifications alert every day.** With yesterday's «Goal reached» or evening reminder
+  still in the notification shade, today's arrived without a sound. Each now alerts, and goes by
+  itself at midnight.
+- **The evening reminder tidies up after itself.** It goes once you tap «Walk now» or reach the
+  goal, instead of staying with steps to go that are already walked; it no longer comes during an
+  outing; and it no longer wakes the phone while Passo's notifications are turned off.
+- **A new stage of a way alerts too**, with the last one still in the notification shade.
+- **Lighter at every unlock.** After a walk with the screen off, the steps the phone hands over
+  at once are written in one go instead of one write each; the widgets are drawn again at the
+  unlock only if the count moved since the screen came on; the counting notification shows
+  today's count at the first look of the morning, not a minute later; and a city walk's page lets
+  go of the phone's voice when you leave it.
 
 ## [1.0.0] - 2026-10-01
 

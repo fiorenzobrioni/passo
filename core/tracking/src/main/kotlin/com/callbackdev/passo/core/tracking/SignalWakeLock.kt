@@ -22,12 +22,19 @@ internal class SignalWakeLock(powerManager: PowerManager, private val log: (Stri
     val held: Boolean get() = lock.isHeld
 
     fun hold(on: Boolean) {
+        val since = heldSinceElapsed
+        if (since != null && !lock.isHeld) {
+            // Let go by its own timeout, unnoticed until now: logged as what it was, and taken
+            // anew below only if it is still needed.
+            heldSinceElapsed = null
+            log("timed out after ${SignalWake.TIMEOUT_MILLIS / MILLIS_PER_SECOND}s")
+        }
         if (on && !lock.isHeld) {
             lock.acquire(SignalWake.TIMEOUT_MILLIS)
             heldSinceElapsed = SystemClock.elapsedRealtime()
         } else if (!on && heldSinceElapsed != null) {
-            if (lock.isHeld) lock.release()
-            val seconds = (SystemClock.elapsedRealtime() - (heldSinceElapsed ?: 0L)) / MILLIS_PER_SECOND
+            lock.release()
+            val seconds = (SystemClock.elapsedRealtime() - (since ?: 0L)) / MILLIS_PER_SECOND
             heldSinceElapsed = null
             log("released after ${seconds}s")
         }

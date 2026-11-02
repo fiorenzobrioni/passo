@@ -43,6 +43,10 @@ class StepLedger(initialState: TrackerState?) {
     private var stateDirty = false
     private var loggedTimestampFallback = false
 
+    // A write was asked for and the buffer has not been drained since: that write will carry
+    // whatever is recorded meanwhile.
+    private var writeAsked = false
+
     /** The last sample [record]ed, as accounted; null before the first. */
     var lastAccounted: AccountedSample? = null
         private set
@@ -63,6 +67,11 @@ class StepLedger(initialState: TrackerState?) {
      * baseline, a new boot session or a counter reset (the state they establish is too
      * valuable to keep only in memory), an anomaly, [FLUSH_STEP_THRESHOLD] buffered steps, or
      * a minute boundary crossed while events are flowing.
+     *
+     * Once per drain: a write asked for and not drained yet will carry the samples recorded
+     * meanwhile, so they do not ask again. The sensor hands a FIFO over in one burst, hundreds
+     * of samples while the first write is still under way, and each of them used to ask for a
+     * write of its own (owner's review, 2 Nov 2026).
      */
     fun record(sample: StepSample, snapshot: SystemSnapshot): Boolean {
         val accounting = StepAccountant.account(state, sample, snapshot)
@@ -74,10 +83,13 @@ class StepLedger(initialState: TrackerState?) {
 
         val sampleMinute = Math.floorDiv(accounting.newState.lastSampleWallMillis, 60_000L)
         val minuteCrossed = pending.isNotEmpty() && pending.firstKey() < sampleMinute
-        return accounting.change != SessionChange.SAME_SESSION ||
+        val due = accounting.change != SessionChange.SAME_SESSION ||
             accounting.cappedFromSteps != null ||
             pendingSteps >= FLUSH_STEP_THRESHOLD ||
             minuteCrossed
+        if (!due || writeAsked) return false
+        writeAsked = true
+        return true
     }
 
     /** Adds a log line, written with the next batch. */
@@ -87,6 +99,7 @@ class StepLedger(initialState: TrackerState?) {
 
     /** Hands out everything not yet written and empties the buffer; null if there is nothing. */
     fun drain(): LedgerBatch? {
+        writeAsked = false
         if (pending.isEmpty() && diagnostics.isEmpty() && !stateDirty) return null
         val batch = LedgerBatch(
             increments = pending.values.toList(),

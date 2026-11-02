@@ -40,7 +40,11 @@ internal class GoalNotifications(private val context: Context) {
         context.getSystemService(NotificationManager::class.java)?.createNotificationChannel(channel)
     }
 
-    fun goalReached(content: GoalReachedContent, units: UnitPreference): Notification {
+    /**
+     * Goal reached. [timeoutMillis]: until the day it is about ends, so it is gone by the next
+     * morning rather than standing under the next day's.
+     */
+    fun goalReached(content: GoalReachedContent, units: UnitPreference, timeoutMillis: Long? = null): Notification {
         val format = context.measureFormatter(units)
         val res = context.resources
         val at = context.clockTime(content.reachedAtMinute)
@@ -54,10 +58,15 @@ internal class GoalNotifications(private val context: Context) {
                 res.getQuantityString(R.plurals.goal_reached_title, content.goalSteps, format.steps(content.goalSteps)),
             )
             .setContentText(text)
+            .apply { timeoutMillis?.let(::setTimeoutAfter) }
             .build()
     }
 
-    fun eveningReminder(nudge: EveningNudge, units: UnitPreference): Notification {
+    /**
+     * The evening reminder. [timeoutMillis]: until the evening it is about ends; it is also taken
+     * back once the reader walks it (its "Walk now", or the goal reached).
+     */
+    fun eveningReminder(nudge: EveningNudge, units: UnitPreference, timeoutMillis: Long? = null): Notification {
         val format = context.measureFormatter(units)
         val res = context.resources
         val text = res.getString(
@@ -83,6 +92,7 @@ internal class GoalNotifications(private val context: Context) {
                 res.getString(R.string.evening_reminder_walk_now),
                 SessionControl.pendingIntent(context, SessionControl.ACTION_START_REST_OF_DAY, REQUEST_WALK_NOW),
             )
+            .apply { timeoutMillis?.let(::setTimeoutAfter) }
             .build()
     }
 
@@ -147,6 +157,11 @@ internal class GoalNotifications(private val context: Context) {
             .build()
     }
 
+    /** Takes [id] back from the shade, if it is there. */
+    fun cancel(id: Int) {
+        NotificationManagerCompat.from(context).cancel(id)
+    }
+
     /** Posts [notification] as [id]; a no-op without the notification permission. */
     fun post(id: Int, notification: Notification) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
@@ -157,11 +172,12 @@ internal class GoalNotifications(private val context: Context) {
         NotificationManagerCompat.from(context).notify(id, notification)
     }
 
+    // Not "only alert once": each of these is news of its own, posted once, and under a fixed id
+    // that flag silenced today's whenever yesterday's was still in the shade.
     private fun builder(requestCode: Int): NotificationCompat.Builder = NotificationCompat.Builder(context, CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_stat_steps)
         .setContentIntent(context.openAppIntent(requestCode))
         .setAutoCancel(true)
-        .setOnlyAlertOnce(true)
         .setCategory(NotificationCompat.CATEGORY_REMINDER)
 
     companion object {

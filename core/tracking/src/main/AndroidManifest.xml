@@ -62,13 +62,17 @@
 
         <!-- The evening reminder and the weekly summary (explicit alarm intents), and the clock
              or the zone changing under them. Both system broadcasts are exempt from the limits
-             on implicit broadcasts, so a manifest receiver hears them. -->
+             on implicit broadcasts, so a manifest receiver hears them. The two block states are
+             sent by the system to this package alone: the reminder's alarm follows whether its
+             notification can show. -->
         <receiver
             android:name=".GoalAlarmReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.TIME_SET" />
                 <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.app.action.APP_BLOCK_STATE_CHANGED" />
+                <action android:name="android.app.action.NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED" />
             </intent-filter>
         </receiver>
 

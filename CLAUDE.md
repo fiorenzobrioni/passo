@@ -88,7 +88,8 @@ other. All business logic lives in `:core:domain`, with unit tests.
   only when someone can see them. The one exception: an outing the reader started, while it
   counts: the wake-up step counter at 30 s, and at 2 s in the 40 s before a change of an interval
   walk; on a phone with no wake-up counter, a partial wake lock instead, for an outing with signals
-  only (`SignalWake`; `docs/adr/0009-sessions.md`, `docs/adr/0013-interval-walks.md`); never widen it.
+  only, let go after 15 minutes still by the one timer that runs while it is held (`SignalWake`;
+  `docs/adr/0009-sessions.md`, `docs/adr/0013-interval-walks.md`); never widen it.
 - **No lost steps.** Don't change the tracking engine without updating the tests for every
   edge case in PLANNING.md §4.6.
 - **Honest estimates.** Distance, calories and active time are shown as estimates; formulas

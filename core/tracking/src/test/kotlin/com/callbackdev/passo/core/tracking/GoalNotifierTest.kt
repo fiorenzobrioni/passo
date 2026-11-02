@@ -3,6 +3,7 @@ package com.callbackdev.passo.core.tracking
 import android.Manifest
 import android.app.AlarmManager
 import android.app.Application
+import android.app.Notification
 import android.app.NotificationManager
 import android.hardware.Sensor
 import android.hardware.SensorManager
@@ -12,11 +13,14 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.data.db.PassoDatabase
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
+import com.callbackdev.passo.core.data.sessions.LiveSession
+import com.callbackdev.passo.core.data.sessions.LiveSessionState
 import com.callbackdev.passo.core.data.time.TodaySource
 import com.callbackdev.passo.core.data.tracking.LiveSteps
 import com.callbackdev.passo.core.data.tracking.LiveToday
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.domain.goals.GoalSchedule
+import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.model.UserSettings
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
@@ -57,9 +61,11 @@ class GoalNotifierTest {
     private lateinit var preferences: UserPreferencesDataSource
     private lateinit var repository: TrackingRepository
     private val liveSteps = LiveSteps()
+    private val liveSession = LiveSession()
 
     private val alarms get() = shadowOf(app.getSystemService(AlarmManager::class.java))
-    private val posted get() = shadowOf(app.getSystemService(NotificationManager::class.java)).allNotifications
+    private val manager get() = shadowOf(app.getSystemService(NotificationManager::class.java))
+    private val posted get() = manager.allNotifications
 
     @Before
     fun setUp() {
@@ -80,7 +86,7 @@ class GoalNotifierTest {
     }
 
     // A notifier as a fresh process would make it: same store, same database.
-    private fun notifier() = GoalNotifier(app, preferences, repository, liveSteps, TrackerLink())
+    private fun notifier() = GoalNotifier(app, preferences, repository, liveSteps, TrackerLink(), liveSession)
 
     private suspend fun settings(transform: (UserSettings) -> UserSettings) {
         preferences.updateSettings { transform(it.copy(onboardingCompleted = true)) }
@@ -184,5 +190,75 @@ class GoalNotifierTest {
         notifier().eveningReminder(dueAt = Instant.now().minusSeconds(3 * 3_600))
 
         assertThat(posted).isEmpty()
+    }
+
+    @Test
+    fun `the goal notifications alert each time, and are gone by the next day`() = runTest {
+        settings { it.copy(goalReachedNotification = true, eveningReminder = true) }
+        live(5_000)
+        notifier().eveningReminder(dueAt = null)
+        live(8_100)
+        val before = Instant.now()
+        notifier().tellGoalReached(today)
+
+        val reached = posted.single()
+        // Under a fixed id, "only alert once" silenced today's while yesterday's was still shown.
+        assertThat(reached.flags and Notification.FLAG_ONLY_ALERT_ONCE).isEqualTo(0)
+        assertThat(reached.timeoutAfter).isGreaterThan(0L)
+        assertThat(reached.timeoutAfter)
+            .isAtMost(GoalSchedule.untilEndOfDay(before, zone).toMillis())
+    }
+
+    @Test
+    fun `the goal reached takes the evening reminder back`() = runTest {
+        settings { it.copy(eveningReminder = true) }
+        live(5_000)
+        notifier().eveningReminder(dueAt = null)
+        assertThat(posted).hasSize(1)
+
+        live(8_100)
+        notifier().tellGoalReached(today)
+
+        assertThat(posted).isEmpty()
+    }
+
+    @Test
+    fun `walk now takes the evening reminder back`() = runTest {
+        settings { it.copy(eveningReminder = true) }
+        live(5_000)
+        notifier().eveningReminder(dueAt = null)
+
+        notifier().reminderAnswered()
+
+        assertThat(posted).isEmpty()
+    }
+
+    @Test
+    fun `no reminder while an outing is under way`() = runTest {
+        settings { it.copy(eveningReminder = true) }
+        live(5_000)
+        val outing = checkNotNull(SessionPlans.start(SessionPlans.REST_OF_DAY, 0, today, 5_000, 8_000))
+        liveSession.publish(LiveSessionState(outing, cadence = null, canKeepGoing = false, alertsWhileScreenOff = true))
+
+        notifier().eveningReminder(dueAt = null)
+
+        assertThat(posted).isEmpty()
+    }
+
+    @Test
+    fun `no wake for a reminder that could not show, armed again when it can`() = runTest {
+        settings { it.copy(eveningReminder = true, weeklySummary = true) }
+        live(1_000)
+        manager.setNotificationsEnabled(false)
+
+        val notifier = notifier()
+        notifier.reschedule()
+        // The weekly summary wakes nothing: it stays.
+        assertThat(alarms.scheduledAlarms.map { it.type }).containsExactly(AlarmManager.RTC)
+
+        manager.setNotificationsEnabled(true)
+        notifier.accessMayHaveChanged()
+        assertThat(alarms.scheduledAlarms.map { it.type })
+            .containsExactly(AlarmManager.RTC, AlarmManager.RTC_WAKEUP)
     }
 }

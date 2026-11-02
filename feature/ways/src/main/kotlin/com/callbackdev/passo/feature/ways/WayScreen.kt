@@ -133,6 +133,7 @@ fun WayRoute(way: WayId, journeyId: Long?, onBack: () -> Unit, viewModel: WaysVi
                 },
                 voice = viewModel::setWalkVoice,
                 prepareVoice = viewModel::prepareVoice,
+                releaseVoice = viewModel::releaseVoice,
                 tryVoice = { viewModel.tryWalkVoice(way) },
                 openVoiceSettings = { runCatching { context.startActivity(SessionSpeech.settingsIntent()) } },
                 delete = { id ->

@@ -14,6 +14,18 @@ class WidgetUpdatePolicyTest {
     }
 
     @Test
+    fun `an unlock right after the screen came on repaints only a count that moved`() {
+        val policy = WidgetUpdatePolicy(interactive = false)
+        assertThat(policy.decide(WidgetEvent.SCREEN_ON, nowElapsed = 0)).isEqualTo(WidgetDecision.Now)
+        policy.pushed(nowElapsed = 0, steps = 4_200)
+
+        assertThat(policy.decide(WidgetEvent.UNLOCKED, nowElapsed = 3_000, steps = 4_200))
+            .isEqualTo(WidgetDecision.Skip)
+        assertThat(policy.decide(WidgetEvent.UNLOCKED, nowElapsed = 3_000, steps = 4_212))
+            .isEqualTo(WidgetDecision.Now)
+    }
+
+    @Test
     fun `nothing moves while the screen is off`() {
         val policy = WidgetUpdatePolicy()
         policy.decide(WidgetEvent.SCREEN_OFF, nowElapsed = 0)

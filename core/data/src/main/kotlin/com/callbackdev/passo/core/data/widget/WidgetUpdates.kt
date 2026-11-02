@@ -10,6 +10,6 @@ import com.callbackdev.passo.core.domain.widget.WidgetEvent
  * or not at all. Calls are cheap and never block: the caller may be the sensor's thread.
  */
 interface WidgetUpdates {
-    /** @param steps today's live count, for [WidgetEvent.STEPS]; ignored otherwise. */
+    /** @param steps today's live count, for [WidgetEvent.STEPS] and [WidgetEvent.UNLOCKED]; ignored otherwise. */
     fun notify(event: WidgetEvent, steps: Int = 0)
 }

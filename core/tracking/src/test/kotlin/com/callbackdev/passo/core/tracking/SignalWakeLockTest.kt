@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.PowerManager
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.callbackdev.passo.core.domain.sessions.SignalWake
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -30,6 +31,22 @@ class SignalWakeLockTest {
         assertThat(ShadowPowerManager.getLatestWakeLock()?.isHeld).isFalse()
         assertThat(log).hasSize(1)
         assertThat(log.single()).startsWith("released after ")
+    }
+
+    @Test
+    fun `let go by its timeout, it is logged as such, and taken anew only if asked`() {
+        lock.hold(true)
+        // What the platform does at the timeout: the lock goes without a call from here.
+        ShadowPowerManager.getLatestWakeLock()?.release()
+
+        lock.hold(false)
+        assertThat(log).containsExactly("timed out after ${SignalWake.TIMEOUT_MILLIS / 1_000}s")
+
+        lock.hold(true)
+        assertThat(lock.held).isTrue()
+        lock.hold(false)
+        assertThat(log).hasSize(2)
+        assertThat(log.last()).startsWith("released after ")
     }
 
     @Test

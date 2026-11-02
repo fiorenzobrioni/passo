@@ -5,6 +5,7 @@ import android.content.res.Resources
 import android.util.Log
 import com.callbackdev.passo.core.data.prefs.UserPreferences
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
+import com.callbackdev.passo.core.data.sessions.LiveSession
 import com.callbackdev.passo.core.data.tracking.LiveSteps
 import com.callbackdev.passo.core.data.tracking.LiveToday
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
@@ -59,11 +60,15 @@ constructor(
     private val tracking: TrackingRepository,
     private val liveSteps: LiveSteps,
     private val link: TrackerLink,
+    private val liveSession: LiveSession,
 ) {
     private val notifications = GoalNotifications(context)
     private val alarms = GoalAlarms(context)
     private val scheduleLock = Mutex()
     private val started = AtomicBoolean(false)
+
+    // Whether the goal notifications could reach the reader when the alarms were last armed.
+    @Volatile private var armedForAccess: Boolean? = null
 
     /**
      * Keeps the alarms in step with the settings for as long as the process lives: armed at
@@ -82,12 +87,19 @@ constructor(
         }
     }
 
-    /** Arms, moves or cancels both alarms for what the settings and today say now. */
+    /**
+     * Arms, moves or cancels both alarms for what the settings and today say now. The evening
+     * reminder wakes the phone, so it is not armed while its notification could not show (the
+     * app's notifications or the goals' channel off): a wake a day for nothing. It is armed again
+     * when they come back ([accessMayHaveChanged]). The weekly summary wakes nothing and stays.
+     */
     suspend fun reschedule() = scheduleLock.withLock {
         val settings = preferences.current().settings
         val zone = ZoneId.systemDefault()
         val now = Instant.now()
-        if (settings.eveningReminder && settings.trackingEnabled) {
+        val mayNotify = mayNotify()
+        armedForAccess = mayNotify
+        if (settings.eveningReminder && settings.trackingEnabled && mayNotify) {
             val today = LocalDate.now(zone)
             // A day already at its goal has nothing left to remind: no wake for it.
             val met = todaySteps(today.toEpochDay()) >= settings.dailyGoalSteps
@@ -104,6 +116,23 @@ constructor(
     }
 
     /**
+     * The goals' notifications may have been turned off or on in the system's settings (the app
+     * coming back to the foreground, or the system's broadcast for it): the alarms follow, if
+     * that changed anything since they were armed.
+     */
+    suspend fun accessMayHaveChanged() {
+        if (armedForAccess != mayNotify()) guarded("Arming the goal alarms") { reschedule() }
+    }
+
+    /**
+     * The evening reminder's suggestion was taken ("Walk now"): it has said what it had to, and
+     * stays in the shade no longer.
+     */
+    fun reminderAnswered() {
+        notifications.cancel(GoalNotifications.ID_EVENING_REMINDER)
+    }
+
+    /**
      * The tracking service saw today's count reach the goal. Told once a day: the day is claimed
      * in the store first, so a reboot, a clock change or a second caller cannot tell it again,
      * and it is claimed with the notification off too, so turning it on later that day does not
@@ -116,25 +145,29 @@ constructor(
     internal suspend fun tellGoalReached(epochDay: Long) = guarded("Telling the goal reached") {
         if (!preferences.claimGoalNoticeDay(epochDay)) return@guarded
         reschedule()
+        // The steps the reminder asked for are walked: its numbers would now be wrong.
+        notifications.cancel(GoalNotifications.ID_EVENING_REMINDER)
         val current = preferences.current()
         if (!current.settings.goalReachedNotification) return@guarded
         val content = goalReachedContent(epochDay, current)
         notifications.ensureChannel()
         notifications.post(
             GoalNotifications.ID_GOAL_REACHED,
-            notifications.goalReached(content, current.settings.units),
+            notifications.goalReached(content, current.settings.units, untilEndOfDay()),
         )
     }
 
     /**
      * The evening reminder's alarm. The next one is armed first, whatever this one decides. It
      * speaks only if Passo is counting right now (a paused or stopped count would make it lie),
-     * after catching up with the sensor, and only below the reader's share of the goal.
+     * after catching up with the sensor, only below the reader's share of the goal, and never
+     * during an outing: the reader is already walking, and its "Walk now" would do nothing.
      */
     suspend fun eveningReminder(dueAt: Instant?) = guarded("The evening reminder") {
         reschedule()
         val settings = preferences.current().settings
         if (!settings.eveningReminder || countingState(settings) != CountingState.COUNTING) return@guarded
+        if (liveSession.current.value?.session?.live == true) return@guarded
         val zone = ZoneId.systemDefault()
         if (dueAt != null && !GoalSchedule.reminderStillTimely(dueAt, Instant.now(), zone)) return@guarded
         withTimeoutOrNull(CATCH_UP_TIMEOUT_MILLIS) { link.catchUp() }
@@ -142,7 +175,10 @@ constructor(
         val nudge = EveningReminder.check(steps, settings.dailyGoalSteps, settings.eveningReminderThresholdPercent)
             ?: return@guarded
         notifications.ensureChannel()
-        notifications.post(GoalNotifications.ID_EVENING_REMINDER, notifications.eveningReminder(nudge, settings.units))
+        notifications.post(
+            GoalNotifications.ID_EVENING_REMINDER,
+            notifications.eveningReminder(nudge, settings.units, untilEndOfDay()),
+        )
     }
 
     /** The weekly summary's alarm: the week that has just ended, as History would show it. */
@@ -192,6 +228,10 @@ constructor(
         val streak = Insights.of(days, LocalDate.ofEpochDay(epochDay), weekStart(current.settings)).currentStreak.days
         return GoalReachedContent(goalSteps = goal, reachedAtMinute = reachedAt, streakDays = streak)
     }
+
+    private fun mayNotify(): Boolean = GoalNotificationsAccess.block(context) == GoalNotificationsBlock.NONE
+
+    private fun untilEndOfDay(): Long = GoalSchedule.untilEndOfDay(Instant.now(), ZoneId.systemDefault()).toMillis()
 
     private fun countingState(settings: UserSettings): CountingState = CountingState.of(
         hasSensor = StepTracking.hasStepCounter(context),

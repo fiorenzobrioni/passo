@@ -200,6 +200,10 @@ class StepTrackingService : Service() {
     private var changeJob: Job? = null
     private var countdownJob: Job? = null
 
+    // While the processor is kept awake for an outing's signals: the moment it is let go, once
+    // the outing has been still too long (SignalWake.letGoAt).
+    private var letGoJob: Job? = null
+
     // Session commands arrive with the start intents, and wait until tracking has started.
     private val commands = Channel<Intent>(Channel.UNLIMITED)
 
@@ -431,6 +435,7 @@ class StepTrackingService : Service() {
             if (on) {
                 // What was batched while the screen was off, then live events.
                 flushSensor()
+                catchUpDay()
                 checkSession()
                 applyRegistration()
                 startTicker()
@@ -487,9 +492,12 @@ class StepTrackingService : Service() {
                     } else {
                         scope.launch {
                             flushSensor()
+                            catchUpDay()
                             checkSession()
                             notifyNow()
-                            widgets.notify(WidgetEvent.SCREEN_ON)
+                            // The cards were drawn when the screen came on, seconds ago: again
+                            // only if the count moved since.
+                            widgets.notify(WidgetEvent.UNLOCKED, displayedToday() ?: 0)
                         }
                     }
             }
@@ -656,14 +664,25 @@ class StepTrackingService : Service() {
         tickerJob = scope.launch {
             while (isActive) {
                 delay(MILLIS_PER_MINUTE - System.currentTimeMillis() % MILLIS_PER_MINUTE)
-                if (storedToday?.day != today()) {
-                    persistMutex.withLock { refreshStoredTodayLocked() }
-                    publishLive()
+                if (catchUpDay()) {
                     notifyNow()
                     widgets.notify(WidgetEvent.DAY_CHANGED)
                 }
             }
         }
+    }
+
+    /**
+     * Today's stored count read again if the day has rolled over since it was read; returns
+     * whether it had. Also at the screen coming on, before anything is drawn: the first look of
+     * the morning found the count of a day that was over, and the notification without a number
+     * until the ticker's next minute (owner's review, 2 Nov 2026).
+     */
+    private suspend fun catchUpDay(): Boolean {
+        if (storedToday?.day == today()) return false
+        persistMutex.withLock { refreshStoredTodayLocked() }
+        publishLive()
+        return true
     }
 
     // --- Outings (PLANNING.md §11 Phase 10) ----------------------------------------------------
@@ -684,8 +703,10 @@ class StepTrackingService : Service() {
                     session = tracker?.session,
                     wakeUpCounter = sensorSource.wakeUpSensor != null,
                     signalsAllowed = sessionNotifications.signalsAllowed(),
+                    nowMillis = System.currentTimeMillis(),
                 ),
             )
+            armLetGo()
         }
         // An interval outing near a change: reports every two seconds, so it is felt on time. Kept
         // awake, the same: a counter with a FIFO would otherwise hold the steps for half a minute.
@@ -698,6 +719,36 @@ class StepTrackingService : Service() {
         }
         sensorSource.register(latency, wakeUp = measuring)
         startCountdown()
+    }
+
+    /**
+     * While the processor is kept awake for an outing's signals, the moment it is let go: when the
+     * outing has been still for [SessionConstants.IDLE_END_MILLIS] it is over, and has nothing left
+     * to tell on time (it is closed at the next step or look, as on every phone). Without this a
+     * forgotten outing kept the processor awake until the screen came on, for up to four hours.
+     * The one timer that runs with the screen off, and only while the lock already keeps the
+     * processor awake: it shortens a wake, never makes one (owner, 2 Nov 2026). A step meanwhile
+     * moves the moment on, and the wait starts again from it.
+     */
+    private fun armLetGo() {
+        if (!signalWake.held) {
+            letGoJob?.cancel()
+            letGoJob = null
+            return
+        }
+        if (letGoJob?.isActive == true) return
+        letGoJob = scope.launch {
+            while (isActive && signalWake.held) {
+                val session = tracker?.session ?: break
+                val wait = SignalWake.letGoAt(session) - System.currentTimeMillis()
+                if (wait > 0) {
+                    delay(wait)
+                } else {
+                    applyRegistration()
+                    break
+                }
+            }
+        }
     }
 
     /**
@@ -930,7 +981,11 @@ class StepTrackingService : Service() {
             when (command.action) {
                 SessionControl.ACTION_START -> startSession(command.getLongExtra(SessionControl.EXTRA_PLAN_ID, 0L))
 
-                SessionControl.ACTION_START_REST_OF_DAY -> startSession(null)
+                SessionControl.ACTION_START_REST_OF_DAY -> {
+                    // The evening reminder's "Walk now": the reminder has been answered.
+                    goals.reminderAnswered()
+                    startSession(null)
+                }
 
                 SessionControl.ACTION_START_WALK -> {
                     val name = command.getStringExtra(SessionControl.EXTRA_WALK)

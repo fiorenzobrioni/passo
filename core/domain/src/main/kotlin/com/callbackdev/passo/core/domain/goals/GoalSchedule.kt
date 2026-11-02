@@ -72,6 +72,17 @@ object GoalSchedule {
         return now.atZone(zone).toLocalDate() in due
     }
 
+    /**
+     * How long until the local day of [now] ends: what a notification about today lives for. A
+     * goal reached yesterday, or a reminder of the steps yesterday still lacked, is not news
+     * the next morning; and a notification left in the shade under the same id silenced the
+     * next day's (owner's review, 2 Nov 2026). The day may be 23 or 25 hours long.
+     */
+    fun untilEndOfDay(now: Instant, zone: ZoneId): Duration {
+        val nextDay = now.atZone(zone).toLocalDate().plusDays(1)
+        return Duration.between(now, nextDay.atStartOfDay(zone).toInstant())
+    }
+
     private fun at(day: LocalDate, time: LocalTime, zone: ZoneId): Instant =
         ZonedDateTime.of(day, time, zone).toInstant()
 }

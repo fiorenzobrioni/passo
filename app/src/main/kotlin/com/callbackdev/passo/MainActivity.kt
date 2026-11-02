@@ -21,6 +21,7 @@ import com.callbackdev.passo.core.domain.widget.WidgetEvent
 import com.callbackdev.passo.core.model.AppFont
 import com.callbackdev.passo.core.model.AppPalette
 import com.callbackdev.passo.core.model.ThemeMode
+import com.callbackdev.passo.core.tracking.GoalNotifier
 import com.callbackdev.passo.core.tracking.SessionControl
 import com.callbackdev.passo.core.tracking.StepTracking
 import com.callbackdev.passo.core.tracking.TrackingControl
@@ -47,6 +48,8 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var trackingControl: TrackingControl
 
     @Inject lateinit var widgets: WidgetUpdates
+
+    @Inject lateinit var goals: GoalNotifier
 
     private var readiness by mutableStateOf(TrackingReadiness.READY)
 
@@ -108,12 +111,20 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         // Also on the way back from the system's settings, where the permission may have changed.
         readiness = StepTracking.readiness(this)
-        // A revoked permission kills the process without a word to the widgets: they learn it here.
-        widgets.notify(WidgetEvent.TRACKING_STATE)
+        // A revoked permission kills the process without a word to the widgets: they learn it
+        // here, once a process and whenever it changed, not at every return to the app (the
+        // service tells them itself when it starts or stops).
+        if (readiness != toldReadiness) {
+            toldReadiness = readiness
+            widgets.notify(WidgetEvent.TRACKING_STATE)
+        }
         lifecycleScope.launch {
             if (readiness == TrackingReadiness.READY && settingsRepository.settings.first().trackingEnabled) {
                 StepTracking.start(this@MainActivity)
             }
+            // Back from the system's settings, where the goals' notifications may have been
+            // turned on again: the evening reminder is armed once they can show.
+            goals.accessMayHaveChanged()
         }
     }
 
@@ -146,5 +157,10 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             if (!settingsRepository.settings.first().trackingEnabled) trackingControl.resume()
         }
+    }
+
+    private companion object {
+        /** The readiness the widgets were last told of, in this process. */
+        var toldReadiness: TrackingReadiness? = null
     }
 }

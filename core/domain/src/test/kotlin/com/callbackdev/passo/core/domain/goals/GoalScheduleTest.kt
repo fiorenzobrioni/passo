@@ -124,4 +124,13 @@ class GoalScheduleTest {
         assertThat(GoalSchedule.summaryStillTimely(due, at("2026-10-04T23:00"), rome, DayOfWeek.MONDAY)).isTrue()
         assertThat(GoalSchedule.summaryStillTimely(due, at("2026-10-05T09:30"), rome, DayOfWeek.MONDAY)).isFalse()
     }
+
+    @Test
+    fun `a notification about today lives until midnight, on the nights the clocks change too`() {
+        assertThat(GoalSchedule.untilEndOfDay(at("2026-09-24T20:30"), rome)).isEqualTo(Duration.ofMinutes(210))
+        // 25 October 2026 has 25 hours in Rome: from 01:00, 24 of them are left.
+        assertThat(GoalSchedule.untilEndOfDay(at("2026-10-25T01:00"), rome)).isEqualTo(Duration.ofHours(24))
+        // 29 March 2026 has 23.
+        assertThat(GoalSchedule.untilEndOfDay(at("2026-03-29T01:00"), rome)).isEqualTo(Duration.ofHours(22))
+    }
 }
