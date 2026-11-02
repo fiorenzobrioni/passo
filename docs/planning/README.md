@@ -173,3 +173,16 @@ reference by name and read from the right place. The current log is not here: it
   - L279: The family's icons, made one suite
   - L281: The family's onboarding frame
   - L283: 18 Oct 2026. Time zones and clock changes, reviewed
+
+## [03-towards-1.1.0.md](03-towards-1.1.0.md): PLANNING, archive 03: towards 1.1.0, 2 Nov 2026
+
+- L12: 11. Delivery phases: Phase 12
+  - L14: Phase 12 — Your year on foot («Il tuo anno a piedi»)
+- L47: 15. Decisions log: 2 Nov 2026
+  - L49: 2 Nov 2026. A review of the wakes, the notifications and the battery
+  - L56: Insights' streak card says since when; the interval walk has a mark of its own
+  - L57: A crash page in test builds
+  - L58: The plan archived as the family's
+  - L60: Your year on foot
+  - L73: The last seven days on At a glance
+  - L75: 1.1.0, prepared

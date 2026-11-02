@@ -160,7 +160,7 @@ Added to v1.0 at the owner's request (Phase 10, `docs/adr/0009-sessions.md`). An
 
 ### Planned after 1.0
 
-Asked for by the owner after the v1.0.0 release (1 Oct 2026); the phases are in PLANNING §11, in an order the owner chooses.
+Asked for by the owner after the v1.0.0 release (1 Oct 2026); the phases are in PLANNING §11, in an order the owner chooses. All five were built, and are in 1.1.0 (2 Nov 2026), with the last seven days on «At a glance» (an option the widget's plan had left open).
 
 - **The Ways** («I Cammini», Phase 11): the "virtual journeys" idea, as five long ways (Via degli Dei, the Camino Portugués from Porto, Via di Francesco, the Camino Francés, and the Italian part of the Via Francigena). The estimated distance walked since a chosen day moves a point along the way, drawn without any location; each stage reached is a stamp.
 - **City walks** («Passeggiate in città», Phase 11, second part): an outing through a city (Milan, Rome, Paris, London, Madrid, Porto, Amsterdam, Prague, Lima and Cusco; about 5 km or about 10), its places told as the reader reaches them, by a vibration and, if the outing speaks, the voice. Imaginary and said so: the route moves with the steps, never with a location.

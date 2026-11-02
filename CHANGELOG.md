@@ -10,152 +10,46 @@ All notable changes to Passo are documented here. The format follows
 
 ## [Unreleased]
 
-### Added
+## [1.1.0] - 2026-11-02
 
-- **Your year on foot**: a year told in pages, made from the days already on your phone. How
-  many steps and how far, measured against a whole way («A whole way, 2 times over: Via
-  Francigena»); the months, with the best one named; your best day and the outing or walk that
-  made it; your day of the week and your hour; the days at your goal, with the year as twelve
-  small months; your outings; the ways walked and the cities; and the year against the one
-  before, by steps a day. A touch goes on, a swipe goes back. From Insights for the year so far
-  and every past year with thirty days counted, and from History's year view; from 1 December
-  to 31 January it is also the first card of Insights, and one card on Today until you close
-  it. Share or save a page as an image: it shows only what the page shows. Nothing is sent.
-- **Ways**: long ways walked from wherever you are. In Europe the Via degli Dei, the Camino
-  Portugués from Porto, the Via di Francesco, the Camino Francés and the
-  Italian part of the Via Francigena; beyond it the Kumano Kodō in Japan, from Takijiri-ōji by
-  Hongū to Nachi, the Great Ocean Walk in Australia, from Apollo Bay round Cape Otway to the
-  Twelve Apostles, the Inca Trail in Peru, from Km 82 to Machu Picchu by the Sun Gate, the
-  John Muir Trail in California, from Yosemite Valley to the summit of Mount Whitney, and
-  Kilimanjaro in Tanzania, up by the Machame route to Uhuru Peak and down by Mweka. Listed under
-  their continent, each group by length. Each is drawn from OpenStreetMap, on maps with the rivers they
-  cross, their lakes, parks and towns. The distance of your days
-  carries you along, stage by stage, with a stamp for each and a notification
-  when you reach one. Start today or in the past, and find yourself already on the way. No
-  location: only your distance. From Insights; while you walk one, the foot of Today says how
-  far the day has carried you along it.
-- **City walks**: Milan, from the Duomo to the Navigli; Rome, from the Colosseum to St Peter's;
-  Paris, from Place des Vosges to the Eiffel Tower; London, from Buckingham Palace to Tower
-  Bridge; Madrid, from the Temple of Debod to the Puerta de Alcalá; Berlin, from the Wall to
-  the Victory Column, by the Brandenburg Gate; Vienna, from the Belvedere round the Ring to the
-  Prater; Lima, through its historic centre; New York, from Central Park to the Brooklyn
-  Bridge, by Times Square and the Empire State; Rio, from the Museum of Tomorrow through Lapa and
-  along the bay to the Sugarloaf; Mexico City, from the Zócalo along the Reforma to Chapultepec;
-  Buenos Aires, from the Plaza de Mayo by the Congress and the Obelisco to Recoleta; San
-  Francisco, from the Ferry Building by Coit Tower and the Wharf to the Palace of Fine Arts;
-  Tokyo, from Sensō-ji by Ueno and Akihabara to the Imperial Palace; Sydney, from Luna Park over
-  the Harbour Bridge, by the Opera House, to the Chinese Garden; Seoul, from Gwanghwamun Square
-  by the palaces and the Cheonggyecheon up to N Seoul Tower; Beijing, from Tiananmen Square
-  through the Forbidden City, in by the Meridian Gate and out by the Gate of Divine Might, then by
-  Beihai and the Drum Tower to the Lama Temple; Hong Kong, from Victoria Park by Wan Chai, the
-  Star Ferry and Central to Western Market; Singapore, from Chinatown by Fort Canning, the river
-  and the Merlion to Marina Bay Sands and the Supertrees; Bangkok, from the Giant Swing by the
-  Golden Mount, Khao San, the Grand Palace and Wat Pho, over the Memorial Bridge to Wat Arun; Cairo, from the Egyptian Museum by Al-Muizz Street, Khan el-Khalili
-  and Al-Azhar to the Citadel; Cape Town, from the Green Point Lighthouse by the Waterfront, the
-  Castle and the Company's Garden to Bo-Kaap; Marrakech, from the Majorelle Garden by the souks,
-  Jemaa el-Fnaa, the Koutoubia and the Saadian Tombs to the Bahia Palace and Dar Si Said; Tunis, from
-  the Clock Tower along Avenue Habib Bourguiba and through the medina to the Belvedere Park;
-  Alexandria, from the Catacombs of Kom el Shoqafa by Pompey's Pillar, the Library and the
-  Corniche to the Citadel of Qaitbay; Dakar, from the Museum of Black Civilisations through the Plateau
-  and the Médina, along the Corniche to the University; Addis Ababa, from Meskel Square by the
-  palaces, Arat Kilo and St George's to the Taitu Hotel; and Cusco, up to Sacsayhuamán and down to the Qorikancha. And twelve short ones, about 5 km, an hour
-  or so: Porto, from the cathedral across the Douro to the Serra do Pilar; Amsterdam, from
-  Centraal Station along the canals to the Westerkerk; Prague, from the Castle over Charles
-  Bridge to Wenceslas Square; Québec, from the Parliament by the Plains of Abraham and the
-  Château Frontenac down to the Lower Town; Havana, from the Capitolio by the Malecón and the old
-  squares to the Alameda de Paula; Cartagena, from the Clock Tower along the walls and
-  through Getsemaní to San Felipe; Kyoto, from Kiyomizu-dera by the Yasaka pagoda, Gion and
-  Pontochō to the Nishiki market; Hanoi, from the Temple of Literature round Hoàn Kiếm Lake and
-  through the Old Quarter to the Long Biên Bridge; and Melbourne, from Flinders Street by the
-  State Library and Parliament to the Royal Exhibition Building; Fez, from the Royal Palace
-  through the medina by Bou Inania, al-Qarawiyyin and the tanneries to the Andalusian Mosque;
-  Zanzibar, from Michenzani through Stone Town by the cathedrals, the fort and the House of Wonders
-  to the Old Dispensary; and Luxor, from Luxor Temple along the Avenue of Sphinxes to Karnak. Each map has the city's
-  water, parks and main streets, and, for a city on the sea, its coast, so the area is
-  recognisable at a glance. Walked where you are
-  in one outing or a few. Each place is told as your steps reach it, with a short vibration and,
-  if you like, its name and a line about it in your headphones; the notification says the next
-  one. Stop when you like and continue later from where you were. On the Ways page, by
-  continent (Europe, the Americas, Asia and Oceania, Africa), each with a map of where its cities are and which you have
-  walked; and from Outings. "Hear it" plays a place as you will hear it, and "Change voice" opens the phone's
-  voices.
-- **The Japanese interval walk**: slow and fast walking in turns, 3 minutes each, five sets or
-  more, as a study at Shinshu University proposed it. Ready to start as "Japanese walking", or
-  made to measure in Outings (the slow and fast minutes, the sets, the fast pace), with a short
-  explanation of what it is where you choose it, and more in the guide. Each change is told with
-  a vibration of its own, "faster" and "slower", and with the voice if you like, on time with
-  the phone in your pocket. The minutes are minutes in motion: a traffic light does not eat a
-  fast interval. On the screen and in the notification, the interval you are in and what is left
-  of it; at the end, each fast interval's cadence against its pace, and how many were at pace.
-- **Your ways can be tidied**: a way finished or left, or a walk walked to its end, can be
-  deleted, after a warning that it is for good. A way left before you walked any of it is not
-  kept. A city walk begun can be left too, between outings: it goes back to its start, and
-  its outings stay in History.
+**Walk somewhere.** Passo still counts every step on your phone and sends nothing; now your steps
+can carry you along a long way or through a city, an outing can be a Japanese interval walk, and
+your year can be told in pages.
 
-### Changed
+Android 14 (API 34) or newer, with a hardware step counter. Installs over 1.0.0 with everything
+kept. Check the download with the `.sha256` file beside the APK, and the signing certificate
+against the fingerprint in the [README](https://github.com/fiorenzobrioni/passo#install).
 
-- **At a glance can show your week.** On a card three cells wide and two rows tall, the bars
-  under the count can be the last 7 days against the goal instead of today hour by hour: choose
-  in the card's settings, «The bars».
-- **Insights' streak card says since when.** With the streak as the page's sentence, the card
-  under it no longer repeats it: «4 / days in a row, since Sep 20».
-- **The Japanese interval walk has a mark of its own** on the Outings page, its card and the day's
-  list: slow and fast in turns, instead of the brisk walk's flag.
-- **Today, tidied after a design review.** The ring shows the day's distance and calories
-  where it showed a percentage, so they are there as soon as the app opens. The ring's
-  usual-day notch is dashed like the usual day in the chart, and a day past its goal starts a
-  second lap. «Your day» starts at five in the morning (earlier on a day that does), so the
-  walks have the room the empty small hours took. Green now only means a
-  met goal, and the tiles side by side are always the same height.
-- **Widgets: the family's sizes.** The line that says the count is paused, the words card's
-  figures' labels and the message a card shows before it counts now use the same sizes as the
-  family's other cards.
-- **«In words» says more**: its sentence is the size of the facts under it, and the room that
-  gives back holds the whole sentence on a one-row card and one more line on a square one.
-- **Widgets wear your launcher's corner**, so they match the widgets beside them.
-- **A signal is not lost to a phone call.** A spoken signal due while you are on the phone is
-  said when the call ends; in an interval walk, as the interval you are in then and the time left
-  of it («Slow, 2 minutes left»).
-- **Signals on time on every phone.** On phones whose step counter cannot wake them (some
-  Samsungs among them), an outing's vibrations and voice could come a minute or two late with the
-  screen off. There, an outing with signals now keeps the phone awake while it counts, for a
-  little more battery (about 1 to 3% an hour); the outing editor and a city walk's page say so. Outings without
-  vibration or voice, and every other phone, are as before.
-- **An outing's distance on phones that hand steps over in clumps.** The same phones made an
-  outing read its pace as a run, and measure its distance and calories with the running step
-  (about a quarter too long). Its pace is now measured over the time the steps took.
-- **Steps land in the minutes they were walked in, on phones that hand them over in clumps.**
-  Some phones (some Samsungs among them) deliver the steps of a minute and a half at once while
-  the screen is off; Passo put them all in one minute, which could read as a minute of running
-  and make the distance and calories of the day too high. They are now spread over the time they
-  took. The day's steps were always right, and days already recorded stay as they are.
-- **Nothing on the widgets is cut any more.** On some phones (a Samsung among them) both cards
-  could cut the count («9.6…») or the end of their sentence («Goal reached at 14:…»): they
-  measured their text in a different typeface from the one the home screen draws it in. They now
-  measure in the home screen's own, with a little room to spare; a sentence that would not fit
-  says the same thing in fewer words («Reached at 2:23 PM»), and the count is made smaller rather
-  than cut, past ten thousand steps too.
-- **Removing a widget no longer closes Passo.** Taking a card off the home screen could make
-  the app crash a moment later, in the background, as it put away the card's settings. It no
-  longer does.
-- **The first-day note** on Today goes as soon as you open the guide from it, instead of
-  staying until the end of the day.
-- **An outing left running no longer keeps the phone awake.** On the phones that keep the
-  processor awake for an outing's signals, an outing forgotten on the table kept it so until the
-  screen came on, for up to four hours. After 15 minutes without a step the outing is over, and
-  the phone sleeps again; the outing is closed as before, at the next step or when you look.
-- **The goal notifications alert every day.** With yesterday's «Goal reached» or evening reminder
-  still in the notification shade, today's arrived without a sound. Each now alerts, and goes by
-  itself at midnight.
-- **The evening reminder tidies up after itself.** It goes once you tap «Walk now» or reach the
-  goal, instead of staying with steps to go that are already walked; it no longer comes during an
-  outing; and it no longer wakes the phone while Passo's notifications are turned off.
-- **A new stage of a way alerts too**, with the last one still in the notification shade.
-- **Lighter at every unlock.** After a walk with the screen off, the steps the phone hands over
-  at once are written in one go instead of one write each; the widgets are drawn again at the
-  unlock only if the count moved since the screen came on; the counting notification shows
-  today's count at the first look of the morning, not a minute later; and a city walk's page lets
-  go of the phone's voice when you leave it.
+### New
+
+- **Ways**: ten long ways on five continents, from the Via Francigena to the Kumano Kodō and
+  Kilimanjaro, walked from home with the distance of your days: stage by stage, a stamp for each,
+  a notification at each, and the foot of Today saying how far the day carried you. No location.
+- **City walks**: forty walks through as many cities, from Milan to Tokyo and Cairo, walked where
+  you are in one outing or a few; each place told as your steps reach it, with a vibration and, if
+  you like, a line in your headphones.
+- **The Japanese interval walk**: 3 slow minutes and 3 fast ones, five sets or more, each change
+  felt in your pocket; at the end, each fast interval against its pace.
+- **Your year on foot**: a year told in pages, from Insights or History at any time, and in
+  December on Today; share a page as an image if you like.
+- **At a glance can show your week**: the last 7 days against the goal under the count.
+
+### Better
+
+- Goal notifications alert every day, and go by themselves at midnight; the evening reminder
+  goes once you walk it, and never comes during an outing.
+- An outing left running no longer keeps the phone awake; the phone does less at each unlock.
+- Steps handed over in clumps land in the minutes they were walked in; nothing on the widgets is
+  cut; removing a widget no longer closes Passo.
+- Insights' streak card says since when; the interval walk has a mark of its own.
+
+### Private and light
+
+- Still no `INTERNET` permission, and no new permission of any kind.
+- The ways, the cities and your year are computed on the phone, from your own steps.
+
+The full development record is in
+[docs/CHANGELOG-1.1.0.md](https://github.com/fiorenzobrioni/passo/blob/main/docs/CHANGELOG-1.1.0.md).
 
 ## [1.0.0] - 2026-10-01
 
