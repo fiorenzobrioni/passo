@@ -14,6 +14,7 @@ class GlanceLayoutTest {
     private val twoByTwo = DpSize(159.dp, 189.dp)
     private val threeByTwo = DpSize(250.dp, 189.dp)
     private val fourByTwo = DpSize(340.dp, 189.dp)
+    private val fourByThree = DpSize(340.dp, 293.dp)
     private val oneByTwo = DpSize(85.dp, 189.dp)
 
     /** «12,345» in Roboto Bold: five digits and a separator. */
@@ -97,24 +98,40 @@ class GlanceLayoutTest {
     }
 
     @Test
-    fun `the tall circle is the height the words' band leaves`() {
-        // Two rows high: 161 dp inside, less the band's 108.24.
-        assertThat(tallCircle(161.dp, 1f, sentence = true)).isEqualTo(52.75.dp)
+    fun `the family's circle at the reference grants`() {
+        // One cell and one row.
+        assertThat(dotRingSize(oneByOne)).isEqualTo(69.dp)
+        assertThat(dotRingSize(DpSize(85.dp, 293.dp))).isEqualTo(69.dp)
+        assertThat(rowRingSize(twoByOne)).isEqualTo(44.dp)
+        assertThat(rowRingSize(threeByOne)).isEqualTo(56.dp)
+        // Two rows high: 161 dp inside, less the band's 108.24 under three cells, 87.12 from three.
+        assertThat(tallCircle(twoByTwo, 1f)).isEqualTo(52.75.dp)
+        assertThat(tallCircle(threeByTwo, 1f)).isEqualTo(73.75.dp)
+        assertThat(tallCircle(fourByTwo, 1f)).isEqualTo(73.75.dp)
         // At larger text sizes the band grows and the circle yields, to its floor.
-        assertThat(tallCircle(161.dp, 1.15f, sentence = true)).isEqualTo(TallRingMin)
-        assertThat(tallCircle(161.dp, 1.3f, sentence = true)).isEqualTo(TallRingMin)
-        // A taller card, a larger circle; without the sentence, the band is the number and the goal.
-        assertThat(tallCircle(186.dp, 1f, sentence = true)).isEqualTo(77.75.dp)
-        assertThat(tallCircle(161.dp, 1f, sentence = false)).isEqualTo(95.dp)
+        assertThat(tallCircle(twoByTwo, 1.15f)).isEqualTo(TallRingMin)
+        assertThat(tallCircle(twoByTwo, 1.3f)).isEqualTo(TallRingMin)
+        // Taller, larger, to the ceiling: 104 dp, or 45% of the inner side.
+        assertThat(tallCircle(DpSize(159.dp, 214.dp), 1f)).isEqualTo(77.75.dp)
+        assertThat(tallCircle(DpSize(159.dp, 293.dp), 1f)).isEqualTo(104.dp)
+        assertThat(tallCircle(DpSize(250.dp, 293.dp), 1f)).isEqualTo(104.dp)
+        assertThat(tallCircle(fourByThree, 1f)).isEqualTo(119.25.dp)
+        assertThat(tallCircle(DpSize(340.dp, 397.dp), 1f)).isEqualTo(140.25.dp)
+        // Without the sentence, the band is the number and the goal.
+        assertThat(tallCircle(twoByTwo, 1f, sentence = false)).isEqualTo(95.dp)
     }
 
     @Test
-    fun `under three cells wide the ring is one size through the day`() {
-        // A sentence over two lines, over one, none at the moment: one ring, on the reference two
-        // by two and on wider ones, where a one-line sentence grew it to 73.75 dp.
-        listOf(159.dp, 175.dp, 200.dp).forEach { w ->
-            (0..2).forEach { lines ->
-                assertThat(tallPlan(DpSize(w, 189.dp), 1f, fiveDigits, lines).ring).isEqualTo(52.75.dp)
+    fun `the tall ring is one size through the day, at every size`() {
+        // A sentence over two lines, over one, none at the moment: one ring. Before, a shorter
+        // sentence grew it (to 73.75 dp on a two by two, 95 with none).
+        listOf(159.dp, 175.dp, 200.dp, 250.dp, 340.dp).forEach { w ->
+            listOf(189.dp, 230.dp, 293.dp, 397.dp).forEach { h ->
+                val size = DpSize(w, h)
+                val lines = if (w < PanelMinWidth) 0..2 else 0..1
+                lines.forEach { l ->
+                    assertThat(tallPlan(size, 1f, fiveDigits, l).ring).isEqualTo(tallCircle(size, 1f))
+                }
             }
         }
         // The reader hid the sentence: the band is the number and the goal, and the ring takes it.
@@ -126,9 +143,25 @@ class GlanceLayoutTest {
     }
 
     @Test
-    fun `from three cells wide the tall ring still grows with its room`() {
-        val one = tallPlan(threeByTwo, 1f, fiveDigits, sentenceLines = 1)
-        assertThat(one.ring).isGreaterThan(tallPlan(threeByTwo, 1f, fiveDigits, sentenceLines = 2).ring)
+    fun `the panel's ring is the family's circle, its bars as they were`() {
+        // Two rows: 73.75 dp (it was 56), inside the header the number over the goal already took.
+        assertThat(panelHeaderHeight(fourByTwo, 1f, footnote = false).value).isWithin(0.01f).of(74.16f)
+        assertThat(panelBarsHeight(fourByTwo, 1f).value).isWithin(0.5f).of(58.3f)
+        // Three rows: the ring at 104 and 119.25 dp, the bars still at their most.
+        assertThat(panelHeaderHeight(DpSize(250.dp, 293.dp), 1f, footnote = false)).isEqualTo(104.dp)
+        assertThat(panelHeaderHeight(fourByThree, 1f, footnote = false)).isEqualTo(119.25.dp)
+        assertThat(panelBarsHeight(fourByThree, 1f)).isEqualTo(BarsMaxHeight)
+        assertThat(glanceForm(fourByThree, showHours = true)).isEqualTo(GlanceForm.PANEL)
+    }
+
+    @Test
+    fun `a panel's header stacks the sentence under the number where the ring is tall`() {
+        // Four by three: the far edge keeps 84 dp, under a sentence's column; the ring's height
+        // holds two lines under the number.
+        assertThat(rowSentenceColumn(340.dp, tallCircle(fourByThree, 1f))).isLessThan(SentenceColumnMin)
+        assertThat(panelStackedLines(tallCircle(fourByThree, 1f), 1f)).isEqualTo(2)
+        // Two rows: the ring is no taller than the number over the goal, nothing to stack.
+        assertThat(panelStackedLines(tallCircle(threeByTwo, 1f), 1f)).isEqualTo(0)
     }
 
     @Test

@@ -12,8 +12,9 @@ All notable changes to Passo are documented here. The format follows
 
 ### Better
 
-- On «At a glance» two cells wide, the ring keeps one size all day, however long the sentence
-  under it.
+- On «At a glance» the ring keeps one size all day at every size, however long the sentence
+  under it. On a widget three or four cells wide and two rows high or more, the ring beside the
+  hours is larger.
 
 ## [1.1.0] - 2026-11-02
 
