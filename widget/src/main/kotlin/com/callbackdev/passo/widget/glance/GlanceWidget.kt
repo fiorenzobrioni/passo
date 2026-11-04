@@ -462,10 +462,11 @@ private fun MirroredRow(parts: CardParts, width: Dp, height: Dp, ring: Dp, wide:
 private fun TallContent(parts: CardParts, size: DpSize) {
     val context = parts.context
     val width = size.width - WidgetCardPadding * 2
-    // The form the card can give its lines whole; fewer words leave the ring more of the height.
+    // The form the card can give its lines whole; fewer words leave the ring more of the height
+    // from three cells wide, and under them the ring keeps the tall circle.
     val (plan, text) = parts.forms.fit(
         measure = { parts.sentenceLines(it, width) },
-        plan = { tallPlan(size, parts.scale, parts.heroEm, it) },
+        plan = { tallPlan(size, parts.scale, parts.heroEm, it, parts.model.look.showSentence) },
         lines = { it.sentenceLines },
     )
     val fitted = text?.let { FittedSentence(it, plan.sentenceLines) }

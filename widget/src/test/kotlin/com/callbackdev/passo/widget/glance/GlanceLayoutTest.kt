@@ -97,6 +97,41 @@ class GlanceLayoutTest {
     }
 
     @Test
+    fun `the tall circle is the height the words' band leaves`() {
+        // Two rows high: 161 dp inside, less the band's 108.24.
+        assertThat(tallCircle(161.dp, 1f, sentence = true)).isEqualTo(52.75.dp)
+        // At larger text sizes the band grows and the circle yields, to its floor.
+        assertThat(tallCircle(161.dp, 1.15f, sentence = true)).isEqualTo(TallRingMin)
+        assertThat(tallCircle(161.dp, 1.3f, sentence = true)).isEqualTo(TallRingMin)
+        // A taller card, a larger circle; without the sentence, the band is the number and the goal.
+        assertThat(tallCircle(186.dp, 1f, sentence = true)).isEqualTo(77.75.dp)
+        assertThat(tallCircle(161.dp, 1f, sentence = false)).isEqualTo(95.dp)
+    }
+
+    @Test
+    fun `under three cells wide the ring is one size through the day`() {
+        // A sentence over two lines, over one, none at the moment: one ring, on the reference two
+        // by two and on wider ones, where a one-line sentence grew it to 73.75 dp.
+        listOf(159.dp, 175.dp, 200.dp).forEach { w ->
+            (0..2).forEach { lines ->
+                assertThat(tallPlan(DpSize(w, 189.dp), 1f, fiveDigits, lines).ring).isEqualTo(52.75.dp)
+            }
+        }
+        // The reader hid the sentence: the band is the number and the goal, and the ring takes it.
+        assertThat(tallPlan(twoByTwo, 1f, fiveDigits, 0, sentence = false).ring).isEqualTo(95.dp)
+        // A large text size: the sentence yields a line and the ring keeps its floor.
+        val large = tallPlan(twoByTwo, 1.3f, fiveDigits, sentenceLines = 2)
+        assertThat(large.ring).isEqualTo(TallRingMin)
+        assertThat(large.sentenceLines).isEqualTo(1)
+    }
+
+    @Test
+    fun `from three cells wide the tall ring still grows with its room`() {
+        val one = tallPlan(threeByTwo, 1f, fiveDigits, sentenceLines = 1)
+        assertThat(one.ring).isGreaterThan(tallPlan(threeByTwo, 1f, fiveDigits, sentenceLines = 2).ring)
+    }
+
+    @Test
     fun `past the ring's ceiling the number grows`() {
         val plan = tallPlan(DpSize(250.dp, 400.dp), 1f, fiveDigits, sentenceLines = 1)
         assertThat(plan.ring).isEqualTo(TallRingMax)

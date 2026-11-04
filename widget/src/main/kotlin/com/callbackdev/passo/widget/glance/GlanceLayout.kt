@@ -139,13 +139,21 @@ internal fun mirroredSentenceWidth(width: Dp, ring: Dp, countWidth: Dp): Dp =
 
 /**
  * The tall card, bottom up: the words (the number, the sentence, the goal) take what they need, and the ring takes the rest of the height in the top trailing corner, between
- * [TallRingMin] and [TallRingMax]. When even two lines of sentence
+ * [TallRingMin] and [TallRingMax]; under three cells wide, never past the tall circle
+ * ([tallCircle]), so fewer words do not grow it. When even two lines of sentence
  * would leave the ring under its floor, the sentence gives a line, then the other: the ring is
  * what the card is read by. Past the ring's ceiling the number grows instead, up to [TALL_HERO_MAX].
+ * [sentence] is the reader's choice to show the day's sentence.
  */
 internal data class TallPlan(val ring: Dp, val heroSp: Float, val sentenceLines: Int)
 
-internal fun tallPlan(size: DpSize, fontScale: Float, heroEm: Float, sentenceLines: Int): TallPlan {
+internal fun tallPlan(
+    size: DpSize,
+    fontScale: Float,
+    heroEm: Float,
+    sentenceLines: Int,
+    sentence: Boolean = true,
+): TallPlan {
     val inner = size.height - WidgetCardPadding * 2
     val width = size.width - WidgetCardPadding * 2
     val fixed = textLineHeight(FACT_SP, fontScale)
@@ -156,7 +164,10 @@ internal fun tallPlan(size: DpSize, fontScale: Float, heroEm: Float, sentenceLin
         inner - fixed - textLineHeight(baseHero, fontScale) - textLineHeight(SENTENCE_LINE_SP, fontScale) * l
     while (lines > 0 && ringRoom(lines) < TallRingMin) lines--
     val room = ringRoom(lines)
-    val ring = room.coerceIn(TallRingMin, minOf(TallRingMax, width))
+    val most = minOf(TallRingMax, width).let {
+        if (size.width < PanelMinWidth) minOf(it, tallCircle(inner, fontScale, sentence)) else it
+    }
+    val ring = room.coerceIn(TallRingMin, most)
     val surplus = room - TallRingMax
     val hero = if (surplus > 0.dp) {
         minOf(textSizeForLine(textLineHeight(baseHero, fontScale) + surplus, fontScale), byWidth, TALL_HERO_MAX)
@@ -171,6 +182,24 @@ internal val TallRingMin = 44.dp
 internal val TallRingMax = 104.dp
 internal const val TALL_HERO_MAX = 56f
 internal const val TALL_SENTENCE_MAX_LINES = 2
+
+/**
+ * The tall circle (4 Nov 2026, owner): the side of the circle in the top trailing corner of every
+ * tall card of the family under three cells wide, the height the card's [innerHeight] leaves over
+ * the words' band, never under [TallRingMin]. The band is budgeted, never measured: the number's
+ * line, the goal and the sentence's two lines (the number and the goal where the reader hid the
+ * sentence), at their nominal sizes. The day's words do not move it, so a short sentence's ring is
+ * a long one's, and two cards of one size side by side on the home screen draw one circle. It
+ * grows with the card, and with the reader's text size the band grows and the circle yields.
+ */
+internal fun tallCircle(innerHeight: Dp, fontScale: Float, sentence: Boolean): Dp {
+    val band = if (sentence) TALL_WORDS_BAND_SP else TALL_WORDS_BAND_SP - TALL_SENTENCE_MAX_LINES * SENTENCE_LINE_SP
+    val side = maxOf(TallRingMin, innerHeight - textLineHeight(band, fontScale))
+    return quarterPoint(side.value).dp
+}
+
+/** The words' band in sp of whole lines: the number, the sentence's two lines and the goal. */
+internal const val TALL_WORDS_BAND_SP = ROW_HERO_SP + TALL_SENTENCE_MAX_LINES * SENTENCE_LINE_SP + FACT_SP
 
 // --- Panel -----------------------------------------------------------------------------------
 

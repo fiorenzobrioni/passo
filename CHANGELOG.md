@@ -10,6 +10,11 @@ All notable changes to Passo are documented here. The format follows
 
 ## [Unreleased]
 
+### Better
+
+- On «At a glance» two cells wide, the ring keeps one size all day, however long the sentence
+  under it.
+
 ## [1.1.0] - 2026-11-02
 
 **Walk somewhere.** Passo still counts every step on your phone and sends nothing; now your steps
