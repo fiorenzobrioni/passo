@@ -10,6 +10,12 @@ All notable changes to Passo are documented here. The format follows
 
 ## [Unreleased]
 
+### Better
+
+- On «At a glance» the ring keeps one size all day at every size, however long the sentence
+  under it. On a widget three or four cells wide and two rows high or more, the ring beside the
+  hours is larger, and larger still with the day’s sentence turned off.
+
 ## [1.1.0] - 2026-11-02
 
 **Walk somewhere.** Passo still counts every step on your phone and sends nothing; now your steps

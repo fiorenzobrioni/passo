@@ -38,15 +38,18 @@ import com.callbackdev.passo.widget.textSizeForLine
  */
 internal enum class GlanceForm { DOT, NARROW, WIDE, TALL, PANEL }
 
-internal fun glanceForm(size: DpSize, showHours: Boolean, fontScale: Float = 1f): GlanceForm = when {
+internal fun glanceForm(
+    size: DpSize,
+    showHours: Boolean,
+    fontScale: Float = 1f,
+    sentence: Boolean = true,
+): GlanceForm = when {
     size.width < DotMaxWidth -> GlanceForm.DOT
 
-    size.height >= TallMinHeight ->
-        if (showHours && size.width >= PanelMinWidth && panelBarsHeight(size, fontScale) >= BarsMinHeight) {
-            GlanceForm.PANEL
-        } else {
-            GlanceForm.TALL
-        }
+    size.height >= TallMinHeight -> {
+        val bars = panelBarsHeight(size, fontScale, sentence)
+        if (showHours && size.width >= PanelMinWidth && bars >= BarsMinHeight) GlanceForm.PANEL else GlanceForm.TALL
+    }
 
     rowSentenceColumn(size.width, rowRingSize(size)) >= SentenceColumnMin -> GlanceForm.WIDE
 
@@ -138,14 +141,22 @@ internal fun mirroredSentenceWidth(width: Dp, ring: Dp, countWidth: Dp): Dp =
 // --- Tall ------------------------------------------------------------------------------------
 
 /**
- * The tall card, bottom up: the words (the number, the sentence, the goal) take what they need, and the ring takes the rest of the height in the top trailing corner, between
- * [TallRingMin] and [TallRingMax]. When even two lines of sentence
- * would leave the ring under its floor, the sentence gives a line, then the other: the ring is
- * what the card is read by. Past the ring's ceiling the number grows instead, up to [TALL_HERO_MAX].
+ * The tall card, bottom up: the words (the number, the sentence, the goal) take what they need,
+ * and the ring stands in the top trailing corner at the family's circle ([tallCircle]), smaller
+ * only where the words leave it less, never under [TallRingMin]; fewer words do not grow it. When
+ * even two lines of sentence would leave the ring under its floor, the sentence gives a line, then
+ * the other: the ring is what the card is read by. Past the ring's ceiling the number grows
+ * instead, up to [TALL_HERO_MAX]. [sentence] is the reader's choice to show the day's sentence.
  */
 internal data class TallPlan(val ring: Dp, val heroSp: Float, val sentenceLines: Int)
 
-internal fun tallPlan(size: DpSize, fontScale: Float, heroEm: Float, sentenceLines: Int): TallPlan {
+internal fun tallPlan(
+    size: DpSize,
+    fontScale: Float,
+    heroEm: Float,
+    sentenceLines: Int,
+    sentence: Boolean = true,
+): TallPlan {
     val inner = size.height - WidgetCardPadding * 2
     val width = size.width - WidgetCardPadding * 2
     val fixed = textLineHeight(FACT_SP, fontScale)
@@ -156,8 +167,8 @@ internal fun tallPlan(size: DpSize, fontScale: Float, heroEm: Float, sentenceLin
         inner - fixed - textLineHeight(baseHero, fontScale) - textLineHeight(SENTENCE_LINE_SP, fontScale) * l
     while (lines > 0 && ringRoom(lines) < TallRingMin) lines--
     val room = ringRoom(lines)
-    val ring = room.coerceIn(TallRingMin, minOf(TallRingMax, width))
-    val surplus = room - TallRingMax
+    val ring = room.coerceIn(TallRingMin, tallCircle(size, fontScale, sentence))
+    val surplus = room - maxOf(ring, TallRingMax)
     val hero = if (surplus > 0.dp) {
         minOf(textSizeForLine(textLineHeight(baseHero, fontScale) + surplus, fontScale), byWidth, TALL_HERO_MAX)
             .coerceAtLeast(baseHero)
@@ -172,17 +183,78 @@ internal val TallRingMax = 104.dp
 internal const val TALL_HERO_MAX = 56f
 internal const val TALL_SENTENCE_MAX_LINES = 2
 
+/**
+ * The family's circle two rows high and up (owner, 4 Nov 2026): every card of the family that
+ * draws a circle draws it at the size the card's size gives, whatever the day's words say, so two
+ * cards of one size side by side on the home screen show one circle, and a card's own does not
+ * grow when its sentence is short. The height inside the card left over a budgeted band of words,
+ * never measured: the number's line, the sentence's lines and the goal at their nominal sizes, two
+ * lines of sentence under three cells wide and one from three ([PanelMinWidth]), where a sentence
+ * that takes two on two cells takes one; where the reader hid the sentence, the number and the
+ * goal. Between [TallRingMin] and the ceiling ([tallRingCeiling]) or the card's inner width,
+ * rounded down to a quarter. It grows with the card, and with the reader's text size the band
+ * grows and the circle yields. The tall card's ring and the panel's are this circle; one cell's
+ * is [dotRingSize] and a row's [rowRingSize], the family's there too.
+ */
+internal fun tallCircle(size: DpSize, fontScale: Float, sentence: Boolean = true): Dp {
+    val inner = size.height - WidgetCardPadding * 2
+    val width = size.width - WidgetCardPadding * 2
+    val lines = if (!sentence) {
+        0
+    } else if (size.width < PanelMinWidth) {
+        TALL_SENTENCE_MAX_LINES
+    } else {
+        1
+    }
+    val band = ROW_HERO_SP + FACT_SP + lines * SENTENCE_LINE_SP
+    val side = (
+        inner - textLineHeight(
+            band,
+            fontScale,
+        )
+        ).coerceIn(TallRingMin, minOf(tallRingCeiling(inner, width), width))
+    return quarterPoint(side.value).dp
+}
+
+/**
+ * The most a tall circle grows to: [TALL_RING_SHARE] of the card's inner height and of its inner
+ * width, so a large card's circle grows with it and its words keep their room; never less than
+ * [TallRingMax].
+ */
+internal fun tallRingCeiling(innerHeight: Dp, innerWidth: Dp): Dp =
+    maxOf(TallRingMax, minOf(innerHeight, innerWidth) * TALL_RING_SHARE)
+
+internal const val TALL_RING_SHARE = 0.45f
+
 // --- Panel -----------------------------------------------------------------------------------
 
 /**
  * The panel's header: the one-row composition at the height its tallest column needs (the
- * ring, or the number over the goal, with its ink balance or the footnote of a card with no
- * room for a sentence).
+ * ring, the family's circle for the card's size ([tallCircle]), larger where the reader hid the
+ * [sentence] as on the tall card (owner, 5 Nov 2026), or the number over the goal, with its ink
+ * balance or the footnote of a card with no room for a sentence). A sentence stacked under the
+ * number ([panelStackedLines]) stands in the ring's height, never past it.
  */
-internal fun panelHeaderHeight(fontScale: Float, footnote: Boolean): Dp = maxOf(
-    RowRingMax,
+internal fun panelHeaderHeight(size: DpSize, fontScale: Float, footnote: Boolean, sentence: Boolean = true): Dp = maxOf(
+    tallCircle(size, fontScale, sentence),
     textLineHeight(ROW_HERO_SP, fontScale) + textLineHeight(FACT_SP, fontScale) +
         (if (footnote) textLineHeight(STATUS_SP, fontScale) else textInkBalance(ROW_HERO_SP, fontScale)),
+)
+
+/**
+ * The lines of sentence a panel's header can stack under the number, beside a ring taller than
+ * the number over the goal, where the sentence cannot stand at the far edge: what the ring's
+ * height leaves, [TALL_SENTENCE_MAX_LINES] at most. A four-by-three's 119.25 dp ring leaves the
+ * far edge 84 dp, under the column a sentence needs, and two lines beside it.
+ */
+internal fun panelStackedLines(ring: Dp, fontScale: Float): Int = minOf(
+    TALL_SENTENCE_MAX_LINES,
+    linesThatFit(
+        ring - textLineHeight(ROW_HERO_SP, fontScale) - textLineHeight(FACT_SP, fontScale) -
+            textInkBalance(ROW_HERO_SP, fontScale),
+        SENTENCE_LINE_SP,
+        fontScale,
+    ),
 )
 
 /**
@@ -191,8 +263,8 @@ internal fun panelHeaderHeight(fontScale: Float, footnote: Boolean): Dp = maxOf(
  * air goes between the header and the bars instead). Measured without a status line, so the
  * form does not change the moment counting pauses.
  */
-internal fun panelBarsHeight(size: DpSize, fontScale: Float): Dp {
-    val rest = size.height - WidgetCardPadding * 2 - panelHeaderHeight(fontScale, footnote = false) -
+internal fun panelBarsHeight(size: DpSize, fontScale: Float, sentence: Boolean = true): Dp {
+    val rest = size.height - WidgetCardPadding * 2 - panelHeaderHeight(size, fontScale, footnote = false, sentence) -
         BarsGap - barsLabelHeight(fontScale)
     return rest.coerceAtMost(BarsMaxHeight)
 }

@@ -124,7 +124,7 @@ internal fun GlanceWidgetContent(model: WidgetModel) {
         remember(model.settings.palette, model.settings.dynamicColor) { widgetDressFor(context, model.settings) }
     val day = model.day
     val scale = fontScale(context)
-    val form = day?.let { glanceForm(size, model.look.showHours, scale) }
+    val form = day?.let { glanceForm(size, model.look.showHours, scale, model.look.showSentence) }
     val (horizontal, vertical) = when (form) {
         GlanceForm.DOT -> DotPadding to DotPadding
         GlanceForm.NARROW, GlanceForm.WIDE -> WidgetCardPadding to WidgetCardPaddingSnug
@@ -337,7 +337,8 @@ private fun Sentence(
 
 /**
  * The one-row card: the ring, the count over the goal, and on a wide card the day's sentence
- * against the far edge (or at the number's shoulder, mirrored). Also the panel's header.
+ * against the far edge (or at the number's shoulder, mirrored). Also the panel's header, where
+ * up to [stack] lines of sentence stand under the count when the far edge has no room for it.
  */
 @Composable
 private fun RowContent(
@@ -346,13 +347,14 @@ private fun RowContent(
     height: Dp,
     wide: Boolean,
     ring: Dp = rowRingSize(DpSize(width, height)),
+    stack: Int = 0,
 ) {
     val context = parts.context
     val scale = parts.scale
     val words = rowWordsWidth(width, ring)
     val mirrored = parts.model.look.arrangement == WidgetArrangement.RING_END
     if (mirrored) {
-        MirroredRow(parts, width, height, ring, wide)
+        MirroredRow(parts, width, height, ring, wide, stack)
         return
     }
     // The split is measured on the sentence's first form; then the form that fits it whole, if any.
@@ -371,18 +373,21 @@ private fun RowContent(
         parts.fitSentence(sentenceColumn, rowSentenceLines(height, scale, Int.MAX_VALUE))
             ?.let { RowSplit(column, sentenceColumn, it) }
     }
-    val footnote = parts.status && split == null
+    val stacked = if (split == null && stack > 0) parts.fitSentence(words, stack) else null
+    val footnote = parts.status && split == null && stacked == null
     // The words' ink and the ring's share a centre line; a footnote
     // under them already fills that band.
     val balance = if (footnote) GlanceModifier else GlanceModifier.padding(bottom = textInkBalance(ROW_HERO_SP, scale))
     val column = split?.column ?: words
-    val hero = rowHeroSp(height, column, parts.heroEm, scale, footnote)
+    val stackedHeight = stacked?.let { textLineHeight(SENTENCE_LINE_SP, scale) * it.lines } ?: 0.dp
+    val hero = rowHeroSp(height - stackedHeight, column, parts.heroEm, scale, footnote)
     Row(modifier = GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
         Ring(parts, ring)
         // A width beside a sentence, where the split was measured; the whole row without one.
         val sized = if (split != null) GlanceModifier.width(RingTextGap + column) else GlanceModifier.defaultWeight()
         Column(modifier = GlanceModifier.padding(start = RingTextGap).then(balance).then(sized)) {
             Count(parts, hero)
+            StackedSentence(parts, stacked, column)
             GoalLine(parts, column)
             if (footnote) StatusFootnote(parts.model.state, parts.palette, column)
         }
@@ -407,6 +412,14 @@ private fun RowContent(
     }
 }
 
+/** A sentence under the count in a panel's header, its lines balanced in the words' column. */
+@Composable
+private fun StackedSentence(parts: CardParts, fitted: FittedSentence?, column: Dp) {
+    if (fitted == null) return
+    val balanced = balancedWidth(parts.context, fitted.text, SENTENCE_LINE_SP, column, TextWeight.MEDIUM, fitted.lines)
+    Sentence(parts, fitted, TextAlign.Start, GlanceModifier.width(balanced))
+}
+
 /** A one-row card's columns: the words', the sentence's, and the sentence that fits it. */
 private class RowSplit(val column: Dp, val sentenceColumn: Dp, val sentence: FittedSentence)
 
@@ -416,7 +429,7 @@ private class RowSplit(val column: Dp, val sentenceColumn: Dp, val sentence: Fit
  * the same minimum as the standard row's column.
  */
 @Composable
-private fun MirroredRow(parts: CardParts, width: Dp, height: Dp, ring: Dp, wide: Boolean) {
+private fun MirroredRow(parts: CardParts, width: Dp, height: Dp, ring: Dp, wide: Boolean, stack: Int = 0) {
     val context = parts.context
     val scale = parts.scale
     val words = rowWordsWidth(width, ring)
@@ -429,8 +442,10 @@ private fun MirroredRow(parts: CardParts, width: Dp, height: Dp, ring: Dp, wide:
     )
     val fitted = parts.fitSentence(shoulder, sentenceRoom).takeIf { wide && shoulder >= SentenceColumnMin }
     val showSentence = fitted != null
-    val footnote = parts.status && !showSentence
-    val hero = rowHeroSp(height, words, parts.heroEm, scale, footnote)
+    val stacked = if (!showSentence && stack > 0) parts.fitSentence(words, stack) else null
+    val footnote = parts.status && !showSentence && stacked == null
+    val stackedHeight = stacked?.let { textLineHeight(SENTENCE_LINE_SP, scale) * it.lines } ?: 0.dp
+    val hero = rowHeroSp(height - stackedHeight, words, parts.heroEm, scale, footnote)
     val balance = if (footnote) 0.dp else textInkBalance(ROW_HERO_SP, scale)
     Row(modifier = GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
         Column(
@@ -447,6 +462,7 @@ private fun MirroredRow(parts: CardParts, width: Dp, height: Dp, ring: Dp, wide:
                     )
                 }
             }
+            StackedSentence(parts, stacked, words)
             GoalLine(parts, words)
             if (footnote) StatusFootnote(parts.model.state, parts.palette, words)
         }
@@ -462,10 +478,11 @@ private fun MirroredRow(parts: CardParts, width: Dp, height: Dp, ring: Dp, wide:
 private fun TallContent(parts: CardParts, size: DpSize) {
     val context = parts.context
     val width = size.width - WidgetCardPadding * 2
-    // The form the card can give its lines whole; fewer words leave the ring more of the height.
+    // The form the card can give its lines whole; fewer words leave the ring more of the height
+    // from three cells wide, and under them the ring keeps the tall circle.
     val (plan, text) = parts.forms.fit(
         measure = { parts.sentenceLines(it, width) },
-        plan = { tallPlan(size, parts.scale, parts.heroEm, it) },
+        plan = { tallPlan(size, parts.scale, parts.heroEm, it, parts.model.look.showSentence) },
         lines = { it.sentenceLines },
     )
     val fitted = text?.let { FittedSentence(it, plan.sentenceLines) }
@@ -483,20 +500,25 @@ private fun TallContent(parts: CardParts, size: DpSize) {
 }
 
 /**
- * Wide and tall: the one-row card on top, and under it the day hour by hour, with the air
- * between the two when the card is taller than the bars want.
+ * Wide and tall: the one-row card on top, its ring the family's circle for the card's size, and
+ * under it the day hour by hour, with the air between the two when the card is taller than the
+ * bars want. Where the ring leaves the sentence no room at the far edge, it stands under the
+ * number, in the ring's height.
  */
 @Composable
 private fun PanelContent(parts: CardParts, size: DpSize) {
-    val wide = rowSentenceColumn(size.width, RowRingMax) >= SentenceColumnMin
-    val header = panelHeaderHeight(parts.scale, footnote = parts.status && !wide)
-    val bars = panelBarsHeight(size, parts.scale).coerceAtLeast(BarsMinHeight)
+    val sentence = parts.model.look.showSentence
+    val ring = tallCircle(size, parts.scale, sentence)
+    val wide = rowSentenceColumn(size.width, ring) >= SentenceColumnMin
+    val stack = if (wide) 0 else panelStackedLines(ring, parts.scale)
+    val header = panelHeaderHeight(size, parts.scale, footnote = parts.status && !wide && stack == 0, sentence)
+    val bars = panelBarsHeight(size, parts.scale, sentence).coerceAtLeast(BarsMinHeight)
     val inner = size.width - WidgetCardPadding * 2
     // The header is laid out as a one-row card of its own height (the row's snug inset included).
     val rowHeight = header + WidgetCardPaddingSnug * 2
     Column(modifier = GlanceModifier.fillMaxSize()) {
         Box(modifier = GlanceModifier.fillMaxWidth().height(header)) {
-            RowContent(parts, size.width, rowHeight, wide, ring = RowRingMax)
+            RowContent(parts, size.width, rowHeight, wide, ring = ring, stack = stack)
         }
         Spacer(modifier = GlanceModifier.defaultWeight())
         if (parts.model.look.panel == WidgetPanel.WEEK && parts.day.week.size == WEEK_DAYS) {

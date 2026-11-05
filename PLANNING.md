@@ -492,8 +492,8 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
 | DOT | narrower than 120 dp | The ring with the count inside (compact where the language shortens thousands) |
 | NARROW | one row | Ring, count, «of 10,000 steps» |
 | WIDE | one row with a sentence column (4 cells) | The same, and the day's sentence at the far edge; or mirrored, the ring on the right |
-| TALL | two rows and up | Ring in the top corner; count, sentence and goal from the bottom |
-| PANEL | two rows and up, three cells or wider | The row on top, and under it today's steps by hour (24 bars built from boxes, current hour highlighted) or, as the reader chooses, the last 7 days against the goal (7 bars, today highlighted, a line at today's goal; §15, 2 Nov 2026) |
+| TALL | two rows and up | Ring in the top corner; count, sentence and goal from the bottom. At every form and size the ring is the family's circle, «In words»'s dial in Tempo at the same size (§15, 4 Nov 2026, «at every size») |
+| PANEL | two rows and up, three cells or wider | The row on top, its ring the family's circle, larger without the sentence as the tall card's (the sentence under the count where the ring leaves it no room at the far edge), and under it today's steps by hour (24 bars built from boxes, current hour highlighted) or, as the reader chooses, the last 7 days against the goal (7 bars, today highlighted, a line at today's goal; §15, 2 Nov 2026) |
 
 | «In words» form | When | Content |
 |---|---|---|
@@ -696,6 +696,76 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   the day did for it (archive 02, «The way under way on Today»). Where the reader stands is
   Insights' to say, and the way's page's; a stage reached is a notification already. The widgets
   stay about today.
+- **«At a glance» and Tempo's «In words»: one circle at one size** (owner, 4 Nov 2026, with the
+  two cards side by side on the phone, two by two: "make the circles of the two cards uniform, so
+  that at the same size of card and the same content they are the same size; leave the circles'
+  resizing as it is, but at the same size and text the circles must match"; the screenshots the
+  owner named did not reach the session, the gallery's were drawn and measured instead). On the
+  reference two-by-two (159 × 189 dp) the ring took the height its words left (the number, the
+  sentence over two lines, the goal: 108.24 dp of 161), 52.75 dp, and grew where the sentence was
+  shorter (73.75 dp for one line, 95 for none); Tempo's dial stood at 60.5 to 63 dp, held by the
+  date beside it or by its note, larger on a free day. Now, under three cells wide, both cards'
+  circle is the **tall circle** (`tallCircle` in `GlanceLayout.kt`; Tempo's `WordsFit.tallCircle`,
+  the same arithmetic): the height the card's inside leaves over a budgeted band of words, a 34 sp
+  line and three 16 sp lines at 1.32 em (108.24 dp at the default size, the ring's usual words),
+  rounded down to a quarter, never under `TallRingMin`. Budgeted, never measured, so the day's
+  words do not move it: on the reference two-by-two both draw 52.75 dp, a long sentence and a
+  short one, a free day and a busy one; at 115% and 130% the band grows and both stand at 44 dp
+  (the sentence yields a line first, as before). Where the reader hid the sentence the band is the
+  number and the goal, and the ring takes that (95 dp on the two-by-two, as before). Each card's
+  own limits still hold (here 104 dp and the card's width; on Tempo's the date's column beside the
+  dial), so the two match wherever neither binds: on a card two cells wide up to about 199 dp tall,
+  the two-by-two on every grid measured; a two-by-three keeps its 104 dp ring, Tempo's dial its 63
+  dp. From three cells wide nothing changes: the panel's ring stays the header's 56 dp, and a tall
+  card without the hours keeps its ring as before. Where the circle holds the ring under its room,
+  the room stays air: the number grows only past the ring's 104 dp ceiling, as before. Tests:
+  `GlanceLayoutTest` (the circle at the reference height and text sizes, one ring through the day
+  at 159, 175 and 200 dp wide, the hidden sentence, three cells wide unchanged).
+- **The family's circle at every size** (owner, 4 Nov 2026, after the entry above: "not only two
+  by two: you must check every size; I wrote it badly before"; then, asked about the cards that
+  stand in different compositions: two cells wide and three rows high, "Tempo grows", its dial to
+  this ring's 104 dp with its date on a line over the title; three and four cells wide, "Passo's
+  ring grows", one size per card for both). Measured on both galleries at every reference grant
+  (dp; «In words» busy / free, «At a glance» with the hours / without): one cell 69 / 69 both;
+  two by one 47 against 44; three and four by one 56 both; two by two 52.75 both; two by three 63
+  against 104; three and four by two 78.5 to 82.5 / 101 against 56 / 74; three by three 104
+  against 56 / 104; four by three 119.25 against 56 / 104. Now **the family's circle**, three
+  functions with the same arithmetic in both apps (`dotRingSize`, `rowRingSize`, `tallCircle`;
+  Tempo's `WordsFit.cellCircle`, `rowCircle`, `tallCircle`): one cell, the shorter side less 8 dp
+  each side, 36 to 104 dp; one row, the height inside the snug insets with 84 dp for the words,
+  44 to 56 dp, as before here; two rows and up, the height left over the budgeted band of words,
+  with one line of sentence from three cells wide (where a sentence that takes two lines on two
+  cells takes one), between `TallRingMin` and the ceiling `tallRingCeiling` (104 dp, or 45% of the
+  inner side, Tempo's step 8.3) or the inner width, rounded down to a quarter. At the reference
+  grants: 69; 44, 56, 56; 52.75, 73.75, 73.75; 104, 104, 119.25. Measured again: the same at every
+  grant, with the hours or without, with Tempo's events or without. Here: **the panel's ring is
+  the circle** (73.75 dp on the three- and four-by-two, from 56; 104 and 119.25 on three rows): two
+  rows high it stands inside the height the number over the goal already gave the header, so the
+  bars keep their 58.3 dp; three rows high they stay at their 112 dp. Where the ring leaves the
+  sentence less than a column at the far edge (the four-by-three: 84 dp, under 96) and its height
+  holds lines of it under the number over the goal, the sentence stands under the number, beside
+  the ring (`panelStackedLines`: two lines on the four-by-three). Two side effects, accepted: on
+  the four-by-two the words beside the larger ring have 18 dp less, so the goal takes its short form
+  («of 10,000», the README's picture) and, where the sentence's column (107 dp in the gallery) is
+  narrower than its two lines, the sentence takes three; on the three-by-three the goal is the short
+  «of 10,000».
+  **The tall card without the hours** takes the circle from three cells wide too: 73.75 dp on the
+  three- and four-by-two (a sentence over two lines yields it, as before), 119.25 on the
+  four-by-three (it was held at 104); the number grows past the larger of the ring and 104 dp, as
+  before. Tests: `GlanceLayoutTest` (the circle at every reference grant; one ring through the day
+  at five widths and four heights; the panel's header and bars; the stacked sentence's lines).
+- **The panel's ring grows without the sentence, as the tall card's** (owner, 5 Nov 2026, with
+  Tempo's «In words» kept to the event: "in Passo, when I hide the day's sentence the circle grows,
+  and that's just right; I'd like a similar setting on Tempo's widget, so the circle can grow to
+  the same size as Passo's"). Tempo's card gains «The day's note»: off, it says the event alone and
+  its dial takes the band of a figure's line and one line, this ring's band without its sentence.
+  Asked whether the panel should follow too, the owner: yes, so the two match there as well. The
+  panel's ring is now `tallCircle(size, scale, sentence)` with the reader's choice, as the tall
+  card's: two rows high 95 dp without the sentence (73.75 with it), the bars 37.5 dp (58.3 with it),
+  still the panel (`glanceForm` and the preview's line take the choice too); three rows high the
+  ceiling holds it, nothing changes. Tests: `GlanceLayoutTest` (the panel's header, bars and form
+  without the sentence), `WidgetFitTest` (every card without the sentence, and the owner's
+  two-by-two, 188 × 218 dp, measured from the phone's screenshots, added to its grants: nothing cut).
 
 ### Open
 
