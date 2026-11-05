@@ -155,6 +155,19 @@ class GlanceLayoutTest {
     }
 
     @Test
+    fun `without the sentence the panel's ring grows as the tall card's does`() {
+        // Two rows: the band is the number and the goal, 95 dp, as the tall card's and as Tempo's
+        // «In words» kept to the event (owner, 5 Nov 2026); the bars keep 37.5 dp, still a panel.
+        assertThat(panelHeaderHeight(fourByTwo, 1f, footnote = false, sentence = false)).isEqualTo(95.dp)
+        assertThat(panelBarsHeight(fourByTwo, 1f, sentence = false).value).isWithin(0.1f).of(37.48f)
+        assertThat(glanceForm(fourByTwo, showHours = true, sentence = false)).isEqualTo(GlanceForm.PANEL)
+        assertThat(glanceForm(threeByTwo, showHours = true, sentence = false)).isEqualTo(GlanceForm.PANEL)
+        // Three rows: the ceiling already holds it, nothing changes.
+        assertThat(panelHeaderHeight(fourByThree, 1f, footnote = false, sentence = false)).isEqualTo(119.25.dp)
+        assertThat(panelBarsHeight(fourByThree, 1f, sentence = false)).isEqualTo(BarsMaxHeight)
+    }
+
+    @Test
     fun `a panel's header stacks the sentence under the number where the ring is tall`() {
         // Four by three: the far edge keeps 84 dp, under a sentence's column; the ring's height
         // holds two lines under the number.

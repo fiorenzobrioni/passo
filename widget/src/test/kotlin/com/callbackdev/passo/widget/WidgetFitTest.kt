@@ -99,6 +99,7 @@ class WidgetFitTest {
         Grants.ThreeByTwo,
         Grants.FourByTwo,
         Grants.FourByThree,
+        Grants.OwnersTwoByTwo,
     )
 
     private fun cuts(scale: Float): List<String> {
@@ -107,9 +108,12 @@ class WidgetFitTest {
         val found = mutableListOf<String>()
         days.forEach { model ->
             val mirrored = model.copy(look = WidgetLook(arrangement = WidgetArrangement.RING_END))
+            // Without the sentence the ring takes its band, the panel's too (owner, 5 Nov 2026).
+            val brief = model.copy(look = WidgetLook(showSentence = false))
             sizes.forEach { size ->
                 val at = "${size.width.value.toInt()}x${size.height.value.toInt()} @$scale"
                 cutTexts(context, size, STRETCH) { GlanceWidgetContent(model) }.forEach { found += "glance $at: $it" }
+                cutTexts(context, size, STRETCH) { GlanceWidgetContent(brief) }.forEach { found += "brief $at: $it" }
                 cutTexts(context, size, STRETCH) { GlanceWidgetContent(mirrored) }.forEach {
                     found +=
                         "mirrored $at: $it"

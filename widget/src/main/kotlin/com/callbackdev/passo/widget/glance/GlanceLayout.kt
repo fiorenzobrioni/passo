@@ -38,15 +38,18 @@ import com.callbackdev.passo.widget.textSizeForLine
  */
 internal enum class GlanceForm { DOT, NARROW, WIDE, TALL, PANEL }
 
-internal fun glanceForm(size: DpSize, showHours: Boolean, fontScale: Float = 1f): GlanceForm = when {
+internal fun glanceForm(
+    size: DpSize,
+    showHours: Boolean,
+    fontScale: Float = 1f,
+    sentence: Boolean = true,
+): GlanceForm = when {
     size.width < DotMaxWidth -> GlanceForm.DOT
 
-    size.height >= TallMinHeight ->
-        if (showHours && size.width >= PanelMinWidth && panelBarsHeight(size, fontScale) >= BarsMinHeight) {
-            GlanceForm.PANEL
-        } else {
-            GlanceForm.TALL
-        }
+    size.height >= TallMinHeight -> {
+        val bars = panelBarsHeight(size, fontScale, sentence)
+        if (showHours && size.width >= PanelMinWidth && bars >= BarsMinHeight) GlanceForm.PANEL else GlanceForm.TALL
+    }
 
     rowSentenceColumn(size.width, rowRingSize(size)) >= SentenceColumnMin -> GlanceForm.WIDE
 
@@ -227,12 +230,13 @@ internal const val TALL_RING_SHARE = 0.45f
 
 /**
  * The panel's header: the one-row composition at the height its tallest column needs (the
- * ring, the family's circle for the card's size ([tallCircle]), or the number over the goal,
- * with its ink balance or the footnote of a card with no room for a sentence). A sentence stacked
- * under the number ([panelStackedLines]) stands in the ring's height, never past it.
+ * ring, the family's circle for the card's size ([tallCircle]), larger where the reader hid the
+ * [sentence] as on the tall card (owner, 5 Nov 2026), or the number over the goal, with its ink
+ * balance or the footnote of a card with no room for a sentence). A sentence stacked under the
+ * number ([panelStackedLines]) stands in the ring's height, never past it.
  */
-internal fun panelHeaderHeight(size: DpSize, fontScale: Float, footnote: Boolean): Dp = maxOf(
-    tallCircle(size, fontScale),
+internal fun panelHeaderHeight(size: DpSize, fontScale: Float, footnote: Boolean, sentence: Boolean = true): Dp = maxOf(
+    tallCircle(size, fontScale, sentence),
     textLineHeight(ROW_HERO_SP, fontScale) + textLineHeight(FACT_SP, fontScale) +
         (if (footnote) textLineHeight(STATUS_SP, fontScale) else textInkBalance(ROW_HERO_SP, fontScale)),
 )
@@ -259,8 +263,8 @@ internal fun panelStackedLines(ring: Dp, fontScale: Float): Int = minOf(
  * air goes between the header and the bars instead). Measured without a status line, so the
  * form does not change the moment counting pauses.
  */
-internal fun panelBarsHeight(size: DpSize, fontScale: Float): Dp {
-    val rest = size.height - WidgetCardPadding * 2 - panelHeaderHeight(size, fontScale, footnote = false) -
+internal fun panelBarsHeight(size: DpSize, fontScale: Float, sentence: Boolean = true): Dp {
+    val rest = size.height - WidgetCardPadding * 2 - panelHeaderHeight(size, fontScale, footnote = false, sentence) -
         BarsGap - barsLabelHeight(fontScale)
     return rest.coerceAtMost(BarsMaxHeight)
 }

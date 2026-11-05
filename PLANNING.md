@@ -493,7 +493,7 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
 | NARROW | one row | Ring, count, «of 10,000 steps» |
 | WIDE | one row with a sentence column (4 cells) | The same, and the day's sentence at the far edge; or mirrored, the ring on the right |
 | TALL | two rows and up | Ring in the top corner; count, sentence and goal from the bottom. At every form and size the ring is the family's circle, «In words»'s dial in Tempo at the same size (§15, 4 Nov 2026, «at every size») |
-| PANEL | two rows and up, three cells or wider | The row on top, its ring the family's circle (the sentence under the count where the ring leaves it no room at the far edge), and under it today's steps by hour (24 bars built from boxes, current hour highlighted) or, as the reader chooses, the last 7 days against the goal (7 bars, today highlighted, a line at today's goal; §15, 2 Nov 2026) |
+| PANEL | two rows and up, three cells or wider | The row on top, its ring the family's circle, larger without the sentence as the tall card's (the sentence under the count where the ring leaves it no room at the far edge), and under it today's steps by hour (24 bars built from boxes, current hour highlighted) or, as the reader chooses, the last 7 days against the goal (7 bars, today highlighted, a line at today's goal; §15, 2 Nov 2026) |
 
 | «In words» form | When | Content |
 |---|---|---|
@@ -754,6 +754,18 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   four-by-three (it was held at 104); the number grows past the larger of the ring and 104 dp, as
   before. Tests: `GlanceLayoutTest` (the circle at every reference grant; one ring through the day
   at five widths and four heights; the panel's header and bars; the stacked sentence's lines).
+- **The panel's ring grows without the sentence, as the tall card's** (owner, 5 Nov 2026, with
+  Tempo's «In words» kept to the event: "in Passo, when I hide the day's sentence the circle grows,
+  and that's just right; I'd like a similar setting on Tempo's widget, so the circle can grow to
+  the same size as Passo's"). Tempo's card gains «The day's note»: off, it says the event alone and
+  its dial takes the band of a figure's line and one line, this ring's band without its sentence.
+  Asked whether the panel should follow too, the owner: yes, so the two match there as well. The
+  panel's ring is now `tallCircle(size, scale, sentence)` with the reader's choice, as the tall
+  card's: two rows high 95 dp without the sentence (73.75 with it), the bars 37.5 dp (58.3 with it),
+  still the panel (`glanceForm` and the preview's line take the choice too); three rows high the
+  ceiling holds it, nothing changes. Tests: `GlanceLayoutTest` (the panel's header, bars and form
+  without the sentence), `WidgetFitTest` (every card without the sentence, and the owner's
+  two-by-two, 188 × 218 dp, measured from the phone's screenshots, added to its grants: nothing cut).
 
 ### Open
 

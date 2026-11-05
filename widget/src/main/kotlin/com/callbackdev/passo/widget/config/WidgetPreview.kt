@@ -87,22 +87,23 @@ internal fun placedWidgetSize(context: Context, appWidgetId: Int): DpSize? {
 }
 
 /** One sentence saying what a card of [kind] carries at [size], read off the same functions the card lays itself out with. */
-internal fun formNote(kind: WidgetKind, size: DpSize, showHours: Boolean): Int = when (kind) {
-    WidgetKind.GLANCE -> when (glanceForm(size, showHours)) {
-        GlanceForm.DOT -> R.string.glance_form_dot
-        GlanceForm.NARROW -> R.string.glance_form_narrow
-        GlanceForm.WIDE -> R.string.glance_form_wide
-        GlanceForm.TALL -> R.string.glance_form_tall
-        GlanceForm.PANEL -> R.string.glance_form_panel
-    }
+internal fun formNote(kind: WidgetKind, size: DpSize, showHours: Boolean, showSentence: Boolean = true): Int =
+    when (kind) {
+        WidgetKind.GLANCE -> when (glanceForm(size, showHours, sentence = showSentence)) {
+            GlanceForm.DOT -> R.string.glance_form_dot
+            GlanceForm.NARROW -> R.string.glance_form_narrow
+            GlanceForm.WIDE -> R.string.glance_form_wide
+            GlanceForm.TALL -> R.string.glance_form_tall
+            GlanceForm.PANEL -> R.string.glance_form_panel
+        }
 
-    WidgetKind.WORDS -> when (wordsForm(size)) {
-        WordsForm.LINE -> R.string.words_form_line
-        WordsForm.ROW -> R.string.words_form_row
-        WordsForm.STACK -> R.string.words_form_stack
-        WordsForm.PANEL -> R.string.words_form_panel
+        WidgetKind.WORDS -> when (wordsForm(size)) {
+            WordsForm.LINE -> R.string.words_form_line
+            WordsForm.ROW -> R.string.words_form_row
+            WordsForm.STACK -> R.string.words_form_stack
+            WordsForm.PANEL -> R.string.words_form_panel
+        }
     }
-}
 
 /**
  * The card as it will look, on a ground that stands in for a wallpaper, with the sizes it can
@@ -147,7 +148,7 @@ internal fun WidgetPreviewSection(kind: WidgetKind, model: WidgetModel?, placed:
         }
     }
     Text(
-        text = stringResource(formNote(kind, size, model?.look?.showHours ?: true)),
+        text = stringResource(formNote(kind, size, model?.look?.showHours ?: true, model?.look?.showSentence ?: true)),
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 12.dp),
     )

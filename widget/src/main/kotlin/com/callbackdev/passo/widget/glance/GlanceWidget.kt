@@ -124,7 +124,7 @@ internal fun GlanceWidgetContent(model: WidgetModel) {
         remember(model.settings.palette, model.settings.dynamicColor) { widgetDressFor(context, model.settings) }
     val day = model.day
     val scale = fontScale(context)
-    val form = day?.let { glanceForm(size, model.look.showHours, scale) }
+    val form = day?.let { glanceForm(size, model.look.showHours, scale, model.look.showSentence) }
     val (horizontal, vertical) = when (form) {
         GlanceForm.DOT -> DotPadding to DotPadding
         GlanceForm.NARROW, GlanceForm.WIDE -> WidgetCardPadding to WidgetCardPaddingSnug
@@ -507,11 +507,12 @@ private fun TallContent(parts: CardParts, size: DpSize) {
  */
 @Composable
 private fun PanelContent(parts: CardParts, size: DpSize) {
-    val ring = tallCircle(size, parts.scale)
+    val sentence = parts.model.look.showSentence
+    val ring = tallCircle(size, parts.scale, sentence)
     val wide = rowSentenceColumn(size.width, ring) >= SentenceColumnMin
     val stack = if (wide) 0 else panelStackedLines(ring, parts.scale)
-    val header = panelHeaderHeight(size, parts.scale, footnote = parts.status && !wide && stack == 0)
-    val bars = panelBarsHeight(size, parts.scale).coerceAtLeast(BarsMinHeight)
+    val header = panelHeaderHeight(size, parts.scale, footnote = parts.status && !wide && stack == 0, sentence)
+    val bars = panelBarsHeight(size, parts.scale, sentence).coerceAtLeast(BarsMinHeight)
     val inner = size.width - WidgetCardPadding * 2
     // The header is laid out as a one-row card of its own height (the row's snug inset included).
     val rowHeight = header + WidgetCardPaddingSnug * 2

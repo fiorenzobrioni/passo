@@ -112,6 +112,9 @@ internal object Grants {
     val FourByTwo = DpSize(340.dp, 189.dp)
     val FourByThree = DpSize(340.dp, 293.dp)
     val OneByTwo = DpSize(85.dp, 189.dp)
+
+    /** The owner's two-by-two, measured from the phone's screenshots (5 Nov 2026). */
+    val OwnersTwoByTwo = DpSize(188.dp, 218.dp)
 }
 
 /**
