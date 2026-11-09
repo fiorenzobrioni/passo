@@ -147,7 +147,7 @@ Icons are `PassoIcons`, drawn in code. The launcher icon (two prints walking to 
 right, the one behind white and the step being taken amber, on the app's green: the family's
 series of 9 Nov 2026, its three layers), the status-bar icon (the same prints in one ink,
 `ic_stat_steps`, also the Quick Settings tile's), the outing's walker (`ic_progress_walker`)
-and the ground of the Outing shortcut's adaptive icon (`ic_shortcut_ground`) are written by
+and the ground of the outings' shortcuts, adaptive icons (`ic_shortcut_ground`), are written by
 `tools/draw_launcher_icon.py`: change the script and re-run it, never the XML. Likewise the Ways' and the city walks' data (`docs/adr/0014-ways.md`, `docs/adr/0015-city-walks.md`):
 `tools/build_ways.py` writes `WayData.kt` and the place strings from `tools/ways_content.py`
 (OpenStreetMap lines, ODbL, credited wherever they are read): edit the content and re-run it

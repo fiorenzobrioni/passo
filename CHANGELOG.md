@@ -13,8 +13,10 @@ All notable changes to Passo are documented here. The format follows
 ### Better
 
 - **A new icon**: two footprints on green, the one behind white and the step you are taking
-  amber. The notifications, the Quick Settings tile and the Outing shortcut follow it, the
-  shortcut in the same shape as your launcher's icons.
+  amber. The notifications, the Quick Settings tile and the outings' shortcuts follow it, the
+  shortcuts in the same shape as your launcher's icons. Each shortcut wears its outing's own
+  mark, as on the Outings page: the Japanese interval walk its slow and fast line, a run its
+  bolt.
 
 - On «At a glance» the ring keeps one size all day at every size, however long the sentence
   under it. On a widget three or four cells wide and two rows high or more, the ring beside the

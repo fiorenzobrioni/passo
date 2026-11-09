@@ -58,6 +58,9 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
   shortcut, an adaptive icon», 9 Nov 2026): long press on the icon, in the phone's own mask and
   with the themed icons on. Done by the owner on 9 Nov 2026 (§15, «The adaptive shortcut checked
   on the phone, and Tetto in the family»).
+- [ ] **On a device (owner): each outing's shortcut wears its own mark** (§15, «Each outing's
+  shortcut wears its own mark», 9 Nov 2026): after starting or saving a plan, a long press on the
+  icon shows the interval walk with its slow and fast line, a run with its bolt.
 - [ ] **On a device (owner): a 30-minute interval outing with the screen off**: each change
   felt, its delay read from the log, the battery check of §9, numbers in `docs/battery/`
   (archive 01, «Phase 13»).
@@ -823,6 +826,17 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   in «Open» is ticked. Tetto (budget) is the family's fifth app: the README's «The family», this
   file's opening and «The family in the code», and VISION's opening name it beside Chiaro, Tempo
   and Saldo.
+- **Each outing's shortcut wears its own mark** (owner, 9 Nov 2026: "the icon used for the
+  «Japanese walk» item is not the one that appears in the app. In the app it had been changed on
+  purpose to set it apart from the other walks"). Every shortcut wore the way to a flag, the
+  Outing mark, while the Outings page draws an interval walk with its slow and fast line and a
+  run with its bolt (`sessionIcon`, «the interval walk no longer wore the same mark as the brisk
+  walk above it», the owner's review of 2 Nov 2026). `SessionShortcuts.shortcutIcon` now asks
+  `sessionIcon` and maps its answer to three adaptive icons on the same ground,
+  `ic_shortcut_outing`, `ic_shortcut_intervals` and `ic_shortcut_run`, each glyph placed as the
+  Outing glyph is; one rule for the page and the shortcuts, so they cannot drift apart again
+  (`SessionShortcutsTest`, every intensity with every goal). The launcher updates a shortcut's
+  icon when the list is written again: when a plan is started, saved or deleted.
 
 ### Open
 
