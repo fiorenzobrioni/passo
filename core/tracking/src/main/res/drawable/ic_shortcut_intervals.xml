@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The shortcut of an interval walk: its own mark, as on the Outings page (sessionIcon), in
+     white over the launcher icon's ground, as an adaptive icon like the Outing shortcut's. The
+     glyph is the themed layer too, read by its alpha. -->
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_shortcut_ground" />
+    <foreground android:drawable="@drawable/ic_shortcut_intervals_foreground" />
+    <monochrome android:drawable="@drawable/ic_shortcut_intervals_foreground" />
+</adaptive-icon>

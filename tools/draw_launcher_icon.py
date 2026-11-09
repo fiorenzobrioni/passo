@@ -23,7 +23,7 @@ The status-bar icon is the same two prints in one ink on the 24-unit grid (the s
 it is also the Quick Settings tile's icon. The walker is the two prints on a green disc, white
 and amber, because the system draws a progress tracker's icon as it is, untinted. The badge's
 ground is written a second time beside them (ic_shortcut_ground.xml), as the ground of the
-Outing shortcut's adaptive icon: a library cannot name the app's drawables.
+outings' shortcuts, adaptive icons: a library cannot name the app's drawables.
 
 Re-running this script IS the drawing: the six files are its output and are not edited by hand.
 Only the standard library is used, so any Python 3 runs it.
@@ -215,8 +215,9 @@ def walker():
 def shortcut_ground():
     body = shaded("M 0,0 H 108 V 108 H 0 Z", (18, 18, 90, 90), GREEN[0], GREEN[2])
     what = (
-        "The ground of the Outing shortcut's adaptive icon (ic_shortcut_outing.xml): the launcher\n"
-        "     icon's ground, written here too because a library cannot name the app's drawables."
+        "The ground of the outings' shortcuts, adaptive icons (ic_shortcut_outing.xml,\n"
+        "     ic_shortcut_intervals.xml, ic_shortcut_run.xml): the launcher icon's ground, written\n"
+        "     here too because a library cannot name the app's drawables."
     )
     return HEADER.format(what=what) + vector(body)
 

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A run's shortcut glyph: the run's mark (PassoIcons.Bolt) in white, the foreground of its
+     adaptive icon (ic_shortcut_run.xml). Placed as the Outing glyph is: its 24 units at 55% of
+     the 72 a launcher shows, centred. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="1.65"
+        android:scaleY="1.65"
+        android:translateX="34.2"
+        android:translateY="34.2">
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="1.9"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M13,2.5L5.5,13.5L11.5,13.5L10.5,21.5L18.5,10L12.5,10Z" />
+    </group>
+</vector>
