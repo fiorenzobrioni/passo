@@ -10,9 +10,9 @@ Material 3, Glance widget). It counts every step with the phone's own hardware s
 even if the app is never opened, keeps the data on the device, and derives everything else
 from those steps: distance, active calories, active and brisk minutes, goals, streaks, walks,
 trends. No account, no ads, no internet permission at all. It belongs to a small family of
-single-purpose apps by callbackdev, with **Chiaro** (weather), **Tempo** (clock and agenda) and
-**Saldo** (finance): same developer identity, same build and release setup, and the same visual
-language.
+single-purpose apps by callbackdev, with **Chiaro** (weather), **Tempo** (clock and agenda),
+**Saldo** (finance) and **Tetto** (budget): same developer identity, same build and release
+setup, and the same visual language.
 
 Source of truth:
 
@@ -214,7 +214,7 @@ sandbox). Two standing rules (owner's):
 
 ## The family in the code
 
-The sister apps (Chiaro, Saldo, Tempo) are named **only** in the root `README.md` («The family»)
+The sister apps (Chiaro, Saldo, Tempo, Tetto) are named **only** in the root `README.md` («The family»)
 and in the project's documents (VISION, PLANNING, the ADRs, this file): never in a string the
 app shows, its guide included, and never in the code, comments and tests included (owner,
 10 Oct 2026). A comment says why a value is what it is, not which sister has it too; where a

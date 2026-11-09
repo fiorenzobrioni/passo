@@ -54,9 +54,10 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
   2026): the launcher icon in the phone's own mask, the themed icon, the status-bar icon and the
   Quick Settings tile, the Outing shortcut and the walker on an outing's bar. Done by the owner on
   9 Nov 2026 (§15, «The new icon checked on the phone»).
-- [ ] **On a device (owner): the Outing shortcut as an adaptive icon** (§15, «The Outing
+- [x] **On a device (owner): the Outing shortcut as an adaptive icon** (§15, «The Outing
   shortcut, an adaptive icon», 9 Nov 2026): long press on the icon, in the phone's own mask and
-  with the themed icons on.
+  with the themed icons on. Done by the owner on 9 Nov 2026 (§15, «The adaptive shortcut checked
+  on the phone, and Tetto in the family»).
 - [ ] **On a device (owner): a 30-minute interval outing with the screen off**: each change
   felt, its delay read from the log, the battery check of §9, numbers in `docs/battery/`
   (archive 01, «Phase 13»).
@@ -815,6 +816,13 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   shape; where an app draws its mark itself, it stays a disc (the walker on the outing's bar).
   Checked: the layers drawn in a round, a rounded-square and a squircle mask and as the themed
   icon; `:app:lintDebug`, `:app:assembleDebug`, `spotlessCheck` and `:core:tracking`'s tests.
+- **The adaptive shortcut checked on the phone, and Tetto in the family** (owner, 9 Nov 2026:
+  "I did every test on the phone and it is all fine. You can close every box."; then "Did you
+  also align the documents with the reference to the family's new app, Tetto, in the various
+  repositories?"). The device check of «The Outing shortcut, an adaptive icon» is done; its box
+  in «Open» is ticked. Tetto (budget) is the family's fifth app: the README's «The family», this
+  file's opening and «The family in the code», and VISION's opening name it beside Chiaro, Tempo
+  and Saldo.
 
 ### Open
 
