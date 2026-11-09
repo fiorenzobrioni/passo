@@ -50,9 +50,10 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
   over it, with the data kept (archive 01, «Phase 8»). Done by the owner on 2 Nov 2026, 1.0.0 to
   1.1.0, before the tag («I did the tests and everything works»); the database's road from schema
   3 to 6 is also tested (`UpgradeFromFirstReleaseTest`).
-- [ ] **On a device (owner): the new icon** (§15, «The new icon: two prints on the green», 9 Nov
+- [x] **On a device (owner): the new icon** (§15, «The new icon: two prints on the green», 9 Nov
   2026): the launcher icon in the phone's own mask, the themed icon, the status-bar icon and the
-  Quick Settings tile, the Outing shortcut and the walker on an outing's bar.
+  Quick Settings tile, the Outing shortcut and the walker on an outing's bar. Done by the owner on
+  9 Nov 2026 (§15, «The new icon checked on the phone»).
 - [ ] **On a device (owner): a 30-minute interval outing with the screen off**: each change
   felt, its delay read from the log, the battery check of §9, numbers in `docs/battery/`
   (archive 01, «Phase 13»).
@@ -794,6 +795,9 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   the first run show no app icon, so nothing changes there. Checked: the XML the script writes,
   drawn and compared pixel by pixel with the approved drawings, differs only at the edges
   (0.6% of the badge's pixels, the antialiasing).
+- **The new icon checked on the phone** (owner, 9 Nov 2026: "I merged the PRs of the other
+  repositories too. I checked the APKs."; then "tick the boxes"). The device check of «The new
+  icon: two prints on the green» is done; its box in «Open» is ticked.
 
 ### Open
 
