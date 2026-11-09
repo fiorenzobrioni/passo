@@ -143,9 +143,11 @@ family reads as one (`docs/adr/0004-design-language.md`). `:core:designsystem` h
 shapes and springs, and every animation collapses to a fade under reduced motion. Its principles
 hold here too: one sentence before any number, every number with the line that says what it
 means, estimates that say so, no dead tab and no switch for a feature that has not shipped.
-Icons are `PassoIcons`, drawn in code. The launcher icon (Chiaro's ring, with a shoe print
-where Chiaro has its sun) and the status-bar icon (two of its prints, `ic_stat_steps`) are
-written by `tools/draw_launcher_icon.py`: change the script and re-run it, never the XML. Likewise the Ways' and the city walks' data (`docs/adr/0014-ways.md`, `docs/adr/0015-city-walks.md`):
+Icons are `PassoIcons`, drawn in code. The launcher icon (two prints walking to the upper
+right, the one behind white and the step being taken amber, on the app's green: the family's
+series of 9 Nov 2026, its three layers), the status-bar icon (the same prints in one ink,
+`ic_stat_steps`, also the Quick Settings tile's) and the outing's walker (`ic_progress_walker`)
+are written by `tools/draw_launcher_icon.py`: change the script and re-run it, never the XML. Likewise the Ways' and the city walks' data (`docs/adr/0014-ways.md`, `docs/adr/0015-city-walks.md`):
 `tools/build_ways.py` writes `WayData.kt` and the place strings from `tools/ways_content.py`
 (OpenStreetMap lines, ODbL, credited wherever they are read): edit the content and re-run it
 (`fetch` first, for the sources; a walk's route is fetched once and committed in `tools/walks/`; `maps` redraws only the ways' maps, keeping their lines), never the outputs.
