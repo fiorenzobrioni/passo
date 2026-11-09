@@ -1,25 +1,30 @@
 #!/usr/bin/env python3
-"""Draws Passo's mark: the two adaptive-icon layers in app/src/main/res/drawable, and the
-status-bar icon (core/tracking/src/main/res/drawable/ic_stat_steps.xml).
+"""Draws Passo's mark: the adaptive icon's three layers in app/src/main/res/drawable, the
+status-bar icon (core/tracking/src/main/res/drawable/ic_stat_steps.xml) and the walker that
+rides an outing's progress bar (ic_progress_walker.xml, beside it).
 
     python3 tools/draw_launcher_icon.py
 
-The mark is a ring with Passo's step on it (owner's choice, 25 Sep 2026): a ring (radius 21,
-stroke 10, on a warm white), green, and a shoe print at the upper left. The print cuts the
-ring with a gap around it, and walks
-clockwise, the way the ring fills: it is the step that closes the day.
+The mark is TWO PRINTS walking to the upper right (owner, 9 Nov 2026, when the family's marks
+were redrawn as one series): the print behind white, the one ahead amber, the step being taken,
+as the amber print was on the ring it replaced (25 Sep 2026). The sole is the app's own, the
+one the status-bar icon walked with already.
 
-Since 18 Oct 2026 (owner, the family's icon review) the print weighs what the sisters' emblems
-weigh: scaled 0.95 to 1.12, its area matches theirs (222 units against the coin's and the clock's
-211) and its heel and toe reach past the ring's edge as theirs do; its gap is theirs (3.0), and its
-amber is lit from the upper left, as theirs is, where it ran along the sole from the toe.
+The series' rules, the same in every app of the family:
+- the badge's ground is the app's own colour, here the green, from its light tone at the upper
+  left to its deep tone at the lower right; the symbol is white with one amber accent;
+- every shape is lit from the upper left: a linear ramp from its light tone at the upper left of
+  its box to its deep tone at the lower right, over the box's larger side; no shadow (the store
+  and the launchers add their own);
+- the symbol stays inside the keyline, a circle of KEYLINE around the centre: 56 dp of the 72
+  that show, so a round mask leaves 8 dp of air all round and no mask of any launcher reaches it.
 
-The status-bar icon is two prints, a left and a right, drawn from the same sole: the walk, where
-the old icon was two pairs of ellipses. It is also the Quick Settings tile's icon.
+The status-bar icon is the same two prints in one ink on the 24-unit grid (the system tints it);
+it is also the Quick Settings tile's icon. The walker is the two prints on a green disc, white
+and amber, because the system draws a progress tracker's icon as it is, untinted.
 
-Re-running this script IS the drawing: ic_launcher_foreground.xml, ic_launcher_monochrome.xml
-and ic_stat_steps.xml are its output and are not edited by hand. Only the standard
-library is used, so any Python 3 runs it.
+Re-running this script IS the drawing: the five files are its output and are not edited by hand.
+Only the standard library is used, so any Python 3 runs it.
 """
 
 import math
@@ -27,25 +32,26 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 RES = ROOT / "app/src/main/res/drawable"
-STAT = ROOT / "core/tracking/src/main/res/drawable/ic_stat_steps.xml"
+TRACKING = ROOT / "core/tracking/src/main/res/drawable"
 
 CENTRE = 54.0
-RING_RADIUS = 21.0
-RING_WIDTH = 10.0
-PRINT_ANGLE = 220.0  # degrees clockwise from three o'clock: the upper left
-PRINT_SCALE = 1.12
-GAP = 3.0  # the clear band around the print, where it cuts the ring: the sisters' gap
+KEYLINE = 28.0  # the symbol's reach from the centre: measured 28.1
 
-# The ring's sweep, from where it starts (just past the print) to where it ends (just
-# before it): the day filling up, a fresh green to the deep green of a met goal.
-RING_STOPS = [(0.0, "74CF91"), (0.45, "2B9E56"), (1.0, "0B5B33")]
-# The print: the family's amber, light at the upper left.
-PRINT_TOP, PRINT_HEEL = "FFC658", "EF8618"
-AMBER_REACH = 8.0  # how far from the print's middle the amber runs, along the diagonal
+# The family's palette, the tones this mark uses: (light, base, deep).
+GREEN = ("5CCB86", "27A35A", "17834A")
+SUN = ("FFD36A", "FDB528", "F28C17")
+WHITE = ("FFFFFF", "F4F7FB", "E3EAF4")
 
-# The status-bar icon, on the 24-unit grid: (middle, scale, turn in degrees, mirrored). A left
-# print behind and a right one ahead, each turned a little out, as feet walk.
-STAT_PRINTS = [((8.4, 14.8), 0.46, -10.0, True), ((15.6, 9.2), 0.46, 10.0, False)]
+# The two prints: (middle, mirrored for a left foot, its tones). Both turned the same way,
+# PRINT_TURN degrees clockwise from upright, a step apart along the walk.
+PRINT_SCALE = 1.22
+PRINT_TURN = 24.0
+PRINTS = [((42.5, 62.0), True, WHITE), ((64.1, 46.4), False, SUN)]
+PRINT_REACH = 12.5  # half a sole's length in its own units: the box its light is laid over
+
+# The status-bar icon and the walker: the same prints, fitted to the 24-unit grid.
+STAT_SCALE, STAT_PRINT = 0.415, 1.06  # the drawing's scale, and the prints' own, a little heavier
+WALKER_SCALE, WALKER_PRINT = 0.36, 1.1
 
 # A right shoe sole in its own units, toe towards -y, about 24 long, origin mid-length:
 # a long forefoot with a flat back edge, and a D-shaped heel with a flat front. Each is a
@@ -66,265 +72,151 @@ HEEL = [
     ("C", (-1.4, 12.2), (-3.0, 10.9), (-3.3, 8.4)),
     ("C", (-3.5, 6.8), (-3.4, 5.3), (-2.9, 4.0)),
 ]
-# The band between the two pieces, so the gap is one shape and no sliver of ring shows
-# between forefoot and heel: a capsule along the sole, in the sole's units.
-BRIDGE_FROM, BRIDGE_TO, BRIDGE_WIDTH = (0.4, -7.0), (0.3, 8.0), 7.4
+
+HEADER = """<?xml version="1.0" encoding="utf-8"?>
+<!-- Written by tools/draw_launcher_icon.py: change the script and run it, never this file.
+     {what} -->
+"""
 
 
 def f(v):
     return f"{v:.2f}"
 
 
-def pt(p):
-    return f"{f(p[0])},{f(p[1])}"
+def lit(box):
+    """A shape's light: from the upper-left corner of its box to the lower-right one, along the
+    diagonal of a square on the box's larger side, so every shape is lit at the same angle."""
+    x0, y0, x1, y1 = box
+    cx, cy, r = (x0 + x1) / 2, (y0 + y1) / 2, max(x1 - x0, y1 - y0) / 2
+    return (cx - r, cy - r), (cx + r, cy + r)
 
 
-def print_origin():
-    a = math.radians(PRINT_ANGLE)
-    return CENTRE + RING_RADIUS * math.cos(a), CENTRE + RING_RADIUS * math.sin(a)
+def ramp(attr, box, light, deep, indent="    "):
+    (sx, sy), (ex, ey) = lit(box)
+    return (
+        f'{indent}<aapt:attr name="android:{attr}">\n'
+        f'{indent}    <gradient android:type="linear" android:startX="{f(sx)}" android:startY="{f(sy)}" '
+        f'android:endX="{f(ex)}" android:endY="{f(ey)}">\n'
+        f'{indent}        <item android:offset="0" android:color="#FF{light}"/>\n'
+        f'{indent}        <item android:offset="1" android:color="#FF{deep}"/>\n'
+        f"{indent}    </gradient>\n{indent}</aapt:attr>\n"
+    )
 
 
-def place(p):
-    """From the sole's units to the canvas: on the ring, pointing clockwise along it."""
-    rho = math.radians(PRINT_ANGLE + 180)
-    ox, oy = print_origin()
-    x, y = p[0] * PRINT_SCALE, p[1] * PRINT_SCALE
-    return ox + x * math.cos(rho) - y * math.sin(rho), oy + x * math.sin(rho) + y * math.cos(rho)
+def shaded(d, box, light, deep):
+    return f'<path android:pathData="{d}">\n{ramp("fillColor", box, light, deep)}</path>\n'
 
 
-def path_data(segments, at=None):
-    at = at or place
-    out = []
-    for seg in segments:
-        kind, *points = seg
-        out.append(kind + " " + " ".join(pt(at(p)) for p in points))
-    return " ".join(out) + " Z"
+def flat(d, colour):
+    return f'<path android:pathData="{d}" android:fillColor="#FF{colour}"/>\n'
 
 
-def placed_at(middle, scale, turn, mirrored):
-    """From the sole's units to the status-bar grid: scaled, mirrored for a left foot, turned."""
-    rho = math.radians(turn)
+def vector(body, size=108, aapt=True):
+    ns = '\n    xmlns:aapt="http://schemas.android.com/aapt"' if aapt else ""
+    return (
+        f'<vector xmlns:android="http://schemas.android.com/apk/res/android"{ns}\n'
+        f'    android:width="{size}dp"\n    android:height="{size}dp"\n'
+        f'    android:viewportWidth="{size}"\n    android:viewportHeight="{size}">\n'
+        f"{body}</vector>\n"
+    )
+
+
+def fitted(body, scale):
+    """The drawing on the 108 grid, scaled about its centre into the middle of the 24 grid."""
+    return (
+        f'<group android:pivotX="{f(CENTRE)}" android:pivotY="{f(CENTRE)}" android:scaleX="{scale:g}" '
+        f'android:scaleY="{scale:g}" android:translateX="{f(12 - CENTRE)}" android:translateY="{f(12 - CENTRE)}">\n'
+        f"{body}</group>\n"
+    )
+
+
+def placed(middle, scale, mirrored):
+    """From the sole's units to the grid: scaled, mirrored for a left foot, turned to the walk."""
+    t = math.radians(PRINT_TURN)
 
     def at(p):
         x, y = p[0] * scale * (-1 if mirrored else 1), p[1] * scale
-        return middle[0] + x * math.cos(rho) - y * math.sin(rho), middle[1] + x * math.sin(rho) + y * math.cos(rho)
+        return middle[0] + x * math.cos(t) - y * math.sin(t), middle[1] + x * math.sin(t) + y * math.cos(t)
 
     return at
 
 
-def outline(segments, per_curve=24):
-    """The shape as a dense polygon on the canvas."""
-    points, current = [], None
-    for kind, *ps in segments:
-        ps = [place(p) for p in ps]
-        if kind == "M":
-            current = ps[0]
-            points.append(current)
-        elif kind == "L":
-            current = ps[0]
-            points.append(current)
-        else:
-            c1, c2, end = ps
-            for i in range(1, per_curve + 1):
-                t = i / per_curve
-                u = 1 - t
-                points.append(
-                    tuple(
-                        u**3 * current[k] + 3 * u * u * t * c1[k] + 3 * u * t * t * c2[k] + t**3 * end[k]
-                        for k in (0, 1)
-                    )
-                )
-            current = end
-    if math.dist(points[0], points[-1]) < 1e-6:
-        points.pop()
-    return points
-
-
-def signed_area(poly):
-    return sum(a[0] * b[1] - b[0] * a[1] for a, b in zip(poly, poly[1:] + poly[:1])) / 2
-
-
-def offset(poly, d):
-    """Grows a convex polygon by d: each vertex moves out along its averaged normal."""
-    # For a positive signed area the outward normal of an edge (dx, dy) is (dy, -dx).
-    s = 1 if signed_area(poly) > 0 else -1
-    n = len(poly)
+def sole(at):
     out = []
-    for i in range(n):
-        prev, here, nxt = poly[i - 1], poly[i], poly[(i + 1) % n]
-        normals = []
-        for a, b in ((prev, here), (here, nxt)):
-            dx, dy = b[0] - a[0], b[1] - a[1]
-            length = math.hypot(dx, dy) or 1
-            normals.append((s * dy / length, -s * dx / length))
-        nx, ny = normals[0][0] + normals[1][0], normals[0][1] + normals[1][1]
-        length = math.hypot(nx, ny) or 1
-        # Keep the band GAP wide across a corner too, not only along the edges.
-        cos_half = max(0.5, (normals[0][0] * nx + normals[0][1] * ny) / length)
-        out.append((here[0] + nx / length * d / cos_half, here[1] + ny / length * d / cos_half))
-    return out
+    for piece in (FOREFOOT, HEEL):
+        for kind, *points in piece:
+            out.append(kind + " " + " ".join(f"{f(at(p)[0])},{f(at(p)[1])}" for p in points))
+        out.append("Z")
+    return " ".join(out)
 
 
-def capsule():
-    a, b = place(BRIDGE_FROM), place(BRIDGE_TO)
-    r = BRIDGE_WIDTH * PRINT_SCALE / 2 + GAP
-    dx, dy = b[0] - a[0], b[1] - a[1]
-    length = math.hypot(dx, dy)
-    ux, uy = dx / length, dy / length
-    points = []
-    for centre, start in ((b, math.atan2(uy, ux) - math.pi / 2), (a, math.atan2(uy, ux) + math.pi / 2)):
-        for i in range(0, 25):
-            t = start + math.pi * i / 24
-            points.append((centre[0] + r * math.cos(t), centre[1] + r * math.sin(t)))
-    return points
+def print_box(middle, scale):
+    r = PRINT_REACH * scale
+    return (middle[0] - r, middle[1] - r, middle[0] + r, middle[1] + r)
 
 
-def hole(poly):
-    """A clip that keeps everything but poly: the canvas clockwise, the shape the other way."""
-    if signed_area(poly) > 0:
-        poly = poly[::-1]
-    return "M 0,0 H 108 V 108 H 0 Z M " + " L ".join(pt(p) for p in poly) + " Z"
-
-
-def clips():
-    shapes = [offset(outline(FOREFOOT), GAP), offset(outline(HEEL), GAP), capsule()]
-    # One group per hole: nested clips intersect, so the ring keeps what is outside all three.
-    return [f'<group>\n<clip-path android:pathData="{hole(s)}"/>' for s in shapes]
-
-
-def ring_gradient():
-    """The sweep starts at three o'clock; turn the ring's stops so the seam hides under the print."""
-    seam = PRINT_ANGLE / 360
-
-    def colour_at(t):
-        for (t0, c0), (t1, c1) in zip(RING_STOPS, RING_STOPS[1:]):
-            if t0 <= t <= t1:
-                k = (t - t0) / (t1 - t0)
-                a, b = int(c0, 16), int(c1, 16)
-                return "".join(
-                    f"{round(((a >> sh) & 255) * (1 - k) + ((b >> sh) & 255) * k):02X}" for sh in (16, 8, 0)
-                )
-        raise ValueError(t)
-
-    items = [(0.0, colour_at(1 - seam))]
-    for t, c in RING_STOPS:
-        o = seam + t
-        if o > 1:
-            items.append((o - 1, c))
-    items.append((seam - 0.0005, RING_STOPS[-1][1]))
-    items.append((seam + 0.0005, RING_STOPS[0][1]))
-    for t, c in RING_STOPS[1:]:
-        o = seam + t
-        if o < 1:
-            items.append((o, c))
-    items.append((1.0, colour_at(1 - seam)))
-    items.sort()
-    return "\n".join(
-        f'                <item android:offset="{o:.4f}" android:color="#FF{c}"/>' for o, c in items
-    )
-
-
-def circle(r):
-    x0 = CENTRE - r
-    return f"M {f(x0)},{f(CENTRE)} a {f(r)},{f(r)} 0 1,0 {f(2 * r)},0 a {f(r)},{f(r)} 0 1,0 {f(-2 * r)},0 z"
-
-
-HEADER = """<?xml version="1.0" encoding="utf-8"?>
-<!-- Written by tools/draw_launcher_icon.py: change the script and run it, never this file.
-{note}-->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
-"""
-
-FOREGROUND_NOTE = """
-     The mark: a ring (radius 21, stroke 10, a warm white under it) in the greens of a day
-     filling up, and at the upper left a shoe print in amber. The print cuts the ring with a
-     3.0 gap, and walks clockwise, the way the ring fills: the step that closes the day.
-     Everything sits inside the 33-unit safe circle of every launcher mask.
-"""
-
-MONOCHROME_NOTE = """
-     The themed icon (Android 13+): the system reads only the alpha, so the mark is
-     restated as shapes, the ring as a filled annulus (evenOdd) with the same cut, and the
-     print. See ic_launcher_foreground for the drawing.
-"""
-
-
-def sole(fill):
-    return "\n".join(f'<path android:pathData="{path_data(s)}"{fill}' for s in (FOREFOOT, HEEL))
+def background():
+    body = shaded("M 0,0 H 108 V 108 H 0 Z", (18, 18, 90, 90), GREEN[0], GREEN[2])
+    return HEADER.format(what="The badge's ground: the app's green, lit from the upper left.") + vector(body)
 
 
 def foreground():
-    ox, oy = print_origin()
-    gradient_fill = f""">
-    <aapt:attr name="android:fillColor">
-        <gradient android:type="linear" android:startX="{f(ox - AMBER_REACH)}" android:startY="{f(oy - AMBER_REACH)}" android:endX="{f(ox + AMBER_REACH)}" android:endY="{f(oy + AMBER_REACH)}">
-            <item android:offset="0" android:color="#FF{PRINT_TOP}"/>
-            <item android:offset="1" android:color="#FF{PRINT_HEEL}"/>
-        </gradient>
-    </aapt:attr>
-</path>"""
-    groups = clips()
-    return (
-        HEADER.format(note=FOREGROUND_NOTE)
-        + "\n".join(groups)
-        + f"""
-<path android:pathData="{circle(RING_RADIUS)}" android:strokeWidth="{f(RING_WIDTH)}" android:fillColor="#00000000">
-    <aapt:attr name="android:strokeColor">
-        <gradient android:type="sweep" android:centerX="{f(CENTRE)}" android:centerY="{f(CENTRE)}">
-{ring_gradient()}
-        </gradient>
-    </aapt:attr>
-</path>
-"""
-        + "</group>\n" * len(groups)
-        + sole(gradient_fill)
-        + "\n</vector>\n"
+    body = "".join(
+        shaded(sole(placed(middle, PRINT_SCALE, mirrored)), print_box(middle, PRINT_SCALE), tones[0], tones[2])
+        for middle, mirrored, tones in PRINTS
     )
+    what = (
+        "The mark: two prints walking to the upper right, the one behind white, the step being\n"
+        f"     taken amber; both inside {KEYLINE:g} units of the centre, the keyline."
+    )
+    return HEADER.format(what=what) + vector(body)
 
 
 def monochrome():
-    groups = clips()
-    outer, inner = RING_RADIUS + RING_WIDTH / 2, RING_RADIUS - RING_WIDTH / 2
-    return (
-        HEADER.format(note=MONOCHROME_NOTE)
-        + "\n".join(groups)
-        + f'\n<path android:pathData="{circle(outer)} {circle(inner)}" android:fillColor="#FFFFFFFF" android:fillType="evenOdd"/>\n'
-        + "</group>\n" * len(groups)
-        + sole(' android:fillColor="#FFFFFFFF"/>')
-        + "\n</vector>\n"
+    body = "".join(
+        flat(sole(placed(middle, PRINT_SCALE, mirrored)), "FFFFFF") for middle, mirrored, _ in PRINTS
     )
+    what = (
+        "The themed icon (Android 13+): the system reads only the alpha, so the mark is\n"
+        "     restated as its two prints in one ink."
+    )
+    return HEADER.format(what=what) + vector(body, aapt=False)
 
 
 def status_bar():
-    prints = "\n".join(
-        f'    <path android:fillColor="#FFFFFFFF" android:pathData="{path_data(piece, placed_at(*where))}" />'
-        for where in STAT_PRINTS
-        for piece in (FOREFOOT, HEEL)
+    prints = "".join(
+        flat(sole(placed(middle, PRINT_SCALE * STAT_PRINT, mirrored)), "FFFFFF") for middle, mirrored, _ in PRINTS
     )
-    return f"""<?xml version="1.0" encoding="utf-8"?>
-<!-- Written by tools/draw_launcher_icon.py: change the script and run it, never this file.
+    what = (
+        "The status-bar mark of the notifications and the Quick Settings tile: the launcher's\n"
+        "     two prints in one ink on the 24-unit grid. White on transparent, as status-bar icons\n"
+        "     must be; the system tints it."
+    )
+    return HEADER.format(what=what) + vector(fitted(prints, STAT_SCALE), size=24, aapt=False)
 
-     Two shoe prints, a left and a right, the launcher mark's sole: the status-bar mark of the
-     notifications and the Quick Settings tile. White on transparent, as status-bar icons must
-     be; the system tints it.
--->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp"
-    android:height="24dp"
-    android:viewportWidth="24"
-    android:viewportHeight="24">
-{prints}
-</vector>
-"""
+
+def walker():
+    disc = "M 0,12 A 12,12 0 1,0 24,12 A 12,12 0 1,0 0,12 Z"
+    prints = "".join(
+        flat(sole(placed(middle, PRINT_SCALE * WALKER_PRINT, mirrored)), "FFFFFF" if tones is WHITE else SUN[0])
+        for middle, mirrored, tones in PRINTS
+    )
+    what = (
+        "The walker riding the outing's bar (Android 16's ProgressStyle): the system draws a tracker\n"
+        "     icon as it is, untinted, so the launcher's two prints, white and amber, stand on a disc\n"
+        "     of its green, which reads on a light shade and on a dark one alike."
+    )
+    body = shaded(disc, (0, 0, 24, 24), GREEN[0], GREEN[2]) + fitted(prints, WALKER_SCALE)
+    return HEADER.format(what=what) + vector(body, size=24)
 
 
 if __name__ == "__main__":
-    (RES / "ic_launcher_foreground.xml").write_text(foreground())
-    (RES / "ic_launcher_monochrome.xml").write_text(monochrome())
-    STAT.write_text(status_bar())
-    print("wrote", RES / "ic_launcher_foreground.xml", RES / "ic_launcher_monochrome.xml", "and", STAT)
+    for path, text in (
+        (RES / "ic_launcher_background.xml", background()),
+        (RES / "ic_launcher_foreground.xml", foreground()),
+        (RES / "ic_launcher_monochrome.xml", monochrome()),
+        (TRACKING / "ic_stat_steps.xml", status_bar()),
+        (TRACKING / "ic_progress_walker.xml", walker()),
+    ):
+        path.write_text(text)
+        print("wrote", path)

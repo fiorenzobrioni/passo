@@ -12,6 +12,9 @@ All notable changes to Passo are documented here. The format follows
 
 ### Better
 
+- **A new icon**: two footprints on green, the one behind white and the step you are taking
+  amber. The notifications, the Quick Settings tile and the Outing shortcut follow it.
+
 - On «At a glance» the ring keeps one size all day at every size, however long the sentence
   under it. On a widget three or four cells wide and two rows high or more, the ring beside the
   hours is larger, and larger still with the day’s sentence turned off.

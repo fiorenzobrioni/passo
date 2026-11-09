@@ -50,6 +50,9 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
   over it, with the data kept (archive 01, «Phase 8»). Done by the owner on 2 Nov 2026, 1.0.0 to
   1.1.0, before the tag («I did the tests and everything works»); the database's road from schema
   3 to 6 is also tested (`UpgradeFromFirstReleaseTest`).
+- [ ] **On a device (owner): the new icon** (§15, «The new icon: two prints on the green», 9 Nov
+  2026): the launcher icon in the phone's own mask, the themed icon, the status-bar icon and the
+  Quick Settings tile, the Outing shortcut and the walker on an outing's bar.
 - [ ] **On a device (owner): a 30-minute interval outing with the screen off**: each change
   felt, its delay read from the log, the battery check of §9, numbers in `docs/battery/`
   (archive 01, «Phase 13»).
@@ -766,6 +769,31 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   ceiling holds it, nothing changes. Tests: `GlanceLayoutTest` (the panel's header, bars and form
   without the sentence), `WidgetFitTest` (every card without the sentence, and the owner's
   two-by-two, 188 × 218 dp, measured from the phone's screenshots, added to its grants: nothing cut).
+
+- **The new icon: two prints on the green** (owner, 9 Nov 2026: the four apps' icons redrawn
+  from scratch as one series, "icons that say the app and recall what it does, full frame in
+  Android's style, clean and readable when small, flat, the light from the same side for all,
+  bright colours but not too much, one palette for the series"). Drawn first on a board, three
+  symbols per app, two grounds, the home-screen check and the grid; the owner chose the series
+  and asked for a margin between the drawing and the badge's edge (the first board let a symbol
+  reach the edge). The mark is **two prints walking to the upper right**, the app's own sole:
+  the one behind white, the one ahead amber, the step being taken, as the amber print was on the
+  ring it replaces (archive 02, «The launcher icon: Chiaro's ring, Passo's step» and «The family's
+  icons, made one suite», which this entry changes). The series' rules, the same in the four apps: the
+  ground is the app's colour, lit from the upper left (the green `5CCB86 · 27A35A · 17834A`); the
+  symbol white with one amber accent (`FFD36A · FDB528 · F28C17`); every shape a ramp from its
+  light tone at the upper left to its deep one at the lower right, no shadow; the whole symbol
+  within 28 units of the centre (measured 28.1), a 56 dp circle on the 72 that show, so a round
+  mask leaves 8 dp of air and none reaches it. `tools/draw_launcher_icon.py` is rewritten: the
+  ground is a drawing now (`ic_launcher_background.xml`) where it was the colour `#F7F4EE`, so
+  `values/colors.xml`, which held only that colour, is gone and `ic_launcher.xml` points at the
+  drawing. Inside the app, asked in the same review: the status-bar icon (`ic_stat_steps`, every
+  notification and the Quick Settings tile) is the two prints in one ink, the outing's walker
+  (`ic_progress_walker`, now the script's too) the two prints white and amber on a green disc,
+  and the Outing shortcut (`ic_shortcut_outing`) its glyph in white on the green. The guide and
+  the first run show no app icon, so nothing changes there. Checked: the XML the script writes,
+  drawn and compared pixel by pixel with the approved drawings, differs only at the edges
+  (0.6% of the badge's pixels, the antialiasing).
 
 ### Open
 

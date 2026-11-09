@@ -1,33 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- The walker riding the outing's bar (Android 16's ProgressStyle): the system draws a tracker
-     icon as it is, untinted, so the status-bar mark (white) vanished on a light shade. Here the
-     two footprints are white on a disc in the launcher ring's green, which reads on a light
-     shade and on a dark one alike. -->
+<!-- Written by tools/draw_launcher_icon.py: change the script and run it, never this file.
+     The walker riding the outing's bar (Android 16's ProgressStyle): the system draws a tracker
+     icon as it is, untinted, so the launcher's two prints, white and amber, stand on a disc
+     of its green, which reads on a light shade and on a dark one alike. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <path
-        android:fillColor="#FF2B9E56"
-        android:pathData="M12,12m-12,0a12,12 0,1 1,24 0a12,12 0,1 1,-24 0" />
-    <group
-        android:pivotX="12"
-        android:pivotY="11.4"
-        android:scaleX="0.62"
-        android:scaleY="0.62"
-        android:translateY="0.6">
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M4.8,11.5a3,4.8 0,1 0,6 0a3,4.8 0,1 0,-6 0z" />
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M5.8,19a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z" />
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M13.2,6.5a3,4.8 0,1 0,6 0a3,4.8 0,1 0,-6 0z" />
-        <path
-            android:fillColor="#FFFFFFFF"
-            android:pathData="M14.2,14a2,2 0,1 0,4 0a2,2 0,1 0,-4 0z" />
-    </group>
+<path android:pathData="M 0,12 A 12,12 0 1,0 24,12 A 12,12 0 1,0 0,12 Z">
+    <aapt:attr name="android:fillColor">
+        <gradient android:type="linear" android:startX="0.00" android:startY="0.00" android:endX="24.00" android:endY="24.00">
+            <item android:offset="0" android:color="#FF5CCB86"/>
+            <item android:offset="1" android:color="#FF17834A"/>
+        </gradient>
+    </aapt:attr>
+</path>
+<group android:pivotX="54.00" android:pivotY="54.00" android:scaleX="0.36" android:scaleY="0.36" android:translateX="-42.00" android:translateY="-42.00">
+<path android:pathData="M 49.02,46.69 C 43.98,44.15 40.06,47.69 38.35,52.51 C 37.18,55.81 36.83,58.89 36.59,61.42 L 45.18,65.54 C 47.72,63.15 50.00,60.34 51.41,57.15 C 53.38,52.74 53.08,48.79 49.02,46.69 Z M 43.87,68.49 L 35.64,64.53 C 34.62,65.84 33.75,67.80 33.12,69.87 C 32.07,73.22 33.27,75.81 35.35,76.74 C 37.56,77.72 40.23,77.00 41.96,74.10 C 43.08,72.25 43.78,70.35 43.87,68.49 Z" android:fillColor="#FFFFFFFF"/>
+<path android:pathData="M 71.11,31.31 C 76.37,33.35 76.37,38.64 73.93,43.14 C 72.26,46.21 70.20,48.53 68.48,50.41 L 59.67,46.78 C 59.76,43.29 60.32,39.72 61.74,36.53 C 63.70,32.12 66.84,29.70 71.11,31.31 Z M 58.36,49.72 L 66.81,53.19 C 66.52,54.82 65.65,56.78 64.53,58.64 C 62.74,61.66 60.02,62.50 57.93,61.58 C 55.72,60.59 54.47,58.13 55.47,54.90 C 56.10,52.83 57.04,51.04 58.36,49.72 Z" android:fillColor="#FFFFD36A"/>
+</group>
 </vector>

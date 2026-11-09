@@ -1,14 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- A launcher shortcut's mark: the Outings icon (PassoIcons.Outing) in the launcher ring's
-     green, on its warm white (ic_launcher_background). Launchers draw shortcut icons as they are. -->
+<!-- A launcher shortcut's mark: the Outings icon (PassoIcons.Outing) in white on a disc of the
+     launcher icon's green, lit from the upper left as the icon's ground is
+     (tools/draw_launcher_icon.py). Launchers draw shortcut icons as they are. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="48dp"
     android:height="48dp"
     android:viewportWidth="48"
     android:viewportHeight="48">
-    <path
-        android:fillColor="#FFF7F4EE"
-        android:pathData="M24,24m-24,0a24,24 0,1 1,48 0a24,24 0,1 1,-48 0" />
+    <path android:pathData="M24,24m-24,0a24,24 0,1 1,48 0a24,24 0,1 1,-48 0">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0"
+                android:startY="0"
+                android:endX="48"
+                android:endY="48">
+                <item android:offset="0" android:color="#FF5CCB86" />
+                <item android:offset="1" android:color="#FF17834A" />
+            </gradient>
+        </aapt:attr>
+    </path>
     <group
         android:scaleX="1.1"
         android:scaleY="1.1"
@@ -16,8 +28,8 @@
         android:translateY="10.8">
         <path
             android:fillColor="#00000000"
-            android:strokeColor="#FF2B9E56"
-            android:strokeWidth="1.8"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="1.9"
             android:strokeLineCap="round"
             android:strokeLineJoin="round"
             android:pathData="M3.2,19a1.8,1.8 0,1 0,3.6 0a1.8,1.8 0,1 0,-3.6 0z M6.8,19L12,19C15,19 15,13 12,13C9,13 9,9.5 12,9.5L16,9.5 M16,9.5L16,3L20.5,5L16,7" />
