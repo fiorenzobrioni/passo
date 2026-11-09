@@ -58,9 +58,10 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
   shortcut, an adaptive icon», 9 Nov 2026): long press on the icon, in the phone's own mask and
   with the themed icons on. Done by the owner on 9 Nov 2026 (§15, «The adaptive shortcut checked
   on the phone, and Tetto in the family»).
-- [ ] **On a device (owner): each outing's shortcut wears its own mark** (§15, «Each outing's
+- [x] **On a device (owner): each outing's shortcut wears its own mark** (§15, «Each outing's
   shortcut wears its own mark», 9 Nov 2026): after starting or saving a plan, a long press on the
-  icon shows the interval walk with its slow and fast line, a run with its bolt.
+  icon shows the interval walk with its slow and fast line, a run with its bolt. Done by the owner
+  on 9 Nov 2026 (§15, «The outings' own marks checked on the phone»).
 - [ ] **On a device (owner): a 30-minute interval outing with the screen off**: each change
   felt, its delay read from the log, the battery check of §9, numbers in `docs/battery/`
   (archive 01, «Phase 13»).
@@ -837,6 +838,9 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   Outing glyph is; one rule for the page and the shortcuts, so they cannot drift apart again
   (`SessionShortcutsTest`, every intensity with every goal). The launcher updates a shortcut's
   icon when the list is written again: when a plan is started, saved or deleted.
+- **The outings' own marks checked on the phone** (owner, 9 Nov 2026: "I tried it and it works.
+  Tick the box and merge straight into main."). The device check of «Each outing's shortcut
+  wears its own mark» is done; its box in «Open» is ticked.
 
 ### Open
 
