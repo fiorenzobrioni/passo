@@ -21,9 +21,11 @@ The series' rules, the same in every app of the family:
 
 The status-bar icon is the same two prints in one ink on the 24-unit grid (the system tints it);
 it is also the Quick Settings tile's icon. The walker is the two prints on a green disc, white
-and amber, because the system draws a progress tracker's icon as it is, untinted.
+and amber, because the system draws a progress tracker's icon as it is, untinted. The badge's
+ground is written a second time beside them (ic_shortcut_ground.xml), as the ground of the
+Outing shortcut's adaptive icon: a library cannot name the app's drawables.
 
-Re-running this script IS the drawing: the five files are its output and are not edited by hand.
+Re-running this script IS the drawing: the six files are its output and are not edited by hand.
 Only the standard library is used, so any Python 3 runs it.
 """
 
@@ -210,6 +212,15 @@ def walker():
     return HEADER.format(what=what) + vector(body, size=24)
 
 
+def shortcut_ground():
+    body = shaded("M 0,0 H 108 V 108 H 0 Z", (18, 18, 90, 90), GREEN[0], GREEN[2])
+    what = (
+        "The ground of the Outing shortcut's adaptive icon (ic_shortcut_outing.xml): the launcher\n"
+        "     icon's ground, written here too because a library cannot name the app's drawables."
+    )
+    return HEADER.format(what=what) + vector(body)
+
+
 if __name__ == "__main__":
     for path, text in (
         (RES / "ic_launcher_background.xml", background()),
@@ -217,6 +228,7 @@ if __name__ == "__main__":
         (RES / "ic_launcher_monochrome.xml", monochrome()),
         (TRACKING / "ic_stat_steps.xml", status_bar()),
         (TRACKING / "ic_progress_walker.xml", walker()),
+        (TRACKING / "ic_shortcut_ground.xml", shortcut_ground()),
     ):
         path.write_text(text)
         print("wrote", path)

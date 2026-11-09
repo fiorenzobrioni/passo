@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The Outing shortcut's glyph: the Outings icon (PassoIcons.Outing) in white, the foreground
+     of its adaptive icon (ic_shortcut_outing.xml). Its 24 units are scaled to 55% of the 72 a
+     launcher shows and centred, so a round mask leaves the same air around it as a disc did. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="1.65"
+        android:scaleY="1.65"
+        android:translateX="34.2"
+        android:translateY="34.2">
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="1.9"
+            android:strokeLineCap="round"
+            android:strokeLineJoin="round"
+            android:pathData="M3.2,19a1.8,1.8 0,1 0,3.6 0a1.8,1.8 0,1 0,-3.6 0z M6.8,19L12,19C15,19 15,13 12,13C9,13 9,9.5 12,9.5L16,9.5 M16,9.5L16,3L20.5,5L16,7" />
+    </group>
+</vector>

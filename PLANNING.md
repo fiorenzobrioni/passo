@@ -54,6 +54,9 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
   2026): the launcher icon in the phone's own mask, the themed icon, the status-bar icon and the
   Quick Settings tile, the Outing shortcut and the walker on an outing's bar. Done by the owner on
   9 Nov 2026 (§15, «The new icon checked on the phone»).
+- [ ] **On a device (owner): the Outing shortcut as an adaptive icon** (§15, «The Outing
+  shortcut, an adaptive icon», 9 Nov 2026): long press on the icon, in the phone's own mask and
+  with the themed icons on.
 - [ ] **On a device (owner): a 30-minute interval outing with the screen off**: each change
   felt, its delay read from the log, the battery check of §9, numbers in `docs/battery/`
   (archive 01, «Phase 13»).
@@ -798,6 +801,20 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
 - **The new icon checked on the phone** (owner, 9 Nov 2026: "I merged the PRs of the other
   repositories too. I checked the APKs."; then "tick the boxes"). The device check of «The new
   icon: two prints on the green» is done; its box in «Open» is ticked.
+- **The Outing shortcut, an adaptive icon** (owner, 9 Nov 2026, seeing the shortcuts of Passo
+  and Tempo on the phone: "now I see a circle, and white around it"; then "make them adaptive,
+  for Saldo and for the other two repositories too"). The shortcut drawn as a green disc («The new icon: two prints on
+  the green», above, which this entry changes) kept its shape only under a round mask: under any
+  other the launcher shrank it onto a white plate, as it does with any icon that is not
+  adaptive. `ic_shortcut_outing` is now an `<adaptive-icon>`: the launcher icon's ground under
+  the Outings glyph in white (`ic_shortcut_outing_foreground`, its 24 units at 55% of the 72
+  that show, the share it had on the disc), the glyph again as the themed layer. The ground is
+  written by `tools/draw_launcher_icon.py` a second time, into `:core:tracking`
+  (`ic_shortcut_ground`), because a library cannot name the app's drawables. The family's rule
+  for the launcher's shortcuts is now the white glyph on the app's colour, in the launcher's own
+  shape; where an app draws its mark itself, it stays a disc (the walker on the outing's bar).
+  Checked: the layers drawn in a round, a rounded-square and a squircle mask and as the themed
+  icon; `:app:lintDebug`, `:app:assembleDebug`, `spotlessCheck` and `:core:tracking`'s tests.
 
 ### Open
 
