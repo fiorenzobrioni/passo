@@ -546,7 +546,7 @@ private fun Stats(state: TodayUiState, format: MeasureFormatter) {
                     Row(Modifier.height(IntrinsicSize.Min)) {
                         stats.forEachIndexed { i, stat ->
                             if (i > 0) VerticalDivider(color = rule)
-                            Stat(stat, Modifier.weight(1f).padding(start = if (i == 0) 8.dp else 16.dp, end = 4.dp))
+                            Stat(stat, Modifier.weight(1f).padding(horizontal = 4.dp))
                         }
                     }
                 } else {
@@ -562,7 +562,8 @@ private fun Stats(state: TodayUiState, format: MeasureFormatter) {
             text = stringResource(R.string.today_stats_note, stepLength),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 8.dp).clearAndSetSemantics { },
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp).clearAndSetSemantics { },
         )
     }
 }
@@ -571,8 +572,11 @@ private class StatItem(val value: AnnotatedString, val label: String, val spoken
 
 @Composable
 private fun Stat(stat: StatItem, modifier: Modifier) {
+    // Centred on its share, as the ring and the sentence above are on the page: one axis down the
+    // first screen (owner, 10 Nov 2026).
     Column(
         verticalArrangement = Arrangement.spacedBy(2.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .padding(vertical = 10.dp)
             .clearAndSetSemantics { contentDescription = stat.spoken },
@@ -583,7 +587,12 @@ private fun Stat(stat: StatItem, modifier: Modifier) {
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
         )
-        Text(stat.label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            stat.label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 

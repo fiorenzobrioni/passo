@@ -876,6 +876,13 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   The guide's paragraph on the ring and its sample ring say the same (no distance inside it).
   README screenshots regenerated (Today, the dark goal, the chart read, the outing, the foldable).
   Checked: `:core:domain` and `:feature:today` tests, `:feature:guide`'s, lint and spotless.
+- **Today's three amounts, centred** (owner, 10 Nov 2026: "can distance, active calories and active
+  minutes under the sentence be centred? Do you honestly agree, or is it better to leave them as
+  they are?"; then "Ok, do it"). Each amount, its label and the line on the estimates are centred,
+  in its third or stacked at a large text size: the ring and the sentence above stand on the
+  page's middle, and the row left-aligned was the one block off that axis; three amounts read one
+  at a time gain nothing from a left edge, which helps a column of numbers compared down. This
+  changes «Today reviewed for a premium first screen», above. README screenshots regenerated.
 
 ### Open
 
