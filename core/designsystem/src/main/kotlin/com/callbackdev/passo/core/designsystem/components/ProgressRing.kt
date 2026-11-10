@@ -43,6 +43,9 @@ import kotlin.math.sin
  * running inside the full ring, so a day well past its goal still looks different from one
  * that just met it. It stops at twice the goal.
  *
+ * The arc ends in a plain round cap: a dot of the ground at its head read as a knob to turn, on a
+ * ring nobody can drag (the Today review of 10 Nov 2026).
+ *
  * The arc sweeps in from zero when the ring first appears and follows the count with the
  * spatial spring; a met goal turns it to the goal color, and the moment it is met (with the
  * screen on, or the first time the screen sees it that day, [celebrate]) the ring blooms once:
@@ -119,9 +122,6 @@ fun ProgressRing(
                     arcSize,
                     style = Stroke(stroke, cap = StrokeCap.Round),
                 )
-                // Only on a ring still filling: on a closed one the dot would sit at the top as a
-                // leftover.
-                if (progress < 1f) drawHead(center, diameter / 2, sweep.value, stroke, ground)
             }
             // Keyed on the target, not the sweep: the spring overshoots 1 on its way to a met goal,
             // and that must not flash a second lap.
@@ -155,13 +155,6 @@ fun ProgressRing(
             content = content,
         )
     }
-}
-
-/** A dot of the ground at the arc's end: the ring's leading edge, so a moving ring reads as moving. */
-private fun DrawScope.drawHead(center: Offset, radius: Float, share: Float, stroke: Float, ground: Color) {
-    val angle = (share * 360f - 90f) * DEG
-    val at = Offset(center.x + radius * cos(angle), center.y + radius * sin(angle))
-    drawCircle(ground.copy(alpha = 0.9f), radius = stroke * 0.18f, center = at)
 }
 
 /**

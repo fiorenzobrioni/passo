@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="today_settings">Settings</string>
+    <!-- Beside the streak’s mark, by the date: short, so it shares the date’s line. -->
+    <plurals name="today_streak">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <plurals name="today_streak_spoken">
+        <item quantity="one">%1$d day in a row at the goal</item>
+        <item quantity="other">%1$d days in a row at the goal</item>
+    </plurals>
 
     <!-- The ring -->
     <string name="today_of_goal">of %1$s steps</string>
@@ -9,8 +18,6 @@
     <string name="today_ring_description_usual">A usual day is at %1$s by now.</string>
     <string name="today_ring_description_estimates">Estimated so far: %1$s and %2$s.</string>
     <!-- Under the count in the ring: the day's distance and active calories, "≈" for estimates. -->
-    <string name="today_ring_estimates">≈ %1$s · %2$s</string>
-    <string name="today_ring_estimates_distance">≈ %1$s</string>
 
     <!-- The headline: one sentence before any number -->
     <string name="today_headline_no_steps">No steps yet today</string>
@@ -58,14 +65,14 @@
     <string name="today_trend_title">Your day</string>
     <string name="today_trend_legend_today">Today</string>
     <string name="today_trend_legend_usual">Usual</string>
-    <string name="today_trend_legend_goal">Goal</string>
+    <string name="today_trend_goal">Goal %1$s</string>
     <string name="today_trend_now">Now</string>
     <plurals name="today_trend_steps">
         <item quantity="one">%1$s step</item>
         <item quantity="other">%1$s steps</item>
     </plurals>
     <string name="today_trend_usual">usual %1$s</string>
-    <string name="today_trend_caption">Usual is the average of the same weekday over the last 4 weeks. Touch the chart to read it.</string>
+    <string name="today_trend_caption">Usual: the same weekday, over the last 4 weeks. Touch the chart to read any hour.</string>
     <string name="today_trend_caption_no_usual">Touch the chart to read it. The usual line appears once two past weeks of the same weekday are recorded.</string>
     <plurals name="today_trend_description">
         <item quantity="one">Your day so far: %1$s step.</item>
@@ -85,6 +92,12 @@
     <string name="today_walks_title">Walks today</string>
 
     <!-- The metric tiles -->
+    <!-- The three answers to “how much”, under the sentence; the estimates say so. -->
+    <string name="today_stat_distance">≈ distance</string>
+    <string name="today_stat_calories">≈ active calories</string>
+    <string name="today_stat_active">active</string>
+    <string name="today_stats_note">Estimates from your %1$s step. Calories count movement only; active minutes have 40 steps or more.</string>
+    <string name="today_intensity_title">Intensity</string>
     <string name="today_metric_distance">Distance</string>
     <string name="today_metric_distance_meaning">Estimate, with a step of %1$s</string>
     <string name="today_metric_calories">Active calories</string>
@@ -103,6 +116,7 @@
     <string name="today_metric_cadence_vigorous">A very brisk pace: vigorous intensity</string>
     <string name="today_metric_spoken">%1$s: %2$s. %3$s</string>
     <string name="today_start_outing">Start an outing</string>
+    <string name="today_start_outing_body">A walk with a goal, or intervals</string>
     <!-- The way under way, at the foot of Today: what today did for it. -->
     <string name="today_way_moved">Today, %1$s further along</string>
     <string name="today_way_last">The last %1$s today</string>

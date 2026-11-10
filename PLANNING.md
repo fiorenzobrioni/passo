@@ -842,7 +842,44 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   Tick the box and merge straight into main."). The device check of «Each outing's shortcut
   wears its own mark» is done; its box in «Open» is ticked.
 
+- **Today reviewed for a premium first screen** (owner, 10 Nov 2026: "Transform it into a premium
+  Play Store app. A graphic review of the main screen. No noise, only added value."; then, on the
+  design: "Fine, implement it in Compose", and, asked how to keep the chart whole on the first
+  screen: "Values under the sentence"). What changed on Today, and why:
+  - **No glow.** The top stands on the page's own ground; the ring is the one thing in the day's
+    colour. The gradient tinted the whole top and greyed the text on it (`docs/adr/0004-design-language.md`,
+    amended).
+  - **A finer ring** (12dp on 256dp, growing with the text size as the guide's does), with a plain
+    round cap: the dot of the ground at the arc's head read as a knob to turn, on every ring
+    (`ProgressRing`, the guide's and Settings' too). The notch stays dashed, in the chart's ink.
+  - **Inside the ring, the count and the goal only.** The distance and the calories went to a
+    row of three under the sentence, **distance, active calories, active minutes**, with one line
+    on what the estimates rest on; each amount is one node for TalkBack, read with its own
+    meaning, so the shared line is hidden from it and the ring no longer reads the estimates.
+    Three across while a third holds the text size, else stacked.
+  - **The chart begins on the first screen** instead of being whole on it: on the owner's phone in
+    Italian, under two sentences of two lines, its readout and the top of its plot show, the rest
+    one short scroll away. This changes «Today's chart whole on the first screen» (archived in
+    `docs/planning/02-decisions-to-1-nov-2026.md`); the test says the new rule.
+  - **The chart without the grey block over the hours ahead**: the usual day goes on past now,
+    fainter (`DayTrendChart`, Today's only user). The goal is named on its line («Goal 10,000»),
+    so the key holds Today and Usual; the caption is one line shorter.
+  - **The way to an outing is a row as wide as the cards**, with the line that says what one is
+    («A walk with a goal, or intervals») and a chevron, where a centred pill read as left over.
+  - **The four tiles and the cadence's became one card, «Intensity»**: brisk minutes on today's
+    share of the WHO's 150 and the cadence on its ramp, each with its meaning. The distance, the
+    calories and the active minutes, now under the sentence, are not said twice.
+  - **The streak beside the date** («12 days», with the streak's mark; read as "12 days in a row
+    at the goal"), from two days: Insights' streak, the same rule (`StreakSoFar`, pinned against
+    `Insights` by a test). The days to yesterday are their own flow, distinct, since the past is
+    frozen; today joins once its goal is met.
+  The guide's paragraph on the ring and its sample ring say the same (no distance inside it).
+  README screenshots regenerated (Today, the dark goal, the chart read, the outing, the foldable).
+  Checked: `:core:domain` and `:feature:today` tests, `:feature:guide`'s, lint and spotless.
+
 ### Open
 
-Nothing open.
+- [ ] **On a device (owner): Today's premium review** (§15, «Today reviewed for a premium first
+  screen»): the ring, the row of three, the streak by the date, the chart and the Intensity card,
+  in the light and the dark, at a large text size and with TalkBack.
 

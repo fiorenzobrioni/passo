@@ -28,9 +28,8 @@
 
     <!-- Today -->
     <string name="guide_today_title">Today</string>
-    <string name="guide_today_p1">The ring is today’s steps against today’s goal. The small notch on it, dashed like the usual day in the chart below, is where a usual day of the same weekday stands by this hour, so the ring alone says whether the day is ahead or behind. Under the count, the day’s distance and active calories so far, with “≈” because they are estimates. Once the goal is met the ring turns green, the color Passo keeps for a goal reached and nothing else; past the goal a thin line starts a second lap, up to twice the goal.</string>
+    <string name="guide_today_p1">The ring is today’s steps against today’s goal. The small notch on it, dashed like the usual day in the chart below, is where a usual day of the same weekday stands by this hour, so the ring alone says whether the day is ahead or behind. Once the goal is met the ring turns green, the color Passo keeps for a goal reached and nothing else; past the goal a thin line starts a second lap, up to twice the goal. Under the sentence, the day’s distance, active calories and active minutes so far, the first two with “≈” because they are estimates. Beside the date, from the second day in a row at the goal, how long the streak is.</string>
     <string name="guide_sample_of_goal">of %1$s steps</string>
-    <string name="guide_sample_ring_distance">≈ %1$s</string>
     <string name="guide_today_ring_caption">An example: a day a little ahead of the notch of a usual day.</string>
     <string name="guide_today_sentence_title">The sentence</string>
     <string name="guide_today_sentence_body">One line under the ring says how the day is going: ahead of your usual pace or behind it, how many steps are left and how long a brisk walk that is, or when the goal was reached.</string>

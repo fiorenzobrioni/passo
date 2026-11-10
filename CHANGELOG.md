@@ -12,6 +12,13 @@ All notable changes to Passo are documented here. The format follows
 
 ### Better
 
+- **Today, calmer.** A finer ring on a plain page, with only your steps and your goal inside it.
+  Under the sentence, the day’s distance, active calories and active minutes in one row, with one
+  line on what the estimates rest on. Beside the date, how many days in a row you have met your
+  goal. The day’s chart without the grey block over the hours ahead, and with the goal named on
+  its line. Brisk minutes and cadence together in one card, «Intensity», and the way to an
+  outing as a full row that says what an outing is.
+
 - **A new icon**: two footprints on green, the one behind white and the step you are taking
   amber. The notifications, the Quick Settings tile and the outings' shortcuts follow it, the
   shortcuts in the same shape as your launcher's icons. Each shortcut wears its outing's own

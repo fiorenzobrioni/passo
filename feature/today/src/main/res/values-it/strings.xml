@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="today_settings">Impostazioni</string>
+    <plurals name="today_streak">
+        <item quantity="one">%1$d giorno</item>
+        <item quantity="many">%1$d giorni</item>
+        <item quantity="other">%1$d giorni</item>
+    </plurals>
+    <plurals name="today_streak_spoken">
+        <item quantity="one">%1$d giorno di fila all’obiettivo</item>
+        <item quantity="many">%1$d giorni di fila all’obiettivo</item>
+        <item quantity="other">%1$d giorni di fila all’obiettivo</item>
+    </plurals>
 
     <!-- L'anello -->
     <string name="today_of_goal">su %1$s passi</string>
@@ -9,8 +19,6 @@
     <string name="today_ring_description_usual">Una giornata tipica a quest’ora è a %1$s.</string>
     <string name="today_ring_description_estimates">Stima finora: %1$s e %2$s.</string>
     <!-- Sotto il conteggio nell’anello: distanza e calorie attive del giorno, «≈» perché sono stime. -->
-    <string name="today_ring_estimates">≈ %1$s · %2$s</string>
-    <string name="today_ring_estimates_distance">≈ %1$s</string>
 
     <!-- La frase che apre la schermata -->
     <string name="today_headline_no_steps">Ancora nessun passo, oggi</string>
@@ -63,7 +71,7 @@
     <string name="today_trend_title">La tua giornata</string>
     <string name="today_trend_legend_today">Oggi</string>
     <string name="today_trend_legend_usual">Di solito</string>
-    <string name="today_trend_legend_goal">Obiettivo</string>
+    <string name="today_trend_goal">Obiettivo %1$s</string>
     <string name="today_trend_now">Adesso</string>
     <plurals name="today_trend_steps">
         <item quantity="one">%1$s passo</item>
@@ -71,7 +79,7 @@
         <item quantity="other">%1$s passi</item>
     </plurals>
     <string name="today_trend_usual">di solito %1$s</string>
-    <string name="today_trend_caption">«Di solito» è la media dello stesso giorno della settimana nelle ultime 4 settimane. Tocca il grafico per leggerlo.</string>
+    <string name="today_trend_caption">«Di solito»: lo stesso giorno della settimana, nelle ultime 4 settimane. Tocca il grafico per leggere ogni ora.</string>
     <string name="today_trend_caption_no_usual">Tocca il grafico per leggerlo. La linea «di solito» compare quando ci sono due settimane passate dello stesso giorno.</string>
     <plurals name="today_trend_description">
         <item quantity="one">La tua giornata finora: %1$s passo.</item>
@@ -94,6 +102,11 @@
     <string name="today_walks_title">Camminate di oggi</string>
 
     <!-- Le metriche -->
+    <string name="today_stat_distance">≈ distanza</string>
+    <string name="today_stat_calories">≈ calorie attive</string>
+    <string name="today_stat_active">attivi</string>
+    <string name="today_stats_note">Stime con il tuo passo di %1$s. Le calorie contano solo il movimento; un minuto attivo ha almeno 40 passi.</string>
+    <string name="today_intensity_title">Intensità</string>
     <string name="today_metric_distance">Distanza</string>
     <string name="today_metric_distance_meaning">Stima, con un passo di %1$s</string>
     <string name="today_metric_calories">Calorie attive</string>
@@ -113,6 +126,7 @@
     <string name="today_metric_cadence_vigorous">Passo molto svelto: intensità vigorosa</string>
     <string name="today_metric_spoken">%1$s: %2$s. %3$s</string>
     <string name="today_start_outing">Inizia un’uscita</string>
+    <string name="today_start_outing_body">Una camminata con un obiettivo, o a intervalli</string>
     <!-- Il cammino in corso, in fondo a Oggi: che cosa ha fatto oggi per lui. -->
     <string name="today_way_moved">Oggi %1$s più avanti</string>
     <string name="today_way_last">Oggi gli ultimi %1$s</string>

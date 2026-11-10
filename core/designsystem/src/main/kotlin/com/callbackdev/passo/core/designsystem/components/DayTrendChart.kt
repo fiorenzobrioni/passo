@@ -20,7 +20,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
@@ -97,8 +96,8 @@ data class DayTrend(
 /**
  * The day so far as a shape (PLANNING.md §6.2, VISION "Day trend sparkline"): the running total
  * since midnight on a whole day's width, the goal as a line, a usual day of the same weekday as
- * a dashed line that goes on past now (what usually comes later), and the rest of the day
- * shaded, so the room left to walk in is visible too.
+ * a dashed line that goes on past now (what usually comes later), fainter there: the rest of the
+ * day is told by that line alone, with no block laid over it (the Today review of 10 Nov 2026).
  *
  * The plot takes the card's whole width, from the day's start ([DayTrend.startMinute], 05:00 on
  * most days) to midnight: the flat small hours would take a quarter of it and squeeze the walks
@@ -152,7 +151,7 @@ fun DayTrendChart(
     val colors = MaterialTheme.colorScheme
     val goalInk = PassoTheme.colors.goal
     // On a dark ground the light primary at the light theme's strength reads as grey, not as a
-    // tint: the day walked needs more of it to stand apart from the shaded rest of the day.
+    // tint: the day walked needs more of it to stand apart from the card.
     val areaAlpha = if (colors.surface.luminance() < 0.5f) 0.45f else 0.28f
     val axisDp = chartMargins(measurer, labelStyle, goalLabel).second
 
@@ -215,9 +214,7 @@ fun DayTrendChart(
             fun x(minute: Float) = plotW * (minute - start) / (MINUTES_PER_DAY - start)
             fun y(value: Int) = plotBottom - plotH * value / yMax
 
-            // The part of the day still ahead.
             val nowX = x(trend.nowMinute.coerceIn(start, MINUTES_PER_DAY.toFloat()))
-            drawRect(colors.surfaceContainerHigh.copy(alpha = 0.55f), Offset(nowX, top), Size(plotW - nowX, plotH))
             // Baseline.
             drawLine(
                 colors.outlineVariant,
@@ -256,24 +253,25 @@ fun DayTrendChart(
                 lastRight = left + text.size.width
             }
 
-            // A usual day, dashed, the whole day long; what came before the start is cut at the edge.
+            // A usual day, dashed, the whole day long, fainter past now: what usually comes later,
+            // not what has been. What came before the start is cut at the edge.
             val usual = trend.usual
             if (usual != null) {
-                clipRect(left = 0f) {
-                    val path = Path()
-                    usual.forEachIndexed { i, total ->
-                        val px = x((i * trend.usualStepMinutes).toFloat())
-                        if (i == 0) path.moveTo(px, y(total)) else path.lineTo(px, y(total))
-                    }
-                    drawPath(
-                        path,
-                        colors.onSurfaceVariant.copy(alpha = 0.8f),
-                        style = Stroke(
-                            width = 1.5.dp.toPx(),
-                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx())),
-                            cap = StrokeCap.Round,
-                        ),
-                    )
+                val path = Path()
+                usual.forEachIndexed { i, total ->
+                    val px = x((i * trend.usualStepMinutes).toFloat())
+                    if (i == 0) path.moveTo(px, y(total)) else path.lineTo(px, y(total))
+                }
+                val dashed = Stroke(
+                    width = 1.5.dp.toPx(),
+                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(5.dp.toPx(), 4.dp.toPx())),
+                    cap = StrokeCap.Round,
+                )
+                clipRect(left = 0f, right = nowX) {
+                    drawPath(path, colors.onSurfaceVariant.copy(alpha = 0.8f), style = dashed)
+                }
+                clipRect(left = nowX) {
+                    drawPath(path, colors.onSurfaceVariant.copy(alpha = USUAL_AHEAD_ALPHA), style = dashed)
                 }
             }
 
@@ -333,4 +331,7 @@ private const val MINUTES_PER_DAY = 1_440
 /** The chart's start on a day with no steps before it: the small hours are flat on almost every day. */
 private const val DAY_START_MINUTE = 5 * 60
 private const val HEADROOM = 1.12f
+
+/** The usual day past now: still readable (it sits above the 3:1 of a graphic), plainly behind today's line. */
+private const val USUAL_AHEAD_ALPHA = 0.45f
 private const val REVEAL_MILLIS = 900
