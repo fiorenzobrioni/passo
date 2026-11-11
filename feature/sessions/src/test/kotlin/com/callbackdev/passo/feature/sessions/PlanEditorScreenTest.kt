@@ -70,7 +70,7 @@ class PlanEditorScreenTest {
         compose.onNodeWithText("New outing").assertIsDisplayed()
         compose.onNodeWithText("30 min").assertIsDisplayed()
         compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.ESTIMATE))
-        compose.onNodeWithText("About 3,000 steps and 2.19 km, with your step of 73 cm.").assertIsDisplayed()
+        compose.onNodeWithText("About 3,000 steps and 2.19 km, with your step of\u00A073\u00A0cm.").assertIsDisplayed()
         snapshot("editor_new")
     }
 
@@ -134,7 +134,7 @@ class PlanEditorScreenTest {
         compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.TRY_ENDED_STILL))
         compose.onNodeWithTag("${EditorTags.TRY}-100").performClick()
         compose.onNodeWithTag(EditorTags.TRY_ENDED_STILL).assertIsDisplayed()
-        compose.onNodeWithText("Long stop").performClick()
+        compose.onNodeWithText("Ended after a long stop").performClick()
         assertThat(felt).containsExactly("GOAL", "STILL").inOrder()
     }
 
@@ -273,8 +273,14 @@ class PlanEditorScreenTest {
 
         compose.onNodeWithTag("${EditorTags.KIND}-true").performClick()
         compose.onNodeWithText("The Japanese interval walk").assertIsDisplayed()
-        compose.onNodeWithText("Slow and fast walking in turns", substring = true).assertIsDisplayed()
+        // In two lines where it is chosen, the sets on the same screen; the whole of it a touch away.
+        compose.onNodeWithText("Three slow minutes and three brisk ones", substring = true).assertIsDisplayed()
         snapshot("editor_intervals")
+        compose.onNodeWithTag(EditorTags.INTERVALS_MORE).performClick()
+        compose.onNodeWithText("Slow and fast walking in turns", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("A study at Shinshu University", substring = true).assertIsDisplayed()
+        snapshot("editor_intervals_whole")
+        compose.onNodeWithTag(EditorTags.INTERVALS_MORE).performClick()
         compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.SETS))
         compose.onNodeWithTag("${EditorTags.SETS}-more").performClick()
         compose.onNodeWithTag("${EditorTags.FAST}-less").performClick()

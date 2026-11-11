@@ -61,13 +61,24 @@
     <string name="editor_estimate_note">An estimate: the outing itself is measured from your steps.</string>
     <string name="editor_signals">Signals</string>
     <string name="editor_signals_note">On the way at the shares you choose, and always at the goal, which ends the outing.</string>
-    <string name="editor_signal_goal">Goal, always</string>
     <string name="editor_vibrate">Vibrate</string>
-    <string name="editor_vibrate_note" formatted="false">One short pulse at 25%, two at half, three at 75%, a long one at the goal, two long ones if it ends after a long stop. They follow the phone’s silent mode.</string>
-    <string name="editor_try">Try them</string>
-    <string name="editor_try_goal">Goal</string>
+    <string name="editor_vibrate_silent">Vibrations follow the phone’s silent mode.</string>
+    <!-- The signals' legend: each with its pattern drawn beside it, felt at a touch. -->
+    <string name="editor_try">Touch a signal to feel it</string>
+    <string name="editor_try_action">feel it</string>
+    <string name="editor_try_share">At %1$s</string>
+    <string name="editor_try_goal">At the goal</string>
+    <!-- A pattern in words, for TalkBack. -->
+    <plurals name="editor_pulse_short">
+        <item quantity="one">%1$d short pulse</item>
+        <item quantity="other">%1$d short pulses</item>
+    </plurals>
+    <string name="editor_pulse_long">one long pulse</string>
+    <string name="editor_pulse_long_two">two long pulses</string>
+    <string name="editor_pulse_taps">four quick taps</string>
+    <string name="editor_pulse_ease">a long pulse and a short one</string>
     <!-- The end by a long stop, to feel before it comes. -->
-    <string name="editor_try_ended_still">Long stop</string>
+    <string name="editor_try_ended_still">Ended after a long stop</string>
     <string name="editor_discard_title">Discard your changes?</string>
     <string name="editor_discard_keep">Keep editing</string>
     <string name="editor_discard">Discard</string>
@@ -100,22 +111,22 @@
     <!-- What the Japanese interval walk is, where it is chosen: short, so it is read. -->
     <string name="editor_intervals_about_title">The Japanese interval walk</string>
     <string name="editor_intervals_about">Slow and fast walking in turns: 3 easy minutes, then 3 fast enough to feel the effort, five times or more. A study at Shinshu University, in Japan, found it raised fitness and lowered blood pressure more than walking at one steady pace.</string>
+    <!-- The same in two lines, with the rest a touch away. -->
+    <string name="editor_intervals_brief">Three slow minutes and three brisk ones, in turns. Passo tells each change with a vibration.</string>
+    <string name="editor_intervals_about_more">How it works, and the study</string>
+    <string name="editor_intervals_about_less">Show less</string>
     <string name="editor_intervals_how">Passo tells each change with a vibration, so the phone can stay in your pocket. The minutes are minutes in motion: a stop does not eat an interval.</string>
     <string name="editor_intervals">Intervals</string>
     <string name="editor_intervals_slow">Slow minutes</string>
-    <string name="editor_intervals_slow_note">Easy, to catch your breath</string>
     <string name="editor_intervals_fast">Fast minutes</string>
-    <string name="editor_intervals_fast_note">At the pace below</string>
     <string name="editor_intervals_sets">Sets</string>
-    <string name="editor_intervals_sets_note">One slow and one fast interval each</string>
     <string name="editor_intervals_fewer">Fewer %1$s</string>
     <string name="editor_intervals_more">More %1$s</string>
     <!-- «30 min in all: it starts slow, and ends at the end of the last fast interval». -->
-    <string name="editor_intervals_total">%1$s in all, starting slow. The end of the last fast interval is the goal.</string>
+    <string name="editor_intervals_total">%1$s in all, starting slow: a set is one slow and one fast interval. The end of the last fast one is the goal.</string>
     <string name="editor_intervals_protocol">As the study did it</string>
     <string name="editor_fast_pace">Fast pace</string>
     <string name="editor_intervals_signals_note">The changes are the signals: “faster” into each fast interval, “slower” out of it, and the long one at the goal.</string>
-    <string name="editor_intervals_vibrate_note">Four quick taps for faster, a long and a short pulse for slower, a long one at the goal, two long ones if it ends after a long stop. They follow the phone’s silent mode.</string>
     <string name="editor_try_faster">Faster</string>
     <string name="editor_try_slower">Slower</string>
     <string name="editor_intervals_voice_note">Through headphones only: the start, each change (“Fast, 3 minutes”, “Slow”), and at the goal how many fast intervals were at pace.</string>
