@@ -22,7 +22,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +30,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
@@ -47,6 +46,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
@@ -55,6 +55,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.text
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -64,15 +67,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.callbackdev.passo.core.designsystem.components.IntervalBlocks
 import com.callbackdev.passo.core.designsystem.components.SessionCard
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
+import com.callbackdev.passo.core.designsystem.components.SessionMarkIconSize
+import com.callbackdev.passo.core.designsystem.components.SessionMarkSize
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
 import com.callbackdev.passo.core.designsystem.components.StatusCard
 import com.callbackdev.passo.core.designsystem.components.StatusTone
+import com.callbackdev.passo.core.designsystem.components.WayMapView
 import com.callbackdev.passo.core.designsystem.components.reveal
 import com.callbackdev.passo.core.designsystem.components.sessionIcon
 import com.callbackdev.passo.core.designsystem.format.format
 import com.callbackdev.passo.core.designsystem.format.planDescription
 import com.callbackdev.passo.core.designsystem.format.rememberMeasureFormatter
 import com.callbackdev.passo.core.designsystem.format.sessionName
+import com.callbackdev.passo.core.designsystem.format.unorphaned
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.PassoMotion
@@ -83,9 +90,11 @@ import com.callbackdev.passo.core.designsystem.theme.reducedMotion
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.sessions.SessionConstants
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
+import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.SessionVoice
+import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.tracking.GoalNotificationsBlock
 import com.callbackdev.passo.core.tracking.SessionSignalsAccess
 
@@ -157,7 +166,8 @@ class SessionsActions(
  * The Outings page (PLANNING.md §11 Phase 10): one sentence of what an outing is, what stands in
  * the way if anything does (a paused count, silenced signals), the outing under way, then the
  * reader's outings, each with what it is, what it comes to and its signals, one touch from
- * starting. Editing is a tap on the card; a new one is at the end of the list.
+ * starting. Editing is a tap on the card; a new one is the bar's own action, in reach wherever
+ * the list stands.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -178,6 +188,11 @@ fun SessionsScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(PassoIcons.Back, contentDescription = stringResource(R.string.sessions_back))
+                    }
+                },
+                actions = {
+                    IconButton(onClick = { onEdit(null) }, modifier = Modifier.testTag(SessionsTags.NEW)) {
+                        Icon(PassoIcons.Plus, contentDescription = stringResource(R.string.sessions_new))
                     }
                 },
                 windowInsets = TopAppBarDefaults.windowInsets.add(pageGutter(sideInsets = false).asInsets()),
@@ -231,7 +246,7 @@ private fun SessionsList(
         item(key = "intro") {
             Text(
                 text = stringResource(R.string.sessions_intro),
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
             )
@@ -326,13 +341,31 @@ private fun SessionsList(
             }
         }
         if (state.plans.isEmpty()) {
+            // With nothing kept, the way to make one is said where the list would be, too.
             item(key = "empty") {
-                Text(
-                    text = stringResource(R.string.sessions_empty),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 20.dp),
-                )
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.padding(horizontal = ScreenMargin),
+                ) {
+                    Text(
+                        text = stringResource(R.string.sessions_empty),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                    )
+                    OutlinedButton(
+                        onClick = { onEdit(null) },
+                        modifier = Modifier.fillMaxWidth().testTag(SessionsTags.NEW_FIRST),
+                    ) {
+                        Icon(
+                            PassoIcons.Plus,
+                            contentDescription = null,
+                            modifier = Modifier.size(ButtonDefaults.IconSize),
+                        )
+                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                        Text(stringResource(R.string.sessions_new))
+                    }
+                }
             }
         }
         items(state.plans, key = { "plan-${it.id}" }) { plan ->
@@ -347,16 +380,6 @@ private fun SessionsList(
                 onEdit = { onEdit(plan.id) },
                 modifier = Modifier.animateItem(placementSpec = placement),
             )
-        }
-        item(key = "new") {
-            OutlinedButton(
-                onClick = { onEdit(null) },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenMargin).testTag(SessionsTags.NEW),
-            ) {
-                Icon(PassoIcons.Plus, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                Text(stringResource(R.string.sessions_new))
-            }
         }
         item(key = "cities") { CitiesDoor(actions.openWays) }
         item(key = "footer") {
@@ -381,7 +404,10 @@ private fun SessionsList(
     }
 }
 
-/** One kept outing: what it is, what it comes to, its signals; tap to edit, Start to go. */
+/**
+ * One kept outing: what it is, what it comes to, its signals, all on the line its name starts
+ * on; a tap on the card edits it, the button at its end starts it.
+ */
 @Composable
 private fun PlanCard(
     plan: SessionPlan,
@@ -393,6 +419,8 @@ private fun PlanCard(
     modifier: Modifier = Modifier,
 ) {
     val res = LocalResources.current
+    val name = res.sessionName(plan)
+    val estimate = estimateLine(plan, state, format)
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         shape = GroupShape,
@@ -401,56 +429,49 @@ private fun PlanCard(
             .padding(horizontal = ScreenMargin)
             .testTag("${SessionsTags.PLAN}-${plan.id}"),
     ) {
-        Column(
-            modifier = Modifier.clickable(
-                onClick = onEdit,
-            ).padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .clickable(onClickLabel = stringResource(R.string.sessions_edit), onClick = onEdit)
+                .padding(start = 16.dp, top = 16.dp, end = 12.dp, bottom = 16.dp),
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                PlanMark(sessionIcon(plan.intensity, plan.goalKind))
-                Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    Text(res.sessionName(plan), style = MaterialTheme.typography.titleMedium)
-                    Text(
-                        text = res.planDescription(plan, format),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+            PlanMark(sessionIcon(plan.intensity, plan.goalKind))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(name, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = res.planDescription(plan, format).unorphaned(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                // Shown short, with the sign of an estimate; read whole by TalkBack.
+                Text(
+                    text = estimate.shown,
+                    style = MaterialTheme.typography.bodySmall.copy(fontFeatureSettings = "tnum"),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .padding(top = 6.dp)
+                        .clearAndSetSemantics { text = AnnotatedString(estimate.spoken) },
+                )
+                SignalsLine(plan, format, modifier = Modifier.padding(top = 2.dp))
+                // An interval plan shows its shape: slow and fast blocks, read before any number.
+                if (plan.goalKind == SessionGoalKind.INTERVALS) {
+                    IntervalBlocks(
+                        sets = plan.intervals,
+                        progress = 0f,
+                        color = MaterialTheme.colorScheme.primary,
+                        plan = true,
+                        modifier = Modifier.padding(top = 10.dp).clearAndSetSemantics {},
                     )
                 }
             }
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(
-                    text = estimateLine(plan, state, format),
-                    style = MaterialTheme.typography.bodySmall.copy(fontFeatureSettings = "tnum"),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(
-                    text = signalsLine(plan, format),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            // An interval plan shows its shape: slow and fast blocks, read before any number.
-            if (plan.goalKind == SessionGoalKind.INTERVALS) {
-                IntervalBlocks(
-                    sets = plan.intervals,
-                    progress = 0f,
-                    color = MaterialTheme.colorScheme.primary,
-                    plan = true,
-                    modifier = Modifier.padding(top = 2.dp).clearAndSetSemantics {},
-                )
-            }
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End), modifier = Modifier.fillMaxWidth()) {
-                TextButton(onClick = onEdit) { Text(stringResource(R.string.sessions_edit)) }
-                FilledTonalButton(
-                    onClick = onStart,
-                    enabled = canStart,
-                    modifier = Modifier.testTag("${SessionsTags.START}-${plan.id}"),
-                ) {
-                    Icon(PassoIcons.Play, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-                    Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                    Text(stringResource(R.string.sessions_start))
-                }
+            // The icon alone: with its word the button took a row of its own, or the name's room.
+            FilledTonalIconButton(
+                onClick = onStart,
+                enabled = canStart,
+                modifier = Modifier.size(START_SIZE).testTag("${SessionsTags.START}-${plan.id}"),
+            ) {
+                Icon(PassoIcons.Play, contentDescription = stringResource(R.string.sessions_start_named, name))
             }
         }
     }
@@ -458,21 +479,33 @@ private fun PlanCard(
 
 @Composable
 private fun PlanMark(icon: ImageVector) {
-    Surface(color = MaterialTheme.colorScheme.primaryContainer, shape = CircleShape, modifier = Modifier.size(40.dp)) {
+    Surface(
+        color = MaterialTheme.colorScheme.primaryContainer,
+        shape = CircleShape,
+        modifier = Modifier.size(SessionMarkSize),
+    ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.size(22.dp),
+                modifier = Modifier.size(SessionMarkIconSize),
             )
         }
     }
 }
 
-/** «About 2,000 steps · 1.40 km, estimated»; for the rest of the day, what it is right now. */
+private val START_SIZE = 48.dp
+
+/** A line of a plan's card as it is shown and as it is read aloud. */
+private class CardLine(val shown: String, val spoken: String)
+
+/**
+ * «≈ 2,000 steps · 1.40 km», read as «About 2,000 steps · 1.40 km, estimated»; for the rest of
+ * the day, what it is right now.
+ */
 @Composable
-private fun estimateLine(plan: SessionPlan, state: SessionsUiState, format: MeasureFormatter): String {
+private fun estimateLine(plan: SessionPlan, state: SessionsUiState, format: MeasureFormatter): CardLine {
     val res = LocalResources.current
     val estimate = SessionPlans.estimate(plan, state.lengths, state.restOfDaySteps)
     val distance = res.format(format.distance(estimate.distanceMeters))
@@ -483,27 +516,35 @@ private fun estimateLine(plan: SessionPlan, state: SessionsUiState, format: Meas
     )
     val minutes = res.format(format.minutes(estimate.minutes))
     // The two quantities the goal is not in.
-    return when {
-        plan.goalKind == SessionGoalKind.TIME || plan.goalKind == SessionGoalKind.INTERVALS ->
-            stringResource(R.string.sessions_estimate, steps, distance)
+    val (first, second) = when (plan.goalKind) {
+        SessionGoalKind.TIME, SessionGoalKind.INTERVALS -> steps to distance
 
-        plan.goalKind == SessionGoalKind.STEPS -> stringResource(R.string.sessions_estimate, minutes, distance)
+        SessionGoalKind.STEPS -> minutes to distance
 
-        plan.goalKind == SessionGoalKind.DISTANCE -> stringResource(R.string.sessions_estimate, steps, minutes)
+        SessionGoalKind.DISTANCE -> steps to minutes
 
-        state.restOfDaySteps < SessionConstants.MIN_REST_OF_DAY_STEPS -> stringResource(R.string.sessions_rest_met)
-
-        else -> stringResource(
-            R.string.sessions_rest_now,
-            steps,
-            distance,
-        )
+        SessionGoalKind.REST_OF_DAY -> {
+            if (state.restOfDaySteps < SessionConstants.MIN_REST_OF_DAY_STEPS) {
+                return stringResource(R.string.sessions_rest_met).let { CardLine(it, it) }
+            }
+            return CardLine(
+                shown = stringResource(R.string.sessions_rest_now_short, steps, distance),
+                spoken = stringResource(R.string.sessions_rest_now, steps, distance),
+            )
+        }
     }
+    return CardLine(
+        shown = stringResource(R.string.sessions_estimate_short, first, second),
+        spoken = stringResource(R.string.sessions_estimate, first, second),
+    )
 }
 
-/** «Signals at 25%, 50% and at the goal, with vibration and voice». */
+/**
+ * «Signals at 25%, 50% and at the goal», with how they arrive as marks before it (a vibration,
+ * a voice) and in words for TalkBack: «…, with vibration and voice».
+ */
 @Composable
-private fun signalsLine(plan: SessionPlan, format: MeasureFormatter): String {
+private fun SignalsLine(plan: SessionPlan, format: MeasureFormatter, modifier: Modifier = Modifier) {
     val shares = plan.milestones.sortedBy { it.percent }.joinToString(", ") { format.percent(it.percent / 100.0) }
     val signals = if (plan.goalKind == SessionGoalKind.INTERVALS) {
         stringResource(R.string.sessions_signals_intervals)
@@ -513,12 +554,38 @@ private fun signalsLine(plan: SessionPlan, format: MeasureFormatter): String {
         stringResource(R.string.sessions_signals, shares)
     }
     val voice = plan.voice != SessionVoice.OFF
-    return when {
+    val spoken = when {
         plan.vibrate && voice -> stringResource(R.string.sessions_signals_vibrate_voice, signals)
         plan.vibrate -> stringResource(R.string.sessions_signals_vibrate, signals)
         voice -> stringResource(R.string.sessions_signals_voice, signals)
         else -> signals
     }
+    val style = MaterialTheme.typography.bodySmall
+    // The marks grow with the text they stand before.
+    val mark = with(LocalDensity.current) { style.lineHeight.toDp() } - 2.dp
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = modifier.clearAndSetSemantics { text = AnnotatedString(spoken) },
+    ) {
+        if (plan.vibrate) SignalMark(PassoIcons.Vibrate, mark)
+        if (voice) SignalMark(PassoIcons.Voice, mark)
+        Text(
+            text = signals,
+            style = style,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = if (plan.vibrate || voice) 2.dp else 0.dp),
+        )
+    }
+}
+
+@Composable
+private fun SignalMark(icon: ImageVector, size: Dp) {
+    Icon(
+        imageVector = icon,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 1.dp).size(size),
+    )
 }
 
 /** The outing under way's item in the list: the page glides to it when an outing starts here. */
@@ -530,6 +597,7 @@ object SessionsTags {
     const val PLAN = "sessions_plan"
     const val START = "sessions_start"
     const val NEW = "sessions_new"
+    const val NEW_FIRST = "sessions_new_first"
     const val BLOCKED = "sessions_blocked"
     const val CITIES = "sessions_cities"
 }
@@ -549,7 +617,16 @@ private fun CitiesDoor(onOpen: () -> Unit) {
                 .clickable(onClick = onOpen, role = Role.Button)
                 .padding(horizontal = ScreenMargin, vertical = 14.dp),
         ) {
-            Icon(PassoIcons.Way, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            // A city's walk as its door: the first of the two the line under it names.
+            WayMapView(
+                way = remember { Ways.of(DOOR_WALK) },
+                walkedMeters = null,
+                reached = 0,
+                contentDescription = "",
+                detailed = false,
+                ratio = 1f,
+                modifier = Modifier.size(DOOR_MAP_SIZE),
+            )
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(stringResource(R.string.sessions_cities_title), style = MaterialTheme.typography.bodyLarge)
                 Text(
@@ -562,3 +639,6 @@ private fun CitiesDoor(onOpen: () -> Unit) {
         }
     }
 }
+
+private val DOOR_WALK = WayId.MILAN_DUOMO_NAVIGLI
+private val DOOR_MAP_SIZE = 56.dp

@@ -5,21 +5,27 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
@@ -31,8 +37,10 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -41,28 +49,42 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.callbackdev.passo.core.designsystem.R
+import com.callbackdev.passo.core.designsystem.format.annotated
 import com.callbackdev.passo.core.designsystem.format.clockTime
+import com.callbackdev.passo.core.designsystem.format.sessionAmount
 import com.callbackdev.passo.core.designsystem.format.sessionCadence
 import com.callbackdev.passo.core.designsystem.format.sessionEstimates
 import com.callbackdev.passo.core.designsystem.format.sessionHeadline
 import com.callbackdev.passo.core.designsystem.format.sessionName
+import com.callbackdev.passo.core.designsystem.format.sessionPaceWord
+import com.callbackdev.passo.core.designsystem.format.sessionPlaceAhead
 import com.callbackdev.passo.core.designsystem.format.sessionProgress
+import com.callbackdev.passo.core.designsystem.format.sessionStanding
 import com.callbackdev.passo.core.designsystem.format.sessionSteps
 import com.callbackdev.passo.core.designsystem.format.sessionZone
+import com.callbackdev.passo.core.designsystem.format.unbrokenText
+import com.callbackdev.passo.core.designsystem.format.unitOf
+import com.callbackdev.passo.core.designsystem.format.walkNextIn
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.designsystem.theme.reducedMotion
+import com.callbackdev.passo.core.designsystem.ways.placeNameRes
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.sessions.IntervalSchedule
 import com.callbackdev.passo.core.domain.sessions.cadence
 import com.callbackdev.passo.core.domain.sessions.cadenceFloor
 import com.callbackdev.passo.core.domain.sessions.fraction
+import com.callbackdev.passo.core.domain.sessions.goal
 import com.callbackdev.passo.core.domain.sessions.intervalAt
 import com.callbackdev.passo.core.domain.sessions.progress
 import com.callbackdev.passo.core.domain.ways.WalkPlaces
@@ -88,11 +110,12 @@ class SessionCardActions(
 
 /**
  * An outing on Today (PLANNING.md §11 Phase 10): under way, paused, or just over. In order:
- * what it is, one sentence, the shape of it (a bar with the reader's milestones marked), then the
- * numbers each with what they mean, then the buttons.
+ * what it is and how it stands, one sentence as its headline, the shape of it (a bar with the
+ * reader's milestones marked, how far it is and where it ends at its two ends), then the numbers
+ * each over what it is, then the buttons.
  *
- * - Under way: the pace now against the outing's own, the steps, the estimates; Pause and Stop.
- * - Paused: the same numbers standing still; Resume and Stop.
+ * - Under way: the pace now against the outing's own, the steps, the estimates; Stop and Pause.
+ * - Paused: the numbers standing still; Stop and Resume.
  * - Over: when it was and for how long, what it came to, the time at its pace; Close, and "Keep
  *   going" for a while after a goal ([canKeepGoing]), "Resume" after an end by a long stillness.
  *
@@ -131,15 +154,20 @@ fun SessionCard(
     }
     val sentence = res.sessionHeadline(session, format, now)
     val interval = session.intervalAt(now)
-    val stateLabel = when (session.state) {
+    val state = when (session.state) {
         SessionState.ACTIVE -> stringResource(R.string.session_card_under_way)
         SessionState.PAUSED -> stringResource(R.string.session_card_paused)
         SessionState.FINISHED -> finishedWhen(session)
     }
+    // A slow interval has no pace to keep: its cadence is said in words.
+    val pace = if (interval?.fast == false) SessionIntensity.FREE else session.intensity
+    // Under way, how the pace stands is said beside the state, in a word: the number is below.
+    val paceWord = if (session.state == SessionState.ACTIVE) res.sessionPaceWord(cadence, pace) else null
+    val stateLabel = paceWord?.let { stringResource(R.string.session_card_state_pace, state, it) } ?: state
     // An outing that starts or pauses is said once by TalkBack, wherever its card appears: a pane
     // title is announced when it comes and when it changes. Not a finished one, which would be
-    // said again each time Today opens.
-    val pane = if (finished) null else stringResource(R.string.session_card_pane, name, stateLabel)
+    // said again each time Today opens; and not the pace's word, which changes as it is walked.
+    val pane = if (finished) null else stringResource(R.string.session_card_pane, name, state)
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         shape = GroupShape,
@@ -148,15 +176,17 @@ fun SessionCard(
             .then(if (pane != null) Modifier.semantics { paneTitle = pane } else Modifier)
             .testTag(SessionCardTags.CARD),
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Surface(color = container, shape = CircleShape, modifier = Modifier.size(36.dp)) {
+                // The same mark, at the same size, as an outing's card on the Outings page: the
+                // names under one another start on one line.
+                Surface(color = container, shape = CircleShape, modifier = Modifier.size(SessionMarkSize)) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             imageVector = sessionIcon(session.intensity, session.goalKind),
                             contentDescription = null,
                             tint = mark,
-                            modifier = Modifier.size(20.dp),
+                            modifier = Modifier.size(SessionMarkIconSize),
                         )
                     }
                 }
@@ -174,64 +204,210 @@ fun SessionCard(
                         color = accent,
                     )
                 }
+            }
+            // The sentence is the card's headline: on a city walk, the place walked towards, with
+            // how far it is under it.
+            val ahead = sessionPlaceAhead(session, now)
+            if (ahead != null) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                    modifier = Modifier.testTag(SessionCardTags.SENTENCE).semantics(mergeDescendants = true) { },
+                ) {
+                    PlaceText(
+                        stringResource(placeNameRes(ahead.stop.key)),
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                    Text(
+                        res.walkNextIn(ahead, format),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            } else {
                 Text(
-                    text = res.sessionProgress(session, format),
-                    style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum"),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    sentence,
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.testTag(SessionCardTags.SENTENCE),
                 )
             }
-            Text(
-                sentence,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.testTag(SessionCardTags.SENTENCE),
-            )
+            val progressText = res.sessionProgress(session, format)
             val described = Modifier.clearAndSetSemantics {
-                contentDescription = res.getString(
-                    R.string.session_card_progress_description,
-                    res.sessionProgress(session, format),
-                    sentence,
-                )
+                contentDescription = res.getString(R.string.session_card_progress_description, progressText, sentence)
                 progressBarRangeInfo = ProgressBarRangeInfo(session.progress().toFloat().coerceIn(0f, 1f), 0f..1f)
             }
             val walk = session.walk?.let(Ways::of)
             val along = WalkPlaces.along(session)
-            if (walk != null && along != null && showMap) {
-                WayMapView(
-                    way = walk,
-                    walkedMeters = along,
-                    reached = walk.stops.count { it.distanceMeters <= along },
-                    contentDescription = "",
-                    detailed = false,
-                    // Wider than the walk's own frame: a card on Today, not a page.
-                    ratio = CARD_MAP_RATIO,
-                    modifier = Modifier.fillMaxWidth().testTag(SessionCardTags.MAP).then(described),
-                )
-            } else if (session.intervals != null) {
-                IntervalTrack(session = session, color = accent, nowMillis = now, modifier = described)
-            } else {
-                SessionTrack(session = session, color = accent, modifier = described)
-            }
-            val lines = buildList {
-                if (session.state == SessionState.ACTIVE) {
-                    // A slow interval has no pace to keep: its cadence is said in words.
-                    val pace = if (interval?.fast == false) SessionIntensity.FREE else session.intensity
-                    add(
-                        listOf(
-                            res.sessionCadence(cadence, pace, format),
-                            res.sessionSteps(session, format),
-                        ).joinToString(" · "),
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                if (walk != null && along != null && showMap) {
+                    WayMapView(
+                        way = walk,
+                        walkedMeters = along,
+                        reached = walk.stops.count { it.distanceMeters <= along },
+                        contentDescription = "",
+                        detailed = false,
+                        // Wider than the walk's own frame: a card on Today, not a page.
+                        ratio = CARD_MAP_RATIO,
+                        modifier = Modifier.fillMaxWidth().testTag(SessionCardTags.MAP).then(described),
                     )
+                } else if (session.intervals != null) {
+                    IntervalTrack(session = session, color = accent, nowMillis = now, modifier = described)
                 } else {
-                    add(
-                        listOfNotNull(
-                            res.sessionSteps(session, format),
-                            res.sessionZone(session, format),
-                        ).joinToString(" · "),
+                    SessionTrack(session = session, color = accent, modifier = described)
+                }
+                // Where it stands and where it ends, at the two ends of its bar: said by the bar
+                // itself to TalkBack, so here they are for the eye only.
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxWidth().clearAndSetSemantics { },
+                ) {
+                    val ends = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum")
+                    Text(
+                        text = res.sessionStanding(session, format),
+                        style = ends,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Text(
+                        text = res.sessionAmount(session.goal(), format),
+                        style = ends,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.End,
                     )
                 }
-                add(res.sessionEstimates(session, format))
             }
             if (finished && session.intervals != null) IntervalBars(session, accent)
+            SessionStats(session, cadence, pace, format)
+            if (session.state != SessionState.ACTIVE) {
+                res.sessionZone(session, format)?.let {
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+            when {
+                finished -> Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    TextButton(onClick = actions.onClose, modifier = Modifier.testTag(SessionCardTags.CLOSE)) {
+                        Text(stringResource(R.string.session_card_close))
+                    }
+                    if (canKeepGoing) {
+                        FilledTonalButton(
+                            onClick = actions.onKeepGoing,
+                            modifier = Modifier.testTag(SessionCardTags.KEEP_GOING),
+                        ) {
+                            ButtonIcon(PassoIcons.Play)
+                            Text(
+                                stringResource(
+                                    if (session.end == SessionEnd.IDLE) {
+                                        R.string.session_card_resume
+                                    } else {
+                                        R.string.session_card_keep_going
+                                    },
+                                ),
+                            )
+                        }
+                    }
+                }
+
+                // Under way, the two buttons share the card's width and stand a little taller:
+                // they are touched while walking.
+                else -> Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                    val live = Modifier.weight(1f).heightIn(min = LIVE_BUTTON_HEIGHT)
+                    OutlinedButton(
+                        onClick = actions.onStop,
+                        contentPadding = LIVE_BUTTON_PADDING,
+                        modifier = live.testTag(SessionCardTags.STOP),
+                    ) {
+                        ButtonIcon(PassoIcons.Stop)
+                        SegmentLabel(stringResource(R.string.session_card_stop))
+                    }
+                    if (session.state == SessionState.PAUSED) {
+                        FilledTonalButton(
+                            onClick = actions.onResume,
+                            contentPadding = LIVE_BUTTON_PADDING,
+                            modifier = live.testTag(SessionCardTags.RESUME),
+                        ) {
+                            ButtonIcon(PassoIcons.Play)
+                            SegmentLabel(stringResource(R.string.session_card_resume))
+                        }
+                    } else {
+                        FilledTonalButton(
+                            onClick = actions.onPause,
+                            contentPadding = LIVE_BUTTON_PADDING,
+                            modifier = live.testTag(SessionCardTags.PAUSE),
+                        ) {
+                            ButtonIcon(PassoIcons.Pause)
+                            SegmentLabel(stringResource(R.string.session_card_pause))
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** The mark of an outing's card, here and on the Outings page: one size, so their names line up. */
+val SessionMarkSize = 40.dp
+val SessionMarkIconSize = 22.dp
+
+private val LIVE_BUTTON_HEIGHT = 48.dp
+private val LIVE_BUTTON_PADDING = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+
+/** A third of the card narrower than this, at the reader's text size, and the numbers go back to lines. */
+private val STAT_MIN_WIDTH = 80.dp
+
+/**
+ * An outing's numbers, each over what it is: under way the pace now, the steps and the distance
+ * (with the calories beside the word that says both are estimates); paused or over, the steps
+ * and the two estimates. Three columns between two hairlines, the figures tabular, so a number
+ * that changes does not move its neighbours.
+ *
+ * One node for TalkBack, read as the two sentences the card always said. Where a third of the
+ * card is too narrow for a number at the reader's text size, those sentences are what is shown.
+ */
+@Composable
+private fun SessionStats(session: Session, cadence: Int?, pace: SessionIntensity, format: MeasureFormatter) {
+    val res = LocalResources.current
+    val active = session.state == SessionState.ACTIVE
+    val lines = listOf(
+        if (active) {
+            listOf(res.sessionCadence(cadence, pace, format), res.sessionSteps(session, format)).joinToString(" · ")
+        } else {
+            res.sessionSteps(session, format)
+        },
+        res.sessionEstimates(session, format),
+    )
+    val spoken = lines.joinToString(". ")
+    val unit = SpanStyle(fontSize = MaterialTheme.typography.bodyMedium.fontSize)
+    val steps = Stat(
+        AnnotatedString(format.steps(session.totals.steps)),
+        pluralStringResource(R.plurals.session_stat_steps, session.totals.steps),
+    )
+    val distance = format.distance(session.totals.distanceMeters).annotated(unit)
+    val energy = format.energy(session.totals.activeKcal)
+    val estimate = stringResource(R.string.session_stat_estimate)
+    val stats = if (active) {
+        val now = format.cadence(cadence ?: 0)
+        listOf(
+            Stat(AnnotatedString(if (cadence == null) NO_VALUE else now.number), res.unitOf(now)),
+            steps,
+            Stat(distance, stringResource(R.string.session_stat_estimate_with, energy.unbrokenText())),
+        )
+    } else {
+        listOf(steps, Stat(distance, estimate), Stat(energy.annotated(unit), estimate))
+    }
+    val fontScale = LocalDensity.current.fontScale
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag(SessionCardTags.STATS)
+            .clearAndSetSemantics { contentDescription = spoken },
+    ) {
+        if (maxWidth / stats.size / fontScale < STAT_MIN_WIDTH) {
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 lines.forEach {
                     Text(
@@ -241,62 +417,51 @@ fun SessionCard(
                     )
                 }
             }
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                when {
-                    finished -> {
-                        TextButton(onClick = actions.onClose, modifier = Modifier.testTag(SessionCardTags.CLOSE)) {
-                            Text(stringResource(R.string.session_card_close))
-                        }
-                        if (canKeepGoing) {
-                            FilledTonalButton(
-                                onClick = actions.onKeepGoing,
-                                modifier = Modifier.testTag(SessionCardTags.KEEP_GOING),
-                            ) {
-                                ButtonIcon(PassoIcons.Play)
-                                Text(
-                                    stringResource(
-                                        if (session.end == SessionEnd.IDLE) {
-                                            R.string.session_card_resume
-                                        } else {
-                                            R.string.session_card_keep_going
-                                        },
-                                    ),
-                                )
-                            }
-                        }
-                    }
-
-                    else -> {
-                        OutlinedButton(onClick = actions.onStop, modifier = Modifier.testTag(SessionCardTags.STOP)) {
-                            ButtonIcon(PassoIcons.Stop)
-                            Text(stringResource(R.string.session_card_stop))
-                        }
-                        if (session.state == SessionState.PAUSED) {
-                            FilledTonalButton(
-                                onClick = actions.onResume,
-                                modifier = Modifier.testTag(SessionCardTags.RESUME),
-                            ) {
-                                ButtonIcon(PassoIcons.Play)
-                                Text(stringResource(R.string.session_card_resume))
-                            }
-                        } else {
-                            FilledTonalButton(
-                                onClick = actions.onPause,
-                                modifier = Modifier.testTag(SessionCardTags.PAUSE),
-                            ) {
-                                ButtonIcon(PassoIcons.Pause)
-                                Text(stringResource(R.string.session_card_pause))
-                            }
+        } else {
+            val hairline = MaterialTheme.colorScheme.outlineVariant.copy(alpha = HAIRLINE_ALPHA)
+            Column {
+                HorizontalDivider(color = hairline)
+                Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+                    stats.forEachIndexed { index, stat ->
+                        if (index > 0) VerticalDivider(color = hairline)
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(
+                                    start = if (index > 0) 12.dp else 0.dp,
+                                    end = if (index < stats.lastIndex) 8.dp else 0.dp,
+                                    top = 8.dp,
+                                    bottom = 8.dp,
+                                ),
+                        ) {
+                            Text(
+                                stat.value,
+                                style = PassoTheme.type.readingValue.copy(
+                                    fontSize = 20.sp,
+                                    lineHeight = 28.sp,
+                                    fontWeight = FontWeight.Normal,
+                                ),
+                            )
+                            Text(
+                                stat.label,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                         }
                     }
                 }
+                HorizontalDivider(color = hairline)
             }
         }
     }
 }
+
+/** A number of an outing and the word under it. */
+private class Stat(val value: AnnotatedString, val label: String)
+
+/** A pace not measured yet: the first seconds of an outing. */
+private const val NO_VALUE = "–"
+private const val HAIRLINE_ALPHA = 0.6f
 
 @Composable
 private fun ButtonIcon(icon: ImageVector) {
@@ -507,4 +672,5 @@ object SessionCardTags {
     const val MAP = "session_card_map"
     const val INTERVALS = "session_card_intervals"
     const val INTERVAL_BARS = "session_card_interval_bars"
+    const val STATS = "session_card_stats"
 }

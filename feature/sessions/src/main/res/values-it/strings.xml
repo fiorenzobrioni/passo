@@ -3,16 +3,18 @@
 <resources>
     <string name="sessions_title">Uscite</string>
     <string name="sessions_back">Indietro</string>
-    <string name="sessions_intro">Un’uscita è una camminata con un obiettivo. Avviala e tieni il telefono in tasca: Passo ti avvisa lungo la strada, con una vibrazione che si capisce senza guardare.</string>
+    <string name="sessions_intro">Una camminata con un obiettivo: avviala e tieni il telefono in tasca.</string>
     <string name="sessions_yours">Le tue uscite</string>
-    <string name="sessions_start">Inizia</string>
+    <string name="sessions_start_named">Inizia %1$s</string>
     <string name="sessions_edit">Modifica</string>
     <string name="sessions_new">Nuova uscita</string>
     <string name="sessions_empty">Nessuna uscita salvata. Creane una: un obiettivo, un ritmo e i segnali che vuoi lungo la strada.</string>
+    <string name="sessions_estimate_short">≈ %1$s · %2$s</string>
     <string name="sessions_estimate">Circa %1$s · %2$s, stima</string>
+    <string name="sessions_rest_now_short">Mancano %1$s · ≈ %2$s</string>
     <string name="sessions_rest_now">Oggi ne mancano %1$s · %2$s, stima</string>
     <string name="sessions_rest_met">L’obiettivo di oggi è raggiunto: non manca niente</string>
-    <string name="sessions_signals">Segnali a %1$s e all’obiettivo</string>
+    <string name="sessions_signals">Segnali al %1$s e all’obiettivo</string>
     <string name="sessions_signals_goal_only">Un segnale all’obiettivo</string>
     <string name="sessions_signals_vibrate">%1$s, con vibrazione</string>
     <string name="sessions_live_busy">C’è un’uscita in corso: terminala per iniziarne un’altra.</string>

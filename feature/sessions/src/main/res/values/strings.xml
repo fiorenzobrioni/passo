@@ -3,14 +3,18 @@
 <resources>
     <string name="sessions_title">Outings</string>
     <string name="sessions_back">Back</string>
-    <string name="sessions_intro">An outing is a walk with a goal. Start one and keep the phone in your pocket: Passo tells you on the way, with a vibration you can read without looking.</string>
+    <string name="sessions_intro">A walk with a goal: start one and keep the phone in your pocket.</string>
     <string name="sessions_yours">Your outings</string>
-    <string name="sessions_start">Start</string>
+    <!-- The start button is its icon alone: what TalkBack says for it, «Start Brisk walk». -->
+    <string name="sessions_start_named">Start %1$s</string>
+    <!-- What a tap on an outing's card does, for TalkBack. -->
     <string name="sessions_edit">Edit</string>
     <string name="sessions_new">New outing</string>
     <string name="sessions_empty">No outings kept. Make one: a goal, a pace, and the signals you want on the way.</string>
-    <!-- «About 2,000 steps · 1.40 km, estimated». -->
+    <!-- «≈ 2,000 steps · 1.40 km» on the card, read aloud as «About 2,000 steps · 1.40 km, estimated». -->
+    <string name="sessions_estimate_short">≈ %1$s · %2$s</string>
     <string name="sessions_estimate">About %1$s · %2$s, estimated</string>
+    <string name="sessions_rest_now_short">%1$s left · ≈ %2$s</string>
     <string name="sessions_rest_now">%1$s left today · %2$s, estimated</string>
     <string name="sessions_rest_met">Today’s goal is met: nothing left to walk</string>
     <!-- «Signals at 25%, 50% and at the goal, with vibration». -->

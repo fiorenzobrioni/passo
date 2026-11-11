@@ -60,6 +60,18 @@
     <string name="session_cadence_vigorous">vigorous</string>
     <string name="session_cadence_running">running</string>
     <string name="session_cadence_waiting">Cadence in a few seconds</string>
+    <!-- The same verdict in a word or two, beside the card's state: «Under way · on pace». -->
+    <string name="session_pace_on">on pace</string>
+    <string name="session_pace_below">below your pace</string>
+    <string name="session_card_state_pace">%1$s · %2$s</string>
+    <!-- The words under the card's three numbers: «steps» under their count, «estimate» under
+         the distance (with the calories beside it while the outing goes) and under the calories. -->
+    <plurals name="session_stat_steps">
+        <item quantity="one">step</item>
+        <item quantity="other">steps</item>
+    </plurals>
+    <string name="session_stat_estimate">estimate</string>
+    <string name="session_stat_estimate_with">estimate · %1$s</string>
 
     <!-- «17 of 20 min at the pace you set». -->
     <string name="session_zone">%1$s of %2$s at the pace you set</string>
@@ -88,6 +100,8 @@
     <string name="session_brief_short_paused">Outing paused</string>
     <!-- A city walk under way (Phase 11): «Next: the Duomo, 600 m». -->
     <string name="walk_next">Next: %1$s, %2$s</string>
+    <!-- On the outing's card the place is the headline, and this the line under it. -->
+    <string name="walk_next_in">The next place, %1$s ahead</string>
     <!-- A city walk walked to its last place: «The walk is done: Tower Bridge.» -->
     <string name="walk_done">The walk is done: %1$s.</string>
 
@@ -125,5 +139,5 @@
     <!-- The chart of the fast intervals, for a screen reader: «Fast intervals, steps a minute: 112, 108, 92. Pace from 100.» -->
     <string name="session_intervals_chart_description">Fast intervals, steps a minute: %1$s. Pace from %2$d.</string>
     <!-- Under the chart: the line is the pace. -->
-    <string name="session_intervals_chart_legend">Each fast interval’s cadence; the line is the pace from %1$d.</string>
+    <string name="session_intervals_chart_legend">Each fast interval’s cadence; the line is the pace from\u00A0%1$d.</string>
 </resources>

@@ -983,11 +983,13 @@ class WaysScreenTest {
     fun `a walk under way shows its outing, with the place ahead`() {
         showWay(WayId.LONDON_PALACE_TOWER)
         compose.onNodeWithTag(SessionCardTags.CARD).assertExists()
-        compose.onNodeWithText("Next: Royal Festival Hall, 230 m").assertExists()
+        // The place ahead is the card's headline, with how far it is under it.
+        compose.onNode(hasTestTag(SessionCardTags.SENTENCE) and hasText("Royal Festival Hall")).assertExists()
+        compose.onNodeWithText("The next place, 230\u00A0m ahead", substring = true).assertExists()
         // The page has the walk's map: the card does not draw its own.
         compose.onNodeWithTag(SessionCardTags.MAP).assertDoesNotExist()
         snapshot("walk_live")
-        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Royal Festival Hall"))
+        compose.onNodeWithTag(WaysTags.PAGE).performScrollToNode(hasText("Tate Modern"))
         snapshot("walk_places")
     }
 

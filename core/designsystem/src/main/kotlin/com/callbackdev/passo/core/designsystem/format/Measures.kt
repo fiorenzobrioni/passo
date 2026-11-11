@@ -71,6 +71,9 @@ fun Measure.annotated(unitStyle: SpanStyle): AnnotatedString {
 
 fun Resources.format(measure: Measure): String = getString(measure.unit.formatRes, measure.number)
 
+/** A measure's unit alone («steps/min»), for a label under its number. */
+fun Resources.unitOf(measure: Measure): String = format(measure).replace(measure.number, "").trim()
+
 fun Resources.format(measures: List<Measure>): String = measures.joinToString(" ") { format(it) }
 
 private fun systemRegion(): String? = Resources.getSystem().configuration.locales[0]?.country
