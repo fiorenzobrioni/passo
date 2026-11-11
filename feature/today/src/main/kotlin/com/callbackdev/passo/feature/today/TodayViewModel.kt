@@ -13,6 +13,7 @@ import com.callbackdev.passo.core.data.tracking.LiveToday
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.data.tracking.withPending
 import com.callbackdev.passo.core.data.ways.WayRepository
+import com.callbackdev.passo.core.domain.insights.StreakSoFar
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.sessions.DayOutings
 import com.callbackdev.passo.core.domain.sessions.Outing
@@ -101,13 +102,24 @@ constructor(
             Inputs(moment, stored, live, usual)
         }
 
+    /**
+     * The streak up to yesterday, on its own: the past days are frozen, so it changes at midnight,
+     * and today's half of it is added in [build] from the live count. Distinct, so the writes to
+     * today's row that re-run the query do not rebuild the page.
+     */
+    private val streakToYesterday: Flow<Int> = day.flatMapLatest { date ->
+        tracking.observeSummaries(0, date.toEpochDay() - 1).map { StreakSoFar.endingYesterday(it, date) }
+    }.distinctUntilChanged()
+
     private val preferences: Flow<Preferences> = combine(
         settingsRepository.settings,
         settingsRepository.profile,
         readiness,
         tracking.observeFirstRecordedDay(),
-        celebratedOn,
-    ) { settings, profile, ready, firstDay, celebrated -> Preferences(settings, profile, ready, firstDay, celebrated) }
+        combine(celebratedOn, streakToYesterday, ::Pair),
+    ) { settings, profile, ready, firstDay, (celebrated, streak) ->
+        Preferences(settings, profile, ready, firstDay, celebrated, streak)
+    }
 
     /**
      * Today's outings, and the one the card shows: the service's while it runs (ahead of what it
@@ -259,6 +271,7 @@ constructor(
             firstDay = (prefs.firstRecordedDay == null || prefs.firstRecordedDay >= epochDay) &&
                 !prefs.settings.firstDayNoteRead,
             celebrate = overview.goalReachedAt != null && prefs.celebratedOn != date,
+            streakDays = StreakSoFar.withToday(prefs.streakToYesterday, overview.goalReachedAt != null),
             walks = walks,
             session = outings.card,
             // The outing under way is the card's; the list holds the ones that are over.
@@ -306,6 +319,7 @@ constructor(
         val readiness: TrackingReadiness,
         val firstRecordedDay: Long?,
         val celebratedOn: LocalDate?,
+        val streakToYesterday: Int,
     )
 
     private companion object {

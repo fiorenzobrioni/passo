@@ -34,7 +34,7 @@ calories are estimates, and Passo says so.
 
 <table>
   <tr>
-    <td align="center" width="33%"><img src="docs/screenshots/today.png" width="250" alt="Today: 7,855 of 10,000 steps, 1,484 ahead of the usual pace, with the day's chart"><br><sub><b>Today</b>: the ring and one sentence on the day</sub></td>
+    <td align="center" width="33%"><img src="docs/screenshots/today.png" width="250" alt="Today: 7,855 of 10,000 steps, 1,484 ahead of the usual pace, 12 days in a row at the goal, the distance, calories and active minutes in a row, and the day's chart"><br><sub><b>Today</b>: the ring and one sentence on the day</sub></td>
     <td align="center" width="33%"><img src="docs/screenshots/today-chart.png" width="250" alt="The day's chart read with a finger at 12:55 PM"><br><sub><b>Your day</b>: read the chart at any minute</sub></td>
     <td align="center" width="33%"><img src="docs/screenshots/today-goal-dark.png" width="250" alt="Today in the dark theme: 10,772 steps, goal reached at 5:51 PM"><br><sub><b>Goal reached</b>, in the dark theme</sub></td>
   </tr>
@@ -80,7 +80,7 @@ calories are estimates, and Passo says so.
   </tr>
   <tr>
     <td align="center"><img src="docs/screenshots/year.png" width="250" alt="Your year on foot, the goal's page: at the goal on 182 of 365 days, the longest streak, and the year as twelve small months coloured by how close each day came"><br><sub><b>Your year on foot</b>: a year told in pages</sub></td>
-    <td align="center" colspan="2"><img src="docs/screenshots/today-foldable.png" width="510" alt="Today on the inner screen of an open foldable: the date, the ring, the sentence and the day's chart in a column in the middle, the glow behind them across the whole screen"><br><sub><b>On an open foldable</b>: a centred column</sub></td>
+    <td align="center" colspan="2"><img src="docs/screenshots/today-foldable.png" width="510" alt="Today on the inner screen of an open foldable: the date, the ring, the sentence, the day's three amounts and its chart in a column in the middle"><br><sub><b>On an open foldable</b>: a centred column</sub></td>
   </tr>
 </table>
 
@@ -90,7 +90,7 @@ Italian). The phone's status bar is not in the pictures. The command that redraw
 
 ## Features
 
-- 👟 **Today**: the steps against your goal, where a usual day stands by now, and one sentence on how the day is going.
+- 👟 **Today**: the steps against your goal, where a usual day stands by now, one sentence on how the day is going, and your streak of days at the goal.
 - 📈 **Your day**: a chart you read with a finger, plus distance, calories, active and brisk minutes, cadence.
 - 📅 **History**: a day, week, month or year at a time, and a calendar of how close each day came.
 - 🚶 **Walks, found for you**: stretches of walking recognised in the steps already counted.

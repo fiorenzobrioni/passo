@@ -27,6 +27,8 @@ enum class TrackingStatus {
  *   the distance so the estimate states what it rests on.
  * @property firstDay today is the first day counted: steps from before the install are not in it.
  * @property celebrate the goal is met and the ring has not bloomed for it yet today.
+ * @property streakDays the days in a row at the goal, today in it once met (Insights' streak); the
+ *   header shows it from [com.callbackdev.passo.core.domain.insights.StreakSoFar.SHOWN_FROM_DAYS].
  * @property walks today's walks so far (PLANNING.md §6.1); null when walk detection is off, and
  *   then no walk appears on the screen.
  * @property session the outing under way, paused, or just over and not yet put away: the card
@@ -45,6 +47,7 @@ data class TodayUiState(
     val walkingStepLength: Double,
     val firstDay: Boolean,
     val celebrate: Boolean,
+    val streakDays: Int = 0,
     val walks: List<Walk>? = null,
     val session: LiveSessionState? = null,
     val outings: List<Outing> = emptyList(),

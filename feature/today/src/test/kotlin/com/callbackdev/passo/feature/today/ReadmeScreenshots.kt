@@ -16,6 +16,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.data.sessions.LiveSessionState
 import com.callbackdev.passo.core.designsystem.components.SessionCardTags
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
+import com.callbackdev.passo.core.domain.insights.StreakSoFar
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.today.TypicalDayCalculator
@@ -53,22 +54,27 @@ class ReadmeScreenshots {
     @Before
     fun onlyOnRequest() = assumeTrue("Run with -PupdateScreenshots", output != null)
 
-    private fun state(nowMinute: Int) = TodayUiState(
-        date = LocalDate.of(2026, 9, 24),
-        nowMinute = nowMinute.toDouble(),
-        overview = TodayOverview.of(
+    /** Twelve days in a row at the goal up to yesterday: today joins the streak once it is met. */
+    private fun state(nowMinute: Int): TodayUiState {
+        val overview = TodayOverview.of(
             minutes = SampleDays.workday(seed = 5, lunchWalkMinutes = 36, until = nowMinute),
             profile = profile,
             goalSteps = 10_000,
             nowMinute = nowMinute.toDouble(),
             typical = usual,
-        ),
-        status = TrackingStatus.COUNTING,
-        units = UnitPreference.METRIC,
-        walkingStepLength = StepLengths.of(profile).walkingMeters,
-        firstDay = false,
-        celebrate = false,
-    )
+        )
+        return TodayUiState(
+            date = LocalDate.of(2026, 9, 24),
+            nowMinute = nowMinute.toDouble(),
+            overview = overview,
+            status = TrackingStatus.COUNTING,
+            units = UnitPreference.METRIC,
+            walkingStepLength = StepLengths.of(profile).walkingMeters,
+            firstDay = false,
+            celebrate = false,
+            streakDays = StreakSoFar.withToday(12, overview.goalReachedAt != null),
+        )
+    }
 
     private fun show(state: TodayUiState, dark: Boolean = false) {
         compose.setContent {

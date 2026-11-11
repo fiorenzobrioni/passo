@@ -54,3 +54,16 @@ default typeface. Phase 3 is the first real screen, so this is where the visual 
 - Two fonts travel in the APK (about 1.2 MB), whatever the setting says; both are credited.
 - The home-screen widget (Phase 4) is drawn by the launcher in the system face whatever the
   setting says, as Chiaro's are.
+
+## Amendment, 10 Nov 2026: Today without the glow
+
+The owner's review of Today's first screen ("no noise, only added value"; PLANNING.md §15, «Today
+reviewed for a premium first screen») changes two things recorded here:
+
+- **The glow is gone.** Today's top no longer stands on a gradient of the day's colour: it tinted
+  the whole top and lowered the contrast of the text on it. The ring alone carries the day's
+  colour, primary while the goal is ahead, the goal's green once met; the rule that colour is
+  never the only sign of a met goal stands (the check, the sentence).
+- **Decision 7, the ring**: the notch, the second lap and the bloom stay; the ring is finer (12dp)
+  and its arc ends in a plain round cap, without the dot of the ground at its head. The day's
+  distance and calories leave the ring for a row of three under the sentence.

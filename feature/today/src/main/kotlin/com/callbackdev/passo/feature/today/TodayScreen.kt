@@ -8,17 +8,16 @@ import android.provider.Settings
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +26,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -34,15 +34,16 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,12 +54,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -66,12 +67,12 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
@@ -84,7 +85,6 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.callbackdev.passo.core.designsystem.components.DayTrend
 import com.callbackdev.passo.core.designsystem.components.DayTrendChart
-import com.callbackdev.passo.core.designsystem.components.MetricTile
 import com.callbackdev.passo.core.designsystem.components.MetricTrack
 import com.callbackdev.passo.core.designsystem.components.OutingList
 import com.callbackdev.passo.core.designsystem.components.ProgressRing
@@ -92,7 +92,6 @@ import com.callbackdev.passo.core.designsystem.components.SessionCard
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
 import com.callbackdev.passo.core.designsystem.components.StatusCard
 import com.callbackdev.passo.core.designsystem.components.StatusTone
-import com.callbackdev.passo.core.designsystem.components.TilePair
 import com.callbackdev.passo.core.designsystem.components.TrendPoint
 import com.callbackdev.passo.core.designsystem.components.reveal
 import com.callbackdev.passo.core.designsystem.format.annotated
@@ -110,6 +109,7 @@ import com.callbackdev.passo.core.designsystem.theme.padding
 import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.designsystem.theme.reducedMotion
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
+import com.callbackdev.passo.core.domain.insights.StreakSoFar
 import com.callbackdev.passo.core.domain.metrics.MetricsConstants
 import com.callbackdev.passo.core.domain.sessions.Outing
 import com.callbackdev.passo.core.domain.today.CadenceBand
@@ -215,8 +215,8 @@ fun TodayScreen(
 ) {
     val format = rememberMeasureFormatter(state.units)
     val bottom = bottomPadding
-    // Each item takes the gutter itself rather than the list, so the hero's glow still
-    // reaches both edges of an open foldable.
+    // Each item takes the gutter itself rather than the list, so the list scrolls from either
+    // edge of an open foldable.
     val gutter = pageGutter()
     val inColumn = Modifier.padding(gutter)
     val list = rememberLazyListState()
@@ -289,10 +289,10 @@ fun TodayScreen(
             // Under the day rather than above it: the sentence's evidence comes first, so the
             // chart is whole on the first screen of a tall phone, and the way out after it.
             if (session == null && state.status == TrackingStatus.COUNTING && state.startOutingButton) {
-                item(key = "start-outing") { StartOuting(onOpenSessions) }
+                item(key = "start-outing") { StartOuting(onOpenSessions, inColumn) }
             }
             if (state.outings.isNotEmpty()) item(key = "walks") { Box(inColumn) { WalksCard(state.outings, format) } }
-            item(key = "metrics") { Box(inColumn) { Metrics(state, format) } }
+            item(key = "metrics") { Box(inColumn) { Intensity(state, format) } }
             // Last: a way lasts weeks, and today's share of it is news only after the day's own.
             state.way?.let { way -> item(key = "way") { Box(inColumn) { WayCard(way, format, onOpenWay) } } }
         }
@@ -300,10 +300,10 @@ fun TodayScreen(
 }
 
 /**
- * The top of the page: the date and the gear, the state of counting when it needs the reader,
- * the ring and the sentence. It stands on a glow of the day's color, primary while the goal is
- * ahead and the goal's green once it is met, fading into the page: the color of the screen is
- * the first thing it says.
+ * The top of the page: the date, the streak and the gear, the state of counting when it needs the
+ * reader, the ring, the sentence and the day's three amounts. On the page's own ground: the ring is
+ * the one thing in the day's color, primary while the goal is ahead and the goal's green once it
+ * is met (the Today review of 10 Nov 2026, which took away the glow that tinted the whole top).
  */
 @Composable
 private fun Hero(
@@ -316,25 +316,10 @@ private fun Hero(
     onResume: () -> Unit,
     onCelebrated: (LocalDate) -> Unit,
 ) {
-    val overview = state.overview
-    val reached = overview.goalReachedAt != null
-    val glow by animateColorAsState(
-        targetValue = if (reached) PassoTheme.colors.goalContainer else MaterialTheme.colorScheme.primaryContainer,
-        animationSpec = tween(600),
-        label = "glow",
-    )
-    val surface = MaterialTheme.colorScheme.surface
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                Brush.verticalGradient(
-                    0f to glow.copy(alpha = 0.75f),
-                    0.55f to glow.copy(alpha = 0.18f),
-                    1f to surface,
-                ),
-            )
             .statusBarsPadding()
             .padding(gutter),
     ) {
@@ -342,11 +327,20 @@ private fun Hero(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 4.dp),
         ) {
-            Text(
-                text = longDate(state.date),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f).semantics { heading() },
-            )
+            // The streak goes under the date when the two do not fit one line (large text).
+            FlowRow(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                itemVerticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(
+                    text = longDate(state.date),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(end = 8.dp).semantics { heading() },
+                )
+                if (state.streakDays >= StreakSoFar.SHOWN_FROM_DAYS) StreakChip(state.streakDays)
+            }
             IconButton(onClick = onOpenSettings) {
                 Icon(PassoIcons.Settings, contentDescription = stringResource(R.string.today_settings))
             }
@@ -354,6 +348,40 @@ private fun Hero(
         StatusBanner(state.status, askInSettings, onAllow, onResume)
         Ring(state, format, onCelebrated)
         Headline(state, format)
+        Spacer(Modifier.height(16.dp))
+        Stats(state, format)
+    }
+}
+
+/**
+ * The days in a row at the goal, beside the date: Insights' streak, said where it is earned. A
+ * label, not a button: the streak's own page is Insights, one tab away.
+ */
+@Composable
+private fun StreakChip(days: Int) {
+    val spoken = pluralStringResource(R.plurals.today_streak_spoken, days, days)
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = CircleShape,
+        modifier = Modifier.testTag(TodayTags.STREAK).clearAndSetSemantics { contentDescription = spoken },
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.heightIn(min = 32.dp).padding(start = 10.dp, end = 12.dp),
+        ) {
+            Icon(
+                PassoIcons.Streak,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(16.dp),
+            )
+            Text(
+                text = pluralStringResource(R.plurals.today_streak, days, days),
+                style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum"),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
     }
 }
 
@@ -406,23 +434,18 @@ private fun Ring(state: TodayUiState, format: MeasureFormatter, onCelebrated: (L
         overview.usualNow?.let {
             append(' ').append(stringResource(R.string.today_ring_description_usual, format.steps(it)))
         }
-        val metrics = overview.metrics
-        append(' ').append(
-            stringResource(
-                R.string.today_ring_description_estimates,
-                format.distance(metrics.distanceMeters).text(),
-                format.energy(metrics.activeKcal).text(),
-            ),
-        )
     }
     BoxWithConstraints(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
-        val diameter = minOf(maxWidth - 64.dp, 300.dp)
+        // A larger text size takes back the room the count and the goal need inside the ring.
+        val fontScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
+        val diameter = minOf(maxWidth - 64.dp, RING_MAX_DIAMETER * fontScale)
         ProgressRing(
             progress = overview.progress.toFloat(),
             usualProgress = overview.usualProgress?.toFloat(),
             reached = reached,
             celebrate = state.celebrate,
             onCelebrated = { onCelebrated(state.date) },
+            strokeWidth = RING_STROKE,
             modifier = Modifier
                 .size(diameter)
                 .clearAndSetSemantics { contentDescription = description }
@@ -446,46 +469,135 @@ private fun Ring(state: TodayUiState, format: MeasureFormatter, onCelebrated: (L
                     }
                     Text(
                         text = stringResource(R.string.today_of_goal, format.steps(overview.goalSteps)),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                Spacer(Modifier.height(6.dp))
-                val ink = if (reached) PassoTheme.colors.goal else MaterialTheme.colorScheme.primary
-                RingEstimates(state, format, ink)
             }
         }
     }
 }
 
 /**
- * The day's distance and active calories under the count, where a percentage only repeated what
- * the arc and the count already say: the first screen answers "how far" without a scroll. The
- * "≈" says they are estimates; the tiles below say what each rests on. The calories go when the
- * pair would not fit the ring on one line (a large text size), so the distance is never cut.
+ * The ring's size and weight: a line drawn round the count rather than a band, so the number is
+ * the heaviest thing on the screen (the Today review of 10 Nov 2026). Inside it only the count
+ * and the goal: the distance and the calories have their own row under the sentence.
+ */
+private val RING_MAX_DIAMETER = 256.dp
+private val RING_STROKE = 12.dp
+
+/**
+ * The day's three answers to "how much" (distance, active calories, active minutes), under the
+ * sentence, so the first screen answers them without a scroll; one line under the row says what
+ * the estimates rest on. Each is one node for a screen reader, read with its own meaning, so the
+ * shared line is not read again. Three across while each third holds the reader's text size,
+ * else one above the other.
  */
 @Composable
-private fun RingEstimates(state: TodayUiState, format: MeasureFormatter, color: Color) {
+private fun Stats(state: TodayUiState, format: MeasureFormatter) {
     val metrics = state.overview.metrics
-    val distance = format.distance(metrics.distanceMeters).text()
-    val both = stringResource(R.string.today_ring_estimates, distance, format.energy(metrics.activeKcal).text())
-    val style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum")
-    val measurer = rememberTextMeasurer()
-    BoxWithConstraints(contentAlignment = Alignment.Center) {
-        // The line sits below the ring's middle, where the circle is narrower than its box.
-        val room = constraints.maxWidth * RING_LINE_SHARE
-        val fits = measurer.measure(both, style, maxLines = 1).size.width <= room
+    val unit = SpanStyle(fontSize = 15.sp, fontWeight = FontWeight.Normal)
+    val distance = format.distance(metrics.distanceMeters)
+    val energy = format.energy(metrics.activeKcal)
+    val active = format.minutes(metrics.activeMinutes)
+    val stepLength = format.stepLength(state.walkingStepLength).text()
+    val stats = listOf(
+        StatItem(
+            value = distance.annotated(unit),
+            label = stringResource(R.string.today_stat_distance),
+            spoken = stringResource(
+                R.string.today_metric_spoken,
+                stringResource(R.string.today_metric_distance),
+                distance.text(),
+                stringResource(R.string.today_metric_distance_meaning, stepLength),
+            ),
+        ),
+        StatItem(
+            value = energy.annotated(unit),
+            label = stringResource(R.string.today_stat_calories),
+            spoken = stringResource(
+                R.string.today_metric_spoken,
+                stringResource(R.string.today_metric_calories),
+                energy.text(),
+                stringResource(R.string.today_metric_calories_meaning),
+            ),
+        ),
+        StatItem(
+            value = active.annotated(unit),
+            label = stringResource(R.string.today_stat_active),
+            spoken = stringResource(
+                R.string.today_metric_spoken,
+                stringResource(R.string.today_metric_active),
+                active.text(),
+                stringResource(R.string.today_metric_active_meaning),
+            ),
+        ),
+    )
+    val rule = MaterialTheme.colorScheme.outlineVariant
+    Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenMargin).testTag(TodayTags.STATS),
+    ) {
+        BoxWithConstraints(Modifier.fillMaxWidth()) {
+            val across = maxWidth / stats.size / LocalDensity.current.fontScale >= STAT_MIN_WIDTH
+            Column {
+                HorizontalDivider(color = rule)
+                if (across) {
+                    Row(Modifier.height(IntrinsicSize.Min)) {
+                        stats.forEachIndexed { i, stat ->
+                            if (i > 0) VerticalDivider(color = rule)
+                            Stat(stat, Modifier.weight(1f).padding(horizontal = 4.dp))
+                        }
+                    }
+                } else {
+                    stats.forEachIndexed { i, stat ->
+                        if (i > 0) HorizontalDivider(color = rule)
+                        Stat(stat, Modifier.fillMaxWidth().padding(horizontal = 8.dp))
+                    }
+                }
+                HorizontalDivider(color = rule)
+            }
+        }
         Text(
-            text = if (fits) both else stringResource(R.string.today_ring_estimates_distance, distance),
-            style = style,
-            color = color,
-            maxLines = 1,
+            text = stringResource(R.string.today_stats_note, stepLength),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp).clearAndSetSemantics { },
         )
     }
 }
 
-/** The share of the ring's inner box the estimates' line may take, the circle being round. */
-private const val RING_LINE_SHARE = 0.85f
+private class StatItem(val value: AnnotatedString, val label: String, val spoken: String)
+
+@Composable
+private fun Stat(stat: StatItem, modifier: Modifier) {
+    // Centred on its share, as the ring and the sentence above are on the page: one axis down the
+    // first screen (owner, 10 Nov 2026).
+    Column(
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .padding(vertical = 10.dp)
+            .clearAndSetSemantics { contentDescription = stat.spoken },
+    ) {
+        Text(
+            stat.value,
+            style = PassoTheme.type.readingValue,
+            color = MaterialTheme.colorScheme.onSurface,
+            maxLines = 1,
+        )
+        Text(
+            stat.label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+/** A third narrower than this, at the reader's text size, stacks the three amounts. */
+private val STAT_MIN_WIDTH = 96.dp
 
 /**
  * The count, in the hero's voice, counting up from zero the first time the screen shows it and
@@ -554,7 +666,10 @@ private fun Headline(state: TodayUiState, format: MeasureFormatter) {
                 ) { Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.fillMaxSize()) },
             ),
             // Balanced lines: two of a like length, never a lone word under a full line.
-            style = MaterialTheme.typography.titleLarge.copy(lineBreak = LineBreak.Heading),
+            style = MaterialTheme.typography.titleLarge.copy(
+                fontWeight = FontWeight.Medium,
+                lineBreak = LineBreak.Heading,
+            ),
             textAlign = TextAlign.Center,
         )
         val detail = overview.detail
@@ -641,7 +756,7 @@ private fun TrendCard(state: TodayUiState, format: MeasureFormatter) {
             val hours = listOf(6, 12, 18).map { it * 60 to axisHour(it) }
             DayTrendChart(
                 trend = trend,
-                goalLabel = format.steps(overview.goalSteps),
+                goalLabel = stringResource(R.string.today_trend_goal, format.steps(overview.goalSteps)),
                 hourLabels = hours,
                 description = description,
                 readout = { point -> Readout(point, overview.steps, overview.usualNow, format) },
@@ -694,11 +809,11 @@ private fun Readout(point: TrendPoint?, stepsNow: Int, usualNow: Int?, format: M
     )
 }
 
+/** Today's line and a usual day's; the goal is named on its own line, in the chart. */
 @Composable
 private fun Legend(hasUsual: Boolean) {
     val today = MaterialTheme.colorScheme.primary
     val usual = MaterialTheme.colorScheme.onSurfaceVariant
-    val goal = PassoTheme.colors.goal
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
         LegendItem(stringResource(R.string.today_trend_legend_today)) {
             drawSwatch(today, dashed = false, width = 2.5f)
@@ -708,7 +823,6 @@ private fun Legend(hasUsual: Boolean) {
                 drawSwatch(usual, dashed = true, width = 1.5f)
             }
         }
-        LegendItem(stringResource(R.string.today_trend_legend_goal)) { drawSwatch(goal, dashed = false, width = 1.5f) }
     }
 }
 
@@ -738,26 +852,33 @@ private fun androidx.compose.ui.graphics.drawscope.DrawScope.drawSwatch(color: C
 }
 
 /**
- * The way to an outing (PLANNING.md §11 Phase 10): one quiet button under the day, to the page
- * where they are kept and started. Not while one is under way: its card stands here instead.
- * The reader who never walks with a goal can take it away in Settings, where the page stays one
- * row away; an outing started from a shortcut or a reminder still shows its card.
+ * The way to an outing (PLANNING.md §11 Phase 10): one row under the day, as wide as the cards, to
+ * the page where they are kept and started, with the line that says what one is (a centred pill
+ * read as left over, the Today review of 10 Nov 2026). Not while one is under way: its card stands
+ * here instead. The reader who never walks with a goal can take it away in Settings, where the page
+ * stays one row away; an outing started from a shortcut or a reminder still shows its card.
  */
 @Composable
-private fun StartOuting(onOpenSessions: () -> Unit) {
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
-        // In the page's own primary, so a quiet way to an outing does not outshout the day.
-        FilledTonalButton(
-            onClick = onOpenSessions,
-            colors = ButtonDefaults.filledTonalButtonColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            ),
-            modifier = Modifier.testTag(TodayTags.START_OUTING),
+private fun StartOuting(onOpenSessions: () -> Unit, modifier: Modifier) {
+    // In the page's own primary container, so a quiet way to an outing does not outshout the day.
+    Surface(
+        onClick = onOpenSessions,
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        shape = GroupShape,
+        modifier = modifier.fillMaxWidth().padding(horizontal = ScreenMargin).testTag(TodayTags.START_OUTING),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp),
+            modifier = Modifier.heightIn(min = 64.dp).padding(start = 20.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
         ) {
-            Icon(PassoIcons.Outing, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
-            Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-            Text(stringResource(R.string.today_start_outing))
+            Icon(PassoIcons.Outing, contentDescription = null, modifier = Modifier.size(24.dp))
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(stringResource(R.string.today_start_outing), style = MaterialTheme.typography.titleSmall)
+                Text(stringResource(R.string.today_start_outing_body), style = MaterialTheme.typography.bodyMedium)
+            }
+            Icon(PassoIcons.ChevronRight, contentDescription = null, modifier = Modifier.size(20.dp))
         }
     }
 }
@@ -781,49 +902,33 @@ private fun WalksCard(outings: List<Outing>, format: MeasureFormatter) {
     }
 }
 
-/** The metrics, two to a row; the cadence across the page, with its scale. */
+/**
+ * The two amounts of effort, each on its own scale with the line that says what it means: brisk
+ * minutes against today's share of the WHO's 150 a week, and the cadence from a stroll to a run.
+ * One card, where they were two tiles among four (the Today review of 10 Nov 2026): the distance,
+ * the calories and the active minutes are under the sentence. The cadence is left out on a day with
+ * no walking to average.
+ */
 @Composable
-private fun Metrics(state: TodayUiState, format: MeasureFormatter) {
+private fun Intensity(state: TodayUiState, format: MeasureFormatter) {
     val metrics = state.overview.metrics
     val unit = SpanStyle(fontSize = 15.sp, fontWeight = FontWeight.Normal)
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.padding(horizontal = ScreenMargin).testTag(TodayTags.METRICS),
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = GroupShape,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenMargin).testTag(TodayTags.METRICS),
     ) {
-        TilePair {
-            val distance = format.distance(metrics.distanceMeters)
-            val stepLength = format.stepLength(state.walkingStepLength).text()
-            Tile(
-                icon = PassoIcons.Distance,
-                label = stringResource(R.string.today_metric_distance),
-                value = distance.annotated(unit),
-                spokenValue = distance.text(),
-                meaning = stringResource(R.string.today_metric_distance_meaning, stepLength),
-            )
-            val energy = format.energy(metrics.activeKcal)
-            Tile(
-                icon = PassoIcons.Flame,
-                label = stringResource(R.string.today_metric_calories),
-                value = energy.annotated(unit),
-                spokenValue = energy.text(),
-                meaning = stringResource(R.string.today_metric_calories_meaning),
-            )
-        }
-        TilePair {
-            val active = format.minutes(metrics.activeMinutes)
-            Tile(
-                icon = PassoIcons.Clock,
-                label = stringResource(R.string.today_metric_active),
-                value = active.annotated(unit),
-                spokenValue = active.text(),
-                meaning = stringResource(R.string.today_metric_active_meaning),
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Text(
+                text = stringResource(R.string.today_intensity_title),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() },
             )
             val brisk = format.minutes(metrics.briskMinutes)
             val left = state.overview.briskShareLeft
             val done = left == 0
             val shareColor = if (done) PassoTheme.colors.goal else MaterialTheme.colorScheme.primary
-            Tile(
-                icon = PassoIcons.Bolt,
+            Effort(
                 label = stringResource(R.string.today_metric_brisk),
                 value = brisk.annotated(unit),
                 spokenValue = brisk.text(),
@@ -832,33 +937,30 @@ private fun Metrics(state: TodayUiState, format: MeasureFormatter) {
                 } else {
                     pluralStringResource(R.plurals.today_metric_brisk_left, left, left)
                 },
-                track = {
-                    MetricTrack(
-                        value = metrics.briskMinutes.toFloat(),
-                        range = 0f..MetricsConstants.DAILY_BRISK_SHARE_MINUTES.toFloat(),
-                        colors = listOf(shareColor),
-                    )
-                },
-            )
-        }
-        val cadence = metrics.averageCadence
-        val band = state.overview.cadenceBand
-        if (cadence != null && band != null) {
-            val measure = format.cadence(cadence)
-            Tile(
-                icon = PassoIcons.Pulse,
-                label = stringResource(R.string.today_metric_cadence),
-                value = measure.annotated(unit),
-                spokenValue = measure.text(),
-                meaning = stringResource(
-                    when (band) {
-                        CadenceBand.RELAXED -> R.string.today_metric_cadence_relaxed
-                        CadenceBand.BRISK -> R.string.today_metric_cadence_brisk
-                        CadenceBand.VIGOROUS -> R.string.today_metric_cadence_vigorous
-                    },
-                ),
-                modifier = Modifier.fillMaxWidth(),
-                track = {
+            ) {
+                MetricTrack(
+                    value = metrics.briskMinutes.toFloat(),
+                    range = 0f..MetricsConstants.DAILY_BRISK_SHARE_MINUTES.toFloat(),
+                    colors = listOf(shareColor),
+                )
+            }
+            val cadence = metrics.averageCadence
+            val band = state.overview.cadenceBand
+            if (cadence != null && band != null) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                val measure = format.cadence(cadence)
+                Effort(
+                    label = stringResource(R.string.today_metric_cadence),
+                    value = measure.annotated(unit),
+                    spokenValue = measure.text(),
+                    meaning = stringResource(
+                        when (band) {
+                            CadenceBand.RELAXED -> R.string.today_metric_cadence_relaxed
+                            CadenceBand.BRISK -> R.string.today_metric_cadence_brisk
+                            CadenceBand.VIGOROUS -> R.string.today_metric_cadence_vigorous
+                        },
+                    ),
+                ) {
                     MetricTrack(
                         value = cadence.toFloat(),
                         range = CADENCE_SCALE,
@@ -868,31 +970,45 @@ private fun Metrics(state: TodayUiState, format: MeasureFormatter) {
                             MetricsConstants.VIGOROUS_CADENCE.toFloat(),
                         ),
                     )
-                },
-            )
+                }
+            }
         }
     }
 }
 
+/**
+ * One amount of effort: its name and value on a line (the value under the name at a large text
+ * size), its scale, and the line that says what it means; one node for a screen reader.
+ */
 @Composable
-private fun Tile(
-    icon: ImageVector,
+private fun Effort(
     label: String,
-    value: androidx.compose.ui.text.AnnotatedString,
+    value: AnnotatedString,
     spokenValue: String,
     meaning: String,
-    modifier: Modifier = Modifier,
-    track: (@Composable () -> Unit)? = null,
+    track: @Composable () -> Unit,
 ) {
-    MetricTile(
-        icon = icon,
-        label = label,
-        value = value,
-        meaning = meaning,
-        spoken = stringResource(R.string.today_metric_spoken, label, spokenValue, meaning),
-        modifier = modifier,
-        track = track,
-    )
+    val spoken = stringResource(R.string.today_metric_spoken, label, spokenValue, meaning)
+    Column(
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier.fillMaxWidth().clearAndSetSemantics { contentDescription = spoken },
+    ) {
+        FlowRow(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            itemVerticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text(
+                label,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(end = 8.dp),
+            )
+            Text(value, style = PassoTheme.type.readingValue, color = MaterialTheme.colorScheme.onSurface)
+        }
+        Box(modifier = Modifier.padding(vertical = 2.dp)) { track() }
+        Text(meaning, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
 }
 
 /** Cadence drawn from a stroll to a run, so brisk and vigorous sit where a reader expects them. */
@@ -911,6 +1027,8 @@ object TodayTags {
     const val TREND = "today_trend"
     const val CHART = "today_chart"
     const val METRICS = "today_metrics"
+    const val STATS = "today_stats"
+    const val STREAK = "today_streak"
     const val WALKS = "today_walks"
     const val START_OUTING = "today_start_outing"
     const val WAY = "today_way"

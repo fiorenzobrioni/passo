@@ -367,7 +367,8 @@ class TodayScreenTest {
             hasContentDescription("${us(state.overview.steps)} steps of 8,000", substring = true),
         ).assertIsDisplayed()
         compose.onNode(hasContentDescription("A usual day is at", substring = true)).assertExists()
-        compose.onNode(hasContentDescription("Estimated so far: ", substring = true)).assertExists()
+        // The estimates have their own row under the sentence: the ring does not read them again.
+        compose.onNode(hasContentDescription("Estimated so far", substring = true)).assertDoesNotExist()
         snapshot("today_light")
     }
 
@@ -449,25 +450,31 @@ class TodayScreenTest {
     }
 
     @Test
-    fun `the tiles of a pair stand as tall as each other`() {
+    fun `the day's three amounts stand in one row under the sentence, above the chart`() {
         show(state())
 
-        // The calories' meaning wraps to one line more than the distance's at this width.
-        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(TodayTags.METRICS))
+        val headline = compose.onNodeWithTag(TodayTags.HEADLINE).getBoundsInRoot()
         val distance = compose.onNode(hasContentDescription("Distance:", substring = true)).getBoundsInRoot()
         val calories = compose.onNode(hasContentDescription("Active calories:", substring = true)).getBoundsInRoot()
-        assertThat(distance.top).isEqualTo(calories.top)
-        assertThat(distance.bottom).isEqualTo(calories.bottom)
+        val active = compose.onNode(hasContentDescription("Active minutes:", substring = true)).getBoundsInRoot()
+        assertThat(distance.top).isGreaterThan(headline.bottom)
+        assertThat(calories.top).isEqualTo(distance.top)
+        assertThat(active.top).isEqualTo(distance.top)
+        assertThat(active.left).isGreaterThan(calories.left)
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(TodayTags.TREND))
+        assertThat(compose.onNodeWithTag(TodayTags.TREND).getBoundsInRoot().top).isGreaterThan(distance.bottom)
     }
 
     @Test
     fun `the metrics say what they mean`() {
         show(state())
 
+        // Each of the three amounts reads its own meaning; the shared line under them is not read again.
+        compose.onNode(hasContentDescription("Estimate, with a step of 73 cm", substring = true)).assertExists()
+        compose.onNode(hasContentDescription("Minutes with 40 steps or more", substring = true)).assertExists()
         compose.onNodeWithTag(
             TodayTags.LIST,
         ).performScrollToNode(hasContentDescription("Average cadence", substring = true))
-        compose.onNode(hasContentDescription("Estimate, with a step of 73 cm", substring = true)).assertExists()
         compose.onNode(
             hasContentDescription("Today’s share of the WHO’s 150 a week: done", substring = true),
         ).assertExists()
@@ -475,9 +482,24 @@ class TodayScreenTest {
     }
 
     @Test
+    fun `a streak of days at the goal stands beside the date`() {
+        show(state().copy(streakDays = 12))
+
+        compose.onNodeWithTag(TodayTags.STREAK).assertIsDisplayed()
+        compose.onNode(hasContentDescription("12 days in a row at the goal")).assertIsDisplayed()
+    }
+
+    @Test
+    fun `one day at the goal is not a streak yet`() {
+        show(state().copy(streakDays = 1))
+
+        compose.onNodeWithTag(TodayTags.STREAK).assertDoesNotExist()
+    }
+
+    @Test
     @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
     fun `at twice the text size on a small phone, the whole day still reads`() {
-        show(state(firstDay = true).copy(way = way()))
+        show(state(firstDay = true).copy(way = way(), streakDays = 12))
 
         compose.onNodeWithTag(TodayTags.HEADLINE).assertIsDisplayed()
         compose.walkPage(hasTestTag(TodayTags.LIST), "today_large_text")
@@ -485,16 +507,22 @@ class TodayScreenTest {
 
     @Test
     @Config(qualifiers = "it-rIT-w384dp-h832dp-xxhdpi")
-    fun `on a tall phone the day's chart is whole on the first screen, under two sentences of two lines`() {
+    fun `on a tall phone the day's chart begins on the first screen, under two sentences of two lines`() {
         // Behind a usual day with the goal far: in Italian, both sentences take two lines.
         show(state(minutes = List(30) { DayMinute(8 * 60 + it, 29) }))
 
         compose.onNodeWithText("indietro rispetto al solito", substring = true).assertIsDisplayed()
         compose.onNodeWithText("Ne mancano", substring = true).assertIsDisplayed()
         // The owner's phone at its default display size: a 38dp status bar and a 95dp bottom bar,
-        // neither drawn here, so the first screen ends 133dp above the window's bottom.
+        // neither drawn here, so the first screen ends 133dp above the window's bottom. The day's
+        // three amounts stand under the sentence, and the chart begins under them: its readout and
+        // the top of its plot, where the goal's line runs, are on the first screen, the rest one
+        // short scroll away (owner, 10 Nov 2026, the Today review; the chart was whole until then).
+        val firstScreenEnd = 832.dp - 38.dp - 95.dp
+        val stats = compose.onNodeWithTag(TodayTags.STATS).getBoundsInRoot()
         val chart = compose.onNodeWithTag(TodayTags.CHART).getBoundsInRoot()
-        assertThat(chart.bottom).isAtMost(832.dp - 38.dp - 95.dp)
+        assertThat(stats.bottom).isAtMost(firstScreenEnd)
+        assertThat(chart.top + 64.dp).isAtMost(firstScreenEnd)
         snapshot("today_first_screen")
     }
 
@@ -508,7 +536,7 @@ class TodayScreenTest {
 
     @Test
     @Config(qualifiers = "en-rUS-w841dp-h701dp-xhdpi")
-    fun `on an open foldable the day is a column in the middle, under a glow that spans the screen`() {
+    fun `on an open foldable the day is a column in the middle`() {
         show(state().copy(way = way()))
 
         // (841 - 640) / 2 on each side, then the cards' own 16dp margin.
