@@ -77,6 +77,11 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
   image in both themes, a page saved (archive 03, «Phase 12»). Done by the owner on 2 Nov 2026,
   before the tag.
 
+- [ ] **On a device (owner): the outings, the editor and the maps reviewed** (§15, «The outings,
+  their editor and the city walks' maps, reviewed», 11 Nov 2026): the Outings page and an outing
+  under way in both themes and at a large text size; the editor's legend, each signal felt; a
+  city walk's map before a start and under way, a way's map; TalkBack on a card and on the legend.
+
 Read again on 2 Nov 2026, at archive 01 and 02: the boxes above are the ones the phases done had
 left open, and the review's device check. Read again at 1.1.0's tag: the owner's checks of the
 update, the outing let go, Your year on foot and the new ways' maps are done; §15 has no open
@@ -883,6 +888,73 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   page's middle, and the row left-aligned was the one block off that axis; three amounts read one
   at a time gain nothing from a left edge, which helps a column of numbers compared down. This
   changes «Today reviewed for a premium first screen», above. README screenshots regenerated.
+
+- **The outings, their editor and the city walks' maps, reviewed** (owner, 11 Nov 2026: "review
+  the design of the Outings and walks screens and their children, keeping to Material 3: what
+  does not respect it, and what would make them better and more premium; the type too, watching
+  for unwanted line breaks and for strings out of line; and the walks' maps. Keep it clean,
+  avoid noise"; the review went to the owner as a canvas, today's screens beside the proposals;
+  then "I want every point", with the start button as its icon alone). Built in three parts.
+  - **The Outings page.** An outing's card reads on one line, the name's: the estimates and the
+    signals started at the card's edge, under the mark. One way to start it, the icon at the
+    card's end (a tonal icon button, 48dp, named for TalkBack: «Start Brisk walk»), and the card
+    itself to edit: the «Edit» and «Start» row is gone, the card is a third shorter and the
+    presets fit a screen. A new outing is the top bar's action; with no outing kept, the page
+    still offers it where the list would be. The introduction is one sentence in the body's
+    smaller size. The estimates are shown short with the sign Today uses («≈ 2,000 steps ·
+    1.46 km») and how the signals arrive as marks before their line; TalkBack reads the whole
+    sentences as before. The city walks' door shows a walk's map. Italian: «Segnali al 50%».
+  - **The card of an outing under way** (`SessionCard`: Today, Outings, a walk's page). Its
+    mark is the size of the cards' below it (40dp, it was 36dp: the names were 3dp out of line).
+    The sentence is the headline, in the title's large size; on a city walk the place ahead,
+    with how far it is under it («Royal Festival Hall», «The next place, 230 m ahead»: the
+    notification and the voice keep «Next: …»). How far it is and where it ends stand at the two
+    ends of its bar, not beside the name, which a long name («Japanese walking», «A walk in
+    London») shared the line with. The pace's verdict is a word beside the state («Under way ·
+    on pace»), and the numbers three columns between two hairlines (the pace, the steps, the
+    distance with the calories beside the word «estimate»; paused or over, the steps and the two
+    estimates); TalkBack reads them as the two sentences they were, and at a large text size
+    those sentences are what is shown. Stop and Pause share the card's width at 48dp.
+  - **The editor.** Its top bar takes the scrolled tone as the settings run under it, as the
+    Outings page's does, and Save's bar wears the same: on the page's own ground a line cut by a
+    bar read as a fault. «Goal, always», a label in the accent's colour with an icon, read as a
+    text button that did nothing: gone, the sentence above the chips says it. One stepper
+    (`StepButton`, the goal's tonal one) for the interval rows too. No check mark on any of the
+    three segmented rows (two had it, one not). The interval rows are a line each: their notes
+    broke in two in the column the steppers left them, and what a set is reads once under the
+    group. The Japanese walk is said in two lines on the page's quiet ground, the study and how
+    Passo walks it a touch away (it was twelve lines in the accent's container, the tone of a
+    choice made and of a warning, and it pushed the sets off the first screen). The vibrations
+    are a legend in the switch's own group: each signal with its pattern drawn beside it (drawn
+    from `SessionHaptics`' own: one to three short pulses, a long one, two long ones, four taps,
+    a long and a short), felt at a touch, said in words to TalkBack; it takes the place of the
+    paragraph that listed the patterns and of the chips to try them. This changes how «Outings:
+    vibrations in counts» and «The interval walk, built» (archive 02) put them on the page, not
+    the signals themselves.
+  - **A sentence's last word is not left alone on a line** (`unorphaned()`, `:core:designsystem`):
+    its last two words are held together, a number with its unit too, up to 20 characters and
+    not above 1.3 times the text size, where a pair held could be wider than the line. On the
+    cards' descriptions and the editor's paragraphs («sforzo moderato», «with your step of
+    73 cm»). The strings themselves are untouched: the voice says the same ones.
+  - **The map** (`WayMapView`). The way still to walk was a grey at 40% over a city's white
+    streets and was lost among them: it has more ink (72%), and on a page the whole way lies on
+    an edge of the page's colour. The side streets are hairlines at part ink. A name goes on the
+    side its own way leaves free (`placeLabels`, pure and tested: fewest names covered, then the
+    least of the way and its stops), where beside its point it lay over the line (London, Rome,
+    Paris). A city walk under way names the place being walked to, drawn larger in the goal's
+    colour, not its two ends (this changes ADR 0014's decision 8 for a walk under way; a way
+    keeps its ends' names, and the locator its rule). Before a start, where it begins is a full
+    point and where it ends a ring: they were the same ring. The water is a tone deeper in light
+    (`PassoColors.water`: a river through a city was almost the land's own blue-grey). A name's
+    pill has a hairline around it. On a page a map has the groups' 24dp corner (16dp above
+    24dp cards, at the same width), the continents' too; a city walk's map is never taller than
+    wide (Rome's, at 1.2, pushed Start past the middle of the screen).
+  - **The places** of a walk and the stages of a way: one line through their points, in the
+    goal's colour as far as the reader has come, in place of a rule between every two; the stop
+    ahead stands out.
+  README screenshots regenerated (the outings, the editor, the intervals, the outing on Today,
+  the walk, the ways). Checked: every module's tests, lint, spotless, the forbidden permissions.
+  Not done on a device: the box is in «Open».
 
 ### Open
 

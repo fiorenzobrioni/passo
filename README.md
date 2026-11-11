@@ -44,9 +44,9 @@ calories are estimates, and Passo says so.
     <td align="center"><img src="docs/screenshots/insights.png" width="250" alt="Insights: four days in a row at the goal, the last seven days, and the records"><br><sub><b>Insights</b>: streak, records, averages</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/outings.png" width="250" alt="Outings: a brisk walk of 20 minutes, a 30-minute run and the rest of the day, each with what it comes to and its signals"><br><sub><b>Outings</b>: a walk with a goal</sub></td>
-    <td align="center"><img src="docs/screenshots/today-outing.png" width="250" alt="Today with a brisk walk under way: 12 of 20 minutes, past halfway, 112 steps a minute on pace"><br><sub><b>Under way</b>: progress and pace</sub></td>
-    <td align="center"><img src="docs/screenshots/outing-editor.png" width="250" alt="Editing an outing: the signals at 25, 50 and 75 percent, the vibrations to try, and the voice through headphones"><br><sub><b>Signals</b> you can feel or hear</sub></td>
+    <td align="center"><img src="docs/screenshots/outings.png" width="250" alt="Outings: a brisk walk of 20 minutes, a 30-minute run, the rest of the day and the Japanese interval walk, each with what it comes to, its signals and a button to start it"><br><sub><b>Outings</b>: a walk with a goal</sub></td>
+    <td align="center"><img src="docs/screenshots/today-outing.png" width="250" alt="Today with a brisk walk under way: past halfway, 8 minutes to go, 12 of 20 minutes on its bar, 112 steps a minute on pace"><br><sub><b>Under way</b>: progress and pace</sub></td>
+    <td align="center"><img src="docs/screenshots/outing-editor.png" width="250" alt="Editing an outing: the signals at 25, 50 and 75 percent, each vibration with its pattern drawn beside it and felt at a touch, and the voice through headphones"><br><sub><b>Signals</b> you can feel or hear</sub></td>
   </tr>
   <tr>
     <td align="center"><img src="docs/screenshots/way.png" width="250" alt="The Via Francigena under way: the map from the Great St Bernard Pass to Rome with the part walked, past Monteriggioni, 280 km to Rome"><br><sub><b>Ways</b>: a long way, walked from home</sub></td>
@@ -56,10 +56,10 @@ calories are estimates, and Passo says so.
   <tr>
     <td align="center"><img src="docs/screenshots/way-kumano.png" width="250" alt="The Kumano Kodō in Japan, two weeks in: the map from Takijiri-ōji with the part walked, past Yunomine Onsen, 23.3 km to Kumano Nachi Taisha, and the first stamps"><br><sub><b>Beyond Europe</b>: the Kumano Kodō, in Japan</sub></td>
     <td align="center"><img src="docs/screenshots/ways-continents.png" width="250" alt="The Ways page by continent: the Inca Trail and the John Muir Trail under the Americas, the Kumano Kodō and the Great Ocean Walk under Asia and Oceania, Kilimanjaro under Africa, each with its length and how long at your pace"><br><sub><b>Ten ways</b>, by continent</sub></td>
-    <td align="center"><img src="docs/screenshots/walk.png" width="250" alt="A walk in London under way: the map from Buckingham Palace along the Thames with the part walked, past the London Eye, and the outing's card: next, the Royal Festival Hall, 230 m"><br><sub><b>City walks</b>: London place by place, walked where you are</sub></td>
+    <td align="center"><img src="docs/screenshots/walk.png" width="250" alt="A walk in London under way: the map from Buckingham Palace along the Thames with the part walked, past the London Eye, and the outing's card: the Royal Festival Hall, the next place, 230 m ahead"><br><sub><b>City walks</b>: London place by place, walked where you are</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/intervals.png" width="250" alt="Editing the Japanese interval walk: what it is, then 3 slow minutes, 3 fast minutes and 5 sets, with the outing's shape in slow and fast blocks"><br><sub><b>Japanese interval walk</b>: slow and fast in turns</sub></td>
+    <td align="center"><img src="docs/screenshots/intervals.png" width="250" alt="Editing the Japanese interval walk: what it is in two lines, then 3 slow minutes, 3 fast minutes and 5 sets, with the outing's shape in slow and fast blocks"><br><sub><b>Japanese interval walk</b>: slow and fast in turns</sub></td>
     <td align="center"><img src="docs/screenshots/intervals-done.png" width="250" alt="An interval walk just over: goal reached, each fast interval's cadence against the pace line, 4 fast intervals of 5 at pace"><br><sub><b>Each fast interval</b>, against its pace</sub></td>
     <td align="center"><img src="docs/screenshots/widgets.png" width="250" alt="The two widgets on a home screen: At a glance with its ring, In words, a terracotta pair side by side, and the day hour by hour"><br><sub><b>Two widgets</b>: At a glance and In words</sub></td>
   </tr>

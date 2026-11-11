@@ -395,7 +395,8 @@ private fun SessionStats(session: Session, cadence: Int?, pace: SessionIntensity
         listOf(
             Stat(AnnotatedString(if (cadence == null) NO_VALUE else now.number), res.unitOf(now)),
             steps,
-            Stat(distance, stringResource(R.string.session_stat_estimate_with, energy.unbrokenText())),
+            // A little wider than the other two: its label carries the calories as well.
+            Stat(distance, stringResource(R.string.session_stat_estimate_with, energy.unbrokenText()), WIDE_STAT),
         )
     } else {
         listOf(steps, Stat(distance, estimate), Stat(energy.annotated(unit), estimate))
@@ -426,7 +427,7 @@ private fun SessionStats(session: Session, cadence: Int?, pace: SessionIntensity
                         if (index > 0) VerticalDivider(color = hairline)
                         Column(
                             modifier = Modifier
-                                .weight(1f)
+                                .weight(stat.weight)
                                 .padding(
                                     start = if (index > 0) 12.dp else 0.dp,
                                     end = if (index < stats.lastIndex) 8.dp else 0.dp,
@@ -456,8 +457,10 @@ private fun SessionStats(session: Session, cadence: Int?, pace: SessionIntensity
     }
 }
 
-/** A number of an outing and the word under it. */
-private class Stat(val value: AnnotatedString, val label: String)
+/** A number of an outing and the word under it, in a column [weight] wide against the others. */
+private class Stat(val value: AnnotatedString, val label: String, val weight: Float = 1f)
+
+private const val WIDE_STAT = 1.3f
 
 /** A pace not measured yet: the first seconds of an outing. */
 private const val NO_VALUE = "–"
