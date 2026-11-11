@@ -26,6 +26,16 @@ All notable changes to Passo are documented here. The format follows
   step back, and a name no longer covers the line it names. While you walk, the map names the
   place ahead. The list of places is one line running through them, as far as you have come.
 
+- **Insights, tidier.** The streak on a plain card, the way you are walking with its bar from
+  where you are to where it ends, the records without their trophies and with the number in
+  full ink, and your averages side by side, as Today's three amounts are. Dates say their month
+  once, and no line leaves a word or a number alone.
+
+- **Your year on foot, steadier.** Whose year it is stays at the top of every page, so the
+  words no longer jump as you go on. A page's number stays on one line on a narrow phone, the
+  outings and the ways show theirs large as the other pages do, and the picture you share or
+  save no longer carries the line on how to turn the pages.
+
 - **History, easier to read.** Touch a bar and its reading is two short lines, the day with
   its steps and whether the goal was met, with «Open» beside them; the chart no longer moves
   under your finger. The four scales are whole words on a small phone, in Italian too. A day's

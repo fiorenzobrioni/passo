@@ -53,6 +53,17 @@ fun wayDetail(progress: WayProgress, format: MeasureFormatter): String? {
     return "$toEnd. ${wayNextStage(progress, format)}"
 }
 
+/** How far the way's end is, «171 km to Rome»: null once the way is finished. */
+@Composable
+fun wayToEnd(progress: WayProgress, format: MeasureFormatter): String? {
+    if (progress.nextStage == null) return null
+    return stringResource(
+        R.string.way_to_end,
+        format.distance(progress.metersLeft).unbrokenText(),
+        stringResource(placeNameRes(progress.way.stops.last().key)),
+    )
+}
+
 /**
  * A way's next stage and how far it is, or its end once that is the next stage: the one line of
  * [wayDetail] that Today's card keeps. Null once the way is finished.

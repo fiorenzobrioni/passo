@@ -123,7 +123,9 @@ class WaysScreenTest {
         compose.onNodeWithTag(WaysTags.way(WayId.CAMINO_FRANCES)).performClick()
         assertThat(opened).isEqualTo(WayId.CAMINO_FRANCES to null)
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.YOURS))
-        compose.onNodeWithText("Walked from Sep 1, 2025 to", substring = true).assertExists()
+        // The year once, with the day it ended.
+        compose.onNodeWithText("Walked from Sep 1 to", substring = true).assertExists()
+        compose.onNodeWithText("Sep 1, 2025", substring = true).assertDoesNotExist()
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.CREDIT))
         compose.onNodeWithText("OpenStreetMap contributors", substring = true).assertExists()
         snapshot("ways_catalogue")
@@ -443,7 +445,9 @@ class WaysScreenTest {
         assertThat(continent).isEqualTo(Continent.AMERICAS)
         // A city walked to its end is still kept in Your ways, on the Ways page itself.
         compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.YOURS))
-        compose.onAllNodes(hasText("Walked on Sep 12", substring = true) and hasAnyAncestor(hasTestTag(WaysTags.YOURS)))
+        compose.onAllNodes(
+            hasText("Walked on Sep\u00A012", substring = true) and hasAnyAncestor(hasTestTag(WaysTags.YOURS)),
+        )
             .assertCountEquals(1)
     }
 

@@ -79,6 +79,37 @@ class YearScreenTest {
     }
 
     @Test
+    fun `how the pages turn is said at the foot of the first page only`() {
+        show()
+        compose.onNodeWithText("Touch to go on, swipe back").assertIsDisplayed()
+        next()
+        compose.onNodeWithText("Touch to go on, swipe back").assertDoesNotExist()
+    }
+
+    @Test
+    fun `the outings and the ways give their number large, as every page does`() {
+        show()
+        repeat(5) { next() }
+        compose.onNodeWithContentDescription("Out with a goal. 25 outings. 10 h 8 min in motion.", substring = true)
+            .assertExists()
+        next()
+        compose.onNodeWithContentDescription("Along the ways. 1,188 km. Via Francigena: 1,020", substring = true)
+            .assertExists()
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT-w320dp-h640dp-xxhdpi")
+    fun `in Italian on a narrow phone every page keeps its number on one line`() {
+        show()
+        val pages = checkNotNull(YearSamples.state().review).pages
+        snapshot("year_it_narrow_1")
+        for (page in 2..pages.size) {
+            next()
+            snapshot("year_it_narrow_$page")
+        }
+    }
+
+    @Test
     fun `a touch on the leading third goes back`() {
         show()
         next()
@@ -111,7 +142,8 @@ class YearScreenTest {
     fun `the year so far, and since when when it began late`() {
         val late = YearSamples.state(year = 2025, days = YearSamples.days(LocalDate.of(2025, 10, 1)))
         show(late)
-        compose.onNodeWithContentDescription("Your 2025 on foot · Since Oct 1, 2025", substring = true).assertExists()
+        // The year is the title's: the day is written without it.
+        compose.onNodeWithContentDescription("Your 2025 on foot · since Oct\u00A01.", substring = true).assertExists()
     }
 
     @Test

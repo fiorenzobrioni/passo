@@ -1028,6 +1028,72 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   are, outside History: Insights' and the year's own ranges still say the month twice («Sep 7 –
   Sep 13»).
 
+- **Insights and Your year on foot reviewed, after Today, the Outings and History** (owner,
+  11 Nov 2026: "review the design of Insights and its child screens, such as Your year on foot,
+  the ones the earlier reviews did not touch; Material 3, what is wrong today and what would make
+  it more premium; the type, the line breaks nobody wanted and the alignments; a clean layout, in
+  step with what is already reviewed, no noise", then, on the review drawn beside the pages as
+  they were, "apply everything": Insights' twelve faults and its three things that asked for a
+  yes, the year's seven, the Ways' two). The pages were drawn in Italian at 360dp and at 320dp,
+  where the faults were, and read again after.
+  - **Insights, the streak.** The card stands on the groups' own ground: it still had the
+    gradient Today lost on 10 Nov, the goal's colour is the marks'. With no streak it is a title
+    and its line («No streak right now», «A day at your goal starts one.»), as the running one
+    is: one sentence ran to three lines beside the mark, «una.» alone on the last. In the seven
+    days, a day before the first one counted is a point: it was a third empty circle, a hair
+    thinner than a missed day's and today's.
+  - **Insights, the way under way.** The map (72dp), the way, where the reader stands and the
+    stage ahead, with the chevron every other door on the page has; under them the bar the card's
+    width, how far the reader has come and how far the end is at its two ends, as an outing's
+    card sets them (`wayToEnd`, new beside `wayNextStage`). It was four small lines in 192dp,
+    «tra / 14,7 km» broken, the bar under the words only.
+  - **Insights, the records.** No mark before a record: three trophies alike said nothing, in
+    the titles' colour, and without them every group's words stand on one edge. The amount takes
+    the full ink, the date stays quiet. A week or a streak inside one month says the month once
+    («7 – 13 set», `dayRange`, History's), each date whole on its line; the month of the best
+    month is in the language's own case («agosto 2026» under «dom 13 set»).
+  - **Insights, the averages** are Today's strip (`StatStrip`): three amounts side by side
+    between two hairlines, «steps a day» said once in the group's title, the last seven days
+    against the seven before in a sentence under them («…dei 7 / giorni prima» was a line
+    break). An average with too few days yet is a dash, and one line says when it comes. The
+    page is about 120dp shorter.
+  - **Insights, the years.** A year is a row of one line; what a year's pages are is said once,
+    under the group (every row said it, «i / mesi» at a line's end). The group's rule is the
+    other groups'.
+  - **Insights, the totals.** The title says what the group is («In all, since Jul 26, 2026»):
+    «Since Jul 26, 2026» was a date, and the averages' third label besides. The tiles keep their
+    label on one line (`fitLabel`, as History's): «Days at your goal» is «At your goal» beside
+    the mark, whole for a screen reader, where on two lines it set its value a line lower than
+    its neighbour's; «days» is small as «km» and «kcal» are; the meanings are short, in History's
+    words («Estimate, movement only», «Estimate, from each day's step»).
+  - **Insights, the door to the Ways** is a title and two or three lines (it was seven, in a
+    list's row), its mark in the row icons' quiet ink. The page's sentence, the line under it and
+    the season card's body go through `unorphaned()` («…per farne / 5.» at 320dp).
+  - **Your year on foot.** Whose year it is stands under the marks at one height on every page,
+    and the rest is centred in the room under it: the eyebrow moved between 105 and 340dp from
+    page to page, and the title jumped at each touch. A page's number is one line, a size
+    smaller where a narrow phone has no room for it («3.065.44 / 0» at 320dp). How the pages turn
+    is said at the foot of the first page, outside what is drawn into the image: it was inside
+    the page, so in the picture shared or saved. The sentence and the lines under it break as a
+    title does (`LineBreak.Heading`), a way's name and a stretch of days are not parted, a fact
+    has a line of its own where a «·» joined two, and the rhythm's two sentences are a line each.
+    The outings' and the ways' pages give their number large, as every page with one does («Out
+    with a goal», 25, «outings»; «Along the ways», 1,188, «km», then each way by name with its
+    amounts under it): they had it in the title, at the title's size. The year's strings have the
+    curved apostrophe the rest of the app has; a weekday after a colon is in the language's own
+    case; a year begun late says «· since Oct 1», the year once. A page saved says so in a
+    snackbar: it was the app's one toast.
+  - **The Ways.** A route's last word is not left alone («…a / Roma»); a way kept says its year
+    once, with the day it ended («Walked from Sep 1 to Oct 7, 2025»), and its mark is in the row
+    icons' quiet ink. «…Santiago, da / Saint-Jean-Pied-de-Port» stays: in the row's 176dp the
+    name does not fit beside its preposition.
+  This changes how «Phase 5» and «Phase 12» (archive 01) and «Your year on foot» (archive 03) put
+  these pages on the screen, not what they count. Tests: a week in one month and the averages
+  side by side, the card with no streak, Insights in Italian at 360dp, the hint at the foot of
+  the first page only, the outings' and the ways' numbers, the year in Italian at 320dp. README
+  screenshots regenerated (Insights, Your year on foot). Checked: every module's tests, lint,
+  spotless, the forbidden permissions. Not done on a device: the box is in «Open».
+
 ### Open
 
 - [ ] **On a device (owner): Today's premium review** (§15, «Today reviewed for a premium first
@@ -1038,3 +1104,9 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   Outings»): the four scales in Italian, a bar's reading and «Open», the tiles' quiet marks (in
   Insights too), a day's walks on two lines, in the light and the dark, at a large text size and
   with TalkBack.
+
+- [ ] **On a device (owner): Insights' and the year's review** (§15, «Insights and Your year on
+  foot reviewed, after Today, the Outings and History»): Insights with and without a streak, a way
+  under way, the averages' strip and the tiles in Italian, in the light and the dark and at a
+  large text size; Your year on foot page by page, a page shared and one saved (the image without
+  the hint, the snackbar); a way kept on the Ways page; TalkBack on the averages and on a page.
