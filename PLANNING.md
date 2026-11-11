@@ -956,6 +956,18 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   the walk, the ways). Checked: every module's tests, lint, spotless, the forbidden permissions.
   Not done on a device: the box is in «Open».
 
+- **An outing's numbers centred, as Today's three amounts are** (owner, 11 Nov 2026, on the
+  screenshots of the review above: "can the words in those boxes be centred, as on the main
+  screen? Everywhere the app shows this kind of row, so they are the same across the app"). The
+  app sets a few amounts in a row between two hairlines in two places, Today's three under the
+  sentence and an outing's card (on Today, on the Outings page, on a walk's page): both are now
+  drawn by one component, `StatStrip` (`:core:designsystem`), each amount centred on its share,
+  with the same hairlines and the same room. Today's is unchanged to the pixel; the card's, left
+  aligned when it was made earlier today, follows it. The values keep their two sizes (the
+  reading's on the page, a step smaller under a card's headline). History's and Insights' tiles
+  are another thing, a card each with its mark and its meaning, and stay as they are. README
+  screenshots regenerated (the outing on Today, the intervals over, the walk).
+
 ### Open
 
 - [ ] **On a device (owner): Today's premium review** (§15, «Today reviewed for a premium first

@@ -5,9 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,14 +16,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
@@ -37,7 +33,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
@@ -363,8 +358,9 @@ private val STAT_MIN_WIDTH = 80.dp
 /**
  * An outing's numbers, each over what it is: under way the pace now, the steps and the distance
  * (with the calories beside the word that says both are estimates); paused or over, the steps
- * and the two estimates. Three columns between two hairlines, the figures tabular, so a number
- * that changes does not move its neighbours.
+ * and the two estimates. Three columns between two hairlines, each centred on its own, as
+ * Today's three amounts are ([StatStrip]); the figures tabular, so a number that changes does
+ * not move its neighbours.
  *
  * One node for TalkBack, read as the two sentences the card always said. Where a third of the
  * card is too narrow for a number at the reader's text size, those sentences are what is shown.
@@ -383,7 +379,7 @@ private fun SessionStats(session: Session, cadence: Int?, pace: SessionIntensity
     )
     val spoken = lines.joinToString(". ")
     val unit = SpanStyle(fontSize = MaterialTheme.typography.bodyMedium.fontSize)
-    val steps = Stat(
+    val steps = StripStat(
         AnnotatedString(format.steps(session.totals.steps)),
         pluralStringResource(R.plurals.session_stat_steps, session.totals.steps),
     )
@@ -393,78 +389,47 @@ private fun SessionStats(session: Session, cadence: Int?, pace: SessionIntensity
     val stats = if (active) {
         val now = format.cadence(cadence ?: 0)
         listOf(
-            Stat(AnnotatedString(if (cadence == null) NO_VALUE else now.number), res.unitOf(now)),
+            StripStat(AnnotatedString(if (cadence == null) NO_VALUE else now.number), res.unitOf(now)),
             steps,
             // A little wider than the other two: its label carries the calories as well.
-            Stat(distance, stringResource(R.string.session_stat_estimate_with, energy.unbrokenText()), WIDE_STAT),
+            StripStat(
+                distance,
+                stringResource(R.string.session_stat_estimate_with, energy.unbrokenText()),
+                weight = WIDE_STAT,
+            ),
         )
     } else {
-        listOf(steps, Stat(distance, estimate), Stat(energy.annotated(unit), estimate))
+        listOf(steps, StripStat(distance, estimate), StripStat(energy.annotated(unit), estimate))
     }
-    val fontScale = LocalDensity.current.fontScale
-    BoxWithConstraints(
+    StatStrip(
+        stats = stats,
+        minShare = STAT_MIN_WIDTH,
+        // A step under the card's headline: the reading's style is a page's.
+        valueStyle = PassoTheme.type.readingValue.copy(
+            fontSize = 20.sp,
+            lineHeight = 28.sp,
+            fontWeight = FontWeight.Normal,
+        ),
         modifier = Modifier
-            .fillMaxWidth()
             .testTag(SessionCardTags.STATS)
             .clearAndSetSemantics { contentDescription = spoken },
     ) {
-        if (maxWidth / stats.size / fontScale < STAT_MIN_WIDTH) {
-            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                lines.forEach {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-        } else {
-            val hairline = MaterialTheme.colorScheme.outlineVariant.copy(alpha = HAIRLINE_ALPHA)
-            Column {
-                HorizontalDivider(color = hairline)
-                Row(modifier = Modifier.height(IntrinsicSize.Min)) {
-                    stats.forEachIndexed { index, stat ->
-                        if (index > 0) VerticalDivider(color = hairline)
-                        Column(
-                            modifier = Modifier
-                                .weight(stat.weight)
-                                .padding(
-                                    start = if (index > 0) 12.dp else 0.dp,
-                                    end = if (index < stats.lastIndex) 8.dp else 0.dp,
-                                    top = 8.dp,
-                                    bottom = 8.dp,
-                                ),
-                        ) {
-                            Text(
-                                stat.value,
-                                style = PassoTheme.type.readingValue.copy(
-                                    fontSize = 20.sp,
-                                    lineHeight = 28.sp,
-                                    fontWeight = FontWeight.Normal,
-                                ),
-                            )
-                            Text(
-                                stat.label,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        }
-                    }
-                }
-                HorizontalDivider(color = hairline)
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            lines.forEach {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
     }
 }
 
-/** A number of an outing and the word under it, in a column [weight] wide against the others. */
-private class Stat(val value: AnnotatedString, val label: String, val weight: Float = 1f)
-
 private const val WIDE_STAT = 1.3f
 
 /** A pace not measured yet: the first seconds of an outing. */
 private const val NO_VALUE = "–"
-private const val HAIRLINE_ALPHA = 0.6f
 
 @Composable
 private fun ButtonIcon(icon: ImageVector) {
