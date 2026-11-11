@@ -171,6 +171,14 @@ fun Resources.sessionProgress(session: Session, format: MeasureFormatter): Strin
     )
 }
 
+/**
+ * How far an outing stands, for the near end of its bar: «12 min», «1,240 steps», «1.10 km»; an
+ * interval outing's set, «Set 2 of 5». The far end is its goal ([sessionAmount]).
+ */
+fun Resources.sessionStanding(session: Session, format: MeasureFormatter): String =
+    session.intervalAt(session.lastStepAtMillis)?.let { getString(R.string.session_interval_set, it.set, it.sets) }
+        ?: sessionAmount(session.done(), format)
+
 /** An interval's word: «Fast», «Slow». */
 fun Resources.intervalWord(fast: Boolean): String =
     getString(if (fast) R.string.session_interval_fast else R.string.session_interval_slow)
@@ -191,9 +199,7 @@ fun Resources.sessionHeadline(
     nowMillis: Long = session.lastStepAtMillis,
 ): String {
     val headline = SessionHeadline.of(session, nowMillis)
-    val going = headline is SessionHeadline.Starting || headline is SessionHeadline.Going ||
-        headline is SessionHeadline.PastHalf || headline is SessionHeadline.AlmostThere
-    if (going) WalkPlaces.next(session)?.let { return walkNext(it, format) }
+    if (headline.going) WalkPlaces.next(session)?.let { return walkNext(it, format) }
     val walk = session.walk
     if (headline is SessionHeadline.Reached && walk != null) {
         return getString(R.string.walk_done, getString(placeNameRes(Ways.of(walk).stops.last().key)))
@@ -234,6 +240,23 @@ fun Resources.sessionHeadline(
     }
 }
 
+private val SessionHeadline.going: Boolean
+    get() = this is SessionHeadline.Starting || this is SessionHeadline.Going ||
+        this is SessionHeadline.PastHalf || this is SessionHeadline.AlmostThere
+
+/**
+ * The place ahead on a city walk while its outing goes, where [sessionHeadline] says «Next: …»;
+ * null for any other outing, and for a walk paused or over. The card sets it as its headline.
+ */
+fun sessionPlaceAhead(session: Session, nowMillis: Long = session.lastStepAtMillis): NextPlace? =
+    if (SessionHeadline.of(session, nowMillis).going) WalkPlaces.next(session) else null
+
+/** «The next place, in 230 m»: under the place's name on the outing's card, the measure kept whole. */
+fun Resources.walkNextIn(next: NextPlace, format: MeasureFormatter): String = getString(
+    R.string.walk_next_in,
+    format(format.aheadDistance(next.inMeters.toDouble())).replace(' ', NO_BREAK),
+)
+
 private fun Resources.amountPlural(id: Int, amount: SessionAmount, format: MeasureFormatter): String {
     // A distance reads as many whatever its value: «mancano 1,20 km».
     val quantity = if (amount.kind == SessionGoalKind.DISTANCE) 2 else amount.value.roundToInt()
@@ -252,6 +275,20 @@ fun Resources.sessionCadence(cadence: Int?, intensity: SessionIntensity, format:
         floor == null -> getString(R.string.session_cadence_free, measure, cadenceBandWord(cadence))
         cadence >= floor -> getString(R.string.session_cadence_on_pace, measure)
         else -> getString(R.string.session_cadence_below, measure)
+    }
+}
+
+/**
+ * How the pace now stands against the outing's own, in a word or two: «on pace», «below your
+ * pace»; with no cadence to keep, its band («brisk»). Null until a cadence is measured.
+ */
+fun Resources.sessionPaceWord(cadence: Int?, intensity: SessionIntensity): String? {
+    if (cadence == null) return null
+    val floor = intensity.cadenceFloor
+    return when {
+        floor == null -> cadenceBandWord(cadence)
+        cadence >= floor -> getString(R.string.session_pace_on)
+        else -> getString(R.string.session_pace_below)
     }
 }
 

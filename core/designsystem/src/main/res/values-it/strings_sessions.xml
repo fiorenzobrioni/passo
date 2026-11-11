@@ -59,6 +59,16 @@
     <string name="session_cadence_vigorous">passo sostenuto</string>
     <string name="session_cadence_running">corsa</string>
     <string name="session_cadence_waiting">Cadenza tra qualche secondo</string>
+    <string name="session_pace_on">a ritmo</string>
+    <string name="session_pace_below">sotto il tuo ritmo</string>
+    <string name="session_card_state_pace">%1$s · %2$s</string>
+    <plurals name="session_stat_steps">
+        <item quantity="one">passo</item>
+        <item quantity="many">passi</item>
+        <item quantity="other">passi</item>
+    </plurals>
+    <string name="session_stat_estimate">stima</string>
+    <string name="session_stat_estimate_with">stima · %1$s</string>
 
     <string name="session_zone">%1$s di %2$s al ritmo scelto</string>
     <string name="session_outcome_reached">Obiettivo raggiunto</string>
@@ -81,6 +91,7 @@
     <string name="session_brief_short_paused">Uscita in pausa</string>
     <!-- A city walk under way (Phase 11): «Next: the Duomo, 600 m». -->
     <string name="walk_next">Più avanti: %1$s, a %2$s</string>
+    <string name="walk_next_in">Il prossimo luogo, a %1$s</string>
     <!-- A city walk walked to its last place: «The walk is done: Tower Bridge.» -->
     <string name="walk_done">Passeggiata conclusa: %1$s.</string>
 
@@ -114,5 +125,5 @@
         <item quantity="other">%1$d intervalli veloci su %2$d al ritmo</item>
     </plurals>
     <string name="session_intervals_chart_description">Intervalli veloci, passi al minuto: %1$s. Ritmo da %2$d.</string>
-    <string name="session_intervals_chart_legend">La cadenza di ogni intervallo veloce; la linea è il ritmo da %1$d.</string>
+    <string name="session_intervals_chart_legend">La cadenza di ogni intervallo veloce; la linea è il ritmo da\u00A0%1$d.</string>
 </resources>

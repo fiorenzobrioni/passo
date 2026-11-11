@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -12,6 +13,7 @@ import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -107,12 +109,12 @@ class SessionsScreenTest {
         show(state())
 
         compose.onNodeWithText("Brisk walk").assertIsDisplayed()
-        compose.onNodeWithText("20 min at a brisk pace").assertIsDisplayed()
+        compose.onNodeWithText("20 min at a brisk\u00A0pace").assertIsDisplayed()
         compose.onNodeWithText("About 2,000 steps · 1.46 km, estimated").assertIsDisplayed()
         compose.onAllNodesWithText("Signals at 50% and at the goal, with vibration").assertCountEquals(3)
         compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag("${SessionsTags.PLAN}-4"))
         compose.onNodeWithText("Japanese walking").assertIsDisplayed()
-        compose.onNodeWithText("5 sets: 3 min slow, 3 min brisk").assertIsDisplayed()
+        compose.onNodeWithText("5 sets: 3 min slow, 3\u00A0min\u00A0brisk").assertIsDisplayed()
         compose.onNodeWithText("A signal at each change, with vibration").assertIsDisplayed()
         compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag("${SessionsTags.PLAN}-3"))
         compose.onNodeWithText("Finish the day").assertIsDisplayed()
@@ -164,14 +166,34 @@ class SessionsScreenTest {
     }
 
     @Test
-    fun `a card opens its editor, and the last button a new one`() {
+    fun `a card opens its editor, and the bar's button a new one`() {
         val opened = mutableListOf<Long?>()
         show(state(), onEdit = { opened += it })
 
-        compose.onNodeWithText("20 min at a brisk pace").performClick()
-        compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag(SessionsTags.NEW))
+        compose.onNodeWithText("20 min at a brisk\u00A0pace").performClick()
+        // In the bar, so in reach wherever the list stands: nothing to scroll to.
+        compose.onNodeWithContentDescription("New outing").assertIsDisplayed()
         compose.onNodeWithTag(SessionsTags.NEW).performClick()
         assertThat(opened).containsExactly(1L, null).inOrder()
+    }
+
+    @Test
+    fun `each outing starts from a button that says which`() {
+        show(state())
+
+        compose.onNodeWithContentDescription("Start Brisk walk").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Start Run").assertIsDisplayed()
+    }
+
+    @Test
+    fun `with no outing kept, the page says how to make one, there too`() {
+        val opened = mutableListOf<Long?>()
+        show(state(list = emptyList()), onEdit = { opened += it })
+
+        compose.onNodeWithText("No outings kept", substring = true).assertIsDisplayed()
+        compose.onNodeWithTag(SessionsTags.NEW_FIRST).performClick()
+        assertThat(opened).containsExactly(null)
+        snapshot("sessions_empty")
     }
 
     @Test
@@ -182,7 +204,12 @@ class SessionsScreenTest {
         )
 
         compose.onNodeWithText("Past halfway: 8 min to go.").assertIsDisplayed()
-        compose.onNodeWithText("108 steps/min: on pace · 1,240 steps").assertIsDisplayed()
+        compose.onNodeWithText("Under way · on pace").assertIsDisplayed()
+        // The numbers are three columns for the eye and the card's two sentences for TalkBack.
+        compose.onNodeWithTag(SessionCardTags.STATS)
+            .assertContentDescriptionContains("108 steps/min: on pace · 1,240 steps", substring = true)
+        // How far it is and where it ends, said by the bar they stand under.
+        compose.onNodeWithContentDescription("12 of 20 min", substring = true).assertIsDisplayed()
         compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag("${SessionsTags.START}-1"))
         compose.onNodeWithTag("${SessionsTags.START}-1").assertIsNotEnabled()
         snapshot("sessions_live_dark")
@@ -197,9 +224,10 @@ class SessionsScreenTest {
         show(state(live = LiveSessionState(going, cadence = 114, canKeepGoing = false, alertsWhileScreenOff = true)))
 
         compose.onNodeWithText("Japanese walking").assertIsDisplayed()
-        compose.onNodeWithText("Set 1 of 5").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Set 1 of 5", substring = true).assertIsDisplayed()
         compose.onNodeWithText("Fast: 1:35 left.").assertIsDisplayed()
-        compose.onNodeWithText("114 steps/min: on pace · 470 steps").assertIsDisplayed()
+        compose.onNodeWithTag(SessionCardTags.STATS)
+            .assertContentDescriptionContains("114 steps/min: on pace · 470 steps", substring = true)
         snapshot("sessions_intervals_live")
     }
 

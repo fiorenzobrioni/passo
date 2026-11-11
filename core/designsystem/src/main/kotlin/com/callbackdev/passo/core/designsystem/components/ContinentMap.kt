@@ -27,6 +27,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.ways.ContinentMap
 import com.callbackdev.passo.core.domain.ways.GeoBox
@@ -74,6 +75,7 @@ fun ContinentMapView(
     val goal = PassoTheme.colors.goal
     val halo = scheme.surface
     val ink = scheme.onSurface
+    val outline = scheme.outlineVariant
     val measurer = rememberTextMeasurer()
     val labelStyle = MaterialTheme.typography.labelMedium
     var touched by remember(cities) { mutableStateOf<Int?>(null) }
@@ -93,7 +95,8 @@ fun ContinentMapView(
     Spacer(
         modifier
             .aspectRatio(ratio ?: continentMapRatio(map.frame))
-            .clip(MaterialTheme.shapes.large)
+            // On its page the map stands over the page's groups, as wide as they are: their corner.
+            .clip(if (detailed) GroupShape else MaterialTheme.shapes.large)
             // An empty description makes it decoration: a thumbnail beside the continent's name.
             .clearAndSetSemantics { if (contentDescription.isNotEmpty()) this.contentDescription = contentDescription }
             .then(touch)
@@ -129,7 +132,7 @@ fun ContinentMapView(
                             CityMark.UNDER_WAY -> drawHere(at, detailed, goal, halo)
                         }
                     }
-                    labels.forEach { (text, box) -> drawLabel(text, box, halo, ink) }
+                    labels.forEach { (text, box) -> drawLabel(text, box, halo, ink, outline) }
                 }
             },
     )

@@ -322,7 +322,9 @@ class TodayScreenTest {
 
         compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(SessionCardTags.CARD))
         compose.onNodeWithText("A walk in Milan").assertExists()
-        compose.onNodeWithText("Next: Sempione Park, 230 m").assertExists()
+        // The place ahead is the card's headline, with how far it is under it.
+        compose.onNode(hasTestTag(SessionCardTags.SENTENCE) and hasText("Sempione Park")).assertExists()
+        compose.onNodeWithText("The next place, 230\u00A0m ahead", substring = true).assertExists()
         compose.onNodeWithTag(SessionCardTags.MAP).assertExists()
         snapshot("today_walk")
     }
@@ -348,7 +350,7 @@ class TodayScreenTest {
 
         compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(SessionCardTags.CARD))
         compose.onNodeWithText("Goal reached: 20 min.").assertIsDisplayed()
-        compose.onNodeWithText("2,140 steps · 17 of 20 min at the pace you set").assertIsDisplayed()
+        compose.onNodeWithText("17 of 20 min at the pace you set").assertIsDisplayed()
         snapshot("today_outing_done_dark")
         compose.onNodeWithTag(SessionCardTags.KEEP_GOING).performClick()
         compose.onNodeWithTag(SessionCardTags.CLOSE).performClick()

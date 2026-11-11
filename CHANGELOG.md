@@ -12,6 +12,20 @@ All notable changes to Passo are documented here. The format follows
 
 ### Better
 
+- **Outings, easier to read and to start.** Each outing is a shorter card that reads on one
+  line, with one button to start it and a touch on the card to change it; a new one is at the
+  top of the page. An outing under way leads with its sentence, shows how far it is and where
+  it ends at the two ends of its bar, and its numbers in three columns; Stop and Pause are
+  larger, for a hand in motion.
+
+- **The outing's editor, lighter.** The signals are a legend: each with its pattern drawn
+  beside it, and a touch to feel it. The interval settings are a line each, and the Japanese
+  walk is explained in two lines, with the rest a touch away.
+
+- **City maps you can read at a glance.** The way stands out from the streets, the side streets
+  step back, and a name no longer covers the line it names. While you walk, the map names the
+  place ahead. The list of places is one line running through them, as far as you have come.
+
 - **Today, calmer.** A finer ring on a plain page, with only your steps and your goal inside it.
   Under the sentence, the day’s distance, active calories and active minutes in one row, with one
   line on what the estimates rest on. Beside the date, how many days in a row you have met your

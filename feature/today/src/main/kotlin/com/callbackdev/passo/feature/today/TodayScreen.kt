@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -43,7 +42,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -90,8 +88,10 @@ import com.callbackdev.passo.core.designsystem.components.OutingList
 import com.callbackdev.passo.core.designsystem.components.ProgressRing
 import com.callbackdev.passo.core.designsystem.components.SessionCard
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
+import com.callbackdev.passo.core.designsystem.components.StatStrip
 import com.callbackdev.passo.core.designsystem.components.StatusCard
 import com.callbackdev.passo.core.designsystem.components.StatusTone
+import com.callbackdev.passo.core.designsystem.components.StripStat
 import com.callbackdev.passo.core.designsystem.components.TrendPoint
 import com.callbackdev.passo.core.designsystem.components.reveal
 import com.callbackdev.passo.core.designsystem.format.annotated
@@ -502,7 +502,7 @@ private fun Stats(state: TodayUiState, format: MeasureFormatter) {
     val active = format.minutes(metrics.activeMinutes)
     val stepLength = format.stepLength(state.walkingStepLength).text()
     val stats = listOf(
-        StatItem(
+        StripStat(
             value = distance.annotated(unit),
             label = stringResource(R.string.today_stat_distance),
             spoken = stringResource(
@@ -512,7 +512,7 @@ private fun Stats(state: TodayUiState, format: MeasureFormatter) {
                 stringResource(R.string.today_metric_distance_meaning, stepLength),
             ),
         ),
-        StatItem(
+        StripStat(
             value = energy.annotated(unit),
             label = stringResource(R.string.today_stat_calories),
             spoken = stringResource(
@@ -522,7 +522,7 @@ private fun Stats(state: TodayUiState, format: MeasureFormatter) {
                 stringResource(R.string.today_metric_calories_meaning),
             ),
         ),
-        StatItem(
+        StripStat(
             value = active.annotated(unit),
             label = stringResource(R.string.today_stat_active),
             spoken = stringResource(
@@ -533,65 +533,19 @@ private fun Stats(state: TodayUiState, format: MeasureFormatter) {
             ),
         ),
     )
-    val rule = MaterialTheme.colorScheme.outlineVariant
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenMargin).testTag(TodayTags.STATS),
     ) {
-        BoxWithConstraints(Modifier.fillMaxWidth()) {
-            val across = maxWidth / stats.size / LocalDensity.current.fontScale >= STAT_MIN_WIDTH
-            Column {
-                HorizontalDivider(color = rule)
-                if (across) {
-                    Row(Modifier.height(IntrinsicSize.Min)) {
-                        stats.forEachIndexed { i, stat ->
-                            if (i > 0) VerticalDivider(color = rule)
-                            Stat(stat, Modifier.weight(1f).padding(horizontal = 4.dp))
-                        }
-                    }
-                } else {
-                    stats.forEachIndexed { i, stat ->
-                        if (i > 0) HorizontalDivider(color = rule)
-                        Stat(stat, Modifier.fillMaxWidth().padding(horizontal = 8.dp))
-                    }
-                }
-                HorizontalDivider(color = rule)
-            }
-        }
+        // Each amount centred on its third, as the ring and the sentence above are on the page:
+        // one axis down the first screen (owner, 10 Nov 2026).
+        StatStrip(stats, minShare = STAT_MIN_WIDTH)
         Text(
             text = stringResource(R.string.today_stats_note, stepLength),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp).clearAndSetSemantics { },
-        )
-    }
-}
-
-private class StatItem(val value: AnnotatedString, val label: String, val spoken: String)
-
-@Composable
-private fun Stat(stat: StatItem, modifier: Modifier) {
-    // Centred on its share, as the ring and the sentence above are on the page: one axis down the
-    // first screen (owner, 10 Nov 2026).
-    Column(
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-            .padding(vertical = 10.dp)
-            .clearAndSetSemantics { contentDescription = stat.spoken },
-    ) {
-        Text(
-            stat.value,
-            style = PassoTheme.type.readingValue,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-        )
-        Text(
-            stat.label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
         )
     }
 }

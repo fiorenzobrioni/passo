@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -47,18 +48,14 @@ fun ValueStepper(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.fillMaxWidth(),
         ) {
-            FilledTonalIconButton(onClick = onDecrease, enabled = value > range.start, colors = buttonColors()) {
-                Icon(PassoIcons.Minus, contentDescription = decreaseLabel)
-            }
+            StepButton(PassoIcons.Minus, decreaseLabel, onClick = onDecrease, enabled = value > range.start)
             Text(
                 text = text,
                 style = PassoTheme.type.heroNumber.copy(fontSize = 40.sp, lineHeight = 48.sp),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.weight(1f),
             )
-            FilledTonalIconButton(onClick = onIncrease, enabled = value < range.endInclusive, colors = buttonColors()) {
-                Icon(PassoIcons.Plus, contentDescription = increaseLabel)
-            }
+            StepButton(PassoIcons.Plus, increaseLabel, onClick = onIncrease, enabled = value < range.endInclusive)
         }
         if (caption != null) {
             Text(
@@ -80,6 +77,23 @@ fun ValueStepper(
                 if (caption != null) contentDescription = caption
             },
         )
+    }
+}
+
+/**
+ * A step down or a step up: the one button every stepper of the app steps with, here and where
+ * a count is picked in a row of its own. [label] is what it does, for TalkBack.
+ */
+@Composable
+fun StepButton(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    FilledTonalIconButton(onClick = onClick, enabled = enabled, colors = buttonColors(), modifier = modifier) {
+        Icon(icon, contentDescription = label)
     }
 }
 
