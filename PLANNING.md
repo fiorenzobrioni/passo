@@ -968,9 +968,73 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   are another thing, a card each with its mark and its meaning, and stay as they are. README
   screenshots regenerated (the outing on Today, the intervals over, the walk).
 
+- **History reviewed, after Today and the Outings** (owner, 11 Nov 2026: "review the design of
+  History and its child screens, the ones the earlier review did not touch; Material 3, what is
+  wrong today and what would make it more premium; the type, the line breaks nobody wanted and
+  the alignments; a clean layout, in step with what is already reviewed, no noise", then, on the
+  review drawn beside the pages as they were, "apply everything": the eight faults and the three
+  things that asked for a yes). The four pages were drawn in Italian at 360dp, where the faults
+  were, and read again after.
+  - **The scales.** «Settimana» read «Settim…» in its quarter of the row: the segments keep 4dp
+    a side for their word, not Material's 12dp, and a label still too long for its room goes a
+    step smaller (12sp from 14sp at most) before it is cut, at the standard text size too
+    (`FittedLabel`, which `SegmentLabel` now is; at 320dp the four words are whole).
+  - **A bar's reading** is two lines that stay two: the day and its steps, and under them what
+    came of it («Goal met» with the goal's mark and colour, «1,677 short of the goal»). On one
+    line it ran to three in Italian, «10.536» parted from its «passi», and the chart moved
+    under the finger. The way in is one word at the line's end, «Open» (a screen reader still
+    says «Open day», «Open month»), and the readout keeps a button's height (48dp) whether or
+    not the button is there: it was 40dp without it and 48dp with it. A day with no bar touched
+    reads its busiest hour the same way, the hour and its steps, «The busiest hour» under them.
+  - **Said once.** The days' chart told the reader to touch a bar twice (the readout and the
+    line under the plot) and what its line is three times (the key, the number at its end, the
+    line under the plot): the line under the plot is gone for a week and a month. A year keeps
+    «Each bar is the month's average day», a day its shaded walks and the touch (the walks named
+    only on a day that has them), the calendar «Touch a day to open it».
+  - **No word alone.** A page's sentence and the line under it, the captions and a tile's
+    meaning go through `unorphaned()`, and the sentence's numbers are held to their words in
+    the strings («su 4, finora», «20% in più», "of 24"): «…5 giorni su / 7» was a headline.
+  - **The tiles.** A label is one line, a step smaller where half a phone is short for it
+    (`MetricTile`'s `fitLabel`; "Active calories" broke at 360dp, and a label on two lines set
+    its value a line lower than its neighbour's); a day's brisk minutes are «Passo svelto» in
+    Italian beside the mark, the whole name still read aloud. The meanings are short («Estimate,
+    from your step», «Estimate, movement only», «With 40 steps or more», «From 100 steps a
+    minute»): one line or two balanced ones, where they ran from one to three. The mark is
+    quiet, the highest container with the variant ink: the accent's container is the tone of
+    the scale chosen above, and five marks wore it. This changes one thing in «An outing's
+    numbers centred» above, which left History's and Insights' tiles as they were: the tile is
+    the same card, its mark another tone, in Insights and the guide too (`MetricTile` is theirs).
+  - **Walks and outings in a day's list** (`OutingList`, so on Today as well). The four figures
+    on one line broke where the width ran out, «108 passi/» from its «min»: they are two lines
+    that never change places, what was counted (the steps, the cadence) and what is estimated
+    from it (the distance, the calories) after the «≈» Today uses, each figure held together.
+    What came of an outing has a line of its own under its name: beside it, «Obiettivo
+    raggiunto» broke in two. TalkBack reads the sentences it read.
+  - **Ranges.** A week inside one month says the month once, on the side the locale writes it
+    («21 – 27 set», "Sep 21 – 27"; `dayRange`), and the dash stays with the first date. An hour
+    is written as the walks under it are, «12:00–13:00» (`clockRange`): the page had both. The
+    range has a place to break after its dash that shows nothing: at twice the text size
+    «12:35 PM–12:55 PM» broke inside its last «PM».
+  - **The period's name** keeps the room of its two lines when it has one, so at a large text
+    size the page does not move up and down as the weeks are paged (at the standard size the
+    arrows' 48dp already held it: the review said otherwise, wrongly).
+  - **The year's pages** are a tonal button at the headline's edge, with the same words: a text
+    link between the sentence and the chart read as a caption.
+  The goal calendar keeps its ticks on the days at the goal (the review's drawing had left them
+  out): they say it without the colour. Tests: a bar's two lines and its «Open», a week in one
+  month, the four scales uncut in Italian. README screenshots regenerated (History's day and
+  month; no other picture shows a tile or a day's list). Checked: every module's tests, lint,
+  spotless, the forbidden permissions. Not done on a device: the box is in «Open». Left as they
+  are, outside History: Insights' and the year's own ranges still say the month twice («Sep 7 –
+  Sep 13»).
+
 ### Open
 
 - [ ] **On a device (owner): Today's premium review** (§15, «Today reviewed for a premium first
   screen»): the ring, the row of three, the streak by the date, the chart and the Intensity card,
   in the light and the dark, at a large text size and with TalkBack.
 
+- [ ] **On a device (owner): History's review** (§15, «History reviewed, after Today and the
+  Outings»): the four scales in Italian, a bar's reading and «Open», the tiles' quiet marks (in
+  Insights too), a day's walks on two lines, in the light and the dark, at a large text size and
+  with TalkBack.

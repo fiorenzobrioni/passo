@@ -22,12 +22,14 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performSemanticsAction
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.history.PeriodScale
 import com.callbackdev.passo.core.testing.assertAccessible
 import com.callbackdev.passo.core.testing.walkPage
+import org.junit.Assert.assertFalse
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -70,7 +72,7 @@ class HistoryScreenTest {
     fun `a week opens on this week with its sentence and its bars`() {
         show()
         compose.onNodeWithText("This week").assertIsDisplayed()
-        compose.onNodeWithText("so far", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("far", substring = true).assertIsDisplayed()
         compose.onNode(hasContentDescription("Thursday, September 24", substring = true)).assertExists()
         // Days still to come are drawn as nothing, and said as not counted.
         compose.onNode(hasContentDescription("Friday, September 25: not counted")).assertExists()
@@ -89,12 +91,36 @@ class HistoryScreenTest {
     }
 
     @Test
+    fun `a week inside one month says the month once`() {
+        show(target = HistoryTarget(PeriodScale.WEEK, today.minusWeeks(2)))
+        compose.onNodeWithText("Sep 7\u00A0– 13").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Earlier").performClick()
+        compose.waitForIdle()
+        compose.onNodeWithText("Aug 31\u00A0– Sep 6").assertIsDisplayed()
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT-w360dp-h740dp-xxhdpi")
+    fun `in Italian on a small phone the four scales are whole words`() {
+        show()
+        // «Settimana» in a quarter of the width was «Settim…»: its text is laid out uncut.
+        val layouts = mutableListOf<TextLayoutResult>()
+        compose.onNodeWithText("Settimana").performSemanticsAction(SemanticsActions.GetTextLayoutResult) { it(layouts) }
+        assertFalse(layouts.single().hasVisualOverflow)
+        snapshot("history_week_it")
+    }
+
+    @Test
     fun `a bar reads its day and opens it`() {
         show()
         compose.onNode(hasContentDescription("Tuesday, September 22", substring = true))
             .performSemanticsAction(SemanticsActions.OnClick)
         compose.waitForIdle()
-        compose.onNodeWithText("Open day").performClick()
+        // The reading is two lines that stay two: the day and its steps, what came of it under them.
+        compose.onNodeWithText("10,536", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("Goal met").assertIsDisplayed()
+        compose.onNodeWithText("Open").assertIsDisplayed()
+        compose.onNodeWithContentDescription("Open day").performClick()
         compose.waitForIdle()
         compose.onNodeWithText("Tuesday, September 22").assertIsDisplayed()
         compose.onNodeWithText("Steps by hour").assertExists()
@@ -131,7 +157,7 @@ class HistoryScreenTest {
     fun `a day shows its walks on the chart and in a list`() {
         show(target = HistoryTarget(PeriodScale.DAY, today.minusDays(1)))
         compose.onNodeWithText("Yesterday").assertIsDisplayed()
-        compose.onNodeWithText("in all", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("3 walks", substring = true).assertIsDisplayed()
         snapshot("history_day")
         page().performScrollToNode(hasTestTag(HistoryTags.WALKS))
         compose.onAllNodes(hasContentDescription("Walk from", substring = true)).assertCountEquals(3)
@@ -155,7 +181,7 @@ class HistoryScreenTest {
             target = HistoryTarget(PeriodScale.DAY, today.minusDays(1)),
             walkDetection = false,
         )
-        compose.onNodeWithText("in all", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("walks,", substring = true).assertDoesNotExist()
         compose.onNodeWithText("Walks").assertDoesNotExist()
         compose.onNodeWithTag(HistoryTags.WALKS).assertDoesNotExist()
     }

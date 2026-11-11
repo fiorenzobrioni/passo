@@ -4,8 +4,11 @@
     <string name="walk_type_walk">Walk</string>
     <string name="walk_type_run">Run</string>
     <string name="walk_type_mixed">Walk and run</string>
-    <!-- A time range: «10:12–10:47». -->
-    <string name="walk_time_range">%1$s–%2$s</string>
+    <!-- A time range: «10:12–10:47». After the dash, a place to break that shows nothing: at a large
+         text size a range too long for its line broke inside «PM». -->
+    <string name="walk_time_range">%1$s–\u200B%2$s</string>
+    <!-- A row's estimates, the distance and the calories: «≈ 1.35 km · 52 kcal». The sign says "estimate", as on Today. -->
+    <string name="walk_estimates">≈ %1$s</string>
     <plurals name="walk_steps">
         <item quantity="one">%1$s step</item>
         <item quantity="other">%1$s steps</item>

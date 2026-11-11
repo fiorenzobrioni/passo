@@ -1,20 +1,21 @@
 package com.callbackdev.passo.feature.history
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +42,7 @@ import com.callbackdev.passo.core.designsystem.format.annotated
 import com.callbackdev.passo.core.designsystem.format.currentLocale
 import com.callbackdev.passo.core.designsystem.format.datePattern
 import com.callbackdev.passo.core.designsystem.format.text
+import com.callbackdev.passo.core.designsystem.format.unorphaned
 import com.callbackdev.passo.core.designsystem.format.weekdayLetter
 import com.callbackdev.passo.core.designsystem.format.weekdayShort
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
@@ -83,15 +85,22 @@ internal fun PeriodPage(
         if (overview.period.scale == PeriodScale.YEAR && overview.countedDays >= YearInReview.MIN_COUNTED_DAYS) {
             item(key = "year-pages") {
                 val year = overview.period.start.year
-                TextButton(
-                    onClick = { onOpenYear(year) },
-                    modifier = Modifier.padding(
-                        horizontal = 8.dp,
-                    ).heightIn(min = 48.dp).testTag(HistoryTags.YEAR_PAGES),
-                ) {
-                    Icon(PassoIcons.Calendar, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.size(8.dp))
-                    Text(stringResource(R.string.history_year_pages, year))
+                // A tonal button at the headline's edge: a text link between the sentence and the
+                // chart read as a caption, and the year's pages are the one thing here to open.
+                Box(Modifier.padding(horizontal = 20.dp)) {
+                    FilledTonalButton(
+                        onClick = { onOpenYear(year) },
+                        contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
+                        modifier = Modifier.testTag(HistoryTags.YEAR_PAGES),
+                    ) {
+                        Icon(
+                            PassoIcons.Calendar,
+                            contentDescription = null,
+                            modifier = Modifier.size(ButtonDefaults.IconSize),
+                        )
+                        Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+                        Text(stringResource(R.string.history_year_pages, year))
+                    }
                 }
             }
         }
@@ -119,7 +128,7 @@ private fun BarsCard(overview: PeriodOverview, format: MeasureFormatter, onOpen:
     )
     ChartCard(
         title = title,
-        caption = stringResource(if (year) R.string.history_caption_months else R.string.history_caption_days),
+        caption = if (year) stringResource(R.string.history_caption_months) else null,
         legend = { ChartLegend(goal = true, walks = false) },
         readout = {
             val index = selected
@@ -128,6 +137,7 @@ private fun BarsCard(overview: PeriodOverview, format: MeasureFormatter, onOpen:
                 ChartReadout(AnnotatedString(stringResource(R.string.history_readout_hint)))
             } else {
                 val steps = bar.steps
+                val locale = currentLocale()
                 ChartReadout(
                     text = readoutText(
                         time = if (year) datePattern(bar.start, "MMMM") else barDay(bar.start),
@@ -138,13 +148,12 @@ private fun BarsCard(overview: PeriodOverview, format: MeasureFormatter, onOpen:
                                 pluralStringResource(R.plurals.history_steps, it, format.steps(it))
                             }
                         } ?: stringResource(R.string.history_not_counted),
-                        extra = steps?.let { goalState(bar, year, format) },
                     ),
-                    action = when {
-                        steps == null -> null
-                        year -> stringResource(R.string.history_open_month)
-                        else -> stringResource(R.string.history_open_day)
-                    },
+                    // What came of it, on a line of its own: after the steps it ran to three.
+                    detail = steps?.let { goalState(bar, year, format).replaceFirstChar { it.titlecase(locale) } },
+                    met = !year && bar.met,
+                    action = if (steps == null) null else stringResource(R.string.history_open),
+                    actionLabel = stringResource(if (year) R.string.history_open_month else R.string.history_open_day),
                     onAction = { onOpen(if (year) PeriodScale.MONTH else PeriodScale.DAY, bar.start) },
                 )
             }
@@ -237,7 +246,7 @@ private fun CalendarCard(
                 met = stringResource(R.string.history_calendar_met),
             )
             Text(
-                text = stringResource(R.string.history_calendar_caption),
+                text = stringResource(R.string.history_calendar_caption).unorphaned(),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

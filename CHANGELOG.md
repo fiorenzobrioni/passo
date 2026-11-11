@@ -26,6 +26,12 @@ All notable changes to Passo are documented here. The format follows
   step back, and a name no longer covers the line it names. While you walk, the map names the
   place ahead. The list of places is one line running through them, as far as you have come.
 
+- **History, easier to read.** Touch a bar and its reading is two short lines, the day with
+  its steps and whether the goal was met, with «Open» beside them; the chart no longer moves
+  under your finger. The four scales are whole words on a small phone, in Italian too. A day's
+  walks show what was counted and what is estimated on two tidy lines, and no sentence leaves
+  its last word alone. The tiles' marks are quieter, in Insights as well.
+
 - **Today, calmer.** A finer ring on a plain page, with only your steps and your goal inside it.
   Under the sentence, the day’s distance, active calories and active minutes in one row, with one
   line on what the estimates rest on. Beside the date, how many days in a row you have met your

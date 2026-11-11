@@ -6,11 +6,13 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -42,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -52,6 +55,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.callbackdev.passo.core.designsystem.components.SegmentLabel
@@ -247,6 +251,9 @@ private fun ScaleChoice(scale: PeriodScale, onChoose: (PeriodScale) -> Unit) {
                 selected = option == scale,
                 onClick = { onChoose(option) },
                 shape = SegmentedButtonDefaults.itemShape(index, scales.size),
+                // The words to the segment's edge, less a hair: at the default 12dp a side,
+                // «Settimana» in a quarter of a phone's width read «Settim…».
+                contentPadding = PaddingValues(horizontal = 4.dp),
                 // No check mark: four words fit a phone's width only without it.
                 icon = {},
                 label = {
@@ -280,10 +287,20 @@ private fun Navigator(pager: PagerState, count: Int, period: Period, today: Loca
         ) {
             Icon(PassoIcons.ChevronLeft, contentDescription = stringResource(R.string.history_earlier))
         }
+        // The room of both lines whether or not the second is there («This week» has its dates
+        // under it, an older week has not): at a large text size the page under it would
+        // otherwise move up and down as the weeks are paged.
+        val type = MaterialTheme.typography
+        val twoLines = with(LocalDensity.current) {
+            (type.titleMedium.lineHeight.value + type.bodySmall.lineHeight.value).sp.toDp()
+        }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.weight(1f).semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
+            modifier = Modifier
+                .weight(1f)
+                .heightIn(min = twoLines)
+                .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
         ) {
             Text(
                 text = periodTitle(period, today),

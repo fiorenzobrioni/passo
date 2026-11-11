@@ -23,6 +23,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
@@ -32,6 +33,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.callbackdev.passo.core.designsystem.components.MetricTile
+import com.callbackdev.passo.core.designsystem.format.unorphaned
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
@@ -47,18 +49,27 @@ internal fun PageHeadline(sentence: String, detail: String?, modifier: Modifier 
             .padding(horizontal = 20.dp, vertical = 4.dp)
             .semantics(mergeDescendants = true) { },
     ) {
-        Text(sentence, style = MaterialTheme.typography.titleLarge)
+        // Neither line leaves its last word alone: «…5 days out of / 7» was the page's headline.
+        Text(sentence.unorphaned(), style = MaterialTheme.typography.titleLarge)
         if (detail != null) {
-            Text(detail, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                detail.unorphaned(),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
 
-/** A chart on its ground: title and key, the readout, the plot, the line that says how to read it. */
+/**
+ * A chart on its ground: title and key, the readout, the plot, and a line under it only where it
+ * says what the chart and its readout do not ([caption]; null for the days against their goal,
+ * whose key names the line and whose readout says to touch a bar).
+ */
 @Composable
 internal fun ChartCard(
     title: String,
-    caption: String,
+    caption: String?,
     modifier: Modifier = Modifier,
     legend: @Composable () -> Unit = {},
     readout: @Composable () -> Unit,
@@ -80,34 +91,61 @@ internal fun ChartCard(
             }
             readout()
             chart()
-            Text(
-                caption,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            if (caption != null) {
+                Text(
+                    caption.unorphaned(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }
 
 /**
- * The line above a chart: what the finger is on, or a hint when it is on nothing, and the way
- * into it ([action]) when there is one. Its height does not move with its content, so the chart
+ * The lines above a chart: what the finger is on, or a hint when it is on nothing, with what
+ * came of it under it ([detail]: the goal met or missed, with its mark when [met]) and the way
+ * into it at the end ([action], one short word; [actionLabel] is what a screen reader says).
+ * Two lines and a button's height at most, kept whether or not they are there, so the chart
  * does not jump under the finger.
  */
 @Composable
-internal fun ChartReadout(text: AnnotatedString, action: String? = null, onAction: () -> Unit = {}) {
+internal fun ChartReadout(
+    text: AnnotatedString,
+    detail: String? = null,
+    met: Boolean = false,
+    action: String? = null,
+    actionLabel: String? = null,
+    onAction: () -> Unit = {},
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 40.dp),
+        modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 48.dp),
     ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum"),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.weight(1f),
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.labelLarge.copy(fontFeatureSettings = "tnum"),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            if (detail != null) {
+                val ink = if (met) PassoTheme.colors.goal else MaterialTheme.colorScheme.onSurfaceVariant
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    if (met) {
+                        Icon(PassoIcons.Check, contentDescription = null, tint = ink, modifier = Modifier.size(12.dp))
+                    }
+                    Text(detail, style = MaterialTheme.typography.bodySmall, color = ink)
+                }
+            }
+        }
         if (action != null) {
-            TextButton(onClick = onAction) {
+            TextButton(
+                onClick = onAction,
+                modifier = Modifier.semantics { if (actionLabel != null) contentDescription = actionLabel },
+            ) {
                 Text(action)
                 Icon(
                     PassoIcons.ChevronRight,
@@ -119,9 +157,9 @@ internal fun ChartReadout(text: AnnotatedString, action: String? = null, onActio
     }
 }
 
-/** A readout's parts: the when in bold, the how many in the accent, the rest plain. */
+/** A readout's first line: the when in bold, the how many in the accent, each held together. */
 @Composable
-internal fun readoutText(time: String, value: String?, extra: String? = null): AnnotatedString {
+internal fun readoutText(time: String, value: String?): AnnotatedString {
     val primary = MaterialTheme.colorScheme.primary
     return androidx.compose.ui.text.buildAnnotatedString {
         withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)) {
@@ -129,11 +167,9 @@ internal fun readoutText(time: String, value: String?, extra: String? = null): A
         }
         if (value != null) {
             append("  ·  ")
-            withStyle(SpanStyle(color = primary, fontWeight = FontWeight.SemiBold)) { append(value) }
-        }
-        if (extra != null) {
-            append("  ·  ")
-            append(extra)
+            withStyle(SpanStyle(color = primary, fontWeight = FontWeight.SemiBold)) {
+                append(value.replace(' ', '\u00A0'))
+            }
         }
     }
 }
@@ -180,7 +216,12 @@ private fun LegendItem(label: String, swatch: @Composable () -> Unit) {
     }
 }
 
-/** A metric tile in History's voice. */
+/**
+ * A metric tile in History's voice.
+ *
+ * @param spokenLabel the metric's whole name, where [label] is the short one half a phone's
+ *   width has room for on one line.
+ */
 @Composable
 internal fun HistoryTile(
     icon: ImageVector,
@@ -189,6 +230,7 @@ internal fun HistoryTile(
     spokenValue: String,
     meaning: String,
     modifier: Modifier = Modifier,
+    spokenLabel: String = label,
     track: (@Composable () -> Unit)? = null,
 ) {
     MetricTile(
@@ -196,8 +238,9 @@ internal fun HistoryTile(
         label = label,
         value = value,
         meaning = meaning,
-        spoken = stringResource(R.string.history_metric_spoken, label, spokenValue, meaning),
+        spoken = stringResource(R.string.history_metric_spoken, spokenLabel, spokenValue, meaning),
         modifier = modifier,
+        fitLabel = true,
         track = track,
     )
 }
