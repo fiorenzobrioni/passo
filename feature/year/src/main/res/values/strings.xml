@@ -3,7 +3,7 @@
 <resources>
     <string name="year_title_full">Your %1$d on foot</string>
     <string name="year_title_so_far">Your %1$d so far</string>
-    <string name="year_since">Since %1$s</string>
+    <string name="year_since">since %1$s</string>
     <string name="year_close">Close</string>
     <string name="year_share">Share</string>
     <string name="year_save">Save</string>
@@ -39,20 +39,20 @@
     <!-- 1. The year in steps and in distance -->
     <string name="year_distance_more">Farther than a whole way: %1$s</string>
     <plurals name="year_distance_times">
-        <item quantity="one">A whole way, %1$d time over: %2$s</item>
-        <item quantity="other">A whole way, %1$d times over: %2$s</item>
+        <item quantity="one">A whole way, %1$d\u00A0time over: %2$s</item>
+        <item quantity="other">A whole way, %1$d\u00A0times over: %2$s</item>
     </plurals>
     <string name="year_distance_quarter">A quarter of a way: %1$s</string>
     <string name="year_distance_half">Half of a way: %1$s</string>
     <string name="year_distance_three_quarters">Three quarters of a way: %1$s</string>
     <string name="year_distance_plain">Your year in steps</string>
-    <string name="year_distance_detail">About %1$s, an estimate · %2$s</string>
+    <string name="year_distance_detail">About %1$s, an estimate</string>
 
     <!-- 2. The months -->
     <string name="year_months_title">%1$s was your best month</string>
     <string name="year_months_chart">Your steps month by month in %1$d</string>
     <string name="year_months_bar">%1$s: %2$s</string>
-    <string name="year_months_detail">Each bar is a month\'s steps.</string>
+    <string name="year_months_detail">Each bar is a month’s steps.</string>
 
     <!-- 3. The best day -->
     <string name="year_best_title">Your best day: %1$s</string>
@@ -60,7 +60,8 @@
     <string name="year_best_walk">With a walk of %1$s, %2$s</string>
 
     <!-- 4. The rhythm -->
-    <string name="year_rhythm_title">Your day: %1$s. Your hour: %2$s.</string>
+    <!-- Two sentences, a line each. -->
+    <string name="year_rhythm_title">Your day: %1$s.\nYour hour: %2$s.</string>
     <string name="year_rhythm_detail">%1$s, on average: %2$s</string>
     <string name="year_rhythm_chart">Your average steps by day of the week</string>
 
@@ -75,25 +76,28 @@
         <item quantity="one">Longest streak: %1$d day, %2$s</item>
         <item quantity="other">Longest streak: %1$d days, %2$s</item>
     </plurals>
-    <string name="year_range">%1$s – %2$s</string>
-    <string name="year_goal_calendar">Each day\'s ground says how close it came to its goal.</string>
+    <string name="year_range">%1$s\u00A0– %2$s</string>
+    <string name="year_goal_calendar">Each day’s ground says how close it came to its goal.</string>
 
     <!-- 6. The outings -->
-    <plurals name="year_outings_title">
-        <item quantity="one">%1$d outing</item>
-        <item quantity="other">%1$d outings</item>
+    <string name="year_outings_title">Out with a goal</string>
+    <plurals name="year_outings_unit">
+        <item quantity="one">outing</item>
+        <item quantity="other">outings</item>
     </plurals>
-    <string name="year_outings_detail">%1$s in motion. The longest: %2$s, %3$s.</string>
+    <string name="year_outings_moving">%1$s in motion</string>
+    <string name="year_outings_longest">The longest: %1$s, %2$s</string>
     <plurals name="year_outings_intervals">
         <item quantity="one">Of them, %1$d Japanese interval walk.</item>
         <item quantity="other">Of them, %1$d Japanese interval walks.</item>
     </plurals>
 
     <!-- 7. The ways and the cities -->
-    <string name="year_ways_title">%1$s along the ways</string>
-    <plurals name="year_cities_title">
-        <item quantity="one">%1$d city walked</item>
-        <item quantity="other">%1$d cities walked</item>
+    <string name="year_ways_title">Along the ways</string>
+    <string name="year_cities_title">Through the cities</string>
+    <plurals name="year_cities_unit">
+        <item quantity="one">city walked</item>
+        <item quantity="other">cities walked</item>
     </plurals>
     <string name="year_way_line">%1$s: %2$s</string>
     <plurals name="year_way_stamps">
@@ -101,7 +105,7 @@
         <item quantity="other">%1$d stamps</item>
     </plurals>
     <string name="year_way_arrived">walked to its end</string>
-    <string name="year_cities">Cities walked: %1$s</string>
+    <string name="year_cities">Cities walked</string>
 
     <!-- 8. Against the year before -->
     <string name="year_versus_up">More steps a day than in %1$d</string>

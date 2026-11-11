@@ -43,7 +43,9 @@ import com.callbackdev.passo.core.designsystem.components.PlaceText
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
 import com.callbackdev.passo.core.designsystem.components.WayMapView
 import com.callbackdev.passo.core.designsystem.format.rememberMeasureFormatter
+import com.callbackdev.passo.core.designsystem.format.shortDate
 import com.callbackdev.passo.core.designsystem.format.unbrokenText
+import com.callbackdev.passo.core.designsystem.format.unorphaned
 import com.callbackdev.passo.core.designsystem.format.wayDetail
 import com.callbackdev.passo.core.designsystem.format.wayDuration
 import com.callbackdev.passo.core.designsystem.format.wayHeadline
@@ -66,6 +68,7 @@ import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.Continent
 import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.model.WayJourneyState
+import java.time.LocalDate
 
 /** The Ways page, with its state from [WaysViewModel]. */
 @Composable
@@ -289,7 +292,8 @@ private fun WayRow(way: Way, pace: Double?, format: MeasureFormatter, onClick: (
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(stringResource(wayNameRes(way.id)), style = MaterialTheme.typography.bodyLarge)
             PlaceText(
-                stringResource(wayRouteRes(way.id)),
+                // The route's last word is not left alone on a line («…a / Roma»).
+                stringResource(wayRouteRes(way.id)).unorphaned(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -360,7 +364,8 @@ internal fun WalkRow(walk: WalkView, state: WaysUiState, format: MeasureFormatte
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(stringResource(wayNameRes(way.id)), style = MaterialTheme.typography.bodyLarge)
             PlaceText(
-                stringResource(wayRouteRes(way.id)),
+                // The route's last word is not left alone on a line («…a / Roma»).
+                stringResource(wayRouteRes(way.id)).unorphaned(),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -443,8 +448,11 @@ private fun ContinentRow(continent: Continent, walks: List<WalkView>, onClick: (
 @Composable
 private fun PastRow(view: JourneyView, state: WaysUiState, format: MeasureFormatter, onClick: () -> Unit) {
     val journey = view.journey
-    val start = dayText(journey.startEpochDay, state.today)
-    val end = dayText(journey.endedEpochDay ?: state.today.toEpochDay(), state.today)
+    val startDay = LocalDate.ofEpochDay(journey.startEpochDay)
+    val endDay = LocalDate.ofEpochDay(journey.endedEpochDay ?: state.today.toEpochDay())
+    val end = dateText(endDay, state.today)
+    // The year once, with the day the way ended, where it began in the same one.
+    val start = if (startDay.year == endDay.year) shortDate(startDay) else dateText(startDay, state.today)
     val line = if (journey.state == WayJourneyState.FINISHED) {
         // A city walked in a day is walked "on" it, not "from" it "to" it.
         if (start == end) {
@@ -466,12 +474,17 @@ private fun PastRow(view: JourneyView, state: WaysUiState, format: MeasureFormat
         Icon(
             if (journey.state == WayJourneyState.FINISHED) PassoIcons.Flag else PassoIcons.Way,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
+            // The row icons' quiet ink: the accent is the titles'.
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(24.dp),
         )
         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(stringResource(wayNameRes(journey.way)), style = MaterialTheme.typography.bodyLarge)
-            Text(line, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                line.unorphaned(),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
         Icon(PassoIcons.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
     }

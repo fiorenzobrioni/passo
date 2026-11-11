@@ -72,8 +72,8 @@ class InsightsScreenTest {
     @Test
     fun `a running streak is the sentence and the number`() {
         show(state())
-        compose.onNodeWithText("4 days in a row at your goal").assertIsDisplayed()
-        compose.onNodeWithText("Reach 8,000 steps today to make it 5.").assertIsDisplayed()
+        compose.onNodeWithText("4 days in a row at your\u00A0goal").assertIsDisplayed()
+        compose.onNodeWithText("Reach 8,000 steps today to make it\u00A05.").assertIsDisplayed()
         // The card under the sentence says since when, not the sentence again.
         compose.onNodeWithText("days in a row, since Sep 20").assertIsDisplayed()
         compose.onNodeWithText("days in a row at your goal").assertDoesNotExist()
@@ -109,8 +109,8 @@ class InsightsScreenTest {
     fun `averages and totals say what they rest on`() {
         show(state())
         compose.onNodeWithTag(InsightsTags.LIST).performScrollToNode(hasTestTag(InsightsTags.TOTALS))
-        compose.onNodeWithText("than the 7 days before", substring = true).assertExists()
-        compose.onNode(hasContentDescription("Estimate, each day with its own step length", substring = true))
+        compose.onNodeWithText("fewer than the 7", substring = true).assertExists()
+        compose.onNode(hasContentDescription("Estimate, from each day’s step", substring = true))
             .assertExists()
         snapshot("insights_totals")
     }
@@ -120,7 +120,7 @@ class InsightsScreenTest {
         var opened = false
         show(state(), onOpenWays = { opened = true })
         compose.onNodeWithTag(InsightsTags.LIST).performScrollToNode(hasTestTag(InsightsTags.WAYS_DOOR))
-        compose.onNodeWithText("Walk a way or a city").performClick()
+        compose.onNodeWithText("Walk a way or a\u00A0city").performClick()
         assertThat(opened).isTrue()
         compose.onNodeWithTag(InsightsTags.WAY).assertDoesNotExist()
         snapshot("insights_ways_door")
@@ -156,8 +156,45 @@ class InsightsScreenTest {
     @Test
     fun `nothing recorded yet is said, and nothing else is drawn`() {
         show(state(days = emptyMap()))
-        compose.onNodeWithText("Insights start with your first day").assertIsDisplayed()
+        compose.onNodeWithText("Insights start with your first\u00A0day").assertIsDisplayed()
         compose.onNodeWithTag(InsightsTags.STREAK).assertDoesNotExist()
+    }
+
+    @Test
+    fun `a week in one month says the month once, and the averages stand side by side`() {
+        show(state())
+        compose.onNodeWithTag(InsightsTags.LIST).performScrollToNode(hasTestTag(InsightsTags.RECORDS))
+        // «Sep 7 – 13», as History writes it, each date whole on its line.
+        compose.onNodeWithText("67,480 steps · Sep\u00A07\u00A0– 13").assertExists()
+        compose.onNodeWithTag(InsightsTags.LIST).performScrollToNode(hasTestTag(InsightsTags.AVERAGES))
+        compose.onNode(hasContentDescription("last 7 days: 8,426 steps a day")).assertExists()
+        compose.onNode(hasContentDescription("last 30 days: 8,747 steps a day")).assertExists()
+        compose.onNode(hasContentDescription("since Jul\u00A026: 8,685 steps a day")).assertExists()
+    }
+
+    @Test
+    fun `with no streak the card is a title and its line`() {
+        val days = sample().mapValues { (day, summary) ->
+            if (today.toEpochDay() - day in 1..2) summary.copy(steps = 4_100) else summary
+        }
+        show(state(days))
+        compose.onNodeWithText("No streak right now").assertIsDisplayed()
+        compose.onNodeWithText("A day at your goal starts\u00A0one.").assertIsDisplayed()
+        snapshot("insights_no_streak")
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT-w360dp-h740dp-xxhdpi")
+    fun `in Italian on a small phone the dates and the tiles keep to their lines`() {
+        show(state().copy(offeredYears = listOf(2026, 2025)))
+        compose.onNodeWithTag(InsightsTags.LIST).performScrollToNode(hasTestTag(InsightsTags.RECORDS))
+        compose.onNodeWithText("67.480 passi · 7\u00A0– 13\u00A0set").assertExists()
+        // The month in the language's own case, as the day above it is.
+        compose.onNodeWithText("269.040 passi · agosto 2026").assertExists()
+        compose.onNodeWithTag(InsightsTags.LIST).performScrollToNode(hasTestTag(InsightsTags.TOTALS))
+        // Short beside the mark, whole for a screen reader.
+        compose.onNode(hasContentDescription("Giorni all’obiettivo: 40 giorni.", substring = true)).assertExists()
+        compose.walkPage(hasTestTag(InsightsTags.LIST), "insights_it")
     }
 
     @Test

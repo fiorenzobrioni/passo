@@ -2,7 +2,6 @@ package com.callbackdev.passo.feature.year
 
 import android.graphics.Bitmap
 import android.net.Uri
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.Animatable
@@ -10,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,6 +31,8 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -43,6 +45,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.asAndroidBitmap
@@ -81,6 +84,7 @@ object YearTags {
     const val PROGRESS = "year_progress"
     const val SHARE = "year_share"
     const val SAVE = "year_save"
+    const val HINT = "year_hint"
 }
 
 /** The pages of [year], from Insights, History's year or Today's card in season. */
@@ -96,7 +100,9 @@ fun YearRoute(year: Int, onBack: () -> Unit, viewModel: YearViewModel = hiltView
  * on (on the leading third, back), a swipe goes back or on; the marks at the top say where the
  * reader is. Under reduced motion a page arrives by a fade. TalkBack reads each page as one
  * sentence, with "Next page" and "Previous page" as its actions; at twice the text size a page
- * scrolls. Each page can be shared or saved as an image, drawn from what it shows.
+ * scrolls. Each page can be shared or saved as an image, drawn from what it shows: whose year it
+ * is stands at the top of every page, at one height, so the words under it do not jump from page
+ * to page; how to turn the pages is said at the foot, outside the image.
  */
 @Composable
 fun YearScreen(state: YearUiState?, onBack: () -> Unit) {
@@ -140,6 +146,7 @@ private fun Pages(state: YearUiState, onBack: () -> Unit) {
     val signature = stringResource(R.string.year_signature)
     val saved = stringResource(R.string.year_saved)
     val saveFailed = stringResource(R.string.year_save_failed)
+    val messages = remember { SnackbarHostState() }
     val chooser = stringResource(R.string.year_share_chooser)
     var pendingSave by remember { mutableStateOf<Bitmap?>(null) }
     val save = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(PNG)) { uri: Uri? ->
@@ -148,7 +155,8 @@ private fun Pages(state: YearUiState, onBack: () -> Unit) {
         if (uri != null && image != null) {
             scope.launch {
                 val ok = YearImage.save(context, image, uri)
-                Toast.makeText(context, if (ok) saved else saveFailed, Toast.LENGTH_SHORT).show()
+                // Said on the page, where it can be read: a toast is gone before it is.
+                messages.showSnackbar(if (ok) saved else saveFailed)
             }
         }
     }
@@ -166,119 +174,157 @@ private fun Pages(state: YearUiState, onBack: () -> Unit) {
         signature = signature,
     )
 
-    Column(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(pageGutter())) {
-            CloseButton(onBack)
-            Progress(
-                current = pager.currentPage,
-                count = pages.size,
-                modifier = Modifier.weight(1f).padding(end = 16.dp),
-            )
-        }
-        Box(
-            Modifier
-                .weight(1f)
-                .fillMaxWidth()
-                // What the page draws, recorded for its image; the bars and the buttons stay out.
-                .drawWithContent {
-                    layer.record { this@drawWithContent.drawContent() }
-                    drawLayer(layer)
-                }
-                .pointerInput(pages.size, rtl) {
-                    detectTapGestures { offset ->
-                        val leading = if (rtl) offset.x > size.width * 2 / 3f else offset.x < size.width / 3f
-                        go(if (leading) pager.currentPage - 1 else pager.currentPage + 1)
+    Box(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
+        Column(Modifier.fillMaxSize()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(pageGutter()),
+            ) {
+                CloseButton(onBack)
+                Progress(
+                    current = pager.currentPage,
+                    count = pages.size,
+                    modifier = Modifier.weight(1f).padding(end = 16.dp),
+                )
+            }
+            BoxWithConstraints(
+                Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    // What the page draws, recorded for its image; the bars and the buttons stay out.
+                    .drawWithContent {
+                        layer.record { this@drawWithContent.drawContent() }
+                        drawLayer(layer)
                     }
-                },
-        ) {
-            HorizontalPager(state = pager, modifier = Modifier.fillMaxSize()) { index ->
-                val page = pages[index]
-                val words = pageWords(page, review, format)
-                val eyebrow = yearEyebrow(review)
-                // The first page says whose year it is, and since when; the others are its pages.
-                val spoken = if (index == 0) "$eyebrow. ${words.sentence}" else words.sentence
-                val next = stringResource(R.string.year_next)
-                val previous = stringResource(R.string.year_previous)
-                val fade = remember { Animatable(if (reduced) 0f else 1f) }
-                LaunchedEffect(pager.currentPage == index, reduced) {
-                    if (!reduced) {
-                        fade.snapTo(1f)
-                    } else if (pager.currentPage == index) {
-                        fade.animateTo(1f, PassoMotion.fade())
-                    } else {
-                        fade.snapTo(0f)
+                    .pointerInput(pages.size, rtl) {
+                        detectTapGestures { offset ->
+                            val leading = if (rtl) offset.x > size.width * 2 / 3f else offset.x < size.width / 3f
+                            go(if (leading) pager.currentPage - 1 else pager.currentPage + 1)
+                        }
+                    },
+            ) {
+                val room = maxHeight
+                HorizontalPager(state = pager, modifier = Modifier.fillMaxSize()) { index ->
+                    val page = pages[index]
+                    val words = pageWords(page, review, format)
+                    val eyebrow = yearEyebrow(review)
+                    // The first page says whose year it is, and since when; the others are its pages.
+                    val spoken = if (index == 0) "$eyebrow. ${words.sentence}" else words.sentence
+                    val next = stringResource(R.string.year_next)
+                    val previous = stringResource(R.string.year_previous)
+                    val fade = remember { Animatable(if (reduced) 0f else 1f) }
+                    LaunchedEffect(pager.currentPage == index, reduced) {
+                        if (!reduced) {
+                            fade.snapTo(1f)
+                        } else if (pager.currentPage == index) {
+                            fade.animateTo(1f, PassoMotion.fade())
+                        } else {
+                            fade.snapTo(0f)
+                        }
                     }
-                }
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .graphicsLayer { alpha = fade.value }
-                        .verticalScroll(rememberScrollState())
-                        .then(if (pager.currentPage == index) Modifier.testTag(YearTags.PAGE) else Modifier)
-                        .padding(pageGutter())
-                        .padding(horizontal = 24.dp, vertical = 24.dp),
-                ) {
                     Column(
-                        verticalArrangement = Arrangement.spacedBy(24.dp),
-                        modifier = Modifier.fillMaxWidth().clearAndSetSemantics {
-                            contentDescription = spoken
-                            heading()
-                            customActions = listOfNotNull(
-                                CustomAccessibilityAction(next) {
-                                    go(index + 1)
-                                    true
-                                }.takeIf { index < pages.lastIndex },
-                                CustomAccessibilityAction(previous) {
-                                    go(index - 1)
-                                    true
-                                }.takeIf { index > 0 },
-                            )
-                        },
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .graphicsLayer { alpha = fade.value }
+                            .verticalScroll(rememberScrollState())
+                            .then(if (pager.currentPage == index) Modifier.testTag(YearTags.PAGE) else Modifier)
+                            .padding(pageGutter())
+                            .padding(horizontal = 24.dp),
                     ) {
-                        PageText(words, eyebrow)
-                        PageVisual(page, state, format)
-                        if (index == 0) {
+                        // As tall as the page at least, so the eyebrow keeps the top and the rest
+                        // is centred in the room under it; taller, and the page scrolls.
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = room)
+                                .clearAndSetSemantics {
+                                    contentDescription = spoken
+                                    heading()
+                                    customActions = listOfNotNull(
+                                        CustomAccessibilityAction(next) {
+                                            go(index + 1)
+                                            true
+                                        }.takeIf { index < pages.lastIndex },
+                                        CustomAccessibilityAction(previous) {
+                                            go(index - 1)
+                                            true
+                                        }.takeIf { index > 0 },
+                                    )
+                                },
+                        ) {
                             Text(
-                                stringResource(R.string.year_hint),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                eyebrow,
+                                style = MaterialTheme.typography.titleSmall,
+                                color = MaterialTheme.colorScheme.primary,
                                 textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth(),
+                                modifier = Modifier.align(
+                                    Alignment.TopCenter,
+                                ).fillMaxWidth().padding(top = EYEBROW_TOP),
                             )
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(24.dp),
+                                modifier = Modifier
+                                    .align(Alignment.Center)
+                                    .fillMaxWidth()
+                                    .padding(top = EYEBROW_ROOM, bottom = 24.dp),
+                            ) {
+                                PageText(words)
+                                PageVisual(page, state, format)
+                            }
                         }
                     }
                 }
             }
-        }
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(pageGutter()).padding(16.dp),
-        ) {
-            TextButton(
-                onClick = {
-                    scope.launch {
-                        pendingSave = image()
-                        runCatching { save.launch(YearImage.fileName(state.year, pager.currentPage)) }
-                    }
-                },
-                modifier = Modifier.heightIn(min = 48.dp).testTag(YearTags.SAVE),
-            ) { Text(stringResource(R.string.year_save)) }
-            FilledTonalButton(
-                onClick = {
-                    scope.launch {
-                        val uri = YearImage.cache(context, image(), YearImage.fileName(state.year, pager.currentPage))
-                        uri?.let { YearImage.share(context, it, chooser) }
-                    }
-                },
-                modifier = Modifier.heightIn(min = 48.dp).testTag(YearTags.SHARE),
+            // How the pages turn, on the first one only and never in its image; its room is
+            // kept on the others, so the page above does not grow when it goes.
+            val first = pager.currentPage == 0
+            Text(
+                stringResource(R.string.year_hint),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(pageGutter())
+                    .padding(horizontal = 24.dp)
+                    .alpha(if (first) 1f else 0f)
+                    .then(if (first) Modifier else Modifier.clearAndSetSemantics { })
+                    .testTag(YearTags.HINT),
+            )
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth().padding(pageGutter()).padding(16.dp),
             ) {
-                Icon(PassoIcons.Share, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.size(8.dp))
-                Text(stringResource(R.string.year_share))
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            pendingSave = image()
+                            runCatching { save.launch(YearImage.fileName(state.year, pager.currentPage)) }
+                        }
+                    },
+                    modifier = Modifier.heightIn(min = 48.dp).testTag(YearTags.SAVE),
+                ) { Text(stringResource(R.string.year_save)) }
+                FilledTonalButton(
+                    onClick = {
+                        scope.launch {
+                            val uri = YearImage.cache(
+                                context,
+                                image(),
+                                YearImage.fileName(state.year, pager.currentPage),
+                            )
+                            uri?.let { YearImage.share(context, it, chooser) }
+                        }
+                    },
+                    modifier = Modifier.heightIn(min = 48.dp).testTag(YearTags.SHARE),
+                ) {
+                    Icon(PassoIcons.Share, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.size(8.dp))
+                    Text(stringResource(R.string.year_share))
+                }
             }
         }
+        SnackbarHost(messages, Modifier.align(Alignment.BottomCenter).padding(bottom = SNACKBAR_LIFT))
     }
 }
 
@@ -316,3 +362,10 @@ private fun Progress(current: Int, count: Int, modifier: Modifier) {
 }
 
 private const val PNG = "image/png"
+
+/** The eyebrow under the marks, and the room it takes above a page's words. */
+private val EYEBROW_TOP = 12.dp
+private val EYEBROW_ROOM = 56.dp
+
+/** A message stands clear of Save and Share. */
+private val SNACKBAR_LIFT = 88.dp

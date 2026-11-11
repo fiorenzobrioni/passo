@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,8 +23,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.callbackdev.passo.core.designsystem.components.BarChart
 import com.callbackdev.passo.core.designsystem.components.ChartBar
 import com.callbackdev.passo.core.designsystem.components.HeatLevel
@@ -31,10 +34,10 @@ import com.callbackdev.passo.core.designsystem.components.heatColor
 import com.callbackdev.passo.core.designsystem.format.clockTime
 import com.callbackdev.passo.core.designsystem.format.currentLocale
 import com.callbackdev.passo.core.designsystem.format.datePattern
-import com.callbackdev.passo.core.designsystem.format.longDate
+import com.callbackdev.passo.core.designsystem.format.dayRange
 import com.callbackdev.passo.core.designsystem.format.sessionName
 import com.callbackdev.passo.core.designsystem.format.shortDate
-import com.callbackdev.passo.core.designsystem.format.shortDateWithYear
+import com.callbackdev.passo.core.designsystem.format.text
 import com.callbackdev.passo.core.designsystem.format.unbrokenText
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.designsystem.ways.wayNameRes
@@ -54,17 +57,32 @@ import kotlin.math.abs
 
 /**
  * What a page says, in the order it is read: the sentence first, then the number and what it is,
- * then the lines under it. TalkBack reads it as one ([sentence]); the share image draws it.
+ * then the lines under it, a fact each, and the things it lists by name ([entries]: a way and
+ * what was walked of it). TalkBack reads it as one ([sentence]); the share image draws it.
  */
 @Immutable
-internal data class PageWords(val headline: String, val figure: String?, val unit: String?, val details: List<String>) {
+internal data class PageWords(
+    val headline: String,
+    val figure: String?,
+    val unit: String?,
+    val details: List<String>,
+    val entries: List<PageEntry> = emptyList(),
+) {
     val sentence: String get() = (
-        listOf(headline) +
+        listOf(headline.replace('\n', ' ')) +
             listOfNotNull(listOfNotNull(figure, unit).joinToString(" ").ifBlank { null }) +
-            details
+            details +
+            entries.map { entry -> "${entry.name}: " + listOfNotNull(entry.facts, entry.note).joinToString(", ") }
         )
         .joinToString(". ") { it.trimEnd('.') } + "."
 }
+
+/**
+ * A thing a page names, with its facts under it: «Via Francigena», «1,020 km · 45 stamps», and
+ * on a line of its own what else there is to say of it («walked to its end»).
+ */
+@Immutable
+internal data class PageEntry(val name: String, val facts: String, val note: String? = null)
 
 /** The eyebrow over every page, so a page shared alone still says whose year and which. */
 @Composable
@@ -74,8 +92,9 @@ internal fun yearEyebrow(review: YearInReview): String {
     } else {
         stringResource(R.string.year_title_full, review.year)
     }
+    // The year is the title's: the day it was counted from is written without it.
     return if (review.begunLate) {
-        "$title · ${stringResource(R.string.year_since, shortDateWithYear(review.countedFrom))}"
+        "$title · ${stringResource(R.string.year_since, shortDate(review.countedFrom).held())}"
     } else {
         title
     }
@@ -88,11 +107,8 @@ internal fun pageWords(page: YearPage, review: YearInReview, format: MeasureForm
         figure = format.integer(page.steps),
         unit = pluralStringResource(R.plurals.year_steps_unit, page.steps.toQuantity()),
         details = listOf(
-            stringResource(
-                R.string.year_distance_detail,
-                format.distance(page.distanceMeters).unbrokenText(),
-                stepsADay(page.averageSteps, format),
-            ),
+            stringResource(R.string.year_distance_detail, format.distance(page.distanceMeters).unbrokenText()),
+            stepsADay(page.averageSteps, format),
         ),
     )
 
@@ -107,7 +123,8 @@ internal fun pageWords(page: YearPage, review: YearInReview, format: MeasureForm
     }
 
     is YearPage.BestDay -> PageWords(
-        headline = stringResource(R.string.year_best_title, longDate(page.date)),
+        // The day in the locale's own case: after a colon, «sabato 13 settembre».
+        headline = stringResource(R.string.year_best_title, datePattern(page.date, "EEEEdMMMM", capitalized = false)),
         figure = format.steps(page.steps),
         unit = pluralStringResource(R.plurals.year_steps_unit, page.steps),
         details = listOfNotNull(
@@ -161,15 +178,17 @@ internal fun pageWords(page: YearPage, review: YearInReview, format: MeasureForm
         ),
     )
 
+    // The sentence, then the number large, as on every page with one: «25 outings» as the
+    // title set the number in the title's size.
     is YearPage.Outings -> PageWords(
-        headline = pluralStringResource(R.plurals.year_outings_title, page.count, page.count),
-        figure = null,
-        unit = null,
+        headline = stringResource(R.string.year_outings_title),
+        figure = format.integer(page.count.toLong()),
+        unit = pluralStringResource(R.plurals.year_outings_unit, page.count),
         details = listOfNotNull(
+            stringResource(R.string.year_outings_moving, duration(page.movingMillis)),
             stringResource(
-                R.string.year_outings_detail,
-                duration(page.movingMillis),
-                LocalContext.current.resources.sessionName(page.longest),
+                R.string.year_outings_longest,
+                LocalContext.current.resources.sessionName(page.longest).held(),
                 duration(page.longest.totals.movingMillis),
             ),
             page.intervals.takeIf { it > 0 }?.let {
@@ -179,30 +198,40 @@ internal fun pageWords(page: YearPage, review: YearInReview, format: MeasureForm
     )
 
     is YearPage.Ways -> {
-        val total = page.ways.sumOf { it.meters }
-        val wayLines = page.ways.map { way ->
+        val total = format.distance(page.ways.sumOf { it.meters })
+        val entries = page.ways.map { way ->
             val parts = listOfNotNull(
                 format.distance(way.meters).unbrokenText(),
                 way.stamps.takeIf { it > 0 }?.let { pluralStringResource(R.plurals.year_way_stamps, it, it) },
-                stringResource(R.string.year_way_arrived).takeIf { way.arrived },
             )
-            stringResource(R.string.year_way_line, stringResource(wayNameRes(way.way)), parts.joinToString(" · "))
+            // The amounts are one line that does not break: a break left its «·» at a line's end.
+            PageEntry(
+                name = stringResource(wayNameRes(way.way)),
+                facts = parts.joinToString(" · ").held(),
+                note = stringResource(R.string.year_way_arrived).takeIf { way.arrived },
+            )
         }
         val cityNames = page.cities.map { stringResource(wayNameRes(it)) }
-        PageWords(
-            headline = if (page.ways.isNotEmpty()) {
-                stringResource(R.string.year_ways_title, format.distance(total).unbrokenText())
-            } else {
-                pluralStringResource(R.plurals.year_cities_title, page.cities.size, page.cities.size)
-            },
-            figure = null,
-            unit = null,
-            details = wayLines + listOfNotNull(
-                cityNames.takeIf {
-                    it.isNotEmpty()
-                }?.let { stringResource(R.string.year_cities, it.joinToString(", ")) },
-            ),
-        )
+        val cities = cityNames.takeIf { it.isNotEmpty() }?.let {
+            PageEntry(stringResource(R.string.year_cities), it.joinToString(", "))
+        }
+        if (page.ways.isNotEmpty()) {
+            val whole = total.text()
+            PageWords(
+                headline = stringResource(R.string.year_ways_title),
+                figure = total.number,
+                unit = whole.replace(total.number, "").trim(),
+                details = emptyList(),
+                entries = entries + listOfNotNull(cities),
+            )
+        } else {
+            PageWords(
+                headline = stringResource(R.string.year_cities_title),
+                figure = format.integer(page.cities.size.toLong()),
+                unit = pluralStringResource(R.plurals.year_cities_unit, page.cities.size),
+                details = listOf(cityNames.joinToString(", ")),
+            )
+        }
     }
 
     is YearPage.VersusLastYear -> {
@@ -350,28 +379,39 @@ private fun MiniMonth(month: YearMonth, byDate: Map<LocalDate, YearDay>, modifie
     }
 }
 
-/** The words over a page's number, centred, in the hero's voice. */
+/**
+ * The words over a page's number, centred, in the hero's voice. The sentence and the lines under
+ * it break into lines of a like length, as a title does, so no word is left alone on the last;
+ * the number is one line, a size smaller where a narrow phone has no room for it at its own
+ * («3.065.44 / 0» at 320dp).
+ */
 @Composable
-internal fun PageText(words: PageWords, eyebrow: String) {
+internal fun PageText(words: PageWords) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Text(
-            eyebrow,
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.primary,
+            words.headline,
+            style = MaterialTheme.typography.headlineMedium.copy(lineBreak = LineBreak.Heading),
             textAlign = TextAlign.Center,
         )
-        Text(words.headline, style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
         if (words.figure != null) {
+            val hero = PassoTheme.type.heroNumber
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 8.dp)) {
                 Text(
                     words.figure,
-                    style = PassoTheme.type.heroNumber,
+                    style = hero,
                     color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    softWrap = false,
+                    autoSize = TextAutoSize.StepBased(
+                        minFontSize = FIGURE_MIN_SIZE,
+                        maxFontSize = hero.fontSize,
+                        stepSize = FIGURE_STEP,
+                    ),
                 )
                 words.unit?.let {
                     Text(
@@ -385,17 +425,34 @@ internal fun PageText(words: PageWords, eyebrow: String) {
         words.details.forEach {
             Text(
                 it,
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyLarge.copy(lineBreak = LineBreak.Heading),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
+        }
+        words.entries.forEach { entry ->
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(entry.name, style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+                listOfNotNull(entry.facts, entry.note).forEach { line ->
+                    Text(
+                        line,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontFeatureSettings = "tnum",
+                            lineBreak = LineBreak.Heading,
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
 private fun measureSentence(measure: WayMeasure): String {
-    val name = stringResource(wayNameRes(measure.way))
+    // A way's name is not parted across two lines («Via / Francigena»).
+    val name = stringResource(wayNameRes(measure.way)).held()
     return when (measure) {
         is WayMeasure.MoreThan -> if (measure.times >= 2) {
             pluralStringResource(R.plurals.year_distance_times, measure.times, measure.times, name)
@@ -413,7 +470,8 @@ private fun measureSentence(measure: WayMeasure): String {
 
 @Composable
 private fun closeSentence(close: YearClose, format: MeasureFormatter): String = when (close) {
-    is YearClose.Arrived -> stringResource(R.string.year_close_arrived, stringResource(wayNameRes(close.way)))
+    is YearClose.Arrived ->
+        stringResource(R.string.year_close_arrived, stringResource(wayNameRes(close.way)).held())
 
     is YearClose.GoalMostDays -> pluralStringResource(R.plurals.year_close_goal, close.days, close.days)
 
@@ -453,9 +511,13 @@ private fun duration(millis: Long): String {
 private fun streakRange(streak: Streak): String {
     val start = streak.start ?: return ""
     val end = streak.end ?: return ""
-    if (start == end) return shortDate(start)
-    return stringResource(R.string.year_range, shortDate(start), shortDate(end))
+    if (start == end) return shortDate(start).held()
+    // The month once where both days are in it, each date whole on its line.
+    val (from, to) = dayRange(start, end, withYear = false)
+    return stringResource(R.string.year_range, from.held(), to.held())
 }
+
+private fun String.held(): String = replace(' ', '\u00A0')
 
 @Composable
 private fun monthName(month: YearMonth): String = datePattern(month.atDay(1), "MMMM")
@@ -473,4 +535,8 @@ private fun Long.toQuantity(): Int = coerceAtMost(Int.MAX_VALUE.toLong()).toInt(
 private const val MILLIS_PER_MINUTE = 60_000L
 private const val MINUTES_PER_HOUR = 60
 private const val MONTHS_A_ROW = 4
+
+/** The smallest a page's number is set, on a phone too narrow for it at its own size. */
+private val FIGURE_MIN_SIZE = 36.sp
+private val FIGURE_STEP = 2.sp
 private const val DAYS_A_ROW = 7
