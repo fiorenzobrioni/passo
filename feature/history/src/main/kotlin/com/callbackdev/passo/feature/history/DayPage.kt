@@ -32,8 +32,9 @@ import com.callbackdev.passo.core.designsystem.components.OutingList
 import com.callbackdev.passo.core.designsystem.components.TilePair
 import com.callbackdev.passo.core.designsystem.format.annotated
 import com.callbackdev.passo.core.designsystem.format.axisHour
-import com.callbackdev.passo.core.designsystem.format.clockTime
+import com.callbackdev.passo.core.designsystem.format.clockRange
 import com.callbackdev.passo.core.designsystem.format.text
+import com.callbackdev.passo.core.designsystem.format.unorphaned
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
@@ -79,7 +80,7 @@ internal fun DayPage(detail: DayDetail?, minWalkMinutes: Int, format: MeasureFor
                         )
                         OutingList(detail.outings, format)
                         Text(
-                            text = stringResource(R.string.history_walks_caption),
+                            text = stringResource(R.string.history_walks_caption).unorphaned(),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
@@ -104,11 +105,7 @@ private fun HoursCard(detail: DayDetail, format: MeasureFormatter) {
         pluralStringResource(R.plurals.history_steps, steps, format.steps(steps))
     }
     val hourRange = @Composable { hour: Int ->
-        stringResource(
-            R.string.history_range,
-            clockTime(hour * MINUTES_PER_HOUR),
-            clockTime(((hour + 1) % 24) * MINUTES_PER_HOUR),
-        )
+        clockRange(hour * MINUTES_PER_HOUR, ((hour + 1) % 24) * MINUTES_PER_HOUR)
     }
     val barTexts = (0 until HourlySteps.HOURS).map { hour ->
         val value = bars[hour].value
@@ -123,21 +120,23 @@ private fun HoursCard(detail: DayDetail, format: MeasureFormatter) {
     val description = stringResource(R.string.history_chart_description, title, dayHeadline(detail, format))
     ChartCard(
         title = title,
-        caption = stringResource(R.string.history_caption_hours),
+        caption = stringResource(
+            if (outings.isEmpty()) R.string.history_caption_hours_plain else R.string.history_caption_hours,
+        ),
         legend = { if (outings.isNotEmpty()) ChartLegend(goal = false, walks = true) },
         readout = {
             val hour = selected
-            val text = when {
-                hour != null -> readoutText(hourRange(hour), bars[hour].value?.let { stepsOf(it) })
+            when {
+                hour != null -> ChartReadout(readoutText(hourRange(hour), bars[hour].value?.let { stepsOf(it) }))
 
-                busiest != null -> readoutText(
-                    stringResource(R.string.history_readout_busiest, hourRange(busiest)),
-                    stepsOf(hourly[busiest]),
+                // With no bar touched, the hour worth reading: named on the line under it.
+                busiest != null -> ChartReadout(
+                    text = readoutText(hourRange(busiest), stepsOf(hourly[busiest])),
+                    detail = stringResource(R.string.history_readout_busiest),
                 )
 
-                else -> AnnotatedString(stringResource(R.string.history_readout_hint))
+                else -> ChartReadout(AnnotatedString(stringResource(R.string.history_readout_hint)))
             }
-            ChartReadout(text)
         },
     ) {
         BarChart(
@@ -189,12 +188,15 @@ private fun DayMetrics(detail: DayDetail, format: MeasureFormatter) {
                 meaning = stringResource(R.string.history_metric_active_meaning),
             )
             val brisk = format.minutes(detail.briskMinutes)
+            // The short name beside the mark: «Minuti a passo svelto» took two lines in half a
+            // phone's width, and its value stood a line lower than its neighbour's.
             HistoryTile(
                 icon = PassoIcons.Bolt,
-                label = stringResource(R.string.history_metric_brisk),
+                label = stringResource(R.string.history_metric_brisk_short),
                 value = brisk.annotated(UnitStyle),
                 spokenValue = brisk.text(),
                 meaning = stringResource(R.string.history_metric_brisk_day),
+                spokenLabel = stringResource(R.string.history_metric_brisk),
             )
         }
     }

@@ -5,10 +5,9 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.callbackdev.passo.core.designsystem.components.duration
 import com.callbackdev.passo.core.designsystem.format.datePattern
+import com.callbackdev.passo.core.designsystem.format.dayRange
 import com.callbackdev.passo.core.designsystem.format.longDate
 import com.callbackdev.passo.core.designsystem.format.monthYear
-import com.callbackdev.passo.core.designsystem.format.shortDate
-import com.callbackdev.passo.core.designsystem.format.shortDateWithYear
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.history.Period
 import com.callbackdev.passo.core.domain.history.PeriodOverview
@@ -59,11 +58,8 @@ internal fun periodSubtitle(period: Period, today: LocalDate): String? = when (p
 @Composable
 private fun dateRange(period: Period, today: LocalDate): String {
     val sameYear = period.start.year == today.year && period.end.year == today.year
-    return stringResource(
-        R.string.history_range,
-        if (sameYear) shortDate(period.start) else shortDateWithYear(period.start),
-        if (sameYear) shortDate(period.end) else shortDateWithYear(period.end),
-    )
+    val (from, to) = dayRange(period.start, period.end, withYear = !sameYear)
+    return stringResource(R.string.history_range, from, to)
 }
 
 /** A day on a bar or in a readout: «Tue 23 Sep». */

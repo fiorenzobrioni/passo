@@ -31,6 +31,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
+import com.callbackdev.passo.core.designsystem.format.unorphaned
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 
 /**
@@ -39,6 +40,9 @@ import com.callbackdev.passo.core.designsystem.theme.PassoTheme
  * metric with no honest second line does not get a tile.
  *
  * The tile is one node for a screen reader, read as [spoken].
+ *
+ * @param fitLabel the label on one line, a step smaller where its room is short: for tiles set
+ *   two by two, where a label on two lines sets its value a line lower than its neighbour's.
  */
 @Composable
 fun MetricTile(
@@ -48,6 +52,7 @@ fun MetricTile(
     meaning: String,
     spoken: String,
     modifier: Modifier = Modifier,
+    fitLabel: Boolean = false,
     track: (@Composable () -> Unit)? = null,
 ) {
     Surface(
@@ -57,8 +62,10 @@ fun MetricTile(
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // A quiet mark: the accent's container is the tone of a choice made (a segment,
+                // a tonal button), and five of them on a page of readings said so of none.
                 Surface(
-                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
                     shape = CircleShape,
                     modifier = Modifier.size(28.dp),
                 ) {
@@ -66,23 +73,32 @@ fun MetricTile(
                         Icon(
                             imageVector = icon,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(18.dp),
                         )
                     }
                 }
-                Text(
-                    label,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                if (fitLabel) {
+                    FittedLabel(
+                        label,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                } else {
+                    Text(
+                        label,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
             Text(value, style = PassoTheme.type.readingValue, color = MaterialTheme.colorScheme.onSurface)
             if (track != null) {
                 Box(modifier = Modifier.padding(vertical = 4.dp)) { track() }
             }
+            // Where it takes two lines, two words on the second: never one alone.
             Text(
-                meaning,
+                meaning.unorphaned(),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

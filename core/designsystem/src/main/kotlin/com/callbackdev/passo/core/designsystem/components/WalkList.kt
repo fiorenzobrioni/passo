@@ -99,6 +99,8 @@ private fun SessionRow(outing: Outing.Planned, format: MeasureFormatter) {
     val energy = format.energy(session.totals.activeKcal).text()
     val figures = listOfNotNull(steps, distance, cadence, energy).joinToString("  ·  ")
     val spoken = stringResource(R.string.session_spoken, name, from, to, outcome, goal, figures)
+    val counted = figureLine(steps, cadence)
+    val estimated = stringResource(R.string.walk_estimates, figureLine(distance, energy))
     val reached = session.reached
     Row(
         verticalAlignment = Alignment.Top,
@@ -141,17 +143,14 @@ private fun SessionRow(outing: Outing.Planned, format: MeasureFormatter) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            Text(
+                text = name,
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
+                color = MaterialTheme.colorScheme.primary,
+            )
+            // What came of it on a line of its own: beside the name, «Goal reached» broke in two
+            // on a phone's width.
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                Text(
-                    "·",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
                 if (reached) {
                     Icon(
                         PassoIcons.Check,
@@ -171,11 +170,7 @@ private fun SessionRow(outing: Outing.Planned, format: MeasureFormatter) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Text(
-                text = figures,
-                style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Figures(counted, estimated)
         }
     }
 }
@@ -191,6 +186,8 @@ private fun WalkRow(walk: Walk, format: MeasureFormatter) {
     val cadence = format.cadence(walk.averageCadence).text()
     val energy = format.energy(walk.activeKcal).text()
     val spoken = stringResource(R.string.walk_spoken, kind, from, to, length, steps, distance, cadence, energy)
+    val counted = figureLine(steps, cadence)
+    val estimated = stringResource(R.string.walk_estimates, figureLine(distance, energy))
     Row(
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
@@ -237,14 +234,27 @@ private fun WalkRow(walk: Walk, format: MeasureFormatter) {
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Medium),
                 color = MaterialTheme.colorScheme.tertiary,
             )
-            Text(
-                text = listOf(steps, distance, cadence, energy).joinToString("  ·  "),
-                style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Figures(counted, estimated)
         }
     }
 }
+
+/**
+ * A row's figures on two lines that never change places: what was counted (the steps, the
+ * cadence), then what is estimated from it (the distance, the calories), with the sign Today
+ * sets before its estimates. Four on one line broke wherever the width ran out, «108 steps/»
+ * from its «min».
+ */
+@Composable
+private fun Figures(counted: String, estimated: String) {
+    val style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum")
+    Text(counted, style = style, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    Text(estimated, style = style, color = MaterialTheme.colorScheme.onSurfaceVariant)
+}
+
+/** Figures on a line, each one held together: a line too long breaks between two, never inside one. */
+private fun figureLine(vararg figures: String?): String =
+    figures.filterNotNull().joinToString("  ·  ") { it.unbroken().replace("/", "/\u2060") }
 
 @Composable
 fun walkTypeLabel(type: WalkType): String = stringResource(

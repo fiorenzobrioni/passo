@@ -5,6 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import com.callbackdev.passo.core.designsystem.R
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -30,6 +32,33 @@ fun clockTime(minuteOfDay: Int): String {
     val pattern = DateFormat.getBestDateTimePattern(locale, if (DateFormat.is24HourFormat(context)) "Hm" else "hm")
     return LocalTime.of((minuteOfDay / 60) % 24, minuteOfDay % 60).format(DateTimeFormatter.ofPattern(pattern, locale))
 }
+
+/**
+ * From one time to another, «07:58–08:15», the one way the app writes it: the walks' rows and
+ * History's hours stand on the same page. Neither time breaks inside itself.
+ */
+@Composable
+fun clockRange(fromMinute: Int, toMinute: Int): String = stringResource(
+    R.string.walk_time_range,
+    clockTime(fromMinute).unbroken(),
+    clockTime(toMinute).unbroken(),
+)
+
+/**
+ * A stretch of days: «21 – 27 Sep» where both are in one month (the month said once, on the
+ * side the locale writes it), «31 Aug – 6 Sep» across two, each with its year when [withYear].
+ */
+@Composable
+fun dayRange(start: LocalDate, end: LocalDate, withYear: Boolean): Pair<String, String> {
+    if (withYear) return shortDateWithYear(start) to shortDateWithYear(end)
+    if (start.month != end.month || start.year != end.year) return shortDate(start) to shortDate(end)
+    val day = DateTimeFormatter.ofPattern("d", currentLocale())
+    val pattern = DateFormat.getBestDateTimePattern(currentLocale(), "dMMM")
+    val dayFirst = pattern.indexOf('d') < pattern.indexOf('M')
+    return if (dayFirst) start.format(day) to shortDate(end) else shortDate(start) to end.format(day)
+}
+
+private fun String.unbroken(): String = replace(' ', '\u00A0').replace('\u202F', '\u00A0')
 
 /** An hour on a chart's axis: «06» or «6 AM». */
 @Composable
