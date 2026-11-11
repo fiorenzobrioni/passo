@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.designsystem.ways.placeNameRes
 import com.callbackdev.passo.core.domain.ways.GeoBox
@@ -52,13 +53,18 @@ import kotlin.math.hypot
 /**
  * The map of a way or a city walk (PLANNING.md §11 Phase 11), drawn in code like every chart of
  * Passo: the ground (land, towns, parks, lakes, rivers, borders; a city's streets, water and
- * canals), the whole way faint, the part walked in the goal's colour up to the reader's point,
- * and the stops, filled once reached. It knows nothing of where the reader is: their point is
- * their distance along the way.
+ * canals), the way still to walk in a quiet ink, the part walked in the goal's colour up to the
+ * reader's point, and the stops, filled once reached. It knows nothing of where the reader is:
+ * their point is their distance along the way.
  *
- * [detailed] adds the start's and the end's names, the locator (the country, with the way on
- * it, in the corner the line leaves free) and a touch that names the nearest stop; the small
- * card in Insights leaves them out. The map is one image to TalkBack, said by
+ * The ground steps back for the way: a city's side streets are hairlines, its main streets, its
+ * water and its parks what the eye finds first, and on a page the way lies on an edge of the
+ * page's own colour, so it reads apart from the streets it runs along.
+ *
+ * [detailed] adds the names (the start's and the end's; on a city walk under way the place
+ * ahead instead, the one that is being walked to), each on the side its own way leaves free,
+ * the locator (the country, with the way on it, in the corner the line leaves free) and a touch
+ * that names the nearest stop; the small card in Insights leaves them out. The map is one image to TalkBack, said by
  * [contentDescription]: the page lists the stops in words beside it.
  *
  * @param walkedMeters null for a way not started: the whole line plain, no point.
@@ -90,6 +96,7 @@ fun WayMapView(
         park = PassoTheme.colors.park,
         // A street is a lighter line on the land: white on the light grey, a step up in the dark.
         street = if (scheme.surface.luminance() > 0.5f) scheme.surfaceContainerLowest else scheme.surfaceBright,
+        outline = scheme.outlineVariant,
         river = lerp(PassoTheme.colors.water, scheme.onSurfaceVariant, RIVER_INK),
         border = scheme.outline.copy(alpha = BORDER_ALPHA),
         way = scheme.onSurfaceVariant.copy(alpha = WAY_ALPHA),
@@ -133,8 +140,9 @@ fun WayMapView(
     }
     Spacer(
         modifier
-            .aspectRatio(ratio ?: wayMapRatio(map.frame))
-            .clip(MaterialTheme.shapes.large)
+            .aspectRatio(ratio ?: wayMapRatio(map.frame, way.kind))
+            // On its page the map stands over the page's groups, as wide as they are: their corner.
+            .clip(if (detailed) GroupShape else MaterialTheme.shapes.large)
             // An empty description makes it decoration: a thumbnail beside the way's own name.
             .clearAndSetSemantics { if (contentDescription.isNotEmpty()) this.contentDescription = contentDescription }
             .then(touch)
@@ -177,24 +185,41 @@ fun WayMapView(
                     val p = map.line.pointAt(it)
                     Offset(projection.x(p.longitude), projection.y(p.latitude))
                 }
-                val labels = if (detailed) {
-                    listOfNotNull(
-                        names.first() to stops.first(),
-                        names.last() to stops.last(),
-                        touched?.takeIf { it != 0 && it != stops.lastIndex }?.let { names[it] to stops[it] },
-                    ).map { (text, at) -> Label(measurer.measure(text, labelStyle), at) }
-                        .let { placeLabels(it, size) }
+                // The way as points at even steps along it: what a name, and the locator, keep clear of.
+                val along = if (detailed) {
+                    (0..LINE_SAMPLES).map {
+                        val p = map.line.pointAt(map.line.lengthMeters * it / LINE_SAMPLES)
+                        Offset(projection.x(p.longitude), projection.y(p.latitude))
+                    }
                 } else {
                     emptyList()
                 }
+                // The stop ahead, on a way under way and not yet at its end.
+                val next = reached.takeIf { walkedMeters != null && it in 1 until stops.lastIndex }
+                val named = when {
+                    !detailed -> emptyList()
+
+                    // A city walk under way names the place being walked to: its two ends are in
+                    // the line over the map, and their names lay over the way between them.
+                    way.kind == WayKind.WALK && next != null -> listOf(next)
+
+                    else -> listOf(0, stops.lastIndex)
+                }
+                val labels = (named + listOfNotNull(touched?.takeIf { it !in named }))
+                    .map { Label(measurer.measure(names[it], labelStyle), stops[it]) }
+                    .let { labels ->
+                        val pills = labels.map { label ->
+                            Size(
+                                label.text.size.width + 2 * LABEL_PAD_X.toPx(),
+                                label.text.size.height + 2 * LABEL_PAD_Y.toPx(),
+                            ) to label.at
+                        }
+                        labels.zip(placeLabels(pills, size, along + stops))
+                    }
                 // A city's walk fills its frame: no corner is free for the country, and the page
                 // names the city anyway. The ends' names are kept clear of it (a touched stop's
                 // is not, or the locator would jump at every touch).
                 val locator = if (detailed && way.kind == WayKind.WAY) {
-                    val along = (0..LOCATOR_SAMPLES).map {
-                        val p = map.line.pointAt(map.line.lengthMeters * it / LOCATOR_SAMPLES)
-                        Offset(projection.x(p.longitude), projection.y(p.latitude))
-                    }
                     locatorBox(size, stops.first(), along, map.locatorFrame, labels.take(2).map { it.second })
                 } else {
                     null
@@ -211,11 +236,15 @@ fun WayMapView(
                     lakes.forEach { drawPath(it, colors.water) }
                     // Over a river the streets are its bridges; a canal, drawn as a line, stays on
                     // top of the streets along its banks.
-                    streets.forEach { drawPath(it, colors.street, style = line(STREET_WIDTH)) }
+                    val side = colors.street.copy(alpha = SIDE_STREET_ALPHA)
+                    streets.forEach { drawPath(it, side, style = line(STREET_WIDTH)) }
                     mainStreets.forEach { drawPath(it, colors.street, style = line(MAIN_STREET_WIDTH)) }
                     if (!hairlines) rivers.forEach { drawPath(it, riverInk, style = line(riverWidth)) }
                     val dash = PathEffect.dashPathEffect(floatArrayOf(4.dp.toPx(), 3.dp.toPx()))
                     borders.forEach { drawPath(it, colors.border, style = Stroke(1.dp.toPx(), pathEffect = dash)) }
+                    // On its page the way lies on an edge of the page's colour: over streets, water
+                    // and parks alike it reads as one line, apart from the ground.
+                    if (detailed) drawPath(whole, colors.halo, style = line(WAY_CASING_WIDTH))
                     // Not started, the line is the way itself, at full ink; under way, it steps back
                     // for the part walked.
                     drawPath(whole, if (walkedMeters == null) colors.stopRing else colors.way, style = line(WAY_WIDTH))
@@ -228,20 +257,24 @@ fun WayMapView(
                             // A small map keeps only its line and its ends: dots would crowd it.
                             !detailed && !end -> Unit
 
-                            // The two ends always show, as rings, filled once reached.
+                            // The two ends always show. Where it begins is a full point, in the
+                            // way's ink before a start and the goal's colour after; where it ends
+                            // a ring, filled once reached: the two are told apart before a step.
                             end -> {
                                 val radius = (if (detailed) END_RADIUS else SMALL_END_RADIUS).toPx()
-                                drawCircle(if (done) colors.walked else colors.land, radius, at)
-                                drawCircle(
-                                    if (done) colors.walked else colors.stopRing,
-                                    radius,
-                                    at,
-                                    style = Stroke(1.5.dp.toPx()),
-                                )
+                                val ink = if (done) colors.walked else colors.stopRing
+                                drawCircle(if (done || i == 0) ink else colors.land, radius, at)
+                                drawCircle(ink, radius, at, style = Stroke(1.5.dp.toPx()))
                             }
 
                             // A stage reached is a bead on the walked line; one ahead, a ring.
                             done -> if (stop.stage) drawCircle(colors.land, BEAD_RADIUS.toPx(), at)
+
+                            // The one ahead of the reader, in the goal's colour and a little larger.
+                            i == next -> {
+                                drawCircle(colors.halo, NEXT_RADIUS.toPx(), at)
+                                drawCircle(colors.walked, NEXT_RADIUS.toPx(), at, style = Stroke(2.dp.toPx()))
+                            }
 
                             else -> {
                                 val radius = (if (stop.stage) STAGE_RADIUS else PLACE_RADIUS).toPx()
@@ -258,15 +291,24 @@ fun WayMapView(
                         drawCircle(colors.halo, radius + (if (detailed) 2.dp else 1.5.dp).toPx(), it)
                         drawCircle(colors.walked, radius, it)
                     }
-                    labels.forEach { (label, box) -> drawLabel(label.text, box, colors.halo, colors.ink) }
+                    labels.forEach { (label, box) ->
+                        drawLabel(label.text, box, colors.halo, colors.ink, colors.outline)
+                    }
                     locator?.let { drawLocator(it, map.locatorLand, map.locatorLine, map.locatorFrame, colors) }
                 }
             },
     )
 }
 
-/** The map box's width over height: the frame's own shape, held to one that sits on a page. */
-fun wayMapRatio(frame: GeoBox): Float = (1.0 / WayProjection.boxAspect(frame, MIN_ASPECT, MAX_ASPECT)).toFloat()
+/**
+ * The map box's width over height: the frame's own shape, held to one that sits on a page. A
+ * city walk's is never taller than it is wide: under it comes Start, which a tall map (Rome's)
+ * pushed past the middle of the screen.
+ */
+fun wayMapRatio(frame: GeoBox, kind: WayKind): Float {
+    val tallest = if (kind == WayKind.WALK) MAX_WALK_ASPECT else MAX_ASPECT
+    return (1.0 / WayProjection.boxAspect(frame, MIN_ASPECT, tallest)).toFloat()
+}
 
 private class WayMapColors(
     val water: Color,
@@ -274,6 +316,7 @@ private class WayMapColors(
     val town: Color,
     val park: Color,
     val street: Color,
+    val outline: Color,
     val river: Color,
     val border: Color,
     val way: Color,
@@ -378,17 +421,22 @@ private fun DrawScope.drawLocator(box: Rect, land: List<GeoPath>, line: GeoPath,
 }
 
 /**
- * Where each name's pill goes, in order: beside its point, on the right if it fits, kept inside
- * the map. A walk that ends near where it began (Cartagena's) would lay the second name over the
- * first, so a name that would cover one placed before it goes above its point, below it or on
- * its other side instead, the first of those that is clear.
+ * Where each name's pill goes, in order: beside its point, on the right if it fits, above it,
+ * below it or on its other side, kept inside the map. Of those, the one that covers no name
+ * placed before it (a walk that ends near where it began, Cartagena's, would lay the second name
+ * over the first) and the least of the way: a name beside its point lay over the line that left
+ * it, and over the stops on it (London's, Rome's, Paris's). Among equals, the first of the four.
+ *
+ * @param pills each pill's size and the point it names.
+ * @param way the line as points at even steps, with its stops.
  */
-private fun Density.placeLabels(labels: List<Label>, size: Size): List<Pair<Label, Rect>> {
+internal fun Density.placeLabels(pills: List<Pair<Size, Offset>>, size: Size, way: List<Offset>): List<Rect> {
     val gap = 8.dp.toPx()
-    val placed = mutableListOf<Pair<Label, Rect>>()
-    for (label in labels) {
-        val width = label.text.size.width + 2 * LABEL_PAD_X.toPx()
-        val height = label.text.size.height + 2 * LABEL_PAD_Y.toPx()
+    val room = LABEL_CLEARANCE.toPx()
+    val placed = mutableListOf<Rect>()
+    for ((pill, at) in pills) {
+        val width = pill.width
+        val height = pill.height
         fun kept(x: Float, y: Float) = Rect(
             Offset(
                 x.coerceIn(gap, (size.width - width - gap).coerceAtLeast(gap)),
@@ -396,7 +444,6 @@ private fun Density.placeLabels(labels: List<Label>, size: Size): List<Pair<Labe
             ),
             Size(width, height),
         )
-        val at = label.at
         val beside = at.y - height / 2f
         val rightFits = at.x + gap + width <= size.width - gap
         val right = kept(at.x + gap, beside)
@@ -408,26 +455,39 @@ private fun Density.placeLabels(labels: List<Label>, size: Size): List<Pair<Labe
             kept(at.x - width / 2f, at.y + gap),
             if (rightFits) left else right,
         )
-        val box = candidates.firstOrNull { box -> placed.none { it.second.overlaps(box) } } ?: candidates.first()
-        placed += label to box
+        placed += candidates.minWith(
+            compareBy<Rect> { box -> placed.count { it.overlaps(box) } }
+                .thenBy { box -> box.inflate(room).let { clear -> way.count { clear.contains(it) } } },
+        )
     }
     return placed
 }
 
-/** A name on a small pill of the page's colour ([halo]), in [box]. */
-internal fun DrawScope.drawLabel(text: TextLayoutResult, box: Rect, halo: Color, ink: Color) {
-    drawRoundRect(halo.copy(alpha = PILL_ALPHA), box.topLeft, box.size, CornerRadius(box.height / 2))
+/**
+ * A name on a small pill of the page's colour ([halo]), in [box], with a hairline around it
+ * ([outline]): over a city's white streets the pill alone had no edge.
+ */
+internal fun DrawScope.drawLabel(text: TextLayoutResult, box: Rect, halo: Color, ink: Color, outline: Color) {
+    val radius = CornerRadius(box.height / 2)
+    drawRoundRect(halo.copy(alpha = PILL_ALPHA), box.topLeft, box.size, radius)
+    drawRoundRect(outline, box.topLeft, box.size, radius, style = Stroke(1.dp.toPx()))
     drawText(text, ink, Offset(box.left + LABEL_PAD_X.toPx(), box.top + LABEL_PAD_Y.toPx()))
 }
 
 private const val MIN_ASPECT = 0.62
 private const val MAX_ASPECT = 1.2
+private const val MAX_WALK_ASPECT = 1.0
 private const val RIVER_INK = 0.3f
 private const val TOWN_INK = 0.5f
 private const val BORDER_ALPHA = 0.55f
-private const val WAY_ALPHA = 0.4f
+
+/** The way still to walk: quieter than the part walked, yet plain over a city's streets. */
+private const val WAY_ALPHA = 0.72f
+
+/** A city's side streets: there, under the main ones. */
+private const val SIDE_STREET_ALPHA = 0.6f
 private const val HALO_ALPHA = 0.22f
-private const val PILL_ALPHA = 0.88f
+private const val PILL_ALPHA = 0.94f
 private const val LOCATOR_SHARE = 0.3f
 private val LOCATOR_MAX = 120.dp
 
@@ -438,14 +498,16 @@ private val LOCATOR_SIZES = listOf(1f, 0.75f)
 private const val MAX_LABEL_SCALE = 1.5f
 private val LOCATOR_DOT = 3.5.dp
 private val LOCATOR_CLEARANCE = 6.dp
-private const val LOCATOR_SAMPLES = 200
+private const val LINE_SAMPLES = 200
 private val INSET = 20.dp
 private val RIVER_WIDTH = 1.dp
 private val WAY_WIDTH = 3.dp
+private val WAY_CASING_WIDTH = 7.dp
 private val WALKED_WIDTH = 4.dp
 private val END_RADIUS = 5.dp
 private val SMALL_END_RADIUS = 3.5.dp
 private val STAGE_RADIUS = 3.dp
+private val NEXT_RADIUS = 4.5.dp
 private val PLACE_RADIUS = 2.dp
 private val BEAD_RADIUS = 1.4.dp
 private val HERE_RADIUS = 6.dp
@@ -453,7 +515,8 @@ private val HERE_HALO = 14.dp
 private val SMALL_HERE_RADIUS = 3.5.dp
 private val SMALL_HERE_HALO = 7.dp
 private val LABEL_ROOM = 40.dp
-private val STREET_WIDTH = 1.5.dp
+private val LABEL_CLEARANCE = 3.dp
+private val STREET_WIDTH = 1.dp
 private val MAIN_STREET_WIDTH = 2.5.dp
 internal val LABEL_PAD_X = 5.dp
 internal val LABEL_PAD_Y = 2.dp

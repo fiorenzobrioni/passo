@@ -18,7 +18,9 @@ import androidx.compose.ui.graphics.Color
  *   better on either surface. The same class of statement, so it does not learn a new color.
  * - **water**: the sea and the lakes of a way's map (Phase 11), the one ground Material has no
  *   role for: the dresses put their blue in different roles (Paper's secondary, Vivid's primary),
- *   and a sea in amber would not read as one. A pale sky in light, a deep one in dark; a ground for marks, never for text.
+ *   and a sea in amber would not read as one. A pale sky in light, a deep one in dark; a ground
+ *   for marks, never for text. In light it stands a clear step from the land (a river through a
+ *   city was almost the land's own blue-grey).
  * - **park**: a city's parks on a walk's map (Phase 11): a pale sage in light, a deep one in
  *   dark, quieter than the goal's green so the walked line stays the strongest mark on it.
  */
@@ -37,7 +39,7 @@ internal val PaperLightColors = PassoColors(
     goalContainer = Color(0xFFD1EDD9),
     effortRamp = listOf(Color(0xFFFDE8B0), Color(0xFFFAC66A), Color(0xFFF29A2E), Color(0xFFD9661A), Color(0xFFA8400F)),
     attention = Color(0xFF7A5200),
-    water = Color(0xFFCFE3F2),
+    water = Color(0xFFC3DCEE),
     park = Color(0xFFDCE8D3),
 )
 
@@ -55,7 +57,7 @@ internal val VividLightColors = PassoColors(
     goalContainer = Color(0xFFBFF2CE),
     effortRamp = listOf(Color(0xFFFFE8AA), Color(0xFFFFC559), Color(0xFFF89700), Color(0xFFDE6300), Color(0xFFAC3D00)),
     attention = Color(0xFF7A5200),
-    water = Color(0xFFCFE1F5),
+    water = Color(0xFFC2DAF3),
     park = Color(0xFFDAEAD4),
 )
 

@@ -42,18 +42,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.callbackdev.passo.core.designsystem.components.GroupDivider
 import com.callbackdev.passo.core.designsystem.components.PlaceText
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
@@ -508,6 +511,9 @@ internal fun Stamps(state: WaysUiState, way: Way, progress: WayProgress) {
  * The stops in words: each with where it falls, and when it was reached or how far it is. A
  * stop's sentence is said once it is reached, or when it is the next: the way is discovered
  * as it is walked.
+ *
+ * One line runs down through their points, in the goal's colour as far as the reader has come:
+ * the stops are a way, in order, and a rule between every two of them cut it into a list.
  */
 @Composable
 internal fun Stages(state: WaysUiState, way: Way, progress: WayProgress?, format: MeasureFormatter) {
@@ -515,11 +521,14 @@ internal fun Stages(state: WaysUiState, way: Way, progress: WayProgress?, format
     val next = progress?.next
     SettingsGroup(modifier = Modifier.testTag(WaysTags.STAGES)) {
         way.stops.forEachIndexed { index, stop ->
-            if (index > 0) GroupDivider()
             StopRow(
                 stop = stop,
                 reached = reached[stop.key],
                 isNext = stop == next,
+                first = index == 0,
+                last = index == way.stops.lastIndex,
+                // The line below a stop is walked once the stop after it is reached.
+                walkedOn = way.stops.getOrNull(index + 1)?.key in reached,
                 // Before a start every sentence is there to read: nothing is being discovered yet.
                 showNote = progress == null || stop.key in reached || stop == next,
                 progress = progress,
@@ -535,6 +544,9 @@ private fun StopRow(
     stop: WayStop,
     reached: StopReached?,
     isNext: Boolean,
+    first: Boolean,
+    last: Boolean,
+    walkedOn: Boolean,
     showNote: Boolean,
     progress: WayProgress?,
     today: LocalDate,
@@ -554,34 +566,50 @@ private fun StopRow(
 
         else -> stringResource(R.string.way_stop_mark, format.distance(stop.distanceMeters.toDouble()).unbrokenText())
     }
+    // The stop ahead is the one the page is about: its name and how far it is stand out.
+    val ahead = isNext && progress != null
+    val nameStyle = (if (stop.stage) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodyMedium)
+        .let { if (ahead) it.copy(fontWeight = FontWeight.SemiBold) else it }
+    // The point sits on the name's first line, at any text size, and the line runs through it.
+    val nameLine = with(LocalDensity.current) { nameStyle.lineHeight.toDp() }
+    val rest = scheme.outlineVariant
     Row(
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier
             .fillMaxWidth()
             .semantics(mergeDescendants = true) { }
-            .padding(horizontal = ScreenMargin, vertical = 12.dp),
+            .drawBehind {
+                val x = (ScreenMargin + STOP_MARK / 2).toPx()
+                val y = (STOP_PADDING + nameLine / 2).toPx()
+                val width = STOP_RAIL.toPx()
+                if (!first) drawLine(if (reached != null) goal else rest, Offset(x, 0f), Offset(x, y), width)
+                if (!last) drawLine(if (walkedOn) goal else rest, Offset(x, y), Offset(x, size.height), width)
+            }
+            .padding(horizontal = ScreenMargin, vertical = STOP_PADDING),
     ) {
-        Box(Modifier.size(24.dp), contentAlignment = Alignment.Center) {
+        Box(Modifier.size(STOP_MARK, nameLine), contentAlignment = Alignment.Center) {
             val size = if (stop.stage) 12.dp else 8.dp
             val dot = Modifier.size(size).clip(CircleShape)
             Box(
                 if (reached != null) {
                     dot.background(goal)
                 } else {
-                    dot.border(1.5.dp, if (isNext) goal else scheme.outline, CircleShape)
+                    // A ring on the group's own ground, so the line stops at it.
+                    dot.background(scheme.surfaceContainerLow)
+                        .border(if (ahead) 2.dp else 1.5.dp, if (isNext) goal else scheme.outline, CircleShape)
                 },
             )
         }
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            PlaceText(
-                text = stringResource(placeNameRes(stop.key)),
-                style = if (stop.stage) MaterialTheme.typography.bodyLarge else MaterialTheme.typography.bodyMedium,
-            )
+            PlaceText(text = stringResource(placeNameRes(stop.key)), style = nameStyle)
             Text(
                 text = if (stop.stage) status else stringResource(R.string.way_stop_place) + " · " + status,
-                style = MaterialTheme.typography.bodySmall.copy(fontFeatureSettings = "tnum"),
-                color = scheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontFeatureSettings = "tnum",
+                    fontWeight = if (ahead) FontWeight.Medium else null,
+                ),
+                color = if (ahead) goal else scheme.onSurfaceVariant,
             )
             val note = placeNoteRes(stop.key)
             if (showNote && note != null) {
@@ -595,6 +623,11 @@ private fun StopRow(
         }
     }
 }
+
+/** The column a stop's point stands in, the room above and below a stop, and the line through the points. */
+private val STOP_MARK = 24.dp
+private val STOP_PADDING = 12.dp
+private val STOP_RAIL = 2.dp
 
 /** A day of this year without its year, another year's with it. */
 @Composable
