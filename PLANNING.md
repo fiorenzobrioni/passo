@@ -1094,6 +1094,18 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   screenshots regenerated (Insights, Your year on foot). Checked: every module's tests, lint,
   spotless, the forbidden permissions. Not done on a device: the box is in «Open».
 
+- **12 Nov 2026.** **The first run's lines balanced, in the four apps** (owner, after the review
+  of Tempo's, Tetto's and Saldo's first runs against this one: "if a word alone at the end of a
+  line should be fixed in Passo too, we do it in all four repos"). The first run's texts are
+  centred and short, where a word alone on the last line («…in the / background.») reads as a
+  slip; the budget app already broke them balanced. `:core:designsystem` gains `balanced()`
+  (`LineBreak.Heading`: lines of about one width, never a word alone on the last), and every
+  centred text of the first run and of the no-sensor screen takes it: the titles, the sentence,
+  the promises, the bodies, the goal's note, the permission's refusal. Only the first run: the
+  rest of the app keeps its breaks until a review of its own looks at it screen by screen.
+  `onboarding-goal.png` regenerated (the welcome's breaks did not change). Checked: the
+  onboarding's tests and their screenshots, spotless.
+
 ### Open
 
 - [ ] **On a device (owner): Today's premium review** (§15, «Today reviewed for a premium first

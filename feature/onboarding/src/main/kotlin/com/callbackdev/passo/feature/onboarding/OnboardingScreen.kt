@@ -66,6 +66,7 @@ import com.callbackdev.passo.core.designsystem.format.text
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
+import com.callbackdev.passo.core.designsystem.theme.balanced
 import com.callbackdev.passo.core.designsystem.theme.padding
 import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.designsystem.theme.reducedMotion
@@ -274,7 +275,7 @@ private fun Modifier.stepHeading(where: String): Modifier = semantics {
 private fun PageTitle(text: String, where: String) {
     Text(
         text = text,
-        style = MaterialTheme.typography.headlineMedium,
+        style = MaterialTheme.typography.headlineMedium.balanced(),
         textAlign = TextAlign.Center,
         modifier = Modifier.stepHeading(where),
     )
@@ -285,7 +286,7 @@ private fun PageBody(text: String) {
     Spacer(Modifier.height(12.dp))
     Text(
         text = text,
-        style = MaterialTheme.typography.bodyLarge,
+        style = MaterialTheme.typography.bodyLarge.balanced(),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
     )
@@ -296,14 +297,14 @@ private fun PageBody(text: String) {
 private fun WelcomePage(where: String) {
     Text(
         text = stringResource(R.string.onboarding_app_name),
-        style = MaterialTheme.typography.displaySmall,
+        style = MaterialTheme.typography.displaySmall.balanced(),
         textAlign = TextAlign.Center,
         modifier = Modifier.stepHeading(where),
     )
     Spacer(Modifier.height(8.dp))
     Text(
         text = stringResource(R.string.onboarding_welcome_tagline),
-        style = MaterialTheme.typography.titleMedium,
+        style = MaterialTheme.typography.titleMedium.balanced(),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
     )
@@ -322,10 +323,14 @@ private fun Promise(title: Int, body: Int) {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Text(stringResource(title), style = MaterialTheme.typography.titleMedium, textAlign = TextAlign.Center)
+        Text(
+            stringResource(title),
+            style = MaterialTheme.typography.titleMedium.balanced(),
+            textAlign = TextAlign.Center,
+        )
         Text(
             stringResource(body),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyMedium.balanced(),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
@@ -359,7 +364,7 @@ private fun ProfilePage(state: OnboardingState, actions: OnboardingActions, wher
     Spacer(Modifier.height(16.dp))
     Text(
         stringResource(R.string.onboarding_sex),
-        style = MaterialTheme.typography.titleSmall,
+        style = MaterialTheme.typography.titleSmall.balanced(),
         textAlign = TextAlign.Center,
     )
     FlowRow(
@@ -462,7 +467,7 @@ private fun GoalPage(state: OnboardingState, actions: OnboardingActions, where: 
     Spacer(Modifier.height(16.dp))
     Text(
         text = stringResource(R.string.onboarding_goal_note),
-        style = MaterialTheme.typography.bodyMedium,
+        style = MaterialTheme.typography.bodyMedium.balanced(),
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
     )
@@ -509,7 +514,7 @@ private fun PermissionsPage(state: OnboardingState, where: String) {
         Spacer(Modifier.height(24.dp))
         Text(
             text = stringResource(R.string.onboarding_permissions_denied),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodyMedium.balanced(),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
