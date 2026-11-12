@@ -9,6 +9,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.callbackdev.passo.core.designsystem.R
@@ -136,3 +137,10 @@ val LocalPassoType = staticCompositionLocalOf { passoTypeFor(GoogleSansFamily) }
 
 /** Any style, with tabular figures. */
 fun TextStyle.tabular(): TextStyle = copy(fontFeatureSettings = TABULAR)
+
+/**
+ * Any style, its lines balanced: a few lines of about one width, never a word alone on the last.
+ * For a short text that stands on its own, centred (a first run's title, sentence and promises);
+ * a long one reads better by the paragraph.
+ */
+fun TextStyle.balanced(): TextStyle = copy(lineBreak = LineBreak.Heading)

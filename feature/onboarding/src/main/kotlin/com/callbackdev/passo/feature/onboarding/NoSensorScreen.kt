@@ -16,6 +16,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
+import com.callbackdev.passo.core.designsystem.theme.balanced
 import com.callbackdev.passo.core.designsystem.theme.padding
 import com.callbackdev.passo.core.designsystem.theme.pageGutter
 
@@ -40,12 +41,12 @@ fun NoSensorScreen(modifier: Modifier = Modifier) {
             )
             Text(
                 text = stringResource(R.string.setup_no_sensor_title),
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineMedium.balanced(),
                 textAlign = TextAlign.Center,
             )
             Text(
                 text = stringResource(R.string.setup_no_sensor_body),
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyLarge.balanced(),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
