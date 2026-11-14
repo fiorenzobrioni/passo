@@ -20,12 +20,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
-/** The two cards, as the settings screen and the previews need to tell them apart. */
+/**
+ * The two cards, as the settings screen and the previews need to tell them apart. The code's
+ * names (`GLANCE`, `GlanceWidget`, `widget_glance_*`; `WORDS`, `WordsWidget`) are older than the
+ * cards' names, which the owner swapped on 14 Nov 2026 (PLANNING.md §15): they stay, because a
+ * card placed on a home screen is bound to its receiver's class name, and a rename would take it
+ * off every phone.
+ */
 enum class WidgetKind {
-    /** «At a glance»: the ring, the number, the sentence, and the day hour by hour. */
+    /** «In words»: the ring, the number, the sentence, and the day hour by hour. */
     GLANCE,
 
-    /** «In words»: the number and the day in type. */
+    /** «At a glance»: the number and the day in type. */
     WORDS,
 }
 

@@ -116,3 +116,10 @@ part in the style of Chiaro's «Colpo d'occhio».
 today's hours, chosen per card (`WidgetLook.panel`): seven boxes on the world's scale with a
 hairline at today's goal, under the same ink rule (PLANNING.md §15, «The last seven days on At a
 glance»).
+
+**Amended 14 Nov 2026** (owner): the two cards swap names, so that «In parole» is the same card in
+the whole family. The ring card (`GlanceWidget`) is now «In words» / «In parole», the card in type
+alone (`WordsWidget`) «At a glance» / «Colpo d'occhio»; what each card shows does not change, and
+neither do the code's names: a card placed on a home screen is bound to its receiver's class
+name, so renaming `GlanceWidgetReceiver` or `WordsWidgetReceiver` would remove it from every phone.
+Above, the names are the ones of the time.

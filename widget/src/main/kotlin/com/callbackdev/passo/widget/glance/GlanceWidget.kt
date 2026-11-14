@@ -81,7 +81,7 @@ import com.callbackdev.passo.widget.widgetFormatter
 import com.callbackdev.passo.widget.withSlack
 
 /**
- * «At a glance»: today's ring, the count, the goal, the day's
+ * «In words»: today's ring, the count, the goal, the day's
  * sentence where the grant has room, and on a wide tall card the day hour by hour. The forms
  * and their arithmetic are [GlanceLayout]'s; this file draws them.
  */

@@ -103,7 +103,7 @@
     <string name="guide_ways_credit">The ways and the walks are drawn from OpenStreetMap, © OpenStreetMap contributors (ODbL), the walks routed with BRouter; the ways’ borders and towns and the continents’ land from Natural Earth.</string>
     <string name="guide_widgets_title">On the home screen</string>
     <string name="guide_widgets_two_title">Two widgets</string>
-    <string name="guide_widgets_two_body">“At a glance” carries the ring and the day’s sentence; “In words” says the same day in type alone. Both fit any size, from a single cell up, and each has its own card, color and opacity.</string>
+    <string name="guide_widgets_two_body">“In words” carries the ring and the day’s sentence; “At a glance” says the same day in type alone. Both fit any size, from a single cell up, and each has its own card, color and opacity.</string>
     <string name="guide_widgets_wait_title">They wait until you look</string>
     <string name="guide_widgets_wait_body">The widgets and the notification are brought up to date when the screen turns on, and never while it is off; the Quick Settings tile, while its panel is open. A count nobody can see is not worth the battery.</string>
 

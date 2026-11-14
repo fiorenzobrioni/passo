@@ -14,7 +14,7 @@ import com.callbackdev.passo.widget.textLineHeight
 import com.callbackdev.passo.widget.textSizeForLine
 
 /*
- * «In words»: the day with nothing drawn on it but two small marks, and
+ * «At a glance»: the day with nothing drawn on it but two small marks, and
  * its whole hierarchy built out of type, in four ranks, each differing by weight AND ink, and
  * by size wherever the scale has a step between them (the sentence and the facts share 16 sp
  * since 13 Oct 2026):
@@ -27,7 +27,7 @@ import com.callbackdev.passo.widget.textSizeForLine
  * | 2 | or, when the count is not moving, what a tap does about it | [WORDS_SENTENCE_SP] | Medium | attention |
  * | 4 | the same, on the one-cell card, as a footnote | 13 | Medium | attention |
  *
- * The number is sized by the grant, the way «At a glance» sizes its ring. Four forms:
+ * The number is sized by the grant, the way «In words» sizes its ring. Four forms:
  *
  * - [WordsForm.LINE], one row too narrow for two columns: the eyebrow, the number, the goal.
  * - [WordsForm.ROW], one row with a second column: the number on the leading side, the
