@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- The two cards, as the launcher's picker names them (PLANNING.md §7). -->
-    <string name="widget_glance_label">At a glance</string>
+    <!-- The two cards, as the launcher's picker names them (PLANNING.md §7). Since 14 Nov 2026 the
+         ring card (GlanceWidget) is «In words», the family's ring card, and the type card
+         (WordsWidget) «At a glance»: the names swapped, the classes kept theirs, so a card already
+         on a home screen stays where it is. -->
+    <string name="widget_glance_label">In words</string>
     <string name="widget_glance_desc">Today\'s steps on a ring, the day\'s sentence where there is room and, on a wide tall card, the day hour by hour</string>
-    <string name="widget_words_label">In words</string>
+    <string name="widget_words_label">At a glance</string>
     <string name="widget_words_desc">Words and figures: today\'s steps large, the day\'s sentence, the goal and, on a tall card, the day in figures</string>
 
     <!-- The day's sentence, brief -->

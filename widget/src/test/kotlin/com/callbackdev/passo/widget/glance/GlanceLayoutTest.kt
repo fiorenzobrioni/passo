@@ -5,7 +5,7 @@ import androidx.compose.ui.unit.dp
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
-/** The forms and budgets of «At a glance», at the household's reference grants. */
+/** The forms and budgets of «In words», the ring card (named «At a glance» until 14 Nov 2026), at the household's reference grants. */
 class GlanceLayoutTest {
     private val oneByOne = DpSize(85.dp, 85.dp)
     private val twoByOne = DpSize(159.dp, 85.dp)
@@ -205,5 +205,15 @@ class GlanceLayoutTest {
     fun `the one-cell ring takes the cell`() {
         assertThat(dotRingSize(oneByOne)).isEqualTo(85.dp - DotPadding * 2)
         assertThat(dotRingSize(oneByTwo)).isEqualTo(85.dp - DotPadding * 2)
+    }
+
+    @Test
+    fun `the tall card's eyebrow stands beside the ring, in the column it leaves`() {
+        val plan = tallPlan(twoByTwo, 1f, fiveDigits, 2)
+        val inner = twoByTwo.width - 28.dp
+        assertThat(tallEyebrowWidth(inner, plan.ring)).isEqualTo(inner - plan.ring - 8.dp)
+        // «Today» at 16 sp is about 45 dp: the two-by-two leaves it room.
+        assertThat(tallEyebrowWidth(inner, plan.ring).value).isGreaterThan(60f)
+        assertThat(tallEyebrowWidth(20.dp, 44.dp)).isEqualTo(0.dp)
     }
 }

@@ -70,7 +70,8 @@ import com.callbackdev.passo.widget.widgetFormatter
 import com.callbackdev.passo.widget.withSlack
 
 /**
- * «In words»: the same day as «At a glance», with no drawing on the card
+ * «At a glance» (named «In words» until 14 Nov 2026, when the ring card took that name): the same
+ * day as the ring card «In words», with no drawing on the card
  * but two marks at the size of the line they belong to (a check before a goal that is met, and
  * the pause of a count that is not moving). The number is the drawing now. [WordsLayout] holds
  * the ranks, the forms and every number's reason.

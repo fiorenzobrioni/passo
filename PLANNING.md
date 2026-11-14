@@ -1106,6 +1106,26 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   `onboarding-goal.png` regenerated (the welcome's breaks did not change). Checked: the
   onboarding's tests and their screenshots, spotless.
 
+- **14 Nov 2026.** **The family's ring card: «In words» in the four apps** (owner: "the «At a
+  glance» widget of Passo becomes «In words», so it lines up with the other three in the ring's
+  drawing; then, with Passo's as the model of layout, drawing and type, a review and a redesign so
+  the four are one family at every size, on one home screen"). The design was drawn first, on a
+  canvas the owner approved, then built in the four repositories. Passo's part:
+  - **The names swap.** The ring card (`GlanceWidget`) is «In words» / «In parole», the name every
+    sister gives its ring card; the type card (`WordsWidget`) takes the name the ring leaves, «At a
+    glance» / «Colpo d'occhio». Only the labels change: the classes, receivers and layouts keep
+    their names, so a card already on a home screen stays where it is, with its settings. The
+    guide's paragraph says the new names.
+  - **The tall card's eyebrow**: «Today» in the top leading corner beside the ring
+    (`tallEyebrowWidth`, `EYEBROW_SP`, 16 sp Medium, quiet), as every ring card names its subject
+    there (Tempo the date, Tetto the cap, Chiaro the place). It stands in the ring's height and
+    takes nothing from the words; dropped where even the word does not fit.
+  - **The family's order** under the number: the goal (what the number is) before the sentence
+    (what it means), on the tall card and in a panel's stacked header, as a row already reads.
+  - The ring, its sizes, the bars and the type scale are the family's model and do not change: the
+    sisters follow them. Checked: `:widget` and `:feature:guide` tests, the gallery looked at,
+    spotless. README screenshot `widgets.png` regenerated and looked at.
+
 ### Open
 
 - [ ] **On a device (owner): Today's premium review** (§15, «Today reviewed for a premium first

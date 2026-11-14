@@ -116,3 +116,9 @@ part in the style of Chiaro's «Colpo d'occhio».
 today's hours, chosen per card (`WidgetLook.panel`): seven boxes on the world's scale with a
 hairline at today's goal, under the same ink rule (PLANNING.md §15, «The last seven days on At a
 glance»).
+
+**Amended 14 Nov 2026** (owner): the names swap. The ring card (`GlanceWidget`) is «In words» /
+«In parole», the name every card of the family that draws the ring carries; the type card
+(`WordsWidget`) is «At a glance» / «Colpo d'occhio». Only the labels change, so placed cards
+stay. The tall ring card gains the family's eyebrow («Today», beside the ring) and the family's
+order under the number: the goal, then the sentence (PLANNING.md §15, 14 Nov 2026).

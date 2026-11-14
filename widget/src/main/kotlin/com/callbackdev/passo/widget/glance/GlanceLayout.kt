@@ -16,7 +16,8 @@ import com.callbackdev.passo.widget.textLineHeight
 import com.callbackdev.passo.widget.textSizeForLine
 
 /*
- * «At a glance»: the ring is the picture the card is read by across a room, and it says
+ * «In words», the family's ring card (owner, 14 Nov 2026: it was «At a glance», and took the
+ * name its sisters' ring cards carry; the class names stay, so placed cards stay): the ring is the picture the card is read by across a room, and it says
  * at a glance (how far along the day is) before any number is read.
  *
  * Five forms, picked by the grant the launcher really makes, so every size is a composition
@@ -177,6 +178,16 @@ internal fun tallPlan(
     }
     return TallPlan(ring = ring, heroSp = quarterPoint(hero), sentenceLines = lines)
 }
+
+/**
+ * The tall card's eyebrow (owner, 14 Nov 2026, the family's ring card): «Today» in the top leading
+ * corner, beside the ring, at the scale's body size, quiet and Medium. Its column is what the ring
+ * leaves less [EyebrowRingGap]; it stands in the ring's height, so it takes nothing from the words.
+ */
+internal fun tallEyebrowWidth(innerWidth: Dp, ring: Dp): Dp = (innerWidth - ring - EyebrowRingGap).coerceAtLeast(0.dp)
+
+internal const val EYEBROW_SP = WidgetType.BODY
+internal val EyebrowRingGap = 8.dp
 
 internal val TallRingMin = 44.dp
 internal val TallRingMax = 104.dp

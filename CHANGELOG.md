@@ -12,6 +12,10 @@ All notable changes to Passo are documented here. The format follows
 
 ### Better
 
+- **The widgets swap names.** The card with the ring is now «In words», as on the other apps
+  of the family, and the card with the large number is «At a glance». Your cards stay where they
+  are. On a tall card the ring now has «Today» beside it, and the goal comes before the sentence.
+
 - **Outings, easier to read and to start.** Each outing is a shorter card that reads on one
   line, with one button to start it and a touch on the card to change it; a new one is at the
   top of the page. An outing under way leads with its sentence, shows how far it is and where

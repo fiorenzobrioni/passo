@@ -112,8 +112,8 @@ Added to v1.0 at the owner's request (Phase 10, `docs/adr/0009-sessions.md`). An
 ### Widgets (Jetpack Glance)
 
 - Two widgets, in the dress of Chiaro's pair so the family's cards sit side by side as one (decided in Phase 4, `docs/adr/0005-widgets.md`):
-  - **At a glance**: today's ring (with the usual-day notch), the count, the goal and the day's sentence; on a wide tall card, today's steps hour by hour in 24 bars, built without images.
-  - **In words**: the same day in type alone, Chiaro's «In parole»: the count large, the sentence, the goal, distance and calories, and on a tall card the day in figures.
+  - **In words** (named «At a glance» until 14 Nov 2026, when it took the name of the family's ring cards): today's ring (with the usual-day notch), the count, the goal and the day's sentence; on a wide tall card, today's steps hour by hour in 24 bars, built without images.
+  - **At a glance** (named «In words» until 14 Nov 2026): the same day in type alone: the count large, the sentence, the goal, distance and calories, and on a tall card the day in figures.
 - The same sizes for both: from one cell to as large as the launcher allows, 4x1 by default, with a layout for every size.
 - Per widget: a light, dark or phone-following card, or one of Chiaro's six colours, any opacity, and which content it carries.
 - Updates quickly when the screen turns on, is throttled while the screen is on, and never updates while the screen is off.

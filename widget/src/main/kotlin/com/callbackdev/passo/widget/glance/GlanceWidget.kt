@@ -64,6 +64,7 @@ import com.callbackdev.passo.widget.WidgetSamples
 import com.callbackdev.passo.widget.axisHour
 import com.callbackdev.passo.widget.balancedWidth
 import com.callbackdev.passo.widget.compactCount
+import com.callbackdev.passo.widget.eyebrowText
 import com.callbackdev.passo.widget.fontScale
 import com.callbackdev.passo.widget.goalOfText
 import com.callbackdev.passo.widget.linesThatFit
@@ -387,8 +388,9 @@ private fun RowContent(
         val sized = if (split != null) GlanceModifier.width(RingTextGap + column) else GlanceModifier.defaultWeight()
         Column(modifier = GlanceModifier.padding(start = RingTextGap).then(balance).then(sized)) {
             Count(parts, hero)
-            StackedSentence(parts, stacked, column)
+            // The family's order (owner, 14 Nov 2026): what the number is, then what it means.
             GoalLine(parts, column)
+            StackedSentence(parts, stacked, column)
             if (footnote) StatusFootnote(parts.model.state, parts.palette, column)
         }
         if (split != null) {
@@ -462,8 +464,8 @@ private fun MirroredRow(parts: CardParts, width: Dp, height: Dp, ring: Dp, wide:
                     )
                 }
             }
-            StackedSentence(parts, stacked, words)
             GoalLine(parts, words)
+            StackedSentence(parts, stacked, words)
             if (footnote) StatusFootnote(parts.model.state, parts.palette, words)
         }
         Ring(parts, ring)
@@ -471,8 +473,10 @@ private fun MirroredRow(parts: CardParts, width: Dp, height: Dp, ring: Dp, wide:
 }
 
 /**
- * Two rows and up: the ring alone in the top trailing corner, the words stacked from the bottom
- * leading one, in order: the number, the sentence, the goal.
+ * Two rows and up: the ring in the top trailing corner with the eyebrow («Today») beside it, the
+ * words stacked from the bottom leading one, in order: the number, the goal (what the number is,
+ * as under the number of a one-row card), the sentence (what it means). The family's order on a
+ * tall ring card (owner, 14 Nov 2026, PLANNING.md §15 «The family's ring card»).
  */
 @Composable
 private fun TallContent(parts: CardParts, size: DpSize) {
@@ -488,14 +492,37 @@ private fun TallContent(parts: CardParts, size: DpSize) {
     val fitted = text?.let { FittedSentence(it, plan.sentenceLines) }
     Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Alignment.TopEnd) {
         Ring(parts, plan.ring)
+        Eyebrow(parts, tallEyebrowWidth(width, plan.ring))
         Column(modifier = GlanceModifier.fillMaxSize(), verticalAlignment = Alignment.Bottom) {
             Count(parts, plan.heroSp)
+            GoalLine(parts, width)
             val sentenceWidth = fitted?.let {
                 balancedWidth(context, it.text, SENTENCE_LINE_SP, width, TextWeight.MEDIUM, it.lines)
             } ?: width
             Sentence(parts, fitted, TextAlign.Start, GlanceModifier.width(sentenceWidth))
-            GoalLine(parts, width)
         }
+    }
+}
+
+/**
+ * The tall card's eyebrow, in the top leading corner beside the ring: what the card is about,
+ * «Today», as every ring card of the family names its subject there. Quiet and Medium, one line,
+ * left out where even the word does not fit the column the ring leaves.
+ */
+@Composable
+private fun Eyebrow(parts: CardParts, room: Dp) {
+    val text = eyebrowText(parts.context, short = true)
+    if (measureWidgetText(parts.context, text, EYEBROW_SP, TextWeight.MEDIUM).withSlack() > room) return
+    Box(modifier = GlanceModifier.fillMaxSize(), contentAlignment = Alignment.TopStart) {
+        Text(
+            text = text,
+            style = TextStyle(
+                color = parts.palette.secondaryInk,
+                fontSize = EYEBROW_SP.sp,
+                fontWeight = FontWeight.Medium,
+            ),
+            maxLines = 1,
+        )
     }
 }
 

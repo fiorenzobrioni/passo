@@ -14,7 +14,8 @@ import com.callbackdev.passo.widget.textLineHeight
 import com.callbackdev.passo.widget.textSizeForLine
 
 /*
- * «In words»: the day with nothing drawn on it but two small marks, and
+ * «At a glance» (named «In words» until 14 Nov 2026, when the ring card took that name): the day
+ * with nothing drawn on it but two small marks, and
  * its whole hierarchy built out of type, in four ranks, each differing by weight AND ink, and
  * by size wherever the scale has a step between them (the sentence and the facts share 16 sp
  * since 13 Oct 2026):

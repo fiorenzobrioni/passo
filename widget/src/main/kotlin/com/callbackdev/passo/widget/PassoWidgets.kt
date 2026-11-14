@@ -22,10 +22,10 @@ import kotlinx.coroutines.launch
 
 /** The two cards, as the settings screen and the previews need to tell them apart. */
 enum class WidgetKind {
-    /** «At a glance»: the ring, the number, the sentence, and the day hour by hour. */
+    /** «In words», the family's ring card (named «At a glance» until 14 Nov 2026): the ring, the number, the sentence, and the day hour by hour. */
     GLANCE,
 
-    /** «In words»: the number and the day in type. */
+    /** «At a glance» (named «In words» until 14 Nov 2026): the number and the day in type. */
     WORDS,
 }
 
