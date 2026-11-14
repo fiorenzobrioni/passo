@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="widget_glance_label">Colpo d\'occhio</string>
+    <string name="widget_glance_label">In parole</string>
     <string name="widget_glance_desc">I passi di oggi su un anello, la frase del giorno dove c\'è spazio e, su una card larga e alta, la giornata ora per ora</string>
-    <string name="widget_words_label">In parole</string>
+    <string name="widget_words_label">Colpo d\'occhio</string>
     <string name="widget_words_desc">Parole e numeri: i passi di oggi in grande, la frase del giorno, l\'obiettivo e, su una card alta, la giornata in cifre</string>
 
     <string name="widget_sentence_no_steps">Ancora nessun passo oggi</string>

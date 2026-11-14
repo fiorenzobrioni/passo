@@ -104,7 +104,7 @@
     <string name="guide_ways_credit">I cammini e le passeggiate sono tracciati da OpenStreetMap, © OpenStreetMap contributors (ODbL), le passeggiate instradate con BRouter; confini e città dei cammini e terre dei continenti da Natural Earth.</string>
     <string name="guide_widgets_title">Nella schermata Home</string>
     <string name="guide_widgets_two_title">Due widget</string>
-    <string name="guide_widgets_two_body">«Colpo d’occhio» ha l’anello e la frase del giorno; «In parole» dice la stessa giornata solo con il testo. Tutti e due stanno in ogni misura, da una sola cella in su, e ognuno ha la sua scheda, il suo colore e la sua opacità.</string>
+    <string name="guide_widgets_two_body">«In parole» ha l’anello e la frase del giorno; «Colpo d’occhio» dice la stessa giornata solo con il testo. Tutti e due stanno in ogni misura, da una sola cella in su, e ognuno ha la sua scheda, il suo colore e la sua opacità.</string>
     <string name="guide_widgets_wait_title">Aspettano che guardi</string>
     <string name="guide_widgets_wait_body">I widget e la notifica si aggiornano quando lo schermo si accende, e mai mentre è spento; il riquadro delle Impostazioni rapide, mentre il pannello è aperto. Un numero che nessuno vede non vale la batteria.</string>
 

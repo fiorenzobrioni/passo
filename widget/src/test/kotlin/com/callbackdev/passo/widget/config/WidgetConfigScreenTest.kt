@@ -59,7 +59,7 @@ class WidgetConfigScreenTest {
     }
 
     @Test
-    fun `at a glance offers its own switches and the arrangement, and nothing it would ignore`() {
+    fun `in words offers its own switches and the arrangement, and nothing it would ignore`() {
         show(WidgetKind.GLANCE)
         scrollTo("Bars under the count")
         compose.onNodeWithText("Bars under the count").assertExists()
@@ -76,7 +76,7 @@ class WidgetConfigScreenTest {
     }
 
     @Test
-    fun `in words offers the goal, the estimates and the figures, and no arrangement`() {
+    fun `at a glance offers the goal, the estimates and the figures, and no arrangement`() {
         show(WidgetKind.WORDS)
         scrollTo("The day in figures")
         compose.onNodeWithText("The goal").assertExists()

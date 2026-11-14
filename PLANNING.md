@@ -495,7 +495,7 @@ Input: the minute buckets of one local day, plus the settings. Output: a list of
 
 ## 7. Widgets (Glance)
 
-Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card and a Chiaro card on one home screen read as one family: «At a glance» (Chiaro's «Colpo d'occhio», with today's ring where the weather glyph was) and «In words» (Chiaro's «In parole»: the day in type, with two small marks). Decisions and reasons: `docs/adr/0005-widgets.md`.
+Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card and a Chiaro card on one home screen read as one family: «In words» / «In parole» (`GlanceWidget`: today's ring where Chiaro's weather glyph was) and «At a glance» / «Colpo d'occhio» (`WordsWidget`: the day in type, with two small marks). The names were the other way round until the owner swapped them on 14 Nov 2026, so that «In parole» is the same card in the whole family (§15); the code keeps its older names. Decisions and reasons: `docs/adr/0005-widgets.md`.
 
 ### Configuration
 
@@ -504,15 +504,15 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
 - `updatePeriodMillis = 0`; `configure` is the per-widget settings screen, `reconfigurable|configuration_optional`.
 - Reference grants the layout tests measure against (Chiaro's): one row ≈ 85 dp tall, two cells ≈ 159 dp, three ≈ 250, four ≈ 340; two rows ≈ 189 dp.
 
-| «At a glance» form | When | Content |
+| «In words» (`GlanceWidget`) form | When | Content |
 |---|---|---|
 | DOT | narrower than 120 dp | The ring with the count inside (compact where the language shortens thousands) |
 | NARROW | one row | Ring, count, «of 10,000 steps» |
 | WIDE | one row with a sentence column (4 cells) | The same, and the day's sentence at the far edge; or mirrored, the ring on the right |
-| TALL | two rows and up | Ring in the top corner; count, sentence and goal from the bottom. At every form and size the ring is the family's circle, «In words»'s dial in Tempo at the same size (§15, 4 Nov 2026, «at every size») |
+| TALL | two rows and up | Ring in the top corner; count, sentence and goal from the bottom. At every form and size the ring is the family's circle, the dial of Tempo's «In words» at the same size (§15, 4 Nov 2026, «at every size») |
 | PANEL | two rows and up, three cells or wider | The row on top, its ring the family's circle, larger without the sentence as the tall card's (the sentence under the count where the ring leaves it no room at the far edge), and under it today's steps by hour (24 bars built from boxes, current hour highlighted) or, as the reader chooses, the last 7 days against the goal (7 bars, today highlighted, a line at today's goal; §15, 2 Nov 2026) |
 
-| «In words» form | When | Content |
+| «At a glance» (`WordsWidget`) form | When | Content |
 |---|---|---|
 | LINE | one row, one or two cells | «Steps today», the count, the share of the goal where it costs the number nothing |
 | ROW | one row, three cells and up | The count on the leading side; the sentence, the goal and the distance and calories at the far edge |
@@ -1105,6 +1105,21 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   rest of the app keeps its breaks until a review of its own looks at it screen by screen.
   `onboarding-goal.png` regenerated (the welcome's breaks did not change). Checked: the
   onboarding's tests and their screenshots, spotless.
+
+- **14 Nov 2026.** **The widgets swap names** (owner: "I'd like to swap the two widgets' names, so
+  the «In parole» widget becomes the same for the whole family"). The ring card (`GlanceWidget`)
+  is now «In words» / «In parole», as Tempo's card with the dial is; the card in type alone
+  (`WordsWidget`) is «At a glance» / «Colpo d'occhio». Only the names move: each card keeps its
+  forms, its description in the launcher's list and its settings. Changed: the two labels
+  (`widget_glance_label`, `widget_words_label`, English and Italian), the guide's «Two widgets»,
+  the README's caption, VISION, CLAUDE.md, §7, ADR 0005 (amended), the CHANGELOG's Unreleased, and
+  the comments and test names that name a card. **The code keeps its names** (`GlanceWidget`,
+  `WordsWidget`, `WidgetKind.GLANCE` / `WORDS`, `widget_glance_*`, the `glance/` and `words/`
+  packages), now the other way round from the cards': the launcher binds a placed card to its
+  receiver's class name, so renaming `GlanceWidgetReceiver` / `WordsWidgetReceiver` would take
+  every card off the readers' home screens, and renaming only the rest would leave the code half
+  one way and half the other; `WidgetKind`'s comment says so. The README's `widgets.png` draws no
+  name, so it was not regenerated. The log above keeps the names of its time.
 
 ### Open
 

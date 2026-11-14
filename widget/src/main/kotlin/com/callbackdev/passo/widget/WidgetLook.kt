@@ -22,11 +22,11 @@ internal val Context.widgetLookDataStore by preferencesDataStore(name = "widget_
  */
 enum class WidgetBackground { LIGHT, DARK, SYSTEM, COLOR }
 
-/** Which way round the «At a glance» one-row card is laid: the ring leading or closing the row. */
+/** Which way round the «In words» one-row card is laid: the ring leading or closing the row. */
 enum class WidgetArrangement { RING_START, RING_END }
 
 /**
- * What «At a glance»'s bars show on a wide, tall card: today hour by hour, or the last seven
+ * What «In words»'s bars show on a wide, tall card: today hour by hour, or the last seven
  * days against their goals (PLANNING.md §15, «The last seven days on At a glance»).
  */
 enum class WidgetPanel { HOURS, WEEK }
@@ -38,10 +38,10 @@ enum class WidgetPanel { HOURS, WEEK }
  *
  * @property showSentence the day's sentence (ahead of or behind a usual day, what is left, when
  *   the goal was met). Whether there is room is the grant's decision; this can only take it away.
- * @property showGoal «In words»: the share of the goal walked, with the goal.
- * @property showMetrics «In words»: distance and active calories, estimated, on one line.
- * @property showDetails «In words», tall cards: the day in figures, one quantity per line.
- * @property showHours «At a glance», wide and tall cards: the bars under the count ([panel]).
+ * @property showGoal «At a glance»: the share of the goal walked, with the goal.
+ * @property showMetrics «At a glance»: distance and active calories, estimated, on one line.
+ * @property showDetails «At a glance», tall cards: the day in figures, one quantity per line.
+ * @property showHours «In words», wide and tall cards: the bars under the count ([panel]).
  * @property panel what those bars show: today hour by hour, or the last seven days.
  * @property cardColor kept while another background is picked, so coming back finds it.
  */

@@ -46,7 +46,7 @@ class WidgetGalleryTest {
     )
 
     @Test
-    fun `at a glance, every size`() {
+    fun `in words (the ring), every size`() {
         val board = HomeBoard(context, widthDp = 380)
         sizes.forEach { size ->
             board.row(size to renderCard(context, size) { GlanceWidgetContent(WidgetSamples.model()) })
@@ -55,7 +55,7 @@ class WidgetGalleryTest {
     }
 
     @Test
-    fun `in words, every size`() {
+    fun `at a glance (type alone), every size`() {
         val board = HomeBoard(context, widthDp = 380)
         sizes.forEach { size ->
             board.row(size to renderCard(context, size) { WordsWidgetContent(WidgetSamples.model()) })

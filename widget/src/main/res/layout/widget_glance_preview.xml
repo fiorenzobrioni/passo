@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  «At a glance» as the launcher's picker draws it where it asks for a static layout: the picker
+  «In words» as the launcher's picker draws it where it asks for a static layout: the picker
   never runs the widget's code, so this is sample values in the default dress (the blue card,
   white ink), the wide one-row form of the default 4×1 placement, with the widget's numbers:
   14 dp at the edges and 6 above and below, the ring 56 dp and 12 dp from the words, the count

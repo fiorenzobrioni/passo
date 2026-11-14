@@ -164,7 +164,7 @@ internal fun messageHint(context: Context, model: WidgetModel): String = context
     },
 )
 
-/** «of 10,000 steps», the line under the number on «At a glance»; [short] drops the word. */
+/** «of 10,000 steps», the line under the number on «In words»; [short] drops the word. */
 internal fun goalOfText(context: Context, goalSteps: Int, format: MeasureFormatter, short: Boolean): String =
     if (short) {
         context.getString(R.string.widget_goal_of_short, format.steps(goalSteps))
@@ -172,7 +172,7 @@ internal fun goalOfText(context: Context, goalSteps: Int, format: MeasureFormatt
         context.resources.getQuantityString(R.plurals.widget_goal_of, goalSteps, format.steps(goalSteps))
     }
 
-/** «84% of 10,000», the goal as a fact on «In words». Floored, so 100% is never shown early. */
+/** «84% of 10,000», the goal as a fact on «At a glance». Floored, so 100% is never shown early. */
 internal fun goalShareText(context: Context, overview: TodayOverview, format: MeasureFormatter): String =
     context.getString(R.string.widget_goal_share, format.percent(overview.progress), format.steps(overview.goalSteps))
 
@@ -190,7 +190,7 @@ internal fun metricsText(context: Context, overview: TodayOverview, format: Meas
     )
 }
 
-/** «Steps today», the eyebrow of «In words»; [short] is «Today», for the one-cell card. */
+/** «Steps today», the eyebrow of «At a glance»; [short] is «Today», for the one-cell card. */
 internal fun eyebrowText(context: Context, short: Boolean): String =
     context.getString(if (short) R.string.widget_eyebrow_short else R.string.widget_eyebrow)
 
