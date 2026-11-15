@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Passo, In immagini</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=Roboto+Flex:opsz,wght@8..144,300..800&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: {{w}}px; height: {{h}}px; position: relative; border-radius: 24px; overflow: hidden; box-sizing: border-box; font-family: 'Roboto Flex', Roboto, system-ui, sans-serif; font-variant-numeric: tabular-nums; color: {{g.ink}}; box-shadow: 0 12px 28px -14px rgba(0,30,10,0.55)">
+  <div style="position: absolute; inset: 0; background: {{g.layer}}; opacity: {{op}}"></div>
+
+  <sc-if value="{{is21}}" hint-placeholder-val="{{ false }}">
+    <div style="position: relative; height: 100%; box-sizing: border-box; padding: 10px 12px; display: flex; align-items: center; gap: 8px">
+      <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 1px">
+        <div style="font-size: 30px; line-height: 32px; font-weight: 700; letter-spacing: -0.03em">{{count}}</div>
+        <div style="font-size: 13px; line-height: 15px; color: {{g.quiet}}">di {{goal}}</div>
+      </div>
+      <div style="position: relative; width: 56px; height: 52px; flex: 0 0 56px">
+        <svg width="56" height="52" viewBox="0 0 56 52" style="position: absolute; inset: 0; overflow: visible" aria-hidden="true">
+          <path d="{{p21.goalLine}}" stroke="{{g.accent}}" stroke-width="1.5" stroke-dasharray="3 3" fill="none"></path>
+          <sc-if value="{{usualOn}}" hint-placeholder-val="{{ true }}"><path d="{{p21.usual}}" stroke="{{g.soft}}" stroke-width="1.4" stroke-dasharray="2 3" fill="none" stroke-linecap="round"></path></sc-if>
+          <path d="{{p21.area}}" fill="{{g.ink}}" fill-opacity="0.14"></path>
+          <path d="{{p21.line}}" stroke="{{g.ink}}" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        <div style="position: absolute; left: {{p21.nowX}}px; top: {{p21.nowY}}px; width: 9px; height: 9px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 0 0 2px {{g.ring}}"></div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{is41}}" hint-placeholder-val="{{ false }}">
+    <div style="position: relative; height: 100%; box-sizing: border-box; padding: 12px 16px; display: flex; align-items: center; gap: 12px">
+      <div style="font-size: 36px; line-height: 40px; font-weight: 700; letter-spacing: -0.03em">{{count}}</div>
+      <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 7px">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 8px">
+          <div style="font-size: 16px; line-height: 20px; font-weight: 500; white-space: nowrap">{{short}}</div>
+        </div>
+        <div style="position: relative; height: 24px">
+          <sc-for list="{{s41.bars}}" as="b" hint-placeholder-count="12">
+            <div style="position: absolute; left: {{b.x}}px; top: {{b.y}}px; width: {{b.w}}px; height: {{b.h}}px; border-radius: 2px 2px 1px 1px; background: {{b.c}}"></div>
+          </sc-for>
+          <div style="position: absolute; left: 0; right: 0; top: 17px; height: 1px; background: {{g.hair}}"></div>
+          <sc-if value="{{walksOn}}" hint-placeholder-val="{{ true }}">
+            <sc-for list="{{s41.walks}}" as="k" hint-placeholder-count="2">
+              <div style="position: absolute; left: {{k.x}}px; top: 20px; width: {{k.w}}px; height: 4px; border-radius: 2px; background: {{g.accent}}"></div>
+            </sc-for>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{is22}}" hint-placeholder-val="{{ false }}">
+    <div style="position: relative; height: 100%; box-sizing: border-box; padding: 12px; display: flex; flex-direction: column; gap: 4px">
+      <div style="display: flex; align-items: baseline; gap: 6px">
+        <div style="font-size: 38px; line-height: 40px; font-weight: 700; letter-spacing: -0.03em">{{count}}</div>
+        <div style="font-size: 13px; color: {{g.quiet}}">di {{goal}}</div>
+      </div>
+      <sc-if value="{{sentenceOn}}" hint-placeholder-val="{{ true }}">
+        <div style="font-size: 13px; line-height: 16px; font-weight: 500">{{sentence}}</div>
+      </sc-if>
+      <div style="flex: 1 1 auto"></div>
+      <div style="position: relative; height: 76px; border-radius: 16px; background: {{g.plate}}; box-shadow: inset 0 0 0 1px {{g.hair}}">
+        <svg width="135" height="50" viewBox="0 0 135 50" style="position: absolute; left: 0; top: 0; overflow: visible" aria-hidden="true">
+          <path d="{{p22.goalLine}}" stroke="{{g.accent}}" stroke-width="1.5" stroke-dasharray="3 3" fill="none"></path>
+          <sc-if value="{{usualOn}}" hint-placeholder-val="{{ true }}"><path d="{{p22.usual}}" stroke="{{g.soft}}" stroke-width="1.4" stroke-dasharray="2 3" fill="none" stroke-linecap="round"></path></sc-if>
+          <path d="{{p22.area}}" fill="{{g.ink}}" fill-opacity="0.14"></path>
+          <path d="{{p22.line}}" stroke="{{g.ink}}" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        <div style="position: absolute; left: {{p22.nowX}}px; top: {{p22.nowY}}px; width: 10px; height: 10px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 0 0 2.5px {{g.ring}}"></div>
+        <div style="position: absolute; left: 6px; right: 6px; top: 52px; height: 4px; border-radius: 2px; background: {{g.track}}"></div>
+        <sc-if value="{{walksOn}}" hint-placeholder-val="{{ true }}">
+          <sc-for list="{{p22.walks}}" as="k" hint-placeholder-count="2">
+            <div style="position: absolute; left: {{k.x}}px; top: 52px; width: {{k.w}}px; height: 4px; border-radius: 2px; background: {{g.accent}}"></div>
+          </sc-for>
+        </sc-if>
+        <sc-for list="{{p22.ticks}}" as="t" hint-placeholder-count="3">
+          <div style="position: absolute; left: {{t.x}}px; top: 60px; width: 24px; text-align: center; font-size: 11px; line-height: 12px; color: {{g.quiet}}">{{t.label}}</div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{wide}}" hint-placeholder-val="{{ true }}">
+    <div style="position: relative; height: 100%; box-sizing: border-box; padding: 14px 14px 12px; display: flex; flex-direction: column; gap: 8px">
+      <div style="display: flex; align-items: flex-start; gap: 12px; height: 60px">
+        <div style="font-size: {{heroSize}}px; line-height: 48px; font-weight: 700; letter-spacing: -0.035em">{{count}}</div>
+        <div style="flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 2px; padding-top: 3px">
+          <sc-if value="{{sentenceOn}}" hint-placeholder-val="{{ true }}">
+            <div style="font-size: {{sentSize}}px; line-height: {{sentLine}}px; font-weight: 500">{{sentence}}</div>
+          </sc-if>
+          <div style="font-size: 13px; line-height: 17px; color: {{g.quiet}}">{{facts}}</div>
+        </div>
+      </div>
+      <div style="position: relative; height: 95px; border-radius: 16px; background: {{g.plate}}; box-shadow: inset 0 0 0 1px {{g.hair}}">
+        <svg width="{{pw.w}}" height="50" viewBox="{{pw.box}}" style="position: absolute; left: 0; top: 0; overflow: visible" aria-hidden="true">
+          <path d="{{pw.goalLine}}" stroke="{{g.accent}}" stroke-width="1.5" stroke-dasharray="4 4" fill="none"></path>
+          <sc-if value="{{usualOn}}" hint-placeholder-val="{{ true }}"><path d="{{pw.usual}}" stroke="{{g.soft}}" stroke-width="1.5" stroke-dasharray="2 3.5" fill="none" stroke-linecap="round"></path></sc-if>
+          <path d="{{pw.area}}" fill="{{g.ink}}" fill-opacity="0.15"></path>
+          <path d="{{pw.line}}" stroke="{{g.ink}}" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        <div style="position: absolute; left: 10px; top: 13px; font-size: 11px; line-height: 12px; font-weight: 600; color: {{g.accent}}">{{goal}}</div>
+        <div style="position: absolute; left: {{pw.nowX}}px; top: {{pw.nowY}}px; width: 12px; height: 12px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 0 0 3px {{g.ring}}"></div>
+        <sc-for list="{{pw.bars}}" as="b" hint-placeholder-count="12">
+          <div style="position: absolute; left: {{b.x}}px; top: {{b.y}}px; width: {{b.w}}px; height: {{b.h}}px; border-radius: 2px 2px 1px 1px; background: {{b.c}}"></div>
+        </sc-for>
+        <div style="position: absolute; left: 6px; right: 6px; top: 72px; height: 1px; background: {{g.hair}}"></div>
+        <div style="position: absolute; left: 6px; right: 6px; top: 75px; height: 4px; border-radius: 2px; background: {{g.track}}"></div>
+        <sc-if value="{{walksOn}}" hint-placeholder-val="{{ true }}">
+          <sc-for list="{{pw.walks}}" as="k" hint-placeholder-count="2">
+            <div style="position: absolute; left: {{k.x}}px; top: 75px; width: {{k.w}}px; height: 4px; border-radius: 2px; background: {{g.accent}}"></div>
+          </sc-for>
+        </sc-if>
+        <sc-for list="{{pw.ticks}}" as="t" hint-placeholder-count="8">
+          <div style="position: absolute; left: {{t.x}}px; top: 82px; width: 24px; text-align: center; font-size: 11px; line-height: 12px; color: {{g.quiet}}">{{t.label}}</div>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{is43}}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; flex-direction: column; gap: 0; margin-top: 4px">
+          <div style="display: flex; justify-content: space-between; font-size: 13px; line-height: 18px; color: {{g.quiet}}"><span>Le camminate di oggi</span><span>45 min a passo svelto</span></div>
+          <sc-for list="{{walkRows}}" as="r" hint-placeholder-count="2">
+            <div style="display: flex; align-items: center; gap: 10px; height: 26px; border-top: {{r.rule}}">
+              <div style="width: 8px; height: 8px; border-radius: 50%; background: {{g.accent}}"></div>
+              <div style="width: 84px; font-size: 13px; font-weight: 500">{{r.when}}</div>
+              <div style="flex: 1 1 auto; font-size: 13px; color: {{g.quiet}}">{{r.mins}}</div>
+              <div style="font-size: 13px; font-weight: 600">{{r.steps}}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{is44}}" hint-placeholder-val="{{ false }}">
+        <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 6px">
+          <div style="display: flex; justify-content: space-between; font-size: 13px; line-height: 16px; color: {{g.quiet}}"><span>Gli ultimi sette giorni</span><span>4 su 6 all'obiettivo</span></div>
+          <div style="position: relative; height: 138px">
+            <div style="position: absolute; left: 0; right: 0; top: {{week.goalY}}px; border-top: 1.5px dashed {{g.accent}}"></div>
+            <div style="display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; height: 138px">
+              <sc-for list="{{week.days}}" as="d" hint-placeholder-count="7">
+                <div style="display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 138px">
+                  <div style="height: 12px; display: flex; align-items: center">
+                    <sc-if value="{{d.met}}" hint-placeholder-val="{{ false }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="{{g.ink}}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></sc-if>
+                  </div>
+                  <div style="width: 22px; height: {{d.h}}px; border-radius: 6px 6px 3px 3px; background: {{d.c}}"></div>
+                  <div style="font-size: 13px; line-height: 16px; font-weight: {{d.weight}}; color: {{d.ink}}">{{d.label}}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{is23}}" hint-placeholder-val="{{ false }}">
+    <div style="position: relative; height: 100%; box-sizing: border-box; padding: 12px; display: flex; flex-direction: column; gap: 4px">
+      <div style="display: flex; align-items: baseline; gap: 6px">
+        <div style="font-size: 38px; line-height: 40px; font-weight: 700; letter-spacing: -0.03em">{{count}}</div>
+        <div style="font-size: 13px; color: {{g.quiet}}">di {{goal}}</div>
+      </div>
+      <sc-if value="{{sentenceOn}}" hint-placeholder-val="{{ true }}">
+        <div style="font-size: 16px; line-height: 20px; font-weight: 500">{{sentence}}</div>
+      </sc-if>
+      <div style="flex: 1 1 auto"></div>
+      <div style="position: relative; height: 76px; border-radius: 16px; background: {{g.plate}}; box-shadow: inset 0 0 0 1px {{g.hair}}">
+        <svg width="135" height="50" viewBox="0 0 135 50" style="position: absolute; left: 0; top: 0; overflow: visible" aria-hidden="true">
+          <path d="{{p22.goalLine}}" stroke="{{g.accent}}" stroke-width="1.5" stroke-dasharray="3 3" fill="none"></path>
+          <sc-if value="{{usualOn}}" hint-placeholder-val="{{ true }}"><path d="{{p22.usual}}" stroke="{{g.soft}}" stroke-width="1.4" stroke-dasharray="2 3" fill="none" stroke-linecap="round"></path></sc-if>
+          <path d="{{p22.area}}" fill="{{g.ink}}" fill-opacity="0.14"></path>
+          <path d="{{p22.line}}" stroke="{{g.ink}}" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        <div style="position: absolute; left: {{p22.nowX}}px; top: {{p22.nowY}}px; width: 10px; height: 10px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 0 0 2.5px {{g.ring}}"></div>
+        <div style="position: absolute; left: 6px; right: 6px; top: 52px; height: 4px; border-radius: 2px; background: {{g.track}}"></div>
+        <sc-if value="{{walksOn}}" hint-placeholder-val="{{ true }}">
+          <sc-for list="{{p22.walks}}" as="k" hint-placeholder-count="2">
+            <div style="position: absolute; left: {{k.x}}px; top: 52px; width: {{k.w}}px; height: 4px; border-radius: 2px; background: {{g.accent}}"></div>
+          </sc-for>
+        </sc-if>
+        <sc-for list="{{p22.ticks}}" as="t" hint-placeholder-count="3">
+          <div style="position: absolute; left: {{t.x}}px; top: 60px; width: 24px; text-align: center; font-size: 11px; line-height: 12px; color: {{g.quiet}}">{{t.label}}</div>
+        </sc-for>
+      </div>
+      <sc-if value="{{walksOn}}" hint-placeholder-val="{{ true }}">
+        <div style="display: flex; flex-direction: column; margin-top: 4px">
+          <sc-for list="{{walkRows}}" as="r" hint-placeholder-count="2">
+            <div style="display: flex; align-items: center; gap: 8px; height: 24px; border-top: {{r.rule}}">
+              <div style="width: 7px; height: 7px; border-radius: 50%; background: {{g.accent}}"></div>
+              <div style="flex: 1 1 auto; font-size: 13px; font-weight: 500">{{r.start}}</div>
+              <div style="font-size: 13px; color: {{g.quiet}}">{{r.mins}}</div>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"size":{"editor":"enum","options":["21","41","22","32","42","23","43","44"],"default":"42"},"ground":{"editor":"enum","options":["app","light","dark","blue","azure","green","teal","plum","clay"],"default":"app"},"opacity":{"editor":"range","min":20,"max":100,"step":5,"default":100},"sentenceOn":{"editor":"boolean","default":true},"usualOn":{"editor":"boolean","default":true},"walksOn":{"editor":"boolean","default":true},"$preview":{"width":340,"height":189}}'>
+var SIZES = {'21':[159,85],'41':[340,85],'22':[159,189],'32':[250,189],'42':[340,189],'23':[159,293],'43':[340,293],'44':[340,397]};
+var HOURS = [0,0,0,0,0,0,0,420,2600,310,240,520,2700,380,290,460,420];
+var NOW = 16 + 40/60, GOAL = 10000;
+var USUAL = [0,0,0,0,0,0,0,150,700,1500,2300,3100,3900,4600,5300,6000,6800,7400,8100,8700,9200,9500,9650,9700,9700];
+var WALKS = [[8+10/60,8+32/60,'8:10 – 8:32','22 min','2.310 passi','8:10'],[12+35/60,12+58/60,'12:35 – 12:58','23 min','2.420 passi','12:35']];
+var WEEK = [[11200,'L'],[7400,'M'],[10350,'M'],[12800,'G'],[6200,'V'],[14100,'S'],[8340,'D']];
+var COLORS = {blue:'#0F3B6B',azure:'#0F5580',green:'#17572E',teal:'#0F5B5B',plum:'#4A2C63',clay:'#7A3320'};
+var WHITE = {ink:'#FFFFFF',quiet:'rgba(255,255,255,0.75)',soft:'rgba(255,255,255,0.55)',hair:'rgba(255,255,255,0.12)',track:'rgba(255,255,255,0.16)',accent:'#FDB528',ring:'rgba(0,20,8,0.45)',plate:'rgba(0,0,0,0.18)'};
+function ground(key){
+  if(key==='light')return {layer:'#FCF9F3',ink:'#1E1B17',quiet:'#4F4639',soft:'rgba(30,27,23,0.42)',hair:'rgba(30,27,23,0.10)',track:'rgba(30,27,23,0.10)',accent:'#835500',ring:'rgba(30,27,23,0.55)',plate:'rgba(131,85,0,0.06)'};
+  if(key==='dark')return {layer:'#16130E',ink:'#E9E1D8',quiet:'rgba(233,225,216,0.74)',soft:'rgba(233,225,216,0.45)',hair:'rgba(255,255,255,0.08)',track:'rgba(255,255,255,0.10)',accent:'#FFB957',ring:'rgba(0,0,0,0.6)',plate:'rgba(255,255,255,0.05)'};
+  if(COLORS[key])return Object.assign({},WHITE,{layer:COLORS[key]});
+  return Object.assign({},WHITE,{layer:'linear-gradient(150deg,#136A3C 0%,#0F5C34 55%,#0B4A2A 100%)',plate:'rgba(0,24,10,0.26)'});
+}
+function f(v){return v.toFixed(1);}
+function it(n){return String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
+function mono(pts){var n=pts.length,d=[],m=[],i;if(n<2)return '';for(i=0;i<n-1;i++){d.push((pts[i+1][1]-pts[i][1])/(pts[i+1][0]-pts[i][0]));}
+  m[0]=d[0];m[n-1]=d[n-2];for(i=1;i<n-1;i++){m[i]=(d[i-1]*d[i]<=0)?0:(d[i-1]+d[i])/2;}
+  for(i=0;i<n-1;i++){if(d[i]===0){m[i]=0;m[i+1]=0;}else{var a=m[i]/d[i],b=m[i+1]/d[i],s=a*a+b*b;if(s>9){var t=3/Math.sqrt(s);m[i]=t*a*d[i];m[i+1]=t*b*d[i];}}}
+  var p='M'+f(pts[0][0])+' '+f(pts[0][1]);for(i=0;i<n-1;i++){var dx=(pts[i+1][0]-pts[i][0])/3;p+=' C'+f(pts[i][0]+dx)+' '+f(pts[i][1]+m[i]*dx)+' '+f(pts[i+1][0]-dx)+' '+f(pts[i+1][1]-m[i+1]*dx)+' '+f(pts[i+1][0])+' '+f(pts[i+1][1]);}return p;}
+function cum(){var c=[0],i;for(i=0;i<16;i++){c.push(c[i]+HOURS[i]);}return c;}
+function usualAt(h){var i=Math.floor(h);return USUAL[i]+(USUAL[Math.min(24,i+1)]-USUAL[i])*(h-i);}
+function plate(w,top,bottom,barTop,barH,tickEvery,g){
+  var x=function(h){return 6+h/24*(w-12);},y=function(s){return top+(1-Math.min(s,GOAL)/GOAL)*(bottom-top);};
+  var c=cum(),pts=[],i;for(i=0;i<=16;i++){pts.push([x(i),y(c[i])]);}
+  var nowSteps=c[16]+HOURS[16];pts.push([x(NOW),y(nowSteps)]);
+  var line=mono(pts),area=line+' L'+f(x(NOW))+' '+f(bottom)+' L'+f(x(0))+' '+f(bottom)+' Z';
+  var up=[];for(i=0;i<=24;i++){up.push([x(i),y(USUAL[i])]);}
+  var bars=[];if(barH>0){var bw=(w-12)/24*0.6;for(i=0;i<=16;i++){if(HOURS[i]>0){var hh=Math.max(2,Math.min(HOURS[i]/2000,1)*barH);bars.push({x:f(x(i+0.5)-bw/2),y:f(barTop+barH-hh),w:f(bw),h:f(hh),c:i===16?g.accent:g.soft});}}}
+  var walks=WALKS.map(function(k){return {x:f(x(k[0])),w:f(Math.max(3,x(k[1])-x(k[0])))};});
+  var ticks=[];for(i=0;i<24;i+=tickEvery){ticks.push({x:f(x(i)-12),label:String(i)});}
+  return {w:w,box:'0 0 '+w+' 50',line:line,area:area,usual:mono(up),goalLine:'M6 '+f(top)+' H'+f(w-6),
+    nowX:f(x(NOW)-6),nowY:f(y(nowSteps)-6),usualDotX:f(x(NOW)-3.5),usualDotY:f(y(usualAt(NOW))-3.5),bars:bars,walks:walks,ticks:ticks};
+}
+class Component extends DCLogic {
+  renderVals() {
+    var p=this.props,size=p.size||'42',g=ground(p.ground||'app'),dims=SIZES[size]||SIZES['42'],i;
+    var c=cum(),nowSteps=c[16]+HOURS[16],delta=Math.round(nowSteps-usualAt(NOW));
+    var deltaR=Math.round(delta/10)*10;
+    var sentence=it(deltaR)+' passi avanti rispetto al solito';
+    var p21=plate(56,8,46,0,0,6,g),p22=plate(135,10,44,0,0,6,g);
+    var pw=size==='32'?plate(226,10,46,52,16,6,g):plate(312,10,46,52,16,3,g);
+    pw.nowX=f(parseFloat(pw.nowX)-0.5);
+    var s41={bars:[],walks:[]},sw=200,bw=sw/24*0.6;
+    for(i=0;i<=16;i++){if(HOURS[i]>0){var hh=Math.max(2,Math.min(HOURS[i]/2000,1)*16);s41.bars.push({x:f(i/24*sw+sw/48-bw/2),y:f(17-hh),w:f(bw),h:f(hh),c:i===16?g.accent:g.soft});}}
+    s41.walks=WALKS.map(function(k){return {x:f(k[0]/24*sw),w:f(Math.max(3,(k[1]-k[0])/24*sw))};});
+    var scale=15000,area=100;
+    var week={goalY:f(118-area*GOAL/scale),days:WEEK.map(function(d,idx){var today=idx===6,met=d[0]>=GOAL;return {label:d[1],h:f(Math.max(4,Math.min(d[0]/scale,1)*area)),c:today?g.accent:(met?g.ink:g.soft),met:met,weight:today?700:400,ink:today?g.ink:g.quiet};})};
+    var wide=size==='32'||size==='42'||size==='43'||size==='44';
+    return {
+      w:dims[0],h:dims[1],g:g,op:((p.opacity==null?100:p.opacity)/100).toFixed(2),
+      is21:size==='21',is41:size==='41',is22:size==='22',is23:size==='23',is43:size==='43',is44:size==='44',wide:wide,
+      sentenceOn:p.sentenceOn!==false,usualOn:p.usualOn!==false,walksOn:p.walksOn!==false,
+      count:it(nowSteps),goal:it(GOAL),km:'6,0 km',sentence:sentence,short:'Avanti di '+it(deltaR)+' sul solito',
+      heroSize:size==='32'?40:46,sentSize:size==='32'?13:16,sentLine:size==='32'?16:19,facts:size==='32'?'di '+it(GOAL):'di '+it(GOAL)+' · circa 6,0 km',
+      p21:p21,p22:p22,pw:pw,s41:s41,week:week,
+      walkRows:WALKS.map(function(k,idx){return {when:k[2],start:k[5],mins:k[3],steps:k[4],rule:idx===0?'0 solid transparent':'1px solid '+g.hair};})
+    };
+  }
+}
+</script>
+</body>
+</html>
