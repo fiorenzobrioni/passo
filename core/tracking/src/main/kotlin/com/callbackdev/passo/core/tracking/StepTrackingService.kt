@@ -340,6 +340,16 @@ class StepTrackingService : Service() {
             liveSteps.setServiceRunning(true)
             widgets.notify(WidgetEvent.TRACKING_STATE)
             onScreenChanged(powerManager.isInteractive)
+            // The launcher keeps the shortcuts as they were last written, icons included, until
+            // a plan is started, saved or deleted: a list written by an older version outlived it
+            // (owner, 15 Nov 2026: every shortcut still wore the same mark). Written again on each
+            // start of the service, which an update, a reboot and a reopened app all are: one
+            // read and one write, no wake-up of its own.
+            SessionShortcuts.update(
+                this@StepTrackingService,
+                sessions.plansByUse(),
+                preferencesSource.current().settings.units,
+            )
         }
     }
 

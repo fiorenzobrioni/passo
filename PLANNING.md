@@ -1151,7 +1151,27 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   - Checked: the widget module's tests, spotless; `widgets.png` and `widget-settings.png`
     regenerated (README).
 
+- **15 Nov 2026.** **The shortcuts written again at every start of the service** (owner: "the
+  shortcuts all wear the same drawing for the different kinds of walk, but in the app each walk
+  has a different one, at least the Japanese walk"). The rule has matched the Outings page since
+  9 Nov 2026 (`SessionShortcuts.shortcutIcon` asks `sessionIcon`; `SessionShortcutsTest`): the
+  interval walk its slow and fast line, a run its bolt, every other walk the way to a flag, so
+  the brisk walk, the stroll and the reader's own walks share the flag, on the page and on the
+  launcher alike. What could still show the same mark everywhere is the launcher's copy of the
+  list: it keeps the shortcuts, icons included, as they were last written, and they were written
+  only when a plan was started, saved or deleted, so a list written by a version before 9 Nov
+  2026 outlived it on the phone. `StepTrackingService` now writes the list again at the end of
+  each start (an update, through `MY_PACKAGE_REPLACED`; a reboot; the app reopened after the
+  process died): one read of the plans and one write, no wake-up of its own, the launcher's rate
+  limit caught as before. Checked: `:core:tracking`'s tests, spotless. On the phone: the box in
+  «Open».
+
 ### Open
+
+- [ ] **On a device (owner): the shortcuts after an update** (§15, 15 Nov 2026, «The shortcuts
+  written again at every start of the service»): install the build over the old one, then a long
+  press on the icon: the Japanese walk with its slow and fast line, a run with its bolt, the
+  other walks with the flag, without starting or saving a plan first.
 
 - [ ] **On a device (owner): Today's premium review** (§15, «Today reviewed for a premium first
   screen»): the ring, the row of three, the streak by the date, the chart and the Intensity card,
