@@ -1165,13 +1165,20 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   process died): one read of the plans and one write, no wake-up of its own, the launcher's rate
   limit caught as before. Checked: `:core:tracking`'s tests, spotless. On the phone: the box in
   «Open».
+  - **Four shortcuts, not three** (owner, the same day, on a tablet: the marks were right, a run
+    with its bolt, but the Japanese walk was not there). The long press offered three outings,
+    the most recently started first, then the Outings page's order: on a phone where none was
+    started yet, the first three presets, and the interval walk is the fourth.
+    `SessionConstants.SHORTCUTS` is 4: a first visit finds all four presets, and four is as many
+    as the common launchers show. No reason for three was written anywhere.
 
 ### Open
 
 - [ ] **On a device (owner): the shortcuts after an update** (§15, 15 Nov 2026, «The shortcuts
   written again at every start of the service»): install the build over the old one, then a long
-  press on the icon: the Japanese walk with its slow and fast line, a run with its bolt, the
-  other walks with the flag, without starting or saving a plan first.
+  press on the icon: four outings, the Japanese walk with its slow and fast line, a run with its
+  bolt, the other walks with the flag, without starting or saving a plan first. On the tablet the
+  marks are right (owner, 15 Nov 2026); the fourth shortcut and the phone remain.
 
 - [ ] **On a device (owner): Today's premium review** (§15, «Today reviewed for a premium first
   screen»): the ring, the row of three, the streak by the date, the chart and the Intensity card,

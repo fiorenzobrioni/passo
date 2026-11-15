@@ -55,6 +55,9 @@ All notable changes to Passo are documented here. The format follows
   mark, as on the Outings page: the Japanese interval walk its slow and fast line, a run its
   bolt.
 
+- **Four outings on a long press of Passo's icon**, not three, so the Japanese interval walk is
+  there from the start; each with its own mark, now also right after an update.
+
 - **The widgets wear green**, the app's own colour, until you choose another; a widget you never
   set up turns green too. There is a seventh colour to choose, **ochre**, and on most phones the
   colours stand in one row.

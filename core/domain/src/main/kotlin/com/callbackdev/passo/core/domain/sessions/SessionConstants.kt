@@ -115,8 +115,13 @@ object SessionConstants {
      */
     const val COUNTDOWN_GLIDE_MILLIS: Long = 5_000L
 
-    /** How many outings the launcher's long press offers. */
-    const val SHORTCUTS: Int = 3
+    /**
+     * How many outings the launcher's long press offers: four, so a first visit finds every
+     * outing it starts with there, the interval walk included (owner, 15 Nov 2026; it was three,
+     * and the fourth of the list never showed until it was started), and four is as many as the
+     * common launchers show.
+     */
+    const val SHORTCUTS: Int = 4
 }
 
 /**
