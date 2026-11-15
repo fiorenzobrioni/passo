@@ -5,7 +5,7 @@ import androidx.compose.ui.unit.dp
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
-/** The forms and budgets of «At a glance», at the household's reference grants. */
+/** The forms and budgets of «In words», at the household's reference grants. */
 class WordsLayoutTest {
     private val fiveDigits = 3.07f
     private val oneByOne = DpSize(85.dp, 85.dp)

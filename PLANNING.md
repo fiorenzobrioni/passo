@@ -495,7 +495,7 @@ Input: the minute buckets of one local day, plus the settings. Output: a list of
 
 ## 7. Widgets (Glance)
 
-Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card and a Chiaro card on one home screen read as one family: «In words» / «In parole» (`GlanceWidget`: today's ring where Chiaro's weather glyph was) and «At a glance» / «Colpo d'occhio» (`WordsWidget`: the day in type, with two small marks). The names were the other way round until the owner swapped them on 14 Nov 2026, so that «In parole» is the same card in the whole family (§15); the code keeps its older names. Decisions and reasons: `docs/adr/0005-widgets.md`.
+Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card and a Chiaro card on one home screen read as one family: «At a glance» / «A colpo d'occhio» (`GlanceWidget`: today's ring where Chiaro's weather glyph was) and «In words» / «In parole» (`WordsWidget`: the day in type, with two small marks). The names were swapped on 14 Nov 2026 and swapped back on 15 Nov 2026 (owner, §15): in the whole family «At a glance» is the card with a picture and «In words» the card in type alone, and the code's names say the same again. «At a glance» is first in the manifest and opens at 4×1; a new card wears the app's green. Decisions and reasons: `docs/adr/0005-widgets.md`.
 
 ### Configuration
 
@@ -504,15 +504,15 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
 - `updatePeriodMillis = 0`; `configure` is the per-widget settings screen, `reconfigurable|configuration_optional`.
 - Reference grants the layout tests measure against (Chiaro's): one row ≈ 85 dp tall, two cells ≈ 159 dp, three ≈ 250, four ≈ 340; two rows ≈ 189 dp.
 
-| «In words» (`GlanceWidget`) form | When | Content |
+| «At a glance» (`GlanceWidget`) form | When | Content |
 |---|---|---|
 | DOT | narrower than 120 dp | The ring with the count inside (compact where the language shortens thousands) |
 | NARROW | one row | Ring, count, «of 10,000 steps» |
 | WIDE | one row with a sentence column (4 cells) | The same, and the day's sentence at the far edge; or mirrored, the ring on the right |
-| TALL | two rows and up | Ring in the top corner; count, sentence and goal from the bottom. At every form and size the ring is the family's circle, the dial of Tempo's «In words» at the same size (§15, 4 Nov 2026, «at every size») |
+| TALL | two rows and up | Ring in the top corner; count, sentence and goal from the bottom. At every form and size the ring is the family's circle, the dial of Tempo's «At a glance» at the same size (§15, 4 Nov 2026, «at every size») |
 | PANEL | two rows and up, three cells or wider | The row on top, its ring the family's circle, larger without the sentence as the tall card's (the sentence under the count where the ring leaves it no room at the far edge), and under it today's steps by hour (24 bars built from boxes, current hour highlighted) or, as the reader chooses, the last 7 days against the goal (7 bars, today highlighted, a line at today's goal; §15, 2 Nov 2026) |
 
-| «At a glance» (`WordsWidget`) form | When | Content |
+| «In words» (`WordsWidget`) form | When | Content |
 |---|---|---|
 | LINE | one row, one or two cells | «Steps today», the count, the share of the goal where it costs the number nothing |
 | ROW | one row, three cells and up | The count on the leading side; the sentence, the goal and the distance and calories at the far edge |
@@ -1120,6 +1120,36 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   every card off the readers' home screens, and renaming only the rest would leave the code half
   one way and half the other; `WidgetKind`'s comment says so. The README's `widgets.png` draws no
   name, so it was not regenerated. The log above keeps the names of its time.
+
+
+- **15 Nov 2026.** **The widgets' names swap back, the cards wear green, a seventh colour**
+  (owner, for the whole family: in Passo the two names looked swapped; every «A colpo
+  d'occhio» first in the list and 4×1; each app's widgets in its own colour; a seventh colour
+  that stands apart). The rule is now one for the four apps: «At a
+  glance» / «A colpo d'occhio» is the card with a picture (here the ring), «In words» / «In
+  parole» the card in type alone, as on the weather app. So 14 Nov's swap is reverted in the
+  code, the labels, the guide, the README's alt text, VISION and CLAUDE.md, and the code's names
+  agree with the cards' again (`WidgetKind`'s note on the older names went with it); the entry
+  of 14 Nov above keeps its names. The Italian label is «A colpo d'occhio» in the whole family:
+  the launcher's list sorts an app's widgets by name, and «A colpo d'occhio» / «At a glance»
+  sorts first in both languages here; it is also declared first, and opens at 4×1 as before.
+  - **A new card wears the app's green** (`WidgetLook.cardColor`, owner: each app's widgets in
+    its own colour), and so does a card placed before and never configured, whose colour was the
+    default rather than a choice. The picker's static previews follow (`widget_preview_card`,
+    and `WidgetProviderTest` now reads it from the default look rather than a hex).
+  - **The ochre** (`#5C4A0E`), the family's seventh card colour, after the owner asked for one
+    that stands apart from the six in their style and is no shade of violet: the hue the six
+    left out, 30 ΔE from its nearest (the terracotta), white ink 8.6:1, the 75% ink 5.7:1, the
+    85% one 6.8:1 (measured in the weather app's DESIGN §2.6, the family's table). Seven is where
+    it stops (the owner asked; a bright series would need a dark ink measured on every mark, and
+    a strip that scrolls hides colours).
+  - **The strip of colours starts under the radio buttons** (10 dp, the first disc on the
+    buttons' line), not under their labels: seven 48 dp targets want 336 dp: in the settings group (16 dp margins), less the strip's
+    own 12, a 384 dp phone leaves 340 and holds them in one row; a 360 dp phone leaves 316, and
+    `swatchesPerRow` breaks them into four over three, never one alone (with six, the strip under
+    the labels already broke there, five over one). Tested at 384 dp (one row) and in arithmetic.
+  - Checked: the widget module's tests, spotless; `widgets.png` and `widget-settings.png`
+    regenerated (README).
 
 ### Open
 

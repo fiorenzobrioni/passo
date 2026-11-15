@@ -14,7 +14,7 @@ part in the style of Chiaro's «Colpo d'occhio».
 
 ## Decisions
 
-1. **Two cards, named after Chiaro's**: «Colpo d'occhio» / «At a glance» (`GlanceWidget`) and
+1. **Two cards, named after Chiaro's**: «A colpo d'occhio» / «At a glance» (`GlanceWidget`) and
    «In parole» / «In words» (`WordsWidget`). The glance card is Chiaro's with the ring where the
    weather glyph was: the picture the card is read by across a room. The words card is Chiaro's
    four ranks of type (hero Bold scaled to the grant, sentence 18 sp Medium, facts 16 sp, the
@@ -30,11 +30,12 @@ part in the style of Chiaro's «Colpo d'occhio».
    count's width, a sentence's lines) is measured with `Paint` / `StaticLayout` in the system
    face, which is the one the launcher draws in.
 3. **Chiaro's card, value for value**: the 24 dp corner, 14 dp insets (6 above and below a
-   one-row card), the grounds (light, dark, the phone's, or one of **Chiaro's six colours**,
+   one-row card), the grounds (light, dark, the phone's, or one of **Chiaro's seven colours**,
    hex for hex, in `WidgetPalette.kt`), the opacity slider in 5% steps, and **Chiaro's ink
    rule** (`widgetInk`, `WidgetInkTest`): white inks on a colour, the scheme's own on light or
    dark, and below 50% solidity the wallpaper's hint decides for the colour and the phone's card.
-   The default is Chiaro's: a solid blue card. No sky ground: Passo has none to draw.
+   The default was Chiaro's, a solid blue card, until 15 Nov 2026; since then it is the app's
+   green (below). No sky ground: Passo has none to draw.
 4. **Per-widget settings**, from the launcher's reconfigure flow (`configuration_optional`, so a
    card is placed at once): the real card at the top, drawn by the same composition the
    receiver runs through `GlanceRemoteViews`, with chips for every reference size and a line
@@ -123,3 +124,12 @@ alone (`WordsWidget`) «At a glance» / «Colpo d'occhio»; what each card shows
 neither do the code's names: a card placed on a home screen is bound to its receiver's class
 name, so renaming `GlanceWidgetReceiver` or `WordsWidgetReceiver` would remove it from every phone.
 Above, the names are the ones of the time.
+
+**Amended 15 Nov 2026** (owner): the names swap back, for the whole family's sake the other way:
+«At a glance» / «A colpo d'occhio» is the card with a picture (Chiaro's glyph card, the ring here
+and on the budget's card, the dial on the clock's), «In words» / «In parole» the card in type
+alone. The ring card (`GlanceWidget`) is «At a glance» again and the code's names agree with the
+cards' once more. «At a glance» is declared first and opens at 4×1 (the launcher's list sorts by
+name, and «A colpo d'occhio» / «At a glance» sorts first). A new card wears the app's own colour,
+green, where it wore blue; a card placed before that and never configured takes green too, since
+its colour was the default and not a choice. The colours are seven, with the family's ochre.

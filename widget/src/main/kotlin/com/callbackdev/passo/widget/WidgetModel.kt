@@ -65,7 +65,7 @@ data class WidgetDay(
 )
 
 /**
- * One of the last seven days on «In words»'s bars, today last: its steps (today's live
+ * One of the last seven days on «At a glance»'s bars, today last: its steps (today's live
  * count), null before counting began, against its own goal.
  */
 data class WeekDay(val date: LocalDate, val steps: Int?, val goalSteps: Int)

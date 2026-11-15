@@ -70,7 +70,7 @@ import com.callbackdev.passo.widget.widgetFormatter
 import com.callbackdev.passo.widget.withSlack
 
 /**
- * «At a glance»: the same day as «In words», with no drawing on the card
+ * «In words»: the same day as «At a glance», with no drawing on the card
  * but two marks at the size of the line they belong to (a check before a goal that is met, and
  * the pause of a count that is not moving). The number is the drawing now. [WordsLayout] holds
  * the ranks, the forms and every number's reason.

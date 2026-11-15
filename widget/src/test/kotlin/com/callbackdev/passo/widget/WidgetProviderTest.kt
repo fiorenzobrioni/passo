@@ -1,5 +1,7 @@
 package com.callbackdev.passo.widget
 
+import androidx.compose.ui.graphics.toArgb
+import com.callbackdev.passo.core.designsystem.theme.widgetCardContainer
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import java.io.File
@@ -53,6 +55,7 @@ class WidgetProviderTest {
     @Test
     fun `the static preview's card is the default card`() {
         val colors = File("src/main/res/values/colors.xml").readText()
-        assertThat(colors).contains("<color name=\"widget_preview_card\">#FF0F3B6B</color>")
+        val card = "#%08X".format(widgetCardContainer(WidgetLook().cardColor).toArgb())
+        assertThat(colors).contains("<color name=\"widget_preview_card\">$card</color>")
     }
 }

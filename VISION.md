@@ -112,10 +112,10 @@ Added to v1.0 at the owner's request (Phase 10, `docs/adr/0009-sessions.md`). An
 ### Widgets (Jetpack Glance)
 
 - Two widgets, in the dress of Chiaro's pair so the family's cards sit side by side as one (decided in Phase 4, `docs/adr/0005-widgets.md`):
-  - **In words** («In parole»): today's ring (with the usual-day notch), the count, the goal and the day's sentence; on a wide tall card, today's steps hour by hour in 24 bars, built without images. The name is the same card's in the whole family (owner, 14 Nov 2026).
-  - **At a glance** («Colpo d'occhio»): the same day in type alone: the count large, the sentence, the goal, distance and calories, and on a tall card the day in figures.
+  - **At a glance** («A colpo d'occhio»): today's ring (with the usual-day notch), the count, the goal and the day's sentence; on a wide tall card, today's steps hour by hour in 24 bars, built without images.
+  - **In words** («In parole»): the same day in type alone, as Chiaro's: the count large, the sentence, the goal, distance and calories, and on a tall card the day in figures.
 - The same sizes for both: from one cell to as large as the launcher allows, 4x1 by default, with a layout for every size.
-- Per widget: a light, dark or phone-following card, or one of Chiaro's six colours, any opacity, and which content it carries.
+- Per widget: a light, dark or phone-following card, or one of the family's seven colours (the app's green by default), any opacity, and which content it carries.
 - Updates quickly when the screen turns on, is throttled while the screen is on, and never updates while the screen is off.
 - A clear "tracking paused" state with tap-to-resume, and the same for a missing permission or a stopped service.
 - While an outing is under way, the sentence's place says it («Brisk walk: 12 of 20 min», or paused), on both cards.
@@ -160,7 +160,7 @@ Added to v1.0 at the owner's request (Phase 10, `docs/adr/0009-sessions.md`). An
 
 ### Planned after 1.0
 
-Asked for by the owner after the v1.0.0 release (1 Oct 2026); the phases are in PLANNING §11, in an order the owner chooses. All five were built, and are in 1.1.0 (2 Nov 2026), with the last seven days on «In words», then named «At a glance» (an option the widget's plan had left open).
+Asked for by the owner after the v1.0.0 release (1 Oct 2026); the phases are in PLANNING §11, in an order the owner chooses. All five were built, and are in 1.1.0 (2 Nov 2026), with the last seven days on «At a glance» (an option the widget's plan had left open).
 
 - **The Ways** («I Cammini», Phase 11): the "virtual journeys" idea, as five long ways (Via degli Dei, the Camino Portugués from Porto, Via di Francesco, the Camino Francés, and the Italian part of the Via Francigena). The estimated distance walked since a chosen day moves a point along the way, drawn without any location; each stage reached is a stamp.
 - **City walks** («Passeggiate in città», Phase 11, second part): an outing through a city (Milan, Rome, Paris, London, Madrid, Porto, Amsterdam, Prague, Lima and Cusco; about 5 km or about 10), its places told as the reader reaches them, by a vibration and, if the outing speaks, the voice. Imaginary and said so: the route moves with the steps, never with a location.
