@@ -608,90 +608,6 @@ The phases done, with their acceptance and their boxes as they stood, are frozen
 12 in [`docs/planning/03-towards-1.1.0.md`](docs/planning/03-towards-1.1.0.md); the boxes they left
 open are in «Open» above. Here stay the phases not done yet.
 
-### Phase 15 — «In pictures», the day on foot drawn (owner, 15 Nov 2026)
-
-A third card beside «In words» (the ring) and «At a glance» (type alone): **«In immagini» / «In
-pictures»**, the family's new drawn card (§15, 15 Nov 2026). Where «In words» says how far the goal
-is, this one draws how the day is getting there: the steps rising from midnight against **the
-usual** (`TypicalDayCalculator`), the day's goal as a fixed line, the hours as bars, the walks
-(`WalkDetector`) as amber strokes. **The approved design** is the canvas
-https://claude.ai/artifact/VFwVjbxyAyWcWRLcRW9uhY, page «Passo»; its sources are in
-`docs/design/in-immagini/` (frozen, with a README on how to read them).
-
-**The fidelity rule** (owner, 15 Nov 2026: "the layouts and the graphics of the new widgets must be
-faithful, as far as possible, to the canvases made here"; an implementation once drifted from its
-design and did not come out well). Fidelity is an acceptance criterion:
-
-1. **The numbers below are the contract**: dp, sp, inks, radii, positions. The pure layout
-   functions reproduce them and the tests pin them at the family's reference grants (heights 85,
-   189, 293, 397 dp; widths 159, 250, 340). Where this plan writes no measure, the source's is the
-   measure.
-2. **A deviation is allowed only where the platform forces it** (Glance and `RemoteViews`: no paths
-   or masks, the launcher's system face, eleven children per container, bitmap memory) **or a
-   measured rule of this repository does** (contrast, the family's ink rule). Each is written in the
-   §15 log by the step that makes it, with its reason and the closest solution. "It looked better"
-   is not a reason: ask the owner first.
-3. **The last step compares by eye**: `WidgetGalleryTest`'s screenshot of each form beside the
-   canvas board at the same scale, and the list of what differs, each difference logged or fixed.
-   The phase does not close on an unlogged difference.
-
-**The card** (the family's: the launcher's corner, Chiaro's six colours, opacity, the ink rule).
-Insets 14 dp (12 on the narrow 2×2 and 2×3; 10/12 on 2×1; 12/16 on 4×1). **The plate** is a box
-inside the card with the launcher's inner radius (16 dp), a veil of `rgba(0,24,10,0.26)` on the
-app's ground (`rgba(0,0,0,0.18)` on the six colours, 5% of the dress's dark on light and dark) and a
-1 dp inner hairline, white at 12%. **The app's ground**, new and the card's default (decision 1
-below): `linear-gradient(150°, #136A3C 0%, #0F5C34 55%, #0B4A2A 100%)`, the launcher icon's green
-darkened until the ink holds: white 6.66:1 and the quiet ink 4.52:1 at its lightest stop; the amber
-`#FDB528` (the icon's sun) is a mark only, and as text (the goal's figure) only on the plate, where it
-is 4.9:1 or more. Inks on it: white, quiet 75%, soft 55% (the usual, the hours not current), track
-16%.
-
-| Form | Size | What it carries |
-|---|---|---|
-| 2×1 | 159 × 85 | The count (30 sp Bold) over «of 10,000» (13, quiet); at the right a 56 × 52 sparkline: the goal's line (1.5 dp amber, dash 3/3), the usual (1.4 dp, soft, dash 2/3), today's curve (2.2 dp) with its area (14%), the now dot (9 dp) |
-| 4×1 | 340 × 85 | The count (36 sp); the **short sentence** (16 Medium, one line: «Ahead of the usual by 1,140», decision 4); under it 24 hour bars over 16 dp (2,000 steps = full, 60% of the hour wide, the current hour amber), the walks (4 dp amber) under them |
-| 2×2 | 159 × 189 | The count (38 sp) and «of 10,000» on one baseline; the sentence (13 Medium); the plate 135 × 76: the curve over 10–44, the walks' track at 52 (4 dp), the hours 6, 12, 18 at 60 (11 sp) |
-| 3×2 | 250 × 189 | The header (60 dp): count 40 sp, the sentence at 13 Medium (16 line) and «of 10,000»; the plate 226 × 95, the hours every six |
-| 4×2 | 340 × 189 | **The reference form**: header 60 dp (count 46 sp on a 48 line; the sentence 16 Medium on a 19 line, two lines, never cut; «of 10,000 · about 6.0 km» 13 quiet), 8 dp, then the plate 312 × 95 (below) |
-| 2×3 | 159 × 293 | The 2×2, the sentence at 16, and today's walks one per row (24 dp: a 7 dp amber dot, the start 13 Medium, the minutes 13 quiet) |
-| 4×3 | 340 × 293 | The 4×2, and «Today's walks» / «45 min brisk» (13 quiet), one row each (26 dp: an 8 dp amber dot, the time range 13 Medium in 84 dp, the minutes quiet, the steps 13 Semibold) |
-| 4×4 | 340 × 397 | The 4×2, and «The last seven days» / «4 of 6 at the goal» (13 quiet); seven bars 22 dp wide, corners 6/3, height steps / 15,000 × 100 dp; **each day measured against its own goal** (past days are frozen): a met day in the ink with a 12 dp check over it, a missed one soft, today amber; the dashed amber goal line where every day's goal is the same, else a 2 dp tick at each bar's own goal; the day's letter 13 sp, today's Bold |
-
-**The 4×2's plate**, top to bottom (y inside the plate, dp): the goal's line at 10 (1.5 dp amber,
-dash 4/4) with its figure at the left (11 sp Semibold amber, at 10, 13), so it never meets the
-usual's end on the right; **today's curve** from midnight to now, monotone (no overshoot), 2.4 dp
-white, from 46 (zero) to 10 (the goal), clamped at the line past the goal (the sentence then says
-the goal is reached), its area 15%; **the usual** over the whole day, 1.5 dp soft, dash 2/3.5, drawn
-only where `TypicalDayCalculator` has two valid days (else no dash, and the sentence says what is
-left); the now dot, 12 dp white with a 3 dp ring of the veil at 45%; **the hour bars** at 52–68
-(16 dp = 2,000 steps, the world's scale, never the busiest hour's), the current hour amber; a
-hairline at 72; **the walks' track** at 75 (4 dp, track ink) with each walk in amber; **the hours**
-at 82, every three, 11 sp quiet.
-
-**The settings** (the family's screen): the real card first on the `primaryContainer` →
-`tertiaryContainer` wallpaper, the size chips (4×2 «as it is», 2×2, 4×1, 4×4) with a line per form
-and the resize hint; **On the card**: the sentence, the usual, the walks, each with its note;
-**Touching the card** opens Today; **Background**: «Passo's green» (default), light, dark, the
-phone's, a colour (the six); **Transparency**; reset.
-
-- [ ] **15.1 — The measures and the engine.** The pure layout of the eight forms in `:core:domain`
-  (`InPicturesLayout`, as `GlanceLayout.kt`), the plate's geometry (the scale to the day's goal, the
-  monotone curve, the usual's 15-minute slots, the bars, the walks, the ticks) and the short
-  sentence; their tests at the reference grants and at 100, 115 and 130% text. The canvas and its
-  numbers read before a line is written.
-- [ ] **15.2 — The drawing.** The plate's painter (a bitmap at the exact size, its labels in the
-  system face; the size cap argued as the ring's was, ADR 0005 decision 5), the card in Glance in
-  every form, the app's ground with its `ContrastTest` and `WidgetInkTest` rows, TalkBack's reading
-  of the plate (the sentence, the count against the usual, the walks).
-- [ ] **15.3 — The widget.** The receiver and its provider (one size spec, as the other two: no
-  maximum), the push-based refresh (`WidgetUpdatePolicy`, unchanged: the same events repaint it), the
-  previews, the settings screen.
-- [ ] **15.4 — The comparison and the close.** `WidgetGalleryTest` draws every form on every ground;
-  each beside the canvas, the differences listed (the fidelity rule, point 3); the strings in
-  English and Italian, the guide's widgets chapter, the README (one figure more), the CHANGELOG's
-  Unreleased; ADR 0005 amended (the default ground of this card, §15, 15 Nov 2026, decision 1)
-  or a new ADR for the card; the screenshots regenerated and looked at.
-
 ### Phase 9 — Google Play (optional, later)
 
 Kept open, not planned yet. Notes to avoid closing the door:
@@ -1205,33 +1121,7 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   one way and half the other; `WidgetKind`'s comment says so. The README's `widgets.png` draws no
   name, so it was not regenerated. The log above keeps the names of its time.
 
-- **15 Nov 2026.** **«In pictures», a third card: the family's drawn widget** (owner, from the
-  design sessions of the family's new series: "a new graphic widget to comment the text one",
-  premium, resizable and adaptive, with a settings screen; Chiaro first, then the sisters in the
-  same style). The canvas https://claude.ai/artifact/VFwVjbxyAyWcWRLcRW9uhY holds the approved
-  design of the four apps; Passo's page is built as §11 Phase 15, with **the fidelity rule** written
-  there. The owner accepted the review's five proposals:
-  1. **The card's default ground is the app's colour**, not the solid blue of ADR 0005 decision 3:
-     a seventh ground, «Passo's green», for «In pictures» (the six colours, light, dark and the
-     phone's stay). This amends ADR 0005 for this card only; whether «In words» and «At a glance»
-     take it too is a question of its own (Open).
-  2. (Tetto's: its columns are a picture of the open period, not a chart.)
-  3. **No duplicate of «In words»**: its PANEL keeps today's 24 bars (or the seven days) beside
-     the ring; «In pictures» draws the count against the usual and the walks, which no card draws.
-     Its hour bars are a thin row under the curve, not the card's subject.
-  4. **The short sentence of the one-row form** is a new string, «Ahead of the usual by 1,140» /
-     «Avanti di 1.140 sul solito», with its «behind» and «on pace» siblings, from the same
-     arithmetic as Today's sentence.
-  5. (Tetto's: on light and dark the shape says «ahead», not the colour.)
-
 ### Open
-
-- [ ] **«In pictures» on a device (owner)** (§11 Phase 15): the eight forms resized on the owner's
-  launcher, beside «In words» of the same size; a day with the usual and one without; a goal passed;
-  the walks of a real day; the six colours and Passo's green; 130% text; TalkBack on the plate.
-
-- [ ] **Passo's green for the other two cards?** (§15, 15 Nov 2026, decision 1): «In pictures»
-  opens on the app's colour; «In words» and «At a glance» keep the blue until the owner says.
 
 - [ ] **On a device (owner): Today's premium review** (§15, «Today reviewed for a premium first
   screen»): the ring, the row of three, the streak by the date, the chart and the Intensity card,
