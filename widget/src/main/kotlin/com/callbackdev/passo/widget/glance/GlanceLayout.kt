@@ -16,7 +16,7 @@ import com.callbackdev.passo.widget.textLineHeight
 import com.callbackdev.passo.widget.textSizeForLine
 
 /*
- * «In words»: the ring is the picture the card is read by across a room, and it says
+ * «At a glance»: the ring is the picture the card is read by across a room, and it says
  * at a glance (how far along the day is) before any number is read.
  *
  * Five forms, picked by the grant the launcher really makes, so every size is a composition

@@ -80,7 +80,7 @@ that does not match it.
 | `:core:designsystem` | Android library | M3 theme, typography, shared components, the Canvas charts (`DayTrendChart`, `BarChart`), `CalendarHeatmap`, `WalkList` and `OutingList`, `SessionCard`, the ways' and the continents' maps and stamps (`WayMapView`, `ContinentMapView`, `WayStamp`) and place names, date formatting |
 | `:core:testing` | Android library, test-only | `assertAccessible()` (labels, 48dp touch targets) and `walkPage()`, shared by the UI tests as `testImplementation` |
 | `:feature:*` | Android library | `today`, `history`, `insights`, `settings` (with your data and the step calibration), `onboarding`, `sessions` (the Outings page and editor), `ways` (the Ways, each continent's cities, each way's page and each city walk's), `guide` (the guide, in Chiaro's shape), `year` (Your year on foot: the year's pages, shared as an image) |
-| `:widget` | Android library | the two Glance widgets («In words», the ring, in `glance/`; «At a glance», type alone, in `words/`: the code's names are older than the cards' and stay, PLANNING.md §7), their settings screen, the update coordinator |
+| `:widget` | Android library | the two Glance widgets («At a glance», «In words»), their settings screen, the update coordinator |
 | `:app` | application | `Application`, `MainActivity`, navigation (the bottom bar: Today, History, Insights), DI entry points; wires everything |
 
 Rules: `:core:model` and `:core:domain` stay pure Kotlin/JVM; if a class there needs a `Context`

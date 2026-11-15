@@ -61,7 +61,7 @@ calories are estimates, and Passo says so.
   <tr>
     <td align="center"><img src="docs/screenshots/intervals.png" width="250" alt="Editing the Japanese interval walk: what it is in two lines, then 3 slow minutes, 3 fast minutes and 5 sets, with the outing's shape in slow and fast blocks"><br><sub><b>Japanese interval walk</b>: slow and fast in turns</sub></td>
     <td align="center"><img src="docs/screenshots/intervals-done.png" width="250" alt="An interval walk just over: goal reached, each fast interval's cadence against the pace line, 4 fast intervals of 5 at pace"><br><sub><b>Each fast interval</b>, against its pace</sub></td>
-    <td align="center"><img src="docs/screenshots/widgets.png" width="250" alt="The two widgets on a home screen: In words with its ring, At a glance, a terracotta pair side by side, and the day hour by hour"><br><sub><b>Two widgets</b>: At a glance and In words</sub></td>
+    <td align="center"><img src="docs/screenshots/widgets.png" width="250" alt="The two widgets on a home screen: At a glance with its ring, In words, a terracotta pair side by side, and the day hour by hour"><br><sub><b>Two widgets</b>: At a glance and In words</sub></td>
   </tr>
   <tr>
     <td align="center"><img src="docs/screenshots/widget-settings.png" width="250" alt="One widget's settings: the card as it will look, its sizes, the background colour, the opacity and the content"><br><sub><b>Widget settings</b>, with a live preview</sub></td>
@@ -101,7 +101,7 @@ Italian). The phone's status bar is not in the pictures. The command that redraw
 - 🗺️ **Ways**: long ways (Via degli Dei, Camino Portugués, Via di Francesco, Camino Francés, Via Francigena, Kumano Kodō, Great Ocean Walk, Inca Trail, John Muir Trail, Kilimanjaro), listed by continent and walked from home, stage by stage, with a stamp for each. No location: only your distance.
 - 🏛️ **City walks**: Milan, Rome, Paris, London, Madrid, Berlin, Vienna, Porto, Amsterdam and Prague in Europe, Lima, Cusco, New York, Rio de Janeiro, Mexico City, Buenos Aires, San Francisco, Québec, Havana and Cartagena in the Americas, Tokyo, Sydney, Seoul, Beijing, Hong Kong, Singapore, Bangkok, Kyoto, Hanoi and Melbourne in Asia and Oceania, Cairo, Cape Town, Marrakech, Tunis, Alexandria, Dakar, Addis Ababa, Fez, Zanzibar and Luxor in Africa, walked where you are in one outing or a few, about 5 km or about 10. Each continent has its page, with a map of where its cities are and which you have walked. Each place is told as your steps reach it, with a short vibration and, if you like, a line about it in your headphones.
 - 📏 **Measure your step**: walk a distance you know and Passo works out your step length. No GPS.
-- 🏠 **Two widgets**: At a glance and In words, resizable, in six colours and any opacity.
+- 🏠 **Two widgets**: At a glance and In words, resizable, in seven colours (green by default) and any opacity.
 - 🔔 **Notifications**: goal reached, an evening reminder, a weekly summary. Each one optional.
 - ⚡ **Quick Settings tile**: today's steps and the share of the goal.
 - 💾 **Your data**: a backup to a file, a CSV for spreadsheets, and an import that never deletes anything.

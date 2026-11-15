@@ -55,11 +55,14 @@ All notable changes to Passo are documented here. The format follows
   mark, as on the Outings page: the Japanese interval walk its slow and fast line, a run its
   bolt.
 
-- **The widgets swap names**, to match the other apps of the family: the one with the ring is
-  now «In words», the one in type alone «At a glance». Cards already on your home screen stay
-  where they are, with their settings; only the name in the widget list changes.
+- **Four outings on a long press of Passo's icon**, not three, so the Japanese interval walk is
+  there from the start; each with its own mark, now also right after an update.
 
-- On «In words» the ring keeps one size all day at every size, however long the sentence
+- **The widgets wear green**, the app's own colour, until you choose another; a widget you never
+  set up turns green too. There is a seventh colour to choose, **ochre**, and on most phones the
+  colours stand in one row.
+
+- On «At a glance» the ring keeps one size all day at every size, however long the sentence
   under it. On a widget three or four cells wide and two rows high or more, the ring beside the
   hours is larger, and larger still with the day’s sentence turned off.
 
