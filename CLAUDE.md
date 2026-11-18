@@ -37,7 +37,9 @@ Source of truth:
     `PLANNING.md` «How it is made» says, then run `python3 tools/planning_index.py` (`--check`
     tells if the index is behind).
 
-Work one phase at a time, starting from the phase's section in PLANNING.md §11.
+Work one phase at a time, starting from the phase's section in PLANNING.md §11. Phases 15 to 20
+(location, `docs/adr/0016-location.md`) each name what to read first and hold «The bar» their
+work is measured against: read the ADR and the phase's section before planning.
 
 ## Build and commands
 
@@ -93,6 +95,12 @@ other. All business logic lives in `:core:domain`, with unit tests.
   `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`,
   `HIGH_SAMPLING_RATE_SENSORS`, `BODY_SENSORS*`. The build fails on the merged manifest; a
   library that adds one is removed or patched with `tools:node="remove"`.
+  **Planned, not built** (owner, 18 Nov 2026; `docs/adr/0016-location.md`, PLANNING.md §11
+  Phases 15 to 20): location for an outing that asks for it. Until Phase 15 is built this
+  invariant stands exactly as written. Phase 15, and only it, changes the list (fine and
+  coarse location and the `location` service type come in, `ACCESS_BACKGROUND_LOCATION` and
+  `INTERNET` stay out, the gate becomes an allowlist) and rewrites this paragraph and the
+  battery one below in the same change. No other work adds a location permission.
 - **The hardware step counter is the only step source.** No Health Connect, Google Fit,
   Samsung Health or Play services for step data; no accelerometer.
 - **Battery first** (PLANNING.md §9): never poll or run timers while the screen is off; no

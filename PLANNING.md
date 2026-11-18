@@ -38,6 +38,10 @@ so they are uniform"):
   14 (more ways, beyond Europe), in archive 01 with Phases 0 to 8 and 10; Phase 12 in archive 03.
 - **Done on 2 Nov 2026**: Phase 12, Your year on foot (archive 03), checked on a device by the owner.
 - **Not started**: Phase 9, Google Play (optional, later; §11, below).
+- **Planned, not started** (owner, 18 Nov 2026): Phases 15 to 20, location for an outing that
+  asks for it (`docs/adr/0016-location.md`; §11, below; §15, «Location, for an outing that asks
+  for it»). Until Phase 15 is built, no location permission is in the manifest and §9, §10 and
+  CLAUDE.md's invariants stand as written.
 
 ## Open
 
@@ -573,6 +577,8 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
    *Amended 2 Nov 2026 (owner, after a review):* that wake lock is also let go once the outing has been still for 15 minutes (`SignalWake.letGoAt`), when it is over and has nothing left to tell on time; it is closed at the next step or look, as on every phone. A forgotten outing had kept the processor awake until the screen came on, up to the 4 h 10 min bound. The moment is kept by a timer in the service, the one timer that runs with the screen off, and only while the wake lock already keeps the processor awake: it shortens a wake and never makes one.
 8. OEM task killers: onboarding shows a battery tip, with a button to the app's own settings page, only when `Build.MANUFACTURER` is on a known list (`OemTips`). Samsung is not on it (§15).
 
+*Planned (owner, 18 Nov 2026; `docs/adr/0016-location.md` decision 10, §11 Phase 15): a second exception, the satellite receiver while an outing with GPS counts and the reader walks. It is written here, as rule 9, in the change that builds Phase 15; until then the rules above are the whole list.*
+
 ---
 
 ## 10. Permissions and manifest
@@ -595,6 +601,8 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
 **Forbidden:** `INTERNET`, `ACCESS_*_LOCATION`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`, `HIGH_SAMPLING_RATE_SENSORS`, `BODY_SENSORS`.
 
 A CI task checks the merged release manifest and fails on any forbidden permission. Libraries that add one must be removed or patched with `tools:node="remove"`.
+
+*Planned (owner, 18 Nov 2026; `docs/adr/0016-location.md` decision 2, §11 Phase 15): `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION` and `FOREGROUND_SERVICE_LOCATION` join the table, `ACCESS_BACKGROUND_LOCATION` takes `ACCESS_*_LOCATION`'s place among the forbidden, and the CI task becomes an allowlist. The table and the list change in the change that builds Phase 15; until then they stand as written.*
 
 ---
 
@@ -622,6 +630,646 @@ Kept open, not planned yet. Notes to avoid closing the door:
   - content rating
 - [ ] Store listing in Italian and English, with screenshots and a feature graphic
 - [ ] Internal test track, then closed testing (check the current tester requirements for personal developer accounts), then production
+
+### Phases 15 to 20 — Location, for an outing that asks for it
+
+Asked for and approved by the owner on 18 Nov 2026 (§15, «Location, for an outing that asks for
+it»). The decisions, with their reasons and the platform's rules, are in
+`docs/adr/0016-location.md`: **read it whole before any of these phases**; the sections below
+say what to build and in what order, not why.
+
+In one paragraph: location is a measuring tape, never a tracker. It is read only inside an
+outing the reader started with «Measure with GPS» on; the day's count, the widgets and every
+screen are untouched for a reader who never turns it on. `INTERNET` and
+`ACCESS_BACKGROUND_LOCATION` stay forbidden. The steps and the fixes are fused (the steps say
+when the reader moves, the fixes how far); routes live in a database of their own that Android's
+cloud backup never carries; the day's distance stays the steps'.
+
+| Phase | Name | Brings | Needs |
+|---|---|---|---|
+| 15 | The measured outing («Uscita misurata») | Permissions and the gate, the receiver, the fusion, the storage, the switch, the numbers | nothing before it |
+| 16 | The outing's page | The route drawn, splits, climb, GPX and image, Your data | 15 |
+| 17 | The step that learns («Il passo che impara») | The step length by cadence, from the outings with GPS | 15 |
+| 18 | On the spot: the cities («Sul posto») | A city walk walked there: real arrivals, off the route, back on it | 15, 16 |
+| 19 | On the spot: the ways | A way walked in person: a fine line, stamps in a second ink, the stretches walked there | 18 |
+| 20 | Your routes («I tuoi percorsi») | Follow a route (a GPX, a past outing), the usual round | 16, 18 |
+
+**One phase, one session.** Each section is written to be enough for a session that has read
+CLAUDE.md, ADR 0016 and that section: it names the files to read first, the steps in order, the
+acceptance, the edge cases (each a test) and what only the owner's phone can check. A session
+starts in plan mode on its section, builds on a branch, and ends by ticking its boxes here,
+writing its entry at the end of §15's log (what was built, what was decided on the way, what was
+checked) and opening its device box in «Open». A decision that departs from ADR 0016 is written
+there as an amendment, with its date and reason, before the code that needs it.
+
+**Releases.** Phases 15 and 16 are released together or not at all (ADR 0016, consequences);
+17 to 20 may each follow in a release of their own, in this order unless the owner changes it.
+
+**The bar** (owner, 18 Nov 2026: "precise work, premium quality as this app is; no compromises,
+no shortcuts, complete and feasible features, premium in the code and in the design and
+UI/UX"). It holds for every step below and is part of each phase's acceptance:
+
+- *Code.* The logic is pure Kotlin in `:core:domain`, written with its tests: every row of a
+  phase's edge-case table is a test that says so in its name. The service stays the one writer;
+  a page's ViewModel is a `stateIn(WhileSubscribed)` and collects nothing in `init`. Constants
+  carry their reason and, where there is one, their source. No `!!`, no `TODO`, no stub, no
+  switch or row for something not built yet, no new dependency. `spotlessCheck`, `test`,
+  `:app:lintDebug` and the permission check are green before the phase is called done.
+- *Design.* Passo's own language (`docs/adr/0004-design-language.md`): one sentence before any
+  number, every number with the line that says what it means, colour, type and shape as roles,
+  icons from `PassoIcons`, maps and charts in Canvas, every animation a fade under reduced
+  motion. Every state is designed, not only the happy one: nothing yet, waiting for the
+  satellites, refused, turned off on the phone, under way, lost and found again, done. The
+  screenshots of each new or changed screen are looked at in both themes and both dresses
+  before the phase ends, and the README's are regenerated where one changed.
+- *Reach.* `assertAccessible()` on every state drawn, `walkPage()` at twice the text size and on
+  an open foldable, `pageGutter()` on each side, a sentence for TalkBack for every map and
+  chart, the vibrations felt before they are chosen (the editor's "Try them").
+- *Words.* Every string a resource in English and Italian, plurals where a count appears.
+  «Measured» / «misurati» only for a distance at least nine tenths from fixes (ADR 0016
+  decision 6); an estimate still says it is one. A refusal is told once, with what it costs and
+  the way back, and never asked again by itself. Nothing that describes the Ways names a faith
+  (CLAUDE.md, «The Ways' words»). The sister apps are never named in code or strings.
+- *The record.* CHANGELOG's `[Unreleased]`, the guide's chapter, VISION and this file kept true
+  in the same change; a README screenshot where the phase brings something worth showing.
+
+### Phase 15 — The measured outing («Uscita misurata»)
+
+An outing whose plan has «Measure with GPS» on reads the satellites while it counts: its
+distance is measured, it has a pace per kilometre, and its route is kept. This phase lets
+location into the app, so it is also the change that amends the documents and the build's gate.
+It ends with numbers on the card and the notification; the route's own page is Phase 16.
+
+**Read first:** `docs/adr/0016-location.md` (all), `docs/adr/0009-sessions.md`,
+`docs/adr/0013-interval-walks.md` (the wake lock), `docs/adr/0007-backup.md`; here §3, §4.5, §9,
+§10. In the code: `build-logic/.../ForbiddenPermissions.kt` and the plugin that wires it;
+`core/tracking/src/main/AndroidManifest.xml`; `StepTrackingService.kt` (`onStartCommand`,
+`applyRegistration`, `onSessionSteps`, `onSessionSignals`, `publishSession`),
+`StepSensorSource.kt`, `SignalWakeLock.kt`, `StepTracking.kt` (`TrackingReadiness`),
+`SessionControl.kt`, `SessionNotifications.kt`, `NotificationText.kt`; `SessionTracker.kt`,
+`SessionConstants.kt`, `SessionAnnouncement.kt`, `SessionProgress.kt`; `Session.kt`
+(`:core:model`); `Entities.kt`, `PassoDatabase.kt`, `SessionMapping.kt`, `SessionDao.kt`,
+`TrackingRepository.kt` (`persist`); `BackupFile.kt`, `BackupCodec.kt`, `BackupMerge.kt`,
+`CsvExport.kt`; `app/src/main/res/xml/data_extraction_rules.xml`; `PlanEditorScreen.kt`,
+`PlanEditorViewModel.kt`, `SessionsScreen.kt`; `SessionCard.kt`, `WalkList.kt`.
+
+- [ ] **The platform, read again.** Android 17's official pages for anything on location (the
+  press's "Location Button", the permission's dialog, the `location` service type), since Passo
+  targets API 37. What is found is written in this phase's §15 entry; if it changes the
+  permission's flow, ADR 0016 is amended first.
+- [ ] **The gate becomes an allowlist** (ADR 0016 decision 2). `build-logic` holds the exact
+  list of permissions the merged manifest may request (today's, read from a green build's
+  report, plus the three below); the task fails on any permission not on it, and names a
+  forbidden one as forbidden (`INTERNET`, `ACCESS_BACKGROUND_LOCATION`, the exact alarms, the
+  battery exemption, the high-rate and body sensors). Proven as in Phase 0: an unlisted
+  permission and `ACCESS_BACKGROUND_LOCATION`, each added to `:core:tracking`'s manifest, turn
+  the build red by name; then removed.
+- [ ] **The manifest** (`:core:tracking`): `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`,
+  `FOREGROUND_SERVICE_LOCATION`; the service's `foregroundServiceType="health|location"`;
+  `<uses-feature android:name="android.hardware.location.gps" android:required="false" />`.
+  The manifest's opening comment is rewritten to say what each is for and that nothing else is
+  held.
+- [ ] **The documents, in this same change** (ADR 0016, «Amends»): VISION.md (principle 1:
+  steps are the core, and location, when the reader asks for it, measures what the steps
+  estimate, never replaces them, and nothing depends on it; principle 3; the non-goals' GPS
+  lines; the success criterion «Privacy is enforced»; the outings' section; the glossary:
+  «measured»); §9 here (rule 9, written like rule 7: when, what bounds it, what it costs once
+  measured) and §10 (the table, the forbidden list, the allowlist); CLAUDE.md (the two
+  invariants, the modules table); the README (the privacy table and every "no location" line,
+  with no em or en dash); ADR 0007 and ADR 0009 (an «Amended» line each, pointing to ADR 0016);
+  the strings that promise no location (`ways_intro`, `settings_calibrate_note`, the guide's
+  «Your distance, not your location» and the first run's promises: grep the `strings.xml` files
+  for "location", "posizione" and "GPS" and rewrite each so that it is true: the ways from home
+  still use no location, and say so). Nothing may still say that Passo cannot know where the
+  phone is; everything still says that Passo sends nothing.
+- [ ] **The model** (`:core:model`). `SessionPlan.gps` (false by default); `Session.gps` (copied
+  at the start, frozen like the goal), `Session.stepsMeters` (what the steps alone said),
+  `Session.measuredShare` (0 to 1, null without GPS). In an outing with GPS
+  `SessionTotals.distanceMeters` is the fused distance (ADR 0016 decision 5): the goal, the
+  signals, a walk's places and the energy read it unchanged. `RoutePoint` (time, latitude,
+  longitude, altitude or none, accuracy, whether it is a fix or a point laid from the steps)
+  and `Route` (the outing, its points, its box).
+- [ ] **The domain** (`:core:domain/routes`, pure, tests first):
+  - `RouteFilter`: a fix is accepted at 25 m of accuracy or better, later than the one before,
+    and no faster from it than the cadence allows (3.5 m/s below `RUNNING_CADENCE`, 8 m/s at or
+    above). A mock fix is accepted only in a debug build (the flag is passed in), so a route
+    can be replayed on a desk with the system's mock-location setting and never fakes a walk in
+    a release.
+  - `RouteMeter`: fed the accepted fixes and the accounted steps with their own times, in any
+    interleaving, it gives the fused distance, the steps' own, the measured share, the pace now
+    (over the last 200 m) and the points to keep (one every 3 m moved or 5 s, whichever first).
+    Its rules are ADR 0016 decision 5, one test each: the stretch before the first fix; no
+    steps, no distance; movement without steps; a gap covered by the steps and never shorter
+    than the straight line across it; the receiver asleep.
+  - `GpsDuty`: when to ask for updates and when to remove them (asleep after 2 minutes without
+    a step, awake at the next one, off at a pause and at the end), as `SignalWake` decides the
+    wake lock: pure, the service only obeys.
+  - `RouteCodec`: points to chunks and back, as offsets in varints (time in seconds, latitude
+    and longitude in millionths of a degree, altitude in decimetres, accuracy in metres): exact
+    round trip, about 10 KB an hour of walking, a chunk self-contained so a lost one loses only
+    itself.
+  - `Pace`: time in motion over distance, formatted by `MeasureFormatter` per kilometre or
+    mile as the units say; none under 200 m.
+  - `StepLengthSample`: for each stretch measured from end to end for a minute or more at a
+    steady cadence (within 8 steps a minute), its cadence, steps and metres. `RouteMeter` emits
+    them; Phase 17 learns from them, so the first outings already teach.
+- [ ] **The storage** (`:core:data`). `passo.db` schema v7 by auto-migration: `session_plan.gps`,
+  `session.gps`, `session.stepsMeters`, `session.measuredShare`, and a table
+  `step_length_sample` (outing, cadence, steps, metres): numbers, never places. A second Room
+  database, `routes.db` (`RouteDatabase`, its schema exported like the first): `route` (the
+  outing's id and start instant, the points' count, the box) and `route_chunk` (outing, order,
+  bytes). `RouteRepository` appends a chunk after the step batch's transaction and never inside
+  it: `passo.db` stays the truth, and a crash costs a route its last chunk, not the outing.
+  Deleting an outing deletes its route. `UpgradeFromFirstReleaseTest` walks to v7.
+- [ ] **The backup** (ADR 0016 decision 9). `data_extraction_rules.xml`: `routes.db` and its
+  write-ahead log under `<device-transfer>` only, with the comment saying why. The JSON backup
+  and the CSV gain the outing's new numbers as added fields (`gps`, `stepsMeters`,
+  `measuredShare`; no new format version), the plan its `gps`; the routes themselves are
+  Phase 16's.
+- [ ] **The receiver** (`:core:tracking`). `LocationSource`, beside `StepSensorSource`:
+  `LocationManager`, `GPS_PROVIDER`, a `LocationRequest` at 1 s, high accuracy, with
+  `setMaxUpdateDelayMillis` asked for (30 s with the screen off, none with it on), batches
+  taken through `onLocationChanged(List<Location>)`, `requestFlush` when the screen comes on;
+  each fix's altitude turned to mean sea level by `AltitudeConverter` off the main thread.
+  `GpsReadiness`: ready, permission needed, approximate only, turned off on the phone, no
+  receiver.
+- [ ] **The service.** One function adds or drops the `location` type (`startForeground()` with
+  `health|location`, or `health`), called when an outing with GPS starts, resumes, pauses or
+  ends, and only from where the while-in-use rule allows it (ADR 0016 decision 4); a refusal is
+  caught, logged, and the outing goes on from the steps. The fixes reach `RouteMeter` on the
+  thread that drives `SessionTracker`; the outing's distance in a GPS outing comes from the
+  meter; the chunks are written with each batch. A process restarted mid-outing rebuilds the
+  meter from the outing's stored numbers, goes on from the steps, and the notification gains
+  «Resume GPS». The evening reminder's "Walk now" never asks for GPS. The diagnostics log gets
+  one row an outing with GPS (fixes taken and refused, the measured share, how long the
+  receiver slept, the type refused or not), like the interval outing's.
+- [ ] **The longest outing asks before it ends** (ADR 0016 decision 14; it amends ADR 0009
+  decision 6, for every outing, with GPS or not). `Session` keeps its own cap (four hours from
+  the start, stored, so an answer survives a restart). At the first step batch within 15
+  minutes of it, once per cap: the stillness's two long pulses and a notification on the
+  `sessions` channel, «Still walking? This outing ends in 15 minutes», with «Keep going»; the
+  card says the same while it is on screen. «Keep going», from either, moves the cap four hours
+  on. Unanswered, the outing ends at its cap, is told (it was silent: `SessionEnd.CLOSED` was
+  neither told nor reopenable), and can be taken back for `KEEP_GOING_MILLIS` with the steps
+  since, as after the goal; in an outing with GPS the receiver stays on through that window
+  and its points are kept aside, joined to the route if the outing is taken back and dropped
+  if not. `SignalWake` follows the outing's own cap. No timer: every part rides on a step
+  batch, a screen-on or a touch. The voice, if the outing speaks, says the question too.
+- [ ] **The switch, and the permission in context** (`:feature:sessions`). In the editor,
+  «Measure with GPS» / «Misura con il GPS», with two lines under it: what it gives (a measured
+  distance, a pace, the route) and what it costs (the battery, in the words the owner's
+  measurement allows; until it is measured, "more battery, only while you walk"). Absent on a
+  phone with no receiver. The permission is asked when an outing with GPS is first started,
+  both permissions in one request, after one screen in Passo's own words that says when
+  location is read and that it is never sent; granted precise, the outing starts with GPS;
+  approximate only or refused, it starts on the steps and its card says so once, with the way
+  to change it (the upgrade request, or the system's page after a second refusal). Location
+  turned off on the phone: the same, with the button to the system's switch. None of the
+  three presets has it on.
+- [ ] **What the reader sees while it counts.** The card (`SessionCard`): «Finding the
+  satellites» until the first fix, then the distance with «measured» under it (or the share
+  from the steps when over a tenth), the pace and the pace now, the cadence as before; the
+  counting notification and its Live Update the same in words; the voice, if the outing
+  speaks, says the pace at each signal. The widgets' and the tile's line are unchanged. The
+  outing's rows in Today and History show the measured distance with its quiet mark.
+- [ ] **Tests.** `RouteFilterTest`, `RouteMeterTest`, `GpsDutyTest`, `RouteCodecTest`,
+  `PaceTest`, the tracker's with a meter; Robolectric for the two databases, the migration and
+  the service's type change (granted, refused, restarted); the editor's and the card's UI
+  tests with every state above, `assertAccessible()`, `walkPage()`; the allowlist's.
+- [ ] Strings in English and Italian; CHANGELOG; the guide's outings chapter (a short «With
+  GPS» part: when it is on, what is kept, what is never sent).
+- [ ] **On a device (owner), the proof first:** start an outing with GPS from the editor, from
+  Today and from the launcher's shortcut; the screen off for ten minutes; pause and Resume
+  from the notification. The log says the type was added each time and fixes kept coming with
+  the screen off. If the second type is refused on a running service, the fallback of ADR 0016
+  decision 4 is built before anything else in Phase 16.
+- [ ] **On a device (owner), the measure:** a 30-minute and a 2-hour outing with GPS, screen
+  off, phone in a pocket: the battery an hour (`dumpsys batterystats`, the system's page), the
+  measured share, the receiver asleep at a stop and awake at the first step; a known distance
+  (a track, a measured path) against the fused one. Numbers in `docs/battery/`, then the
+  editor's cost line and §9's rule 9 say the figure.
+
+**Acceptance:** with the switch off, no screen, number, permission or wake differs from
+1.1.0's; with it on, an outing on a known distance reads within 2% of it under an open sky,
+ends by itself as every outing does, and its cost an hour is measured and written; the build
+fails on any permission outside the list.
+
+**Edge cases** (`RouteMeterTest`, `RouteFilterTest`, `GpsDutyTest`, the service's tests):
+
+| Case | Expected behavior |
+|---|---|
+| No fix for the first minute | The outing counts from its first step; that stretch is the steps', and in the share |
+| A fix 60 m off between two good ones | Refused; the line goes from good to good |
+| Standing ten minutes, fixes wandering | No distance, no points; the receiver asleep after 2 min; the outing ends at 15 as always |
+| A tram between two walks, phone in a pocket | Movement without steps adds nothing; the walk resumes where the steps do |
+| A tunnel of 300 m | Covered by the steps, never shorter than the straight line across; drawn later as laid from the steps |
+| A sensor with no FIFO handing 170 steps at once | The meter lays them over their time in motion, as the tracker does |
+| Paused | The receiver off, the type back to `health`; Resume from the notification brings both back |
+| The permission revoked mid-outing | The outing goes on from the steps and says so; no crash, the type dropped |
+| Approximate only granted | No GPS, said once, with the way to precise |
+| Location turned off on the phone, mid-outing | As the tunnel, until it is back; the card says it |
+| The process restarted by the system | The outing continues from the steps; «Resume GPS» on the notification |
+| An interval outing with GPS | The changes still ride on the steps (ADR 0013); the fixes change nothing of their timing |
+| 3 h 45 min into an outing, walking | Asked once, by vibration and notification; nothing stops |
+| «Keep going» before the cap | The cap is four hours later; asked again 15 minutes before that one |
+| The question unanswered | Ended at four hours and told; «Keep going» for 15 minutes takes it back with the steps and the route since |
+| Taken back 10 minutes after its cap, with GPS | The receiver never stopped: the route has no hole |
+| Not taken back | The receiver stops 15 minutes after the cap; the points kept aside are dropped |
+| 3 h 45 min into an outing, sitting since 3 h 35 | Not asked: no step brings the question, and the stillness ends it at 3 h 50 as always |
+| The process restarted after «Keep going» | The moved cap is read from what was stored |
+| A city walk from home with GPS on | Its places are told by the fused distance; nothing else differs (on the spot is Phase 18) |
+| A mock fix in a release build | Refused |
+
+### Phase 16 — The outing's page: the route, the splits, the climb
+
+Every outing gets a page of its own; one with GPS shows its route drawn, its kilometres one by
+one and how much it climbed, and can be shared as an image or a GPX file. With this phase the
+measured outing is whole and can be released (with Phase 15).
+
+**Read first:** ADR 0016 (decisions 5 to 9 and 11), `docs/adr/0014-ways.md` (decisions 8 and 9:
+how a map is drawn), `docs/adr/0012-foldables-and-accessibility.md`,
+`docs/adr/0011-export-import-and-calibration.md`. In the code: `WayMap.kt`, `ContinentMap.kt`
+and `WayProjection.kt` (a map in Canvas, a touch that names), `BarChart.kt`,
+`DayTrendChart.kt`, `SessionCard.kt`, `WalkList.kt`; `Ways.kt` and `Geo.kt` (a city's frame and
+map); `feature/year/.../YearImage.kt` and that module's manifest (an image shared through the
+app's own provider); `DataSection.kt`, `DataViewModel.kt`, `BackupRepository.kt`;
+`MetricsCalculator.kt`, `MetricsConstants.kt`; `app/.../shell/PassoNavigation.kt`; the
+`ReadmeScreenshots` class of `:feature:sessions`.
+
+- [ ] **The climb** (ADR 0016's facts on altitude). `:core:tracking`: `PressureSource`
+  (`TYPE_PRESSURE`, no permission), registered only while an outing with GPS counts, batched,
+  never waking the processor by itself. `:core:domain/routes`: `Altitude` (the barometer for
+  the short term, the satellites' altitude above mean sea level for the long term, blended so
+  that the weather's drift over hours does not read as a hill; satellites alone on a phone
+  with no barometer) and `Climb` (metres up and down, counted only past a threshold that
+  noise does not cross: 3 m with a barometer, 10 m without). Each point keeps the blended
+  altitude; `route` keeps which source it was; `session` gains `ascentMeters` and
+  `descentMeters` (schema v8, or v7 if Phase 15 is not released yet: one migration a release).
+  Said as an estimate («about 240 m up»). Not floors: VISION's non-goal stands.
+- [ ] **Energy on a slope**, for an outing with GPS only: the walking cost per kilometre gains
+  the grade's term from the ACSM walking equation (which on the flat is the 0.5 kcal/kg/km
+  `MetricsConstants` already has), no credit downhill, the running cost its own; the formula
+  and its sources in `MetricsConstants.kt`, a test at 0, 5 and 10%. The day's energy stays the
+  steps' (ADR 0016 decision 6).
+- [ ] **Splits** (`:core:domain/routes`, `Splits`): one a kilometre or a mile, as the units say,
+  each with its time in motion, pace, cadence and climb; the last, partial one says its length.
+- [ ] **`RouteMapView`** (`:core:designsystem`), Passo's first map that moves: north up, pinch
+  and double tap to zoom, drag to pan, a button back to the whole route; under reduced motion
+  no glide. The line in the goal's colour, dashed where it was laid from the steps (the honest
+  mark), a ring at the start, a bead at the end, a small bead each kilometre, a scale bar in
+  the reader's units. Where at least four fifths of the route lies inside the frame of a city
+  Passo carries, that city's map is the ground (water, parks, streets, as on the walk's page);
+  elsewhere the ground is plain, and the page says in a line that Passo carries no street map.
+  A touch names the kilometre and its pace. One sentence to TalkBack («Your route: 5.2 km,
+  from north to south, 3 stops»); the splits below are its words. Its gestures are a piece of
+  their own, since Phases 18 and 19 reuse them. Drawn in every theme and dress in a gallery
+  test, as the ways' maps are.
+- [ ] **The outing's page** (`:feature:sessions`, a new entry in `PassoNavigation.kt`), for
+  every outing, with or without GPS: the sentence first (what it was and how it went against
+  its goal), then its numbers, each with its line; for an interval outing its intervals, as
+  the card has them; for one with GPS the map, «5.20 km measured; your steps said 5.05», the
+  splits as bars (the fastest marked, the goal's pace as a line when the outing had one), the
+  profile of the climb (a Canvas area over the distance), and what the route can do: share,
+  save, delete. Without GPS: the same page without those parts and without an empty box in
+  their place. Reached from the finished card («See the outing»), from an outing's row in
+  Today and in History (a lambda from `:app`: the feature modules still do not know each
+  other), and from the goal's notification.
+- [ ] **Sharing and saving** (ADR 0016 decision 9). `GpxCodec` (`:core:domain`, GPX 1.1: track,
+  segments at the pauses, time, elevation), written by hand, no library. «Save as GPX» through
+  the Storage Access Framework; «Share» as a GPX or as an image (the map, the sentence and
+  three numbers, in the card's dress, as Your year on foot shares a page), through the one
+  file provider the app already has: move `YearImage`'s plumbing where both features reach it,
+  never a second provider. «Trim the ends» / «Taglia partenza e arrivo» leaves the first and
+  the last 200 m out of what is shared, on by default for a share, remembered; a file saved to
+  the reader's own storage is whole.
+- [ ] **Your data** (`:feature:settings`, `DataSection`). How many routes are kept and their
+  size; the export's «With the routes» (off by default; the JSON then carries each route with
+  its outing, as an added field); «Delete all routes», after a dialog that says the outings and
+  their numbers stay. On an outing's page, «Delete this route». The import adds routes by their
+  outing's start instant and never removes one (`BackupMerge`).
+- [ ] **Tests.** `ClimbTest`, `AltitudeTest`, `SplitsTest`, `GpxCodecTest` (a file another app
+  reads: checked against the schema's shape, and a round trip), the map's gallery, the page's
+  UI tests in each of its forms (`assertAccessible()`, `walkPage()`), the export and import
+  with and without routes.
+- [ ] Strings in English and Italian; CHANGELOG; the guide (the outing's page in the outings
+  chapter); README: one screenshot, `outing-route.png`, the page of an outing with GPS inside
+  a city Passo carries, with its caption, and the feature list's line.
+- [ ] On a device (owner): a walk with a hill and a tunnel or an arcade, then its page: the
+  line where it was walked, the dashed stretch, the climb against a known figure; the GPX
+  opened in a map app; the image shared to two apps; the page at a large text size, in both
+  themes, on the open foldable, with TalkBack.
+
+**Acceptance:** an outing with GPS opens a page that shows where it went, how each kilometre
+went and how much it climbed, each number saying what it is; its GPX opens in another app on
+the streets actually walked; a share with the ends trimmed does not show the door it started
+from; routes leave the phone only by the reader's hand or in a phone-to-phone transfer.
+
+**Edge cases** (`ClimbTest`, `SplitsTest`, `GpxCodecTest`, the page's tests):
+
+| Case | Expected behavior |
+|---|---|
+| A flat walk under a passing weather front | No climb invented: the blend follows the satellites over the long term |
+| A phone with no barometer | Satellites alone, the higher threshold, the same sentence, said as an estimate |
+| An outing shorter than 1 km | One partial split; no "fastest" mark |
+| A route shorter than 400 m shared with the ends trimmed | The trim is refused with a line saying why; nothing shared by mistake |
+| A route with no accepted fix at all | The page of an outing without a map, with a line saying the satellites never answered |
+| A route half inside a carried city | The plain ground: under four fifths, a city's map would end mid-route |
+| An outing whose route was deleted | Its numbers stay; the page has no map and no empty box |
+| An import with routes for outings this phone lacks | The outings come first (as today), their routes with them |
+| A pause of ten minutes | A new segment in the GPX; no line drawn across a place not walked |
+
+### Phase 17 — The step that learns («Il passo che impara»)
+
+Every outing with GPS has said, since Phase 15, how long the reader's step is at the cadence
+they walked (`step_length_sample`). This phase turns those samples into a step length by
+cadence, proposes it, and uses it for every estimate from then on: the distance of a day with
+no GPS comes closer to the truth (ADR 0016 decision 12).
+
+**Read first:** ADR 0016 (decisions 6 and 12), `docs/adr/0011-export-import-and-calibration.md`,
+`docs/adr/0003-daily-summaries.md` (frozen days); here §5 and §6. In the code: `StepLengths.kt`,
+`MetricsCalculator.kt`, `MetricsConstants.kt`, `ProfileLimits.kt`, `StepCalibration.kt`,
+`Profile.kt`, `ProfileInputs.kt`, `UserPreferencesDataSource.kt`,
+`TrackingRepository.kt` (how a profile change freezes the past first), `BackupFile.kt`
+(`ProfileDto`), `CalibrationScreen.kt`, `CalibrationViewModel.kt`, `SettingsScreen.kt` (the
+step length's rows).
+
+- [ ] **The learner** (`:core:domain/calibration`, `StepLengthLearner`, pure). From the samples:
+  bins of 10 steps a minute from 80 to 180; a bin counts with 400 m or more from at least two
+  outings; its length is the median of its samples' (metres over steps), within
+  `ProfileLimits`; the curve is made non-decreasing with the cadence (a step does not shorten
+  as the pace rises: pooled where the data says otherwise); between two bins it is a straight
+  line, beyond the ends flat. It also says what the curve would change: the last four weeks'
+  distance with it against without.
+- [ ] **The profile.** `StepLengthMode.LEARNED` and the curve (cadence and length pairs) in
+  `Profile` and DataStore; `StepLengths.forCadence` reads the curve where it has bins and the
+  walking and running lengths elsewhere, so every caller (the day, an outing without GPS, the
+  ways from home) follows with no change of its own. Applied only when the reader accepts it,
+  through the one door a profile change has, which freezes the past first; «Apply profile to
+  past data» works with it as with any profile. The backup's `ProfileDto` gains the curve as
+  an added field; a file with a mode this version does not know falls back to the height's
+  estimate and says so in the import's summary (check how `BackupCodec` reads a mode today,
+  and how 1.1.0 would read `LEARNED`: if it fails, the mode is written as `CALIBRATED` with
+  the curve beside it).
+- [ ] **The proposal** (`:feature:settings`). When the bins around the reader's usual walking
+  cadence (the median of their active minutes over four weeks) count, and the curve would move
+  the last four weeks' distance by 2% or more: a card at the step length's rows and on the
+  calibration page, sentence first («Passo has measured your step on 14 km of your outings:
+  at your usual pace it is 79 cm, not 74, so distances read 6% longer»), the curve drawn in
+  Canvas (the bins as points, the line through them, the height's estimate as a dashed line,
+  cadence across and centimetres up, one sentence for TalkBack), «Use it» and «Not now». Never
+  a notification. After «Use it», the row says where the length comes from and from how many
+  kilometres, with «Go back to the estimate from your height». It is proposed again only when
+  new outings move it by another 2%. The finished page of an outing with GPS gains one quiet
+  line, «Your step at this pace: 79 cm».
+- [ ] The wizard stays: a reader without GPS measures their step on a known distance as today.
+  A length measured by the wizard and a learnt curve do not fight: the last one the reader
+  chose is the one in use, and the row says which.
+- [ ] **Tests.** `StepLengthLearnerTest`, `StepLengthsTest` with a curve, the repository's
+  (accepting freezes the past first), the backup's round trip and an older file, the
+  settings' UI tests with the card in each state.
+- [ ] Strings in English and Italian; CHANGELOG; the guide («Measure your step» gains the part
+  on outings with GPS); README: `calibration.png` regenerated if its screen changed, and its
+  caption (today it says "no GPS").
+- [ ] On a device (owner): after three or more outings with GPS, the proposal with figures
+  that make sense against the wizard's own measure; accepted, a walk without GPS on a known
+  distance reads closer than before; the card in both themes and at a large text size.
+
+**Acceptance:** with enough outings behind it, a walk without GPS on a known distance reads
+within 3% of it; nothing changes for a reader until they accept, and no past day changes unless
+they ask.
+
+**Edge cases** (`StepLengthLearnerTest`, `StepLengthsTest`):
+
+| Case | Expected behavior |
+|---|---|
+| One long outing only | No proposal: a bin needs two outings |
+| Samples only at a brisk cadence | A curve of one bin: that length around it, the profile's own elsewhere |
+| A bin whose median is shorter than a slower bin's | Pooled: the curve never goes down |
+| A sample outside `ProfileLimits` (a bad stretch) | Left out |
+| The running bins empty | Running keeps its own length, or the factor, as today |
+| The curve accepted, then the height changed | The curve stays in use: it was measured, the height is only an estimate |
+| «Go back to the estimate» | The mode returns to the height's; the samples stay, and a new proposal waits for a new 2% |
+| An outing deleted | Its samples go with it; the curve in use is not recomputed behind the reader's back |
+
+### Phase 18 — On the spot: the cities («Sul posto»)
+
+A city walk is imaginary and says so. A reader who is in the city can now walk it for real:
+«I'm here» / «Sono qui» binds the outing to the route itself, so a place is told when the
+reader reaches it, the point on the map is theirs, and a vibration of its own says the route
+was left and another that it was found again (ADR 0016 decision 13).
+
+**Read first:** ADR 0016 (decisions 4, 5 and 13), `docs/adr/0015-city-walks.md` (all),
+`docs/adr/0010-voice.md`. In the code: `SessionTracker.kt` (`placesPassed`), `WalkPlaces.kt`,
+`WalkDays`, `WayProgress.kt`, `Geo.kt` (`WayLine`), `WayProjection.kt`, `Way.kt`;
+`WayRepository.kt`, `WayDao.kt`; `SessionControl.kt` (`startWalk`), `SessionHaptics.kt`,
+`SessionSpeech.kt`, `SessionAnnouncement.kt`; `WalkScreen.kt`, `WaysViewModel.kt`,
+`WayMap.kt`, `WayStamp.kt`, `SessionCard.kt` (the walk's small map); Phase 16's `RouteMapView`
+and its gestures; `tools/build_ways.py` (`LINE_TOLERANCE`) and `tools/walks/`.
+
+- [ ] **The line is fine enough, proven.** A city's line is simplified to a 4,000th of its
+  frame's diagonal, a metre or two: a data test measures, for every walk, the largest distance
+  between the committed route (`tools/walks/*.geojson`) and the line in `WayData.kt`, and fails
+  over 5 m. No data changes if it passes.
+- [ ] **`LineSnap`** (`:core:domain/routes`, pure): the nearest point of a `WayLine` to a fix,
+  as metres along and metres aside; searched near the last place first, so a route that
+  crosses itself or comes back along a street does not jump; the whole line at the start and
+  after a long gap. Progress along the line only moves forward.
+- [ ] **The outing on the spot.** `Session.onTheSpot` and `Session.walkAtMeters` (the furthest
+  point reached), stored with each batch. A place is told when the position passes it within
+  the corridor, or comes within 30 m of the place itself; the goal is the last place reached,
+  not a distance covered. Off the route: more than 40 m aside for three accepted fixes and
+  15 s, told once; back within 25 m, told once; while off, the progress waits and the outing's
+  own distance still counts. With no fix (an arcade), the position goes on along the line by
+  the steps until the fixes return. Never told twice across a restart: the progress is read
+  from what was stored.
+- [ ] **Two vibrations of their own**, unlike the seven there are (one, two, three short; the
+  goal's long one; the stillness's two long; "faster", four quick taps; "slower", a long and a
+  short): proposed, "off the route" short, long, short (120, 450, 120 ms) and "back on it" two
+  quick taps (70 ms, 80 ms apart); the owner confirms them in the editor's "Try them" on the
+  phone. With the voice: «You have left the route», «Back on the route», and each place as
+  today.
+- [ ] **The start** (`WalkScreen`). «I'm here» beside Start, shown only where GPS can be used
+  (Phase 15's readiness), with one line saying what changes. The first fix decides: within the
+  corridor of the route, the walk begins at that point of it («You are by San Babila: the walk
+  goes on from here»); within 2 km, it waits for the route, the card saying how far the
+  nearest place is; farther, the outing says the walk is not near and goes on as from home, by
+  the steps, with nothing lost. No way to the start is drawn or spoken: Passo has no streets
+  to route on.
+- [ ] **The map under way.** The walk's page and the outing's card show the reader's own point
+  with its accuracy as a halo, the trace walked over the route, the next place named; the page's
+  map moves with Phase 16's gestures and can follow the point. One sentence to TalkBack, kept
+  true as the walk goes («On the route, 300 m to the Duomo»).
+- [ ] **The record.** A walk finished on the spot is stamped in a second ink, «walked there»
+  with its day (`WayStamp`; an ink that holds its contrast in both dresses, in `ContrastTest`);
+  a walk's progress (`WalkDays`) reads `walkAtMeters` for an outing on the spot and the
+  distance for one from home, so a walk may be continued either way. Schema by
+  auto-migration; the backup's added fields.
+- [ ] **Tests.** `LineSnapTest`, the tracker's on the spot (routes replayed from
+  `tools/walks/`, with noise, a detour, a gap), the data test above, the walk page's UI tests in
+  each state, the stamps' gallery.
+- [ ] Strings in English and Italian; CHANGELOG; the guide's chapter on the cities; README: a
+  screenshot of a walk on the spot if it reads well (`walk-on-the-spot.png`).
+- [ ] On a device (owner): the Milan walk on the spot, or part of it: each place told at the
+  place, a street left on purpose and found again, an arcade or a gallery crossed, the start
+  from the middle of the route, the voice through headphones with the screen off; the battery
+  against Phase 15's figure.
+
+**Acceptance:** on the route, every place is told within 30 m of it and none twice; leaving the
+route is felt within about 20 s and finding it again as soon; away from the city the same walk
+still works from home exactly as before.
+
+**Edge cases** (`LineSnapTest`, `SessionTrackerTest`):
+
+| Case | Expected behavior |
+|---|---|
+| A route that returns along the same street | The position does not jump to the later stretch: the search stays near the last place |
+| A shortcut that skips a place | The place is not told; the next one is, when reached; the walk can still be finished |
+| A square crossed 50 m from the line | Told as off the route only after 15 s there; back on it at the far side |
+| Fixes lost for two minutes under an arcade | The position goes on by the steps; no "off the route" from silence |
+| Started 5 km from the city | Goes on as from home, said once; the flag is cleared in what is stored |
+| Paused in a café for forty minutes | As every outing: a pause, or the end by stillness with "Resume"; the next outing continues from the place reached |
+| The reader walks the route backwards | Off the route is not said (they are on it); no place is told; the card says which way the walk goes |
+| The process restarted | Places already told stay told; the position is found again from the first fix |
+
+### Phase 19 — On the spot: the ways
+
+A way is walked from home over months. A reader who goes there walks it for real, a stage or a
+week at a time, perhaps over years: the outing follows a line fine enough to follow on a path,
+each stage reached on foot is stamped in the second ink, and the stretches walked in person are
+kept and drawn, beside and independent of the journey from home (ADR 0016 decisions 13 and 14).
+
+**Read first:** ADR 0016 (decisions 13 and 14), `docs/adr/0014-ways.md` (all), Phase 18's
+section and its code (`LineSnap`, the outing on the spot, the two vibrations),
+`tools/CITY_WALKS.md`. In the code: `tools/build_ways.py` (how a way's path is built, the
+cache in `tools/ways-cache/`, `LINE_TOLERANCE`, `splice`), `tools/ways_content.py`; `WayData.kt`
+(generated, never edited), `Way.kt`, `Polyline.kt`, `WaysDataTest.kt`; `WayScreen.kt`,
+`WayMap.kt`, `WayStamp.kt`; `SessionConstants.kt` (`MAX_SESSION_MILLIS`), `SignalWake.kt`,
+`WayNotifier.kt`.
+
+- [ ] **A fine line for each way** (the script, then its output). A way's line is simplified to
+  a 4,000th of its frame's diagonal, about 250 m on the longest: right for a map of a country,
+  useless on a path. `build_ways.py` writes, beside it, the same path simplified to 5 m, with
+  the same metres along it, as generated data of its own that is decoded only when a way is
+  walked on the spot (a generated Kotlin file in chunks, or a resource of `:core:domain`,
+  whichever keeps the build and the first decode fast: measure both). The two lines must come
+  from the same fetched path: if `tools/ways-cache/` no longer holds the relations the ways
+  were built from, a fetch moves the lines with OpenStreetMap's edits since (ADR 0014 decision
+  14), so the coarse line, the stops' metres and the fine line are then rebuilt together, way
+  by way, and a test proves that no stage of any way moved by more than 200 m along it. The
+  APK's growth is measured and written here; over 2 MB, the tolerance becomes 8 m.
+- [ ] **The outing on a way.** `session.walk` may name a way; on the spot only (a way from home
+  is the days', as before). Its goal is the next stage, reached when the reader is within
+  300 m of its stop or passes it on the line; "Keep going" then makes the stage after it the
+  goal, so a day of two stages is one outing. The corridor is 60 m (a path is mapped less
+  exactly than a street). Its signals: a stage or a place reached (its name and its sentence,
+  as the ways' notifications say them), off the way, back on it. The start needs the first
+  fix within 500 m of the way: otherwise the page says how far the way is and offers an
+  ordinary outing.
+- [ ] **The longest outing** (ADR 0016 decision 14). An outing on a way on the spot (and
+  Phase 20's followed route) starts with a cap of twelve hours instead of four, so a day's
+  stage is not interrupted by Phase 15's question; before twelve it asks in the same way, and
+  «Keep going» moves it four hours on. The end after 15 minutes still and after an hour paused
+  are unchanged: a lunch ends the outing, and the next one starts from where the reader is.
+- [ ] **What was walked in person** (`passo.db`, by auto-migration; numbers along a public
+  line, never coordinates): `way_stretch` (way, from and to in metres, the day) merged as they
+  touch, and `way_visit` (way, stop, the day) for each stage reached on foot. The way's page
+  says «37 of 123 km walked there» when there is any, draws those stretches in the walked
+  colour at full weight over the faint line, and sets the second ink's stamp, with its day, on
+  each stage visited, beside the stamp from home if there is one. A journey from home is not
+  needed, not started and not moved by a walk on the spot: the two never touch. The backup
+  carries both tables as added fields.
+- [ ] **The stage's map.** Under way, the page shows the stretch around the reader (about 2 km
+  across, Phase 16's gestures, north up): the fine line, the stops, the reader's point and
+  halo, the way's own ground (its rivers, lakes, parks and towns, drawn for a country's scale)
+  and one line that says what it is: «A line to follow, not a map of the ground».
+- [ ] **The words.** Nothing here names a faith or calls the reader a pilgrim (CLAUDE.md, «The
+  Ways' words»): «walked there» / «percorso sul posto», «on the way» / «sul cammino».
+- [ ] **Tests.** The data tests (both lines of each way agree in length and in each stop's
+  metres; the stage test above), the tracker's on a way (a stage replayed with noise, a
+  variant taken and left, a day of two stages, the cap told), the stretches' merge, the way
+  page's UI tests with stretches and both inks, the stage map's gallery.
+- [ ] Strings in English and Italian; CHANGELOG; the guide's chapter on the Ways; README: the
+  Ways' line and a screenshot of a way with stretches walked there.
+- [ ] On a device (owner): a stretch of a way within reach, or the same replayed with the
+  system's mock-location setting on a debug build: a stage reached, the way left and found,
+  the stretches and the stamp on the page afterwards; a long outing's battery, written in
+  `docs/battery/` with what a full stage would cost.
+
+**Acceptance:** on a way, the reader's place is on the line within what the receiver allows,
+leaving the path is felt within about 30 s, each stage reached on foot is stamped once, and
+what was walked there over any number of visits adds up on the way's page; a reader at home
+sees the ways exactly as before.
+
+**Edge cases** (`SessionTrackerTest`, `WaysDataTest`, the stretches' tests):
+
+| Case | Expected behavior |
+|---|---|
+| A variant of the way, off the mapped line for 3 km | Off the way, told once; the stretch is not counted as walked there; back on it where it joins |
+| The same stretch walked twice, a year apart | One stretch in the total; the earlier day kept |
+| Two stretches that meet | Merged into one |
+| A stage reached from home and on foot | Two stamps, two inks, two days |
+| Kilimanjaro, whose line goes up and down the same path | The search near the last place keeps the climb and the descent apart |
+| The outing nears twelve hours | Asked as every outing is before its cap; unanswered, ended and told, the stretches up to there kept |
+| Lunch of forty minutes | Ended by stillness as always, with "Resume" for 15 minutes; a new outing continues the same day's stretch |
+| A way deleted from Your ways | The journey from home goes, as today; what was walked there stays unless the reader deletes it too, asked apart |
+
+### Phase 20 — Your routes («I tuoi percorsi»)
+
+The same guidance for any line the reader brings: a GPX from elsewhere, or an outing they walked
+before. And for the walk most readers repeat, Passo's own question asked of a route: am I ahead
+of my usual or behind it?
+
+**Read first:** ADR 0016 (decisions 11, 13, 14 and 16), Phases 16, 18 and 19 here and their code
+(`GpxCodec`, `RouteMapView`, `LineSnap`, the outing on the spot, the twelve hours);
+`TypicalDayCalculator.kt` and `TodayOverview.kt` (how "ahead of your usual" is said for a day);
+`SessionsScreen.kt` (the door to the cities), `SessionPlans.kt`.
+
+- [ ] **A route kept** (`routes.db`: `saved_route`, its name, length, climb and line in chunks;
+  simplified to 5 m with its metres along). From an outing's page, «Walk it again»; from a
+  file, «Open a GPX» through the system's picker, and Passo offered for a `.gpx` opened from a
+  file manager (an intent filter on the activity; no permission). `GpxCodec` reads what the
+  world writes: a track or a route, several segments, with or without times and elevations;
+  a file with no line, or broken, is told as such; a very large one is simplified, never
+  refused for its size alone. The reader names it, or it keeps the file's name.
+- [ ] **Following it.** The Outings page gains «Your routes», a door like the cities': each
+  route with its small map, its length and climb. Start, or «The other way round». The outing
+  is one on the spot (Phase 18's rules, a 60 m corridor, the twelve hours): the distance left,
+  the shares of the route as its signals if the reader chose them, off the route and back on
+  it, the arrival. Its page afterwards is an outing's, with the route followed drawn faint
+  under the one walked.
+- [ ] **The usual round** (`:core:domain/routes`, `RouteMatch`, pure). Two outings with GPS are
+  the same round when they start within 100 m of each other, their lengths are within a tenth,
+  and four fifths of each lies within 40 m of the other; rounds are found when an outing ends,
+  from its box first, and kept (`round`, in `routes.db`). From the third time on, the outing's
+  page says it, sentence first («Your usual round, the sixth time: 2 minutes faster than
+  usual»), against the median of the times in motion before; and while a free outing with GPS
+  that began where a round begins is still on it after 500 m, the card says at each kilometre
+  how far ahead or behind the usual it is, in the day's own words. The reader may name a round
+  or tell Passo that two are not the same. Never a record board, never a segment: one reader,
+  their own walks.
+- [ ] **Tests.** `GpxCodecTest` (files as other apps write them, kept as test resources: check
+  each one's licence, or write them by hand), `RouteMatchTest`, the follow's replays, the
+  Outings page's and the route pages' UI tests.
+- [ ] Strings in English and Italian; CHANGELOG; the guide; README: the feature line and a
+  screenshot if one earns its place.
+- [ ] On a device (owner): a GPX from another app followed from start to end; a usual walk
+  taken three times, then the fourth with the card's line; the other way round.
+
+**Acceptance:** a GPX made by another app is followed with the same signals as a city walk; the
+third time a round is walked Passo knows it without being told, and is right about which walks
+are the same one.
+
+**Edge cases** (`GpxCodecTest`, `RouteMatchTest`):
+
+| Case | Expected behavior |
+|---|---|
+| A GPX with waypoints only | Told: there is no line to follow |
+| A GPX of 200 km | Kept, simplified; started from wherever the reader joins it |
+| The same streets walked the other way | Not the same round |
+| A round with a detour of 300 m one day | Still the round (four fifths), its time compared |
+| Two rounds from the same door | Told apart by their lines, not by their start |
+| A round walked once with a long pause | Compared by time in motion, as every outing |
+| A route's source outing deleted | The kept route stays: it is its own copy |
 
 ---
 
@@ -1171,6 +1819,70 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
     started yet, the first three presets, and the interval walk is the fourth.
     `SessionConstants.SHORTCUTS` is 4: a first visit finds all four presets, and four is as many
     as the common launchers show. No reason for three was written anywhere.
+
+- **18 Nov 2026.** **Location, for an outing that asks for it** (owner: "at the moment GPS is
+  not planned, the rules forbid it; forgetting that rule, analyse how GPS could be integrated,
+  turned on by the reader and leaving the app usable as it is now without it"; then, on the
+  analysis: "I approve the direction completely and everything you proposed"). **This changes
+  an archived decision:** «Route maps with GPS stay out» (1 Oct 2026,
+  `docs/planning/02-decisions-to-1-nov-2026.md`, line 120). Its four reasons are answered one
+  by one in `docs/adr/0016-location.md`, which is the record of this decision; in short:
+  - **What it is.** Location as a measuring tape, never a tracker: read only inside an outing
+    the reader started with «Measure with GPS» on. The day's count, the widgets and every
+    screen are as before for a reader who never turns it on, who is asked for nothing.
+    `INTERNET` and `ACCESS_BACKGROUND_LOCATION` stay forbidden, and the build's gate becomes an
+    allowlist, stricter than today's. Satellites only, through the platform's
+    `LocationManager`: no Google Play services, no new dependency.
+  - **What sets it apart.** The steps and the fixes are fused (no pause guessed from a speed,
+    no distance while still or on a bus, no metre lost in a tunnel, the receiver asleep when
+    the steps stop); every outing with GPS teaches the step counter the reader's step, so days
+    without GPS read truer; the city walks and the ways can be walked on the spot, with the
+    content Passo already has; a round the reader repeats is compared with their usual. And a
+    recorder of routes that holds no `INTERNET` cannot send one.
+  - **The owner's three decisions** (each as recommended):
+    1. *The day's distance stays the steps'.* Only the outing shows a measure. A day mixed of
+       measured and estimated stretches would break frozen days, the import's merge and "Apply
+       profile to past data"; once the step has learnt, the two agree within a few percent.
+    2. *Four hours stays the longest outing, but for two kinds, which get twelve.* The cap
+       counts from the start by the clock, stops included, and ends the outing without a word
+       (`SessionEnd.CLOSED` is neither told nor reopenable). Beside the end after 15 minutes
+       still, it is what stops an outing forgotten by a reader who keeps walking all day; with
+       GPS on, that forgetting would cost a battery, so the cap matters more, not less. But a
+       day's stage on a way is six to eight hours with its stops: the cap would fall in the
+       middle of it and end the guidance silently, on a path. So an outing on a way walked on
+       the spot (Phase 19) and one that follows a route (Phase 20) start with twelve hours.
+       Every other outing, with GPS or not, starts with four.
+       *And no cap ends a walk unasked* (owner, the same day, on reading the above: "before
+       the GPS is turned off, is the reader warned, and can they say to go on, if they walk
+       more than four hours?"). They were not: the plan only told the end after it. Now, for
+       every outing: 15 minutes before its cap it asks, by a vibration and a notification with
+       «Keep going», which moves the cap four hours on; unanswered, it ends at the cap, says
+       so, and can be taken back for 15 minutes, the receiver staying on meanwhile so the
+       route has no hole. The question rides on a step batch, so no timer is added and a
+       reader who is sitting is not asked. Built in Phase 15, since it is every outing's;
+       ADR 0016 decision 14, which amends ADR 0009 decision 6.
+    3. *One APK.* A second build without the permission would double every release's tests and
+       ask every new reader to choose before knowing the app; the allowlist, the permission
+       asked only in context and Android's own pages do that job.
+  - **Six phases, 15 to 20** (§11), each written to be built in a session of its own: the
+    measured outing; the outing's page (route, splits, climb, GPX); the step that learns; on
+    the spot, the cities; on the spot, the ways; your routes. 15 and 16 are released together
+    or not at all. The number 15 is free: the «In pictures» plan that once had it was written
+    and reverted before anything was built (pull requests 68 and 69), and is in no archive.
+  - **Nothing is built, and nothing in force has changed.** Written today: ADR 0016, the phases,
+    this entry, the «Planned» notes in «State», §9, §10, VISION.md and CLAUDE.md. The manifest,
+    the gate, the invariants and the README change in the change that builds Phase 15, as ADR
+    0013 amended §9.7 in the change that built Phase 13.
+  - **«Sul posto» is "On the spot"** in English (owner, the same day).
+  - **Left for the owner to confirm on the way** (owner: "ask me when it is needed, and give me
+    suggestions anyway"): the two new vibrations (Phase 18, in "Try them") and the cost line
+    beside the switch, once measured (Phase 15). The session that reaches one asks the owner
+    then, with its proposal and an alternative or two, and builds with the proposal meanwhile
+    so the work does not wait.
+  - **To prove on the phone before building on it** (Phase 15's first device box): that a
+    running `health` service takes the `location` type by a second `startForeground()` from a
+    page and from the notification's Resume. The documentation says a type is added that way
+    and does not say how the second call is checked; ADR 0016 decision 4 has the fallback.
 
 ### Open
 

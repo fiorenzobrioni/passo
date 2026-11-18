@@ -168,6 +168,36 @@ Asked for by the owner after the v1.0.0 release (1 Oct 2026); the phases are in 
 - **The interval walk** («Camminata a intervalli», Phase 13): the Japanese Interval Walking Training as an outing, in minutes, with each change of interval felt in the pocket (`docs/adr/0013-interval-walks.md`).
 - **More ways, beyond Europe** («Altri cammini», Phase 14, planned): the Kumano Kodō, the Inca Trail, the Great Ocean Walk, the John Muir Trail and Kilimanjaro, so that the ways reach every continent the cities do; the words that describe the feature as a whole name no faith, and the ways' stamps are grouped as «Timbri» / "Stamps", on a page that lists the ways by continent.
 
+### Planned after 1.1: location, for an outing that asks for it
+
+Asked for and approved by the owner on 18 Nov 2026, after weighing it a second time
+(`docs/adr/0016-location.md`; the phases are in PLANNING §11, 15 to 20). **Not built yet:** until
+Phase 15 is, the principles, the non-goals and the success criteria above stand as written, and
+no location permission is in the app. Phase 15 amends them in the change that builds it.
+
+Location enters as a measuring tape, never as a tracker: it is read only inside an outing the
+reader started with «Measure with GPS» on. A reader who never turns it on is asked for nothing,
+and the app is exactly as it is today. Passo still holds no `INTERNET` permission, so it cannot
+send a route anywhere; it never reads location in the background, and routes are left out of
+Android's cloud backup.
+
+- **The measured outing** («Uscita misurata», Phases 15 and 16): a distance measured rather
+  than estimated, a pace per kilometre, the route drawn in the app's own hand, splits, climb,
+  and a GPX file to take elsewhere. The steps and the satellites are fused: the steps say when
+  the reader moves, the fixes how far, so a stop, a bus or a tunnel does not fool it.
+- **The step that learns** («Il passo che impara», Phase 17): each outing with GPS says how
+  long the reader's step is at each pace; Passo proposes the result, and every day without GPS
+  reads truer for it.
+- **On the spot** («Sul posto», Phases 18 and 19): a city walk or a way walked where it is, for
+  a reader who goes there: a place told on arrival, a vibration when the route is left, a stamp
+  in a second ink, the stretches of a way walked in person kept over the years. From home,
+  both stay as they are, with no location.
+- **Your routes** («I tuoi percorsi», Phase 20): the same guidance along a GPX or a past
+  outing, and a round the reader repeats compared with their usual.
+
+Still out: a catalogue of sports, cycling, training plans, segments, rankings, friends, live
+sharing, an outing that starts by itself, and location in the background for any reason.
+
 ### Possible post-1.0 ideas (not committed)
 
 - Optional, opt-in, write-only export to Health Connect. It would never be required and never used as a data source.
