@@ -7,8 +7,14 @@
 - Amends, in the change that builds Phase 15: VISION.md (principles 1 and 3, the non-goals, the
   success criterion «Privacy is enforced»), PLANNING.md §9 and §10, CLAUDE.md's invariants, the
   README's privacy lines, `docs/adr/0007-backup.md` (a second database, left out of the cloud
-  copy) and `docs/adr/0009-sessions.md` (decision 1: a pace per kilometre, shown, never a goal;
-  decision 6: the longest outing asks before it ends and can be carried on)
+  copy), `docs/adr/0009-sessions.md` (decision 1: a pace per kilometre, shown, never a goal;
+  decision 6: the longest outing asks before it ends and can be carried on) and
+  `docs/adr/0013-interval-walks.md` with PLANNING.md §9.7 (the wake lock of a phone with no
+  wake-up step counter: also an outing with GPS's, and bounded by the outing's own cap)
+- Amended 18 Nov 2026, before anything was built (owner, on Phase 15 read against the code:
+  "let us go by what is best, and change the ADRs and CLAUDE.md to follow"; then "I confirm all
+  five"): decisions 4, 5, 9, 10, 13 and 14, each marked where it changed, and the platform's
+  facts on the location button
 
 ## Context
 
@@ -53,6 +59,20 @@ to be proven on a device in Phase 15):
 - Android 17's official change lists (read on 18 Nov 2026) say nothing about location; the
   press wrote of a "Location Button" for a one-time precise fix. Passo targets API 37, so
   Phase 15 reads the official pages again before it writes the permission's flow.
+  *Read again on 18 Nov 2026, as Phase 15's first step:* the change lists still say nothing on
+  location, the `location` service type or the while-in-use rule. The location button is on
+  the permissions page, not in the change lists: an experimental Jetpack library
+  (`androidx.core.locationbutton`, 1.0.0-alpha01 of 17 Jun 2026) with a permission of its own
+  (`USE_LOCATION_BUTTON`), for "momentary, session-based precise location access"; Google Play
+  asks for it of an app that targets API 37 and "only contains features that require
+  session-based location access". Passo's need is the other kind, a walk measured for its
+  whole length with the screen off, by a foreground service; the button would be a new
+  dependency in alpha and one more permission, and its pages do not say that its grant reaches
+  a service. So the permission's flow stays the classic request of decision 2. Phase 9 reads
+  the Play policy itself before a listing.
+- The one-time grant («Only this time») gives the same permissions as «While using the app»;
+  the documentation does not say how long it lasts under a foreground service that never
+  stops. Proven on the phone in Phase 15.
 
 ## Decisions
 
@@ -92,6 +112,25 @@ to be proven on a device in Phase 15):
    - the evening reminder's "Walk now": the rest of the day, never with GPS;
    - a process the system restarted mid-outing: the outing goes on from the steps (decision 5),
      and its notification offers «Resume GPS», one touch.
+
+   *Amended 18 Nov 2026 (owner):*
+   - **"Walk now" keeps the plan's word.** The reader's plan for the rest of the day is theirs
+     to set, GPS included, and a plan that measures from the Outings page and not from the
+     reminder, without a word, is one plan with two behaviours. A touch on a notification is
+     the same documented exemption Resume stands on. So "Walk now" starts with GPS when that
+     plan has it on, the precise permission is already granted and location is on; otherwise
+     it starts on the steps and the card says so once, with the way to change it. It never
+     asks for the permission: a notification cannot.
+   - **GPS comes back by itself, and its stop is told.** A restarted process cannot have the
+     receiver, and a button on a silent notification leaves a reader with the phone in a
+     pocket to find at home that half the route was laid from the steps. So: the stop is told
+     once (a notification on the outings' channel, which alerts as the reader set it, and the
+     voice if the outing speaks; no vibration of its own, the patterns being few and each
+     with one meaning); «Resume GPS» is on the notification and on the card; and the receiver
+     comes back with no touch at all the next time the app is brought forward, which is "a
+     start from a page of the app" in the rule's own terms. With the permission gone, the way
+     back opens the app, where it can be asked.
+
    Should a device refuse the second type on a running service, the fallback is a small second
    service of type `location`, created from the same places and sharing the counting
    notification's id, that hands its fixes to the first; everything above the source is the
@@ -116,6 +155,18 @@ to be proven on a device in Phase 15):
    - **The GPS sleeps when the steps do.** After 2 minutes without a step the updates are
      removed; the next step asks for them again. The outing's own wake-up step counter (or its
      wake lock, §9.7) already brings that step on time.
+     *Amended 18 Nov 2026 (owner):* that wake lock was held only by an outing with signals
+     (ADR 0013), so on a phone with no wake-up step counter an outing with GPS and no signal
+     had nothing to bring the step: the receiver, once asleep, stayed asleep until the screen
+     came on. On such a phone an outing with GPS now holds the same lock while it counts,
+     with signals or without, for the reason the lock exists: the steps must arrive as they
+     are taken, and here they steer the receiver (its sleep, its waking, the speed a fix may
+     imply, "still means still"). A receiver slowed to a fix every half minute during a stop
+     was weighed and left out: it costs more than a processor awake with the receiver off,
+     and finds the first step up to half a minute late. The lock is let go as it always is:
+     at a pause, at the end, after 15 minutes still. It amends ADR 0013 and §9.7 in the
+     change that builds Phase 15. The sleep itself is noticed on whatever arrives, a step
+     batch or a batch of fixes: no timer.
    In an outing with GPS, the outing's distance is this fused distance: its goal, its signals,
    a walk's places and its energy use it. What the steps alone would have said is kept beside
    it, for the outing's page («5.20 km measured; your steps said 5.05») and for decision 12.
@@ -148,6 +199,14 @@ to be proven on a device in Phase 15):
    reader's own export carries the routes only when they tick it; an outing's route can be
    saved as GPX, and deleted alone, and all routes at once, from Your data. An import adds
    routes by their outing's start instant and never takes one away.
+   *Amended 18 Nov 2026 (owner: hiding where a walk starts and ends "seems a little extreme";
+   the plan of Phase 16 had «Trim the ends», on by default for a share):* **what the reader
+   shares is the route as it was walked.** Passo has no network and no feed: a share is one
+   act of the reader's, to a person or an app they chose, of something they are looking at.
+   The image is a line on Passo's own ground, with no street to read a door from; the GPX
+   holds the points, and its choice says so in one line, which is the honest thing a hidden
+   default is not. A switch, a remembered setting and a refusal for short routes come out of
+   the page.
 
 10. **Battery: a second written exception.** The receiver is on only while an outing with GPS
     counts and the reader walks; it sleeps after 2 minutes still, stops at a pause, and the
@@ -157,6 +216,11 @@ to be proven on a device in Phase 15):
     `docs/battery/`; the editor then says the measured figure beside the switch, as it does for
     the wake lock. Batching (`setMaxUpdateDelayMillis`) is asked for and measured, never
     assumed.
+    *Amended 18 Nov 2026 (owner):* two things are added to what the exception allows, each
+    bounded. On a phone with no wake-up step counter, the processor kept awake while an
+    outing with GPS counts (decision 5). And the receiver while an ended outing can still be
+    taken back (decision 14): 15 minutes at most, asleep 2 minutes after the reader stops,
+    off when the card is put away.
 
 11. **A route is drawn in code, with no tiles.** There is no network to fetch a map with, and
     no map pack to carry. A route is a line on Passo's own canvas with its scale, north, start,
@@ -184,6 +248,13 @@ to be proven on a device in Phase 15):
       beside and independent of the journey from home.
     Never a navigation to the start, never a turn spoken with a street's name: Passo has a line
     and where the reader is on it, and says only that.
+    *Made plain on 18 Nov 2026 (owner):* a way or a city walk from home never reads the
+    satellites. Two ways to walk one, each with one meaning: from wherever the reader is, on
+    their steps, and there, with GPS. A third, a far city measured with the satellites of the
+    reader's own streets, would read as a navigation that is not there. It is not a matter of
+    privacy: an outing of the reader's own, started at their door with GPS on, is measured
+    from its first step. The Ways' sentence, "No location, only your steps", stays true of
+    every way from home.
 
 14. **The longest outing: asked before it ends, and the reader may go on.** Four hours stays
     the cap for every outing, GPS or not: beside the end by stillness it is what stops an
@@ -205,6 +276,15 @@ to be proven on a device in Phase 15):
       can (`KEEP_GOING_MILLIS`). In an outing with GPS the receiver stays on through those 15
       minutes, the reader being by definition still walking, so a route taken back has no hole;
       then it stops and the points kept aside are dropped.
+      *Amended 18 Nov 2026 (owner):* the same holds after every end that can be taken back,
+      not the cap's alone. The goal is crossed by a step and the end by stillness is noticed
+      by one: there too the reader is walking, and an outing taken back ten minutes later
+      would have a hole in its route and could lose the word «measured» for it. One rule:
+      while an ended outing with GPS can still be taken back, the receiver does what it does
+      while the outing counts (awake while the reader walks, asleep 2 minutes after they
+      stop) and its points are kept aside; putting the card away, a new outing or the end of
+      the 15 minutes stops it and drops them. The price is at most 15 minutes of the receiver
+      after an outing, paid only by a reader who walks on and leaves the card where it is.
     Two outings start with twelve hours instead of four, so that a long day is not interrupted
     by the question at all: one on a way walked on the spot, and one that follows a route
     (Phase 20), a day's stage being six to eight hours with its stops; they ask before twelve

@@ -86,6 +86,16 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
   under way in both themes and at a large text size; the editor's legend, each signal felt; a
   city walk's map before a start and under way, a way's map; TalkBack on a card and on the legend.
 
+- [ ] **On a device (owner): Phase 15's proof, before the rest is built** (§11 Phase 15, «On a
+  device (owner), the proof first»; §15, «Phase 15, the slice for the proof on the phone», 18 Nov
+  2026). With the debug build of `feature/phase-15-measured-outing`: an outing with «Measure
+  with GPS» started from the Outings page and from the launcher's shortcut; the screen off for
+  ten minutes; pause and Resume from the notification; the app opened and closed meanwhile; a
+  stop of five minutes; "Walk now" from the evening reminder with GPS on that plan; the
+  permission as «Only this time»; the process ended mid-outing and the app opened again. Each
+  outing's `GPS` row in the log says whether the type was added, and whether fixes came with
+  the screen off, in batches or one by one.
+
 Read again on 2 Nov 2026, at archive 01 and 02: the boxes above are the ones the phases done had
 left open, and the review's device check. Read again at 1.1.0's tag: the owner's checks of the
 update, the outing let go, Your year on foot and the new ways' maps are done; §15 has no open
@@ -577,7 +587,7 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
    *Amended 2 Nov 2026 (owner, after a review):* that wake lock is also let go once the outing has been still for 15 minutes (`SignalWake.letGoAt`), when it is over and has nothing left to tell on time; it is closed at the next step or look, as on every phone. A forgotten outing had kept the processor awake until the screen came on, up to the 4 h 10 min bound. The moment is kept by a timer in the service, the one timer that runs with the screen off, and only while the wake lock already keeps the processor awake: it shortens a wake and never makes one.
 8. OEM task killers: onboarding shows a battery tip, with a button to the app's own settings page, only when `Build.MANUFACTURER` is on a known list (`OemTips`). Samsung is not on it (§15).
 
-*Planned (owner, 18 Nov 2026; `docs/adr/0016-location.md` decision 10, §11 Phase 15): a second exception, the satellite receiver while an outing with GPS counts and the reader walks. It is written here, as rule 9, in the change that builds Phase 15; until then the rules above are the whole list.*
+*Planned (owner, 18 Nov 2026; `docs/adr/0016-location.md` decision 10, §11 Phase 15): a second exception, the satellite receiver while an outing with GPS counts and the reader walks, and for at most 15 minutes after its end while it can be taken back. It is written here, as rule 9, in the change that builds Phase 15; rule 7 changes with it (its wake lock is also an outing with GPS's on a phone with no wake-up counter, bounded ten minutes past the outing's cap; ADR 0016 decisions 5 and 14, amended the same day). Until then the rules above are the whole list.*
 
 ---
 
@@ -713,18 +723,27 @@ It ends with numbers on the card and the notification; the route's own page is P
 `CsvExport.kt`; `app/src/main/res/xml/data_extraction_rules.xml`; `PlanEditorScreen.kt`,
 `PlanEditorViewModel.kt`, `SessionsScreen.kt`; `SessionCard.kt`, `WalkList.kt`.
 
-- [ ] **The platform, read again.** Android 17's official pages for anything on location (the
+- [x] **The platform, read again.** Android 17's official pages for anything on location (the
   press's "Location Button", the permission's dialog, the `location` service type), since Passo
   targets API 37. What is found is written in this phase's §15 entry; if it changes the
-  permission's flow, ADR 0016 is amended first.
-- [ ] **The gate becomes an allowlist** (ADR 0016 decision 2). `build-logic` holds the exact
+  permission's flow, ADR 0016 is amended first. Read on 18 Nov 2026 (§15, «The five answered,
+  and the platform read again»): nothing changes the flow; the location button is an alpha
+  Jetpack library for momentary access, not for a walk measured by a service (ADR 0016,
+  the platform's facts).
+- [x] **The gate becomes an allowlist** (ADR 0016 decision 2). `build-logic` holds the exact
   list of permissions the merged manifest may request (today's, read from a green build's
   report, plus the three below); the task fails on any permission not on it, and names a
   forbidden one as forbidden (`INTERNET`, `ACCESS_BACKGROUND_LOCATION`, the exact alarms, the
-  battery exemption, the high-rate and body sensors). Proven as in Phase 0: an unlisted
-  permission and `ACCESS_BACKGROUND_LOCATION`, each added to `:core:tracking`'s manifest, turn
-  the build red by name; then removed.
-- [ ] **The manifest** (`:core:tracking`): `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`,
+  battery exemption, the high-rate and body sensors). **Exactly, both ways** (the ADR's word): a
+  permission on the list that the manifest no longer asks for fails the build too, so the list
+  cannot keep a name nothing needs. A permission named after the application id (a library's
+  own, which differs between the debug build and the release by the `.debug` suffix) is written
+  relative to the id and resolved per variant. The task keeps its name,
+  `checkForbiddenPermissions`: the workflows and the documents call it. The verdict is a pure
+  function (requested, allowed, forbidden) with its own tests in `build-logic`. Proven as in
+  Phase 0: an unlisted permission and `ACCESS_BACKGROUND_LOCATION`, each added to
+  `:core:tracking`'s manifest, turn the build red by name; then removed.
+- [x] **The manifest** (`:core:tracking`): `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`,
   `FOREGROUND_SERVICE_LOCATION`; the service's `foregroundServiceType="health|location"`;
   `<uses-feature android:name="android.hardware.location.gps" android:required="false" />`.
   The manifest's opening comment is rewritten to say what each is for and that nothing else is
@@ -734,9 +753,13 @@ It ends with numbers on the card and the notification; the route's own page is P
   estimate, never replaces them, and nothing depends on it; principle 3; the non-goals' GPS
   lines; the success criterion «Privacy is enforced»; the outings' section; the glossary:
   «measured»); §9 here (rule 9, written like rule 7: when, what bounds it, what it costs once
-  measured) and §10 (the table, the forbidden list, the allowlist); CLAUDE.md (the two
-  invariants, the modules table); the README (the privacy table and every "no location" line,
-  with no em or en dash); ADR 0007 and ADR 0009 (an «Amended» line each, pointing to ADR 0016);
+  measured, the receiver while an ended outing can be taken back included; and rule 7 itself:
+  its wake lock is also an outing with GPS's on a phone with no wake-up counter, and is
+  bounded ten minutes past the outing's cap, not at 4 h 10 min) and §10 (the table, the
+  forbidden list, the allowlist); CLAUDE.md (the two invariants, the battery one saying «for
+  an outing with signals or with GPS» where it says «with signals only», the modules table);
+  the README (the privacy table and every "no location" line, with no em or en dash); ADR
+  0007, ADR 0009 and ADR 0013 (an «Amended» line each, pointing to ADR 0016);
   the strings that promise no location (`ways_intro`, `settings_calibrate_note`, the guide's
   «Your distance, not your location» and the first run's promises: grep the `strings.xml` files
   for "location", "posizione" and "GPS" and rewrite each so that it is true: the ways from home
@@ -746,24 +769,48 @@ It ends with numbers on the card and the notification; the route's own page is P
   at the start, frozen like the goal), `Session.stepsMeters` (what the steps alone said),
   `Session.measuredShare` (0 to 1, null without GPS). In an outing with GPS
   `SessionTotals.distanceMeters` is the fused distance (ADR 0016 decision 5): the goal, the
-  signals, a walk's places and the energy read it unchanged. `RoutePoint` (time, latitude,
-  longitude, altitude or none, accuracy, whether it is a fix or a point laid from the steps)
-  and `Route` (the outing, its points, its box).
+  signals, a walk's places and the energy read it unchanged. `Session.capAtMillis` (when it ends
+  by itself if nobody says to go on: four hours from the start, moved on by «Keep going») and
+  `Session.capAskedForMillis` (the cap the question was last asked for: asked once a cap, and
+  not again by a process that restarted). `RoutePoint` (time, latitude, longitude, altitude or
+  none, accuracy, whether it is a fix or a point laid from the steps) and `Route` (the outing,
+  its points, its box).
 - [ ] **The domain** (`:core:domain/routes`, pure, tests first):
   - `RouteFilter`: a fix is accepted at 25 m of accuracy or better, later than the one before,
     and no faster from it than the cadence allows (3.5 m/s below `RUNNING_CADENCE`, 8 m/s at or
     above). A mock fix is accepted only in a debug build (the flag is passed in), so a route
     can be replayed on a desk with the system's mock-location setting and never fakes a walk in
     a release.
+  - **One clock for the two streams.** A fix's time is its `elapsedRealtimeNanos`, turned to
+    wall time by the same snapshot the ledger uses for a step sample (`StepSample.eventElapsedNanos`),
+    never `Location.getTime()`: that is the satellites' clock, which can stand seconds from the
+    phone's, and steps and fixes laid on two clocks would be interleaved wrongly. «Later than
+    the one before» is read on that clock; a clock set by hand mid-outing moves both together.
   - `RouteMeter`: fed the accepted fixes and the accounted steps with their own times, in any
     interleaving, it gives the fused distance, the steps' own, the measured share, the pace now
     (over the last 200 m) and the points to keep (one every 3 m moved or 5 s, whichever first).
     Its rules are ADR 0016 decision 5, one test each: the stretch before the first fix; no
     steps, no distance; movement without steps; a gap covered by the steps and never shorter
     than the straight line across it; the receiver asleep.
+    **Steps ahead of their fixes.** The two streams reach the service in batches of their own,
+    so the steps of a stretch can be in hand before its fixes. A stretch is *open* until a fix
+    later than its last step is in, or until `OPEN_STRETCH_MILLIS` has passed without one (then
+    it is a gap: the steps' for good, and never shorter than the straight line once the next
+    fix comes). An open stretch is counted from the steps for what the card shows; the goal,
+    the milestones and a walk's places are told on the *settled* distance only, so nothing is
+    told, and no outing ended, on metres the fixes then take back. The settled distance never
+    goes down.
   - `GpsDuty`: when to ask for updates and when to remove them (asleep after 2 minutes without
     a step, awake at the next one, off at a pause and at the end), as `SignalWake` decides the
-    wake lock: pure, the service only obeys.
+    wake lock: pure, the service only obeys. It is asked at whatever arrives, a step batch or
+    a batch of fixes, never by a timer. While an ended outing can still be taken back
+    (`canKeepGoing`), it answers as while the outing counts, and off once it cannot or the
+    card is put away (ADR 0016 decision 14, amended).
+  - `SignalWake.needed` and `neededFor` gain the outing's `gps`: on a phone whose step counter
+    cannot wake it, an outing with GPS keeps the processor awake while it counts, with signals
+    or without (ADR 0016 decision 5, amended), since there the steps steer the receiver. Let
+    go as before: a pause, the end, 15 minutes still. The editor's line about the wake lock
+    follows `neededFor`.
   - `RouteCodec`: points to chunks and back, as offsets in varints (time in seconds, latitude
     and longitude in millionths of a degree, altitude in decimetres, accuracy in metres): exact
     round trip, about 10 KB an hour of walking, a chunk self-contained so a lost one loses only
@@ -774,33 +821,64 @@ It ends with numbers on the card and the notification; the route's own page is P
     steady cadence (within 8 steps a minute), its cadence, steps and metres. `RouteMeter` emits
     them; Phase 17 learns from them, so the first outings already teach.
 - [ ] **The storage** (`:core:data`). `passo.db` schema v7 by auto-migration: `session_plan.gps`,
-  `session.gps`, `session.stepsMeters`, `session.measuredShare`, and a table
+  `session.gps`, `session.stepsMeters`, `session.measuredShare`, `session.capAtMillis` and
+  `session.capAskedForMillis` (an outing from before v7 reads its cap as four hours from its
+  start), and a table
   `step_length_sample` (outing, cadence, steps, metres): numbers, never places. A second Room
   database, `routes.db` (`RouteDatabase`, its schema exported like the first): `route` (the
   outing's id and start instant, the points' count, the box) and `route_chunk` (outing, order,
   bytes). `RouteRepository` appends a chunk after the step batch's transaction and never inside
   it: `passo.db` stays the truth, and a crash costs a route its last chunk, not the outing.
-  Deleting an outing deletes its route. `UpgradeFromFirstReleaseTest` walks to v7.
+  Deleting an outing deletes its route, **the route first**: two databases share no
+  transaction, and a crash between the two must leave an outing without its route (a state
+  the app already draws), never places with no outing. That holds for an outing too short to
+  be kept (`MIN_KEPT_STEPS`), which the service deletes, and for one a restore brought without
+  `routes.db` (the cloud copy: its numbers stay, said as they were). At each start of the
+  service, a route whose outing is not in `passo.db` is deleted: one read, no wake of its own.
+  `UpgradeFromFirstReleaseTest` walks to v7.
 - [ ] **The backup** (ADR 0016 decision 9). `data_extraction_rules.xml`: `routes.db` and its
   write-ahead log under `<device-transfer>` only, with the comment saying why. The JSON backup
   and the CSV gain the outing's new numbers as added fields (`gps`, `stepsMeters`,
   `measuredShare`; no new format version), the plan its `gps`; the routes themselves are
-  Phase 16's.
+  Phase 16's. The JSON also carries each outing's `step_length_sample` rows, as an added field
+  of the outing (numbers, no places): what Phase 17 learns from must not be lost by a reader
+  who moves phone with their own file; an outing the import leaves out leaves its samples out.
 - [ ] **The receiver** (`:core:tracking`). `LocationSource`, beside `StepSensorSource`:
   `LocationManager`, `GPS_PROVIDER`, a `LocationRequest` at 1 s, high accuracy, with
-  `setMaxUpdateDelayMillis` asked for (30 s with the screen off, none with it on), batches
-  taken through `onLocationChanged(List<Location>)`, `requestFlush` when the screen comes on;
-  each fix's altitude turned to mean sea level by `AltitudeConverter` off the main thread.
+  `setMaxUpdateDelayMillis` asked for (60 s with the screen off, none with it on), batches
+  taken through `onLocationChanged(List<Location>)`, `requestFlush` when the screen comes on
+  **and at each step batch**: the steps lead, as everywhere in Passo. The step batch has
+  already woken the processor (ADR 0009's two brief wakes a minute); the fixes are asked for
+  in that same wake, and the meter moves when they are in (`onFlushComplete`, or
+  `FLUSH_TIMEOUT_MS` as for the sensor's). The receiver's own delay is twice the steps', so by
+  itself it wakes the phone only when no step came: two streams, one rhythm of wakes, not two.
+  Whether the phone batches at all is measured, never assumed (ADR 0016 decision 10).
+  Only the points kept (one every 3 m or 5 s) have their altitude turned to mean sea level by
+  `AltitudeConverter`, off the main thread: the others are measured and let go.
   `GpsReadiness`: ready, permission needed, approximate only, turned off on the phone, no
   receiver.
 - [ ] **The service.** One function adds or drops the `location` type (`startForeground()` with
   `health|location`, or `health`), called when an outing with GPS starts, resumes, pauses or
   ends, and only from where the while-in-use rule allows it (ADR 0016 decision 4); a refusal is
-  caught, logged, and the outing goes on from the steps. The fixes reach `RouteMeter` on the
+  caught, logged, and the outing goes on from the steps. **`onStartCommand` asks that same
+  function which types to pass**: today it calls `startForeground()` with `health` alone every
+  time the app is opened and at every command, which in an outing with GPS would take the
+  `location` type away at each look at the app. And a refused `location` type must never reach
+  the catch that stops the service: it falls back to `health` and the count goes on (no lost
+  steps); only a refused `health` stops it, as today. The fixes reach `RouteMeter` on the
   thread that drives `SessionTracker`; the outing's distance in a GPS outing comes from the
   meter; the chunks are written with each batch. A process restarted mid-outing rebuilds the
-  meter from the outing's stored numbers, goes on from the steps, and the notification gains
-  «Resume GPS». The evening reminder's "Walk now" never asks for GPS. The diagnostics log gets
+  meter from the outing's stored numbers and goes on from the steps. **The stop is told, and
+  GPS comes back by itself** (ADR 0016 decision 4, amended): once, a notification on the
+  `sessions` channel («GPS stopped. Your outing goes on from your steps», with «Resume GPS»)
+  and the voice if the outing speaks, no vibration of its own; «Resume GPS» on the counting
+  notification and on the card; and with no touch at all the next time the app is brought
+  forward (`onStartCommand` from the activity: an outing with GPS whose receiver is off, the
+  permission granted, asks for the type again). With the permission gone the button opens
+  the app. **"Walk now" keeps the plan's word**: the evening reminder's outing starts with GPS
+  when the rest-of-the-day plan has it on, the precise permission is already granted and
+  location is on; otherwise on the steps, and the card says so once. It never asks for the
+  permission. The diagnostics log gets
   one row an outing with GPS (fixes taken and refused, the measured share, how long the
   receiver slept, the type refused or not), like the interval outing's.
 - [ ] **The longest outing asks before it ends** (ADR 0016 decision 14; it amends ADR 0009
@@ -813,7 +891,18 @@ It ends with numbers on the card and the notification; the route's own page is P
   neither told nor reopenable), and can be taken back for `KEEP_GOING_MILLIS` with the steps
   since, as after the goal; in an outing with GPS the receiver stays on through that window
   and its points are kept aside, joined to the route if the outing is taken back and dropped
-  if not. `SignalWake` follows the outing's own cap. No timer: every part rides on a step
+  if not. **The same after the goal and after an end by stillness** (ADR 0016 decision 14,
+  amended): while an ended outing with GPS can be taken back, the receiver is steered as
+  while it counts (asleep 2 minutes after the reader stops), the service keeps the `location`
+  type, and `RouteMeter` keeps what comes aside, as the tracker keeps the steps; «Keep going»
+  or «Resume» joins them, and putting the card away, a new outing or the 15 minutes' end
+  drops them and turns the receiver off. `SignalWake` follows the outing's own cap, and so does the bound of its lock
+  (`TIMEOUT_MILLIS`, today ten minutes past four hours from when it is taken): the lock is
+  taken again at «Keep going» with ten minutes past the new cap, and §9.7's "bounded at 4 h 10
+  min" is rewritten as "ten minutes past the outing's cap" in the documents' box above. Whether
+  an end can be taken back is the tracker's own knowledge (`reopenableFrom`), never read from
+  `SessionEnd.CLOSED`, which an import also gives to an outing that was under way in the file.
+  No timer: every part rides on a step
   batch, a screen-on or a touch. The voice, if the outing speaks, says the question too.
 - [ ] **The switch, and the permission in context** (`:feature:sessions`). In the editor,
   «Measure with GPS» / «Misura con il GPS», with two lines under it: what it gives (a measured
@@ -825,29 +914,62 @@ It ends with numbers on the card and the notification; the route's own page is P
   approximate only or refused, it starts on the steps and its card says so once, with the way
   to change it (the upgrade request, or the system's page after a second refusal). Location
   turned off on the phone: the same, with the button to the system's switch. None of the
-  three presets has it on.
+  four presets has it on.
+  **One door for every start.** An outing starts from the Outings page (`SessionsViewModel`),
+  from a launcher's shortcut (`MainActivity.startOutingIfAsked`, which goes straight to
+  `SessionControl`) and, from Phase 18, from a walk's page: three modules that do not know each
+  other. The check (`GpsReadiness`), Passo's own screen and the request live behind one door
+  in `:app`, where the activity that owns the permission's launcher is; each start goes through
+  it, by a lambda as the pages' other crossings do, so no start with GPS can skip the screen
+  and none asks twice.
+  **«Only this time»** is a grant: the outing starts with GPS. The system takes it back by
+  itself later, and the next outing with GPS asks again, by the system's dialog alone (Passo's
+  own screen is shown once). How long it lasts under a service that never stops is not written
+  anywhere: proven on the phone, below.
 - [ ] **What the reader sees while it counts.** The card (`SessionCard`): «Finding the
   satellites» until the first fix, then the distance with «measured» under it (or the share
   from the steps when over a tenth), the pace and the pace now, the cadence as before; the
   counting notification and its Live Update the same in words; the voice, if the outing
   speaks, says the pace at each signal. The widgets' and the tile's line are unchanged. The
-  outing's rows in Today and History show the measured distance with its quiet mark.
+  outing's rows in Today and History show the measured distance with its quiet mark. Every
+  state of the receiver has its line on the card, and one only: finding the satellites,
+  measuring, asleep while the reader is still (nothing said: the numbers stand), the signal
+  lost (a tunnel), location turned off on the phone (with the button to the system's switch),
+  GPS stopped (with «Resume GPS»), started on the steps (approximate only, refused, or "Walk
+  now" without the permission: said once, with the way to change it).
 - [ ] **Tests.** `RouteFilterTest`, `RouteMeterTest`, `GpsDutyTest`, `RouteCodecTest`,
   `PaceTest`, the tracker's with a meter; Robolectric for the two databases, the migration and
-  the service's type change (granted, refused, restarted); the editor's and the card's UI
-  tests with every state above, `assertAccessible()`, `walkPage()`; the allowlist's.
+  the service's type change (granted, refused, restarted, the app opened mid-outing); the
+  editor's and the card's UI tests with every state above, `assertAccessible()`, `walkPage()`;
+  the allowlist's (unlisted, forbidden, listed and missing, named after the application id);
+  the backup's round trip with the samples, and an older file without them.
 - [ ] Strings in English and Italian; CHANGELOG; the guide's outings chapter (a short «With
   GPS» part: when it is on, what is kept, what is never sent).
 - [ ] **On a device (owner), the proof first:** start an outing with GPS from the editor, from
   Today and from the launcher's shortcut; the screen off for ten minutes; pause and Resume
   from the notification. The log says the type was added each time and fixes kept coming with
-  the screen off. If the second type is refused on a running service, the fallback of ADR 0016
-  decision 4 is built before anything else in Phase 16.
+  the screen off. The app opened and closed during the outing: the type is still there. The
+  permission given as «Only this time»: whether the outing keeps its fixes to its end with the
+  app out of sight, and what the next outing finds. "Walk now" from the evening reminder, the
+  plan with GPS on, the app not open: the type added from the notification's touch. The
+  process ended mid-outing (the developer options, or `adb shell am kill`): the stop told,
+  and GPS back when the app is opened. An outing with GPS and no signal on the owner's phone
+  (no wake-up counter): a stop of five minutes, and fixes again from the first steps after
+  it. If the second type is refused on a running
+  service, the fallback of ADR 0016 decision 4 is built before anything else in Phase 16.
+  **This box comes before the rest is built** (ADR 0016 decision 4: "Phase 15 proves which one
+  it is before building on it"): the gate, the manifest, the plan's `gps`, `LocationSource`,
+  the function that changes the type, the log's row, the switch and the request are built
+  first, as a thin slice, and its debug APK goes to the owner; the fusion, the storage and the
+  screens follow the answer.
 - [ ] **On a device (owner), the measure:** a 30-minute and a 2-hour outing with GPS, screen
   off, phone in a pocket: the battery an hour (`dumpsys batterystats`, the system's page), the
   measured share, the receiver asleep at a stop and awake at the first step; a known distance
   (a track, a measured path) against the fused one. Numbers in `docs/battery/`, then the
-  editor's cost line and §9's rule 9 say the figure.
+  editor's cost line and §9's rule 9 say the figure. The record says which phone it was and
+  whether it held the wake lock of §9.7 (the owner's has no wake-up counter, so with signals
+  on it does, and batching saves nothing there): the figure is that phone's, not every
+  phone's, and the cost line is worded so that it stays true on both kinds.
 
 **Acceptance:** with the switch off, no screen, number, permission or wake differs from
 1.1.0's; with it on, an outing on a known distance reads within 2% of it under an open sky,
@@ -865,10 +987,28 @@ fails on any permission outside the list.
 | A tunnel of 300 m | Covered by the steps, never shorter than the straight line across; drawn later as laid from the steps |
 | A sensor with no FIFO handing 170 steps at once | The meter lays them over their time in motion, as the tracker does |
 | Paused | The receiver off, the type back to `health`; Resume from the notification brings both back |
-| The permission revoked mid-outing | The outing goes on from the steps and says so; no crash, the type dropped |
+| The permission revoked mid-outing | Android ends the process: it is the restarted process below, with the permission gone. The outing goes on from the steps and says so; the way back opens the app, where it can be asked, never a button that would be refused |
+| The permission given «Only this time» | The outing starts with GPS; the next one asks again, by the system's dialog alone |
+| The app opened, or a button of the notification touched, mid-outing | `onStartCommand` passes `health\|location` again: the type and the fixes stay |
+| The `location` type refused where the rule does not allow it | Back to `health`, logged; the service and the count go on, the outing from the steps |
+| A fix whose satellite time is 5 s from the phone's | Laid by its elapsed time, on the steps' clock: in its place among them |
+| The steps of the last 30 s in hand, their fixes not yet | An open stretch: shown from the steps, no goal or place told on it; told once the fixes are in, or the stretch is a gap |
+| The goal 20 m away on the steps' estimate, the fixes say 45 m | Not ended: the goal is told on the settled distance |
+| An outing with GPS ended under 30 steps | Not kept: its route deleted first, then the outing |
+| A crash between deleting a route and its outing | An outing without a route; the next start of the service finds no route without an outing |
+| A restore from the cloud copy, with outings measured by GPS | Their numbers as they were, no route: `routes.db` was never in that copy |
+| «Keep going» on a phone that keeps the processor awake (§9.7) | The lock taken again, bounded ten minutes past the new cap |
 | Approximate only granted | No GPS, said once, with the way to precise |
 | Location turned off on the phone, mid-outing | As the tunnel, until it is back; the card says it |
-| The process restarted by the system | The outing continues from the steps; «Resume GPS» on the notification |
+| The process restarted by the system | The outing continues from the steps; told once (notification, voice); «Resume GPS» on the notification and the card |
+| The app brought forward after that restart | The receiver is back with no touch; the stretch between is the steps', never shorter than the straight line |
+| "Walk now", the plan with GPS on, the precise permission granted | Starts with GPS: a touch on a notification |
+| "Walk now", the plan with GPS on, no permission | Starts on the steps; the card says so once; nothing is asked from a notification |
+| A phone with no wake-up counter, an outing with GPS and no signal | The processor kept awake while it counts (§9.7, amended): the receiver asleep at a stop, awake at the first step |
+| The goal reached with GPS, the reader walks on, «Keep going» 10 minutes later | The receiver never stopped: the route has no hole |
+| The goal reached with GPS, the card put away | The receiver off at once, the `location` type dropped, the points kept aside dropped |
+| The goal reached with GPS, the reader sits down | The receiver asleep after 2 minutes, off at 15 |
+| Ended by stillness, noticed by a step, «Resume» | The receiver awake from that step; the stillness adds nothing, the route goes on from where it stopped |
 | An interval outing with GPS | The changes still ride on the steps (ADR 0013); the fixes change nothing of their timing |
 | 3 h 45 min into an outing, walking | Asked once, by vibration and notification; nothing stops |
 | «Keep going» before the cap | The cap is four hours later; asked again 15 minutes before that one |
@@ -877,7 +1017,7 @@ fails on any permission outside the list.
 | Not taken back | The receiver stops 15 minutes after the cap; the points kept aside are dropped |
 | 3 h 45 min into an outing, sitting since 3 h 35 | Not asked: no step brings the question, and the stillness ends it at 3 h 50 as always |
 | The process restarted after «Keep going» | The moved cap is read from what was stored |
-| A city walk from home with GPS on | Its places are told by the fused distance; nothing else differs (on the spot is Phase 18) |
+| A city walk from home | Never with GPS (ADR 0016 decision 13, made plain): its outing has `gps` false, and no switch offers it; on the spot is Phase 18 |
 | A mock fix in a release build | Refused |
 
 ### Phase 16 — The outing's page: the route, the splits, the climb
@@ -939,9 +1079,11 @@ app's own provider); `DataSection.kt`, `DataViewModel.kt`, `BackupRepository.kt`
   the Storage Access Framework; «Share» as a GPX or as an image (the map, the sentence and
   three numbers, in the card's dress, as Your year on foot shares a page), through the one
   file provider the app already has: move `YearImage`'s plumbing where both features reach it,
-  never a second provider. «Trim the ends» / «Taglia partenza e arrivo» leaves the first and
-  the last 200 m out of what is shared, on by default for a share, remembered; a file saved to
-  the reader's own storage is whole.
+  never a second provider. What is shared is the route as it was walked, whole (ADR 0016
+  decision 9, amended 18 Nov 2026: no «Trim the ends»; no switch, no remembered setting). The
+  image is a line on Passo's own ground and names no street; the GPX holds every point, and
+  its choice says so in one line under it («The file says where you walked, from the first
+  step to the last»), once, where the reader chooses, never as a dialog.
 - [ ] **Your data** (`:feature:settings`, `DataSection`). How many routes are kept and their
   size; the export's «With the routes» (off by default; the JSON then carries each route with
   its outing, as an added field); «Delete all routes», after a dialog that says the outings and
@@ -961,8 +1103,8 @@ app's own provider); `DataSection.kt`, `DataViewModel.kt`, `BackupRepository.kt`
 
 **Acceptance:** an outing with GPS opens a page that shows where it went, how each kilometre
 went and how much it climbed, each number saying what it is; its GPX opens in another app on
-the streets actually walked; a share with the ends trimmed does not show the door it started
-from; routes leave the phone only by the reader's hand or in a phone-to-phone transfer.
+the streets actually walked; the choice of a GPX says what the file holds; routes leave the
+phone only by the reader's hand or in a phone-to-phone transfer.
 
 **Edge cases** (`ClimbTest`, `SplitsTest`, `GpxCodecTest`, the page's tests):
 
@@ -971,7 +1113,6 @@ from; routes leave the phone only by the reader's hand or in a phone-to-phone tr
 | A flat walk under a passing weather front | No climb invented: the blend follows the satellites over the long term |
 | A phone with no barometer | Satellites alone, the higher threshold, the same sentence, said as an estimate |
 | An outing shorter than 1 km | One partial split; no "fastest" mark |
-| A route shorter than 400 m shared with the ends trimmed | The trim is refused with a line saying why; nothing shared by mistake |
 | A route with no accepted fix at all | The page of an outing without a map, with a line saying the satellites never answered |
 | A route half inside a carried city | The plain ground: under four fifths, a city's map would end mid-route |
 | An outing whose route was deleted | Its numbers stay; the page has no map and no empty box |
@@ -1883,6 +2024,144 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
     running `health` service takes the `location` type by a second `startForeground()` from a
     page and from the notification's Resume. The documentation says a type is added that way
     and does not say how the second call is checked; ADR 0016 decision 4 has the fallback.
+
+- **18 Nov 2026.** **Phase 15 read against the code before it is built** (owner: "check whether
+  the phase has gaps, or whether you have suggestions, and list them apart, before the plan";
+  then: "OK for the gaps, write them in the phase"). Nothing built. Written into §11 Phase 15,
+  each where it belongs, none changing a decision of ADR 0016:
+  - **`onStartCommand` would have taken the `location` type away.** It calls
+    `startForeground()` with `health` alone at every opening of the app (`MainActivity.onResume`
+    starts the service each time) and at every command; and its catch stops the service on a
+    refused type. The one function that knows the types answers there too, and a refused
+    `location` falls back to `health`: the count never stops for it.
+  - **The cap was said to be stored, and was in no list.** `Session.capAtMillis` and
+    `capAskedForMillis`, in the model and in schema v7; the wake lock's own bound follows the
+    cap and is taken again at «Keep going» (§9.7's "4 h 10 min" is reworded in Phase 15's
+    change); an end that can be taken back is the tracker's knowledge, not `SessionEnd.CLOSED`.
+  - **One clock.** A fix is laid by its elapsed time, as a step sample is, never by the
+    satellites' clock.
+  - **Steps ahead of their fixes.** An open stretch is shown from the steps, and the goal, the
+    milestones and the places are told on the settled distance only. The step batch asks for
+    the fixes in its own wake (`requestFlush`), and the receiver's own delay is 60 s, not 30:
+    one rhythm of wakes for the two streams.
+  - **The permission.** «Only this time» is a grant, to be proven on the phone under a service
+    that never stops; a revoked permission ends the process, so that row is the restarted
+    process with the permission gone. The check, Passo's screen and the request are behind one
+    door in `:app`: the outings start from three modules.
+  - **Two databases share no transaction.** The route is deleted first, the outing after; the
+    service deletes a route without an outing when it starts; a restore from the cloud copy
+    has measured outings with no route.
+  - **The samples travel with the reader's own file** (`step_length_sample`, an added field of
+    the outing): neither Phase 15 nor 17 carried them.
+  - **The allowlist is exact both ways**, as the ADR says; a permission named after the
+    application id is resolved per variant; the task keeps its name.
+  - **The proof on the phone comes first**, on a thin slice, before the fusion, the storage and
+    the screens are built on the answer.
+  - Smaller: the presets are four, not three; only the points kept get their altitude
+    converted; the battery's record says which phone and whether it held the wake lock.
+  - **Waiting for the owner, since each changes a decision or a rule** (asked the same day, to
+    be judged on what is best, the ADRs and CLAUDE.md to follow): what wakes the receiver on a
+    phone with no wake-up counter in an outing without signals; how GPS comes back after a
+    restarted process; the city walk from home with GPS on; the receiver while an ended outing
+    can still be taken back; "Walk now" on a plan with GPS on.
+
+- **18 Nov 2026.** **The five answered, and the platform read again** (owner, on the five left
+  waiting: "re-evaluate them without regard to the ADRs or CLAUDE.md: tell me what is best and
+  premium, with respect for the battery too, and we change the ADRs and CLAUDE.md to follow";
+  then, on the answers: "I confirm all five, write the amendments and go on"). Written as
+  amendments in `docs/adr/0016-location.md`, each under its decision with its reason, and in
+  §11 Phase 15; CLAUDE.md, §9.7 and ADR 0013 change in the change that builds Phase 15, as
+  every rule in force does, and until then stand as written.
+  1. **A phone with no wake-up step counter: an outing with GPS holds §9.7's wake lock**, with
+     signals or without (ADR 0016 decision 5). The first proposal, the receiver slowed to a fix
+     every half minute during a stop, had been made only to leave §9.7 as it was, and is the
+     worse on both counts: more battery than a processor awake with the receiver off, and the
+     first step found up to half a minute late. The lock is already built, measured and let go
+     after 15 minutes still. It widens an exception CLAUDE.md says never to widen: the owner's
+     decision, and the invariant's words change with Phase 15.
+  2. **GPS comes back by itself, and its stop is told** (decision 4): told once by a
+     notification and the voice, «Resume GPS» on the notification and the card, and with no
+     touch when the app is brought forward.
+  3. **A city walk from home never reads the satellites** (decision 13, made plain): two ways
+     to walk one, each with one meaning. The edge case that had it «with GPS on» contradicted
+     the same phase's own sentence, "the ways from home still use no location". Not a matter
+     of privacy: an outing of the reader's own, started at their door, is measured from its
+     first step.
+  4. **The receiver stays while an ended outing can be taken back**, after the goal and the
+     stillness as after the cap (decisions 10 and 14): at most 15 minutes, asleep 2 minutes
+     after the reader stops, off when the card is put away. The alternative, off at the goal
+     and the stretch laid from the steps, costs nothing and can take the word «measured» from
+     an outing taken back.
+  5. **"Walk now" keeps the plan's word** (decision 4): with GPS when the plan has it on and
+     the permission is there, on the steps and said once otherwise.
+  - **No «Trim the ends»** (owner, the same day: hiding where a walk starts and ends "seems a
+    little extreme; if you agree, we avoid it, and the app is cleaner and clearer"). Agreed:
+    Passo has no feed, a share is one act towards someone the reader chose, the image is a
+    line on a ground with no streets, and the GPX's choice says what the file holds. §11 Phase
+    16 loses the switch, its remembered setting and its edge case; ADR 0016 decision 9.
+  - **The platform, read again** (Phase 15's first box, ticked): Android 17's change lists
+    say nothing on location, the `location` service type or the while-in-use rule. The
+    "Location Button" is real and is not in those lists but on the permissions page: an
+    experimental Jetpack library (`androidx.core.locationbutton`, 1.0.0-alpha01, 17 Jun 2026)
+    with its own permission, for momentary access; Google Play asks for it of apps that
+    target API 37 and have only session-based needs. Passo measures a walk for its whole
+    length with the screen off: the classic request stays, no dependency is added, and Phase
+    9 reads the policy itself before a listing. The one-time grant gives the same permissions
+    as «While using the app»; how long it lasts under a service that never stops is written
+    nowhere, and is in the proof on the phone.
+
+- **18 Nov 2026.** **Phase 15, the slice for the proof on the phone** (owner: "write the
+  amendments and go on"). On the branch `feature/phase-15-measured-outing`; built so that the
+  first device box can be answered before the fusion, the storage of routes and the screens are
+  built on it (§11 Phase 15, «This box comes before the rest is built»).
+  - **The gate is an allowlist** (box ticked). `AllowedPermissions` in `build-logic`: the ten
+    names a green build's report held, plus the three of location; exact both ways; the one
+    named after the application id resolved per variant; `permissionVerdict` pure, with nine
+    tests, which `./gradlew test` now runs too (the root's `test` reaches the included build).
+    Proven as in Phase 0: `CAMERA` and `ACCESS_BACKGROUND_LOCATION` added to `:core:tracking`'s
+    manifest turned the build red, the first as not on the list and the second as forbidden,
+    each by name; then removed.
+  - **The manifest** (box ticked): the three permissions, `health|location`, the `gps` feature
+    not required, and its opening comment rewritten.
+  - **Schema v7, whole.** Every column of the phase is in it now (`gps` on a plan and an
+    outing, `stepsMeters`, `measuredShare`, `capAtMillis`, `capAskedForMillis`,
+    `step_length_sample`), not only the plan's `gps` the slice needs: a debug build installed
+    for the proof must not meet a second, different v7 at the next build. An outing gets its
+    cap when it starts; what reads it is the tracker's question, not built yet.
+  - **The receiver and the type.** `LocationSource` (the platform's `LocationManager`,
+    `GPS_PROVIDER`, 1 s, batched 60 s with the screen off, flushed by each step batch and at
+    the screen coming on); `GpsDuty` (pure: awake while the reader walks, asleep after 2
+    minutes, off at a pause and the end, and steered as while it counted for as long as an end
+    can be taken back); one function, `enterForeground`, that every `startForeground()` goes
+    through, `onStartCommand`'s included, so a look at the app no longer takes the type away,
+    and a refused `location` falls back to `health` without stopping the count. The type is
+    asked for only from an outing's own start, resume and «Keep going», and from the activity's
+    own start of the service (`StepTracking.start(fromApp = true)`); never from a restart by
+    the system or a broadcast. `SignalWake` holds the lock for an outing with GPS on a phone
+    with no wake-up counter, while the service holds the type.
+  - **The log's row** (`DiagnosticsType.GPS`, `GpsLog`): fixes, the good ones, the ones that
+    came with the screen off, batches and the largest, the longest gap inside one stretch, the
+    first fix's delay, sleeps, the type added and refused and what refused it. Counts and
+    delays only. Until the meter is built the fixes are counted and let go: no route is kept
+    by this build, and an outing with GPS still shows the steps' distance.
+  - **The switch and the door.** The editor's «Measure with GPS» with what it gives and what
+    it costs, absent with no receiver, the estimate's note and the wake lock's note true with
+    it on; `OutingStarter`, the one door the Outings page and the launcher's shortcut start
+    through; `GpsStart` (pure) decides: Passo's own screen and then the system's request the
+    first time, the request alone after a grant the system took back, nothing after a refusal;
+    `GpsIntroScreen`, its page, and the answer remembered beside the settings.
+  - **Not in this slice**, and so not for the proof: the stop told by a notification and
+    «Resume GPS» as a button (the receiver does come back when the app is opened), the card's
+    lines for each state of the receiver, the cap's question, `RouteMeter` and the routes'
+    database, the backup's added fields, the documents of the «Amends» list. CLAUDE.md, §9,
+    §10, VISION and the README still say what was true before this branch: they change before
+    it is merged, in this same change.
+  - **Checked.** `spotlessCheck`, `:app:checkForbiddenPermissions` (13 permissions, both variants), `test` in every module and in `build-logic`, `:app:lintDebug`, `:app:assembleDebug`: green, but for the six tests of the next line. The new pages' screenshots looked at (the intro in the light, the dark, Italian, twice the text size and on the open foldable; the editor with the switch). **Not checked: anything on a phone.** No fix has been received by this code yet: that is the proof's first answer.
+  - **A machine's limit, not a fault:** on the owner's Windows the six tests that walk a
+    migration (`MigrationTestHelper`) fail before reaching Room, on a comparison of paths
+    («This driver is configured to open a database named…»), on an untouched checkout as
+    here. Schema 7 was generated and `UpgradeFromFirstReleaseTest` walks to it: CI, on Linux,
+    is where it runs.
 
 ### Open
 
