@@ -8,7 +8,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.callbackdev.passo.core.data.TestDataStore
 import com.callbackdev.passo.core.data.db.PassoDatabase
+import com.callbackdev.passo.core.data.db.RouteDatabase
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
+import com.callbackdev.passo.core.data.routes.RouteRepository
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.tracking.LedgerBatch
@@ -52,6 +54,8 @@ class SessionRepositoryTest {
     private lateinit var store: TestDataStore
     private lateinit var preferences: UserPreferencesDataSource
     private lateinit var repository: SessionRepository
+    private lateinit var routeDatabase: RouteDatabase
+    private lateinit var routes: RouteRepository
 
     private val day = 20_720L
 
@@ -62,12 +66,18 @@ class SessionRepositoryTest {
             .build()
         store = TestDataStore(folder.root)
         preferences = UserPreferencesDataSource(store.dataStore)
-        repository = SessionRepository(database.sessionDao(), preferences)
+        routeDatabase = Room.inMemoryDatabaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            RouteDatabase::class.java,
+        ).allowMainThreadQueries().build()
+        routes = RouteRepository(routeDatabase.routeDao())
+        repository = SessionRepository(database.sessionDao(), preferences, routes)
     }
 
     @After
     fun tearDown() {
         database.close()
+        routeDatabase.close()
         store.scope.cancel()
     }
 

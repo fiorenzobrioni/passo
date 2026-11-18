@@ -1,13 +1,16 @@
 package com.callbackdev.passo.core.data.sessions
 
 import com.callbackdev.passo.core.data.db.SessionDao
+import com.callbackdev.passo.core.data.db.StepLengthSampleEntity
 import com.callbackdev.passo.core.data.db.toEntity
 import com.callbackdev.passo.core.data.db.toModel
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
+import com.callbackdev.passo.core.data.routes.RouteRepository
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionPlan
+import com.callbackdev.passo.core.model.StepLengthSample
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
@@ -27,6 +30,7 @@ class SessionRepository
 constructor(
     private val dao: SessionDao,
     private val preferences: UserPreferencesDataSource,
+    private val routes: RouteRepository,
 ) {
     private val seedLock = Mutex()
 
@@ -91,8 +95,41 @@ constructor(
     /** Writes an outing's state outside a step batch: a pause, a resume, its end. */
     suspend fun save(session: Session) = dao.upsertSession(session)
 
-    /** Forgets an outing too short to keep. */
-    suspend fun delete(id: Long) = dao.deleteSession(id)
+    /**
+     * Forgets an outing (one too short to keep), **its route first**: the two are in databases
+     * that share no transaction, and a crash between them must leave an outing without its
+     * route, a state the app already draws, never places with no outing
+     * (docs/adr/0016-location.md, decision 8).
+     */
+    suspend fun delete(id: Long) {
+        routes.delete(id)
+        dao.deleteSession(id)
+    }
+
+    /** What an outing with GPS said of the reader's step on its clean stretches: numbers, no place. */
+    suspend fun addStepLengthSamples(sessionId: Long, samples: List<StepLengthSample>) {
+        if (samples.isEmpty()) return
+        dao.insertStepLengthSamples(
+            samples.map {
+                StepLengthSampleEntity(
+                    sessionId = sessionId,
+                    cadence = it.cadence,
+                    steps = it.steps,
+                    meters = it.meters,
+                )
+            },
+        )
+    }
+
+    suspend fun stepLengthSamples(sessionId: Long): List<StepLengthSample> =
+        dao.stepLengthSamples(sessionId).map { StepLengthSample(it.cadence, it.steps, it.meters) }
+
+    /**
+     * Deletes every route whose outing is no longer here: at the service's start, one read of
+     * each database and no wake of its own. Returns how many went.
+     */
+    suspend fun deleteOrphanRoutes(): Int =
+        routes.deleteOrphans(dao.sessionStarts().associate { it.id to it.startedAtMillis })
 
     /** The last outing whose summary the reader put away on Today. */
     val summarySeen: Flow<Long?> = preferences.sessionSummarySeen

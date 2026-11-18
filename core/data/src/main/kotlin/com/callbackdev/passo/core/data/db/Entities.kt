@@ -140,6 +140,9 @@ data class StepLengthSampleEntity(
     val meters: Double,
 )
 
+/** An outing's id with its start, the pair a route is matched to its outing by. */
+data class SessionStart(val id: Long, val startedAtMillis: Long)
+
 /**
  * One interval of an interval outing as it was walked (Phase 13): `intervalIndex` from 0, slow
  * when even. Written with the outing, in the same transaction; deleted with it.

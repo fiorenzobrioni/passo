@@ -135,6 +135,21 @@ abstract class SessionDao {
     @Query("DELETE FROM step_length_sample WHERE sessionId = :id")
     protected abstract suspend fun deleteStepLengthSamples(id: Long)
 
+    /** What an outing's clean stretches said of the step: added as it goes (Phase 15, for 17). */
+    @Insert
+    abstract suspend fun insertStepLengthSamples(samples: List<StepLengthSampleEntity>)
+
+    @Query("SELECT * FROM step_length_sample WHERE sessionId = :sessionId ORDER BY id")
+    abstract suspend fun stepLengthSamples(sessionId: Long): List<StepLengthSampleEntity>
+
+    /** Every sample, oldest first: for the learner, and for the reader's own export. */
+    @Query("SELECT * FROM step_length_sample ORDER BY id")
+    abstract suspend fun allStepLengthSamples(): List<StepLengthSampleEntity>
+
+    /** Each outing's id with its start: what the routes' database is checked against. */
+    @Query("SELECT id, startedAtMillis FROM session")
+    abstract suspend fun sessionStarts(): List<SessionStart>
+
     /** An outing with what belongs to it alone: its intervals, and what it said of the step. */
     @Transaction
     open suspend fun deleteSession(id: Long) {

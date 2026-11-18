@@ -9,6 +9,8 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.callbackdev.passo.core.data.db.PassoDatabase
+import com.callbackdev.passo.core.data.db.RouteDao
+import com.callbackdev.passo.core.data.db.RouteDatabase
 import com.callbackdev.passo.core.data.db.SessionDao
 import com.callbackdev.passo.core.data.db.TrackingDao
 import com.callbackdev.passo.core.data.db.WayDao
@@ -37,6 +39,19 @@ object DataModule {
 
     @Provides
     fun wayDao(database: PassoDatabase): WayDao = database.wayDao()
+
+    /**
+     * The routes' own database (docs/adr/0016-location.md, decision 8): a second file, so that
+     * Android's cloud backup can be told to carry the first and not this one. Opened the first
+     * time a route is written or read: a reader who never measures with GPS never has the file.
+     */
+    @Provides
+    @Singleton
+    fun routeDatabase(@ApplicationContext context: Context): RouteDatabase =
+        Room.databaseBuilder(context, RouteDatabase::class.java, RouteDatabase.NAME).build()
+
+    @Provides
+    fun routeDao(database: RouteDatabase): RouteDao = database.routeDao()
 
     /**
      * One instance per process, as DataStore requires. A corrupt file is replaced by an empty
