@@ -1,16 +1,8 @@
 package com.callbackdev.passo.core.domain.routes
 
+import com.callbackdev.passo.core.model.AltitudeSource
 import kotlin.math.exp
 import kotlin.math.pow
-
-/** Where the altitudes of a route came from, and so how far its climb can be trusted. */
-enum class AltitudeSource {
-    /** The pressure sensor for the short term, the satellites for the long: metres are metres. */
-    BAROMETER,
-
-    /** The satellites alone, on a phone with no pressure sensor: smoothed, and counted coarsely. */
-    SATELLITES,
-}
 
 /**
  * The altitude of a route's points (PLANNING.md §11 Phase 16, «The climb»), blended from the

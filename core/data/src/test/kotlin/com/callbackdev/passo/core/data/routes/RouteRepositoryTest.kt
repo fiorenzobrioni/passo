@@ -9,6 +9,7 @@ import com.callbackdev.passo.core.data.db.RouteDatabase
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
 import com.callbackdev.passo.core.data.sessions.SessionRepository
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
+import com.callbackdev.passo.core.model.AltitudeSource
 import com.callbackdev.passo.core.model.RouteBox
 import com.callbackdev.passo.core.model.RoutePoint
 import com.callbackdev.passo.core.model.RoutePointKind
@@ -16,6 +17,7 @@ import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.StepLengthSample
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
@@ -105,6 +107,42 @@ class RouteRepositoryTest {
         val box = checkNotNull(RouteBox.of(points(100)))
         assertThat(row.pointCount).isEqualTo(100)
         assertThat(RouteBox(row.southE6, row.westE6, row.northE6, row.eastE6)).isEqualTo(box)
+    }
+
+    @Test
+    fun `a route says where its heights came from`() = runTest {
+        val outing = outing()
+
+        routes.append(outing.id, outing.startedAtMillis, points(40))
+        assertThat(checkNotNull(routes.route(outing.id, outing.startedAtMillis)).altitudes).isNull()
+        routes.append(outing.id, outing.startedAtMillis, points(25, from = 40), AltitudeSource.BAROMETER)
+        assertThat(checkNotNull(routes.route(outing.id, outing.startedAtMillis)).altitudes)
+            .isEqualTo(AltitudeSource.BAROMETER)
+        // A chunk that says nothing leaves what was said.
+        routes.append(outing.id, outing.startedAtMillis, points(10, from = 65))
+        assertThat(checkNotNull(routes.route(outing.id, outing.startedAtMillis)).altitudes)
+            .isEqualTo(AltitudeSource.BAROMETER)
+    }
+
+    @Test
+    fun `the routes are counted and weighed, and all go at once, the outings staying`() = runTest {
+        val first = outing()
+        val second = outing(startedAtMillis = START_SECOND * 1_000 + 3_600_000)
+        routes.append(first.id, first.startedAtMillis, points(100))
+        routes.append(second.id, second.startedAtMillis, points(50))
+
+        assertThat(routes.count.first()).isEqualTo(2)
+        assertThat(routes.routeIds.first()).containsExactly(first.id, second.id)
+        // About six bytes a point.
+        assertThat(routes.bytes()).isIn(300L..1_500L)
+
+        routes.deleteAll()
+
+        assertThat(routes.count.first()).isEqualTo(0)
+        assertThat(routes.bytes()).isEqualTo(0)
+        assertThat(routes.route(first.id, first.startedAtMillis)).isNull()
+        assertThat(sessions.session(first.id)).isNotNull()
+        assertThat(sessions.session(second.id)).isNotNull()
     }
 
     @Test

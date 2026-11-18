@@ -26,6 +26,11 @@ import androidx.room.RoomDatabase
  *   for an outing from before, which reads as the longest outing from its start), and what its
  *   clean stretches said of the step (`step_length_sample`, a new table). Numbers only: the
  *   places are in another database (`routes.db`), which Android's cloud backup never carries.
+ * - v8: the outing's page (Phase 16): what an outing with GPS climbed and came down
+ *   (`ascentMeters`, `descentMeters`, none before it or without GPS), and the outing a hundred
+ *   metres at a time (`session_leg`, a new table), from which its kilometres or its miles are
+ *   cut. Numbers still. A version of its own although Phase 15's was not released: a debug
+ *   build installed to try Phase 15 on a phone must not meet a second, different v7.
  */
 @Database(
     entities = [
@@ -38,8 +43,9 @@ import androidx.room.RoomDatabase
         WayJourneyEntity::class,
         SessionIntervalEntity::class,
         StepLengthSampleEntity::class,
+        SessionLegEntity::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -48,6 +54,7 @@ import androidx.room.RoomDatabase
         AutoMigration(from = 4, to = 5),
         AutoMigration(from = 5, to = 6),
         AutoMigration(from = 6, to = 7),
+        AutoMigration(from = 7, to = 8),
     ],
 )
 abstract class PassoDatabase : RoomDatabase() {

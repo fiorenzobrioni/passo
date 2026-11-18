@@ -27,17 +27,22 @@ import kotlin.math.roundToLong
  */
 data class RouteStretch(val meters: Double, val measured: Boolean, val cadence: Int?)
 
-/** What a call to the meter settled: distance, the points worth keeping, and what was learnt of the step. */
+/**
+ * What a call to the meter settled: distance, the points worth keeping, what was learnt of the
+ * step, and the same distance batch by batch with the steps and the time in motion it took
+ * ([pieces]), from which an outing's legs are laid.
+ */
 data class RouteSettlement(
     val stretches: List<RouteStretch> = emptyList(),
     val points: List<RoutePoint> = emptyList(),
     val samples: List<StepLengthSample> = emptyList(),
+    val pieces: List<LegPiece> = emptyList(),
 ) {
     val meters: Double get() = stretches.sumOf { it.meters }
 
     val measuredMeters: Double get() = stretches.sumOf { if (it.measured) it.meters else 0.0 }
 
-    val isEmpty: Boolean get() = stretches.isEmpty() && points.isEmpty() && samples.isEmpty()
+    val isEmpty: Boolean get() = stretches.isEmpty() && points.isEmpty() && samples.isEmpty() && pieces.isEmpty()
 }
 
 /**
@@ -192,12 +197,17 @@ class RouteMeter(private val allowMock: Boolean = false) {
         while (open.isNotEmpty()) settle(open.removeFirst(), out)
         val end = anchor
         val seen = lastFix
+        val before = out.meters
         if (end == null || seen == null || carryCounted > 0 || settledThroughMillis - seen.atMillis > HOLE_MILLIS) {
             // No fix covered them: the steps'.
             out.add(carryMeters - carryCounted, measured = false, cadence = null)
         } else if (carrySteps > 0) {
             // The fixes covered them and the line's end did not move a grain: what it did move.
             out.add(minOf(Geodesy.meters(end, seen), carryMeters), measured = true, cadence = null)
+        }
+        // The last metres, whose steps and time their batches have already given.
+        if (out.meters > before) {
+            out.pieces += LegPiece(out.meters - before, 0.0, 0L, settledThroughMillis, settledThroughMillis)
         }
         endSample(out)
         fixes.clear()
@@ -327,6 +337,13 @@ class RouteMeter(private val allowMock: Boolean = false) {
 
         sample(batch, walked, walkedSteps, clean, out)
         remember(out.meters - metersBefore, batch.movingMillis)
+        out.pieces += LegPiece(
+            meters = out.meters - metersBefore,
+            steps = batch.steps.toDouble(),
+            movingMillis = batch.movingMillis,
+            fromMillis = motionFrom,
+            toMillis = batch.toMillis,
+        )
     }
 
     /** Whether [fix] comes after too long with no fix for the stretch to it to count as measured. */
@@ -423,6 +440,7 @@ class RouteMeter(private val allowMock: Boolean = false) {
         val stretches = ArrayList<RouteStretch>()
         val points = ArrayList<RoutePoint>()
         val samples = ArrayList<StepLengthSample>()
+        val pieces = ArrayList<LegPiece>()
         var meters = 0.0
         var unmeasured = 0.0
 
@@ -433,7 +451,7 @@ class RouteMeter(private val allowMock: Boolean = false) {
             if (!measured) unmeasured += meters
         }
 
-        fun settlement() = RouteSettlement(stretches, points, samples)
+        fun settlement() = RouteSettlement(stretches, points, samples, pieces)
     }
 
     private companion object {

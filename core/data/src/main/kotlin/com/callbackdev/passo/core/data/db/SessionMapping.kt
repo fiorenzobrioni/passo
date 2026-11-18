@@ -2,6 +2,7 @@ package com.callbackdev.passo.core.data.db
 
 import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.IntervalSplit
+import com.callbackdev.passo.core.model.OutingLeg
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
@@ -49,13 +50,16 @@ internal fun SessionPlan.toEntity() = SessionPlanEntity(
     gps = gps,
 )
 
-internal fun SessionRow.toModel(): Session? = session.toModel(intervals)
+internal fun SessionRow.toModel(): Session? = session.toModel(intervals, legs)
 
 /**
  * Null for a row a newer build wrote with a kind this one does not know, or an interval outing
  * without its sets: it is left out.
  */
-internal fun SessionEntity.toModel(intervals: List<SessionIntervalEntity> = emptyList()): Session? {
+internal fun SessionEntity.toModel(
+    intervals: List<SessionIntervalEntity> = emptyList(),
+    legs: List<SessionLegEntity> = emptyList(),
+): Session? {
     val kind = goalKind.toEnumOrNull<SessionGoalKind>() ?: return null
     val sets = IntervalSets(slowMinutes, fastMinutes, sets).takeIf { kind == SessionGoalKind.INTERVALS }
     if (sets != null && (sets.sets <= 0 || sets.slowMinutes <= 0 || sets.fastMinutes <= 0)) return null
@@ -104,6 +108,19 @@ internal fun SessionEntity.toModel(intervals: List<SessionIntervalEntity> = empt
         measuredShare = measuredShare,
         capAtMillis = capAtMillis,
         capAskedForMillis = capAskedForMillis,
+        ascentMeters = ascentMeters,
+        descentMeters = descentMeters,
+        legs = legs.sortedBy { it.legIndex }.map {
+            OutingLeg(
+                index = it.legIndex,
+                meters = it.meters,
+                movingMillis = it.movingMillis,
+                steps = it.steps,
+                endedAtMillis = it.endedAtMillis,
+                ascentMeters = it.ascentMeters,
+                descentMeters = it.descentMeters,
+            )
+        },
     )
 }
 
@@ -143,7 +160,36 @@ internal fun Session.toEntity() = SessionEntity(
     measuredShare = measuredShare,
     capAtMillis = capAtMillis,
     capAskedForMillis = capAskedForMillis,
+    ascentMeters = ascentMeters,
+    descentMeters = descentMeters,
 )
+
+/** An outing's legs as rows; none for an outing without GPS, or one not yet written. */
+internal fun Session.legEntities(): List<SessionLegEntity> = if (id == 0L) {
+    emptyList()
+} else {
+    legs.map {
+        SessionLegEntity(
+            sessionId = id,
+            legIndex = it.index,
+            meters = it.meters,
+            movingMillis = it.movingMillis,
+            steps = it.steps,
+            endedAtMillis = it.endedAtMillis,
+            ascentMeters = it.ascentMeters,
+            descentMeters = it.descentMeters,
+        )
+    }
+}
+
+/**
+ * The legs a batch of steps can have changed: the one under way and the few before it, a climb
+ * being counted a moment after the metres it belongs to. The ones before them were written
+ * when they were the last, and an outing's end writes them all.
+ */
+internal fun Session.recentLegEntities(): List<SessionLegEntity> = legEntities().takeLast(RECENT_LEGS)
+
+private const val RECENT_LEGS = 5
 
 /** An outing's intervals as rows; none for any other outing, or one not yet written. */
 internal fun Session.intervalEntities(): List<SessionIntervalEntity> = if (id == 0L) {

@@ -1,5 +1,6 @@
 package com.callbackdev.passo.core.domain.routes
 
+import com.callbackdev.passo.core.model.AltitudeSource
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import kotlin.math.pow

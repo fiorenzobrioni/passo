@@ -1,5 +1,7 @@
 package com.callbackdev.passo.core.data.db
 
+import androidx.room.AutoMigration
+import androidx.room.ColumnInfo
 import androidx.room.Dao
 import androidx.room.Database
 import androidx.room.Entity
@@ -10,6 +12,7 @@ import androidx.room.RoomDatabase
 import androidx.room.Transaction
 import androidx.room.Upsert
 import com.callbackdev.passo.core.model.RouteBox
+import kotlinx.coroutines.flow.Flow
 
 /**
  * An outing's route, as a whole: which outing, how many points, and the box they lie in. The
@@ -19,6 +22,9 @@ import com.callbackdev.passo.core.model.RouteBox
  * @property sessionStartedAtMillis the outing's start: the one thing of an outing that is the
  *   same on every phone, and what tells a route apart from a stranger's with the same id (a
  *   `passo.db` restored from elsewhere beside a `routes.db` that stayed).
+ * @property altitudeSource where its points' heights came from (`AltitudeSource`, by name):
+ *   the pressure sensor and the satellites together, or the satellites alone; null when no
+ *   point has a height, and for a route from before the heights were kept.
  */
 @Entity(tableName = "route")
 data class RouteEntity(
@@ -29,6 +35,7 @@ data class RouteEntity(
     val westE6: Int,
     val northE6: Int,
     val eastE6: Int,
+    @ColumnInfo(defaultValue = "NULL") val altitudeSource: String? = null,
 )
 
 /**
@@ -70,6 +77,7 @@ abstract class RouteDao {
         bytes: ByteArray,
         count: Int,
         box: RouteBox,
+        altitudeSource: String? = null,
     ) {
         val existing = route(sessionId)?.takeIf { it.sessionStartedAtMillis == sessionStartedAtMillis }
         // A row left by another outing that once had this id: its points are not this one's.
@@ -84,8 +92,38 @@ abstract class RouteDao {
                 westE6 = minOf(existing?.westE6 ?: box.westE6, box.westE6),
                 northE6 = maxOf(existing?.northE6 ?: box.northE6, box.northE6),
                 eastE6 = maxOf(existing?.eastE6 ?: box.eastE6, box.eastE6),
+                // The latest chunk's word: a pressure sensor that came in late is still one.
+                altitudeSource = altitudeSource ?: existing?.altitudeSource,
             ),
         )
+    }
+
+    /** How many routes are kept, and how many bytes their points take: for Your data. */
+    @Query("SELECT COUNT(*) FROM route")
+    abstract suspend fun routeCount(): Int
+
+    @Query("SELECT COALESCE(SUM(LENGTH(bytes)), 0) FROM route_chunk")
+    abstract suspend fun routeBytes(): Long
+
+    /** The same, as they change: a route written or deleted. */
+    @Query("SELECT COUNT(*) FROM route")
+    abstract fun observeRouteCount(): Flow<Int>
+
+    /** The outings that have a route, as they change: an outing's page asks for its own. */
+    @Query("SELECT sessionId FROM route")
+    abstract fun observeRouteIds(): Flow<List<Long>>
+
+    @Query("DELETE FROM route")
+    protected abstract suspend fun deleteAllRoutes()
+
+    @Query("DELETE FROM route_chunk")
+    protected abstract suspend fun deleteAllChunks()
+
+    /** Every route and its points, gone together; the outings are in another database, untouched. */
+    @Transaction
+    open suspend fun deleteAll() {
+        deleteAllChunks()
+        deleteAllRoutes()
     }
 
     @Query("DELETE FROM route WHERE sessionId = :sessionId")
@@ -116,8 +154,15 @@ abstract class RouteDao {
  * without its route, never places with no outing.
  *
  * - v1: `route` and `route_chunk` (Phase 15).
+ * - v2: where a route's heights came from (`altitudeSource`, Phase 16): none for a route from
+ *   before.
  */
-@Database(entities = [RouteEntity::class, RouteChunkEntity::class], version = 1, exportSchema = true)
+@Database(
+    entities = [RouteEntity::class, RouteChunkEntity::class],
+    version = 2,
+    exportSchema = true,
+    autoMigrations = [AutoMigration(from = 1, to = 2)],
+)
 abstract class RouteDatabase : RoomDatabase() {
     abstract fun routeDao(): RouteDao
 

@@ -111,6 +111,7 @@ abstract class TrackingDao {
         diagnosticsKept: Int,
         session: SessionEntity? = null,
         intervals: List<SessionIntervalEntity> = emptyList(),
+        legs: List<SessionLegEntity> = emptyList(),
     ) {
         val changes = linkedMapOf<Long, MutableList<MinuteChange>>()
         for (increment in increments) {
@@ -139,6 +140,7 @@ abstract class TrackingDao {
         }
         if (session != null) upsertSession(session)
         if (intervals.isNotEmpty()) upsertIntervals(intervals)
+        if (legs.isNotEmpty()) upsertLegs(legs)
     }
 
     /**
@@ -236,6 +238,9 @@ abstract class TrackingDao {
 
     @Upsert
     protected abstract suspend fun upsertIntervals(intervals: List<SessionIntervalEntity>)
+
+    @Upsert
+    protected abstract suspend fun upsertLegs(legs: List<SessionLegEntity>)
 
     @Upsert
     protected abstract suspend fun upsertTrackerState(state: TrackerStateEntity)

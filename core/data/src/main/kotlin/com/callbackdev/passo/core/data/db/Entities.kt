@@ -122,6 +122,8 @@ data class SessionEntity(
     @ColumnInfo(defaultValue = "NULL") val measuredShare: Double? = null,
     @ColumnInfo(defaultValue = "NULL") val capAtMillis: Long? = null,
     @ColumnInfo(defaultValue = "NULL") val capAskedForMillis: Long? = null,
+    @ColumnInfo(defaultValue = "NULL") val ascentMeters: Double? = null,
+    @ColumnInfo(defaultValue = "NULL") val descentMeters: Double? = null,
 )
 
 /**
@@ -157,11 +159,30 @@ data class SessionIntervalEntity(
     val zoneMillis: Long,
 )
 
-/** An outing with its intervals, read in one go. */
+/**
+ * A hundred metres of an outing measured with GPS as it was walked (Phase 16): `legIndex` from
+ * 0, the last one under way or left short. What the outing's kilometres or miles are cut from.
+ * Numbers, never places: written with the outing, deleted with it, kept when its route goes.
+ */
+@Entity(tableName = "session_leg", primaryKeys = ["sessionId", "legIndex"])
+data class SessionLegEntity(
+    val sessionId: Long,
+    val legIndex: Int,
+    val meters: Double,
+    val movingMillis: Long,
+    val steps: Double,
+    val endedAtMillis: Long,
+    val ascentMeters: Double,
+    val descentMeters: Double,
+)
+
+/** An outing with its intervals and its legs, read in one go. */
 data class SessionRow(
     @Embedded val session: SessionEntity,
     @Relation(parentColumn = "id", entityColumn = "sessionId")
     val intervals: List<SessionIntervalEntity>,
+    @Relation(parentColumn = "id", entityColumn = "sessionId")
+    val legs: List<SessionLegEntity>,
 )
 
 /**

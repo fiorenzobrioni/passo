@@ -66,14 +66,28 @@ data class RouteBox(val southE6: Int, val westE6: Int, val northE6: Int, val eas
     }
 }
 
+/** Where the altitudes of a route came from, and so how far its climb can be trusted. */
+enum class AltitudeSource {
+    /** The pressure sensor for the short term, the satellites for the long: metres are metres. */
+    BAROMETER,
+
+    /** The satellites alone, on a phone with no pressure sensor: smoothed, and counted coarsely. */
+    SATELLITES,
+}
+
 /**
  * An outing's route: where it went, kept apart from the days (in a database of its own, which
  * Android's cloud backup never carries).
  *
  * @property sessionStartedAtMillis the outing it belongs to, by its start: the one thing of an
  *   outing that is the same on every phone a backup reaches.
+ * @property altitudes where its points' heights came from; null when none has one.
  */
-data class Route(val sessionStartedAtMillis: Long, val points: List<RoutePoint>) {
+data class Route(
+    val sessionStartedAtMillis: Long,
+    val points: List<RoutePoint>,
+    val altitudes: AltitudeSource? = null,
+) {
     val box: RouteBox? get() = RouteBox.of(points)
 }
 

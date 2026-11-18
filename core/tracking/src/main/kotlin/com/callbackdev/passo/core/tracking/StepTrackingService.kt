@@ -39,10 +39,13 @@ import com.callbackdev.passo.core.domain.routes.GpsDuty
 import com.callbackdev.passo.core.domain.routes.GpsLines
 import com.callbackdev.passo.core.domain.routes.GpsReadiness
 import com.callbackdev.passo.core.domain.routes.LiveMeasure
+import com.callbackdev.passo.core.domain.routes.PressureTrack
 import com.callbackdev.passo.core.domain.routes.ReceiverState
+import com.callbackdev.passo.core.domain.routes.RouteHeights
 import com.callbackdev.passo.core.domain.routes.RouteMeter
 import com.callbackdev.passo.core.domain.routes.pace
 import com.callbackdev.passo.core.domain.sessions.IntervalSchedule
+import com.callbackdev.passo.core.domain.sessions.RouteHarvest
 import com.callbackdev.passo.core.domain.sessions.SessionAnnouncement
 import com.callbackdev.passo.core.domain.sessions.SessionConstants
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
@@ -140,6 +143,11 @@ import javax.inject.Inject
  * launcher's shortcut, a touch on a notification); a refusal, and a process the system restarted,
  * leave the outing counting from the steps. Nothing of this runs for any other outing, nor with
  * none: the service starts and stays `health`.
+ *
+ * While that receiver is on, and only then, the pressure sensor is read too ([PressureSource],
+ * Phase 16): each point the route keeps is given its height from the pressure and the
+ * satellites together (`RouteHeights`), and what the outing climbed is counted on them. It asks
+ * for no permission, never wakes the processor by itself, and is removed with the receiver.
  */
 @AndroidEntryPoint
 class StepTrackingService : Service() {
@@ -174,6 +182,13 @@ class StepTrackingService : Service() {
     private lateinit var powerManager: PowerManager
     private lateinit var signalWake: SignalWakeLock
     private lateinit var locationSource: LocationSource
+    private lateinit var pressureSource: PressureSource
+
+    // The pressure of the last while, on the steps' clock, and the heights of the route of the
+    // outing under way, counted as its points are written (null for any other outing).
+    private val pressure = PressureTrack()
+    private var heights: OutingHeights? = null
+    private var pendingPressureFlush: CompletableDeferred<Unit>? = null
 
     // The types this service is in the foreground with: `health`, and `location` while an
     // outing with GPS counts. A restarted process comes back without the second.
@@ -281,6 +296,10 @@ class StepTrackingService : Service() {
                 if (!added) stopReceiver(asleep = false)
             },
         )
+        pressureSource = PressureSource(
+            sensorManager = requireNotNull(getSystemService(SensorManager::class.java)) { "No SensorManager" },
+            handler = Handler(Looper.getMainLooper()),
+        )
         // The fixes arrive on the main thread, where everything here runs: no locking.
         locationSource = LocationSource(
             manager = requireNotNull(getSystemService(LocationManager::class.java)) { "No LocationManager" },
@@ -348,6 +367,7 @@ class StepTrackingService : Service() {
         unregisterReceivers()
         sensorSource.close()
         locationSource.close()
+        pressureSource.close()
         // Whatever is still buffered is written on a scope that outlives this one. If the
         // process dies first, the stored state is older than the counter and the next sample
         // recomputes the delta: nothing is lost, only the minutes may shift.
@@ -421,6 +441,7 @@ class StepTrackingService : Service() {
             link.attach { withContext(Dispatchers.Main.immediate) { flushSensor() } }
             launch { sensorSource.readings.collect(::onReading) }
             launch { locationSource.readings.collect(::onLocationReading) }
+            launch { pressureSource.readings.collect(::onPressureReading) }
             launch { preferencesSource.data.distinctUntilChanged().collect(::onPreferences) }
             launch { for (command in commands) onSessionCommand(command) }
             persist()
@@ -516,16 +537,68 @@ class StepTrackingService : Service() {
     private suspend fun writeRoute() {
         val current = tracker ?: return
         val harvest = current.takeRoute()
-        if (harvest.isEmpty) return
-        val session = current.session
+        if (harvest.isEmpty &&
+            heights?.takeIf { it.sessionId == current.session.id }?.heights?.hasWaiting != true
+        ) {
+            return
+        }
         try {
-            routes.append(session.id, session.startedAtMillis, RouteAltitudes.aboveMeanSeaLevel(this, harvest.points))
-            sessions.addStepLengthSamples(session.id, harvest.samples)
+            writeHarvest(current, harvest, ending = false)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
             Log.e(TAG, "Writing the route failed", e)
         }
+    }
+
+    /**
+     * Writes [harvest], the points and the samples [outing] has to keep: the points' altitude
+     * turned to mean sea level, then blended with the pressure (`RouteHeights`); what they
+     * climbed told to the outing, which prices it and lays it on its legs; the points appended
+     * to the route. Points whose pressure is still on its way wait for the next call, unless
+     * the outing is [ending]. Under [persistMutex].
+     */
+    private suspend fun writeHarvest(outing: SessionTracker, harvest: RouteHarvest, ending: Boolean) {
+        val session = outing.session
+        val measured = heightsOf(session)
+        val leveled = RouteAltitudes.aboveMeanSeaLevel(this, harvest.points)
+        val taken = measured.take(leveled, pressure, System.currentTimeMillis(), all = ending)
+        if (taken.climbed.isNotEmpty()) {
+            taken.climbed.forEach { outing.addClimb(it.atMillis, it.upMeters, it.downMeters) }
+            sessionDirty = true
+        }
+        routes.append(session.id, session.startedAtMillis, taken.points, measured.source)
+        sessions.addStepLengthSamples(session.id, harvest.samples)
+    }
+
+    /** The heights of [session]'s route, begun with its first points and kept until it is over for good. */
+    private fun heightsOf(session: Session): RouteHeights {
+        heights?.takeIf { it.sessionId == session.id }?.let { return it.heights }
+        return RouteHeights(barometer = pressureSource.available).also { heights = OutingHeights(session.id, it) }
+    }
+
+    private fun onPressureReading(reading: PressureReading) {
+        when (reading) {
+            is PressureReading.Sample -> {
+                val snapshot = snapshots.current()
+                val atMillis = snapshot.wallClockMillis -
+                    (snapshot.elapsedRealtimeNanos - reading.elapsedNanos) / NANOS_PER_MILLI
+                pressure.add(atMillis, reading.hpa)
+            }
+
+            PressureReading.FlushCompleted -> {
+                pendingPressureFlush?.complete(Unit)
+                pendingPressureFlush = null
+            }
+        }
+    }
+
+    /** The pressure's readings up to now, before an outing's last points are given their height. */
+    private suspend fun flushPressure() {
+        if (!pressureSource.requestFlush()) return
+        val done = pendingPressureFlush ?: CompletableDeferred<Unit>().also { pendingPressureFlush = it }
+        withTimeoutOrNull(FLUSH_TIMEOUT_MS) { done.await() }
+        pendingPressureFlush = null
     }
 
     private suspend fun refreshStoredTodayLocked() {
@@ -891,6 +964,8 @@ class StepTrackingService : Service() {
         }
         val wasActive = locationSource.active
         val granted = locationSource.start(batched = !interactive)
+        // With the receiver, and only with it: the pressure the route's heights are read from.
+        if (granted) pressureSource.start(batched = !interactive) else pressureSource.stop()
         if (!wasActive) {
             gpsLog.onAsked(SystemClock.elapsedRealtime(), granted)
             receiverAwakeSinceMillis = now.takeIf { granted }
@@ -899,6 +974,7 @@ class StepTrackingService : Service() {
 
     private fun stopReceiver(asleep: Boolean) {
         receiverAwakeSinceMillis = null
+        pressureSource.stop()
         if (!locationSource.active) return
         locationSource.stop()
         gpsLog.onStopped(asleep)
@@ -987,6 +1063,8 @@ class StepTrackingService : Service() {
     private fun settleSoon() {
         if (tracker?.measuring != true) return
         val now = System.currentTimeMillis()
+        // In the wake the step batch made: the pressure's readings too, for the points' heights.
+        pressureSource.requestFlush()
         if (!locationSource.requestFlush()) {
             settleRoute(now)
             return
@@ -1251,8 +1329,11 @@ class StepTrackingService : Service() {
         pendingChange = null
         logIntervalSummary(session)
         if (session.gps) logGpsSummary(session)
-        // What the route has to keep up to its end, taken while the tracker is still in hand.
-        val harvest = tracker?.takeRoute()
+        // What the route has to keep up to its end, taken while the tracker is still in hand:
+        // the tracker itself too, which takes the climb of those last points after the service
+        // has let it go.
+        val ending = tracker
+        val harvest = ending?.takeRoute()
         sessionNotifications.cancelGpsStopped()
         // Kept a while after its goal or a long stillness, for "Keep going" and "Resume";
         // otherwise it is over here. The voice is let go once its last sentence is said.
@@ -1269,10 +1350,13 @@ class StepTrackingService : Service() {
                 try {
                     if (finished.kept) {
                         sessions.save(session)
-                        if (harvest != null && !harvest.isEmpty) {
-                            val points = RouteAltitudes.aboveMeanSeaLevel(this@StepTrackingService, harvest.points)
-                            routes.append(session.id, session.startedAtMillis, points)
-                            sessions.addStepLengthSamples(session.id, harvest.samples)
+                        if (ending != null && harvest != null && session.gps) {
+                            // The last points' heights, with the readings up to the end; what
+                            // they climbed is the outing's, written with it.
+                            flushPressure()
+                            writeHarvest(ending, harvest, ending = true)
+                            sessions.save(ending.session)
+                            sessionDirty = false
                         }
                     } else {
                         // Too short to keep: its route goes first, then the outing.
@@ -1590,6 +1674,8 @@ class StepTrackingService : Service() {
     private data class StoredDay(val day: Long, val steps: Int)
 
     private class OnSteps(val sessionId: Long, val reason: GpsReadiness)
+
+    private class OutingHeights(val sessionId: Long, val heights: RouteHeights)
 
     private class StoredMinutes(val day: Long, val version: Long, val minutes: List<MinuteSteps>)
 

@@ -100,6 +100,98 @@ class SessionTrackerRouteTest {
     }
 
     @Test
+    fun `it is laid a hundred metres at a time, and the legs add up to its distance, steps and time`() {
+        val walker = walker(started(plan(SessionGoalKind.TIME, 60)))
+
+        walker.go(600)
+
+        val session = walker.tracker.session
+        // 840 m: eight legs of a hundred and the one under way.
+        assertThat(session.legs.size).isAtLeast(8)
+        assertThat(session.legs.dropLast(1).map { it.meters }.distinct().single()).isWithin(1e-6).of(100.0)
+        assertThat(session.legs.sumOf { it.meters }).isWithin(1e-6).of(session.totals.distanceMeters)
+        assertThat(session.legs.sumOf { it.steps }).isWithin(1e-6).of(session.totals.steps.toDouble())
+        assertThat(session.legs.sumOf { it.movingMillis }.toDouble())
+            .isWithin(1_000.0).of(session.totals.movingMillis.toDouble())
+        // Each leg ends later than the one before, on the steps' clock.
+        assertThat(session.legs.map { it.endedAtMillis }).isInOrder()
+    }
+
+    @Test
+    fun `a pause and a stop lose no metre of the legs`() {
+        val walker = walker(started(plan(SessionGoalKind.TIME, 60)))
+
+        walker.go(125)
+        walker.tracker.pause(walker.at)
+        walker.tracker.resume(walker.at)
+        walker.go(125)
+        val finished = checkNotNull(walker.tracker.stop(walker.at)).session
+
+        assertThat(finished.legs.sumOf { it.meters }).isWithin(1e-6).of(finished.totals.distanceMeters)
+    }
+
+    @Test
+    fun `an outing without GPS has no legs`() {
+        val walker = walker(started(plan(SessionGoalKind.TIME, 60), withGps = false))
+
+        walker.go(600)
+
+        assertThat(walker.tracker.session.legs).isEmpty()
+    }
+
+    @Test
+    fun `what was walked after the goal is laid on the legs only if the outing is taken back`() {
+        val walker = walker(started(plan(SessionGoalKind.DISTANCE, 500)))
+        walker.go(600)
+        val ended = walker.tracker.session
+        assertThat(ended.state).isEqualTo(SessionState.FINISHED)
+        val legsAtGoal = ended.legs.sumOf { it.meters }
+        assertThat(legsAtGoal).isWithin(1e-6).of(ended.totals.distanceMeters)
+
+        checkNotNull(walker.tracker.keepGoing(walker.at))
+
+        val reopened = walker.tracker.session
+        assertThat(reopened.legs.sumOf { it.meters }).isGreaterThan(legsAtGoal + 50)
+        assertThat(reopened.legs.sumOf { it.meters }).isWithin(1e-6).of(reopened.totals.distanceMeters)
+    }
+
+    @Test
+    fun `a climb is the outing's, the leg's it was walked in, and its energy's`() {
+        val walker = walker(started(plan(SessionGoalKind.TIME, 60)))
+        walker.go(600)
+        val before = walker.tracker.session
+        assertThat(before.ascentMeters).isNull()
+
+        // The first altitude known: a height, and nothing climbed yet.
+        walker.tracker.addClimb(start + 10_000, 0.0, 0.0)
+        assertThat(walker.tracker.session.ascentMeters).isEqualTo(0.0)
+        // Twelve metres up in the third minute, four down in the eighth.
+        walker.tracker.addClimb(start + 150_000, 12.0, 0.0)
+        walker.tracker.addClimb(start + 450_000, 0.0, 4.0)
+
+        val session = walker.tracker.session
+        assertThat(session.ascentMeters).isEqualTo(12.0)
+        assertThat(session.descentMeters).isEqualTo(4.0)
+        assertThat(session.legs.sumOf { it.ascentMeters }).isEqualTo(12.0)
+        assertThat(session.legs.first { it.ascentMeters > 0 }.endedAtMillis).isAtLeast(start + 150_000)
+        // 0.009 kcal a kilogram a metre climbed; nothing for coming down.
+        assertThat(session.totals.activeKcal - before.totals.activeKcal).isWithin(1e-9).of(12.0 * 70.0 * 0.009)
+        // The distance, the steps and the time are untouched.
+        assertThat(session.totals.copy(activeKcal = 0.0)).isEqualTo(before.totals.copy(activeKcal = 0.0))
+    }
+
+    @Test
+    fun `an outing without GPS takes no climb - its energy is the steps' alone`() {
+        val walker = walker(started(plan(SessionGoalKind.TIME, 60), withGps = false))
+        walker.go(300)
+        val before = walker.tracker.session
+
+        walker.tracker.addClimb(start + 100_000, 20.0, 0.0)
+
+        assertThat(walker.tracker.session).isEqualTo(before)
+    }
+
+    @Test
     fun `its distance is the measured one, and what the steps alone said is kept beside it`() {
         val walker = walker(started(plan(SessionGoalKind.TIME, 60)))
 

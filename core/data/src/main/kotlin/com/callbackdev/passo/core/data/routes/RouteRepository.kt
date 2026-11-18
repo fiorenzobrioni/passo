@@ -2,9 +2,12 @@ package com.callbackdev.passo.core.data.routes
 
 import com.callbackdev.passo.core.data.db.RouteDao
 import com.callbackdev.passo.core.domain.routes.RouteCodec
+import com.callbackdev.passo.core.model.AltitudeSource
 import com.callbackdev.passo.core.model.Route
 import com.callbackdev.passo.core.model.RouteBox
 import com.callbackdev.passo.core.model.RoutePoint
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -20,10 +23,18 @@ import javax.inject.Singleton
 class RouteRepository
 @Inject
 constructor(private val dao: RouteDao) {
-    /** Adds [points] to the route of the outing [sessionId], which started at [sessionStartedAtMillis]. */
-    suspend fun append(sessionId: Long, sessionStartedAtMillis: Long, points: List<RoutePoint>) {
+    /**
+     * Adds [points] to the route of the outing [sessionId], which started at
+     * [sessionStartedAtMillis]; [altitudes] says where their heights came from, if they have any.
+     */
+    suspend fun append(
+        sessionId: Long,
+        sessionStartedAtMillis: Long,
+        points: List<RoutePoint>,
+        altitudes: AltitudeSource? = null,
+    ) {
         val box = RouteBox.of(points) ?: return
-        dao.append(sessionId, sessionStartedAtMillis, RouteCodec.encode(points), points.size, box)
+        dao.append(sessionId, sessionStartedAtMillis, RouteCodec.encode(points), points.size, box, altitudes?.name)
     }
 
     /**
@@ -34,8 +45,21 @@ constructor(private val dao: RouteDao) {
     suspend fun route(sessionId: Long, sessionStartedAtMillis: Long): Route? {
         val row = dao.route(sessionId)?.takeIf { it.sessionStartedAtMillis == sessionStartedAtMillis } ?: return null
         val points = dao.chunks(row.sessionId).flatMap(RouteCodec::decode)
-        return Route(sessionStartedAtMillis, points).takeIf { points.isNotEmpty() }
+        val altitudes = AltitudeSource.entries.firstOrNull { it.name == row.altitudeSource }
+        return Route(sessionStartedAtMillis, points, altitudes).takeIf { points.isNotEmpty() }
     }
+
+    /** The outings that have a route, as they change: a route written, or deleted by the reader. */
+    val routeIds: Flow<Set<Long>> = dao.observeRouteIds().map { it.toSet() }
+
+    /** How many routes are kept, as it changes. */
+    val count: Flow<Int> = dao.observeRouteCount()
+
+    /** The bytes the routes' points take: what Your data says they weigh. */
+    suspend fun bytes(): Long = dao.routeBytes()
+
+    /** Forgets every route; the outings and their numbers are untouched. */
+    suspend fun deleteAll() = dao.deleteAll()
 
     /** Forgets the route of the outing [sessionId]; the outing and its numbers are untouched. */
     suspend fun delete(sessionId: Long) = dao.delete(sessionId)

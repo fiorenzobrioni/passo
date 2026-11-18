@@ -4,6 +4,8 @@ import com.callbackdev.passo.core.domain.metrics.MetricsCalculator
 import com.callbackdev.passo.core.domain.metrics.MetricsConstants
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.routes.Fix
+import com.callbackdev.passo.core.domain.routes.LegPiece
+import com.callbackdev.passo.core.domain.routes.Legs
 import com.callbackdev.passo.core.domain.routes.RouteConstants.PACE_NOW_MILLIS
 import com.callbackdev.passo.core.domain.routes.RouteFilter
 import com.callbackdev.passo.core.domain.routes.RouteMeter
@@ -144,6 +146,7 @@ class SessionTracker(
     private var overtimeStepsMeters = 0.0
     private val asidePoints = ArrayList<RoutePoint>()
     private val asideSamples = ArrayList<StepLengthSample>()
+    private val asidePieces = ArrayList<LegPiece>()
 
     // The last interval whose start was told: the one under way when the tracker was made (its
     // start was told then, or by the process before this one), then each change as it is told.
@@ -229,6 +232,28 @@ class SessionTracker(
     fun settle(fixesThroughMillis: Long, atMillis: Long): List<SessionSignal> {
         val meter = route ?: return emptyList()
         return take(meter.settle(fixesThroughMillis), atMillis)
+    }
+
+    /**
+     * What an outing with GPS climbed and came down since it was last told, counted on the
+     * altitudes of the points it keeps ([upMeters], [downMeters]; both zero says only that its
+     * height is now known). The climb goes to the leg that was being walked at [atMillis], and
+     * what it cost to the outing's energy: the slope's term, over and above the flat's
+     * (PLANNING.md §11 Phase 16, «Energy on a slope»). Nothing for an outing without GPS: its
+     * energy, like the day's, is the steps' alone.
+     */
+    fun addClimb(atMillis: Long, upMeters: Double, downMeters: Double) {
+        if (route == null) return
+        val up = upMeters.coerceAtLeast(0.0)
+        val down = downMeters.coerceAtLeast(0.0)
+        val current = session
+        val cost = up * weightKg * MetricsCalculator.kcalPerKgPerMeterClimbed(measuredCadence ?: 0)
+        session = current.copy(
+            ascentMeters = (current.ascentMeters ?: 0.0) + up,
+            descentMeters = (current.descentMeters ?: 0.0) + down,
+            legs = Legs.climb(current.legs, atMillis, up, down),
+            totals = current.totals.copy(activeKcal = current.totals.activeKcal + cost),
+        )
     }
 
     /** What is to be kept of the route since the last call: for the service to write. */
@@ -360,6 +385,7 @@ class SessionTracker(
             lastStepAtMillis = maxOf(lastEvent, nowMillis),
             capAtMillis = cap,
             stepsMeters = current.stepsMeters?.let { it + overtimeStepsMeters },
+            legs = asidePieces.fold(current.legs, Legs::lay),
         )
         val since = overtime
         // What was kept aside is the outing's again: the route taken back has no hole.
@@ -574,7 +600,8 @@ class SessionTracker(
                 measuredMeters += settled.measuredMeters
                 keptPoints += settled.points
                 keptSamples += settled.samples
-                val signals = advance(session, totals(settled), atMillis, steps = false)
+                val laid = session.copy(legs = settled.pieces.fold(session.legs, Legs::lay))
+                val signals = advance(laid, totals(settled), atMillis, steps = false)
                 withMeasuredShare()
                 signals
             }
@@ -584,6 +611,7 @@ class SessionTracker(
                 overtimeMeasuredMeters += settled.measuredMeters
                 asidePoints += settled.points
                 asideSamples += settled.samples
+                asidePieces += settled.pieces
                 emptyList()
             }
 
@@ -597,7 +625,10 @@ class SessionTracker(
         measuredMeters += settled.measuredMeters
         keptPoints += settled.points
         keptSamples += settled.samples
-        session = session.copy(totals = session.totals + totals(settled))
+        session = session.copy(
+            totals = session.totals + totals(settled),
+            legs = settled.pieces.fold(session.legs, Legs::lay),
+        )
         withMeasuredShare()
     }
 
@@ -616,6 +647,7 @@ class SessionTracker(
         overtimeStepsMeters = 0.0
         asidePoints.clear()
         asideSamples.clear()
+        asidePieces.clear()
     }
 
     /** Ends it at [atMillis]; [reopenableFrom] is when "Keep going" starts to count, if it may. */

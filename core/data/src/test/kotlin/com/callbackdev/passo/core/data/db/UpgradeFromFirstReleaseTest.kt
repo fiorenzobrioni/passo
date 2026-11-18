@@ -76,6 +76,10 @@ class UpgradeFromFirstReleaseTest {
             assertThat(single("SELECT gps, stepsMeters, measuredShare, capAtMillis, capAskedForMillis FROM session"))
                 .isEqualTo("0|null|null|null|null")
             assertThat(single("SELECT COUNT(*) FROM step_length_sample")).isEqualTo("0")
+            // Schema 8 (the outing's page): an outing from before it climbed nothing that is
+            // known, and has no legs.
+            assertThat(single("SELECT ascentMeters, descentMeters FROM session")).isEqualTo("null|null")
+            assertThat(single("SELECT COUNT(*) FROM session_leg")).isEqualTo("0")
         }
     }
 
@@ -86,6 +90,6 @@ class UpgradeFromFirstReleaseTest {
         const val FIRST_RELEASE_SCHEMA = 3
 
         /** [PassoDatabase]'s version now. */
-        const val CURRENT_SCHEMA = 7
+        const val CURRENT_SCHEMA = 8
     }
 }

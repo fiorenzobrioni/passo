@@ -5,6 +5,7 @@ import com.callbackdev.passo.core.data.db.MinuteStepsEntity
 import com.callbackdev.passo.core.data.db.TrackerStateEntity
 import com.callbackdev.passo.core.data.db.TrackingDao
 import com.callbackdev.passo.core.data.db.intervalEntities
+import com.callbackdev.passo.core.data.db.recentLegEntities
 import com.callbackdev.passo.core.data.db.toEntity
 import com.callbackdev.passo.core.data.db.toModel
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
@@ -122,6 +123,7 @@ constructor(
             diagnosticsKept = TrackingConstants.DIAGNOSTICS_LOG_SIZE,
             session = session?.toEntity(),
             intervals = session?.intervalEntities().orEmpty(),
+            legs = session?.recentLegEntities().orEmpty(),
         )
     }
 
