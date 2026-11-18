@@ -141,8 +141,9 @@ constructor(private val dataStore: DataStore<Preferences>) {
      * What the reader last answered when Passo asked for the location permission
      * (docs/adr/0016-location.md, decision 2): a refusal is never asked again by itself, and a
      * grant the system took back («Only this time») is asked again without Passo's own screen,
-     * which is shown once. Not a setting: the reader changes it by answering, or in the system's
-     * own page, and it is not in the backup's file.
+     * which is shown once. Not a setting: the reader changes it by answering, in the system's
+     * own page, or by turning «Measure with GPS» on again after a refusal, which forgets it
+     * (`GpsStart.asksAgain`); and it is not in the backup's file.
      */
     suspend fun gpsAnswer(): GpsAnswer {
         val stored = dataStore.data
@@ -154,8 +155,9 @@ constructor(private val dataStore: DataStore<Preferences>) {
     suspend fun setGpsAnswer(answer: GpsAnswer) {
         dataStore.edit {
             it[Keys.GPS_ANSWER] = answer.name
-            // A grant closes the refusal: one that comes after it is new, and told once again.
-            if (answer == GpsAnswer.GRANTED) it.remove(Keys.GPS_ON_STEPS_TOLD)
+            // A grant closes the refusal, and so does the reader asking to be asked again: one
+            // that comes after either is new, and told once again.
+            if (answer != GpsAnswer.REFUSED) it.remove(Keys.GPS_ON_STEPS_TOLD)
         }
     }
 

@@ -96,6 +96,27 @@ to be proven on a device in Phase 15):
    phone is only while an outing that asked for it counts, and Android's own permission page and
    privacy dashboard show it, not Passo's word.
 
+   *Amended 18 Nov 2026 (owner: "do the best thing, one that adds value and keeps the app
+   premium"):* **the switch turned on again is the reader asking again.** A refusal is still
+   never asked again by Passo itself. But it had one way back, the line its first outing's
+   card said once: every outing after it counted from the steps without a word, under a
+   switch that stayed on. So:
+   - a plan saved with «Measure with GPS» turned on by the reader's own hand (a new plan, or
+     off and on in an old one) forgets the refusal, and the next start of an outing with GPS
+     asks as the first did: Passo's own screen, then the system's request. In context, at the
+     start; the editor itself never asks. A plan saved with the switch as it was (renamed, its
+     goal changed) asks nothing;
+   - the same holds for the approximate location granted alone, which is a refusal of what
+     was asked: it is asked again, for the precise one, only after that gesture or where
+     Passo has no answer to remember;
+   - under the switch the editor says what is true: what it gives and costs; that Passo asks
+     when the outing starts, wherever it will; and, after a refusal with the switch still on,
+     that the outing counts from the steps and that turning the switch off and on is the way
+     to be asked. The estimate's note and the note on what keeps the phone awake follow it.
+   Where Android no longer shows its request (after a second refusal there), Passo's screen is
+   shown and the outing starts from the steps; its card says so once more, and its «Allow
+   location» opens the system's page for Passo, as before.
+
 3. **Satellites only, through the platform.** `LocationManager` with `GPS_PROVIDER`: no Google
    Play services, no fused provider (on a phone with Google's services it may answer from Wi-Fi
    and cell lookups, which are requests to a network; a satellite fix is received, not asked

@@ -90,6 +90,22 @@ constructor(
         }
     }
 
+    /** What the reader last answered when asked for the permission: the editor's note reads it. */
+    suspend fun gpsAnswer(): GpsAnswer = preferences.gpsAnswer()
+
+    /**
+     * A plan was saved with «Measure with GPS» [isOn], which [wasOn] before the reader last
+     * touched it in the editor. Turned on again
+     * after a refusal, it is the reader asking to be asked: the refusal is forgotten, and the
+     * next start through this door asks as the first did (docs/adr/0016-location.md, decision
+     * 2, amended). Nothing is asked here: the editor never asks.
+     */
+    suspend fun planSaved(wasOn: Boolean, isOn: Boolean) {
+        if (GpsStart.asksAgain(wasOn, isOn, Gps.readiness(context), preferences.gpsAnswer())) {
+            preferences.setGpsAnswer(GpsAnswer.NEVER_ASKED)
+        }
+    }
+
     /** The app has put the question in front of the reader. */
     fun shown() {
         state.update { it?.copy(shown = true) }

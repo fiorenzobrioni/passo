@@ -141,6 +141,8 @@
     <string name="editor_gps">Measure with GPS</string>
     <string name="editor_gps_gives">A measured distance, your pace and the route you walked.</string>
     <string name="editor_gps_costs">More battery, only while you walk.</string>
+    <string name="editor_gps_asks">Passo asks for your location when the outing starts.</string>
+    <string name="editor_gps_not_allowed">Passo is not allowed to read your precise location, so this outing counts from your steps. Turn this off and on again, and Passo asks when the outing starts.</string>
     <!-- On a phone whose counter cannot wake it, an outing with GPS and no signal: why it is kept awake (ADR 0016, decision 5). -->
     <string name="editor_awake_note_gps" formatted="false">On this phone, Passo keeps it awake during the outing so the GPS rests when you stop and starts again at your next step. A little more battery: about 1 to 3% an hour.</string>
     <!-- Passo's own words before Android asks for the location: once, the first time an outing with GPS starts. -->

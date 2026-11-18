@@ -126,6 +126,8 @@
     <string name="editor_gps">Misura con il GPS</string>
     <string name="editor_gps_gives">La distanza misurata, la tua andatura e il percorso che hai fatto.</string>
     <string name="editor_gps_costs">Più batteria, solo mentre cammini.</string>
+    <string name="editor_gps_asks">Passo chiede la posizione quando l’uscita parte.</string>
+    <string name="editor_gps_not_allowed">Passo non ha il permesso di leggere la posizione precisa, quindi questa uscita conta dai tuoi passi. Spegni e riaccendi, e Passo lo chiede quando l’uscita parte.</string>
     <string name="editor_awake_note_gps" formatted="false">Su questo telefono Passo lo tiene sveglio durante l’uscita, così il GPS riposa quando ti fermi e riparte al tuo prossimo passo. Un po’ più di batteria: circa l’1–3% all’ora.</string>
     <string name="gps_intro_title">Misura questa uscita con il GPS</string>
     <string name="gps_intro_lead">Passo può leggere i satelliti per misurare la distanza che percorri, invece di stimarla dai tuoi passi.</string>

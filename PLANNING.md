@@ -1567,6 +1567,37 @@ This log starts with Phase 16 built (18 Nov 2026); its entries are written below
     box or a phase's section named an entry of that log, it now names archive 04. The index
     is run again.
 
+- **18 Nov 2026.** **The switch turned on again asks again** (owner, on the one behaviour of
+  the three that was put to them as worth changing: "what if you change it, so as to do the
+  best thing, one that adds value to the app and keeps it premium?"). It changes the third
+  point of the entry above, and ADR 0016 decision 2 is amended with it.
+  - **The rule** (`GpsStart.asksAgain`, pure): a plan saved with «Measure with GPS» turned on
+    by the reader's own hand, on a phone where the permission is what is missing and Passo
+    would not ask by itself, forgets the remembered refusal (and that it was told). The next
+    start of an outing with GPS then asks as the first did, through the one door
+    (`OutingStarter.planSaved`). The editor never asks; a plan saved with the switch as it
+    was asks nothing.
+  - **The gesture is kept, not inferred** (`PlanEditorState.gpsTurnedOn`). The first rule
+    compared the stored plan with the draft, and a test failed on it rightly: off and on in
+    one sitting, which is what the note tells the reader to do, left the two equal.
+  - **Approximate alone follows.** It is a refusal of what was asked, so it had the same
+    silence. `GpsStart.step` now asks for the precise one, as the first time, where Passo has
+    no answer to remember (after the gesture, or the approximate one given in the system's
+    page without Passo ever asking); never by itself after a refusal or a grant taken back
+    to approximate there.
+  - **The switch says what is true** (`GpsSwitchNote`): what it gives and costs; «Passo asks
+    for your location when the outing starts» wherever it will, the first time included; and
+    after a refusal, with the switch still on, that the outing counts from the steps and that
+    off and on is the way to be asked. In that state the estimate's note no longer says
+    «measured with GPS», and the note on the phone kept awake is not shown for a receiver that
+    will not run (`measuresWithGps`).
+  - **Not changed**: an outing that started from the steps stays on the steps, and one
+    started with location off too (the entry above). Where Android no longer shows its
+    request, the card's «Allow location» still opens the system's page.
+  - The guide (a sentence in «With GPS»), CHANGELOG. `GpsStartTest` (the gesture, each note,
+    approximate alone), `PlanEditorScreenTest` (each note, off and on, Italian on a small
+    phone), screenshots looked at.
+
 ### Open
 
 - [ ] **On a device (owner): the shortcuts after an update** (archive 04, 15 Nov 2026, «The shortcuts

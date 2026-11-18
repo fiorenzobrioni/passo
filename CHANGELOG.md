@@ -51,7 +51,9 @@ All notable changes to Passo are documented here. The format follows
   for one thing: an outing you start with «Measure with GPS» on, from its start to its pause
   or end. Never for the day's count, never in the background, never without an outing, by
   satellite only and without Google Play services. Android asks the first time you start such
-  an outing; leave the switch off and you are never asked. Passo still has no internet
+  an outing; leave the switch off and you are never asked. Say no, and Passo does not ask
+  again by itself: turn the switch off and on when you change your mind, and it asks at the
+  next start; until then the switch says the outing counts from your steps. Passo still has no internet
   permission: it sends nothing, and cannot. The routes stay on the phone and are never in
   Android's cloud backup. The permissions Passo may hold are now a fixed list, and the build
   fails on any other.
