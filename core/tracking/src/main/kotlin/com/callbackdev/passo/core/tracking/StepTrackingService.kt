@@ -190,6 +190,10 @@ class StepTrackingService : Service() {
     private var heights: OutingHeights? = null
     private var pendingPressureFlush: CompletableDeferred<Unit>? = null
 
+    // An outing with GPS has just ended, and its last points still wait for their pressure: the
+    // sensor is kept the moment it takes to hand over what it holds, then removed.
+    private var pressureHeldForEnd = false
+
     // The types this service is in the foreground with: `health`, and `location` while an
     // outing with GPS counts. A restarted process comes back without the second.
     private lateinit var foreground: ForegroundTypes
@@ -974,7 +978,7 @@ class StepTrackingService : Service() {
 
     private fun stopReceiver(asleep: Boolean) {
         receiverAwakeSinceMillis = null
-        pressureSource.stop()
+        if (!pressureHeldForEnd) pressureSource.stop()
         if (!locationSource.active) return
         locationSource.stop()
         gpsLog.onStopped(asleep)
@@ -1084,6 +1088,9 @@ class StepTrackingService : Service() {
      */
     private suspend fun flushRoute() {
         if (tracker?.measuring != true) return
+        // The pressure up to the touch too: the points about to be written take their height
+        // from it.
+        flushPressure()
         if (locationSource.requestFlush()) {
             val done = pendingRouteFlush ?: CompletableDeferred<Unit>().also { pendingRouteFlush = it }
             withTimeoutOrNull(FLUSH_TIMEOUT_MS) { done.await() }
@@ -1345,6 +1352,9 @@ class StepTrackingService : Service() {
         if (reopenable && session.end == SessionEnd.CLOSED) tellEndedAtCap(session)
         speech.release()
         sessionDirty = false
+        // The receiver goes with the end, just below; the pressure sensor a moment after it,
+        // once it has handed over the readings of the outing's last points.
+        pressureHeldForEnd = session.gps && pressureSource.active
         scope.launch {
             persistMutex.withLock {
                 try {
@@ -1368,6 +1378,11 @@ class StepTrackingService : Service() {
                     if (walk != null && session.end == SessionEnd.GOAL) ways.finishWalk(walk, today())
                 } catch (e: Exception) {
                     Log.e(TAG, "Writing the end of an outing failed", e)
+                }
+                if (pressureHeldForEnd) {
+                    pressureHeldForEnd = false
+                    // Unless the receiver is on again meanwhile (an end taken back at once).
+                    if (!locationSource.active) pressureSource.stop()
                 }
             }
         }

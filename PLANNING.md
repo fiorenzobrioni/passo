@@ -2471,6 +2471,22 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
     both themes, zoomed, with a bead named; Your data with its two rows and the dialog; the
     README's picture. **Nothing on a phone.**
 
+- **18 Nov 2026.** **Phase 16 read again: the last points' pressure, and the shared image's
+  test** (owner: "go on"; a second reading of the service and of the sharing, on
+  `feature/phase-16-outing-page`, pull request 73).
+  - **The pressure sensor outlives the receiver by the moment of a write.** At an outing's
+    end the receiver, and the pressure sensor with it, were removed before the end's own
+    write asked the sensor for what it held: with the screen off that is up to a minute of
+    readings, so the last points of a route took the satellites' height alone and a climb in
+    the last minute could go uncounted. The sensor is now kept until the end's harvest is
+    written, then removed, unless the receiver is on again (an end taken back at once). A
+    pause and a stop from the card ask the sensor first too, as they ask the receiver. No
+    new wake: each happens in the wake that ended or touched the outing, and the wait gives
+    up after the same bound as the receiver's.
+  - **The image to share has its test** (`OutingScreenTest`): the card recorded out of sight
+    is 360 dp wide whatever the page's, opaque, and adds no second map to the page; its
+    picture is written to `build/screenshots` and was looked at.
+
 ### Open
 
 - [ ] **On a device (owner): the shortcuts after an update** (§15, 15 Nov 2026, «The shortcuts

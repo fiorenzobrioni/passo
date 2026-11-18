@@ -2,12 +2,16 @@ package com.callbackdev.passo.feature.sessions
 
 import android.graphics.Bitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.test.assertContentDescriptionContains
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -28,6 +32,7 @@ import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.testing.assertAccessible
 import com.callbackdev.passo.core.testing.walkPage
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -137,6 +142,38 @@ class OutingScreenTest {
         assertThat(asked).containsExactly("image", "gpx", "save").inOrder()
         compose.onNodeWithTag(OutingTags.DELETE_CONFIRM).performClick()
         assertThat(asked).containsExactly("image", "gpx", "save", "delete").inOrder()
+    }
+
+    @Test
+    fun `the image to share is the route's own card, recorded out of sight`() = runTest {
+        lateinit var layer: GraphicsLayer
+        compose.setContent {
+            layer = rememberGraphicsLayer()
+            PassoTheme {
+                OutingScreen(state = OutingSamples.state(), onBack = {}, actions = OutingActions(), shareLayer = layer)
+            }
+        }
+        // A frame drawn, as the page's is before anyone can touch «Share image»: the test's own
+        // window draws only when asked for its picture.
+        compose.onRoot().captureToImage()
+
+        val image = layer.toImageBitmap()
+
+        // Laid out at its own width (360 dp at this density), whatever the page's, with the
+        // name, the sentence, the map and the numbers under one another.
+        assertThat(image.width).isEqualTo(1_080)
+        assertThat(image.height).isGreaterThan(image.width)
+        // Something was drawn on it: the card's own ground is not the transparent of an empty layer.
+        val pixels = image.asAndroidBitmap().copy(Bitmap.Config.ARGB_8888, false)
+        assertThat(pixels.getPixel(pixels.width / 2, 40) ushr 24).isEqualTo(0xFF)
+        runCatching {
+            val dir = File("build/screenshots").apply { mkdirs() }
+            File(dir, "outing_share_card.png").outputStream().use {
+                pixels.compress(Bitmap.CompressFormat.PNG, 100, it)
+            }
+        }
+        // And nothing of it is on the page: no second map, no second sentence for TalkBack.
+        compose.onAllNodesWithTag(RouteMapTags.MAP).assertCountEquals(1)
     }
 
     @Test
