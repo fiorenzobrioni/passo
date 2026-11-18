@@ -155,6 +155,17 @@ class BackupMergeTest {
     }
 
     @Test
+    fun `the same walk measured with GPS is another plan, and both are kept`() {
+        val mine = BackupFixtures.plan.copy(id = 31, position = 0, lastUsedAtMillis = null)
+        val measured = BackupFixtures.plan.copy(id = 6, gps = true)
+
+        val merge = BackupMerge.plans(local = listOf(mine), incoming = listOf(BackupFixtures.plan, measured))
+
+        assertThat(merge.matched).containsExactly(BackupFixtures.plan.id, 31L)
+        assertThat(merge.toAdd).containsExactly(measured)
+    }
+
+    @Test
     fun `plans already here are matched, new ones are added once`() {
         val mine = BackupFixtures.plan.copy(id = 31, position = 0, lastUsedAtMillis = null)
         val other = BackupFixtures.plan.copy(id = 5, name = "Hill", position = 1)

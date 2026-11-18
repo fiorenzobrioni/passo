@@ -21,6 +21,7 @@ import com.callbackdev.passo.core.model.SessionTotals
 import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.Sex
 import com.callbackdev.passo.core.model.StepLengthMode
+import com.callbackdev.passo.core.model.StepLengthSample
 import com.callbackdev.passo.core.model.ThemeMode
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.UserSettings
@@ -68,6 +69,13 @@ sealed interface BackupRead {
  * - `intervals` (added with the interval walk, Phase 13) on a plan or an outing gives its sets
  *   (`slowMinutes`, `fastMinutes`, `sets`); an outing's `splits` give each interval as walked.
  *   An interval plan or outing read by a build without them is left out (its kind is unknown).
+ * - `gps` (added with the measured outing, Phase 15) on a plan says it asks to be measured with
+ *   GPS, and on an outing that it was: its `distanceMeters` is then the distance fused from the
+ *   fixes and the steps, `stepsMeters` what the steps alone said, `measuredShare` the share
+ *   that came from fixes (0 to 1), and `stepLengthSamples` what its clean stretches said of the
+ *   step (`cadence`, `steps`, `meters`). Numbers only: where the outing went is not in this
+ *   file unless the reader asks for the routes. A build without them reads the outing as it
+ *   reads any other, with its distance.
  *
  * Reading is lenient where a value can be dropped without lying (an unknown setting, a minute
  * with a negative count) and strict where it cannot (the format, the version, broken JSON).
@@ -169,6 +177,7 @@ private fun Backup.toFile() = BackupFile(
             position = plan.position,
             lastUsedAtMillis = plan.lastUsedAtMillis,
             intervals = plan.intervals.takeIf { plan.goalKind == SessionGoalKind.INTERVALS }?.toDto(),
+            gps = plan.gps,
         )
     },
     outings = sessions.sortedBy { it.startedAtMillis }.map { session ->
@@ -201,6 +210,11 @@ private fun Backup.toFile() = BackupFile(
             walkFromMeters = session.walkFromMeters,
             intervals = session.intervals?.toDto(),
             splits = session.splits.map { SplitDto(it.index, it.fast, it.steps, it.movingMillis, it.zoneMillis) },
+            gps = session.gps,
+            stepsMeters = session.stepsMeters.takeIf { session.gps },
+            measuredShare = session.measuredShare.takeIf { session.gps },
+            stepLengthSamples = stepLengthSamples[session.startedAtMillis].orEmpty()
+                .map { StepLengthSampleDto(it.cadence, it.steps, it.meters) },
         )
     },
     diagnostics = diagnostics.map { DiagnosticDto(it.wallMillis, it.type.name, it.detail) },
@@ -257,6 +271,14 @@ private fun BackupFile.toBackup(): Backup {
             .sortedBy { it.summary.localEpochDay },
         plans = plans.mapNotNull { it.toPlan() },
         sessions = outings.mapNotNull { it.toSession() },
+        // Of the outings that came, with GPS: a sample with no steps or no metres says nothing.
+        stepLengthSamples = outings.filter { it.gps && it.toSession() != null }
+            .associate { outing ->
+                outing.startedAtMillis to outing.stepLengthSamples
+                    .filter { it.cadence > 0 && it.steps > 0 && it.meters > 0 && !it.meters.isNaN() }
+                    .map { StepLengthSample(it.cadence, it.steps, it.meters) }
+            }
+            .filterValues { it.isNotEmpty() },
         diagnostics = diagnostics.mapNotNull { row ->
             row.type.toEnumOrNull<DiagnosticsType>()?.let { DiagnosticsEvent(row.atMillis, it, row.detail) }
         },
@@ -321,6 +343,7 @@ private fun PlanDto.toPlan(): SessionPlan? {
         position = position,
         lastUsedAtMillis = lastUsedAtMillis,
         intervals = intervals?.toSets()?.let(SessionPlans::clampIntervals) ?: IntervalSets(),
+        gps = gps,
     )
 }
 
@@ -364,6 +387,10 @@ private fun OutingDto.toSession(): Session? {
         toldMilestones = toldMilestones.toMilestones(),
         walk = walk.toEnumOrNull<WayId>(),
         walkFromMeters = walkFromMeters.coerceAtLeast(0),
+        // What an outing measured with GPS says beside its distance; nothing for any other.
+        gps = gps,
+        stepsMeters = stepsMeters?.nonNegative().takeIf { gps },
+        measuredShare = measuredShare?.takeIf { gps && !it.isNaN() }?.coerceIn(0.0, 1.0),
         intervals = sets.takeIf { kind == SessionGoalKind.INTERVALS },
         splits = if (kind == SessionGoalKind.INTERVALS) {
             splits.filter { it.index in 0 until checkNotNull(sets).sets * 2 }

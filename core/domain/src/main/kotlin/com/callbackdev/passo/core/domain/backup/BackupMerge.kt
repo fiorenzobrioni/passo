@@ -234,6 +234,8 @@ object BackupMerge {
         milestones == other.milestones &&
         vibrate == other.vibrate &&
         voice == other.voice &&
+        // The same walk measured with GPS and without are two plans: the reader keeps both.
+        gps == other.gps &&
         (goalKind != SessionGoalKind.INTERVALS || intervals == other.intervals)
 }
 

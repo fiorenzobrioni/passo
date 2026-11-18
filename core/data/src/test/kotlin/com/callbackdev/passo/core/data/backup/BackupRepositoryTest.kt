@@ -5,8 +5,10 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.data.TestDataStore
 import com.callbackdev.passo.core.data.db.PassoDatabase
+import com.callbackdev.passo.core.data.db.StepLengthSampleEntity
 import com.callbackdev.passo.core.data.db.WayJourneyEntity
 import com.callbackdev.passo.core.data.db.toEntity
+import com.callbackdev.passo.core.data.db.toModel
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.domain.backup.BackupCodec
@@ -186,6 +188,35 @@ class BackupRepositoryTest {
         assertThat(report).isEqualTo(ImportReport(3, 0, 0, addedOutings = 1, addedPlans = 1, preferences = true))
         // Another phone's counter is never brought over (ADR 0007).
         assertThat(new.database.trackingDao().trackerState()).isNull()
+    }
+
+    @Test
+    fun `what an outing with GPS said of the step travels with the reader's own file`() = runTest {
+        history()
+        val outing = old.database.sessionDao().allSessions().single().session
+        old.database.sessionDao().upsertSession(
+            checkNotNull(outing.toModel()).copy(gps = true, stepsMeters = 2_900.0, measuredShare = 0.97),
+        )
+        old.database.sessionDao().insertStepLengthSamples(
+            listOf(
+                StepLengthSampleEntity(sessionId = outing.id, cadence = 110, steps = 330, meters = 252.0),
+                StepLengthSampleEntity(sessionId = outing.id, cadence = 128, steps = 256, meters = 216.5),
+            ),
+        )
+
+        new.backups.import(read(exported()), withPreferences = true)
+
+        val came = new.database.sessionDao().allSessions().single().session
+        assertThat(came.gps).isTrue()
+        assertThat(came.stepsMeters).isEqualTo(2_900.0)
+        assertThat(came.measuredShare).isEqualTo(0.97)
+        // Under the outing's id on this phone, which is not the other phone's.
+        assertThat(new.database.sessionDao().stepLengthSamples(came.id).map { Triple(it.cadence, it.steps, it.meters) })
+            .containsExactly(Triple(110, 330, 252.0), Triple(128, 256, 216.5)).inOrder()
+
+        // The same file again adds no outing, and so no sample twice.
+        new.backups.import(read(exported()), withPreferences = false)
+        assertThat(new.database.sessionDao().allStepLengthSamples()).hasSize(2)
     }
 
     @Test

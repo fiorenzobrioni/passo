@@ -820,7 +820,7 @@ It ends with numbers on the card and the notification; the route's own page is P
   - `StepLengthSample`: for each stretch measured from end to end for a minute or more at a
     steady cadence (within 8 steps a minute), its cadence, steps and metres. `RouteMeter` emits
     them; Phase 17 learns from them, so the first outings already teach.
-- [ ] **The storage** (`:core:data`). `passo.db` schema v7 by auto-migration: `session_plan.gps`,
+- [x] **The storage** (`:core:data`). `passo.db` schema v7 by auto-migration: `session_plan.gps`,
   `session.gps`, `session.stepsMeters`, `session.measuredShare`, `session.capAtMillis` and
   `session.capAskedForMillis` (an outing from before v7 reads its cap as four hours from its
   start), and a table
@@ -836,14 +836,14 @@ It ends with numbers on the card and the notification; the route's own page is P
   `routes.db` (the cloud copy: its numbers stay, said as they were). At each start of the
   service, a route whose outing is not in `passo.db` is deleted: one read, no wake of its own.
   `UpgradeFromFirstReleaseTest` walks to v7.
-- [ ] **The backup** (ADR 0016 decision 9). `data_extraction_rules.xml`: `routes.db` and its
+- [x] **The backup** (ADR 0016 decision 9). `data_extraction_rules.xml`: `routes.db` and its
   write-ahead log under `<device-transfer>` only, with the comment saying why. The JSON backup
   and the CSV gain the outing's new numbers as added fields (`gps`, `stepsMeters`,
   `measuredShare`; no new format version), the plan its `gps`; the routes themselves are
   Phase 16's. The JSON also carries each outing's `step_length_sample` rows, as an added field
   of the outing (numbers, no places): what Phase 17 learns from must not be lost by a reader
   who moves phone with their own file; an outing the import leaves out leaves its samples out.
-- [ ] **The receiver** (`:core:tracking`). `LocationSource`, beside `StepSensorSource`:
+- [x] **The receiver** (`:core:tracking`). `LocationSource`, beside `StepSensorSource`:
   `LocationManager`, `GPS_PROVIDER`, a `LocationRequest` at 1 s, high accuracy, with
   `setMaxUpdateDelayMillis` asked for (60 s with the screen off, none with it on), batches
   taken through `onLocationChanged(List<Location>)`, `requestFlush` when the screen comes on
@@ -2247,7 +2247,16 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
     share. From here an outing with GPS shows its measured distance and keeps its route.
     **Not yet:** the card's and the notification's lines for the receiver's states, the pace
     in words, the backup's fields, the documents.
-  - **Checked.** `spotlessCheck`, `:app:checkForbiddenPermissions`, `test` (the domain's 462
+  - **The backup's added fields, the same day** (box ticked). The JSON: a plan's `gps`; an
+    outing's `gps`, `stepsMeters`, `measuredShare` and its `stepLengthSamples`, added fields
+    with no new version, read back exactly, absent from an outing without GPS, and dropped
+    where they cannot be a measure (a share is kept between nothing and all, a sample with no
+    steps says nothing). No place is in the file. The import brings the samples of the outings
+    it adds, under this phone's ids, and none twice. The same walk with GPS and without are
+    two plans (`BackupMerge`). The CSV's outings gain three columns at the end (`gps`, the
+    steps' own distance in the reader's unit, the measured percent), empty for any other
+    outing, so an older sheet's columns stay where they were.
+  - **Checked.** `spotlessCheck`, `:app:checkForbiddenPermissions`, `test` (the domain's 469
     among them), `:app:lintDebug`, `:app:assembleDebug`: green, but for the six migration
     tests this machine cannot run. Nothing on a phone.
 

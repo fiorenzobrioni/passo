@@ -83,6 +83,7 @@ internal data class PlanDto(
     val position: Int = 0,
     val lastUsedAtMillis: Long? = null,
     val intervals: IntervalsDto? = null,
+    val gps: Boolean = false,
 )
 
 @Serializable
@@ -115,7 +116,18 @@ internal data class OutingDto(
     val walkFromMeters: Int = 0,
     val intervals: IntervalsDto? = null,
     val splits: List<SplitDto> = emptyList(),
+    val gps: Boolean = false,
+    val stepsMeters: Double? = null,
+    val measuredShare: Double? = null,
+    val stepLengthSamples: List<StepLengthSampleDto> = emptyList(),
 )
+
+/**
+ * What a clean stretch of an outing with GPS said of the step (Phase 15): an added field of the
+ * outing, no new version. A number, never a place.
+ */
+@Serializable
+internal data class StepLengthSampleDto(val cadence: Int = 0, val steps: Int = 0, val meters: Double = 0.0)
 
 /** An interval outing's sets (Phase 13): an added field, no new version. */
 @Serializable

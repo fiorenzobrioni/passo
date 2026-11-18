@@ -99,6 +99,9 @@ object CsvExport {
             "active_kcal",
             "intervals",
             "fast_at_pace",
+            "gps",
+            stepsDistanceHeader(units),
+            "measured_percent",
         ),
         rows = sessions.sortedBy { it.startedAtMillis }.map { session ->
             val (goalValue, goalUnit) = goal(session, units)
@@ -120,6 +123,12 @@ object CsvExport {
                 // and three fast; and its fast intervals at pace, «4/5». Empty for any other.
                 session.intervals?.let { "${it.sets}x${it.slowMinutes}+${it.fastMinutes}" }.orEmpty(),
                 session.intervalResult()?.let { "${it.atPace}/${it.judged}" }.orEmpty(),
+                // An outing measured with GPS (Phase 15): its distance above is then the measured
+                // one; what the steps alone said, and how much of it came from fixes. Empty for
+                // any other, whose distance already is the steps'.
+                if (session.gps) "yes" else "",
+                session.stepsMeters?.takeIf { session.gps }?.let { distance(it, units) }.orEmpty(),
+                session.measuredShare?.takeIf { session.gps }?.let { decimal(it * PERCENT, 0) }.orEmpty(),
             )
         },
     )
@@ -164,6 +173,8 @@ object CsvExport {
 
     private fun distanceHeader(units: UnitSystem) = "distance_${distanceUnit(units)}"
 
+    private fun stepsDistanceHeader(units: UnitSystem) = "steps_distance_${distanceUnit(units)}"
+
     private fun distanceUnit(units: UnitSystem) = if (units == UnitSystem.IMPERIAL) "mi" else "km"
 
     private fun distance(meters: Double, units: UnitSystem): String = decimal(
@@ -180,5 +191,6 @@ object CsvExport {
     private val FORMULA_STARTS = setOf('=', '+', '-', '@')
     private const val SECONDS_PER_MINUTE = 60L
     private const val MILLIS_PER_MINUTE = 60_000.0
+    private const val PERCENT = 100.0
     private const val METERS_PER_KM = 1_000.0
 }

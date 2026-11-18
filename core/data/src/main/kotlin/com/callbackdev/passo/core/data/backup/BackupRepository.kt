@@ -1,6 +1,7 @@
 package com.callbackdev.passo.core.data.backup
 
 import com.callbackdev.passo.core.data.db.SessionDao
+import com.callbackdev.passo.core.data.db.StepLengthSampleEntity
 import com.callbackdev.passo.core.data.db.TrackingDao
 import com.callbackdev.passo.core.data.db.WayDao
 import com.callbackdev.passo.core.data.db.toEntity
@@ -14,6 +15,7 @@ import com.callbackdev.passo.core.domain.backup.CsvExport
 import com.callbackdev.passo.core.domain.backup.CsvTable
 import com.callbackdev.passo.core.domain.metrics.DaySummaries
 import com.callbackdev.passo.core.model.MinuteSteps
+import com.callbackdev.passo.core.model.StepLengthSample
 import com.callbackdev.passo.core.model.UnitSystem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -86,6 +88,13 @@ constructor(
             )
             BackupDay(summary, minutes)
         }
+        // What the outings with GPS said of the step, by the outing's start: its id is this
+        // phone's alone.
+        val starts = sessionDao.sessionStarts().associate { it.id to it.startedAtMillis }
+        val samples = sessionDao.allStepLengthSamples()
+            .groupBy({ starts[it.sessionId] }) { StepLengthSample(it.cadence, it.steps, it.meters) }
+            .mapNotNull { (start, said) -> start?.let { it to said } }
+            .toMap()
         return Backup(
             exportedAtMillis = nowMillis,
             zone = zone.id,
@@ -97,6 +106,7 @@ constructor(
             sessions = sessionDao.allSessions().mapNotNull { it.toModel() },
             diagnostics = tracking.diagnostics(),
             journeys = wayDao.journeys().mapNotNull { it.toModel() },
+            stepLengthSamples = samples,
         )
     }
 
@@ -119,6 +129,23 @@ constructor(
             plans = plans.toAdd.map { it.id to it.copy(id = 0).toEntity() },
             planIds = plans.matched,
         ) { ids -> BackupMerge.sessions(localSessions, backup.sessions, ids) }
+        // What the outings that came said of the step comes with them; an outing this phone
+        // already had keeps its own, and one the import left out leaves its samples out.
+        if (newIds.isNotEmpty() && backup.stepLengthSamples.isNotEmpty()) {
+            val came = sessionDao.sessionStarts().filter { it.id in newIds }
+            sessionDao.insertStepLengthSamples(
+                came.flatMap { outing ->
+                    backup.stepLengthSamples[outing.startedAtMillis].orEmpty().map {
+                        StepLengthSampleEntity(
+                            sessionId = outing.id,
+                            cadence = it.cadence,
+                            steps = it.steps,
+                            meters = it.meters,
+                        )
+                    }
+                },
+            )
+        }
         // An outing walked on the other phone today is history here, not one just over: Today's
         // card for the last outing stays put away.
         if (newIds.isNotEmpty()) {

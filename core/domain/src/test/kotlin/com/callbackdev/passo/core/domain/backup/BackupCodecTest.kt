@@ -14,6 +14,7 @@ import com.callbackdev.passo.core.model.IntervalSplit
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.Sex
 import com.callbackdev.passo.core.model.StepLengthMode
+import com.callbackdev.passo.core.model.StepLengthSample
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.UserSettings
 import com.google.common.truth.Truth.assertThat
@@ -55,6 +56,69 @@ class BackupCodecTest {
         val read = BackupCodec.decode(BackupCodec.encode(full))
 
         assertThat(read).isEqualTo(BackupRead.Ok(full))
+    }
+
+    @Test
+    fun `an outing measured with GPS reads back with its numbers and what it said of the step`() {
+        val plan = SessionPlans.NEW.copy(id = 11, gps = true, position = 1)
+        val outing = session(1_790_000_000_000, planId = 11).copy(
+            gps = true,
+            stepsMeters = 5_050.0,
+            measuredShare = 0.96,
+        )
+        val samples = listOf(StepLengthSample(110, 330, 252.0), StepLengthSample(128, 256, 216.5))
+        val measured = full.copy(
+            plans = full.plans + plan,
+            sessions = full.sessions + outing,
+            stepLengthSamples = mapOf(outing.startedAtMillis to samples),
+        )
+
+        assertThat(BackupCodec.decode(BackupCodec.encode(measured))).isEqualTo(BackupRead.Ok(measured))
+    }
+
+    @Test
+    fun `the file holds an outing's numbers, never where it went`() {
+        val outing = session(1_790_000_000_000).copy(gps = true, stepsMeters = 5_050.0, measuredShare = 0.96)
+        val measured = full.copy(
+            sessions = listOf(outing),
+            stepLengthSamples = mapOf(outing.startedAtMillis to listOf(StepLengthSample(110, 330, 252.0))),
+        )
+
+        val text = BackupCodec.encode(measured)
+
+        assertThat(text).contains("\"gps\"")
+        assertThat(text).contains("\"measuredShare\"")
+        assertThat(text).doesNotContainMatch("(?i)latitude|longitude|\"lat\"|\"lon\"|route|chunk")
+    }
+
+    @Test
+    fun `an outing without GPS writes none of it, and a file from before reads as it always did`() {
+        val text = BackupCodec.encode(full)
+        val read = (BackupCodec.decode(text) as BackupRead.Ok).backup
+
+        assertThat(read.sessions.none { it.gps }).isTrue()
+        assertThat(read.sessions.all { it.stepsMeters == null && it.measuredShare == null }).isTrue()
+        assertThat(read.stepLengthSamples).isEmpty()
+        assertThat(read.plans.none { it.gps }).isTrue()
+    }
+
+    @Test
+    fun `what cannot be a measure is dropped, and the outing kept`() {
+        val outing = session(1_790_000_000_000).copy(gps = true, stepsMeters = 5_050.0, measuredShare = 0.96)
+        val measured = full.copy(
+            sessions = listOf(outing),
+            stepLengthSamples = mapOf(outing.startedAtMillis to listOf(StepLengthSample(110, 330, 252.0))),
+        )
+        val broken = BackupCodec.encode(measured)
+            .replace(Regex("\"measuredShare\"\\s*:\\s*0\\.96"), "\"measuredShare\": 7.5")
+            .replace(Regex("\"steps\"\\s*:\\s*330"), "\"steps\": 0")
+        assertThat(broken).contains("7.5")
+
+        val read = (BackupCodec.decode(broken) as BackupRead.Ok).backup
+
+        // A share is between nothing and all; a sample with no steps says nothing of a step.
+        assertThat(read.sessions.single().measuredShare).isEqualTo(1.0)
+        assertThat(read.stepLengthSamples).isEmpty()
     }
 
     @Test

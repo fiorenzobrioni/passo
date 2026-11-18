@@ -51,6 +51,32 @@ class CsvExportTest {
     }
 
     @Test
+    fun `an outing measured with GPS says so, with what the steps alone said and the measured share`() {
+        val measured = session(DAY * 86_400_000L + 9 * 3_600_000L).copy(
+            gps = true,
+            totals = session(0).totals.copy(distanceMeters = 5_200.0),
+            stepsMeters = 5_050.0,
+            measuredShare = 0.964,
+        )
+
+        val rows = lines(CsvExport.outings(listOf(measured), UnitSystem.METRIC, ZoneOffset.UTC))
+
+        // Its distance is the measured one; the steps' own and the share stand beside it.
+        assertThat(rows[1]).contains(",5.200,")
+        assertThat(rows[1]).endsWith(",yes,5.050,96")
+    }
+
+    @Test
+    fun `in miles, what the steps said is in miles too`() {
+        val measured = session(DAY * 86_400_000L + 9 * 3_600_000L).copy(gps = true, stepsMeters = 1_609.344)
+
+        val rows = lines(CsvExport.outings(listOf(measured), UnitSystem.IMPERIAL, ZoneOffset.UTC))
+
+        assertThat(rows[0]).endsWith(",gps,steps_distance_mi,measured_percent")
+        assertThat(rows[1]).endsWith(",yes,1.000,")
+    }
+
+    @Test
     fun `an outing's name is quoted when it must be, and is never a formula`() {
         val named = session(DAY * 86_400_000L + 9 * 3_600_000L).copy(name = "Walk, \"quick\"")
         val formula = session(DAY * 86_400_000L + 18 * 3_600_000L).copy(name = "=HYPERLINK(1)")
@@ -60,11 +86,11 @@ class CsvExportTest {
 
         assertThat(rows[0]).isEqualTo(
             "date,start,end,name,goal,goal_value,goal_unit,pace,outcome,steps,minutes_in_motion," +
-                "distance_km,active_kcal,intervals,fast_at_pace",
+                "distance_km,active_kcal,intervals,fast_at_pace,gps,steps_distance_km,measured_percent",
         )
         assertThat(
             rows[1],
-        ).isEqualTo("$date,09:00,09:25,\"Walk, \"\"quick\"\"\",time,25,min,brisk,reached,2600,25.0,1.950,88.0,,")
+        ).isEqualTo("$date,09:00,09:25,\"Walk, \"\"quick\"\"\",time,25,min,brisk,reached,2600,25.0,1.950,88.0,,,,,")
         assertThat(rows[2]).contains(",'=HYPERLINK(1),")
         assertThat(rows[3]).contains(",under_way,")
         assertThat(rows[3]).startsWith("$date,20:00,,,")

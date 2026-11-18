@@ -6,6 +6,7 @@ import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionPlan
+import com.callbackdev.passo.core.model.StepLengthSample
 import com.callbackdev.passo.core.model.UserSettings
 import com.callbackdev.passo.core.model.WayJourney
 
@@ -24,6 +25,10 @@ data class BackupDay(val summary: DailySummary, val minutes: List<MinuteSteps>)
  *
  * @property zone the time zone the phone was in when the file was written, for a reader of the
  *   file; nothing is converted with it.
+ * @property stepLengthSamples what the clean stretches of the outings with GPS said of the
+ *   reader's step (docs/adr/0016-location.md, decision 12), by the outing's start: numbers,
+ *   never places. The routes themselves are not here (they travel only when the reader says
+ *   so, Phase 16).
  */
 data class Backup(
     val exportedAtMillis: Long,
@@ -36,6 +41,7 @@ data class Backup(
     val sessions: List<Session>,
     val diagnostics: List<DiagnosticsEvent> = emptyList(),
     val journeys: List<WayJourney> = emptyList(),
+    val stepLengthSamples: Map<Long, List<StepLengthSample>> = emptyMap(),
 ) {
     /** The first and last day with steps, null for a backup without any. */
     val firstDay: Long? get() = days.minOfOrNull { it.summary.localEpochDay }
