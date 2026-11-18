@@ -240,10 +240,51 @@ internal class SessionNotifications(private val context: Context) {
     }
 
     /**
-     * An end by a long stillness, noticed as the reader walks on (or looks): what the outing came
-     * to, and "Resume" while it can still be taken back ([withResume]).
+     * «Still walking?»: the outing is within a quarter of an hour of the longest it stays open,
+     * and the reader is walking (docs/adr/0016-location.md, decision 14). «Keep going» moves that
+     * on; unanswered, the outing ends there, says so, and can still be taken back.
+     */
+    fun capAhead(session: Session, minutes: Int): android.app.Notification {
+        val res = context.resources
+        val text = res.getQuantityString(R.plurals.session_cap_ahead_text, minutes, minutes)
+        return NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_stat_steps)
+            .setContentTitle(context.getString(R.string.session_cap_ahead_title, res.sessionName(session)))
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setContentIntent(context.openAppIntent(REQUEST_GOAL))
+            .setAutoCancel(true)
+            .setCategory(NotificationCompat.CATEGORY_WORKOUT)
+            .addAction(
+                0,
+                context.getString(R.string.session_action_keep_going),
+                SessionControl.pendingIntent(context, SessionControl.ACTION_KEEP_GOING, REQUEST_KEEP_GOING),
+            )
+            .build()
+    }
+
+    /** The question, in the shade: under its own id, so the end's notification never hides it. */
+    fun postCapAhead(notification: android.app.Notification) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        NotificationManagerCompat.from(context).notify(ID_CAP_AHEAD, notification)
+    }
+
+    /** Answered, or overtaken by the outing's end. */
+    fun cancelCapAhead() {
+        NotificationManagerCompat.from(context).cancel(ID_CAP_AHEAD)
+    }
+
+    /**
+     * An end the outing came to by itself, noticed as the reader walks on (or looks): after a
+     * long stillness, or at the longest it stays open. What it came to, and "Resume" or "Keep
+     * going" while it can still be taken back ([withResume]).
      */
     fun endedStill(session: Session, units: UnitPreference, withResume: Boolean): android.app.Notification {
+        val atCap = session.end == SessionEnd.CLOSED
         val format = context.measureFormatter(units)
         val res = context.resources
         val summary = listOfNotNull(
@@ -253,7 +294,12 @@ internal class SessionNotifications(private val context: Context) {
         val sentence = res.sessionHeadline(session, format)
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_steps)
-            .setContentTitle(context.getString(R.string.session_ended_still_title, res.sessionName(session)))
+            .setContentTitle(
+                context.getString(
+                    if (atCap) R.string.session_ended_cap_title else R.string.session_ended_still_title,
+                    res.sessionName(session),
+                ),
+            )
             .setContentText(sentence)
             .setStyle(
                 NotificationCompat.BigTextStyle().bigText(
@@ -267,14 +313,15 @@ internal class SessionNotifications(private val context: Context) {
         if (withResume) {
             builder.addAction(
                 0,
-                context.getString(R.string.session_action_resume),
+                // The reader who stopped resumes; the one the clock stopped keeps going.
+                context.getString(if (atCap) R.string.session_action_keep_going else R.string.session_action_resume),
                 SessionControl.pendingIntent(context, SessionControl.ACTION_KEEP_GOING, REQUEST_KEEP_GOING),
             )
         }
         return builder.build()
     }
 
-    /** The notification of an outing's end that can be taken back: its goal, or a long stillness. */
+    /** The notification of an outing's end that can be taken back: its goal, a long stillness, or its cap. */
     fun ended(session: Session, units: UnitPreference, canReopen: Boolean): android.app.Notification =
         if (session.end == SessionEnd.GOAL) {
             goalReached(session, units, withKeepGoing = canReopen)
@@ -319,6 +366,9 @@ internal class SessionNotifications(private val context: Context) {
 
         /** The goal's notification, or the end by stillness's: one outing's end at a time. */
         const val ID_END = 5
+
+        /** «Still walking?», before the longest an outing stays open. */
+        const val ID_CAP_AHEAD = 7
 
         private const val PROGRESS_MAX = 1_000
         private const val REQUEST_PAUSE = 10

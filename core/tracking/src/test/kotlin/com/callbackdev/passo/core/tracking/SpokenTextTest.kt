@@ -140,6 +140,40 @@ class SpokenTextTest {
             .isEqualTo("Uscita chiusa dopo una lunga sosta, a 764 passi. Puoi riprenderla dalla notifica.")
     }
 
+    @Test
+    @Config(qualifiers = "en-rUS")
+    fun `before the longest an outing stays open, it asks aloud`() {
+        assertThat(say(SessionAnnouncement.capAhead(), walk)).isEqualTo(
+            "Still walking? This outing ends in 15 minutes. Touch Keep going on the notification to carry on.",
+        )
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT")
+    fun `in Italian, the question before the longest outing`() {
+        assertThat(say(SessionAnnouncement.capAhead(), walk)).isEqualTo(
+            "Stai ancora camminando? Questa uscita si chiude tra 15 minuti. " +
+                "Tocca Continua sulla notifica per andare avanti.",
+        )
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS")
+    fun `the question unanswered, the end says what was walked and that it can be kept going`() {
+        val closed = walk.copy(totals = walk.totals.copy(steps = 21_400))
+        assertThat(say(SessionAnnouncement.endedAtCap(closed), closed)).isEqualTo(
+            "Outing ended at its time limit, at 21,400 steps. You can keep going from the notification.",
+        )
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT")
+    fun `in Italian, the end at the longest outing`() {
+        val closed = walk.copy(totals = walk.totals.copy(steps = 764))
+        assertThat(say(SessionAnnouncement.endedAtCap(closed), closed))
+            .isEqualTo("Uscita chiusa per limite di tempo, a 764 passi. Puoi continuarla dalla notifica.")
+    }
+
     private val milan = Ways.of(WayId.MILAN_DUOMO_NAVIGLI)
 
     private fun milanWalk(from: Int, walked: Double) = checkNotNull(

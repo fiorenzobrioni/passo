@@ -801,6 +801,9 @@ class StepTrackingService : Service() {
                     signalsAllowed = sessionNotifications.signalsAllowed(),
                     nowMillis = System.currentTimeMillis(),
                 ),
+                // Bounded ten minutes past the outing's own cap, which «Keep going» moves.
+                timeoutMillis = tracker?.session?.let { SignalWake.timeoutMillis(it, System.currentTimeMillis()) }
+                    ?: SignalWake.TIMEOUT_MILLIS,
             )
             armLetGo()
         }
@@ -1068,6 +1071,8 @@ class StepTrackingService : Service() {
                 // Told once the batch is in: a later change in the same batch replaces it.
                 is SessionSignal.IntervalChange -> pendingChange = signal
 
+                is SessionSignal.CapAhead -> tellCapAhead()
+
                 is SessionSignal.Finished -> onSessionFinished(signal)
             }
         }
@@ -1083,7 +1088,10 @@ class StepTrackingService : Service() {
         // otherwise it is over here. The voice is let go once its last sentence is said.
         val reopenable = finished.kept && tracker?.canKeepGoing(System.currentTimeMillis()) == true
         if (!reopenable) tracker = null
+        // The question before the cap is answered by the end, whatever ended it.
+        sessionNotifications.cancelCapAhead()
         if (reopenable && session.end == SessionEnd.IDLE) tellEndedStill(session)
+        if (reopenable && session.end == SessionEnd.CLOSED) tellEndedAtCap(session)
         speech.release()
         sessionDirty = false
         scope.launch {
@@ -1118,6 +1126,35 @@ class StepTrackingService : Service() {
         if (!sessionNotifications.signalsAllowed()) return
         if (session.vibrate) SessionHaptics.playEndedStill(this)
         if (session.voice != SessionVoice.OFF) speak(SessionAnnouncement.endedStill(session), session)
+    }
+
+    /**
+     * «Still walking?», a quarter of an hour before the longest an outing stays open
+     * (docs/adr/0016-location.md, decision 14): the stillness's two long pulses, the voice if the
+     * outing speaks, and a notification with «Keep going». It rides on the step batch that came
+     * within that quarter of an hour, as every signal does: no timer, and a reader who is not
+     * walking is not asked. The notification is posted even where the signals are silenced: it
+     * is a question, and an outing that ends unasked is the fault this exists to mend.
+     */
+    private fun tellCapAhead() {
+        val session = tracker?.session?.takeIf { it.live } ?: return
+        val asked = SessionAnnouncement.capAhead()
+        sessionNotifications.postCapAhead(sessionNotifications.capAhead(session, asked.minutes))
+        if (sessionNotifications.signalsAllowed()) {
+            if (session.vibrate) SessionHaptics.playEndedStill(this)
+            if (session.voice != SessionVoice.OFF) speak(asked, session)
+        }
+        publishSession()
+    }
+
+    /**
+     * The end at the cap, the question having gone unanswered, told as the reader walks on (or
+     * looks): it was silent, and for good. Once, as the end by stillness is.
+     */
+    private fun tellEndedAtCap(session: Session) {
+        if (!sessionNotifications.signalsAllowed()) return
+        if (session.vibrate) SessionHaptics.playEndedStill(this)
+        if (session.voice != SessionVoice.OFF) speak(SessionAnnouncement.endedAtCap(session), session)
     }
 
     /**
@@ -1175,6 +1212,17 @@ class StepTrackingService : Service() {
 
                 SessionControl.ACTION_RESUME ->
                     changeSession(mayEngageGps = true) { tracker -> tracker.resume(System.currentTimeMillis()) }
+
+                // «Keep going» to the question before the cap: the cap moves on, nothing stops.
+                SessionControl.ACTION_KEEP_GOING if tracker?.session?.state == SessionState.ACTIVE -> {
+                    val moved = changeSession { tracker -> tracker.goOn(System.currentTimeMillis()) }
+                    if (moved) {
+                        sessionNotifications.cancelCapAhead()
+                        tracker?.session?.let {
+                            signalWake.renew(SignalWake.timeoutMillis(it, System.currentTimeMillis()))
+                        }
+                    }
+                }
 
                 SessionControl.ACTION_KEEP_GOING -> {
                     var crossed: List<SessionSignal> = emptyList()

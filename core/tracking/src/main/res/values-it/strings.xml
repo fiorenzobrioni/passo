@@ -98,6 +98,13 @@
     <string name="session_paused_reached">In pausa, con l’obiettivo raggiunto.</string>
     <string name="session_goal_title">%1$s: obiettivo raggiunto</string>
     <string name="session_ended_still_title">%1$s: chiusa dopo una lunga sosta</string>
+    <string name="session_cap_ahead_title">%1$s: stai ancora camminando?</string>
+    <plurals name="session_cap_ahead_text">
+        <item quantity="one">Questa uscita si chiude tra %1$d minuto. Tocca Continua per andare avanti.</item>
+        <item quantity="many">Questa uscita si chiude tra %1$d minuti. Tocca Continua per andare avanti.</item>
+        <item quantity="other">Questa uscita si chiude tra %1$d minuti. Tocca Continua per andare avanti.</item>
+    </plurals>
+    <string name="session_ended_cap_title">%1$s: chiusa per limite di tempo</string>
     <string name="evening_reminder_walk_now">Cammina ora</string>
     <!-- I segnali detti a voce (Fase 10, la voce): pronunciati, quindi ogni quantità in parole. -->
     <plurals name="spoken_minutes">
@@ -152,6 +159,8 @@
     <string name="spoken_day_goal">Anche l’obiettivo di oggi è raggiunto.</string>
     <string name="spoken_well_done">Ben fatto.</string>
     <string name="spoken_ended_still">Uscita chiusa dopo una lunga sosta, a %1$s. Puoi riprenderla dalla notifica.</string>
+    <string name="spoken_cap_ahead">Stai ancora camminando? Questa uscita si chiude tra %1$s. Tocca Continua sulla notifica per andare avanti.</string>
+    <string name="spoken_ended_cap">Uscita chiusa per limite di tempo, a %1$s. Puoi continuarla dalla notifica.</string>
     <string name="spoken_zone">%1$d su %2$s al tuo ritmo.</string>
 
     <!-- I cammini (PLANNING.md §11 Fase 11) -->

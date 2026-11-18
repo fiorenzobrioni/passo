@@ -2,6 +2,7 @@ package com.callbackdev.passo.core.domain.sessions
 
 import com.callbackdev.passo.core.domain.metrics.MetricsConstants
 import com.callbackdev.passo.core.domain.tracking.TrackingConstants
+import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionIntensity
 
 /**
@@ -40,8 +41,21 @@ object SessionConstants {
     /** A pause longer than this ends the outing where it was paused. */
     const val PAUSE_END_MILLIS: Long = 60 * 60_000L
 
-    /** No outing stays open longer than this; past it, it ends at its last step. */
+    /**
+     * No outing stays open longer than this unless the reader says to go on: it is its cap when
+     * it starts ([capMillis]). Beside the end by stillness it is what stops an outing forgotten
+     * by a reader who goes on walking all day (docs/adr/0016-location.md, decision 14).
+     */
     const val MAX_SESSION_MILLIS: Long = 4 * 60 * 60_000L
+
+    /**
+     * This long before its cap an outing asks «Still walking?», once a cap: time enough to feel
+     * the vibration, take the phone out and answer, and no cap ends a walk unasked.
+     */
+    const val CAP_WARNING_MILLIS: Long = 15 * 60_000L
+
+    /** «Keep going» moves the cap this far on: a reader who answers is not a reader who forgot. */
+    const val CAP_EXTENSION_MILLIS: Long = MAX_SESSION_MILLIS
 
     /**
      * After the goal, "Keep going" can reopen the outing for this long, with the steps taken
@@ -123,6 +137,13 @@ object SessionConstants {
      */
     const val SHORTCUTS: Int = 4
 }
+
+/**
+ * When this outing ends by itself if nobody says to go on: its own cap, or, for one from before
+ * the cap was kept, the longest outing from its start.
+ */
+val Session.capMillis: Long
+    get() = capAtMillis ?: (startedAtMillis + SessionConstants.MAX_SESSION_MILLIS)
 
 /**
  * The cadence an intensity asks to stay at or above; null for [SessionIntensity.FREE]. Brisk and

@@ -46,13 +46,22 @@ object SignalWake {
 
     /**
      * When a counting [session] stops keeping the processor awake: [SessionConstants.IDLE_END_MILLIS]
-     * after its last step, when it is over by stillness, or at [SessionConstants.MAX_SESSION_MILLIS]
-     * from its start, the longest outing Passo keeps open; whichever comes first.
+     * after its last step, when it is over by stillness, or at the outing's own cap
+     * ([capMillis]: [SessionConstants.MAX_SESSION_MILLIS] from its start until the reader says to
+     * go on); whichever comes first.
      */
     fun letGoAt(session: Session): Long = minOf(
         session.lastStepAtMillis + SessionConstants.IDLE_END_MILLIS,
-        session.startedAtMillis + SessionConstants.MAX_SESSION_MILLIS,
+        session.capMillis,
     )
+
+    /**
+     * How long the lock may be held from [nowMillis] at the most, whatever happens: to
+     * [TIMEOUT_MARGIN_MILLIS] past the outing's own cap, which «Keep going» moves on (the lock is
+     * then taken again with the new bound). It bounds a fault; [letGoAt] is what lets it go.
+     */
+    fun timeoutMillis(session: Session, nowMillis: Long): Long =
+        (session.capMillis + TIMEOUT_MARGIN_MILLIS - nowMillis).coerceAtLeast(TIMEOUT_MARGIN_MILLIS)
 
     /** Whether an outing started from [plan] would, on this phone: what the editor says. */
     fun neededFor(plan: SessionPlan, wakeUpCounter: Boolean): Boolean =
@@ -64,4 +73,7 @@ object SignalWake {
      * this bounds a fault.
      */
     const val TIMEOUT_MILLIS: Long = SessionConstants.MAX_SESSION_MILLIS + 10 * 60_000L
+
+    /** Past the cap, the lock's bound leaves this much room for the end to be noticed. */
+    const val TIMEOUT_MARGIN_MILLIS: Long = 10 * 60_000L
 }

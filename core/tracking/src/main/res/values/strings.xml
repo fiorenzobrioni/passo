@@ -90,6 +90,14 @@
     <string name="session_goal_title">%1$s: goal reached</string>
     <!-- «Brisk walk: ended after a long stop». -->
     <string name="session_ended_still_title">%1$s: ended after a long stop</string>
+    <!-- Before the longest an outing stays open: «Brisk walk: still walking?», and what happens if nobody answers. -->
+    <string name="session_cap_ahead_title">%1$s: still walking?</string>
+    <plurals name="session_cap_ahead_text">
+        <item quantity="one">This outing ends in %1$d minute. Keep going to carry on.</item>
+        <item quantity="other">This outing ends in %1$d minutes. Keep going to carry on.</item>
+    </plurals>
+    <!-- The question went unanswered: «Brisk walk: ended at its time limit». It can still be taken back. -->
+    <string name="session_ended_cap_title">%1$s: ended at its time limit</string>
     <string name="evening_reminder_walk_now">Walk now</string>
     <!-- Spoken signals (Phase 10, the voice): said aloud, so every amount is in words. -->
     <plurals name="spoken_minutes">
@@ -141,6 +149,10 @@
     <string name="spoken_well_done">Well done.</string>
     <!-- The outing ended by itself after a long stop, said as the reader walks on. -->
     <string name="spoken_ended_still">Outing ended after a long stop, at %1$s. You can resume it from the notification.</string>
+    <!-- Before the longest an outing stays open, said as the reader walks. %1$s: «15 minutes». -->
+    <string name="spoken_cap_ahead">Still walking? This outing ends in %1$s. Touch Keep going on the notification to carry on.</string>
+    <!-- The question went unanswered, said as the reader walks on. -->
+    <string name="spoken_ended_cap">Outing ended at its time limit, at %1$s. You can keep going from the notification.</string>
     <!-- «17 of 20 minutes at your pace.» -->
     <string name="spoken_zone">%1$d of %2$s at your pace.</string>
 

@@ -765,7 +765,7 @@ It ends with numbers on the card and the notification; the route's own page is P
   for "location", "posizione" and "GPS" and rewrite each so that it is true: the ways from home
   still use no location, and say so). Nothing may still say that Passo cannot know where the
   phone is; everything still says that Passo sends nothing.
-- [ ] **The model** (`:core:model`). `SessionPlan.gps` (false by default); `Session.gps` (copied
+- [x] **The model** (`:core:model`). `SessionPlan.gps` (false by default); `Session.gps` (copied
   at the start, frozen like the goal), `Session.stepsMeters` (what the steps alone said),
   `Session.measuredShare` (0 to 1, null without GPS). In an outing with GPS
   `SessionTotals.distanceMeters` is the fused distance (ADR 0016 decision 5): the goal, the
@@ -957,11 +957,15 @@ It ends with numbers on the card and the notification; the route's own page is P
   (no wake-up counter): a stop of five minutes, and fixes again from the first steps after
   it. If the second type is refused on a running
   service, the fallback of ADR 0016 decision 4 is built before anything else in Phase 16.
-  **This box comes before the rest is built** (ADR 0016 decision 4: "Phase 15 proves which one
-  it is before building on it"): the gate, the manifest, the plan's `gps`, `LocationSource`,
-  the function that changes the type, the log's row, the switch and the request are built
-  first, as a thin slice, and its debug APK goes to the owner; the fusion, the storage and the
-  screens follow the answer.
+  **This box comes before what depends on its answer** (ADR 0016 decision 4: "Phase 15 proves
+  which one it is before building on it"): the gate, the manifest, the plan's `gps`,
+  `LocationSource`, the function that changes the type, the log's row, the switch and the
+  request were built first, as a thin slice, and its debug APK is the owner's to try. What
+  hangs on the answer is one thing, how the service comes by its fixes (a second type, or the
+  fallback's second service): "everything above the source is the same" (the same decision).
+  So the fusion, the storage and the screens are built meanwhile (owner, 18 Nov 2026, unable
+  to test for now: "can you go on safely, and in keeping with the plan?"; §15, «Phase 15, the
+  domain»), and nothing is released, nor Phase 16 called done, before this box is answered.
 - [ ] **On a device (owner), the measure:** a 30-minute and a 2-hour outing with GPS, screen
   off, phone in a pocket: the battery an hour (`dumpsys batterystats`, the system's page), the
   measured share, the receiver asleep at a stop and awake at the first step; a known distance
@@ -2162,6 +2166,72 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
     («This driver is configured to open a database named…»), on an untouched checkout as
     here. Schema 7 was generated and `UpgradeFromFirstReleaseTest` walks to it: CI, on Linux,
     is where it runs.
+
+- **18 Nov 2026.** **Phase 15, the domain: the fusion, the route's bytes, the cap's question**
+  (owner, asked whether Phase 16 could begin while the phone cannot be tried: "can you go on
+  safely, and in keeping with the plan?"). Not Phase 16 yet: it draws and shares routes that
+  come from the part of 15 not built. But what the proof on the phone decides is one thing
+  only, how the service comes by its fixes, and ADR 0016 decision 4 says the rest is the same
+  either way. So Phase 15 goes on from its pure domain, which a phone adds nothing to, and
+  Phase 16 follows it. **A departure from the order written the same morning** («This box
+  comes before the rest is built»), made at the owner's word and reworded in the phase: the
+  proof still comes before any release, and before the fallback is or is not built.
+  - **CI is green on the pull request** (#72, both runs): the migration to schema 7 passes
+    where it can run.
+  - **`RouteMeter`** (pure, 26 tests, one a rule and one a row). The steps say when the reader
+    walks, the fixes how far. A batch of steps is laid over its own time in motion; a fix
+    outside it moves the line's end and adds nothing (the bench, the tram); a fix inside it
+    moves the line by a grain. Open until the fixes are known to be in through its end
+    (`settle`), so nothing is told on metres that could be taken back. Decided on the way,
+    each with its reason in `RouteConstants` and each to be validated on a device:
+    - *The grain grows where the receiver is less sure* (half the fix's own accuracy, three
+      metres at the least): the wander between tall buildings stays under it.
+    - *After a ride the receiver is believed again once five fixes in a row agree.* Judged
+      only against the last fix accepted, every good fix after a bus read as too fast from
+      the stop it left, for minutes.
+    - *No hop beyond what the steps since the line's end could reach*, and no batch beyond
+      what its steps could cover (2.5 m a step, the longest a profile may hold): a reflection
+      that lasts, a tram, walking down a moving tram's aisle.
+    - *Steps that go nowhere are measured as what they are*: marching on the spot under the
+      satellites is no distance, where the steps alone said 165 m.
+    - *A point says how it is joined to the one before* (`RoutePointKind`): measured, laid
+      from the steps (a hole: dashed, later), or the start of a stretch (the first point, a
+      pause, the far side of a ride): a route never draws a line across a place not walked.
+      The phase's model had a fix or a laid point only; the third is what a pause in a GPX
+      and a tram on a map both need.
+  - **`RouteFilter`, `RouteCodec`, `Pace`**, and **`StepLengthSample`** from the meter's clean
+    runs. The codec: a point in about six bytes, an hour in about ten kilobytes, a chunk that
+    stands by itself and never throws on damaged bytes.
+  - **The tracker** takes a meter for an outing with GPS: steps, time in motion and the
+    intervals are told with the steps as ever; the distance, and the energy priced on it,
+    when it is settled. What is walked after an end that can be taken back waits aside, and
+    is the outing's again at «Keep going» (the route with no hole), or nobody's.
+  - **The longest outing asks before it ends**, for every outing: `Session.capAtMillis` set at
+    the start and read by the tracker, `SessionSignal.CapAhead` at the first steps within 15
+    minutes of it, `goOn` moving it four hours, the end at the cap told and taken back as the
+    stillness's is. In the service: the notification «Still walking?» with «Keep going» (an
+    id of its own), the stillness's two long pulses, the voice; the wake lock's bound follows
+    the cap and is renewed. Posted even where the outings' signals are silenced: it is a
+    question, and an outing ended unasked is the fault it mends. **Not yet:** the card saying
+    it too.
+  - **The model's box ticked.** The domain's is not: the pace's words by the kilometre or the
+    mile come with the card that shows it.
+  - **Still to build in Phase 15:** the meter wired into the service (the flush that settles,
+    the fixes on the steps' clock, the points written), `routes.db`, the backup's fields, the
+    stop told with «Resume GPS», the card and the notification's lines, the documents.
+  - **The routes' database, the same day.** `routes.db` (`RouteDatabase`, schema 1 exported):
+    `route` (the outing's id and start, the count, the box) and `route_chunk` (outing, order,
+    bytes); `RouteRepository` appends a chunk, reads a route back whole, deletes one. A route
+    is its outing's by the outing's start, not by the id alone. `SessionRepository.delete`
+    deletes the route first, then the outing with its intervals and its samples;
+    `deleteOrphanRoutes` deletes every route whose outing is gone (for the service's start);
+    the samples are written and read. `data_extraction_rules.xml` names `routes.db` and its
+    write-ahead log under `<device-transfer>` only, and a test reads the file to say so. 13
+    tests on real Room databases. **Not yet:** the service calling any of it, and the
+    backup's added fields in the JSON and the CSV.
+  - **Checked.** `spotlessCheck`, `:app:checkForbiddenPermissions`, `test` (the domain's 462
+    among them), `:app:lintDebug`, `:app:assembleDebug`: green, but for the six migration
+    tests this machine cannot run. Nothing on a phone.
 
 ### Open
 

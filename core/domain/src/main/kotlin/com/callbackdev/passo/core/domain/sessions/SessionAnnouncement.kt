@@ -74,6 +74,18 @@ sealed interface SessionAnnouncement {
     data class EndedStill(val steps: Int) : SessionAnnouncement
 
     /**
+     * «Still walking?»: the outing ends by itself in [minutes], unless the reader says to go on
+     * (docs/adr/0016-location.md, decision 14). No cap ends a walk unasked.
+     */
+    data class CapAhead(val minutes: Int) : SessionAnnouncement
+
+    /**
+     * The question went unanswered and the outing ended at its cap, noticed as the reader walks
+     * on: [steps] walked, and that it can still be taken back.
+     */
+    data class EndedAtCap(val steps: Int) : SessionAnnouncement
+
+    /**
      * A city walk began (Phase 11): at its first place, said with its sentence, or, continued,
      * from [here], with the place ahead. The walk's name is the outing's.
      */
@@ -111,6 +123,10 @@ sealed interface SessionAnnouncement {
         }
 
         fun endedStill(session: Session): EndedStill = EndedStill(session.totals.steps)
+
+        fun capAhead(): CapAhead = CapAhead((SessionConstants.CAP_WARNING_MILLIS / MILLIS_PER_MINUTE).toInt())
+
+        fun endedAtCap(session: Session): EndedAtCap = EndedAtCap(session.totals.steps)
 
         /** What [session], an outing on a city walk, says as it starts; null on no walk. */
         fun walkStarted(session: Session): WalkStarted? {

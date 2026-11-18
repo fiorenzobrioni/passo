@@ -396,6 +396,16 @@ internal fun Context.spoken(announcement: SessionAnnouncement, session: Session,
             res.spokenAmount(SessionAmount(SessionGoalKind.STEPS, announcement.steps.toDouble()), format),
         )
 
+        is SessionAnnouncement.CapAhead -> res.getString(
+            R.string.spoken_cap_ahead,
+            res.getQuantityString(R.plurals.spoken_minutes, announcement.minutes, announcement.minutes),
+        )
+
+        is SessionAnnouncement.EndedAtCap -> res.getString(
+            R.string.spoken_ended_cap,
+            res.spokenAmount(SessionAmount(SessionGoalKind.STEPS, announcement.steps.toDouble()), format),
+        )
+
         is SessionAnnouncement.WalkStarted -> {
             val here = res.getString(placeNameRes(announcement.here.key))
             if (announcement.continued) {

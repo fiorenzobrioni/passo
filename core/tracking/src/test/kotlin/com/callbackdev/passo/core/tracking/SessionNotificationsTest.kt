@@ -139,6 +139,37 @@ class SessionNotificationsTest {
     }
 
     @Test
+    fun `before the longest an outing stays open it asks, with keep going`() {
+        val sessions = SessionNotifications(context)
+        val notification = sessions.capAhead(session, minutes = 15)
+
+        assertThat(NotificationCompat.getContentTitle(notification).toString())
+            .isEqualTo("Brisk walk: still walking?")
+        assertThat(NotificationCompat.getContentText(notification).toString())
+            .isEqualTo("This outing ends in 15 minutes. Keep going to carry on.")
+        assertThat(notification.actions.single().title.toString()).isEqualTo("Keep going")
+    }
+
+    @Test
+    fun `the question unanswered, the end says so and offers to keep going while it can`() {
+        val closed = session.copy(state = SessionState.FINISHED, end = SessionEnd.CLOSED, endedAtMillis = 1)
+        val sessions = SessionNotifications(context)
+        val notification = sessions.ended(closed, UnitPreference.METRIC, canReopen = true)
+
+        assertThat(NotificationCompat.getContentTitle(notification).toString())
+            .isEqualTo("Brisk walk: ended at its time limit")
+        // The clock stopped it, not the reader: they keep going, they do not resume.
+        assertThat(notification.actions.single().title.toString()).isEqualTo("Keep going")
+        assertThat(sessions.ended(closed, UnitPreference.METRIC, canReopen = false).actions).isNull()
+    }
+
+    @Test
+    fun `the question has an id of its own, so the end's notification never hides it`() {
+        assertThat(SessionNotifications.ID_CAP_AHEAD).isNotEqualTo(SessionNotifications.ID_END)
+        assertThat(SessionNotifications.ID_CAP_AHEAD).isNotEqualTo(TrackingNotifications.NOTIFICATION_ID)
+    }
+
+    @Test
     fun `the outings' channel makes no sound and no vibration of its own`() {
         SessionNotifications(context).ensureChannel()
         val channel = context.getSystemService(NotificationManager::class.java)
