@@ -106,6 +106,13 @@ class MeasureFormatterTest {
     }
 
     @Test
+    fun `a climb is whole metres, or whole feet`() {
+        assertThat(english.elevation(239.6)).isEqualTo(Measure("240", MeasureUnit.METER))
+        assertThat(italian.elevation(1_240.0)).isEqualTo(Measure("1.240", MeasureUnit.METER))
+        assertThat(imperial.elevation(240.0)).isEqualTo(Measure("787", MeasureUnit.FOOT))
+    }
+
+    @Test
     fun `the goal share is floored and not capped`() {
         assertThat(english.percent(0.999)).isEqualTo("99%")
         assertThat(english.percent(1.2)).isEqualTo("120%")

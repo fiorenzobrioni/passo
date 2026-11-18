@@ -56,6 +56,11 @@ abstract class SessionDao {
     @Query("SELECT * FROM session WHERE id = :id")
     abstract suspend fun session(id: Long): SessionRow?
 
+    /** One outing as it changes: its own page, while it is open. */
+    @Transaction
+    @Query("SELECT * FROM session WHERE id = :id")
+    abstract fun observeSession(id: Long): Flow<SessionRow?>
+
     @Transaction
     @Query("SELECT * FROM session WHERE localEpochDay = :localEpochDay ORDER BY startedAtMillis")
     abstract fun observeSessionsOn(localEpochDay: Long): Flow<List<SessionRow>>

@@ -109,6 +109,10 @@ abstract class RouteDao {
     @Query("SELECT COUNT(*) FROM route")
     abstract fun observeRouteCount(): Flow<Int>
 
+    /** How many points the route of [sessionId] holds, as it grows or goes; null with no route. */
+    @Query("SELECT pointCount FROM route WHERE sessionId = :sessionId")
+    abstract fun observePointCount(sessionId: Long): Flow<Int?>
+
     /** The outings that have a route, as they change: an outing's page asks for its own. */
     @Query("SELECT sessionId FROM route")
     abstract fun observeRouteIds(): Flow<List<Long>>

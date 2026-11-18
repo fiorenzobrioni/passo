@@ -170,6 +170,8 @@
     <string name="session_gps_turn_on_location">Accendi la posizione</string>
     <string name="session_gps_allow_location">Consenti la posizione</string>
     <string name="session_gps_allow_precise">Consenti la posizione precisa</string>
+    <string name="route_map_north">N</string>
+    <string name="route_map_whole">Tutto il percorso</string>
     <plurals name="session_card_cap_question">
         <item quantity="one">Stai ancora camminando? Questa uscita si chiude tra %1$d minuto.</item>
         <item quantity="many">Stai ancora camminando? Questa uscita si chiude tra %1$d minuti.</item>

@@ -49,6 +49,12 @@ constructor(private val dao: RouteDao) {
         return Route(sessionStartedAtMillis, points, altitudes).takeIf { points.isNotEmpty() }
     }
 
+    /**
+     * How many points the route of the outing [sessionId] holds, as it changes: what its page
+     * reads the route again at. Null with no route.
+     */
+    fun observePointCount(sessionId: Long): Flow<Int?> = dao.observePointCount(sessionId)
+
     /** The outings that have a route, as they change: a route written, or deleted by the reader. */
     val routeIds: Flow<Set<Long>> = dao.observeRouteIds().map { it.toSet() }
 

@@ -192,6 +192,9 @@
     <string name="session_gps_turn_on_location">Turn on location</string>
     <string name="session_gps_allow_location">Allow location</string>
     <string name="session_gps_allow_precise">Allow precise location</string>
+    <!-- An outing's route on its map (Phase 16): north's letter, and the button back to the whole of it. -->
+    <string name="route_map_north">N</string>
+    <string name="route_map_whole">Whole route</string>
     <!-- The question before the longest an outing stays open, on its card too (ADR 0016, decision 14). -->
     <plurals name="session_card_cap_question">
         <item quantity="one">Still walking? This outing ends in %1$d minute.</item>

@@ -74,6 +74,9 @@ constructor(
 
     suspend fun session(id: Long): Session? = dao.session(id)?.toModel()
 
+    /** One outing as it changes, for its own page; null once it is gone. */
+    fun observeSession(id: Long): Flow<Session?> = dao.observeSession(id).map { it?.toModel() }
+
     /** The outings walked on city walks, oldest first (Phase 11). */
     val walkSessions: Flow<List<Session>> = dao.observeWalkSessions().map { rows -> rows.mapNotNull { it.toModel() } }
 

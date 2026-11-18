@@ -90,6 +90,15 @@ class MeasureFormatter(private val locale: Locale, val units: UnitSystem) {
         return Measure("%d:%02d".format(locale, minutes, seconds), unit)
     }
 
+    /**
+     * A height on the ground, or a climb: whole metres, or whole feet. Rounded to the nearest:
+     * it is an estimate, and says so in the words around it.
+     */
+    fun elevation(meters: Double): Measure = when (units) {
+        UnitSystem.METRIC -> Measure(decimal(meters, 0, 0), MeasureUnit.METER)
+        UnitSystem.IMPERIAL -> Measure(decimal(meters * FEET_PER_METER, 0, 0), MeasureUnit.FOOT)
+    }
+
     /** The same pace as whole minutes and seconds, for a sentence said aloud. */
     fun paceParts(secondsPerKm: Double): Pair<Int, Int> {
         val perUnit = if (units == UnitSystem.METRIC) secondsPerKm else Pace.secondsPerMile(secondsPerKm)
@@ -138,5 +147,6 @@ class MeasureFormatter(private val locale: Locale, val units: UnitSystem) {
         const val CM_PER_METER = 100.0
         const val TENS = 10.0
         const val SECONDS_PER_MINUTE = 60L
+        const val FEET_PER_METER = 3.280839895
     }
 }

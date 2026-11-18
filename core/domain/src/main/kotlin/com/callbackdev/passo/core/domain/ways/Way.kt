@@ -50,6 +50,9 @@ class Way internal constructor(private val source: WaySource) {
     val lengthMeters: Int get() = source.lengthMeters
     val stops: List<WayStop> get() = source.stops
 
+    /** The frame its map is drawn in, known without decoding the map. */
+    val frame: GeoBox get() = source.frame
+
     /** The stops that are stages: the stamps. */
     val stages: List<WayStop> by lazy { stops.filter { it.stage } }
 

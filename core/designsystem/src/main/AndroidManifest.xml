@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  What the reader shares by their own hand (a page of the year as an image, an outing's route as
+  an image or a GPX file) is written to the app's cache and handed to the app the reader picks
+  through this provider, for that one share. The app's one file provider: every feature that
+  shares goes through `SharedFiles`. No permission: the reader chooses where it goes.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.share"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/share_paths" />
+        </provider>
+    </application>
+
+</manifest>
