@@ -325,7 +325,8 @@ private fun Sentence(session: Session, format: MeasureFormatter) {
         R.string.outing_when,
         longDate(start.toLocalDate()),
         clockRange(start.hour * MINUTES_PER_HOUR + start.minute, end.hour * MINUTES_PER_HOUR + end.minute),
-        duration(minutes),
+        // How long it lasted is kept whole: «51 minutes», never «51» at a line's end.
+        duration(minutes).replace(' ', NO_BREAK),
     )
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -670,6 +671,7 @@ private val Compass.word: Int
     }
 
 private const val GPX_MIME = "application/gpx+xml"
+private const val NO_BREAK = '\u00A0'
 private const val MILLIS_PER_MINUTE = 60_000L
 private const val MINUTES_PER_HOUR = 60
 private const val SHARE_WIDTH = 360

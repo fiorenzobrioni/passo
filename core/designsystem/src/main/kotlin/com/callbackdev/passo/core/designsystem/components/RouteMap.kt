@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Density
@@ -141,7 +142,11 @@ fun RouteMapView(
                 .fillMaxSize()
                 .onSizeChanged { mapSize = it.toSize() }
                 .testTag(RouteMapTags.MAP)
-                .clearAndSetSemantics { this.contentDescription = contentDescription }
+                .clearAndSetSemantics {
+                    this.contentDescription = contentDescription
+                    // The bead that was touched, said after the route's own sentence.
+                    touched?.let { index -> currentBeads.getOrNull(index)?.let { stateDescription = it.label } }
+                }
                 .then(gestures)
                 .drawWithCache {
                     val projection = WayProjection(shape.frame, size.width, size.height, inset(size))

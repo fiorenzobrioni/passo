@@ -151,6 +151,15 @@ class ReadmeScreenshots {
         save("intervals-done")
     }
 
+    /** The page of an outing measured with GPS, inside a city Passo carries. */
+    @Test
+    fun outingRoute() {
+        compose.setContent {
+            PassoTheme { OutingScreen(OutingSamples.state(), onBack = {}, actions = OutingActions()) }
+        }
+        save("outing-route")
+    }
+
     private fun save(name: String) {
         compose.waitForIdle()
         val bitmap = compose.onRoot().captureToImage().asAndroidBitmap()

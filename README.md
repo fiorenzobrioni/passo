@@ -49,6 +49,9 @@ calories are estimates, and Passo says so.
     <td align="center"><img src="docs/screenshots/outing-editor.png" width="250" alt="Editing an outing: the signals at 25, 50 and 75 percent, each vibration with its pattern drawn beside it and felt at a touch, and the voice through headphones"><br><sub><b>Signals</b> you can feel or hear</sub></td>
   </tr>
   <tr>
+    <td align="center"><img src="docs/screenshots/outing-route.png" width="250" alt="The page of a brisk walk measured with GPS: goal reached, 45 minutes; its route through Milan drawn on the city's own map, with a dashed stretch covered by the steps and a bead at each kilometre; 4.26 km measured by satellite, 47 minutes in motion, a pace of 11:14 a kilometre"><br><sub><b>An outing's page</b>: where it went, measured</sub></td>
+  </tr>
+  <tr>
     <td align="center"><img src="docs/screenshots/way.png" width="250" alt="The Via Francigena under way: the map from the Great St Bernard Pass to Rome with the part walked, past Monteriggioni, 280 km to Rome"><br><sub><b>Ways</b>: a long way, walked from home</sub></td>
     <td align="center"><img src="docs/screenshots/way-stamps.png" width="250" alt="The stamps: one for each stage reached, from the Great St Bernard Pass to Cassio, each with its day"><br><sub><b>The stamps</b>, one a stage</sub></td>
     <td align="center"><img src="docs/screenshots/way-start.png" width="250" alt="Starting a way: from today, from 1 January (you would already be past Vetralla), or from your first day with Passo"><br><sub><b>A start in the past</b> places you at once</sub></td>
@@ -95,6 +98,7 @@ Italian). The phone's status bar is not in the pictures. The command that redraw
 - 📅 **History**: a day, week, month or year at a time, and a calendar of how close each day came.
 - 🚶 **Walks, found for you**: stretches of walking recognised in the steps already counted.
 - 🎯 **Outings**: a walk or run with a goal, with vibrations or a voice at the milestones you choose. Turn on «Measure with GPS» for one, and its distance is measured by satellite instead of estimated, with your pace by the kilometre or the mile.
+- 🧭 **An outing's page**: every outing has a page of its own, with one sentence and its numbers, each saying whether it is measured or estimated. With GPS: the route on a map you can zoom, drawn by Passo with no map service (on its own map of the city where it carries one), each kilometre with its pace, and how much you climbed. Share the route as an image or a GPX file, save it, or delete it.
 - ⏱️ **Japanese interval walk**: 3 slow minutes and 3 fast ones, five sets or more, each change told with a vibration of its own so the phone stays in your pocket; at the end, how many fast intervals were at pace.
 - 🏆 **Insights**: your streak, your best day, week and month, and the averages.
 - 🗓️ **Your year on foot**: a year told in pages, from your own days: the steps and how far they went, the months, your best day, your day of the week and your hour, the goal, the outings and the ways, against the year before. Open it from Insights or History any time; in December it waits for you on Today. Share a page as an image, through an app you pick.
