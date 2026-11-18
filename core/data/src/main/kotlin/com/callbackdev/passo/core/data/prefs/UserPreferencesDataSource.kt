@@ -12,6 +12,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.callbackdev.passo.core.domain.goals.GoalReached
 import com.callbackdev.passo.core.domain.metrics.sanitized
+import com.callbackdev.passo.core.domain.routes.GpsAnswer
 import com.callbackdev.passo.core.model.AppFont
 import com.callbackdev.passo.core.model.AppPalette
 import com.callbackdev.passo.core.model.Profile
@@ -134,6 +135,24 @@ constructor(private val dataStore: DataStore<Preferences>) {
 
     suspend fun markIntervalPresetSeeded() {
         dataStore.edit { it[Keys.INTERVAL_PRESET_SEEDED] = true }
+    }
+
+    /**
+     * What the reader last answered when Passo asked for the location permission
+     * (docs/adr/0016-location.md, decision 2): a refusal is never asked again by itself, and a
+     * grant the system took back («Only this time») is asked again without Passo's own screen,
+     * which is shown once. Not a setting: the reader changes it by answering, or in the system's
+     * own page, and it is not in the backup's file.
+     */
+    suspend fun gpsAnswer(): GpsAnswer {
+        val stored = dataStore.data
+            .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+            .first()[Keys.GPS_ANSWER]
+        return GpsAnswer.entries.firstOrNull { it.name == stored } ?: GpsAnswer.NEVER_ASKED
+    }
+
+    suspend fun setGpsAnswer(answer: GpsAnswer) {
+        dataStore.edit { it[Keys.GPS_ANSWER] = answer.name }
     }
 
     /** The last outing whose summary Today has shown and the reader put away. */
@@ -294,6 +313,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
         val INTERVAL_PRESET_SEEDED = booleanPreferencesKey("interval_preset_seeded")
         val SESSION_SUMMARY_SEEN = longPreferencesKey("session_summary_seen")
         val YEAR_CARD_CLOSED = intPreferencesKey("year_card_closed")
+        val GPS_ANSWER = stringPreferencesKey("gps_answer")
     }
 
     companion object {

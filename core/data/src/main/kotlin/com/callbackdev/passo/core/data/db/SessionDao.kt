@@ -132,9 +132,14 @@ abstract class SessionDao {
     @Query("DELETE FROM session_interval WHERE sessionId = :id")
     protected abstract suspend fun deleteIntervals(id: Long)
 
+    @Query("DELETE FROM step_length_sample WHERE sessionId = :id")
+    protected abstract suspend fun deleteStepLengthSamples(id: Long)
+
+    /** An outing with what belongs to it alone: its intervals, and what it said of the step. */
     @Transaction
     open suspend fun deleteSession(id: Long) {
         deleteIntervals(id)
+        deleteStepLengthSamples(id)
         deleteSessionRow(id)
     }
 }

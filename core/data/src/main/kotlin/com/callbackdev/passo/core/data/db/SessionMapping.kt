@@ -28,6 +28,7 @@ internal fun SessionPlanEntity.toModel(): SessionPlan? {
         position = position,
         lastUsedAtMillis = lastUsedAtMillis,
         intervals = IntervalSets(slowMinutes, fastMinutes, sets),
+        gps = gps,
     )
 }
 
@@ -45,6 +46,7 @@ internal fun SessionPlan.toEntity() = SessionPlanEntity(
     slowMinutes = intervals.slowMinutes,
     fastMinutes = intervals.fastMinutes,
     sets = intervals.sets,
+    gps = gps,
 )
 
 internal fun SessionRow.toModel(): Session? = session.toModel(intervals)
@@ -97,6 +99,11 @@ internal fun SessionEntity.toModel(intervals: List<SessionIntervalEntity> = empt
                 IntervalSplit(it.intervalIndex, it.fast, it.steps, it.movingMillis, it.zoneMillis)
             }
         },
+        gps = gps,
+        stepsMeters = stepsMeters,
+        measuredShare = measuredShare,
+        capAtMillis = capAtMillis,
+        capAskedForMillis = capAskedForMillis,
     )
 }
 
@@ -131,6 +138,11 @@ internal fun Session.toEntity() = SessionEntity(
     slowMinutes = intervals?.slowMinutes ?: 0,
     fastMinutes = intervals?.fastMinutes ?: 0,
     sets = intervals?.sets ?: 0,
+    gps = gps,
+    stepsMeters = stepsMeters,
+    measuredShare = measuredShare,
+    capAtMillis = capAtMillis,
+    capAskedForMillis = capAskedForMillis,
 )
 
 /** An outing's intervals as rows; none for any other outing, or one not yet written. */

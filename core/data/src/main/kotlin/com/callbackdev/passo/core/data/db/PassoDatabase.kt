@@ -19,6 +19,13 @@ import androidx.room.RoomDatabase
  * - v6: the interval walk (Phase 13): the sets of a plan and of an outing (`slowMinutes`,
  *   `fastMinutes`, `sets`, columns with defaults: a plan the protocol's 3, 3 and 5, an outing
  *   none), and each interval as walked (`session_interval`, a new table).
+ * - v7: the measured outing (Phase 15, docs/adr/0016-location.md): whether a plan and an outing
+ *   measure with GPS (`gps`, off for every one before it), an outing's distance by the steps
+ *   alone and the share that was measured (`stepsMeters`, `measuredShare`, none without GPS),
+ *   its own cap and the cap it was last asked about (`capAtMillis`, `capAskedForMillis`: none
+ *   for an outing from before, which reads as the longest outing from its start), and what its
+ *   clean stretches said of the step (`step_length_sample`, a new table). Numbers only: the
+ *   places are in another database (`routes.db`), which Android's cloud backup never carries.
  */
 @Database(
     entities = [
@@ -30,8 +37,9 @@ import androidx.room.RoomDatabase
         SessionEntity::class,
         WayJourneyEntity::class,
         SessionIntervalEntity::class,
+        StepLengthSampleEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -39,6 +47,7 @@ import androidx.room.RoomDatabase
         AutoMigration(from = 3, to = 4),
         AutoMigration(from = 4, to = 5),
         AutoMigration(from = 5, to = 6),
+        AutoMigration(from = 6, to = 7),
     ],
 )
 abstract class PassoDatabase : RoomDatabase() {

@@ -22,6 +22,7 @@ import com.callbackdev.passo.core.model.AppFont
 import com.callbackdev.passo.core.model.AppPalette
 import com.callbackdev.passo.core.model.ThemeMode
 import com.callbackdev.passo.core.tracking.GoalNotifier
+import com.callbackdev.passo.core.tracking.OutingStarter
 import com.callbackdev.passo.core.tracking.SessionControl
 import com.callbackdev.passo.core.tracking.StepTracking
 import com.callbackdev.passo.core.tracking.TrackingControl
@@ -50,6 +51,8 @@ class MainActivity : ComponentActivity() {
     @Inject lateinit var widgets: WidgetUpdates
 
     @Inject lateinit var goals: GoalNotifier
+
+    @Inject lateinit var outings: OutingStarter
 
     private var readiness by mutableStateOf(TrackingReadiness.READY)
 
@@ -91,6 +94,7 @@ class MainActivity : ComponentActivity() {
                 PassoRoot(
                     readiness = readiness,
                     onboardingCompleted = settings?.onboardingCompleted,
+                    outings = outings,
                     openWays = openWays,
                     onWaysOpened = { openWays = false },
                     openToday = openToday,
@@ -120,7 +124,7 @@ class MainActivity : ComponentActivity() {
         }
         lifecycleScope.launch {
             if (readiness == TrackingReadiness.READY && settingsRepository.settings.first().trackingEnabled) {
-                StepTracking.start(this@MainActivity)
+                StepTracking.start(this@MainActivity, fromApp = true)
             }
             // Back from the system's settings, where the goals' notifications may have been
             // turned on again: the evening reminder is armed once they can show.
@@ -132,6 +136,8 @@ class MainActivity : ComponentActivity() {
      * A launcher shortcut's outing, once per touch. Only while counting: an outing is measured
      * from the steps, and a paused count has none; Today then says why, with its button. Either
      * way Today comes forward, wherever the app was left: the card, or the reason, is there.
+     * Through the same door as a start from a page ([OutingStarter]): a plan measured with GPS
+     * asks for its permission here too, the first time.
      */
     private fun startOutingIfAsked(intent: Intent?) {
         val planId = intent?.getLongExtra(SessionControl.EXTRA_START_PLAN, 0L) ?: 0L
@@ -139,7 +145,7 @@ class MainActivity : ComponentActivity() {
         intent?.removeExtra(SessionControl.EXTRA_START_PLAN)
         openToday = true
         lifecycleScope.launch {
-            if (settingsRepository.settings.first().trackingEnabled) SessionControl.start(this@MainActivity, planId)
+            if (settingsRepository.settings.first().trackingEnabled) outings.start(planId)
         }
     }
 

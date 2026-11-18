@@ -64,6 +64,13 @@ data class CalibrationKey(val step: CalibratedStep) : NavKey
 @Serializable
 data class PlanEditorKey(val planId: Long?) : NavKey
 
+/**
+ * Passo's own words before Android asks for the location (PLANNING.md §11 Phase 15): opened by the
+ * start of an outing measured with GPS, the first time, over whichever page it started from.
+ */
+@Serializable
+data object GpsIntroKey : NavKey
+
 /** The Ways, from Insights and from a stage's notification (PLANNING.md §11 Phase 11). */
 @Serializable
 data object WaysKey : NavKey
@@ -171,6 +178,11 @@ class PassoNavigationState(
         } else if (selected != ShellTab.TODAY) {
             selected = ShellTab.TODAY
         }
+    }
+
+    /** Takes [key] off the top of what is on screen, if it is there: a page that has done its job. */
+    fun close(key: NavKey) {
+        if (currentKey == key) goBack()
     }
 
     /** The stacks on screen right now: Today's, then the selected tab's. */

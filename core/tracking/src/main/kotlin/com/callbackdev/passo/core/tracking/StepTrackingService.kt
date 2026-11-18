@@ -1,6 +1,7 @@
 package com.callbackdev.passo.core.tracking
 
 import android.app.ForegroundServiceStartNotAllowedException
+import android.app.Notification
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -8,6 +9,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.ServiceInfo
 import android.hardware.SensorManager
+import android.location.LocationManager
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
@@ -31,6 +33,8 @@ import com.callbackdev.passo.core.designsystem.format.intervalWord
 import com.callbackdev.passo.core.domain.goals.GoalReached
 import com.callbackdev.passo.core.domain.metrics.MetricsCalculator
 import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.routes.GpsDuty
+import com.callbackdev.passo.core.domain.routes.GpsReadiness
 import com.callbackdev.passo.core.domain.sessions.IntervalSchedule
 import com.callbackdev.passo.core.domain.sessions.SessionAnnouncement
 import com.callbackdev.passo.core.domain.sessions.SessionConstants
@@ -120,6 +124,15 @@ import javax.inject.Inject
  * processor awake while it counts ([SignalWakeLock], [SignalWake]): the steps then arrive as they
  * are taken, and every signal with them. The one wake lock of Passo's own besides the shutdown
  * flush's; let go at a pause, the end, or the service's.
+ *
+ * An outing the reader asked to be measured with GPS (Phase 15, docs/adr/0016-location.md) adds
+ * a second type to this service while it counts, `location`, by a second `startForeground()`, and
+ * reads the satellites through [LocationSource]: on while the reader walks, asleep two minutes
+ * after they stop, off at a pause and at the end ([GpsDuty]). Location is a while-in-use
+ * permission, so the type is asked for only where the reader is using the app (a page, a
+ * launcher's shortcut, a touch on a notification); a refusal, and a process the system restarted,
+ * leave the outing counting from the steps. Nothing of this runs for any other outing, nor with
+ * none: the service starts and stays `health`.
  */
 @AndroidEntryPoint
 class StepTrackingService : Service() {
@@ -151,6 +164,15 @@ class StepTrackingService : Service() {
     private lateinit var sensorSource: StepSensorSource
     private lateinit var powerManager: PowerManager
     private lateinit var signalWake: SignalWakeLock
+    private lateinit var locationSource: LocationSource
+
+    // Whether this service holds its `location` type now, in this process: asked for when an
+    // outing with GPS starts or resumes, dropped at its pause or end. A restarted process comes
+    // back without it, and cannot take it by itself.
+    private var locationTypeHeld = false
+
+    // What the receiver and the type did during the outing under way, for its one log row.
+    private val gpsLog = GpsLog()
 
     private var ledger: StepLedger? = null
     private var started = false
@@ -225,6 +247,11 @@ class StepTrackingService : Service() {
         signalWake = SignalWakeLock(powerManager) { detail ->
             ledger?.note(DiagnosticsEvent(System.currentTimeMillis(), DiagnosticsType.SIGNAL_WAKE, detail))
         }
+        // The fixes arrive on the main thread, where everything here runs: no locking.
+        locationSource = LocationSource(
+            manager = requireNotNull(getSystemService(LocationManager::class.java)) { "No LocationManager" },
+            executor = ContextCompat.getMainExecutor(this),
+        )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -237,33 +264,80 @@ class StepTrackingService : Service() {
         // Only today's: after midnight the last one would show yesterday's numbers.
         val content = displayedToday()?.let { steps -> shownContent ?: NotificationContent(steps) }
             ?: NotificationContent(null)
-        try {
-            ServiceCompat.startForeground(
-                this,
-                TrackingNotifications.NOTIFICATION_ID,
-                notifications.build(content),
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH,
-            )
-        } catch (e: SecurityException) {
-            Log.w(TAG, "The health service type was refused", e)
-            stopSelf()
-            return START_NOT_STICKY
-        } catch (e: ForegroundServiceStartNotAllowedException) {
-            Log.w(TAG, "Foreground start not allowed from here", e)
+        // With the types it already holds: the app starts this service again every time it is
+        // opened, and every button of the notification is a start too. With `health` alone here,
+        // each of them would take the `location` type away from an outing with GPS.
+        if (!enterForeground(notifications.build(content), withLocation = locationTypeHeld)) {
             stopSelf()
             return START_NOT_STICKY
         }
+        // The reader has the app in front of them: the one start, besides an outing's own
+        // commands, from which the `location` type may be asked for.
+        val fromApp = intent?.getBooleanExtra(StepTracking.EXTRA_FROM_APP, false) == true
         if (intent?.action in SESSION_ACTIONS) commands.trySend(requireNotNull(intent))
         if (!started) {
             started = true
-            startTracking()
-        } else if (interactive) {
-            // Opened from the app, so someone is looking: the numbers catch up at once, and a
-            // forgotten outing is closed where it ended.
-            checkSession()
-            notifyNow()
+            startTracking(fromApp)
+        } else {
+            // An outing with GPS that lost its receiver to a restarted process takes it back as
+            // soon as the app is brought forward, with no touch; and with the receiver back, the
+            // wake lock that lets its steps steer it, on a phone that needs one.
+            if (fromApp && tracker?.session?.gps == true && !locationTypeHeld) {
+                applyRegistration(mayEngageGps = true)
+            }
+            if (interactive) {
+                // Opened from the app, so someone is looking: the numbers catch up at once, and
+                // a forgotten outing is closed where it ended.
+                checkSession()
+                notifyNow()
+            }
         }
         return START_STICKY
+    }
+
+    /**
+     * Puts the service in the foreground as `health`, and as `location` too when [withLocation]
+     * asks. Returns false only when `health` itself was refused, and the service cannot run.
+     *
+     * A refused `location` never stops the count (no lost steps): it is logged, and the service
+     * stays `health`, the outing going on from the steps. Any failure is caught there, not only
+     * the documented ones: what a phone answers to a second type on a running service is the
+     * very thing Phase 15 proves on a device (docs/adr/0016-location.md, decision 4).
+     */
+    private fun enterForeground(notification: Notification, withLocation: Boolean): Boolean {
+        if (withLocation) {
+            try {
+                ServiceCompat.startForeground(
+                    this,
+                    TrackingNotifications.NOTIFICATION_ID,
+                    notification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH or ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION,
+                )
+                if (!locationTypeHeld) gpsLog.onType(added = true)
+                locationTypeHeld = true
+                return true
+            } catch (e: RuntimeException) {
+                Log.w(TAG, "The location service type was refused", e)
+                gpsLog.onType(added = false, refusal = e)
+                stopReceiver(asleep = false)
+            }
+        }
+        locationTypeHeld = false
+        return try {
+            ServiceCompat.startForeground(
+                this,
+                TrackingNotifications.NOTIFICATION_ID,
+                notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH,
+            )
+            true
+        } catch (e: SecurityException) {
+            Log.w(TAG, "The health service type was refused", e)
+            false
+        } catch (e: ForegroundServiceStartNotAllowedException) {
+            Log.w(TAG, "Foreground start not allowed from here", e)
+            false
+        }
     }
 
     override fun onDestroy() {
@@ -275,6 +349,7 @@ class StepTrackingService : Service() {
         signalWake.hold(false)
         unregisterReceivers()
         sensorSource.close()
+        locationSource.close()
         // Whatever is still buffered is written on a scope that outlives this one. If the
         // process dies first, the stored state is older than the counter and the next sample
         // recomputes the delta: nothing is lost, only the minutes may shift.
@@ -303,7 +378,7 @@ class StepTrackingService : Service() {
         super.onDestroy()
     }
 
-    private fun startTracking() {
+    private fun startTracking(fromApp: Boolean) {
         scope.launch {
             // A paused count is never started by a side door (an old notification's button, a
             // shortcut): the steps of the pause would be added at the first sample.
@@ -334,12 +409,17 @@ class StepTrackingService : Service() {
             // A reminder about to read the count asks for the sensor's batch first.
             link.attach { withContext(Dispatchers.Main.immediate) { flushSensor() } }
             launch { sensorSource.readings.collect(::onReading) }
+            launch { locationSource.readings.collect(::onLocationReading) }
             launch { preferencesSource.data.distinctUntilChanged().collect(::onPreferences) }
             launch { for (command in commands) onSessionCommand(command) }
             persist()
             liveSteps.setServiceRunning(true)
             widgets.notify(WidgetEvent.TRACKING_STATE)
             onScreenChanged(powerManager.isInteractive)
+            // A process restarted mid-outing and started again by the reader opening the app:
+            // the outing with GPS takes its receiver back here. Started by the system alone, it
+            // goes on from the steps until the app is brought forward.
+            if (fromApp) applyGps(mayEngage = true)
             // The launcher keeps the shortcuts as they were last written, icons included, until
             // a plan is started, saved or deleted: a list written by an older version outlived it
             // (owner, 15 Nov 2026: every shortcut still wore the same mark). Written again on each
@@ -445,6 +525,7 @@ class StepTrackingService : Service() {
             if (on) {
                 // What was batched while the screen was off, then live events.
                 flushSensor()
+                locationSource.requestFlush()
                 catchUpDay()
                 checkSession()
                 applyRegistration()
@@ -703,14 +784,19 @@ class StepTrackingService : Service() {
      * with the screen off. Paused, over, or none: exactly the registration of every other
      * moment (docs/adr/0002-sensor-reporting.md).
      */
-    private fun applyRegistration(reconsiderWake: Boolean = true) {
+    private fun applyRegistration(reconsiderWake: Boolean = true, mayEngageGps: Boolean = false) {
+        // First, so that the wake lock below knows whether the receiver is there to steer.
+        applyGps(mayEngageGps)
         val measuring = tracker?.session?.state == SessionState.ACTIVE
         // A phone its counter cannot wake, an outing with signals: the processor is kept awake
         // while it counts, and the steps come as they are taken (docs/adr/0013-interval-walks.md).
         if (reconsiderWake) {
             signalWake.hold(
                 SignalWake.needed(
-                    session = tracker?.session,
+                    // An outing with GPS keeps the processor awake so that its steps steer the
+                    // receiver: without the receiver (refused, or lost to a restarted process)
+                    // it is an outing like any other, awake only for its signals.
+                    session = tracker?.session?.let { if (locationTypeHeld) it else it.copy(gps = false) },
                     wakeUpCounter = sensorSource.wakeUpSensor != null,
                     signalsAllowed = sessionNotifications.signalsAllowed(),
                     nowMillis = System.currentTimeMillis(),
@@ -729,6 +815,81 @@ class StepTrackingService : Service() {
         }
         sensorSource.register(latency, wakeUp = measuring)
         startCountdown()
+    }
+
+    /**
+     * The receiver and the service's `location` type, as the outing stands now ([GpsDuty]): on
+     * while an outing with GPS counts and the reader walks, asleep two minutes after they stop,
+     * off at a pause and at the end. Asked at whatever arrives (a step batch, a batch of fixes,
+     * a command, the screen), never by a timer.
+     *
+     * @param mayEngage the reader is using the app right now (a page, a launcher's shortcut, a
+     *   touch on a notification): only then is the `location` type asked for, location being a
+     *   while-in-use permission. Without it a service that does not hold the type leaves things
+     *   as they are, and the outing goes on from the steps.
+     */
+    private fun applyGps(mayEngage: Boolean = false) {
+        val current = tracker
+        val now = System.currentTimeMillis()
+        val duty = GpsDuty.state(
+            session = current?.session,
+            canKeepGoing = current?.canKeepGoing(now) == true,
+            lastMotionAtMillis = current?.lastMotionAtMillis ?: now,
+            nowMillis = now,
+        )
+        if (duty == GpsDuty.State.OFF) {
+            stopReceiver(asleep = false)
+            if (locationTypeHeld) enterForeground(currentNotification(), withLocation = false)
+            return
+        }
+        if (!locationTypeHeld) {
+            if (!mayEngage || Gps.readiness(this) != GpsReadiness.READY) return
+            enterForeground(currentNotification(), withLocation = true)
+            if (!locationTypeHeld) return
+        }
+        if (duty == GpsDuty.State.ASLEEP) {
+            stopReceiver(asleep = true)
+            return
+        }
+        val wasActive = locationSource.active
+        val granted = locationSource.start(batched = !interactive)
+        if (!wasActive) gpsLog.onAsked(SystemClock.elapsedRealtime(), granted)
+    }
+
+    private fun stopReceiver(asleep: Boolean) {
+        if (!locationSource.active) return
+        locationSource.stop()
+        gpsLog.onStopped(asleep)
+    }
+
+    /** The counting notification as it stands, for a `startForeground()` that only changes the types. */
+    private fun currentNotification(): Notification =
+        notifications.build(shownContent ?: NotificationContent(displayedToday()))
+
+    /**
+     * The fixes of an outing with GPS. Counted here for the log's row; a batch is also a moment
+     * to ask whether the reader still walks, since with no step no step batch comes to ask it.
+     */
+    private fun onLocationReading(reading: LocationReading) {
+        when (reading) {
+            is LocationReading.Fixes -> {
+                gpsLog.onFixes(
+                    elapsedMillis = reading.fixes.map { it.elapsedRealtimeNanos / NANOS_PER_MILLI },
+                    accuracyMeters = reading.fixes.map { if (it.hasAccuracy()) it.accuracy else Float.MAX_VALUE },
+                    screenOn = interactive,
+                )
+                applyGps()
+            }
+
+            LocationReading.FlushCompleted -> Unit
+        }
+    }
+
+    /** An outing with GPS, in one log row when it ends: what the receiver and the type did. */
+    private fun logGpsSummary() {
+        if (!gpsLog.used) return
+        val detail = gpsLog.drain(wakeUpCounter = sensorSource.wakeUpSensor != null)
+        ledger?.note(DiagnosticsEvent(System.currentTimeMillis(), DiagnosticsType.GPS, detail))
     }
 
     /**
@@ -851,6 +1012,10 @@ class StepTrackingService : Service() {
         if (steps <= 0) return
         onSessionSignals(tracker.onSteps(atWallMillis, steps))
         sessionDirty = true
+        // The steps lead: their batch has already woken the processor, and asks for the fixes
+        // in that same wake; and a step is what wakes a receiver put to sleep at a stop.
+        locationSource.requestFlush()
+        applyGps()
         dropExpiredKeepGoing()
         publishSession()
         if (this.tracker?.untilIntervalSignal() != null || pendingChange != null) afterIntervalBatch()
@@ -913,6 +1078,7 @@ class StepTrackingService : Service() {
         // The goal is the last interval's end: its long pulse, never a change on top of it.
         pendingChange = null
         logIntervalSummary(session)
+        if (session.gps) logGpsSummary()
         // Kept a while after its goal or a long stillness, for "Keep going" and "Resume";
         // otherwise it is over here. The voice is let go once its last sentence is said.
         val reopenable = finished.kept && tracker?.canKeepGoing(System.currentTimeMillis()) == true
@@ -964,6 +1130,8 @@ class StepTrackingService : Service() {
         if (session.state != SessionState.FINISHED) return
         if (!now && current.canKeepGoing(System.currentTimeMillis())) return
         tracker = null
+        // The receiver stayed on while the end could be taken back: it cannot any more.
+        applyGps()
         publishSession()
         if (sessionNotifications.endShowing()) {
             val units = preferences?.settings?.units ?: UnitPreference.SYSTEM
@@ -1005,11 +1173,12 @@ class StepTrackingService : Service() {
 
                 SessionControl.ACTION_PAUSE -> changeSession { tracker -> tracker.pause(System.currentTimeMillis()) }
 
-                SessionControl.ACTION_RESUME -> changeSession { tracker -> tracker.resume(System.currentTimeMillis()) }
+                SessionControl.ACTION_RESUME ->
+                    changeSession(mayEngageGps = true) { tracker -> tracker.resume(System.currentTimeMillis()) }
 
                 SessionControl.ACTION_KEEP_GOING -> {
                     var crossed: List<SessionSignal> = emptyList()
-                    val reopened = changeSession { tracker ->
+                    val reopened = changeSession(mayEngageGps = true) { tracker ->
                         tracker.keepGoing(System.currentTimeMillis())?.also { crossed = it } != null
                     }
                     if (reopened) {
@@ -1040,13 +1209,13 @@ class StepTrackingService : Service() {
      * Pause, resume, keep going: after the sensor's batch, so the steps up to the touch land on
      * the right side of it. Returns whether it changed anything.
      */
-    private suspend fun changeSession(change: (SessionTracker) -> Boolean): Boolean {
+    private suspend fun changeSession(mayEngageGps: Boolean = false, change: (SessionTracker) -> Boolean): Boolean {
         flushSensor()
         val tracker = tracker ?: return false
         if (!change(tracker)) return false
         sessionDirty = true
         persist()
-        applyRegistration()
+        applyRegistration(mayEngageGps = mayEngageGps)
         notifyNow()
         publishSession()
         widgets.notify(WidgetEvent.TRACKING_STATE)
@@ -1079,14 +1248,21 @@ class StepTrackingService : Service() {
         val now = System.currentTimeMillis()
         val day = today()
         val todaySteps = displayedToday() ?: repository.stepsOn(day)
-        val session = SessionPlans.start(plan, now, day, todaySteps, current.settings.dailyGoalSteps) ?: return
+        // Measured with GPS when the plan asks for it and the reader and the phone allow it right
+        // now: decided here, for every door alike (a page, a shortcut, the reminder's "Walk
+        // now"), and frozen in the outing. Nothing is asked from here: the permission is the
+        // app's to ask, before the command is sent.
+        val withGps = plan.gps && Gps.readiness(this) == GpsReadiness.READY
+        val session = SessionPlans.start(plan, now, day, todaySteps, current.settings.dailyGoalSteps, withGps)
+            ?: return
         val saved = persistMutex.withLock { sessions.insert(session) }
         if (plan.id != 0L) sessions.markPlanUsed(plan.id, now)
         tracker = newTracker(saved, current.profile)
         if (saved.voice != SessionVoice.OFF && sessionNotifications.signalsAllowed()) {
             speak(SessionAnnouncement.started(saved), saved)
         }
-        applyRegistration()
+        // A start is the reader using the app, from every door there is: the type may be asked.
+        applyRegistration(mayEngageGps = true)
         notifyNow()
         publishSession()
         widgets.notify(WidgetEvent.TRACKING_STATE)
@@ -1192,6 +1368,7 @@ class StepTrackingService : Service() {
         const val NOTIFY_INTERVAL_MS = 5_000L
         const val MILLIS_PER_MINUTE = 60_000L
         const val MINUTES_PER_HOUR = 60
+        const val NANOS_PER_MILLI = 1_000_000L
 
         /** HTC and a few other vendors' fast power-off, which skips ACTION_SHUTDOWN. */
         const val ACTION_QUICKBOOT_POWEROFF = "android.intent.action.QUICKBOOT_POWEROFF"

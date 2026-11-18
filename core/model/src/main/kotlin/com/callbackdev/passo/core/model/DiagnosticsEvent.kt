@@ -51,4 +51,14 @@ enum class DiagnosticsType {
      * export shows it never outlives the outing. Until 5 Oct 2026, also a row when it was taken.
      */
     SIGNAL_WAKE,
+
+    /**
+     * An outing measured with GPS, in one row when it ends (Phase 15, docs/adr/0016-location.md):
+     * how many fixes came and how many were good enough, in what batches and how far apart with
+     * the screen off, how long the first one took, how often the receiver slept, and whether the
+     * service was given its `location` type each time it asked. Counts and delays only, never a
+     * place: this log is in the database Android's backup carries. A field test reads from it
+     * what the phone did, instead of guessing.
+     */
+    GPS,
 }

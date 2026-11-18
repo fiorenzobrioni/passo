@@ -12,6 +12,12 @@ import com.callbackdev.passo.core.model.SessionVoice
  * brings the steps on time by itself (ADR 0009), and an outing with no signal has nothing to tell
  * on time: its end and its numbers come from the steps' own timestamps whenever they arrive.
  *
+ * An outing measured with GPS needs its steps on time too, signals or not
+ * (docs/adr/0016-location.md decision 5, amended 18 Nov 2026): there the steps steer the
+ * receiver, which sleeps when they stop and wakes at the next one. On a phone nothing can wake,
+ * a receiver put to sleep with no signal to keep the processor up would stay asleep until the
+ * screen came on, and the rest of the walk would be laid from the steps.
+ *
  * Awake, the processor receives the counter's steps as they are taken, and the signals ride on
  * them as they always do: no alarm. Paused, over or with no outing, it sleeps.
  *
@@ -28,14 +34,14 @@ object SignalWake {
      *
      * @param wakeUpCounter the phone has a wake-up step counter: then never.
      * @param signalsAllowed the signals would reach the reader (notifications and the outings'
-     *   channel on): a silenced outing tells nothing, on time or late.
+     *   channel on): a silenced outing tells nothing, on time or late. An outing with GPS holds
+     *   it either way: its steps are for the receiver, not for the reader's ear.
      */
     fun needed(session: Session?, wakeUpCounter: Boolean, signalsAllowed: Boolean, nowMillis: Long): Boolean =
         session != null &&
             session.state == SessionState.ACTIVE &&
             !wakeUpCounter &&
-            signalsAllowed &&
-            (session.vibrate || session.voice != SessionVoice.OFF) &&
+            (session.gps || (signalsAllowed && (session.vibrate || session.voice != SessionVoice.OFF))) &&
             nowMillis < letGoAt(session)
 
     /**
@@ -50,7 +56,7 @@ object SignalWake {
 
     /** Whether an outing started from [plan] would, on this phone: what the editor says. */
     fun neededFor(plan: SessionPlan, wakeUpCounter: Boolean): Boolean =
-        !wakeUpCounter && (plan.vibrate || plan.voice != SessionVoice.OFF)
+        !wakeUpCounter && (plan.gps || plan.vibrate || plan.voice != SessionVoice.OFF)
 
     /**
      * The longest it is held at once, whatever happens: the longest outing Passo keeps open, and

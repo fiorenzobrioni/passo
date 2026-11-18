@@ -105,6 +105,12 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
         return IntervalSchedule.of(current)?.untilSignal(current.totals.movingMillis)
     }
 
+    /**
+     * The last step seen, the ones kept aside after an end that can be taken back included: what
+     * says whether the reader is walking now, whichever side of the end they are on.
+     */
+    val lastMotionAtMillis: Long get() = overtimeLastEvent ?: session.lastStepAtMillis
+
     /** Accounts [steps] taken at [atMillis]; returns what to tell, in order. */
     fun onSteps(atMillis: Long, steps: Int): List<SessionSignal> {
         if (steps <= 0) return emptyList()

@@ -68,6 +68,27 @@ class SignalWakeTest {
         assertThat(SignalWake.neededFor(plan.copy(vibrate = false), wakeUpCounter = false)).isFalse()
     }
 
+    @Test
+    fun `an outing with GPS keeps it awake with no signal at all, on a phone its counter cannot wake`() {
+        // The steps steer the receiver there: asleep at a stop, awake at the next step.
+        val silent = counting.copy(gps = true, vibrate = false, voice = SessionVoice.OFF)
+
+        assertThat(SignalWake.needed(silent, wakeUpCounter = false, signalsAllowed = true, nowMillis = 0)).isTrue()
+        assertThat(SignalWake.needed(silent, wakeUpCounter = false, signalsAllowed = false, nowMillis = 0)).isTrue()
+        assertThat(SignalWake.needed(silent, wakeUpCounter = true, signalsAllowed = true, nowMillis = 0)).isFalse()
+        assertThat(SignalWake.needed(silent.copy(state = SessionState.PAUSED), false, true, 0)).isFalse()
+        assertThat(SignalWake.needed(silent, false, true, nowMillis = SignalWake.letGoAt(silent))).isFalse()
+    }
+
+    @Test
+    fun `the editor says it for a silent plan with GPS too, on such a phone only`() {
+        val silent = SessionPlans.NEW.copy(gps = true, vibrate = false, voice = SessionVoice.OFF)
+
+        assertThat(SignalWake.neededFor(silent, wakeUpCounter = false)).isTrue()
+        assertThat(SignalWake.neededFor(silent, wakeUpCounter = true)).isFalse()
+        assertThat(SignalWake.neededFor(silent.copy(gps = false), wakeUpCounter = false)).isFalse()
+    }
+
     private companion object {
         const val MINUTE = 60_000L
     }

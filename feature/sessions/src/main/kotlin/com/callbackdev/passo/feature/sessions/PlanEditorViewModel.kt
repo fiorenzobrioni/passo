@@ -22,6 +22,7 @@ import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.UnitSystem
+import com.callbackdev.passo.core.tracking.Gps
 import com.callbackdev.passo.core.tracking.SessionHaptics
 import com.callbackdev.passo.core.tracking.SessionShortcuts
 import com.callbackdev.passo.core.tracking.SessionSpeech
@@ -56,6 +57,8 @@ import kotlin.math.ceil
  * @property wakeUpCounter the phone has a wake-up step counter: an outing's signals reach it on
  *   time with the screen off by themselves; without it, Passo keeps the phone awake for them
  *   while the outing counts (docs/adr/0013-interval-walks.md), and the editor says so.
+ * @property canMeasureWithGps the phone has a satellite receiver: without one «Measure with GPS»
+ *   is not offered (docs/adr/0016-location.md).
  */
 @Immutable
 data class PlanEditorState(
@@ -69,6 +72,7 @@ data class PlanEditorState(
     val canVibrate: Boolean,
     val voiceAvailability: VoiceAvailability = VoiceAvailability.UNKNOWN,
     val wakeUpCounter: Boolean = true,
+    val canMeasureWithGps: Boolean = false,
 ) {
     val changed: Boolean get() = draft != original
 }
@@ -117,6 +121,7 @@ constructor(
                 restOfDaySteps = SessionPlans.restOfDay(steps, settings.dailyGoalSteps),
                 canVibrate = SessionHaptics.available(context),
                 wakeUpCounter = StepTracking.hasWakeUpStepCounter(context),
+                canMeasureWithGps = Gps.hasReceiver(context),
             )
         }
     }
@@ -182,6 +187,12 @@ constructor(
     fun milestone(milestone: SessionMilestone, on: Boolean) = edit {
         it.draft.copy(milestones = if (on) it.draft.milestones + milestone else it.draft.milestones - milestone)
     }
+
+    /**
+     * «Measure with GPS». Only the plan's wish is kept here: the permission is asked when an
+     * outing with it first starts, in context, never from the editor.
+     */
+    fun gps(on: Boolean) = edit { it.draft.copy(gps = on) }
 
     fun vibrate(on: Boolean) = edit { it.draft.copy(vibrate = on) }
 

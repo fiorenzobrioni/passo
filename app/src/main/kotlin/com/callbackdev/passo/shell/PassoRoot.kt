@@ -1,5 +1,9 @@
 package com.callbackdev.passo.shell
 
+import android.Manifest
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.FastOutLinearInEasing
@@ -31,6 +35,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,12 +44,16 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.callbackdev.passo.core.designsystem.theme.PassoMotion
 import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.designsystem.theme.reducedMotion
+import com.callbackdev.passo.core.domain.routes.GpsStartStep
+import com.callbackdev.passo.core.tracking.Gps
+import com.callbackdev.passo.core.tracking.OutingStarter
 import com.callbackdev.passo.core.tracking.TrackingReadiness
 import com.callbackdev.passo.feature.guide.GuideRoute
 import com.callbackdev.passo.feature.history.HistoryRoute
@@ -52,6 +61,7 @@ import com.callbackdev.passo.feature.history.HistoryTarget
 import com.callbackdev.passo.feature.insights.InsightsRoute
 import com.callbackdev.passo.feature.onboarding.NoSensorScreen
 import com.callbackdev.passo.feature.onboarding.OnboardingRoute
+import com.callbackdev.passo.feature.sessions.GpsIntroScreen
 import com.callbackdev.passo.feature.sessions.PlanEditorRoute
 import com.callbackdev.passo.feature.sessions.SessionsRoute
 import com.callbackdev.passo.feature.settings.SettingsRoute
@@ -61,6 +71,7 @@ import com.callbackdev.passo.feature.ways.ContinentRoute
 import com.callbackdev.passo.feature.ways.WayRoute
 import com.callbackdev.passo.feature.ways.WaysRoute
 import com.callbackdev.passo.feature.year.YearRoute
+import kotlinx.coroutines.launch
 
 /**
  * The shell (PLANNING.md §11 Phase 3). Three questions before a page: can this phone count at
@@ -73,11 +84,14 @@ import com.callbackdev.passo.feature.year.YearRoute
  * @param openWays a stage's notification was touched: the Ways page opens, once ([onWaysOpened]).
  * @param openToday a launcher's shortcut started an outing: Today comes forward, with its card,
  *   once ([onTodayOpened]).
+ * @param outings the door every start of an outing goes through: when one waits for the reader's
+ *   word on the location permission, the pages show Passo's own screen and the system's request.
  */
 @Composable
 fun PassoRoot(
     readiness: TrackingReadiness,
     onboardingCompleted: Boolean?,
+    outings: OutingStarter,
     openWays: Boolean = false,
     onWaysOpened: () -> Unit = {},
     openToday: Boolean = false,
@@ -87,7 +101,7 @@ fun PassoRoot(
         readiness == TrackingReadiness.NO_SENSOR -> NoSensorScreen()
         onboardingCompleted == null -> Surface(Modifier.fillMaxSize()) { }
         !onboardingCompleted -> OnboardingRoute()
-        else -> MainPages(openWays, onWaysOpened, openToday, onTodayOpened)
+        else -> MainPages(outings, openWays, onWaysOpened, openToday, onTodayOpened)
     }
 }
 
@@ -103,8 +117,24 @@ fun PassoRoot(
  * the bar itself, so they are laid out to the pixel where the old `Scaffold` put them.
  */
 @Composable
-private fun MainPages(openWays: Boolean, onWaysOpened: () -> Unit, openToday: Boolean, onTodayOpened: () -> Unit) {
+private fun MainPages(
+    outings: OutingStarter,
+    openWays: Boolean,
+    onWaysOpened: () -> Unit,
+    openToday: Boolean,
+    onTodayOpened: () -> Unit,
+) {
     val nav = rememberPassoNavigationState()
+    // An outing measured with GPS, waiting for the reader's word on the location permission
+    // (docs/adr/0016-location.md, decision 2): asked here, where the activity is, for every door
+    // an outing starts from. The first time, Passo's own screen comes before the system's
+    // request; after a grant the system took back, the request alone. Either answer starts it.
+    val scope = rememberCoroutineScope()
+    val waiting by outings.waiting.collectAsStateWithLifecycle()
+    val locationRequest = rememberLauncherForActivityResult(RequestMultiplePermissions()) { granted ->
+        nav.close(GpsIntroKey)
+        scope.launch { outings.answered(preciseGranted = granted[Manifest.permission.ACCESS_FINE_LOCATION] == true) }
+    }
     LaunchedEffect(openWays) {
         if (openWays) {
             nav.navigate(WaysKey)
@@ -116,6 +146,14 @@ private fun MainPages(openWays: Boolean, onWaysOpened: () -> Unit, openToday: Bo
             nav.showToday()
             onTodayOpened()
         }
+    }
+    // After Today has come forward for a launcher's shortcut, which clears what was over it:
+    // asked before, Passo's own screen would be cleared with the rest and the outing left waiting.
+    LaunchedEffect(waiting) {
+        val outing = waiting?.takeIf { !it.shown } ?: return@LaunchedEffect
+        // Once: a page drawn again by a rotation must not ask a second time.
+        outings.shown()
+        if (outing.step == GpsStartStep.EXPLAIN) nav.navigate(GpsIntroKey) else locationRequest.launch(Gps.PERMISSIONS)
     }
     val reduced = reducedMotion()
     val density = LocalDensity.current
@@ -172,6 +210,23 @@ private fun MainPages(openWays: Boolean, onWaysOpened: () -> Unit, openToday: Bo
             SessionsRoute(onBack = nav::goBack, onEdit = { open(PlanEditorKey(it)) }, onOpenWays = { open(WaysKey) })
         }
         entry<PlanEditorKey> { key -> PlanEditorRoute(planId = key.planId, onDone = nav::goBack) }
+        entry<GpsIntroKey> {
+            // Back, by the bar's arrow or the system's, is neither answer: nothing is
+            // remembered, and nothing starts.
+            val leave = {
+                outings.cancelled()
+                nav.goBack()
+            }
+            BackHandler(onBack = leave)
+            GpsIntroScreen(
+                onContinue = { locationRequest.launch(Gps.PERMISSIONS) },
+                onNotNow = {
+                    nav.goBack()
+                    scope.launch { outings.declined() }
+                },
+                onBack = leave,
+            )
+        }
         entry<WaysKey> {
             WaysRoute(
                 onBack = nav::goBack,

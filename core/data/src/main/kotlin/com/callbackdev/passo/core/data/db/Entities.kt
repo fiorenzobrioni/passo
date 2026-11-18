@@ -77,6 +77,7 @@ data class SessionPlanEntity(
     @ColumnInfo(defaultValue = "3") val slowMinutes: Int = 3,
     @ColumnInfo(defaultValue = "3") val fastMinutes: Int = 3,
     @ColumnInfo(defaultValue = "5") val sets: Int = 5,
+    @ColumnInfo(defaultValue = "0") val gps: Boolean = false,
 )
 
 /**
@@ -116,6 +117,27 @@ data class SessionEntity(
     @ColumnInfo(defaultValue = "0") val slowMinutes: Int = 0,
     @ColumnInfo(defaultValue = "0") val fastMinutes: Int = 0,
     @ColumnInfo(defaultValue = "0") val sets: Int = 0,
+    @ColumnInfo(defaultValue = "0") val gps: Boolean = false,
+    @ColumnInfo(defaultValue = "NULL") val stepsMeters: Double? = null,
+    @ColumnInfo(defaultValue = "NULL") val measuredShare: Double? = null,
+    @ColumnInfo(defaultValue = "NULL") val capAtMillis: Long? = null,
+    @ColumnInfo(defaultValue = "NULL") val capAskedForMillis: Long? = null,
+)
+
+/**
+ * What a clean stretch of an outing with GPS said of the reader's step (Phase 15, for Phase 17 to
+ * learn from; docs/adr/0016-location.md decision 12): measured from end to end at a steady
+ * [cadence], so many [steps] over so many [meters]. Numbers, never places: this table is in
+ * `passo.db`, which Android's backup carries, and the route it came from is not. Deleted with
+ * its outing.
+ */
+@Entity(tableName = "step_length_sample", indices = [Index("sessionId")])
+data class StepLengthSampleEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val sessionId: Long,
+    val cadence: Int,
+    val steps: Int,
+    val meters: Double,
 )
 
 /**

@@ -35,6 +35,9 @@ enum class TrackingReadiness {
 object StepTracking {
     private const val TAG = "StepTracking"
 
+    /** On the service's start intent: it comes from the activity, in front of the reader. */
+    internal const val EXTRA_FROM_APP = "com.callbackdev.passo.extra.FROM_APP"
+
     fun readiness(context: Context): TrackingReadiness = when {
         !hasStepCounter(context) -> TrackingReadiness.NO_SENSOR
         !hasActivityRecognition(context) -> TrackingReadiness.PERMISSION_NEEDED
@@ -93,11 +96,19 @@ object StepTracking {
      * Callers must be allowed to start a foreground service: the app in the foreground, or one
      * of the exempt broadcasts (`BOOT_COMPLETED`, `MY_PACKAGE_REPLACED`). The `health` type is
      * not among those Android 15 forbids from `BOOT_COMPLETED`.
+     *
+     * @param fromApp the reader has the app in front of them (the activity's own start). Only
+     *   then may the service take its `location` type back for an outing with GPS that lost it
+     *   to a restarted process: location is a while-in-use permission, and a broadcast is not a
+     *   use (docs/adr/0016-location.md, decision 4).
      */
-    fun start(context: Context): Boolean {
+    fun start(context: Context, fromApp: Boolean = false): Boolean {
         if (readiness(context) != TrackingReadiness.READY) return false
         return try {
-            ContextCompat.startForegroundService(context, Intent(context, StepTrackingService::class.java))
+            ContextCompat.startForegroundService(
+                context,
+                Intent(context, StepTrackingService::class.java).putExtra(EXTRA_FROM_APP, fromApp),
+            )
             true
         } catch (e: ForegroundServiceStartNotAllowedException) {
             // Only reachable from a context that is not exempt; the next app open retries.

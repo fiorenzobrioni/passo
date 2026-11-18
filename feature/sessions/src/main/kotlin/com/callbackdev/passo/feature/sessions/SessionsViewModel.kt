@@ -13,6 +13,7 @@ import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.UnitPreference
+import com.callbackdev.passo.core.tracking.OutingStarter
 import com.callbackdev.passo.core.tracking.SessionControl
 import com.callbackdev.passo.core.tracking.SessionShortcuts
 import com.callbackdev.passo.core.tracking.StepTracking
@@ -73,6 +74,7 @@ constructor(
     private val sessions: SessionRepository,
     private val settingsRepository: SettingsRepository,
     private val control: TrackingControl,
+    private val outings: OutingStarter,
     tracking: TrackingRepository,
     liveSteps: LiveSteps,
     liveSession: LiveSession,
@@ -120,8 +122,9 @@ constructor(
         readiness.value = StepTracking.readiness(context)
     }
 
+    /** Through the one door every start takes: a plan measured with GPS asks its permission there. */
     fun start(planId: Long) {
-        SessionControl.start(context, planId)
+        viewModelScope.launch { outings.start(planId) }
     }
 
     fun pause() {
