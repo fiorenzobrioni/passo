@@ -38,10 +38,12 @@ so they are uniform"):
   14 (more ways, beyond Europe), in archive 01 with Phases 0 to 8 and 10; Phase 12 in archive 03.
 - **Done on 2 Nov 2026**: Phase 12, Your year on foot (archive 03), checked on a device by the owner.
 - **Not started**: Phase 9, Google Play (optional, later; §11, below).
-- **Planned, not started** (owner, 18 Nov 2026): Phases 15 to 20, location for an outing that
-  asks for it (`docs/adr/0016-location.md`; §11, below; §15, «Location, for an outing that asks
-  for it»). Until Phase 15 is built, no location permission is in the manifest and §9, §10 and
-  CLAUDE.md's invariants stand as written.
+- **Under way** (owner, 18 Nov 2026): Phase 15, the measured outing, first of Phases 15 to 20,
+  location for an outing that asks for it (`docs/adr/0016-location.md`; §11, below; §15, from
+  «Location, for an outing that asks for it» on). Built: the allowlist, the manifest, the
+  receiver, the fusion, the routes' database, the backup's fields, the cap's question. Left:
+  the card's and the notification's lines, the rest of the documents, and the proof on a
+  phone (the box in «Open»), which comes before any release. Phases 16 to 20: not started.
 
 ## Open
 
@@ -587,7 +589,8 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
    *Amended 2 Nov 2026 (owner, after a review):* that wake lock is also let go once the outing has been still for 15 minutes (`SignalWake.letGoAt`), when it is over and has nothing left to tell on time; it is closed at the next step or look, as on every phone. A forgotten outing had kept the processor awake until the screen came on, up to the 4 h 10 min bound. The moment is kept by a timer in the service, the one timer that runs with the screen off, and only while the wake lock already keeps the processor awake: it shortens a wake and never makes one.
 8. OEM task killers: onboarding shows a battery tip, with a button to the app's own settings page, only when `Build.MANUFACTURER` is on a known list (`OemTips`). Samsung is not on it (§15).
 
-*Planned (owner, 18 Nov 2026; `docs/adr/0016-location.md` decision 10, §11 Phase 15): a second exception, the satellite receiver while an outing with GPS counts and the reader walks, and for at most 15 minutes after its end while it can be taken back. It is written here, as rule 9, in the change that builds Phase 15; rule 7 changes with it (its wake lock is also an outing with GPS's on a phone with no wake-up counter, bounded ten minutes past the outing's cap; ADR 0016 decisions 5 and 14, amended the same day). Until then the rules above are the whole list.*
+9. **The second exception (Phase 15, `docs/adr/0016-location.md` decisions 5, 10 and 14):** the satellite receiver, for an outing the reader started with «Measure with GPS» on. On while it counts and the reader walks (a fix a second; with the screen off the fixes are held up to 60 s and asked for by each step batch, in the wake that batch already made); asleep 2 minutes after the last step, awake at the next (`GpsDuty`); off at a pause and at the end; for at most 15 minutes after an end that can be taken back, steered the same way, and off when the card is put away. Never for the day's count, never with no outing, never by a timer or a geofence; every part rides on a step batch, a batch of fixes, a touch or the screen. Its cost is to be measured on a phone and written in `docs/battery/` (expected: a few percent of a battery an hour while walking).
+   *Rule 7, amended with it (18 Nov 2026):* its wake lock is also held by an outing with GPS, with signals or without, on a phone with no wake-up step counter: there the steps steer the receiver, and nothing else could bring the step that wakes it. Its bound is ten minutes past the outing's own cap, which «Keep going» moves, no longer 4 h 10 min from when it is taken.
 
 ---
 
@@ -604,15 +607,16 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
 | `POST_PROMOTED_NOTIFICATIONS` | Normal | The outing under way as a Live Update on Android 16+ (Phase 10) |
 | `<queries>` for `TTS_SERVICE` | Manifest | Lets Android 11+ show Passo the text-to-speech engine, for the outings' voice (ADR 0010). Not a permission |
 | `WAKE_LOCK` | Normal | An outing's signals on a phone whose step counter cannot wake it: the processor kept awake while the outing counts (§9.7, ADR 0013). Also brought by WorkManager, held by the job while a widget card is drawn |
+| `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION` | Runtime | An outing the reader started with «Measure with GPS» on: the satellites, read from its start to its pause or end (Phase 15, ADR 0016). Asked together, in context, the first time such an outing starts; approximate alone measures no walk, and the outing then counts from the steps |
+| `FOREGROUND_SERVICE_LOCATION` | Normal | The service's second type, `location`, added while such an outing counts and dropped at its pause or end |
+| `<uses-feature android:name="android.hardware.location.gps" android:required="false"/>` | Feature | So that a phone with no receiver is not filtered out on a future listing: there the switch is absent |
 | `ACCESS_NETWORK_STATE` | Normal | Brought by WorkManager, which Glance runs its widget sessions on (Phase 4): it lets nothing leave the phone without `INTERNET`. Passo's own code does not use it |
 | `android:allowBackup="true"` + `dataExtractionRules` | Manifest | Android's backup and device transfer carry the step history, the profile and the settings, an allowlist (`docs/adr/0007-backup.md`). No permission: Android sends the copy, not Passo |
 | `<uses-feature android:name="android.hardware.sensor.stepcounter" android:required="true"/>` | Feature | Documents the requirement; filters devices on a future Play listing. It does not block APK installs, so the app also checks the sensor at runtime |
 
-**Forbidden:** `INTERNET`, `ACCESS_*_LOCATION`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`, `HIGH_SAMPLING_RATE_SENSORS`, `BODY_SENSORS`.
+**Forbidden, by name:** `INTERNET`, `ACCESS_BACKGROUND_LOCATION`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`, `HIGH_SAMPLING_RATE_SENSORS`, `BODY_SENSORS`.
 
-A CI task checks the merged release manifest and fails on any forbidden permission. Libraries that add one must be removed or patched with `tools:node="remove"`.
-
-*Planned (owner, 18 Nov 2026; `docs/adr/0016-location.md` decision 2, §11 Phase 15): `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION` and `FOREGROUND_SERVICE_LOCATION` join the table, `ACCESS_BACKGROUND_LOCATION` takes `ACCESS_*_LOCATION`'s place among the forbidden, and the CI task becomes an allowlist. The table and the list change in the change that builds Phase 15; until then they stand as written.*
+**An allowlist** (since Phase 15, 18 Nov 2026; `docs/adr/0016-location.md` decision 2). A CI task checks each variant's merged manifest and fails unless it requests exactly the permissions above, written in `build-logic` (`AllowedPermissions`): one more fails the build, a forbidden one by name, and so does one on the list that nothing requests any longer. Letting location in made the gate stricter than the list of forbidden names it was. A library that adds a permission must be removed or patched with `tools:node="remove"`. Beside the table, the list holds the one permission AndroidX declares for the app itself, named after the application id (`DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`).
 
 ---
 
@@ -2259,6 +2263,23 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   - **Checked.** `spotlessCheck`, `:app:checkForbiddenPermissions`, `test` (the domain's 469
     among them), `:app:lintDebug`, `:app:assembleDebug`: green, but for the six migration
     tests this machine cannot run. Nothing on a phone.
+
+- **18 Nov 2026.** **The rules in force brought in line with what is built** (owner: the pull
+  request is to be merged into `main`, and the work to go on in a new session). The manifest
+  on the branch asks for location while CLAUDE.md, §9 and §10 still said "never": merged so,
+  `main` would have held rules its own code contradicts, and the next session would have read
+  them as its instructions. Changed in this same change, as ADR 0016 asks: CLAUDE.md (the
+  allowlist; location as a measuring tape, with its bounds; the day stays the steps'; the
+  battery's two exceptions, the wake lock for an outing with signals or with GPS; `routes.db`
+  in the backup's rule; the modules), §9 (rule 9, and rule 7's amendment), §10 (the three
+  rows, the forbidden names, the allowlist), «State».
+  - **Still to change, of the «Amends» list** (Phase 15's documents box stays open): VISION.md
+    (principles 1 and 3, the non-goals, «Privacy is enforced», the glossary's «measured»), the
+    README's privacy lines, an «Amended» line in ADR 0007, 0009 and 0013, the strings that
+    promise no location read again one by one, the guide's «With GPS» part, CHANGELOG.
+  - **Merged into `main` is not released.** A release is a tag, and Phases 15 and 16 are
+    released together or not at all; until then `main` holds a measured outing whose card
+    does not yet say what the receiver is doing, and whose proof on a phone is not done.
 
 ### Open
 
