@@ -39,9 +39,11 @@ Source of truth:
 
 Work one phase at a time, starting from the phase's section in PLANNING.md §11. Phases 15 to 20
 (location, `docs/adr/0016-location.md`) each name what to read first and hold «The bar» their
-work is measured against: read the ADR and the phase's section before planning. **Phase 15 is
-under way** (since 18 Nov 2026): what is built and what is left is in its boxes and in §15's
-last entries; its proof on a phone (the box in «Open») comes before any release.
+work is measured against: read the ADR and the phase's section before planning. **Phases 15
+and 16 are built** (18 Nov 2026), on branches in cascade, and wait for a phone: what was built
+and decided is in their boxes and in archive 04 (`docs/planning/README.md`, from «Location, for
+an outing that asks for it» on); their proofs on a phone (the boxes in «Open») come before any
+release. **Phase 17 is next.**
 
 ## Build and commands
 
@@ -79,13 +81,13 @@ that does not match it.
 
 | Module | Kind | Holds |
 |---|---|---|
-| `:core:model` | pure Kotlin/JVM | data classes shared by everything (a route's points among them) |
-| `:core:domain` | pure Kotlin/JVM | `StepAccountant`, metric calculators, `WalkDetector`, `TypicalDayCalculator`, `PeriodOverview`, `Insights` (streaks, records, averages), `SessionTracker` and `SessionPlans` (outings), `IntervalSchedule` (the interval walk), `YearInReview` (Your year on foot), the backup file and its merge (`BackupCodec`, `BackupMerge`, `CsvExport`), `StepCalibration`, the Ways and the city walks (`Ways`, `WayProgress`, `WalkDays`, `WalkPlaces`, `WayForecast`, `WayAnnouncement`, `WayProjection`, `Continents`, the generated `WayData` and `ContinentData`), the measured outing (`routes/`: `RouteMeter`, the fusion of steps and fixes, `RouteFilter`, `RouteCodec`, `GpsDuty`, `GpsStart`, `Pace`) |
-| `:core:data` | Android library | Room (steps, tracker state, outings, ways), DataStore (settings, profile), repositories exposing `Flow`, `BackupRepository` (export, import), `WayRepository`; a second Room database, `routes.db` (`RouteDatabase`, `RouteRepository`), where the outings measured with GPS went |
-| `:core:tracking` | Android library | `StepTrackingService` (FGS type `health`), sensor source, receivers, ongoing notification, `StepCounterProbe` (the calibration's direct read), `WayNotifier` (a stage reached), `LocationSource` (the satellite receiver, for an outing that asks for it), `OutingStarter` (the one door every start of a plan goes through) |
-| `:core:designsystem` | Android library | M3 theme, typography, shared components, the Canvas charts (`DayTrendChart`, `BarChart`), `CalendarHeatmap`, `WalkList` and `OutingList`, `SessionCard`, the ways' and the continents' maps and stamps (`WayMapView`, `ContinentMapView`, `WayStamp`) and place names, date formatting |
+| `:core:model` | pure Kotlin/JVM | data classes shared by everything (a route's points and an outing's legs among them) |
+| `:core:domain` | pure Kotlin/JVM | `StepAccountant`, metric calculators, `WalkDetector`, `TypicalDayCalculator`, `PeriodOverview`, `Insights` (streaks, records, averages), `SessionTracker` and `SessionPlans` (outings), `IntervalSchedule` (the interval walk), `YearInReview` (Your year on foot), the backup file and its merge (`BackupCodec`, `BackupMerge`, `CsvExport`), `StepCalibration`, the Ways and the city walks (`Ways`, `WayProgress`, `WalkDays`, `WalkPlaces`, `WayForecast`, `WayAnnouncement`, `WayProjection`, `Continents`, the generated `WayData` and `ContinentData`), the measured outing (`routes/`: `RouteMeter`, the fusion of steps and fixes, `RouteFilter`, `RouteCodec`, `GpsDuty`, `GpsStart`, `Pace`; `GpsLines`, the card's line for each state of the receiver; `Altitude`, `Climb` and `RouteHeights`, the climb; `Legs` and `Splits`, the kilometres; `GpxCodec`; `RouteShape`, `RouteGround` and `ScaleBar`, what a route's map draws) |
+| `:core:data` | Android library | Room (steps, tracker state, outings, ways), DataStore (settings, profile), repositories exposing `Flow`, `BackupRepository` (export, import), `WayRepository`; a second Room database, `routes.db` (`RouteDatabase`, `RouteRepository`), where the outings measured with GPS went, and which no read ever makes (`RouteFile`) |
+| `:core:tracking` | Android library | `StepTrackingService` (FGS type `health`), sensor source, receivers, ongoing notification, `StepCounterProbe` (the calibration's direct read), `WayNotifier` (a stage reached), `LocationSource` (the satellite receiver, for an outing that asks for it), `PressureSource` (the barometer, on only with that receiver, for the climb), `OutingStarter` (the one door every start of a plan goes through) |
+| `:core:designsystem` | Android library | M3 theme, typography, shared components, the Canvas charts (`DayTrendChart`, `BarChart`), `CalendarHeatmap`, `WalkList` and `OutingList`, `SessionCard`, the ways' and the continents' maps and stamps (`WayMapView`, `ContinentMapView`, `WayStamp`) and place names, a route's map, the one that moves (`RouteMapView`, `MapViewport`), `SplitList` and `ClimbProfile`, the one file provider for what is shared (`SharedFiles`, `ShareImage`), date formatting |
 | `:core:testing` | Android library, test-only | `assertAccessible()` (labels, 48dp touch targets) and `walkPage()`, shared by the UI tests as `testImplementation` |
-| `:feature:*` | Android library | `today`, `history`, `insights`, `settings` (with your data and the step calibration), `onboarding`, `sessions` (the Outings page and editor), `ways` (the Ways, each continent's cities, each way's page and each city walk's), `guide` (the guide, in Chiaro's shape), `year` (Your year on foot: the year's pages, shared as an image) |
+| `:feature:*` | Android library | `today`, `history`, `insights`, `settings` (with your data and the step calibration), `onboarding`, `sessions` (the Outings page and editor, and an outing's own page, `OutingScreen`), `ways` (the Ways, each continent's cities, each way's page and each city walk's), `guide` (the guide, in Chiaro's shape), `year` (Your year on foot: the year's pages, shared as an image) |
 | `:widget` | Android library | the two Glance widgets («At a glance», «In words»), their settings screen, the update coordinator |
 | `:app` | application | `Application`, `MainActivity`, navigation (the bottom bar: Today, History, Insights), DI entry points; wires everything |
 

@@ -195,6 +195,15 @@ to be proven on a device in Phase 15):
    in `passo.db` is the truth, and a route that lost its last chunk to a crash is a shorter
    line, never a lost outing.
 
+   *Amended 18 Nov 2026 (owner):* the outing's numbers also hold its **legs**, a hundred
+   metres each (the fused metres, the steps' own time in motion and their count, the climb
+   and the descent), in a table of their own, `session_leg`, beside the climb's two columns
+   of `session`: schema v8, by auto-migration. The splits by kilometre or mile (decision 7)
+   are cut from them, so a kilometre's pace is the one the outing's own is made of, and the
+   splits stay when a route is deleted. They are numbers, not places, as above: no leg says
+   where it was walked. `routes.db` is at schema 2: a route says where its heights came
+   from, the barometer or the satellites.
+
 9. **The backup: routes do not go to the cloud.** `routes.db` is named only under
    `<device-transfer>` (the direct move to a new phone), not under `<cloud-backup>`. The
    reader's own export carries the routes only when they tick it; an outing's route can be
