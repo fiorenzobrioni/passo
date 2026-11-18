@@ -71,6 +71,13 @@ data class PlanEditorKey(val planId: Long?) : NavKey
 @Serializable
 data object GpsIntroKey : NavKey
 
+/**
+ * One outing's own page (PLANNING.md §11 Phase 16): from its finished card, from its row in
+ * Today and in History, and from the notification of its end.
+ */
+@Serializable
+data class OutingKey(val sessionId: Long) : NavKey
+
 /** The Ways, from Insights and from a stage's notification (PLANNING.md §11 Phase 11). */
 @Serializable
 data object WaysKey : NavKey

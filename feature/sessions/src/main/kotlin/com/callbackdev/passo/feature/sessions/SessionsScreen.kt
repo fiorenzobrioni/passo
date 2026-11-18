@@ -104,6 +104,7 @@ fun SessionsRoute(
     onBack: () -> Unit,
     onEdit: (Long?) -> Unit,
     onOpenWays: () -> Unit = {},
+    onOpenOuting: (Long) -> Unit = {},
     viewModel: SessionsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -144,6 +145,7 @@ fun SessionsRoute(
                 onStop = viewModel::stop,
                 onKeepGoing = viewModel::keepGoing,
                 onGps = viewModel::gps,
+                onOpen = { state?.live?.session?.id?.let(onOpenOuting) },
             ),
             resumeTracking = viewModel::resumeTracking,
             openSignalSettings = {

@@ -65,6 +65,7 @@ import com.callbackdev.passo.feature.insights.InsightsRoute
 import com.callbackdev.passo.feature.onboarding.NoSensorScreen
 import com.callbackdev.passo.feature.onboarding.OnboardingRoute
 import com.callbackdev.passo.feature.sessions.GpsIntroScreen
+import com.callbackdev.passo.feature.sessions.OutingRoute
 import com.callbackdev.passo.feature.sessions.PlanEditorRoute
 import com.callbackdev.passo.feature.sessions.SessionsRoute
 import com.callbackdev.passo.feature.settings.SettingsRoute
@@ -89,6 +90,8 @@ import kotlinx.coroutines.launch
  *   once ([onTodayOpened]).
  * @param outings the door every start of an outing goes through: when one waits for the reader's
  *   word on the location permission, the pages show Passo's own screen and the system's request.
+ * @param openOuting the notification of an outing's end was touched: that outing's page opens,
+ *   once ([onOutingOpened]).
  */
 @Composable
 fun PassoRoot(
@@ -99,12 +102,25 @@ fun PassoRoot(
     onWaysOpened: () -> Unit = {},
     openToday: Boolean = false,
     onTodayOpened: () -> Unit = {},
+    openOuting: Long? = null,
+    onOutingOpened: () -> Unit = {},
 ) {
     when {
         readiness == TrackingReadiness.NO_SENSOR -> NoSensorScreen()
+
         onboardingCompleted == null -> Surface(Modifier.fillMaxSize()) { }
+
         !onboardingCompleted -> OnboardingRoute()
-        else -> MainPages(outings, openWays, onWaysOpened, openToday, onTodayOpened)
+
+        else -> MainPages(
+            outings,
+            openWays,
+            onWaysOpened,
+            openToday,
+            onTodayOpened,
+            openOuting,
+            onOutingOpened,
+        )
     }
 }
 
@@ -126,6 +142,8 @@ private fun MainPages(
     onWaysOpened: () -> Unit,
     openToday: Boolean,
     onTodayOpened: () -> Unit,
+    openOuting: Long?,
+    onOutingOpened: () -> Unit,
 ) {
     val nav = rememberPassoNavigationState()
     // An outing measured with GPS, waiting for the reader's word on the location permission
@@ -159,6 +177,12 @@ private fun MainPages(
             onTodayOpened()
         }
     }
+    LaunchedEffect(openOuting) {
+        if (openOuting != null) {
+            nav.navigate(OutingKey(openOuting))
+            onOutingOpened()
+        }
+    }
     // After Today has come forward for a launcher's shortcut, which clears what was over it:
     // asked before, Passo's own screen would be cleared with the rest and the outing left waiting.
     LaunchedEffect(waiting) {
@@ -189,6 +213,7 @@ private fun MainPages(
                 onOpenGuide = { open(GuideKey) },
                 onOpenWay = { way, journey -> open(WayKey(way, journey)) },
                 onOpenYear = { open(YearKey(it)) },
+                onOpenOuting = { open(OutingKey(it)) },
                 bottomPadding = barHeight,
             )
         }
@@ -199,6 +224,7 @@ private fun MainPages(
                 onTargetShown = { historyTarget = null },
                 bottomPadding = barHeight,
                 onOpenYear = { open(YearKey(it)) },
+                onOpenOuting = { open(OutingKey(it)) },
             )
         }
         entry<InsightsKey> {
@@ -224,8 +250,14 @@ private fun MainPages(
         entry<GuideKey> { GuideRoute(onBack = nav::goBack) }
         entry<CalibrationKey> { key -> CalibrationRoute(step = key.step, onDone = nav::goBack) }
         entry<SessionsKey> {
-            SessionsRoute(onBack = nav::goBack, onEdit = { open(PlanEditorKey(it)) }, onOpenWays = { open(WaysKey) })
+            SessionsRoute(
+                onBack = nav::goBack,
+                onEdit = { open(PlanEditorKey(it)) },
+                onOpenWays = { open(WaysKey) },
+                onOpenOuting = { open(OutingKey(it)) },
+            )
         }
+        entry<OutingKey> { key -> OutingRoute(sessionId = key.sessionId, onBack = nav::goBack) }
         entry<PlanEditorKey> { key -> PlanEditorRoute(planId = key.planId, onDone = nav::goBack) }
         entry<GpsIntroKey> {
             // Back, by the bar's arrow or the system's, is neither answer: nothing is

@@ -1,5 +1,6 @@
 package com.callbackdev.passo.core.designsystem.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,8 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.callbackdev.passo.core.designsystem.R
@@ -60,22 +64,30 @@ fun WalkList(walks: List<Walk>, format: MeasureFormatter, modifier: Modifier = M
 /**
  * A day's walks and outings in one list, by start (PLANNING.md §11 Phase 10): an outing stands in
  * for the walk found in its minutes, with its goal and what came of it.
+ *
+ * @param onOpen an outing's row opens its own page (Phase 16), by its id; null where there is
+ *   no page to open it on. A walk found in the steps has none: its row says all there is.
  */
 @Composable
-fun OutingList(outings: List<Outing>, format: MeasureFormatter, modifier: Modifier = Modifier) {
+fun OutingList(
+    outings: List<Outing>,
+    format: MeasureFormatter,
+    modifier: Modifier = Modifier,
+    onOpen: ((Long) -> Unit)? = null,
+) {
     Column(modifier) {
         outings.forEachIndexed { index, outing ->
             if (index > 0) GroupDivider()
             when (outing) {
                 is Outing.Detected -> WalkRow(outing.walk, format)
-                is Outing.Planned -> SessionRow(outing, format)
+                is Outing.Planned -> SessionRow(outing, format, onOpen)
             }
         }
     }
 }
 
 @Composable
-private fun SessionRow(outing: Outing.Planned, format: MeasureFormatter) {
+private fun SessionRow(outing: Outing.Planned, format: MeasureFormatter, onOpen: ((Long) -> Unit)?) {
     val session = outing.session
     val res = LocalResources.current
     val name = res.sessionName(session)
@@ -112,12 +124,23 @@ private fun SessionRow(outing: Outing.Planned, format: MeasureFormatter) {
         stringResource(R.string.walk_estimates, figureLine(distance, energy))
     }
     val reached = session.reached
+    val open = stringResource(R.string.session_card_open)
     Row(
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .clearAndSetSemantics { contentDescription = spoken }
+            .then(if (onOpen != null) Modifier.clickable { onOpen(session.id) } else Modifier)
+            .clearAndSetSemantics {
+                contentDescription = spoken
+                if (onOpen != null) {
+                    role = Role.Button
+                    onClick(label = open) {
+                        onOpen(session.id)
+                        true
+                    }
+                }
+            }
             .padding(horizontal = 16.dp, vertical = 14.dp),
     ) {
         Surface(

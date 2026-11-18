@@ -6,6 +6,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -111,6 +112,8 @@ import java.time.ZoneId
  *
  * @property onGps the way out a line about the satellites offers (docs/adr/0016-location.md):
  *   «Resume GPS», the system's switch for location, the request for the permission.
+ * @property onOpen «See the outing», on a finished one: its own page (Phase 16). Null where
+ *   the card is already on a page of its own, or there is none to open.
  */
 class SessionCardActions(
     val onPause: () -> Unit = {},
@@ -119,6 +122,7 @@ class SessionCardActions(
     val onKeepGoing: () -> Unit = {},
     val onClose: () -> Unit = {},
     val onGps: (GpsLineAction) -> Unit = {},
+    val onOpen: (() -> Unit)? = null,
 )
 
 /**
@@ -333,12 +337,19 @@ fun SessionCard(
                 )
             }
             when {
-                finished -> Row(
+                // Three buttons at the most, which go on two lines where one is too short for
+                // them (a large text, a narrow phone).
+                finished -> FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     TextButton(onClick = actions.onClose, modifier = Modifier.testTag(SessionCardTags.CLOSE)) {
                         Text(stringResource(R.string.session_card_close))
+                    }
+                    actions.onOpen?.let { open ->
+                        TextButton(onClick = open, modifier = Modifier.testTag(SessionCardTags.OPEN)) {
+                            Text(stringResource(R.string.session_card_open))
+                        }
                     }
                     if (canKeepGoing) {
                         FilledTonalButton(
@@ -796,6 +807,7 @@ object SessionCardTags {
     const val STOP = "session_card_stop"
     const val KEEP_GOING = "session_card_keep_going"
     const val CLOSE = "session_card_close"
+    const val OPEN = "session_card_open"
     const val MAP = "session_card_map"
     const val INTERVALS = "session_card_intervals"
     const val INTERVAL_BARS = "session_card_interval_bars"

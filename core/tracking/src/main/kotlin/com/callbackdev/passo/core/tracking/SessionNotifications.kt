@@ -256,7 +256,7 @@ internal class SessionNotifications(private val context: Context) {
                     ).joinToString("\n"),
                 ),
             )
-            .setContentIntent(context.openAppIntent(REQUEST_GOAL))
+            .setContentIntent(outingIntent(session))
             .setAutoCancel(true)
             .setOnlyAlertOnce(true)
             .setCategory(NotificationCompat.CATEGORY_WORKOUT)
@@ -385,7 +385,7 @@ internal class SessionNotifications(private val context: Context) {
                     ).joinToString("\n"),
                 ),
             )
-            .setContentIntent(context.openAppIntent(REQUEST_GOAL))
+            .setContentIntent(outingIntent(session))
             .setAutoCancel(true)
             .setOnlyAlertOnce(true)
             .setCategory(NotificationCompat.CATEGORY_WORKOUT)
@@ -399,6 +399,13 @@ internal class SessionNotifications(private val context: Context) {
         }
         return builder.build()
     }
+
+    /**
+     * A touch on the notification of an outing's end opens that outing's own page (Phase 16):
+     * what it came to, in full. Its own request code, so its extra is never another intent's.
+     */
+    private fun outingIntent(session: Session) =
+        context.openAppIntent(REQUEST_OUTING) { putExtra(SessionControl.EXTRA_OPEN_OUTING, session.id) }
 
     /** The notification of an outing's end that can be taken back: its goal, a long stillness, or its cap. */
     fun ended(session: Session, units: UnitPreference, canReopen: Boolean): android.app.Notification =
@@ -459,5 +466,6 @@ internal class SessionNotifications(private val context: Context) {
         private const val REQUEST_KEEP_GOING = 13
         private const val REQUEST_GOAL = 14
         private const val REQUEST_RESUME_GPS = 15
+        private const val REQUEST_OUTING = 16
     }
 }

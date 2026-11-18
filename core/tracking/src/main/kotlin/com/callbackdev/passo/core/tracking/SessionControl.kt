@@ -93,4 +93,10 @@ object SessionControl {
      * from the activity, and the reader sees it begin on Today.
      */
     const val EXTRA_START_PLAN: String = "com.callbackdev.passo.extra.START_PLAN"
+
+    /**
+     * On the app's launch intent, from the notification of an outing's end: the outing whose
+     * page to open (Phase 16).
+     */
+    const val EXTRA_OPEN_OUTING: String = "com.callbackdev.passo.extra.OPEN_OUTING"
 }

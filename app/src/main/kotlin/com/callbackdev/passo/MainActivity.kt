@@ -60,6 +60,8 @@ class MainActivity : ComponentActivity() {
 
     private var openToday by mutableStateOf(false)
 
+    private var openOuting by mutableStateOf<Long?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -68,6 +70,7 @@ class MainActivity : ComponentActivity() {
             resumeIfAsked(intent)
             startOutingIfAsked(intent)
             openWaysIfAsked(intent)
+            openOutingIfAsked(intent)
         }
         setContent {
             val settings by settingsRepository.settings.collectAsStateWithLifecycle(initialValue = null)
@@ -99,6 +102,8 @@ class MainActivity : ComponentActivity() {
                     onWaysOpened = { openWays = false },
                     openToday = openToday,
                     onTodayOpened = { openToday = false },
+                    openOuting = openOuting,
+                    onOutingOpened = { openOuting = null },
                 )
             }
         }
@@ -109,6 +114,7 @@ class MainActivity : ComponentActivity() {
         resumeIfAsked(intent)
         startOutingIfAsked(intent)
         openWaysIfAsked(intent)
+        openOutingIfAsked(intent)
     }
 
     override fun onResume() {
@@ -147,6 +153,14 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             if (settingsRepository.settings.first().trackingEnabled) outings.start(planId)
         }
+    }
+
+    /** The notification of an outing's end: that outing's own page, once per touch. */
+    private fun openOutingIfAsked(intent: Intent?) {
+        val sessionId = intent?.getLongExtra(SessionControl.EXTRA_OPEN_OUTING, 0L) ?: 0L
+        if (sessionId == 0L) return
+        intent?.removeExtra(SessionControl.EXTRA_OPEN_OUTING)
+        openOuting = sessionId
     }
 
     /** A stage's notification: the Ways page, once per touch. */

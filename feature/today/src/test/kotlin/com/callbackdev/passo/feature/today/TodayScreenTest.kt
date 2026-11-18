@@ -375,10 +375,15 @@ class TodayScreenTest {
             totals = outing.totals.copy(movingMillis = 20 * 60_000, zoneMillis = 17 * 60_000, steps = 2_140),
         )
         val live = LiveSessionState(done, cadence = null, canKeepGoing = true, alertsWhileScreenOff = true)
+        var opened = false
         show(
             state().copy(session = live),
             dark = true,
-            sessionActions = SessionCardActions(onKeepGoing = { kept = true }, onClose = { closed = true }),
+            sessionActions = SessionCardActions(
+                onKeepGoing = { kept = true },
+                onClose = { closed = true },
+                onOpen = { opened = true },
+            ),
         )
 
         compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(SessionCardTags.CARD))
@@ -387,8 +392,11 @@ class TodayScreenTest {
         snapshot("today_outing_done_dark")
         compose.onNodeWithTag(SessionCardTags.KEEP_GOING).performClick()
         compose.onNodeWithTag(SessionCardTags.CLOSE).performClick()
+        // «See the outing»: its own page.
+        compose.onNodeWithText("See the outing").performClick()
         assertThat(kept).isTrue()
         assertThat(closed).isTrue()
+        assertThat(opened).isTrue()
     }
 
     private fun us(value: Int) = String.format(Locale.US, "%,d", value)

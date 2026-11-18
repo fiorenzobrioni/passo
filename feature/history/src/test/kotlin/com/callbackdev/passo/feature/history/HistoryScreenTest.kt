@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertLeftPositionInRootIsEqualTo
@@ -29,6 +31,7 @@ import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.history.PeriodScale
 import com.callbackdev.passo.core.testing.assertAccessible
 import com.callbackdev.passo.core.testing.walkPage
+import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertFalse
 import org.junit.Rule
 import org.junit.Test
@@ -53,6 +56,7 @@ class HistoryScreenTest {
         walkDetection: Boolean = true,
         outing: Boolean = false,
         measured: Boolean = false,
+        onOpenOuting: (Long) -> Unit = {},
     ) {
         compose.setContent {
             PassoTheme(darkTheme = dark) {
@@ -61,6 +65,7 @@ class HistoryScreenTest {
                     dayDetail = { HistorySamples.detail(it, walkDetection, outing, measured) },
                     onOpenSettings = {},
                     target = target,
+                    onOpenOuting = onOpenOuting,
                 )
             }
         }
@@ -191,6 +196,20 @@ class HistoryScreenTest {
             ) and hasContentDescription("measured", substring = true),
         ).assertCountEquals(0)
         snapshot("history_day_outing_measured")
+    }
+
+    @Test
+    fun `an outing's row opens its own page, and a walk found in the steps opens nothing`() {
+        val opened = mutableListOf<Long>()
+        show(target = HistoryTarget(PeriodScale.DAY, today.minusDays(1)), outing = true, onOpenOuting = {
+            opened += it
+        })
+        page().performScrollToNode(hasTestTag(HistoryTags.WALKS))
+
+        compose.onAllNodes(hasContentDescription("Walk from", substring = true)).onFirst().assertHasNoClickAction()
+        compose.onNode(hasContentDescription("Brisk walk from", substring = true)).assertHasClickAction().performClick()
+
+        assertThat(opened).containsExactly(1L)
     }
 
     @Test
