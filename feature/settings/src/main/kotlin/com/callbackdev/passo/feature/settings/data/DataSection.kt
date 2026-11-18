@@ -1,6 +1,7 @@
 package com.callbackdev.passo.feature.settings.data
 
 import android.net.Uri
+import android.text.format.Formatter
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
@@ -40,6 +42,7 @@ import com.callbackdev.passo.core.designsystem.components.GroupDivider
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
 import com.callbackdev.passo.core.designsystem.components.StatusCard
 import com.callbackdev.passo.core.designsystem.components.StatusTone
+import com.callbackdev.passo.core.designsystem.components.SwitchRow
 import com.callbackdev.passo.core.designsystem.components.ValueRow
 import com.callbackdev.passo.core.designsystem.format.clockTime
 import com.callbackdev.passo.core.designsystem.format.shortDateWithYear
@@ -55,12 +58,13 @@ import java.time.ZoneId
 
 /** What the data rows can ask for. */
 class DataActions(
-    val writeBackup: (Uri) -> Unit = {},
+    val writeBackup: (Uri, Boolean) -> Unit = { _, _ -> },
     val writeTable: (CsvTable, Uri) -> Unit = { _, _ -> },
     val readBackup: (Uri) -> Unit = {},
     val confirmImport: (Boolean) -> Unit = {},
     val cancelImport: () -> Unit = {},
     val dismissOutcome: () -> Unit = {},
+    val deleteRoutes: () -> Unit = {},
     val backupFileName: () -> String = { "passo-backup.json" },
     val tableFileName: (CsvTable) -> String = { "passo-${it.name.lowercase()}.csv" },
 )
@@ -78,14 +82,19 @@ internal class DataFiles(
     internal val tableDialog: MutableState<Boolean>,
     internal val table: MutableState<CsvTable>,
     internal val saveTable: () -> Unit,
+    internal val withRoutes: MutableState<Boolean>,
+    internal val deleteRoutesDialog: MutableState<Boolean>,
 )
 
 @Composable
 internal fun rememberDataFiles(actions: DataActions): DataFiles {
     val tableDialog = rememberSaveable { mutableStateOf(false) }
     val table = rememberSaveable { mutableStateOf(CsvTable.DAYS) }
+    // Off each time the page opens: a file with places in it is asked for, never a habit.
+    val withRoutes = rememberSaveable { mutableStateOf(false) }
+    val deleteRoutesDialog = rememberSaveable { mutableStateOf(false) }
     val createBackup = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(JSON)) { uri ->
-        if (uri != null) actions.writeBackup(uri)
+        if (uri != null) actions.writeBackup(uri, withRoutes.value)
     }
     val createTable = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(CSV)) { uri ->
         if (uri != null) actions.writeTable(table.value, uri)
@@ -102,6 +111,8 @@ internal fun rememberDataFiles(actions: DataActions): DataFiles {
             tableDialog = tableDialog,
             table = table,
             saveTable = { runCatching { createTable.launch(actions.tableFileName(table.value)) } },
+            withRoutes = withRoutes,
+            deleteRoutesDialog = deleteRoutesDialog,
         )
     }
 }
@@ -112,6 +123,11 @@ internal fun rememberDataFiles(actions: DataActions): DataFiles {
  * chooses where a file goes or comes from, so no storage permission is asked and Passo sends
  * nothing anywhere. What an export or import came to is a card over the rows, which stays until
  * it is put away; an import is shown, with what it will do, before anything is written.
+ *
+ * A phone that keeps routes (the outings measured with GPS, Phase 16) has two rows more, and a
+ * phone that keeps none has neither: «With the routes», off each time, which puts where the
+ * reader walked in the backup's file; and «Delete all routes», which says how many there are
+ * and what they weigh, and asks before it does.
  */
 @Composable
 internal fun DataGroup(state: DataUiState, format: MeasureFormatter, files: DataFiles, onDismissOutcome: () -> Unit) {
@@ -130,6 +146,17 @@ internal fun DataGroup(state: DataUiState, format: MeasureFormatter, files: Data
                 onClick = files.saveBackup,
                 modifier = Modifier.testTag(DataTags.BACKUP),
             )
+            if (state.contents.routes > 0) {
+                GroupDivider()
+                SwitchRow(
+                    label = stringResource(R.string.data_with_routes),
+                    checked = files.withRoutes.value,
+                    onChange = { files.withRoutes.value = it },
+                    note = stringResource(R.string.data_with_routes_note),
+                    icon = PassoIcons.Gps,
+                    modifier = Modifier.testTag(DataTags.WITH_ROUTES),
+                )
+            }
             GroupDivider()
             ValueRow(
                 label = stringResource(R.string.data_import),
@@ -156,6 +183,25 @@ internal fun DataGroup(state: DataUiState, format: MeasureFormatter, files: Data
                 onClick = files.chooseTable,
                 modifier = Modifier.testTag(DataTags.TABLE),
             )
+            if (state.contents.routes > 0) {
+                GroupDivider()
+                ValueRow(
+                    label = stringResource(R.string.data_delete_routes),
+                    value = stringResource(
+                        R.string.data_delete_routes_note,
+                        pluralStringResource(
+                            R.plurals.data_routes,
+                            state.contents.routes,
+                            format.steps(state.contents.routes),
+                        ),
+                        Formatter.formatShortFileSize(LocalContext.current, state.contents.routeBytes),
+                    ),
+                    icon = PassoIcons.Trash,
+                    enabled = idle,
+                    onClick = { files.deleteRoutesDialog.value = true },
+                    modifier = Modifier.testTag(DataTags.DELETE_ROUTES),
+                )
+            }
         }
     }
 }
@@ -177,6 +223,27 @@ internal fun DataDialogs(state: DataUiState, format: MeasureFormatter, files: Da
     }
     state.preview?.let { preview ->
         ImportDialog(preview, format, onImport = actions.confirmImport, onDismiss = actions.cancelImport)
+    }
+    if (files.deleteRoutesDialog.value) {
+        AlertDialog(
+            onDismissRequest = { files.deleteRoutesDialog.value = false },
+            title = { Text(stringResource(R.string.data_delete_routes_title)) },
+            text = { Text(stringResource(R.string.data_delete_routes_text)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        files.deleteRoutesDialog.value = false
+                        actions.deleteRoutes()
+                    },
+                    modifier = Modifier.testTag(DataTags.DELETE_ROUTES_CONFIRM),
+                ) { Text(stringResource(R.string.data_delete_routes_confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { files.deleteRoutesDialog.value = false }) {
+                    Text(stringResource(R.string.data_delete_routes_cancel))
+                }
+            },
+        )
     }
 }
 
@@ -497,4 +564,7 @@ object DataTags {
     const val PREVIEW = "data_preview"
     const val PREFERENCES = "data_preferences"
     const val CONFIRM_IMPORT = "data_confirm_import"
+    const val WITH_ROUTES = "data_with_routes"
+    const val DELETE_ROUTES = "data_delete_routes"
+    const val DELETE_ROUTES_CONFIRM = "data_delete_routes_confirm"
 }

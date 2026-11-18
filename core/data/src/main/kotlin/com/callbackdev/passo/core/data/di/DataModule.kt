@@ -15,6 +15,7 @@ import com.callbackdev.passo.core.data.db.SessionDao
 import com.callbackdev.passo.core.data.db.TrackingDao
 import com.callbackdev.passo.core.data.db.WayDao
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
+import com.callbackdev.passo.core.data.routes.RouteFile
 import com.callbackdev.passo.core.data.time.TodaySource
 import dagger.Module
 import dagger.Provides
@@ -52,6 +53,11 @@ object DataModule {
 
     @Provides
     fun routeDao(database: RouteDatabase): RouteDao = database.routeDao()
+
+    /** Whether `routes.db` is there, asked before any read of it: a read must never make it. */
+    @Provides
+    fun routeFile(@ApplicationContext context: Context): RouteFile =
+        RouteFile { context.getDatabasePath(RouteDatabase.NAME).exists() }
 
     /**
      * One instance per process, as DataStore requires. A corrupt file is replaced by an empty

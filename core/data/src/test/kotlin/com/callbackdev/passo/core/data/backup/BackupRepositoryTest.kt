@@ -5,17 +5,23 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.data.TestDataStore
 import com.callbackdev.passo.core.data.db.PassoDatabase
+import com.callbackdev.passo.core.data.db.RouteDatabase
 import com.callbackdev.passo.core.data.db.StepLengthSampleEntity
 import com.callbackdev.passo.core.data.db.WayJourneyEntity
 import com.callbackdev.passo.core.data.db.toEntity
 import com.callbackdev.passo.core.data.db.toModel
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
+import com.callbackdev.passo.core.data.routes.RouteRepository
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.domain.backup.BackupCodec
 import com.callbackdev.passo.core.domain.backup.BackupRead
 import com.callbackdev.passo.core.domain.backup.CsvTable
 import com.callbackdev.passo.core.domain.tracking.LedgerBatch
+import com.callbackdev.passo.core.model.AltitudeSource
 import com.callbackdev.passo.core.model.MinuteSteps
+import com.callbackdev.passo.core.model.OutingLeg
+import com.callbackdev.passo.core.model.RoutePoint
+import com.callbackdev.passo.core.model.RoutePointKind
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
@@ -62,12 +68,18 @@ class BackupRepositoryTest {
         val store = TestDataStore(File(folder.root, name).apply { mkdirs() })
         val preferences = UserPreferencesDataSource(store.dataStore)
         val tracking = TrackingRepository(database.trackingDao(), preferences) { today }
+        val routeDatabase: RouteDatabase =
+            Room.inMemoryDatabaseBuilder(ApplicationProvider.getApplicationContext(), RouteDatabase::class.java)
+                .allowMainThreadQueries()
+                .build()
+        val routes = RouteRepository(routeDatabase.routeDao())
         val backups = BackupRepository(
             database.trackingDao(),
             database.sessionDao(),
             database.wayDao(),
             preferences,
             tracking,
+            routes,
         )
 
         suspend fun walk(vararg minutes: MinuteSteps) {
@@ -162,8 +174,47 @@ class BackupRepositoryTest {
         )
     }
 
-    private suspend fun exported(): String =
-        BackupCodec.encode(old.backups.backup(appVersion = "0.9.0", nowMillis = 1L, zone = ZoneOffset.UTC))
+    private suspend fun exported(withRoutes: Boolean = false): String = BackupCodec.encode(
+        old.backups.backup(appVersion = "0.9.0", nowMillis = 1L, zone = ZoneOffset.UTC, withRoutes = withRoutes),
+    )
+
+    /** The history's one outing, measured with GPS: its climb, its legs, and its route on the old phone. */
+    private suspend fun measuredHistory(): List<RoutePoint> {
+        history()
+        val outing = checkNotNull(old.database.sessionDao().allSessions().single().toModel())
+        old.database.sessionDao().upsertSession(
+            outing.copy(
+                gps = true,
+                stepsMeters = 2_900.0,
+                measuredShare = 0.97,
+                ascentMeters = 24.0,
+                descentMeters = 19.5,
+                legs = listOf(
+                    OutingLeg(
+                        0,
+                        100.0,
+                        71_000,
+                        130.5,
+                        endedAtMillis = outing.startedAtMillis + 72_000,
+                        ascentMeters = 4.0,
+                    ),
+                    OutingLeg(1, 62.0, 44_000, 81.0, endedAtMillis = outing.startedAtMillis + 118_000),
+                ),
+            ),
+        )
+        val points = List(40) { index ->
+            RoutePoint(
+                epochSecond = outing.startedAtMillis / 1_000 + index * 2L,
+                latitudeE6 = 45_464_200 + index * 19,
+                longitudeE6 = 9_191_400 + index * 27,
+                altitudeDm = 1_220 + index,
+                accuracyMeters = 5,
+                kind = if (index == 0) RoutePointKind.START else RoutePointKind.MEASURED,
+            )
+        }
+        old.routes.append(outing.id, outing.startedAtMillis, points, AltitudeSource.BAROMETER)
+        return points
+    }
 
     private fun read(text: String) = (BackupCodec.decode(text) as BackupRead.Ok).backup
 
@@ -217,6 +268,77 @@ class BackupRepositoryTest {
         // The same file again adds no outing, and so no sample twice.
         new.backups.import(read(exported()), withPreferences = false)
         assertThat(new.database.sessionDao().allStepLengthSamples()).hasSize(2)
+    }
+
+    @Test
+    fun `an outing's climb and its legs travel with the file - numbers, and no place`() = runTest {
+        measuredHistory()
+
+        val file = exported()
+        new.backups.import(read(file), withPreferences = true)
+
+        val came = checkNotNull(new.database.sessionDao().allSessions().single().toModel())
+        assertThat(came.ascentMeters).isEqualTo(24.0)
+        assertThat(came.descentMeters).isEqualTo(19.5)
+        assertThat(came.legs.map { it.copy() }).isEqualTo(
+            checkNotNull(old.database.sessionDao().allSessions().single().toModel()).legs,
+        )
+        // Not ticked, the routes stay where they are: the file holds no place.
+        assertThat(file).doesNotContain("\"route\"")
+        assertThat(new.routes.count.first()).isEqualTo(0)
+    }
+
+    @Test
+    fun `with the routes ticked, each route travels with its outing`() = runTest {
+        val points = measuredHistory()
+
+        val report = new.backups.import(read(exported(withRoutes = true)), withPreferences = true)
+
+        val came = new.database.sessionDao().allSessions().single().session
+        val route = checkNotNull(new.routes.route(came.id, came.startedAtMillis))
+        assertThat(route.points).isEqualTo(points)
+        assertThat(route.altitudes).isEqualTo(AltitudeSource.BAROMETER)
+        assertThat(report.addedRoutes).isEqualTo(1)
+    }
+
+    @Test
+    fun `the same file again adds no route twice, and takes none away`() = runTest {
+        val points = measuredHistory()
+        val file = exported(withRoutes = true)
+        new.backups.import(read(file), withPreferences = true)
+
+        val again = new.backups.import(read(file), withPreferences = false)
+        // A file without the routes, after one with: the route the phone has stays.
+        val without = new.backups.import(read(exported()), withPreferences = false)
+
+        val came = new.database.sessionDao().allSessions().single().session
+        assertThat(again.addedRoutes).isEqualTo(0)
+        assertThat(without.addedRoutes).isEqualTo(0)
+        assertThat(checkNotNull(new.routes.route(came.id, came.startedAtMillis)).points).isEqualTo(points)
+    }
+
+    @Test
+    fun `a phone restored from the cloud copy gets its routes back from the reader's own file`() = runTest {
+        val points = measuredHistory()
+        // The cloud copy carried the outing and never its route.
+        new.backups.import(read(exported()), withPreferences = true)
+        val came = new.database.sessionDao().allSessions().single().session
+        assertThat(new.routes.route(came.id, came.startedAtMillis)).isNull()
+
+        val report = new.backups.import(read(exported(withRoutes = true)), withPreferences = false)
+
+        // The outing was there already: no outing added, and its route laid on it.
+        assertThat(report.addedOutings).isEqualTo(0)
+        assertThat(report.addedRoutes).isEqualTo(1)
+        assertThat(checkNotNull(new.routes.route(came.id, came.startedAtMillis)).points).isEqualTo(points)
+    }
+
+    @Test
+    fun `the data rows count the routes kept`() = runTest {
+        measuredHistory()
+
+        assertThat(old.backups.contents.first().routes).isEqualTo(1)
+        assertThat(new.backups.contents.first().routes).isEqualTo(0)
     }
 
     @Test

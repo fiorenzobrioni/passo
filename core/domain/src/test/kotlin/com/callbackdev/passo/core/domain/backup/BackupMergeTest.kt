@@ -10,6 +10,9 @@ import com.callbackdev.passo.core.domain.metrics.MinuteChange
 import com.callbackdev.passo.core.model.DailySummary
 import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.Profile
+import com.callbackdev.passo.core.model.Route
+import com.callbackdev.passo.core.model.RoutePoint
+import com.callbackdev.passo.core.model.RoutePointKind
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.UserSettings
@@ -17,6 +20,33 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
 class BackupMergeTest {
+    private fun route(startedAtMillis: Long, points: Int = 3) = Route(
+        sessionStartedAtMillis = startedAtMillis,
+        points = List(points) {
+            RoutePoint(startedAtMillis / 1_000 + it, 45_000_000 + it, 9_000_000, null, 5, RoutePointKind.MEASURED)
+        },
+    )
+
+    @Test
+    fun `a route goes to the outing that started at its instant, where that outing has none`() {
+        val outings = mapOf(1_000L to 7L, 2_000L to 8L, 3_000L to 9L)
+        val file = mapOf(1_000L to route(1_000), 2_000L to route(2_000), 4_000L to route(4_000))
+
+        val added = BackupMerge.routes(outings, having = setOf(8L), incoming = file)
+
+        // Outing 7 gets its route; 8 has its own, and keeps it; no outing started at 4,000.
+        assertThat(added.map { it.first }).containsExactly(7L)
+        assertThat(added.single().second.sessionStartedAtMillis).isEqualTo(1_000L)
+    }
+
+    @Test
+    fun `a route with no points is no route, and a file with none adds none`() {
+        val outings = mapOf(1_000L to 7L)
+
+        assertThat(BackupMerge.routes(outings, emptySet(), mapOf(1_000L to route(1_000, points = 0)))).isEmpty()
+        assertThat(BackupMerge.routes(outings, emptySet(), emptyMap())).isEmpty()
+    }
+
     private val today = DAY + 3
     private val localProfile = Profile(heightMeters = 1.60, weightKg = 60.0)
 

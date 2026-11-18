@@ -145,6 +145,7 @@ fun SettingsRoute(
             confirmImport = dataViewModel::confirmImport,
             cancelImport = dataViewModel::cancelImport,
             dismissOutcome = dataViewModel::dismissOutcome,
+            deleteRoutes = dataViewModel::deleteRoutes,
             backupFileName = dataViewModel::backupFileName,
             tableFileName = dataViewModel::tableFileName,
         ),

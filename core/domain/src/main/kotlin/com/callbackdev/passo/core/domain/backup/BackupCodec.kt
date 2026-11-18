@@ -1,6 +1,8 @@
 package com.callbackdev.passo.core.domain.backup
 
+import com.callbackdev.passo.core.domain.routes.RouteCodec
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
+import com.callbackdev.passo.core.model.AltitudeSource
 import com.callbackdev.passo.core.model.AppFont
 import com.callbackdev.passo.core.model.AppPalette
 import com.callbackdev.passo.core.model.DailySummary
@@ -9,7 +11,10 @@ import com.callbackdev.passo.core.model.DiagnosticsType
 import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.IntervalSplit
 import com.callbackdev.passo.core.model.MinuteSteps
+import com.callbackdev.passo.core.model.OutingLeg
 import com.callbackdev.passo.core.model.Profile
+import com.callbackdev.passo.core.model.Route
+import com.callbackdev.passo.core.model.RoutePoint
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
@@ -37,6 +42,7 @@ import java.time.DateTimeException
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
+import java.util.Base64
 
 /** What reading a file came to. */
 sealed interface BackupRead {
@@ -76,6 +82,13 @@ sealed interface BackupRead {
  *   step (`cadence`, `steps`, `meters`). Numbers only: where the outing went is not in this
  *   file unless the reader asks for the routes. A build without them reads the outing as it
  *   reads any other, with its distance.
+ * - `ascentMeters`, `descentMeters` and `legs` (added with the outing's page, Phase 16) on an
+ *   outing with GPS: what it climbed and came down, an estimate, and the outing a hundred
+ *   metres at a time (`meters`, `movingMillis`, `steps`, `endedAtMillis`, and each leg's own
+ *   climb), from which its kilometres or miles are cut. Numbers still.
+ * - `route` (Phase 16) on an outing with GPS, **only in a file exported «With the routes»**:
+ *   where it went. `points` is Base64 of the app's own compact form, `altitudes` where their
+ *   heights came from (`BAROMETER` or `SATELLITES`). The one field of this file that is a place.
  *
  * Reading is lenient where a value can be dropped without lying (an unknown setting, a minute
  * with a negative count) and strict where it cannot (the format, the version, broken JSON).
@@ -215,6 +228,17 @@ private fun Backup.toFile() = BackupFile(
             measuredShare = session.measuredShare.takeIf { session.gps },
             stepLengthSamples = stepLengthSamples[session.startedAtMillis].orEmpty()
                 .map { StepLengthSampleDto(it.cadence, it.steps, it.meters) },
+            ascentMeters = session.ascentMeters.takeIf { session.gps },
+            descentMeters = session.descentMeters.takeIf { session.gps },
+            legs = session.legs.takeIf { session.gps }.orEmpty().sortedBy { it.index }.map {
+                LegDto(it.meters, it.movingMillis, it.steps, it.endedAtMillis, it.ascentMeters, it.descentMeters)
+            },
+            route = routes[session.startedAtMillis]?.takeIf { session.gps && it.points.isNotEmpty() }?.let {
+                RouteDto(
+                    altitudes = it.altitudes?.name,
+                    points = Base64.getEncoder().encodeToString(RouteCodec.encode(it.points)),
+                )
+            },
         )
     },
     diagnostics = diagnostics.map { DiagnosticDto(it.wallMillis, it.type.name, it.detail) },
@@ -279,6 +303,21 @@ private fun BackupFile.toBackup(): Backup {
                     .map { StepLengthSample(it.cadence, it.steps, it.meters) }
             }
             .filterValues { it.isNotEmpty() },
+        // Of the outings that came, with GPS: a route whose points cannot be read is left out.
+        routes = outings.filter { it.gps && it.route != null && it.toSession() != null }
+            .mapNotNull { outing ->
+                val points = outing.route?.points.orEmpty().toRoutePoints()
+                if (points.isEmpty()) {
+                    null
+                } else {
+                    outing.startedAtMillis to Route(
+                        sessionStartedAtMillis = outing.startedAtMillis,
+                        points = points,
+                        altitudes = outing.route?.altitudes.toEnumOrNull<AltitudeSource>(),
+                    )
+                }
+            }
+            .toMap(),
         diagnostics = diagnostics.mapNotNull { row ->
             row.type.toEnumOrNull<DiagnosticsType>()?.let { DiagnosticsEvent(row.atMillis, it, row.detail) }
         },
@@ -391,6 +430,22 @@ private fun OutingDto.toSession(): Session? {
         gps = gps,
         stepsMeters = stepsMeters?.nonNegative().takeIf { gps },
         measuredShare = measuredShare?.takeIf { gps && !it.isNaN() }?.coerceIn(0.0, 1.0),
+        ascentMeters = ascentMeters?.nonNegative().takeIf { gps },
+        descentMeters = descentMeters?.nonNegative().takeIf { gps },
+        // A leg with no length says nothing; the rest in the file's order, numbered anew.
+        legs = legs.takeIf { gps }.orEmpty()
+            .filter { it.meters > 0 && !it.meters.isNaN() }
+            .mapIndexed { index, leg ->
+                OutingLeg(
+                    index = index,
+                    meters = leg.meters,
+                    movingMillis = leg.movingMillis.coerceAtLeast(0),
+                    steps = leg.steps.nonNegative(),
+                    endedAtMillis = leg.endedAtMillis,
+                    ascentMeters = leg.ascentMeters.nonNegative(),
+                    descentMeters = leg.descentMeters.nonNegative(),
+                )
+            },
         intervals = sets.takeIf { kind == SessionGoalKind.INTERVALS },
         splits = if (kind == SessionGoalKind.INTERVALS) {
             splits.filter { it.index in 0 until checkNotNull(sets).sets * 2 }
@@ -417,6 +472,13 @@ private fun List<Int>.toMilestones(): Set<SessionMilestone> =
     mapNotNull { percent -> SessionMilestone.entries.firstOrNull { it.percent == percent } }.toSet()
 
 private fun Double.nonNegative(): Double = if (isNaN() || this < 0) 0.0 else this
+
+/** A route's points from the file's Base64; none where it is not Base64, or not a route. */
+private fun String.toRoutePoints(): List<RoutePoint> = try {
+    RouteCodec.decode(Base64.getDecoder().decode(this))
+} catch (_: IllegalArgumentException) {
+    emptyList()
+}
 
 private fun String.toEpochDayOrNull(): Long? = try {
     LocalDate.parse(this).toEpochDay()
