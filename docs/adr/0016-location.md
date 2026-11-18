@@ -1,6 +1,7 @@
 # ADR 0016: Location, for an outing that asks for it (Phases 15 to 20)
 
-- Status: accepted (owner, 18 Nov 2026), not built yet
+- Status: accepted (owner, 18 Nov 2026). Phase 15 built the same day, not released, and not
+  yet tried on a phone (decision 4's proof); Phases 16 to 20 not built
 - Date: 2026-11-18
 - Supersedes: PLANNING.md §15 «Route maps with GPS stay out» (1 Oct 2026; archived in
   `docs/planning/02-decisions-to-1-nov-2026.md`, line 120)

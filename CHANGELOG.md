@@ -10,6 +10,39 @@ All notable changes to Passo are documented here. The format follows
 
 ## [Unreleased]
 
+### New
+
+- **An outing measured with GPS, if you ask.** Turn on «Measure with GPS» for an outing and
+  Passo reads the satellites while it counts: its distance is measured instead of estimated,
+  and it shows your pace by the kilometre or the mile, and the pace now. Your steps and the
+  satellites work together: a stop adds nothing, a bus adds nothing, a tunnel is covered by
+  your steps, and the receiver rests two minutes after you stop. The card says «measured» only
+  when at least nine tenths of the distance came from the satellites, and one line says what
+  the receiver is doing: finding the satellites, no signal, location off on the phone, GPS
+  stopped, each with its way out. Off by default, and nothing else in Passo changes: the day's
+  distance, History and the ways stay your steps'.
+
+- **No outing ends a walk unasked.** Four hours is still the longest an outing stays open, but
+  a quarter of an hour before it asks «Still walking?», with a vibration, a notification and
+  its card; «Keep going» gives it four hours more. Unanswered, it ends there, says so, and can
+  be taken back for a quarter of an hour.
+
+### Private and light
+
+- **Location, only for an outing that asks for it.** Passo now holds the location permission,
+  for one thing: an outing you start with «Measure with GPS» on, from its start to its pause
+  or end. Never for the day's count, never in the background, never without an outing, by
+  satellite only and without Google Play services. Android asks the first time you start such
+  an outing; leave the switch off and you are never asked. Passo still has no internet
+  permission: it sends nothing, and cannot. The routes stay on the phone and are never in
+  Android's cloud backup. The permissions Passo may hold are now a fixed list, and the build
+  fails on any other.
+
+- **What GPS costs.** The satellite receiver uses more battery than anything else in Passo,
+  only while an outing with GPS counts and you walk. On a phone whose step counter cannot wake
+  it, such an outing also keeps the phone awake while it counts, as an outing with signals
+  does. The figure an hour will be written beside the switch once it is measured on a phone.
+
 ### Better
 
 - **Outings, easier to read and to start.** Each outing is a shorter card that reads on one

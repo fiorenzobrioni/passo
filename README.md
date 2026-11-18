@@ -94,7 +94,7 @@ Italian). The phone's status bar is not in the pictures. The command that redraw
 - 📈 **Your day**: a chart you read with a finger, plus distance, calories, active and brisk minutes, cadence.
 - 📅 **History**: a day, week, month or year at a time, and a calendar of how close each day came.
 - 🚶 **Walks, found for you**: stretches of walking recognised in the steps already counted.
-- 🎯 **Outings**: a walk or run with a goal, with vibrations or a voice at the milestones you choose.
+- 🎯 **Outings**: a walk or run with a goal, with vibrations or a voice at the milestones you choose. Turn on «Measure with GPS» for one, and its distance is measured by satellite instead of estimated, with your pace by the kilometre or the mile.
 - ⏱️ **Japanese interval walk**: 3 slow minutes and 3 fast ones, five sets or more, each change told with a vibration of its own so the phone stays in your pocket; at the end, how many fast intervals were at pace.
 - 🏆 **Insights**: your streak, your best day, week and month, and the averages.
 - 🗓️ **Your year on foot**: a year told in pages, from your own days: the steps and how far they went, the months, your best day, your day of the week and your hour, the goal, the outings and the ways, against the year before. Open it from Insights or History any time; in December it waits for you on Today. Share a page as an image, through an app you pick.
@@ -114,12 +114,13 @@ Italian). The phone's status bar is not in the pictures. The command that redraw
 
 | | |
 |---|---|
-| 🔒 **Private by design** | no `INTERNET` permission: Passo cannot send anything. The build fails if a network, location, exact-alarm or body-sensor permission appears |
+| 🔒 **Private by design** | no `INTERNET` permission: Passo sends nothing, and cannot. The permissions it may hold are a fixed list, and the build fails on any other: network, background location, exact alarms and body sensors by name |
+| 📍 **Location, only if you ask** | read by satellite only during an outing you start with «Measure with GPS» on, from its start to its pause or end. Never for the day's count, never in the background, never without an outing. Leave the switch off and Passo never asks for it |
 | 👟 **One source of steps** | the phone's hardware step counter. No Health Connect, no Google Fit, no Play services |
 | 🔋 **Battery is a feature** | the step counter runs on a low-power chip; no timers with the screen off, widgets updated only when visible. Target: about 1% of a day's battery |
 | 📏 **Honest estimates** | distance and calories say they are estimates; every formula is documented in the code with its source |
 | 🗓️ **Past days are frozen** | a new goal or profile changes today, never your history (unless you ask) |
-| 📁 **Your files are yours** | export and import go through Android's file picker, so no storage permission. Android's own backup carries only your steps, profile and settings |
+| 📁 **Your files are yours** | export and import go through Android's file picker, so no storage permission. Android's own backup carries only your steps, profile and settings; the routes of outings measured with GPS never go to the cloud copy |
 
 ## Install
 
