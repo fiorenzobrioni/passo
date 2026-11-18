@@ -44,8 +44,11 @@ so they are uniform"):
   answer: the allowlist, the manifest, the receiver, the fusion, the routes' database, the
   backup's fields, the cap's question, the card's and the notification's lines, the
   documents. Left: the proof on a phone and the measure of what it costs (the boxes in
-  «Open»), which come before any release. Phase 16 follows on a branch of its own, from
-  Phase 15's; Phases 17 to 20: not started.
+  «Open»), which come before any release.
+- **Built, on a branch of its own from Phase 15's** (18 Nov 2026): Phase 16, the outing's
+  page (the route on a map that moves, the kilometres, the climb, GPX and image, Your data;
+  §15, «Phase 16, the outing's page»). Left: its check on a phone (the box in «Open»). 15 and
+  16 are released together or not at all. Phases 17 to 20: not started.
 
 ## Open
 
@@ -111,6 +114,15 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
   measure»): a 30-minute and a 2-hour outing with GPS, the battery an hour, a known distance
   against the fused one; numbers in `docs/battery/`, then the editor's cost line, §9's rule 9
   and the CHANGELOG say the figure.
+
+- [ ] **On a device (owner): Phase 16's page** (§11 Phase 16; §15, «Phase 16, the outing's
+  page», 18 Nov 2026): a walk with a hill and a tunnel or an arcade, then its page: the line
+  where it was walked, the dashed stretch, the climb against a known figure, each kilometre's
+  pace; the map pinched, dragged and brought back whole, a bead touched, the page scrolled
+  with a finger that starts on the map; the GPX opened in a map app; the image shared to two
+  apps; «With the routes» in a backup, imported on the other phone; «Delete this route» and
+  «Delete all routes»; the page at a large text size, in both themes, on the open foldable,
+  with TalkBack. On a phone with no barometer, if one is at hand: the climb said as rough.
 
 Read again on 2 Nov 2026, at archive 01 and 02: the boxes above are the ones the phases done had
 left open, and the review's device check. Read again at 1.1.0's tag: the owner's checks of the
@@ -1061,7 +1073,7 @@ app's own provider); `DataSection.kt`, `DataViewModel.kt`, `BackupRepository.kt`
 `MetricsCalculator.kt`, `MetricsConstants.kt`; `app/.../shell/PassoNavigation.kt`; the
 `ReadmeScreenshots` class of `:feature:sessions`.
 
-- [ ] **The climb** (ADR 0016's facts on altitude). `:core:tracking`: `PressureSource`
+- [x] **The climb** (ADR 0016's facts on altitude). `:core:tracking`: `PressureSource`
   (`TYPE_PRESSURE`, no permission), registered only while an outing with GPS counts, batched,
   never waking the processor by itself. `:core:domain/routes`: `Altitude` (the barometer for
   the short term, the satellites' altitude above mean sea level for the long term, blended so
@@ -1071,14 +1083,14 @@ app's own provider); `DataSection.kt`, `DataViewModel.kt`, `BackupRepository.kt`
   altitude; `route` keeps which source it was; `session` gains `ascentMeters` and
   `descentMeters` (schema v8, or v7 if Phase 15 is not released yet: one migration a release).
   Said as an estimate («about 240 m up»). Not floors: VISION's non-goal stands.
-- [ ] **Energy on a slope**, for an outing with GPS only: the walking cost per kilometre gains
+- [x] **Energy on a slope**, for an outing with GPS only: the walking cost per kilometre gains
   the grade's term from the ACSM walking equation (which on the flat is the 0.5 kcal/kg/km
   `MetricsConstants` already has), no credit downhill, the running cost its own; the formula
   and its sources in `MetricsConstants.kt`, a test at 0, 5 and 10%. The day's energy stays the
   steps' (ADR 0016 decision 6).
-- [ ] **Splits** (`:core:domain/routes`, `Splits`): one a kilometre or a mile, as the units say,
+- [x] **Splits** (`:core:domain/routes`, `Splits`): one a kilometre or a mile, as the units say,
   each with its time in motion, pace, cadence and climb; the last, partial one says its length.
-- [ ] **`RouteMapView`** (`:core:designsystem`), Passo's first map that moves: north up, pinch
+- [x] **`RouteMapView`** (`:core:designsystem`), Passo's first map that moves: north up, pinch
   and double tap to zoom, drag to pan, a button back to the whole route; under reduced motion
   no glide. The line in the goal's colour, dashed where it was laid from the steps (the honest
   mark), a ring at the start, a bead at the end, a small bead each kilometre, a scale bar in
@@ -1089,7 +1101,7 @@ app's own provider); `DataSection.kt`, `DataViewModel.kt`, `BackupRepository.kt`
   from north to south, 3 stops»); the splits below are its words. Its gestures are a piece of
   their own, since Phases 18 and 19 reuse them. Drawn in every theme and dress in a gallery
   test, as the ways' maps are.
-- [ ] **The outing's page** (`:feature:sessions`, a new entry in `PassoNavigation.kt`), for
+- [x] **The outing's page** (`:feature:sessions`, a new entry in `PassoNavigation.kt`), for
   every outing, with or without GPS: the sentence first (what it was and how it went against
   its goal), then its numbers, each with its line; for an interval outing its intervals, as
   the card has them; for one with GPS the map, «5.20 km measured; your steps said 5.05», the
@@ -1099,7 +1111,7 @@ app's own provider); `DataSection.kt`, `DataViewModel.kt`, `BackupRepository.kt`
   their place. Reached from the finished card («See the outing»), from an outing's row in
   Today and in History (a lambda from `:app`: the feature modules still do not know each
   other), and from the goal's notification.
-- [ ] **Sharing and saving** (ADR 0016 decision 9). `GpxCodec` (`:core:domain`, GPX 1.1: track,
+- [x] **Sharing and saving** (ADR 0016 decision 9). `GpxCodec` (`:core:domain`, GPX 1.1: track,
   segments at the pauses, time, elevation), written by hand, no library. «Save as GPX» through
   the Storage Access Framework; «Share» as a GPX or as an image (the map, the sentence and
   three numbers, in the card's dress, as Your year on foot shares a page), through the one
@@ -1109,16 +1121,18 @@ app's own provider); `DataSection.kt`, `DataViewModel.kt`, `BackupRepository.kt`
   image is a line on Passo's own ground and names no street; the GPX holds every point, and
   its choice says so in one line under it («The file says where you walked, from the first
   step to the last»), once, where the reader chooses, never as a dialog.
-- [ ] **Your data** (`:feature:settings`, `DataSection`). How many routes are kept and their
+- [x] **Your data** (`:feature:settings`, `DataSection`). How many routes are kept and their
   size; the export's «With the routes» (off by default; the JSON then carries each route with
   its outing, as an added field); «Delete all routes», after a dialog that says the outings and
   their numbers stay. On an outing's page, «Delete this route». The import adds routes by their
   outing's start instant and never removes one (`BackupMerge`).
-- [ ] **Tests.** `ClimbTest`, `AltitudeTest`, `SplitsTest`, `GpxCodecTest` (a file another app
+- [x] **Tests.** `ClimbTest`, `AltitudeTest`, `SplitsTest`, `GpxCodecTest` (a file another app
   reads: checked against the schema's shape, and a round trip), the map's gallery, the page's
   UI tests in each of its forms (`assertAccessible()`, `walkPage()`), the export and import
-  with and without routes.
-- [ ] Strings in English and Italian; CHANGELOG; the guide (the outing's page in the outings
+  with and without routes. Built (§15, «Phase 16, the outing's page»): the climb's tests are
+  in `AltitudeTest` and `RouteHeightsTest`, the map's gallery is `RouteMapGalleryTest`, the
+  page's forms `OutingScreenTest`.
+- [x] Strings in English and Italian; CHANGELOG; the guide (the outing's page in the outings
   chapter); README: one screenshot, `outing-route.png`, the page of an outing with GPS inside
   a city Passo carries, with its caption, and the feature list's line.
 - [ ] On a device (owner): a walk with a hill and a tunnel or an arcade, then its page: the
@@ -2370,6 +2384,92 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
     `:app:assembleDebug`: green, but for the six migration tests this machine cannot run. The
     card's screenshots looked at in every state, in the light and the dark, in Italian, at
     twice the text size and on the open foldable; the row in History. **Nothing on a phone.**
+
+- **18 Nov 2026.** **Phase 16, the outing's page: the route, the splits, the climb** (owner:
+  "then go on to Phase 16, from its section, without «Trim the ends»: a new branch from
+  Phase 15's, and a draft pull request based on it, not on `main`"). On
+  `feature/phase-16-outing-page`, pull request 73, a draft on top of 72. Every box ticked but
+  the one on a device; nothing here was tried on a phone.
+  - **The climb** (`Altitude`, `Climb`, `RouteHeights`, `PressureTrack`, pure; `PressureSource`).
+    A point's height is what the pressure says, less what the weather is known to add, and
+    the weather is learnt from the satellites over ten minutes: a front that drops three
+    hectopascals over a flat two-hour walk climbs nothing, and a hill is in the pressure at
+    once. Decided on the way, each a constant with its reason, to be validated on a device:
+    - *The level's settling is kept out of the climb.* For its first five minutes the level is
+      still being found, and that correction is the satellites', not the reader's legs.
+    - *A point waits for its pressure.* The points come with the step batches and the
+      pressure in batches of its own; a point given its height before its reading arrived
+      would have had the satellites' alone. It waits at most a minute and a half, and the
+      outing's end takes every point with the readings there are.
+    - *Three metres with a barometer, ten without*, counted from where it was last counted;
+      a pause or a ride cuts the count, so a funicular is not a climb.
+    The sensor asks for no permission, is registered only with the satellite receiver and
+    removed with it, never wakes the processor by itself, and is flushed in the wake the step
+    batch already made.
+  - **The splits are cut from legs laid as the outing goes** (`OutingLeg`, `Legs`, `Splits`),
+    not from the route's points. A hundred metres at a time, from what the meter settles:
+    the distance is the fused one, and the time in motion and the steps are the steps' own
+    (ADR 0016 decision 5), so a kilometre's pace is the one the outing's own pace is made of
+    and its cadence is counted. Kilometres or miles are cut from them afterwards, whichever
+    the reader walks in; and they are numbers, so they stay when a route is deleted (the
+    edge case "its numbers stay"). **It adds to ADR 0016 decision 8's list** of what `session`
+    keeps (the fused distance, the steps' own, the measured share, the climb): the legs, in a
+    table of their own, `session_leg`. Numbers, not places, as that decision asks; said to
+    the owner, for a line in the ADR at their word.
+  - **Schema 8, not a second 7** (`ascentMeters`, `descentMeters`, `session_leg`), and
+    `routes.db` schema 2 (where a route's heights came from). The phase allowed either while
+    Phase 15 is unreleased; a debug build installed to try Phase 15 on a phone must not meet
+    a v7 that changed under it, which was this morning's own reason for making v7 whole.
+  - **Energy on a slope**: 0.009 kcal a kilogram a metre climbed walking, 0.0045 running (the
+    grade's term of the ACSM equations, in `MetricsConstants`), added to an outing with GPS
+    when its climb is counted; nothing for coming down. The day's energy stays the steps'.
+  - **`RouteMapView`**, Passo's first map that moves, and `MapViewport` with its gestures
+    apart (Phases 18 and 19 reuse them): two fingers zoom, one drags it once it is zoomed, a
+    double tap zooms where it lands, a button brings the whole route back. **One finger on a
+    whole map is left to the page**, which scrolls: a map in a list must not trap the finger
+    that only meant to read on. North up, a scale bar in round lengths of the reader's units,
+    the line dashed where it was laid from the steps and never drawn across a pause, a ring
+    where it began, a point where it ended, a bead a kilometre, named with its pace when
+    touched (and said to TalkBack). The ground is a city's map where at least four fifths of
+    the points lie in its frame (`RouteGround`), the finer of two that qualify; plain
+    elsewhere, with the line that says Passo carries no street map.
+  - **The page** (`OutingScreen`, `OutingViewModel`, one key in `:app`): the sentence, when it
+    was, its numbers as tiles each with its line («Measured by satellite. Your steps said
+    4.10 km»), an interval outing's bars, the kilometres as rows, the climb as a shape, and
+    what the route can do. Reached from «See the outing» on a finished card, from an outing's
+    row in Today and in History (a walk found in the steps opens nothing), and from the
+    notification of its end. **No line for "the goal's pace"** among the splits: an outing has
+    no pace to reach (ADR 0016 decision 7: shown, never a goal), so there is none to draw.
+    The kilometres are rows with a bar, not columns: a walk has as many as it has kilometres,
+    and a row still holds its numbers at twice the text size.
+  - **Sharing and saving.** `GpxCodec`, GPX 1.1 by hand, a segment a stretch walked, read
+    back too. The image is a card of its own (the name, the sentence, the map whole, three
+    numbers), recorded out of sight and fitted as the year's pages are. **One file provider**:
+    `SharedFiles` and `ShareImage` in `:core:designsystem` (`.share`), which the year's pages
+    now go through; the year's own provider and its paths are gone. No «Trim the ends»: the
+    GPX's choice says, once, that the file holds the walk from the first step to the last.
+  - **Your data.** The backup's file gains an outing's climb and legs, and, only with «With
+    the routes» ticked (off each time the page opens), its route: the app's own compact
+    points in Base64, an added field. An import lays a route on the outing that started at
+    its instant where that outing has none (`BackupMerge.routes`): the ones that came with
+    their outings, and the ones of a phone restored from the cloud copy; never one taken
+    away. «Delete all routes» says how many and what they weigh, and asks first. Both rows
+    only on a phone that keeps routes.
+  - **No read makes the routes' file** (`RouteFile`). Counting the routes for Your data, or
+    deleting an outing too short to keep, opened `routes.db` and so made it, on a phone that
+    had never measured with GPS: the second was Phase 15's own. Every read and every deletion
+    now asks whether the file is there first; only a route written makes it.
+  - **The documents**: the guide (an outing's own page; its route to take or to delete),
+    CHANGELOG, the README (`outing-route.png` with its caption, the feature's line; no dash).
+    Not changed, and said to the owner: CLAUDE.md's table of modules, which does not name
+    this phase's classes yet.
+  - **Checked.** `spotlessCheck`, `:app:checkForbiddenPermissions` (the same 13 permissions:
+    the pressure sensor asks for none), `test`, `:app:lintDebug`, `:app:assembleDebug`:
+    green, but for the seven migration tests this machine cannot run (the six, and 7 to 8).
+    The page's screenshots looked at in each of its forms, in the light and the dark, in
+    Italian, at twice the text size and on the open foldable; the map in both dresses and
+    both themes, zoomed, with a bead named; Your data with its two rows and the dialog; the
+    README's picture. **Nothing on a phone.**
 
 ### Open
 
