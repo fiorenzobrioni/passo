@@ -40,10 +40,12 @@ so they are uniform"):
 - **Not started**: Phase 9, Google Play (optional, later; §11, below).
 - **Under way** (owner, 18 Nov 2026): Phase 15, the measured outing, first of Phases 15 to 20,
   location for an outing that asks for it (`docs/adr/0016-location.md`; §11, below; §15, from
-  «Location, for an outing that asks for it» on). Built: the allowlist, the manifest, the
-  receiver, the fusion, the routes' database, the backup's fields, the cap's question. Left:
-  the card's and the notification's lines, the rest of the documents, and the proof on a
-  phone (the box in «Open»), which comes before any release. Phases 16 to 20: not started.
+  «Location, for an outing that asks for it» on). Built, all of it but what a phone must
+  answer: the allowlist, the manifest, the receiver, the fusion, the routes' database, the
+  backup's fields, the cap's question, the card's and the notification's lines, the
+  documents. Left: the proof on a phone and the measure of what it costs (the boxes in
+  «Open»), which come before any release. Phase 16 follows on a branch of its own, from
+  Phase 15's; Phases 17 to 20: not started.
 
 ## Open
 
@@ -97,6 +99,18 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
   permission as «Only this time»; the process ended mid-outing and the app opened again. Each
   outing's `GPS` row in the log says whether the type was added, and whether fixes came with
   the screen off, in batches or one by one.
+  With the card built (§15, «Phase 15, what the reader sees, and the documents»), also: the
+  card's line in each state (finding the satellites at the start, a tunnel or an arcade,
+  location turned off and on from the quick settings, «GPS stopped» after the process is
+  ended, with «Resume GPS» from the card and from the notification); «measured» under the
+  distance and the pace beside a known one; the permission refused, then allowed from the
+  card, and refused twice (the system's page); in both themes, at a large text size, with
+  TalkBack.
+
+- [ ] **On a device (owner): Phase 15's measure** (§11 Phase 15, «On a device (owner), the
+  measure»): a 30-minute and a 2-hour outing with GPS, the battery an hour, a known distance
+  against the fused one; numbers in `docs/battery/`, then the editor's cost line, §9's rule 9
+  and the CHANGELOG say the figure.
 
 Read again on 2 Nov 2026, at archive 01 and 02: the boxes above are the ones the phases done had
 left open, and the review's device check. Read again at 1.1.0's tag: the owner's checks of the
@@ -752,7 +766,7 @@ It ends with numbers on the card and the notification; the route's own page is P
   `<uses-feature android:name="android.hardware.location.gps" android:required="false" />`.
   The manifest's opening comment is rewritten to say what each is for and that nothing else is
   held.
-- [ ] **The documents, in this same change** (ADR 0016, «Amends»): VISION.md (principle 1:
+- [x] **The documents, in this same change** (ADR 0016, «Amends»): VISION.md (principle 1:
   steps are the core, and location, when the reader asks for it, measures what the steps
   estimate, never replaces them, and nothing depends on it; principle 3; the non-goals' GPS
   lines; the success criterion «Privacy is enforced»; the outings' section; the glossary:
@@ -779,7 +793,7 @@ It ends with numbers on the card and the notification; the route's own page is P
   not again by a process that restarted). `RoutePoint` (time, latitude, longitude, altitude or
   none, accuracy, whether it is a fix or a point laid from the steps) and `Route` (the outing,
   its points, its box).
-- [ ] **The domain** (`:core:domain/routes`, pure, tests first):
+- [x] **The domain** (`:core:domain/routes`, pure, tests first):
   - `RouteFilter`: a fix is accepted at 25 m of accuracy or better, later than the one before,
     and no faster from it than the cadence allows (3.5 m/s below `RUNNING_CADENCE`, 8 m/s at or
     above). A mock fix is accepted only in a debug build (the flag is passed in), so a route
@@ -861,7 +875,7 @@ It ends with numbers on the card and the notification; the route's own page is P
   `AltitudeConverter`, off the main thread: the others are measured and let go.
   `GpsReadiness`: ready, permission needed, approximate only, turned off on the phone, no
   receiver.
-- [ ] **The service.** One function adds or drops the `location` type (`startForeground()` with
+- [x] **The service.** One function adds or drops the `location` type (`startForeground()` with
   `health|location`, or `health`), called when an outing with GPS starts, resumes, pauses or
   ends, and only from where the while-in-use rule allows it (ADR 0016 decision 4); a refusal is
   caught, logged, and the outing goes on from the steps. **`onStartCommand` asks that same
@@ -885,7 +899,7 @@ It ends with numbers on the card and the notification; the route's own page is P
   permission. The diagnostics log gets
   one row an outing with GPS (fixes taken and refused, the measured share, how long the
   receiver slept, the type refused or not), like the interval outing's.
-- [ ] **The longest outing asks before it ends** (ADR 0016 decision 14; it amends ADR 0009
+- [x] **The longest outing asks before it ends** (ADR 0016 decision 14; it amends ADR 0009
   decision 6, for every outing, with GPS or not). `Session` keeps its own cap (four hours from
   the start, stored, so an answer survives a restart). At the first step batch within 15
   minutes of it, once per cap: the stillness's two long pulses and a notification on the
@@ -908,7 +922,7 @@ It ends with numbers on the card and the notification; the route's own page is P
   `SessionEnd.CLOSED`, which an import also gives to an outing that was under way in the file.
   No timer: every part rides on a step
   batch, a screen-on or a touch. The voice, if the outing speaks, says the question too.
-- [ ] **The switch, and the permission in context** (`:feature:sessions`). In the editor,
+- [x] **The switch, and the permission in context** (`:feature:sessions`). In the editor,
   «Measure with GPS» / «Misura con il GPS», with two lines under it: what it gives (a measured
   distance, a pace, the route) and what it costs (the battery, in the words the owner's
   measurement allows; until it is measured, "more battery, only while you walk"). Absent on a
@@ -930,7 +944,7 @@ It ends with numbers on the card and the notification; the route's own page is P
   itself later, and the next outing with GPS asks again, by the system's dialog alone (Passo's
   own screen is shown once). How long it lasts under a service that never stops is not written
   anywhere: proven on the phone, below.
-- [ ] **What the reader sees while it counts.** The card (`SessionCard`): «Finding the
+- [x] **What the reader sees while it counts.** The card (`SessionCard`): «Finding the
   satellites» until the first fix, then the distance with «measured» under it (or the share
   from the steps when over a tenth), the pace and the pace now, the cadence as before; the
   counting notification and its Live Update the same in words; the voice, if the outing
@@ -941,13 +955,16 @@ It ends with numbers on the card and the notification; the route's own page is P
   lost (a tunnel), location turned off on the phone (with the button to the system's switch),
   GPS stopped (with «Resume GPS»), started on the steps (approximate only, refused, or "Walk
   now" without the permission: said once, with the way to change it).
-- [ ] **Tests.** `RouteFilterTest`, `RouteMeterTest`, `GpsDutyTest`, `RouteCodecTest`,
+- [x] **Tests.** `RouteFilterTest`, `RouteMeterTest`, `GpsDutyTest`, `RouteCodecTest`,
   `PaceTest`, the tracker's with a meter; Robolectric for the two databases, the migration and
   the service's type change (granted, refused, restarted, the app opened mid-outing); the
   editor's and the card's UI tests with every state above, `assertAccessible()`, `walkPage()`;
   the allowlist's (unlisted, forbidden, listed and missing, named after the application id);
-  the backup's round trip with the samples, and an older file without them.
-- [ ] Strings in English and Italian; CHANGELOG; the guide's outings chapter (a short «With
+  the backup's round trip with the samples, and an older file without them. Built (§15,
+  «Phase 15, what the reader sees, and the documents»): the type change is tested on
+  `ForegroundTypes`, the class the service changes its types through, not on the service
+  whole.
+- [x] Strings in English and Italian; CHANGELOG; the guide's outings chapter (a short «With
   GPS» part: when it is on, what is kept, what is never sent).
 - [ ] **On a device (owner), the proof first:** start an outing with GPS from the editor, from
   Today and from the launcher's shortcut; the screen off for ten minutes; pause and Resume
@@ -2280,6 +2297,79 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
   - **Merged into `main` is not released.** A release is a tag, and Phases 15 and 16 are
     released together or not at all; until then `main` holds a measured outing whose card
     does not yet say what the receiver is doing, and whose proof on a phone is not done.
+
+- **18 Nov 2026.** **Phase 15, what the reader sees, and the documents** (owner, opening a new
+  session on the branch, pull request 72 still a draft: "go on with Phase 15, then Phase 16;
+  I cannot test on the device for now, so go on with everything that does not depend on the
+  proof, and do not build the fallback service"). Phase 15's boxes are ticked but the two on
+  a device; nothing here was tried on a phone.
+  - **One line for the receiver, decided in the domain** (`GpsLine`, `GpsLines`, pure, 16
+    tests): finding the satellites, the signal lost, location off on the phone, GPS stopped,
+    the permission gone, and the three ways an outing started on the steps. Measuring has no
+    line (the word under the distance says it) and neither has the receiver asleep at a stop
+    (the numbers stand). In order: what «Resume GPS» could not mend comes first (the
+    permission, the phone's switch), then the receiver lost, then what it is doing. Decided on
+    the way:
+    - *A tunnel is counted on the steps that were settled*, as the meter counts a hole, not on
+      the clock: with the screen off the receiver holds its fixes up to a minute, and a card
+      opened then would have said «no signal» until they came.
+    - *Waking after a stop is not a tunnel.* The quarter of a minute is counted from the last
+      fix or from when the receiver woke, whichever is later; «Finding the satellites» is said
+      only before the first fix of a line (a start, a resume), not at every traffic light.
+    - *Location turned off or on is heard from the receiver's own listener*
+      (`LocationReading.Provider`), so the card changes at once and nothing polls.
+  - **The distance says what it is** (`Measured.kt`): «measured» from nine tenths up
+    (`RouteConstants.MEASURED_SHARE`), under that the share the steps gave («30% from steps»),
+    and before the first fix «from steps»; the calories beside it keep Today's sign for an
+    estimate (≈). The stretch whose fixes are not in yet is shown with it
+    (`LiveMeasure.openMeters`), never told on.
+  - **The pace, in words** (`MeasureFormatter.pace`, two units, «9:40 min/km» and «min/mi»):
+    one line under the numbers, «Pace 10:05 min/km · now 9:48 min/km»; said by TalkBack and by
+    the outing's voice as «10 minutes 5 seconds a kilometre». The pace of the whole only over
+    a measured distance (ADR 0016 decision 7); the pace now only for half a minute after the
+    last step (`RouteConstants.PACE_NOW_MILLIS`): a reader who has stopped has none. The
+    voice says the outing's pace at each signal and at the goal. In Italian the pace is
+    «andatura», which leaves «ritmo» to the cadence against the outing's own.
+  - **`LiveSessionState.measure`** carries the three (the open stretch, the pace now, the
+    line) from the service to the card and to the counting notification, which says the same
+    in words and gains «Resume GPS» as a third button when the receiver was lost.
+  - **«Said once», made exact.** A refusal is remembered (`gps_on_steps_told`, beside the
+    reader's answer, not in the backup): the first outing it costs says so on its card, with
+    the way back, and the ones after it do not. What is not a refusal is said each time it
+    happens: location off on the phone, and the reminder's "Walk now" before the permission
+    was ever asked. A grant clears it, so a later refusal is told once again.
+  - **The way back goes through the outings' one door** (`OutingStarter.onCardAction`):
+    «Resume GPS», the system's switch for location, or the system's request for the
+    permission, alone (Passo's own screen is shown once). Where Android no longer shows its
+    request (after a second refusal) its page for Passo opens instead: known from what it
+    says before and after the request, with no timer. Granted from the card, an outing that
+    lost its receiver takes it back at once.
+  - **The question before the cap is on the card too**, read from the stored outing
+    (`capQuestionMinutes`), with «Keep going»: no ticker, the minutes move as the steps do.
+  - **The rows** of Today and History: «1.49 km measured», the satellites' mark before it,
+    the calories still with their ≈. A distance partly measured stays with the estimates.
+  - **The type change, apart from the service** (`ForegroundTypes`, 11 tests): granted,
+    refused by the rule, refused in a way no page documents, held and then refused, dropped
+    at a pause, a restarted process, the app opened mid-outing. The service itself is not run
+    under a test: what its tests would add is what the phone answers.
+  - **The documents** (box ticked): VISION (principles 1 and 3, the outings, the non-goals,
+    the two success criteria, the glossary's «measured», «pace» and «fix»), the README (the
+    outings' line, a row of its own for location, the backup's row; no dash), an «Amended»
+    line and its paragraph in ADR 0007, 0009 and 0013, ADR 0016's status, the guide («With
+    GPS», «What is kept, and what is never sent», the cap's question, the battery's part),
+    Settings' privacy line, CHANGELOG. The strings that promised no location, read one by
+    one: the guide's "Passo never knows where you are" was no longer true and now says that a
+    way walked from home reads no location; `ways_intro` ("No location, only your steps") and
+    the calibration's "no GPS" are true as they are, and stay.
+  - **Not changed, and said to the owner as suggestions, since each would change a decision:**
+    an outing that started on the steps stays on the steps when the permission is granted
+    from its card (its `gps` is frozen at the start, as the model says), so the line promises
+    the next outing, not this one; and after a refusal the editor's switch does not ask
+    again by itself (ADR 0016 decision 2 asks at a start only).
+  - **Checked.** `spotlessCheck`, `:app:checkForbiddenPermissions`, `test`, `:app:lintDebug`,
+    `:app:assembleDebug`: green, but for the six migration tests this machine cannot run. The
+    card's screenshots looked at in every state, in the light and the dark, in Italian, at
+    twice the text size and on the open foldable; the row in History. **Nothing on a phone.**
 
 ### Open
 
