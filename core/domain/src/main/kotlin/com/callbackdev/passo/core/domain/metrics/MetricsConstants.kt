@@ -141,4 +141,20 @@ object MetricsConstants {
      * 0.2 mL O2 per kg per metre, about 1 kcal/kg/km, nearly independent of speed.
      */
     const val RUN_KCAL_PER_KG_KM: Double = 1.0
+
+    /**
+     * Net energy of walking uphill, per kilogram per metre climbed: the grade's term of the
+     * same ACSM walking equation, 1.8 mL O2 per kg per metre of rise, at about 5 kcal a litre.
+     * On a 5% slope a kilometre then costs 0.5 + 0.009 × 50 = 0.95 kcal/kg, on a 10% one 1.4.
+     * Added only to an outing measured with GPS, whose climb is known (PLANNING.md §11 Phase
+     * 16); no credit for coming down, which costs the legs about what the flat does.
+     * ACSM's Guidelines for Exercise Testing and Prescription, metabolic equations.
+     */
+    const val WALK_KCAL_PER_KG_METER_CLIMBED: Double = 0.009
+
+    /**
+     * The same for running: the ACSM running equation's grade term, 0.9 mL O2 per kg per metre
+     * of rise, half the walking one (a runner's bounce already lifts the body).
+     */
+    const val RUN_KCAL_PER_KG_METER_CLIMBED: Double = 0.0045
 }
