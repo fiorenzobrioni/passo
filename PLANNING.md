@@ -803,6 +803,18 @@ It ends with numbers on the card and the notification; the route's own page is P
   «Resume GPS». The evening reminder's "Walk now" never asks for GPS. The diagnostics log gets
   one row an outing with GPS (fixes taken and refused, the measured share, how long the
   receiver slept, the type refused or not), like the interval outing's.
+- [ ] **The longest outing asks before it ends** (ADR 0016 decision 14; it amends ADR 0009
+  decision 6, for every outing, with GPS or not). `Session` keeps its own cap (four hours from
+  the start, stored, so an answer survives a restart). At the first step batch within 15
+  minutes of it, once per cap: the stillness's two long pulses and a notification on the
+  `sessions` channel, «Still walking? This outing ends in 15 minutes», with «Keep going»; the
+  card says the same while it is on screen. «Keep going», from either, moves the cap four hours
+  on. Unanswered, the outing ends at its cap, is told (it was silent: `SessionEnd.CLOSED` was
+  neither told nor reopenable), and can be taken back for `KEEP_GOING_MILLIS` with the steps
+  since, as after the goal; in an outing with GPS the receiver stays on through that window
+  and its points are kept aside, joined to the route if the outing is taken back and dropped
+  if not. `SignalWake` follows the outing's own cap. No timer: every part rides on a step
+  batch, a screen-on or a touch. The voice, if the outing speaks, says the question too.
 - [ ] **The switch, and the permission in context** (`:feature:sessions`). In the editor,
   «Measure with GPS» / «Misura con il GPS», with two lines under it: what it gives (a measured
   distance, a pace, the route) and what it costs (the battery, in the words the owner's
@@ -858,6 +870,13 @@ fails on any permission outside the list.
 | Location turned off on the phone, mid-outing | As the tunnel, until it is back; the card says it |
 | The process restarted by the system | The outing continues from the steps; «Resume GPS» on the notification |
 | An interval outing with GPS | The changes still ride on the steps (ADR 0013); the fixes change nothing of their timing |
+| 3 h 45 min into an outing, walking | Asked once, by vibration and notification; nothing stops |
+| «Keep going» before the cap | The cap is four hours later; asked again 15 minutes before that one |
+| The question unanswered | Ended at four hours and told; «Keep going» for 15 minutes takes it back with the steps and the route since |
+| Taken back 10 minutes after its cap, with GPS | The receiver never stopped: the route has no hole |
+| Not taken back | The receiver stops 15 minutes after the cap; the points kept aside are dropped |
+| 3 h 45 min into an outing, sitting since 3 h 35 | Not asked: no step brings the question, and the stillness ends it at 3 h 50 as always |
+| The process restarted after «Keep going» | The moved cap is read from what was stored |
 | A city walk from home with GPS on | Its places are told by the fused distance; nothing else differs (on the spot is Phase 18) |
 | A mock fix in a release build | Refused |
 
@@ -1146,11 +1165,10 @@ cache in `tools/ways-cache/`, `LINE_TOLERANCE`, `splice`), `tools/ways_content.p
   as the ways' notifications say them), off the way, back on it. The start needs the first
   fix within 500 m of the way: otherwise the page says how far the way is and offers an
   ordinary outing.
-- [ ] **The longest outing** (ADR 0016 decision 14). `SessionConstants` gains the twelve hours
-  for an outing on a way on the spot (and Phase 20's followed route); every other outing keeps
-  four. `SignalWake` follows the outing's own cap. An outing ended by its cap is told (the
-  stillness's two long pulses and a notification that says it), since on a path a silent end
-  would stop the guidance unnoticed. The end after 15 minutes still and after an hour paused
+- [ ] **The longest outing** (ADR 0016 decision 14). An outing on a way on the spot (and
+  Phase 20's followed route) starts with a cap of twelve hours instead of four, so a day's
+  stage is not interrupted by Phase 15's question; before twelve it asks in the same way, and
+  «Keep going» moves it four hours on. The end after 15 minutes still and after an hour paused
   are unchanged: a lunch ends the outing, and the next one starts from where the reader is.
 - [ ] **What was walked in person** (`passo.db`, by auto-migration; numbers along a public
   line, never coordinates): `way_stretch` (way, from and to in metres, the day) merged as they
@@ -1191,7 +1209,7 @@ sees the ways exactly as before.
 | Two stretches that meet | Merged into one |
 | A stage reached from home and on foot | Two stamps, two inks, two days |
 | Kilimanjaro, whose line goes up and down the same path | The search near the last place keeps the climb and the descent apart |
-| The outing reaches twelve hours | Ended and told; the stretches up to there are kept |
+| The outing nears twelve hours | Asked as every outing is before its cap; unanswered, ended and told, the stretches up to there kept |
 | Lunch of forty minutes | Ended by stillness as always, with "Resume" for 15 minutes; a new outing continues the same day's stretch |
 | A way deleted from Your ways | The journey from home goes, as today; what was walked there stays unless the reader deletes it too, asked apart |
 
@@ -1832,9 +1850,17 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
        GPS on, that forgetting would cost a battery, so the cap matters more, not less. But a
        day's stage on a way is six to eight hours with its stops: the cap would fall in the
        middle of it and end the guidance silently, on a path. So an outing on a way walked on
-       the spot (Phase 19) and one that follows a route (Phase 20) may run to twelve hours,
-       and an outing ended by its cap is told from then on. Every other outing, with GPS or
-       not, keeps four.
+       the spot (Phase 19) and one that follows a route (Phase 20) start with twelve hours.
+       Every other outing, with GPS or not, starts with four.
+       *And no cap ends a walk unasked* (owner, the same day, on reading the above: "before
+       the GPS is turned off, is the reader warned, and can they say to go on, if they walk
+       more than four hours?"). They were not: the plan only told the end after it. Now, for
+       every outing: 15 minutes before its cap it asks, by a vibration and a notification with
+       «Keep going», which moves the cap four hours on; unanswered, it ends at the cap, says
+       so, and can be taken back for 15 minutes, the receiver staying on meanwhile so the
+       route has no hole. The question rides on a step batch, so no timer is added and a
+       reader who is sitting is not asked. Built in Phase 15, since it is every outing's;
+       ADR 0016 decision 14, which amends ADR 0009 decision 6.
     3. *One APK.* A second build without the permission would double every release's tests and
        ask every new reader to choose before knowing the app; the allowlist, the permission
        asked only in context and Android's own pages do that job.

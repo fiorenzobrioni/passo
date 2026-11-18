@@ -7,7 +7,8 @@
 - Amends, in the change that builds Phase 15: VISION.md (principles 1 and 3, the non-goals, the
   success criterion «Privacy is enforced»), PLANNING.md §9 and §10, CLAUDE.md's invariants, the
   README's privacy lines, `docs/adr/0007-backup.md` (a second database, left out of the cloud
-  copy) and `docs/adr/0009-sessions.md` (decision 1: a pace per kilometre, shown, never a goal)
+  copy) and `docs/adr/0009-sessions.md` (decision 1: a pace per kilometre, shown, never a goal;
+  decision 6: the longest outing asks before it ends and can be carried on)
 
 ## Context
 
@@ -184,14 +185,32 @@ to be proven on a device in Phase 15):
     Never a navigation to the start, never a turn spoken with a street's name: Passo has a line
     and where the reader is on it, and says only that.
 
-14. **The longest outing.** Four hours stays the cap for every outing, GPS or not: beside the
-    end by stillness it is what stops an outing forgotten by a reader who goes on walking all
-    day, and with GPS on that forgetting would cost a battery. Two outings may run to twelve
-    hours: one on a way walked on the spot, and one that follows a route (Phase 20), because a
-    day's stage is six to eight hours with its stops and a cap in the middle of it would end
-    the guidance without a word, on a path. Where the cap does end an outing it is told, as an
-    end by stillness is. The end after 15 minutes still and after an hour paused are unchanged
-    everywhere.
+14. **The longest outing: asked before it ends, and the reader may go on.** Four hours stays
+    the cap for every outing, GPS or not: beside the end by stillness it is what stops an
+    outing forgotten by a reader who goes on walking all day, and with GPS on that forgetting
+    would cost a battery. But a cap that ends a walk the reader is still on, without a word,
+    is a fault, and with the receiver going off it would be a worse one (owner, 18 Nov 2026:
+    "before the GPS is turned off, is the reader warned, and can they say to go on?"). So,
+    for every outing, with GPS or not:
+    - **Fifteen minutes before its cap** the outing asks: a vibration of its own kind (the
+      stillness's two long pulses) and a notification, «Still walking? This outing ends in 15
+      minutes», with «Keep going». It rides on the first step batch past that moment, as every
+      signal does: no timer, and a reader who is not walking is not asked (the stillness has
+      ended the outing, or will).
+    - **«Keep going» moves the cap four hours on**, from the card too, and can be said again
+      before the next one: a reader who answers is not a reader who forgot. Nothing stops, the
+      receiver included.
+    - **Unanswered, the outing ends at its cap and says so**, and for 15 minutes after it can be
+      taken back with «Keep going», with the steps since, as an end by its goal or by stillness
+      can (`KEEP_GOING_MILLIS`). In an outing with GPS the receiver stays on through those 15
+      minutes, the reader being by definition still walking, so a route taken back has no hole;
+      then it stops and the points kept aside are dropped.
+    Two outings start with twelve hours instead of four, so that a long day is not interrupted
+    by the question at all: one on a way walked on the spot, and one that follows a route
+    (Phase 20), a day's stage being six to eight hours with its stops; they ask before twelve
+    in the same way. The end after 15 minutes still and after an hour paused are unchanged
+    everywhere. This amends `docs/adr/0009-sessions.md`, decision 6 ("at four hours"), in the
+    change that builds Phase 15.
 
 15. **One APK.** A second build without the permission would keep "cannot" for the reader who
     wants it, at the price of two artifacts to test, sign and explain at every release, and of
