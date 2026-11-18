@@ -2229,6 +2229,24 @@ This log starts after 1.1.0's preparation (2 Nov 2026); its entries are written 
     write-ahead log under `<device-transfer>` only, and a test reads the file to say so. 13
     tests on real Room databases. **Not yet:** the service calling any of it, and the
     backup's added fields in the JSON and the CSV.
+  - **The meter in the service, the same day.** Each fix goes to the tracker on the steps' own
+    clock (`Location.toFix`: its elapsed time, by the snapshot a step sample is read with;
+    never the satellites' time). After a batch of steps the receiver is asked for its fixes in
+    that wake, and the distance settles when they are in (`settleSoon`; at once where the
+    receiver holds nothing back; the wait gives up after the sensor's own 1.5 s, the processor
+    being awake for the batch). Before a pause, a stop or a resume the fixes up to the touch
+    are waited for, as the steps are. The points kept are written as a chunk after the step
+    batch's transaction, their altitude turned to mean sea level off the main thread
+    (`RouteAltitudes`: a point that cannot be converted loses its altitude rather than keep one
+    on another datum); the samples go to `passo.db`. An outing too short to keep has its route
+    deleted first. At the service's start the routes with no outing are deleted, only where
+    the routes' file exists. **The stop is told**: a restarted process posts «GPS stopped»
+    with «Resume GPS» (or "Open Passo" where the permission is gone), says it if the outing
+    speaks, and the notification goes when the receiver is back. A mock fix is taken only by a
+    debuggable build. The log's row gains what the route was built from and the measured
+    share. From here an outing with GPS shows its measured distance and keeps its route.
+    **Not yet:** the card's and the notification's lines for the receiver's states, the pace
+    in words, the backup's fields, the documents.
   - **Checked.** `spotlessCheck`, `:app:checkForbiddenPermissions`, `test` (the domain's 462
     among them), `:app:lintDebug`, `:app:assembleDebug`: green, but for the six migration
     tests this machine cannot run. Nothing on a phone.

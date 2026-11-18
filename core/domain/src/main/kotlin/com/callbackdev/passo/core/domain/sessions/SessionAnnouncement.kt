@@ -86,6 +86,13 @@ sealed interface SessionAnnouncement {
     data class EndedAtCap(val steps: Int) : SessionAnnouncement
 
     /**
+     * The receiver of an outing with GPS stopped (a process the system restarted cannot have
+     * it): the outing goes on from the steps, and says so once (docs/adr/0016-location.md,
+     * decision 4).
+     */
+    data object GpsStopped : SessionAnnouncement
+
+    /**
      * A city walk began (Phase 11): at its first place, said with its sentence, or, continued,
      * from [here], with the place ahead. The walk's name is the outing's.
      */

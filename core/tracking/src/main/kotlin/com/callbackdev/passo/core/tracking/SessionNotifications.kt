@@ -263,6 +263,49 @@ internal class SessionNotifications(private val context: Context) {
             .build()
     }
 
+    /**
+     * The receiver of an outing with GPS stopped: told once, with the way back. «Resume GPS»
+     * where the permission is there ([canResume]), since a touch on a notification is a moment
+     * location may be read from; where it is gone, the app, the one place it can be asked.
+     */
+    fun gpsStopped(session: Session, canResume: Boolean): android.app.Notification {
+        val text = context.getString(
+            if (canResume) R.string.session_gps_stopped_text else R.string.session_gps_stopped_text_open,
+        )
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_stat_steps)
+            .setContentTitle(
+                context.getString(R.string.session_gps_stopped_title, context.resources.sessionName(session)),
+            )
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setContentIntent(context.openAppIntent(REQUEST_GOAL))
+            .setAutoCancel(true)
+            .setCategory(NotificationCompat.CATEGORY_WORKOUT)
+        if (canResume) {
+            builder.addAction(
+                0,
+                context.getString(R.string.session_action_resume_gps),
+                SessionControl.pendingIntent(context, SessionControl.ACTION_RESUME_GPS, REQUEST_RESUME_GPS),
+            )
+        }
+        return builder.build()
+    }
+
+    fun postGpsStopped(notification: android.app.Notification) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        NotificationManagerCompat.from(context).notify(ID_GPS_STOPPED, notification)
+    }
+
+    /** The receiver is back, or the outing is over. */
+    fun cancelGpsStopped() {
+        NotificationManagerCompat.from(context).cancel(ID_GPS_STOPPED)
+    }
+
     /** The question, in the shade: under its own id, so the end's notification never hides it. */
     fun postCapAhead(notification: android.app.Notification) {
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
@@ -370,11 +413,15 @@ internal class SessionNotifications(private val context: Context) {
         /** «Still walking?», before the longest an outing stays open. */
         const val ID_CAP_AHEAD = 7
 
+        /** «GPS stopped», for an outing with GPS whose receiver a restarted process lost. */
+        const val ID_GPS_STOPPED = 8
+
         private const val PROGRESS_MAX = 1_000
         private const val REQUEST_PAUSE = 10
         private const val REQUEST_RESUME = 11
         private const val REQUEST_STOP = 12
         private const val REQUEST_KEEP_GOING = 13
         private const val REQUEST_GOAL = 14
+        private const val REQUEST_RESUME_GPS = 15
     }
 }

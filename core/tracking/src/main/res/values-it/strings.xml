@@ -105,6 +105,10 @@
         <item quantity="other">Questa uscita si chiude tra %1$d minuti. Tocca Continua per andare avanti.</item>
     </plurals>
     <string name="session_ended_cap_title">%1$s: chiusa per limite di tempo</string>
+    <string name="session_gps_stopped_title">%1$s: GPS fermo</string>
+    <string name="session_gps_stopped_text">L’uscita continua dai tuoi passi. Tocca Riprendi GPS per misurarla di nuovo.</string>
+    <string name="session_gps_stopped_text_open">L’uscita continua dai tuoi passi. Apri Passo per misurarla di nuovo.</string>
+    <string name="session_action_resume_gps">Riprendi GPS</string>
     <string name="evening_reminder_walk_now">Cammina ora</string>
     <!-- I segnali detti a voce (Fase 10, la voce): pronunciati, quindi ogni quantità in parole. -->
     <plurals name="spoken_minutes">
@@ -161,6 +165,7 @@
     <string name="spoken_ended_still">Uscita chiusa dopo una lunga sosta, a %1$s. Puoi riprenderla dalla notifica.</string>
     <string name="spoken_cap_ahead">Stai ancora camminando? Questa uscita si chiude tra %1$s. Tocca Continua sulla notifica per andare avanti.</string>
     <string name="spoken_ended_cap">Uscita chiusa per limite di tempo, a %1$s. Puoi continuarla dalla notifica.</string>
+    <string name="spoken_gps_stopped">GPS fermo. L’uscita continua dai tuoi passi.</string>
     <string name="spoken_zone">%1$d su %2$s al tuo ritmo.</string>
 
     <!-- I cammini (PLANNING.md §11 Fase 11) -->

@@ -396,6 +396,8 @@ internal fun Context.spoken(announcement: SessionAnnouncement, session: Session,
             res.spokenAmount(SessionAmount(SessionGoalKind.STEPS, announcement.steps.toDouble()), format),
         )
 
+        SessionAnnouncement.GpsStopped -> res.getString(R.string.spoken_gps_stopped)
+
         is SessionAnnouncement.CapAhead -> res.getString(
             R.string.spoken_cap_ahead,
             res.getQuantityString(R.plurals.spoken_minutes, announcement.minutes, announcement.minutes),

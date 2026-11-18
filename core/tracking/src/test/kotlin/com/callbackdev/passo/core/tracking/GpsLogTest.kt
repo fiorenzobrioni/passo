@@ -21,7 +21,7 @@ class GpsLogTest {
 
         val row = log.drain(wakeUpCounter = true)
 
-        assertThat(row).contains("fixes=4 good=3 screenOff=3")
+        assertThat(row).contains("fixes=4 good=3 taken=0 refused=0 screenOff=3")
         assertThat(row).contains("batches=2 largestBatch=3")
         assertThat(row).contains("firstFix=8000ms")
         assertThat(row).contains("typeAdded=1 typeRefused=0")
@@ -78,6 +78,16 @@ class GpsLogTest {
     }
 
     @Test
+    fun `the row says what the route was built from, and how much of the distance was measured`() {
+        log.onType(added = true)
+
+        val row = log.drain(wakeUpCounter = true, taken = 1_780, refused = 22, measuredShare = 0.964)
+
+        assertThat(row).contains("taken=1780 refused=22")
+        assertThat(row).contains("measured=96%")
+    }
+
+    @Test
     fun `drained, it starts clean for the next outing`() {
         log.onType(added = true)
         log.onAsked(0, granted = true)
@@ -86,6 +96,6 @@ class GpsLogTest {
 
         assertThat(log.used).isFalse()
         log.onType(added = true)
-        assertThat(log.drain(wakeUpCounter = true)).contains("fixes=0 good=0 screenOff=0")
+        assertThat(log.drain(wakeUpCounter = true)).contains("fixes=0 good=0 taken=0 refused=0 screenOff=0")
     }
 }

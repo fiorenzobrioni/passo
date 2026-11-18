@@ -74,10 +74,17 @@ internal class GpsLog {
         }
     }
 
-    /** The row, and a clean slate for the next outing. */
-    fun drain(wakeUpCounter: Boolean): String {
+    /**
+     * The row, and a clean slate for the next outing.
+     *
+     * @param taken the fixes the route was built from, and [refused] the ones it was not (too
+     *   vague, too fast, out of order): the meter's own count, beside the receiver's.
+     * @param measuredShare the share of the outing's distance that came from fixes.
+     */
+    fun drain(wakeUpCounter: Boolean, taken: Int = 0, refused: Int = 0, measuredShare: Double? = null): String {
         val row = buildString {
-            append("fixes=$fixes good=$good screenOff=$screenOffFixes ")
+            append("fixes=$fixes good=$good taken=$taken refused=$refused screenOff=$screenOffFixes ")
+            measuredShare?.let { append("measured=${(it * PERCENT).toInt()}% ") }
             append("batches=$batches largestBatch=$largestBatch longestGap=${longestGapMillis}ms ")
             append("firstFix=${firstFixAfterMillis?.let { "${it}ms" } ?: "none"} sleeps=$sleeps ")
             append("typeAdded=$typeAdded typeRefused=$typeRefused updatesRefused=$updatesRefused")
@@ -108,5 +115,6 @@ internal class GpsLog {
     private companion object {
         /** docs/adr/0016-location.md, decision 5: a fix is accepted at 25 m of accuracy or better. */
         const val GOOD_ACCURACY_METERS = 25f
+        const val PERCENT = 100
     }
 }
