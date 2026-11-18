@@ -69,6 +69,37 @@ class SessionTrackerRouteTest {
         Walker(SessionTracker(session, lengths, weightKg = 70.0, meter))
 
     @Test
+    fun `it says when its last fix came and how far its steps are settled, for the card's line`() {
+        val walker = walker(started(plan(SessionGoalKind.TIME, 60)))
+        assertThat(walker.tracker.lastFixAtMillis).isNull()
+        assertThat(walker.tracker.settledThroughMillis).isNull()
+
+        walker.go(60)
+        assertThat(walker.tracker.lastFixAtMillis).isEqualTo(walker.at)
+        assertThat(walker.tracker.settledThroughMillis).isEqualTo(walker.at)
+
+        // A tunnel: the steps go on and are settled, the last fix stays where it was.
+        val before = walker.at
+        walker.go(30, fixes = false)
+        assertThat(walker.tracker.lastFixAtMillis).isEqualTo(before)
+        assertThat(walker.tracker.settledThroughMillis).isEqualTo(walker.at)
+
+        // A pause cuts the line: the next stretch finds the satellites again.
+        walker.tracker.pause(walker.at)
+        assertThat(walker.tracker.lastFixAtMillis).isNull()
+    }
+
+    @Test
+    fun `an outing without GPS has neither`() {
+        val walker = walker(started(plan(SessionGoalKind.TIME, 60), withGps = false))
+
+        walker.go(60)
+
+        assertThat(walker.tracker.lastFixAtMillis).isNull()
+        assertThat(walker.tracker.settledThroughMillis).isNull()
+    }
+
+    @Test
     fun `its distance is the measured one, and what the steps alone said is kept beside it`() {
         val walker = walker(started(plan(SessionGoalKind.TIME, 60)))
 

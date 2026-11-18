@@ -166,6 +166,7 @@
     <string name="spoken_cap_ahead">Stai ancora camminando? Questa uscita si chiude tra %1$s. Tocca Continua sulla notifica per andare avanti.</string>
     <string name="spoken_ended_cap">Uscita chiusa per limite di tempo, a %1$s. Puoi continuarla dalla notifica.</string>
     <string name="spoken_gps_stopped">GPS fermo. L’uscita continua dai tuoi passi.</string>
+    <string name="spoken_pace">Andatura: %1$s.</string>
     <string name="spoken_zone">%1$d su %2$s al tuo ritmo.</string>
 
     <!-- I cammini (PLANNING.md §11 Fase 11) -->

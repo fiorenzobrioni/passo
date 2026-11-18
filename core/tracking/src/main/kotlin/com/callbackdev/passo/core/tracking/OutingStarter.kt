@@ -1,9 +1,12 @@
 package com.callbackdev.passo.core.tracking
 
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
 import com.callbackdev.passo.core.data.sessions.SessionRepository
 import com.callbackdev.passo.core.domain.routes.GpsAnswer
+import com.callbackdev.passo.core.domain.routes.GpsLineAction
 import com.callbackdev.passo.core.domain.routes.GpsStart
 import com.callbackdev.passo.core.domain.routes.GpsStartStep
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -17,12 +20,15 @@ import javax.inject.Singleton
 /**
  * An outing that waits for the reader's word on the location permission before it starts.
  *
+ * @property planId the plan to start once the reader has answered; null when no outing waits,
+ *   the reader having asked for the permission from the card of an outing already under way
+ *   (the way back after a refusal).
  * @property step what is to be shown: Passo's own screen and then the system's request, or the
  *   request alone.
  * @property shown the app has put it in front of the reader: a screen drawn again (a rotation)
  *   must not ask a second time.
  */
-data class WaitingOuting(val planId: Long, val step: GpsStartStep, val shown: Boolean = false)
+data class WaitingOuting(val planId: Long?, val step: GpsStartStep, val shown: Boolean = false)
 
 /**
  * The one door every start of a plan's outing goes through (PLANNING.md §11 Phase 15, «One door
@@ -64,6 +70,26 @@ constructor(
         return true
     }
 
+    /**
+     * What a line about the satellites on an outing's card asks for (PLANNING.md §11 Phase 15,
+     * «What the reader sees while it counts»), from whichever page the card is on: the receiver
+     * back, the system's switch for location, or the permission, asked through this same door.
+     */
+    fun onCardAction(action: GpsLineAction) {
+        when (action) {
+            GpsLineAction.RESUME_GPS -> SessionControl.resumeGps(context)
+
+            GpsLineAction.LOCATION_SETTINGS -> try {
+                context.startActivity(Gps.locationSettingsIntent().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            } catch (e: ActivityNotFoundException) {
+                // A phone with no such page: the line stays, and says what is off.
+            }
+
+            // The system's request alone: Passo's own screen is shown once, before the first.
+            GpsLineAction.ALLOW_LOCATION -> state.value = WaitingOuting(planId = null, step = GpsStartStep.ASK)
+        }
+    }
+
     /** The app has put the question in front of the reader. */
     fun shown() {
         state.update { it?.copy(shown = true) }
@@ -91,6 +117,13 @@ constructor(
         val outing = state.value ?: return
         state.value = null
         preferences.setGpsAnswer(answer)
-        SessionControl.start(context, outing.planId)
+        val planId = outing.planId
+        when {
+            planId != null -> SessionControl.start(context, planId)
+
+            // Asked from the card of an outing under way: one that lost its receiver takes it
+            // back at once, and one that started on the steps stops saying why.
+            answer == GpsAnswer.GRANTED -> SessionControl.resumeGps(context)
+        }
     }
 }

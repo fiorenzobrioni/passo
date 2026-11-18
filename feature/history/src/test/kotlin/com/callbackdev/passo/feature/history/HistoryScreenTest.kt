@@ -52,12 +52,13 @@ class HistoryScreenTest {
         target: HistoryTarget? = null,
         walkDetection: Boolean = true,
         outing: Boolean = false,
+        measured: Boolean = false,
     ) {
         compose.setContent {
             PassoTheme(darkTheme = dark) {
                 HistoryScreen(
                     state = state,
-                    dayDetail = { HistorySamples.detail(it, walkDetection, outing) },
+                    dayDetail = { HistorySamples.detail(it, walkDetection, outing, measured) },
                     onOpenSettings = {},
                     target = target,
                 )
@@ -172,6 +173,31 @@ class HistoryScreenTest {
         compose.onNode(hasContentDescription("Brisk walk from", substring = true)).assertExists()
         compose.onNode(hasContentDescription("Goal reached: 20 min at a brisk pace", substring = true)).assertExists()
         snapshot("history_day_outing")
+    }
+
+    @Test
+    fun `an outing measured with GPS says so of its distance, and of nothing else`() {
+        show(target = HistoryTarget(PeriodScale.DAY, today.minusDays(1)), outing = true, measured = true)
+        page().performScrollToNode(hasTestTag(HistoryTags.WALKS))
+        // The row's one measure; its calories stay an estimate, and the day's own walks too.
+        compose.onNode(
+            hasContentDescription("Brisk walk from", substring = true) and
+                hasContentDescription("km measured", substring = true),
+        ).assertExists()
+        compose.onAllNodes(
+            hasContentDescription(
+                "Walk from",
+                substring = true,
+            ) and hasContentDescription("measured", substring = true),
+        ).assertCountEquals(0)
+        snapshot("history_day_outing_measured")
+    }
+
+    @Test
+    fun `an outing without GPS is an estimate, as ever`() {
+        show(target = HistoryTarget(PeriodScale.DAY, today.minusDays(1)), outing = true)
+        page().performScrollToNode(hasTestTag(HistoryTags.WALKS))
+        compose.onAllNodes(hasContentDescription("measured", substring = true)).assertCountEquals(0)
     }
 
     @Test

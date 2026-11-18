@@ -6,6 +6,8 @@ import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.callbackdev.passo.core.domain.routes.GpsLine
+import com.callbackdev.passo.core.domain.routes.LiveMeasure
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.Session
@@ -226,6 +228,109 @@ class SessionNotificationsTest {
         assertThat(expanded).contains("Japanese walking")
         assertThat(expanded).contains("Fast: 1:40 left.")
         assertThat(expanded).contains("112 steps/min: on pace")
+    }
+
+    /** The same walk measured with GPS: 1.19 km in twelve minutes of motion, 10:05 a kilometre. */
+    private val measured = session.copy(
+        totals = session.totals.copy(distanceMeters = 1_190.0, activeKcal = 44.0),
+        gps = true,
+        stepsMeters = 868.0,
+        measuredShare = 0.97,
+    )
+
+    private fun ongoing(session: Session, measure: LiveMeasure) = notifications.build(
+        NotificationContent(6_000, session = SessionNotice(session, 108, UnitPreference.METRIC, measure = measure)),
+    )
+
+    private fun expanded(notification: Notification) =
+        notification.extras.getCharSequence(Notification.EXTRA_BIG_TEXT).toString()
+
+    @Test
+    fun `an outing with GPS says the same as its card, in words - measured, the pace and the pace now`() {
+        val notification = ongoing(measured, LiveMeasure(paceNow = 588.0))
+
+        assertThat(expanded(notification)).contains("Measured: 1.19 km · estimated: 44 kcal")
+        assertThat(expanded(notification)).contains("Pace 10:05\u00A0min/km · now 9:48\u00A0min/km")
+        assertThat(expanded(notification)).doesNotContain("Estimated: 1.19")
+        // Measuring has no line of its own, and nothing more to touch.
+        assertThat(notification.actions.map { it.title.toString() }).containsExactly("Pause", "Stop").inOrder()
+    }
+
+    @Test
+    fun `finding the satellites - the notification says it, and the steps' stretch is in the distance`() {
+        val starting = measured.copy(
+            totals = SessionTotals(steps = 70, movingMillis = 40_000, zoneMillis = 40_000),
+            stepsMeters = 51.0,
+            measuredShare = 0.0,
+        )
+        val notification = ongoing(starting, LiveMeasure(openMeters = 51.0, line = GpsLine.FINDING))
+
+        assertThat(expanded(notification)).contains("0.05 km from your steps · estimated: 0 kcal")
+        assertThat(expanded(notification)).contains("Finding the satellites. Your steps count meanwhile.")
+        assertThat(expanded(notification)).doesNotContain("Pace ")
+    }
+
+    @Test
+    fun `more than a tenth from the steps - the share, and no pace of the whole`() {
+        val notification = ongoing(measured.copy(measuredShare = 0.7), LiveMeasure(line = GpsLine.SIGNAL_LOST))
+
+        assertThat(expanded(notification)).contains("1.19 km, 30% from your steps · estimated: 44 kcal")
+        assertThat(expanded(notification)).contains("No GPS signal here. Your steps cover this stretch.")
+        assertThat(expanded(notification)).doesNotContain("Pace ")
+    }
+
+    @Test
+    fun `GPS stopped - said on the counting notification, with Resume GPS as its third button`() {
+        val notification = ongoing(measured, LiveMeasure(line = GpsLine.STOPPED))
+
+        assertThat(expanded(notification)).contains("GPS stopped. Your outing goes on from your steps.")
+        assertThat(notification.actions.map { it.title.toString() })
+            .containsExactly("Pause", "Stop", "Resume GPS")
+            .inOrder()
+    }
+
+    @Test
+    fun `the permission gone or location off - said, with no button that would be refused`() {
+        val gone = ongoing(measured, LiveMeasure(line = GpsLine.PERMISSION_GONE))
+        val off = ongoing(measured, LiveMeasure(line = GpsLine.LOCATION_OFF))
+
+        assertThat(expanded(gone)).contains("Passo can no longer read your location.")
+        assertThat(expanded(off)).contains("Location is off on this phone.")
+        assertThat(gone.actions.map { it.title.toString() }).containsExactly("Pause", "Stop").inOrder()
+        assertThat(off.actions.map { it.title.toString() }).containsExactly("Pause", "Stop").inOrder()
+    }
+
+    @Test
+    fun `started on the steps - the notification says why, and the distance is an estimate`() {
+        val onSteps = session.copy(gps = false)
+        val notification = ongoing(onSteps, LiveMeasure(line = GpsLine.ON_STEPS_NO_PERMISSION))
+
+        assertThat(expanded(notification)).contains("Estimated: 0.86 km · 31 kcal")
+        assertThat(expanded(notification)).contains("This outing counts from your steps")
+    }
+
+    @Test
+    fun `the goal of an outing with GPS is told with its measure and its pace`() {
+        val done = measured.copy(
+            state = SessionState.FINISHED,
+            end = SessionEnd.GOAL,
+            endedAtMillis = 22 * 60_000L,
+            reachedAtMillis = 22 * 60_000L,
+        )
+        val notification = SessionNotifications(context).goalReached(done, UnitPreference.METRIC, withKeepGoing = true)
+
+        assertThat(expanded(notification)).contains("Measured: 1.19 km · estimated: 44 kcal")
+        assertThat(expanded(notification)).contains("Pace 10:05\u00A0min/km")
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT")
+    fun `in Italian - misurati, andatura`() {
+        val notification = ongoing(measured, LiveMeasure(paceNow = 588.0, line = GpsLine.SIGNAL_LOST))
+
+        assertThat(expanded(notification)).contains("Misurati: 1,19 km · stima: 44 kcal")
+        assertThat(expanded(notification)).contains("Andatura 10:05\u00A0min/km · ora 9:48\u00A0min/km")
+        assertThat(expanded(notification)).contains("Qui il segnale GPS non arriva.")
     }
 
     @Test

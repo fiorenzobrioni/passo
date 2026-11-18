@@ -1,5 +1,6 @@
 package com.callbackdev.passo.core.domain.format
 
+import com.callbackdev.passo.core.domain.routes.Pace
 import com.callbackdev.passo.core.model.Measure
 import com.callbackdev.passo.core.model.MeasureUnit
 import com.callbackdev.passo.core.model.UnitSystem
@@ -78,6 +79,24 @@ class MeasureFormatter(private val locale: Locale, val units: UnitSystem) {
 
     fun cadence(stepsPerMinute: Int): Measure = Measure(integer(stepsPerMinute.toLong()), MeasureUnit.STEPS_PER_MINUTE)
 
+    /**
+     * A pace, by the kilometre or the mile as the reader walks: minutes and seconds, «9:40»
+     * (docs/adr/0016-location.md, decision 7). To the nearest second: finer than that a pace is
+     * the receiver's wander.
+     */
+    fun pace(secondsPerKm: Double): Measure {
+        val (minutes, seconds) = paceParts(secondsPerKm)
+        val unit = if (units == UnitSystem.METRIC) MeasureUnit.MINUTES_PER_KILOMETER else MeasureUnit.MINUTES_PER_MILE
+        return Measure("%d:%02d".format(locale, minutes, seconds), unit)
+    }
+
+    /** The same pace as whole minutes and seconds, for a sentence said aloud. */
+    fun paceParts(secondsPerKm: Double): Pair<Int, Int> {
+        val perUnit = if (units == UnitSystem.METRIC) secondsPerKm else Pace.secondsPerMile(secondsPerKm)
+        val total = Math.round(perUnit).coerceAtLeast(0L)
+        return (total / SECONDS_PER_MINUTE).toInt() to (total % SECONDS_PER_MINUTE).toInt()
+    }
+
     /** A body weight: kilograms or pounds, with a decimal only when there is one. */
     fun weight(kg: Double): Measure = when (units) {
         UnitSystem.METRIC -> Measure(decimal(kg, 0, 1), MeasureUnit.KILOGRAM)
@@ -118,5 +137,6 @@ class MeasureFormatter(private val locale: Locale, val units: UnitSystem) {
         const val METERS_PER_KM = 1_000.0
         const val CM_PER_METER = 100.0
         const val TENS = 10.0
+        const val SECONDS_PER_MINUTE = 60L
     }
 }

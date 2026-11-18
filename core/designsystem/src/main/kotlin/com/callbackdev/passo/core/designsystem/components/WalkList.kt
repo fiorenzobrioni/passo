@@ -33,6 +33,8 @@ import com.callbackdev.passo.core.designsystem.format.text
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
+import com.callbackdev.passo.core.domain.routes.DistanceKind
+import com.callbackdev.passo.core.domain.routes.distanceKind
 import com.callbackdev.passo.core.domain.sessions.Outing
 import com.callbackdev.passo.core.domain.today.MINUTES_PER_DAY
 import com.callbackdev.passo.core.domain.walks.Walk
@@ -97,10 +99,18 @@ private fun SessionRow(outing: Outing.Planned, format: MeasureFormatter) {
         null
     }
     val energy = format.energy(session.totals.activeKcal).text()
-    val figures = listOfNotNull(steps, distance, cadence, energy).joinToString("  ·  ")
+    // An outing measured with GPS says so of its distance (docs/adr/0016-location.md, decision
+    // 6): the one figure of the row that is not an estimate, with the satellites' mark before it.
+    val measured = session.distanceKind() == DistanceKind.MEASURED
+    val distanceSaid = if (measured) stringResource(R.string.session_row_measured, distance) else distance
+    val figures = listOfNotNull(steps, distanceSaid, cadence, energy).joinToString("  ·  ")
     val spoken = stringResource(R.string.session_spoken, name, from, to, outcome, goal, figures)
     val counted = figureLine(steps, cadence)
-    val estimated = stringResource(R.string.walk_estimates, figureLine(distance, energy))
+    val estimated = if (measured) {
+        figureLine(distanceSaid, stringResource(R.string.walk_estimates, energy))
+    } else {
+        stringResource(R.string.walk_estimates, figureLine(distance, energy))
+    }
     val reached = session.reached
     Row(
         verticalAlignment = Alignment.Top,
@@ -170,7 +180,7 @@ private fun SessionRow(outing: Outing.Planned, format: MeasureFormatter) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Figures(counted, estimated)
+            Figures(counted, estimated, measured)
         }
     }
 }
@@ -244,12 +254,28 @@ private fun WalkRow(walk: Walk, format: MeasureFormatter) {
  * cadence), then what is estimated from it (the distance, the calories), with the sign Today
  * sets before its estimates. Four on one line broke wherever the width ran out, «108 steps/»
  * from its «min».
+ *
+ * @param measured the second line opens with a distance measured with GPS: the satellites' mark
+ *   stands before it, quiet, in the line's own ink.
  */
 @Composable
-private fun Figures(counted: String, estimated: String) {
+private fun Figures(counted: String, estimated: String, measured: Boolean = false) {
     val style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum")
     Text(counted, style = style, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    Text(estimated, style = style, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    if (measured) {
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Icon(
+                PassoIcons.Gps,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                // On the first line's height: where the figures wrap, the mark stays with the distance.
+                modifier = Modifier.padding(top = 3.dp).size(14.dp),
+            )
+            Text(estimated, style = style, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    } else {
+        Text(estimated, style = style, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
 }
 
 /** Figures on a line, each one held together: a line too long breaks between two, never inside one. */

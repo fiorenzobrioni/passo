@@ -160,6 +160,8 @@
     <string name="spoken_ended_cap">Outing ended at its time limit, at %1$s. You can keep going from the notification.</string>
     <!-- The receiver of an outing with GPS stopped, said once. -->
     <string name="spoken_gps_stopped">GPS stopped. Your outing goes on from your steps.</string>
+    <!-- An outing measured with GPS says its pace at each signal: «Pace: 9 minutes 40 seconds a kilometre.» -->
+    <string name="spoken_pace">Pace: %1$s.</string>
     <!-- «17 of 20 minutes at your pace.» -->
     <string name="spoken_zone">%1$d of %2$s at your pace.</string>
 

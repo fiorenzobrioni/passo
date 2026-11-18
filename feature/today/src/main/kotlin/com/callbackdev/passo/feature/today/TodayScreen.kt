@@ -181,6 +181,7 @@ fun TodayRoute(
                 onStop = viewModel::stopSession,
                 onKeepGoing = viewModel::keepGoing,
                 onClose = { viewModel.closeSession(id) },
+                onGps = viewModel::gps,
             )
         },
     )
@@ -250,6 +251,7 @@ fun TodayScreen(
                         canKeepGoing = session.canKeepGoing,
                         format = format,
                         actions = sessionActions(session.session.id),
+                        measure = session.measure,
                         modifier = inColumn.padding(horizontal = ScreenMargin),
                     )
                 }

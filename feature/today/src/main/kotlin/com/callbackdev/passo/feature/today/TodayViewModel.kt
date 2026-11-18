@@ -15,6 +15,7 @@ import com.callbackdev.passo.core.data.tracking.withPending
 import com.callbackdev.passo.core.data.ways.WayRepository
 import com.callbackdev.passo.core.domain.insights.StreakSoFar
 import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.routes.GpsLineAction
 import com.callbackdev.passo.core.domain.sessions.DayOutings
 import com.callbackdev.passo.core.domain.sessions.Outing
 import com.callbackdev.passo.core.domain.today.DayMinute
@@ -30,6 +31,7 @@ import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.UserSettings
 import com.callbackdev.passo.core.model.WayJourney
+import com.callbackdev.passo.core.tracking.OutingStarter
 import com.callbackdev.passo.core.tracking.SessionControl
 import com.callbackdev.passo.core.tracking.StepTracking
 import com.callbackdev.passo.core.tracking.TrackingControl
@@ -72,6 +74,7 @@ constructor(
     private val control: TrackingControl,
     private val sessions: SessionRepository,
     private val userPreferences: UserPreferencesDataSource,
+    private val outingStarter: OutingStarter,
     ways: WayRepository,
     liveSteps: LiveSteps,
     liveSession: LiveSession,
@@ -222,6 +225,11 @@ constructor(
 
     fun keepGoing() {
         SessionControl.keepGoing(context)
+    }
+
+    /** What the card's line about the satellites asks for, through the outings' one door. */
+    fun gps(action: GpsLineAction) {
+        outingStarter.onCardAction(action)
     }
 
     /**

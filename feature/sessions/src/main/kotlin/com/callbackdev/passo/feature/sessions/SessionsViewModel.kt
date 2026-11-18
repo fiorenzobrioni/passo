@@ -11,6 +11,7 @@ import com.callbackdev.passo.core.data.settings.SettingsRepository
 import com.callbackdev.passo.core.data.tracking.LiveSteps
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.routes.GpsLineAction
 import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.tracking.OutingStarter
@@ -141,6 +142,11 @@ constructor(
 
     fun keepGoing() {
         SessionControl.keepGoing(context)
+    }
+
+    /** What the card's line about the satellites asks for, through the outings' one door. */
+    fun gps(action: GpsLineAction) {
+        outings.onCardAction(action)
     }
 
     fun resumeTracking() {

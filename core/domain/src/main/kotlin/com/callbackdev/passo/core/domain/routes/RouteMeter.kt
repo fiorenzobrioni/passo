@@ -127,6 +127,12 @@ class RouteMeter(private val allowMock: Boolean = false) {
     /** What the steps estimate for the batches still open: shown, never told on. */
     val openMeters: Double get() = open.sumOf { it.stepsMeters }
 
+    /** The last fix accepted since the line began; null before the first, and after the line is cut. */
+    val lastFixAtMillis: Long? get() = lastAccepted?.atMillis
+
+    /** The end of the last batch of steps settled, its fixes known to be in; null before the first. */
+    val settledThrough: Long? get() = settledThroughMillis.takeIf { it != Long.MIN_VALUE }
+
     /**
      * A fix from the receiver, at the reader's [cadence] now. Refused ones are only counted.
      *

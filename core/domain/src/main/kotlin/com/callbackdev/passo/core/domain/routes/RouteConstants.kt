@@ -94,4 +94,18 @@ object RouteConstants {
 
     /** The pace now is the pace of the last so many metres; under them there is none to say. */
     const val PACE_METERS: Double = 200.0
+
+    /**
+     * The pace now is shown for this long after the last step: half a minute, the span the
+     * cadence itself is read over. Past it the reader has stopped, and the pace of the last
+     * stretch is no longer the pace now.
+     */
+    const val PACE_NOW_MILLIS: Long = 30_000L
+
+    /**
+     * «Measured» is said of a distance at least this much from fixes
+     * (docs/adr/0016-location.md, decision 6): nine tenths. Under it the outing says how much
+     * the steps gave, so the word is never spent on a walk half of which was a tunnel.
+     */
+    const val MEASURED_SHARE: Double = 0.9
 }

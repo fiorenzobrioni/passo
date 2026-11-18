@@ -4,6 +4,7 @@ import com.callbackdev.passo.core.domain.metrics.MetricsCalculator
 import com.callbackdev.passo.core.domain.metrics.MetricsConstants
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.routes.Fix
+import com.callbackdev.passo.core.domain.routes.RouteConstants.PACE_NOW_MILLIS
 import com.callbackdev.passo.core.domain.routes.RouteFilter
 import com.callbackdev.passo.core.domain.routes.RouteMeter
 import com.callbackdev.passo.core.domain.routes.RouteSettlement
@@ -170,12 +171,23 @@ class SessionTracker(
 
     /**
      * The pace of the last stretch of an outing with GPS, in seconds in motion a kilometre; null
-     * for any other outing, and before enough has been measured.
+     * for any other outing, before enough has been measured, while it does not count, and once
+     * the reader has stopped for [RouteConstants.PACE_NOW_MILLIS]: the pace of a stretch walked
+     * a while ago is not the pace now.
      */
-    val paceNow: Double? get() = route?.paceNow()
+    fun paceNowAt(nowMillis: Long): Double? {
+        if (session.state != SessionState.ACTIVE || nowMillis - session.lastStepAtMillis > PACE_NOW_MILLIS) return null
+        return route?.paceNow()
+    }
 
     /** What the steps estimate for the stretch whose fixes are not in yet: shown, never told on. */
     val openMeters: Double get() = route?.openMeters ?: 0.0
+
+    /** The last fix the meter accepted since its line began; null before the first. */
+    val lastFixAtMillis: Long? get() = route?.lastFixAtMillis
+
+    /** The end of the last batch of steps the meter settled, its fixes known to be in. */
+    val settledThroughMillis: Long? get() = route?.settledThrough
 
     /** How many fixes the meter took, for the outing's log row. */
     val fixesTaken: Int get() = route?.taken ?: 0

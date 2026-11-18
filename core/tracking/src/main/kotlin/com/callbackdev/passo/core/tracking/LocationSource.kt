@@ -18,6 +18,9 @@ internal sealed interface LocationReading {
 
     /** Everything the receiver held when [LocationSource.requestFlush] ran has been delivered. */
     data object FlushCompleted : LocationReading
+
+    /** Location was turned off on the phone, or on again, while the receiver was registered. */
+    data class Provider(val enabled: Boolean) : LocationReading
 }
 
 /**
@@ -59,11 +62,14 @@ internal class LocationSource(private val manager: LocationManager, private val 
         }
 
         // Location turned off on the phone and on again: the registration stays, and the fixes
-        // come back by themselves. Overridden because the platform's defaults are not there on
-        // every version this listener is compiled against.
-        override fun onProviderEnabled(provider: String) = Unit
+        // come back by themselves. Told on, so the outing's card can say it while it lasts.
+        override fun onProviderEnabled(provider: String) {
+            channel.trySend(LocationReading.Provider(enabled = true))
+        }
 
-        override fun onProviderDisabled(provider: String) = Unit
+        override fun onProviderDisabled(provider: String) {
+            channel.trySend(LocationReading.Provider(enabled = false))
+        }
     }
 
     /**

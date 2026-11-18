@@ -47,12 +47,18 @@ sealed interface SessionAnnouncement {
      */
     data class IntervalChanged(val fast: Boolean, val minutes: Int, val lastSet: Boolean) : SessionAnnouncement
 
-    /** A share of the goal: [left] to go, and the pace. */
+    /**
+     * A share of the goal: [left] to go, and the pace.
+     *
+     * @property paceSecondsPerKm the outing's pace so far, for one measured with GPS
+     *   (docs/adr/0016-location.md, decision 7); null for any other, which has none to say.
+     */
     data class Milestone(
         val milestone: SessionMilestone,
         val left: SessionAmount,
         val cadence: Int?,
         val pace: PaceVerdict,
+        val paceSecondsPerKm: Double? = null,
     ) : SessionAnnouncement
 
     /**
@@ -65,6 +71,7 @@ sealed interface SessionAnnouncement {
         val steps: Int,
         val pace: PaceSummary,
         val dayGoalReached: Boolean,
+        val paceSecondsPerKm: Double? = null,
     ) : SessionAnnouncement
 
     /**
@@ -116,17 +123,19 @@ sealed interface SessionAnnouncement {
 
         /**
          * What [milestone] says for [session] as it stands, the pace read as [cadence]; at the
-         * goal, [dayGoalReached] says whether this outing also brought today's goal.
+         * goal, [dayGoalReached] says whether this outing also brought today's goal. An outing
+         * measured with GPS says its pace a kilometre too ([paceSecondsPerKm]).
          */
         fun milestone(
             session: Session,
             milestone: SessionMilestone,
             cadence: Int?,
             dayGoalReached: Boolean = false,
+            paceSecondsPerKm: Double? = null,
         ): SessionAnnouncement = if (milestone == SessionMilestone.GOAL) {
-            goal(session, dayGoalReached)
+            goal(session, dayGoalReached, paceSecondsPerKm)
         } else {
-            Milestone(milestone, session.remaining(), cadence, verdict(session.intensity, cadence))
+            Milestone(milestone, session.remaining(), cadence, verdict(session.intensity, cadence), paceSecondsPerKm)
         }
 
         fun endedStill(session: Session): EndedStill = EndedStill(session.totals.steps)
@@ -148,12 +157,14 @@ sealed interface SessionAnnouncement {
         fun placesReached(session: Session, places: List<WayStop>): PlacesReached =
             PlacesReached(places, WalkPlaces.next(session))
 
-        fun goal(session: Session, dayGoalReached: Boolean = false): GoalReached = GoalReached(
-            goal = session.goal(),
-            steps = session.totals.steps,
-            pace = paceSummary(session),
-            dayGoalReached = dayGoalReached || session.restOfDay,
-        )
+        fun goal(session: Session, dayGoalReached: Boolean = false, paceSecondsPerKm: Double? = null): GoalReached =
+            GoalReached(
+                goal = session.goal(),
+                steps = session.totals.steps,
+                pace = paceSummary(session),
+                dayGoalReached = dayGoalReached || session.restOfDay,
+                paceSecondsPerKm = paceSecondsPerKm,
+            )
 
         /**
          * How an outing with a pace to keep kept it: "almost all of it" from [MOSTLY_AT_PACE] of

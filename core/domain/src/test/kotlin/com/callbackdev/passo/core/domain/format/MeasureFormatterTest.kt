@@ -90,6 +90,22 @@ class MeasureFormatterTest {
     }
 
     @Test
+    fun `a pace is minutes and seconds, by the kilometre or the mile`() {
+        assertThat(english.pace(580.0)).isEqualTo(Measure("9:40", MeasureUnit.MINUTES_PER_KILOMETER))
+        assertThat(italian.pace(605.4)).isEqualTo(Measure("10:05", MeasureUnit.MINUTES_PER_KILOMETER))
+        // The same walk read by the mile: 9:40 a kilometre is 15:33 a mile.
+        assertThat(imperial.pace(580.0)).isEqualTo(Measure("15:33", MeasureUnit.MINUTES_PER_MILE))
+    }
+
+    @Test
+    fun `a pace is rounded to the second, and its seconds never read sixty`() {
+        assertThat(english.pace(599.6)).isEqualTo(Measure("10:00", MeasureUnit.MINUTES_PER_KILOMETER))
+        assertThat(english.paceParts(599.6)).isEqualTo(10 to 0)
+        assertThat(english.paceParts(580.0)).isEqualTo(9 to 40)
+        assertThat(imperial.paceParts(580.0)).isEqualTo(15 to 33)
+    }
+
+    @Test
     fun `the goal share is floored and not capped`() {
         assertThat(english.percent(0.999)).isEqualTo("99%")
         assertThat(english.percent(1.2)).isEqualTo("120%")

@@ -152,7 +152,25 @@ constructor(private val dataStore: DataStore<Preferences>) {
     }
 
     suspend fun setGpsAnswer(answer: GpsAnswer) {
-        dataStore.edit { it[Keys.GPS_ANSWER] = answer.name }
+        dataStore.edit {
+            it[Keys.GPS_ANSWER] = answer.name
+            // A grant closes the refusal: one that comes after it is new, and told once again.
+            if (answer == GpsAnswer.GRANTED) it.remove(Keys.GPS_ON_STEPS_TOLD)
+        }
+    }
+
+    /**
+     * Whether an outing has already said that it started on the steps because the location
+     * permission was refused (PLANNING.md §11 Phase 15): a refusal is told once, on that
+     * outing's card, with the way back, and not at every outing after it. Not a setting, and
+     * not in the backup's file.
+     */
+    suspend fun gpsOnStepsTold(): Boolean = dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .first()[Keys.GPS_ON_STEPS_TOLD] ?: false
+
+    suspend fun markGpsOnStepsTold() {
+        dataStore.edit { it[Keys.GPS_ON_STEPS_TOLD] = true }
     }
 
     /** The last outing whose summary Today has shown and the reader put away. */
@@ -314,6 +332,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
         val SESSION_SUMMARY_SEEN = longPreferencesKey("session_summary_seen")
         val YEAR_CARD_CLOSED = intPreferencesKey("year_card_closed")
         val GPS_ANSWER = stringPreferencesKey("gps_answer")
+        val GPS_ON_STEPS_TOLD = booleanPreferencesKey("gps_on_steps_told")
     }
 
     companion object {

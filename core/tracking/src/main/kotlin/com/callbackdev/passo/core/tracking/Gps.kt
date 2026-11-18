@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
+import android.net.Uri
 import android.provider.Settings
 import androidx.core.content.ContextCompat
 import com.callbackdev.passo.core.domain.routes.GpsReadiness
@@ -46,6 +47,13 @@ object Gps {
 
     /** The system's own switch for location, for a reader who turned it off. */
     fun locationSettingsIntent(): Intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+
+    /**
+     * The system's page for Passo, where the permission is changed once Android no longer shows
+     * its request (after a second refusal): the one way back left then.
+     */
+    fun appSettingsIntent(context: Context): Intent =
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", context.packageName, null))
 
     private fun enabled(context: Context): Boolean =
         context.getSystemService(LocationManager::class.java)?.isProviderEnabled(LocationManager.GPS_PROVIDER) == true

@@ -126,4 +126,53 @@
     </plurals>
     <string name="session_intervals_chart_description">Intervalli veloci, passi al minuto: %1$s. Ritmo da %2$d.</string>
     <string name="session_intervals_chart_legend">La cadenza di ogni intervallo veloce; la linea è il ritmo da\u00A0%1$d.</string>
+
+    <!-- Un’uscita misurata con il GPS (Fase 15, docs/adr/0016-location.md). «Misurati» si dice
+         solo di una distanza che viene dai fix per almeno nove decimi. -->
+    <string name="session_stat_measured">misurati</string>
+    <string name="session_stat_measured_with">misurati · ≈\u00A0%1$s</string>
+    <string name="session_stat_from_steps">%1$s dai passi</string>
+    <string name="session_stat_from_steps_with">%1$s dai passi · ≈\u00A0%2$s</string>
+    <string name="session_stat_all_from_steps">dai passi</string>
+    <string name="session_stat_all_from_steps_with">dai passi · ≈\u00A0%1$s</string>
+    <string name="session_measured">Misurati: %1$s · stima: %2$s</string>
+    <string name="session_partly_measured">%1$s, il %2$s dai tuoi passi · stima: %3$s</string>
+    <string name="session_from_steps">%1$s dai tuoi passi · stima: %2$s</string>
+    <string name="session_row_measured">%1$s misurati</string>
+    <string name="session_pace">Andatura %1$s</string>
+    <string name="session_pace_and_now">Andatura %1$s · ora %2$s</string>
+    <string name="session_pace_now">Andatura ora %1$s</string>
+    <plurals name="pace_minutes">
+        <item quantity="one">%1$d minuto</item>
+        <item quantity="many">%1$d minuti</item>
+        <item quantity="other">%1$d minuti</item>
+    </plurals>
+    <plurals name="pace_seconds">
+        <item quantity="one">%1$d secondo</item>
+        <item quantity="many">%1$d secondi</item>
+        <item quantity="other">%1$d secondi</item>
+    </plurals>
+    <string name="pace_minutes_seconds">%1$s e %2$s</string>
+    <string name="pace_per_kilometer">%1$s al chilometro</string>
+    <string name="pace_per_mile">%1$s al miglio</string>
+    <string name="session_pace_spoken">Andatura: %1$s</string>
+    <string name="session_pace_and_now_spoken">Andatura: %1$s. Ora: %2$s</string>
+    <string name="session_pace_now_spoken">Andatura ora: %1$s</string>
+    <string name="session_gps_finding">Cerco i satelliti. Intanto contano i tuoi passi.</string>
+    <string name="session_gps_signal_lost">Qui il segnale GPS non arriva. Questo tratto lo coprono i tuoi passi.</string>
+    <string name="session_gps_location_off">La posizione è spenta sul telefono. Contano i tuoi passi finché non la riaccendi.</string>
+    <string name="session_gps_stopped">GPS fermo. L’uscita continua dai tuoi passi.</string>
+    <string name="session_gps_permission_gone">Passo non può più leggere la posizione. L’uscita continua dai tuoi passi.</string>
+    <string name="session_gps_on_steps_no_permission">Questa uscita conta dai tuoi passi: Passo non ha il permesso di leggere la posizione. Consentilo, e la prossima uscita sarà misurata.</string>
+    <string name="session_gps_on_steps_approximate">Questa uscita conta dai tuoi passi: una posizione approssimativa non può misurare una camminata. Consenti quella precisa, e la prossima uscita sarà misurata.</string>
+    <string name="session_gps_on_steps_location_off">Questa uscita conta dai tuoi passi: la posizione è spenta sul telefono. Accendila, e la prossima uscita sarà misurata.</string>
+    <string name="session_gps_resume">Riprendi GPS</string>
+    <string name="session_gps_turn_on_location">Accendi la posizione</string>
+    <string name="session_gps_allow_location">Consenti la posizione</string>
+    <string name="session_gps_allow_precise">Consenti la posizione precisa</string>
+    <plurals name="session_card_cap_question">
+        <item quantity="one">Stai ancora camminando? Questa uscita si chiude tra %1$d minuto.</item>
+        <item quantity="many">Stai ancora camminando? Questa uscita si chiude tra %1$d minuti.</item>
+        <item quantity="other">Stai ancora camminando? Questa uscita si chiude tra %1$d minuti.</item>
+    </plurals>
 </resources>

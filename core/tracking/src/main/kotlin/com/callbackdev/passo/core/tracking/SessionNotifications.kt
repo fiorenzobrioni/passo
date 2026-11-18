@@ -11,6 +11,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.callbackdev.passo.core.designsystem.format.countdown
+import com.callbackdev.passo.core.designsystem.format.gpsLineText
 import com.callbackdev.passo.core.designsystem.format.intervalWord
 import com.callbackdev.passo.core.designsystem.format.measureFormatter
 import com.callbackdev.passo.core.designsystem.format.sessionCadence
@@ -18,10 +19,13 @@ import com.callbackdev.passo.core.designsystem.format.sessionEstimates
 import com.callbackdev.passo.core.designsystem.format.sessionGoalDescription
 import com.callbackdev.passo.core.designsystem.format.sessionHeadline
 import com.callbackdev.passo.core.designsystem.format.sessionName
+import com.callbackdev.passo.core.designsystem.format.sessionPace
 import com.callbackdev.passo.core.designsystem.format.sessionProgress
 import com.callbackdev.passo.core.designsystem.format.sessionSteps
 import com.callbackdev.passo.core.designsystem.format.sessionZone
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
+import com.callbackdev.passo.core.domain.routes.GpsLine
+import com.callbackdev.passo.core.domain.routes.LiveMeasure
 import com.callbackdev.passo.core.domain.sessions.IntervalSchedule
 import com.callbackdev.passo.core.domain.sessions.fraction
 import com.callbackdev.passo.core.domain.sessions.intervalAt
@@ -38,12 +42,15 @@ import kotlin.math.roundToInt
  *
  * @property cadence the last half minute's pace; null before there is one, or paused.
  * @property nowMillis when it is drawn: an interval outing's countdown is counted to it.
+ * @property measure what an outing measured with GPS shows beyond its stored numbers, and the
+ *   line about the satellites: the same in words as on its card.
  */
 internal data class SessionNotice(
     val session: Session,
     val cadence: Int?,
     val units: UnitPreference,
     val nowMillis: Long = session.lastStepAtMillis,
+    val measure: LiveMeasure = LiveMeasure(),
 )
 
 /**
@@ -54,6 +61,9 @@ internal data class SessionNotice(
  *   expanded, the pace against the outing's own, the steps and the estimates, over a bar with
  *   the milestones marked on it. From Android 16 it asks to be a Live Update (a chip in the
  *   status bar and on the lock screen), which the reader can turn off in the system's settings.
+ *   An outing measured with GPS says what its card says, in the same words: the distance as a
+ *   measure, the pace by the kilometre and the pace now, and the one line about the satellites;
+ *   with «Resume GPS» as a third button when the receiver was lost.
  * - **The goal** is its own notification, on the `sessions` channel, which stays as a record:
  *   what was walked, and "Keep going" for a while after. So is **an end by stillness**, with
  *   "Resume" for as long, found by the reader who walks on. The milestones on the way are not
@@ -130,6 +140,15 @@ internal class SessionNotifications(private val context: Context) {
             context.getString(R.string.session_action_stop),
             SessionControl.pendingIntent(context, SessionControl.ACTION_STOP, REQUEST_STOP),
         )
+        // The receiver lost to a restarted process: one touch gives it back, a touch on a
+        // notification being a moment location may be read from (ADR 0016, decision 4).
+        if (notice.measure.line == GpsLine.STOPPED) {
+            builder.addAction(
+                0,
+                context.getString(R.string.session_action_resume_gps),
+                SessionControl.pendingIntent(context, SessionControl.ACTION_RESUME_GPS, REQUEST_RESUME_GPS),
+            )
+        }
         val scaled = (progress.coerceIn(0.0, 1.0) * PROGRESS_MAX).roundToInt()
         val schedule = IntervalSchedule.of(session)
         val text = if (interval != null) {
@@ -189,7 +208,10 @@ internal class SessionNotifications(private val context: Context) {
     private fun scaledAt(movingMillis: Long, schedule: IntervalSchedule): Int =
         (movingMillis.coerceIn(0, schedule.totalMillis).toDouble() / schedule.totalMillis * PROGRESS_MAX).roundToInt()
 
-    /** «108 steps/min: on pace · 1,240 steps», then the estimates. */
+    /**
+     * «108 steps/min: on pace · 1,240 steps», then the estimates; for an outing with GPS the
+     * distance as what it is, its pace, and the line about the satellites if there is one.
+     */
     private fun detailLines(notice: SessionNotice, format: MeasureFormatter): String {
         val res = context.resources
         val session = notice.session
@@ -201,7 +223,12 @@ internal class SessionNotifications(private val context: Context) {
             else -> res.sessionCadence(notice.cadence, session.intensity, format)
         }
         val first = listOfNotNull(pace, res.sessionSteps(session, format)).joinToString(" · ")
-        return listOf(first, res.sessionEstimates(session, format)).joinToString("\n")
+        return listOfNotNull(
+            first,
+            res.sessionEstimates(session, format, notice.measure.openMeters),
+            res.sessionPace(session, notice.measure.paceNow, format),
+            notice.measure.line?.let(res::gpsLineText),
+        ).joinToString("\n")
     }
 
     /**
@@ -221,8 +248,12 @@ internal class SessionNotifications(private val context: Context) {
             .setContentText(res.sessionGoalDescription(session, format))
             .setStyle(
                 NotificationCompat.BigTextStyle().bigText(
-                    listOf(res.sessionGoalDescription(session, format), summary, res.sessionEstimates(session, format))
-                        .joinToString("\n"),
+                    listOfNotNull(
+                        res.sessionGoalDescription(session, format),
+                        summary,
+                        res.sessionEstimates(session, format),
+                        res.sessionPace(session, paceNow = null, format),
+                    ).joinToString("\n"),
                 ),
             )
             .setContentIntent(context.openAppIntent(REQUEST_GOAL))
@@ -346,7 +377,12 @@ internal class SessionNotifications(private val context: Context) {
             .setContentText(sentence)
             .setStyle(
                 NotificationCompat.BigTextStyle().bigText(
-                    listOf(sentence, summary, res.sessionEstimates(session, format)).joinToString("\n"),
+                    listOfNotNull(
+                        sentence,
+                        summary,
+                        res.sessionEstimates(session, format),
+                        res.sessionPace(session, paceNow = null, format),
+                    ).joinToString("\n"),
                 ),
             )
             .setContentIntent(context.openAppIntent(REQUEST_GOAL))

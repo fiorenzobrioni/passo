@@ -2,6 +2,7 @@ package com.callbackdev.passo.shell
 
 import android.Manifest
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions
 import androidx.compose.animation.AnimatedVisibility
@@ -36,6 +37,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,6 +46,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -130,10 +133,19 @@ private fun MainPages(
     // an outing starts from. The first time, Passo's own screen comes before the system's
     // request; after a grant the system took back, the request alone. Either answer starts it.
     val scope = rememberCoroutineScope()
+    val activity = LocalActivity.current
     val waiting by outings.waiting.collectAsStateWithLifecycle()
+    // Asked from an outing's card (the way back after a refusal), when Android would not have
+    // said that a word of the app's would help: after a second refusal it shows no request at
+    // all and answers no by itself, and then its own page for Passo is the one way left.
+    var askedWhereSilent by rememberSaveable { mutableStateOf(false) }
     val locationRequest = rememberLauncherForActivityResult(RequestMultiplePermissions()) { granted ->
         nav.close(GpsIntroKey)
-        scope.launch { outings.answered(preciseGranted = granted[Manifest.permission.ACCESS_FINE_LOCATION] == true) }
+        val precise = granted[Manifest.permission.ACCESS_FINE_LOCATION] == true
+        val unasked = askedWhereSilent && !precise && activity != null && !activity.wouldExplainLocation()
+        askedWhereSilent = false
+        scope.launch { outings.answered(preciseGranted = precise) }
+        if (unasked && activity != null) runCatching { activity.startActivity(Gps.appSettingsIntent(activity)) }
     }
     LaunchedEffect(openWays) {
         if (openWays) {
@@ -153,7 +165,12 @@ private fun MainPages(
         val outing = waiting?.takeIf { !it.shown } ?: return@LaunchedEffect
         // Once: a page drawn again by a rotation must not ask a second time.
         outings.shown()
-        if (outing.step == GpsStartStep.EXPLAIN) nav.navigate(GpsIntroKey) else locationRequest.launch(Gps.PERMISSIONS)
+        if (outing.step == GpsStartStep.EXPLAIN) {
+            nav.navigate(GpsIntroKey)
+        } else {
+            askedWhereSilent = outing.planId == null && activity?.wouldExplainLocation() == false
+            locationRequest.launch(Gps.PERMISSIONS)
+        }
     }
     val reduced = reducedMotion()
     val density = LocalDensity.current
@@ -283,6 +300,13 @@ private fun MainPages(
         }
     }
 }
+
+/**
+ * Whether Android would have the app explain the precise location: true between a first refusal
+ * and a second. False before any, and after the second, when its request no longer shows.
+ */
+private fun android.app.Activity.wouldExplainLocation(): Boolean =
+    ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)
 
 /** Material's navigation bar height, before the bar has been measured once. */
 private val BAR_HEIGHT = 80.dp

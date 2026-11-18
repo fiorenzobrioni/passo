@@ -93,4 +93,6 @@ private val MeasureUnit.formatRes: Int
         MeasureUnit.INCH -> R.string.measure_inches
         MeasureUnit.STEPS_PER_MINUTE -> R.string.measure_steps_per_minute
         MeasureUnit.MINUTE -> R.string.measure_minutes
+        MeasureUnit.MINUTES_PER_KILOMETER -> R.string.measure_minutes_per_kilometer
+        MeasureUnit.MINUTES_PER_MILE -> R.string.measure_minutes_per_mile
     }
