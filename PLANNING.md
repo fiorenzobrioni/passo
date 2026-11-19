@@ -1193,7 +1193,8 @@ step length's rows).
 - [ ] **The profile.** `StepLengthMode.LEARNED` and the curve in `Profile` and DataStore: its
   bins (cadence and length pairs), its usual cadence and the length there, the kilometres and
   outings it was learnt from. `walkingStepLengthMeters` and `runningStepLengthMeters` keep what
-  the reader had: a length measured or typed is not lost by accepting. `StepLengths.forCadence`
+  the reader had: a length measured or typed is not lost by accepting; the curve remembers the
+  mode it replaced, for the way back (the proposal's box). `StepLengths.forCadence`
   reads the curve where a part is learnt and the walking and running lengths elsewhere, so
   every caller that measures (the day minute by minute, an outing without GPS, a plan's
   estimate, the ways from home) follows with no change of its own. The callers that read one
@@ -1224,8 +1225,15 @@ step length's rows).
   estimate says so), the curve drawn in Canvas (the bins as points, the line through them, the
   length in use as a dashed line named by where it comes from, the height's, the wizard's or
   the one typed, cadence across and centimetres up, one sentence for TalkBack), «Use it» and
-  «Not now». Never a notification. After «Use it», the row says where the length comes from
-  and from how many kilometres, with «Go back to the estimate from your height». Choosing
+  «Not now». Never a notification. After «Use it», one line says what changed and what did not
+  («From today, distances use your measured step. Past days keep theirs»), with «Apply to past
+  days too»: «Apply profile to past data» offered where it is meant, asking as it does in
+  Settings, never done unasked; without it History would show a step of 6% the reader could
+  not explain (owner, 19 Nov 2026). The row then says where the length comes from and from how
+  many kilometres, with a way back to what was in use before, named as it was: «Go back to
+  your measured step (76 cm)», «Go back to the step you typed (76 cm)» or «Go back to the
+  estimate from your height»; a calibration is never thrown away by an undo (owner, 19 Nov
+  2026). Choosing
   another length while a curve counts (the wizard, or one typed) puts that curve away as «Not
   now» does: the card would otherwise come back at once, the curve differing from the new
   length by 2% or more. It is proposed again only when
@@ -1237,7 +1245,13 @@ step length's rows).
   and touching it opens the card again, «Use it» and «Not now» with it: a reader who changes
   their mind does not wait for a new 2% (owner, 19 Nov 2026). The finished page of an outing
   with GPS gains one quiet line, «Your step at this pace: 79 cm»: from that outing's own
-  samples (their metres over their steps), not from the curve, and only when it has some.
+  samples (their metres over their steps), not from the curve, and only when it has some. The
+  page of the outing whose samples made the proposal ready gains one more under it, «Passo can
+  now use your measured step for every estimate», which opens the calibration page on the card
+  (through `:app`'s navigation: features do not depend on each other): the moment the reader
+  has just measured, where a card in Settings may never be seen. Shown while the proposal
+  waits, gone once it is used or put away, on no other outing's page; never a notification
+  (owner, 19 Nov 2026).
 - [ ] The wizard stays: a reader without GPS measures their step on a known distance as today.
   A length measured by the wizard and a learnt curve do not fight: the last one the reader
   chose is the one in use, and the row says which (a choice puts the curve away: the
@@ -1246,7 +1260,8 @@ step length's rows).
   not, a running length set after), the repository's (accepting freezes the past first), the
   backup's round trip, an older file and a mode unknown, the settings' UI tests with the card
   in each state and the calibration page's row (shown, not shown, opening the card), Today's
-  line and a city walk's steps in `LEARNED`.
+  line and a city walk's steps in `LEARNED`, the way back to each mode, «Apply to past days
+  too», the outing page's line to the card (shown, gone after a choice).
 - [ ] Strings in English and Italian; CHANGELOG; the guide («Estimates, and what they rest on»
   in Today and «With GPS» in Outings gain the step that outings with GPS measure; the guide has
   no «Measure your step», which is the calibration page's title); README: `calibration.png`
@@ -1273,7 +1288,9 @@ they ask.
 | A file of this version imported by 1.1.0 | The height's estimate, silently: 1.1.0 reads an unknown mode so and cannot say it |
 | An outing with GPS and no sample | No «Your step at this pace» line |
 | The curve accepted, then the height changed | The curve stays in use: it was measured, the height is only an estimate |
-| «Go back to the estimate» | The mode returns to the height's; the samples stay, and a new proposal waits for a new 2% from the curve gone back from |
+| «Go back» | The length and mode in use before return (measured, typed or the height's); the samples stay, and a new proposal waits for a new 2% from the curve gone back from |
+| «Use it» | Today and the days after follow; past days keep theirs unless «Apply to past days too» is touched and confirmed |
+| The outing that made the curve ready | Its page carries the line to the card while the proposal waits; no other outing's page does |
 | «Not now», then new outings | No card in Settings until the curve moves 2% from the one put away; the calibration page's row stays |
 | «Not now», then a change of mind | The calibration page's row opens the card again, with today's curve |
 | An outing deleted | Its samples go with it; the curve in use is not recomputed behind the reader's back |
@@ -1808,6 +1825,26 @@ This log starts with Phase 16 built (18 Nov 2026); its entries are written below
     computed), the day's distance is minute by minute through `forCadence`, `changeProfile`
     freezes the past first, «Apply profile to past data» reads the profile in use, the samples
     go with their outing and travel in the JSON, an outing under way keeps its lengths.
+
+- **19 Nov 2026.** **Phase 17 reviewed for what the reader sees** (owner: a functional review of
+  the phase as a premium app, "only real added value, no noise"; then "record all three").
+  Agreed as planned: the sentence first, an explicit choice and never a notification, the past
+  frozen, the wizard kept, and a curve in use that does not update itself (today's distance
+  would jump in the middle of a day). Three changes, in §11 Phase 17's proposal box, its tests
+  and its edge cases:
+  - **The proposal where the reader has just measured.** The page of the outing whose samples
+    made the proposal ready says, under «Your step at this pace», that Passo can now use the
+    measured step, and opens the calibration page on the card. Settings and the calibration
+    page are opened seldom, and a card only there might never be seen. While the proposal
+    waits, on that outing's page alone.
+  - **The way back keeps a calibration.** «Go back» returns to what was in use before, named as
+    it was (the step measured, the one typed, the height's estimate), not always to the
+    height's: the reader's own lengths stay beside the curve, and the curve remembers the mode
+    it replaced.
+  - **«Apply to past days too», offered after «Use it».** Accepting moves today and the days
+    after, not History's; the step of 6% between yesterday and today would read as a fault.
+    One line says so, with the action that already exists in Settings, asking as it does
+    there. Past days change only when the reader asks, as before.
 
 ### Open
 
