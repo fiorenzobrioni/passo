@@ -12,6 +12,8 @@ import com.callbackdev.passo.core.data.db.toEntity
 import com.callbackdev.passo.core.data.db.toModel
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
 import com.callbackdev.passo.core.data.routes.RouteRepository
+import com.callbackdev.passo.core.data.sessions.LiveSession
+import com.callbackdev.passo.core.data.sessions.LiveSessionState
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.domain.backup.BackupCodec
 import com.callbackdev.passo.core.domain.backup.BackupRead
@@ -74,6 +76,7 @@ class BackupRepositoryTest {
                 .allowMainThreadQueries()
                 .build()
         val routes = RouteRepository(routeDatabase.routeDao())
+        val live = LiveSession()
         val backups = BackupRepository(
             database.trackingDao(),
             database.sessionDao(),
@@ -81,6 +84,7 @@ class BackupRepositoryTest {
             preferences,
             tracking,
             routes,
+            live,
         )
 
         suspend fun walk(vararg minutes: MinuteSteps) {
@@ -362,6 +366,24 @@ class BackupRepositoryTest {
         assertThat(after.deletableRoutes).isEqualTo(0)
         assertThat(after.deletableBytes).isEqualTo(0)
         assertThat(old.routes.route(live.id, live.startedAtMillis)).isNotNull()
+    }
+
+    @Test
+    fun `the route of an outing that can still be taken back is kept too`() = runTest {
+        measuredHistory()
+        val ended = checkNotNull(old.database.sessionDao().allSessions().single().toModel())
+        // Ended by its goal a moment ago: the service holds it, «Keep going» would reopen it.
+        old.live.publish(LiveSessionState(ended, cadence = null, canKeepGoing = true, alertsWhileScreenOff = true))
+
+        assertThat(old.backups.contents.first().deletableRoutes).isEqualTo(0)
+        old.backups.deleteRoutes()
+        assertThat(old.routes.route(ended.id, ended.startedAtMillis)).isNotNull()
+
+        // Over for good: the reader's to delete.
+        old.live.publish(null)
+        assertThat(old.backups.contents.first().deletableRoutes).isEqualTo(1)
+        old.backups.deleteRoutes()
+        assertThat(old.routes.route(ended.id, ended.startedAtMillis)).isNull()
     }
 
     @Test

@@ -228,7 +228,15 @@ internal fun DataDialogs(state: DataUiState, format: MeasureFormatter, files: Da
         AlertDialog(
             onDismissRequest = { files.deleteRoutesDialog.value = false },
             title = { Text(stringResource(R.string.data_delete_routes_title)) },
-            text = { Text(stringResource(R.string.data_delete_routes_text)) },
+            text = {
+                // «Every line» would not be true of the one still being written: said, where it is.
+                val keeps = state.contents.routes > state.contents.deletableRoutes
+                Text(
+                    stringResource(
+                        if (keeps) R.string.data_delete_routes_text_keeping else R.string.data_delete_routes_text,
+                    ),
+                )
+            },
             confirmButton = {
                 TextButton(
                     onClick = {

@@ -199,6 +199,10 @@ class StepTrackingService : Service() {
     // outing with GPS counts. A restarted process comes back without the second.
     private lateinit var foreground: ForegroundTypes
 
+    // «Still walking?» was on show when a pause put it away: the resume brings it back, and
+    // only then (one the reader swiped away stays away).
+    private var capAheadPutAway = false
+
     // When the receiver was last asked for fixes, having been off or asleep; null while it is
     // not on. What «no fix for a while» is counted from after a stop, for the card's line.
     private var receiverAwakeSinceMillis: Long? = null
@@ -1480,6 +1484,9 @@ class StepTrackingService : Service() {
     private fun tellCapAhead() {
         val session = tracker?.session?.takeIf { it.live } ?: return
         val now = System.currentTimeMillis()
+        // Handed over after the cap (the counter's own delay): nothing can answer it any more,
+        // and the end that comes with the next steps says so, with «Keep going».
+        if (now >= session.capMillis) return
         val asked = SessionAnnouncement.capAhead(session, now)
         sessionNotifications.postCapAhead(sessionNotifications.capAhead(session, now))
         if (sessionNotifications.signalsAllowed()) {
@@ -1487,6 +1494,15 @@ class StepTrackingService : Service() {
             if (session.voice != SessionVoice.OFF) speak(asked, session)
         }
         publishSession()
+    }
+
+    /** The question as it stands, posted again in silence, where it is open and its cap ahead. */
+    private fun repostCapAhead() {
+        val now = System.currentTimeMillis()
+        val session = tracker?.session?.takeIf {
+            it.state == SessionState.ACTIVE && it.capAskedForMillis == it.capMillis && now < it.capMillis
+        } ?: return
+        sessionNotifications.postCapAhead(sessionNotifications.capAhead(session, now))
     }
 
     /**
@@ -1553,22 +1569,22 @@ class StepTrackingService : Service() {
 
                 // A paused outing's cap waits with it: the question's countdown would run on
                 // a time that is not passing, so it is put away and comes back at the resume.
-                SessionControl.ACTION_PAUSE -> if (changeSession { tracker ->
-                        tracker.pause(System.currentTimeMillis())
+                SessionControl.ACTION_PAUSE -> {
+                    val showing = sessionNotifications.capAheadShowing()
+                    if (changeSession { tracker -> tracker.pause(System.currentTimeMillis()) }) {
+                        capAheadPutAway = showing
+                        sessionNotifications.cancelCapAhead()
                     }
-                ) {
-                    sessionNotifications.cancelCapAhead()
                 }
 
                 SessionControl.ACTION_RESUME -> {
                     val resumed = changeSession(mayEngageGps = true) { tracker ->
                         tracker.resume(System.currentTimeMillis())
                     }
-                    // Asked already, and not answered: the same question, with the cap the pause
-                    // moved, and without the pulses a second time.
-                    tracker?.session?.takeIf { resumed && it.live && it.capAskedForMillis == it.capMillis }?.let {
-                        sessionNotifications.postCapAhead(sessionNotifications.capAhead(it, System.currentTimeMillis()))
-                    }
+                    // Asked already, not answered, and on show when the pause put it away: the same
+                    // question, with the cap the pause moved, and without the pulses a second time.
+                    if (resumed && capAheadPutAway) repostCapAhead()
+                    if (resumed) capAheadPutAway = false
                 }
 
                 // «Keep going» to the question before the cap: the cap moves on, nothing stops.
@@ -1589,6 +1605,9 @@ class StepTrackingService : Service() {
                     }
                     if (reopened) {
                         sessionNotifications.cancelEnd()
+                        // The end put the question away; taken back before its cap, it is open
+                        // again, and shown again.
+                        repostCapAhead()
                         if (tracker?.session?.voice?.let { it != SessionVoice.OFF } == true) speech.prepare()
                         // The steps since the end may have crossed a milestone, a change, or the goal.
                         onSessionSignals(crossed)

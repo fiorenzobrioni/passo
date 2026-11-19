@@ -8,6 +8,7 @@ import com.callbackdev.passo.core.data.db.toEntity
 import com.callbackdev.passo.core.data.db.toModel
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
 import com.callbackdev.passo.core.data.routes.RouteRepository
+import com.callbackdev.passo.core.data.sessions.LiveSession
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.domain.backup.Backup
 import com.callbackdev.passo.core.domain.backup.BackupDay
@@ -35,13 +36,14 @@ import javax.inject.Singleton
  * @property routes the routes kept, the one of an outing under way included: what «With the
  *   routes» would put in a backup.
  * @property deletableRoutes of them, those «Delete all routes» deletes: every one but the route
- *   still being written; [deletableBytes] what they weigh.
+ *   still being written, of an outing under way or one that can still be taken back;
+ *   [deletableBytes] what they weigh.
  */
 data class DataContents(
     val days: Int,
     val outings: Int,
     val routes: Int = 0,
-    val deletableRoutes: Int = routes,
+    val deletableRoutes: Int = 0,
     val deletableBytes: Long = 0,
 )
 
@@ -80,12 +82,21 @@ constructor(
     private val preferences: UserPreferencesDataSource,
     private val tracking: TrackingRepository,
     private val routes: RouteRepository,
+    private val live: LiveSession,
 ) {
+    // The outing with GPS whose route may still grow: under way (as written), or ended a moment
+    // ago and still to be taken back (as the service holds it). Its route is not the reader's
+    // to delete yet.
+    private val growing: Flow<Long?> = combine(
+        sessionDao.observeLiveSession().map { row -> row?.session?.takeIf { it.gps }?.id },
+        live.current.map { state -> state?.session?.takeIf { it.gps }?.id },
+    ) { written, held -> written ?: held }.distinctUntilChanged()
+
     val contents: Flow<DataContents> = combine(
         tracking.observeDayCount(),
         sessionDao.observeSessionCount(),
         routes.routeIds,
-        sessionDao.observeLiveSession().map { row -> row?.session?.takeIf { it.gps }?.id }.distinctUntilChanged(),
+        growing,
     ) { days, outings, kept, underWay ->
         // The route still being written is not the reader's to delete yet: «Delete all routes»
         // counts and weighs the others, and is not offered for that one alone.
@@ -100,10 +111,10 @@ constructor(
     }
 
     /**
-     * Forgets every route kept on this phone but the one of an outing with GPS still under way,
-     * which the service is writing; the outings and their numbers stay.
+     * Forgets every route kept on this phone but the one that may still grow (an outing with GPS
+     * under way, or one that can still be taken back); the outings and their numbers stay.
      */
-    suspend fun deleteRoutes() = routes.deleteAll(keep = sessionDao.liveSession()?.session?.takeIf { it.gps }?.id)
+    suspend fun deleteRoutes() = routes.deleteAll(keep = growing.first())
 
     /**
      * Everything a new phone could not rebuild, read as it stands now.

@@ -172,6 +172,33 @@ class OutingScreenTest {
     }
 
     @Test
+    fun `ended a moment ago and still to be taken back, its route is not offered yet`() {
+        show(OutingSamples.state().copy(over = false))
+
+        val items = page().fetchSemanticsNode().config[SemanticsProperties.CollectionInfo].rowCount
+        page().performScrollToIndex(items - 1)
+        compose.onNodeWithTag(OutingTags.DELETE_ROUTE).assertDoesNotExist()
+        compose.onNodeWithTag(OutingTags.SHARE_IMAGE).assertDoesNotExist()
+    }
+
+    @Test
+    fun `paused before any satellite answered, the page promises no route`() {
+        val paused = OutingSamples.onSteps.copy(
+            gps = true,
+            stepsMeters = OutingSamples.onSteps.totals.distanceMeters,
+            measuredShare = 0.0,
+            state = SessionState.PAUSED,
+            end = null,
+            endedAtMillis = null,
+            reachedAtMillis = null,
+        )
+        show(OutingSamples.state(session = paused, route = null))
+
+        compose.onNodeWithText("No satellite has answered so far", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("will appear", substring = true).assertDoesNotExist()
+    }
+
+    @Test
     fun `while the outing counts and no satellite has answered, the page says the route is to come`() {
         // A quarter of an hour in, under a sky the receiver has not found yet.
         val waiting = OutingSamples.onSteps.copy(

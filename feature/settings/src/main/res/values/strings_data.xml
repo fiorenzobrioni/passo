@@ -103,6 +103,8 @@
     <string name="data_delete_routes_note">%1$s, %2$s on this phone. Never in Android’s cloud backup.</string>
     <string name="data_delete_routes_title">Delete all routes?</string>
     <string name="data_delete_routes_text">Every line, and the places it went through, is deleted from this phone. Your outings and their numbers stay: the distance, the pace, the kilometres, the climb.</string>
+    <!-- The same, while an outing with GPS is under way, or can still be taken back. -->
+    <string name="data_delete_routes_text_keeping">Every line of the outings that are over, and the places it went through, is deleted from this phone. The outing still under way keeps its route. Your outings and their numbers stay: the distance, the pace, the kilometres, the climb.</string>
     <string name="data_delete_routes_confirm">Delete</string>
     <string name="data_delete_routes_cancel">Cancel</string>
 </resources>

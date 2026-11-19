@@ -4,6 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.callbackdev.passo.core.data.routes.RouteRepository
+import com.callbackdev.passo.core.data.sessions.LiveSession
 import com.callbackdev.passo.core.data.sessions.SessionRepository
 import com.callbackdev.passo.core.data.settings.SettingsRepository
 import com.callbackdev.passo.core.domain.routes.GpxCodec
@@ -48,9 +49,17 @@ class DrawnRoute(val shape: RouteShape, val ground: WayMap?, val altitudes: Alti
  *
  * @property route its route, for an outing measured with GPS that still has one; null for any
  *   other (no GPS, never a fix, a route the reader deleted, a restore from the cloud copy).
+ * @property over the outing is over for good: not counting, and no «Keep going» or «Resume»
+ *   can take it back any more. Only then is its route the reader's to share, save or delete:
+ *   before, the line may still grow.
  */
 @Immutable
-data class OutingUiState(val session: Session, val route: DrawnRoute?, val units: UnitPreference)
+data class OutingUiState(
+    val session: Session,
+    val route: DrawnRoute?,
+    val units: UnitPreference,
+    val over: Boolean = !session.live,
+)
 
 /**
  * An outing's page (PLANNING.md §11 Phase 16). The pages share this one model, as every page of
@@ -66,6 +75,7 @@ constructor(
     private val sessions: SessionRepository,
     private val routes: RouteRepository,
     settingsRepository: SettingsRepository,
+    live: LiveSession,
 ) : ViewModel() {
     private val opened = MutableStateFlow<Long?>(null)
 
@@ -76,8 +86,10 @@ constructor(
             } else {
                 val route = routes.observePointCount(id).distinctUntilChanged().mapLatest { read(id) }
                 val units = settingsRepository.settings.map { it.units }.distinctUntilChanged()
-                combine(sessions.observeSession(id), route, units) { session, drawn, unit ->
-                    session?.let { OutingUiState(it, drawn, unit) }
+                // Ended a moment ago, and the service can still take it back: not over yet.
+                val reopenable = live.current.map { it?.session?.id == id && it.canKeepGoing }.distinctUntilChanged()
+                combine(sessions.observeSession(id), route, units, reopenable) { session, drawn, unit, canReopen ->
+                    session?.let { OutingUiState(it, drawn, unit, over = !it.live && !canReopen) }
                 }
             }
         }
@@ -93,10 +105,10 @@ constructor(
 
     /**
      * Forgets the open outing's route: the line and its places, never to be written again. The
-     * outing and its numbers stay. Not while it counts: its page offers it once it is over.
+     * outing and its numbers stay. Only once it is over for good, as its page offers it.
      */
     fun deleteRoute() {
-        val session = state.value?.session?.takeIf { !it.live } ?: return
+        val session = state.value?.takeIf { it.over }?.session ?: return
         viewModelScope.launch { routes.forget(session.id, session.startedAtMillis) }
     }
 

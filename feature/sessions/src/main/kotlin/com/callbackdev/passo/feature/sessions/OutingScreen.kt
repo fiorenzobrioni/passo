@@ -104,6 +104,7 @@ import com.callbackdev.passo.core.domain.routes.pace
 import com.callbackdev.passo.core.domain.routes.stepsShare
 import com.callbackdev.passo.core.model.AltitudeSource
 import com.callbackdev.passo.core.model.Session
+import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.UnitSystem
 import kotlinx.coroutines.launch
 import java.time.Instant
@@ -231,7 +232,7 @@ fun OutingScreen(
             Box(Modifier.fillMaxSize().padding(padding)) {
                 val format = rememberMeasureFormatter(state.units)
                 // What is shared is an outing that is over: its card, its whole map, its numbers.
-                if (shareLayer != null && state.route != null && !state.session.live) {
+                if (shareLayer != null && state.route != null && state.over) {
                     ShareCard(state, state.route, format, shareLayer)
                 }
                 OutingPage(state, format, actions)
@@ -279,7 +280,13 @@ private fun OutingPage(state: OutingUiState, format: MeasureFormatter, actions: 
             // outing counts, the satellites may still answer, and the route comes in its place.
             item(key = "no-fix") {
                 Note(
-                    stringResource(if (session.live) R.string.outing_no_fix_yet else R.string.outing_no_fix),
+                    stringResource(
+                        when (session.state) {
+                            SessionState.ACTIVE -> R.string.outing_no_fix_yet
+                            SessionState.PAUSED -> R.string.outing_no_fix_so_far
+                            SessionState.FINISHED -> R.string.outing_no_fix
+                        },
+                    ),
                     Modifier.padding(horizontal = 20.dp),
                 )
             }
@@ -297,9 +304,9 @@ private fun OutingPage(state: OutingUiState, format: MeasureFormatter, actions: 
         if (profile.size >= MIN_PROFILE_POINTS && session.ascentMeters != null) {
             item(key = "profile") { ProfileSection(profile, session.totals.distanceMeters, format) }
         }
-        // What a route can do (share, save, delete) is for an outing that is over: while it
-        // counts, the line is still being drawn, and its page is to follow it.
-        if (route != null && !session.live) {
+        // What a route can do (share, save, delete) is for an outing over for good: while it
+        // counts, or can still be taken back, the line may grow, and its page is to follow it.
+        if (route != null && state.over) {
             item(key = "route") { RouteActions(actions, onDelete = { deleting = true }) }
         }
     }

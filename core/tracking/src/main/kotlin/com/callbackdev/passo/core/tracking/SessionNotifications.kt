@@ -443,6 +443,10 @@ internal class SessionNotifications(private val context: Context) {
     fun endShowing(): Boolean = context.getSystemService(NotificationManager::class.java)
         ?.activeNotifications?.any { it.id == ID_END } == true
 
+    /** Whether «Still walking?» is on show: a question the reader swiped away is not brought back. */
+    fun capAheadShowing(): Boolean = context.getSystemService(NotificationManager::class.java)
+        ?.activeNotifications?.any { it.id == ID_CAP_AHEAD } == true
+
     fun cancelEnd() {
         NotificationManagerCompat.from(context).cancel(ID_END)
     }

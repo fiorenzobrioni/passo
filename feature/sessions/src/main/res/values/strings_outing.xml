@@ -30,6 +30,8 @@
     <!-- An outing with GPS that never got a fix. -->
     <string name="outing_no_fix">The satellites never answered during this outing: it was counted from your steps, and has no route.</string>
     <!-- The same place while the outing still counts: the satellites may yet answer. -->
+    <!-- The same place while the outing is paused: the receiver is off until it resumes. -->
+    <string name="outing_no_fix_so_far">No satellite has answered so far: this outing is counted from your steps.</string>
     <string name="outing_no_fix_yet">No satellite has answered yet. Your steps are counting this outing, and the route will appear here as soon as one does.</string>
     <!-- A bead on the map, touched: «3 km · 9:40 min/km». -->
     <string name="outing_bead">%1$s · %2$s</string>

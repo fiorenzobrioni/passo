@@ -125,6 +125,9 @@ class DataSectionTest {
         show(DataUiState(contents = contents.copy(routes = 2, deletableRoutes = 1, deletableBytes = 9_100)))
         compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(DataTags.DELETE_ROUTES))
         compose.onNodeWithText("1 route, ", substring = true).assertIsDisplayed()
+        // «Every line» is not said of the one it keeps.
+        compose.onNodeWithTag(DataTags.DELETE_ROUTES).performClick()
+        compose.onNodeWithText("The outing still under way keeps its route.", substring = true).assertIsDisplayed()
     }
 
     @Test

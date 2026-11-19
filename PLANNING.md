@@ -1698,6 +1698,19 @@ This log starts with Phase 16 built (18 Nov 2026); its entries are written below
     amendment says the owner confirmed it, and the notification's new shape.
   - The guide (the end of an outing, a route), CHANGELOG and VISION say so. Tests:
     `SessionNotificationsTest`, `OutingScreenTest`, `DataSectionTest`, `BackupRepositoryTest`.
+  - **Its control review** (the same day) found the edges, all mended: «over» is over for good,
+    not only not counting: an outing ended a moment ago that «Keep going» or «Resume» can still
+    take back offers nothing of its route on its page (`OutingUiState.over`, from `LiveSession`),
+    and «Delete all routes» keeps its route too (`BackupRepository`, the outing written as under
+    way or held by the service as reopenable); otherwise a route deleted then would have stayed
+    cut short when the outing went on. A paused outing with no fix reads «No satellite has
+    answered so far», never that the steps are counting. The dialog of «Delete all routes» says
+    which lines go when one is kept (`data_delete_routes_text_keeping`), instead of «every
+    line». The question before the cap comes back at the resume only if it was on show when the
+    pause put it away (one swiped away stays away), comes back after an end taken back before
+    the cap, and is not asked at all from a batch handed over after the cap, where nothing can
+    answer it and the end that follows offers «Keep going». `DataContents`' counts have no
+    default that hides a row.
 
 ### Open
 
