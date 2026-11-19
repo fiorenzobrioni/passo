@@ -49,12 +49,13 @@ class SessionTrackerRouteTest {
             fixes: Boolean = true,
             settle: Boolean = true,
             steps: Boolean = true,
+            cadence: Int = 110,
         ) {
             repeat(seconds) {
                 at += 1_000
                 north += speed
                 if (fixes) tracker.onFix(Fix(at, LATITUDE + north / METERS_PER_DEGREE, LONGITUDE, accuracyMeters = 5f))
-                if (steps) owed += 110 / 60.0
+                if (steps) owed += cadence / 60.0
                 if (steps && (at - start) % 10_000 == 0L) {
                     val count = owed.toInt()
                     owed -= count
@@ -178,6 +179,36 @@ class SessionTrackerRouteTest {
         assertThat(session.totals.activeKcal - before.totals.activeKcal).isWithin(1e-9).of(12.0 * 70.0 * 0.009)
         // The distance, the steps and the time are untouched.
         assertThat(session.totals.copy(activeKcal = 0.0)).isEqualTo(before.totals.copy(activeKcal = 0.0))
+    }
+
+    @Test
+    fun `a climb run up and told after the walk began again is priced as the run it was`() {
+        val walker = walker(started(plan(SessionGoalKind.TIME, 60)))
+        // Two minutes up a hill at a run, then a walk: the climb is told a minute and a half
+        // later, its points having waited for their pressure.
+        walker.go(120, speed = 3.0, cadence = 160)
+        walker.go(120)
+        val before = walker.tracker.session
+
+        walker.tracker.addClimb(start + 60_000, 30.0, 0.0)
+
+        // A run's 0.0045 kcal a kilogram a metre, not the walk's 0.009.
+        assertThat(walker.tracker.session.totals.activeKcal - before.totals.activeKcal)
+            .isWithin(1e-9).of(30.0 * 70.0 * 0.0045)
+    }
+
+    @Test
+    fun `cut as the service goes, an outing keeps every metre its meter held, and counts on`() {
+        val walker = walker(started(plan(SessionGoalKind.TIME, 60)))
+        walker.go(115, settle = false)
+
+        walker.tracker.cutRoute()
+
+        val session = walker.tracker.session
+        assertThat(session.state).isEqualTo(SessionState.ACTIVE)
+        assertThat(session.totals.distanceMeters).isWithin(12.0).of(1.4 * 115)
+        assertThat(walker.tracker.takeRoute().points).isNotEmpty()
+        assertThat(walker.tracker.openMeters).isEqualTo(0.0)
     }
 
     @Test

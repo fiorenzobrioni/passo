@@ -280,6 +280,23 @@ class SessionRepositoryTest {
     }
 
     @Test
+    fun `a batch writes every leg changed since the last, however many and however far back`() = runTest {
+        val tracking = TrackingRepository(database.trackingDao(), preferences) { day }
+        val plan = SessionPlans.NEW.copy(gps = true)
+        val started = repository.insert(checkNotNull(SessionPlans.start(plan, 1_000, day, 0, 8_000, withGps = true)))
+        fun leg(index: Int, ascent: Double = 0.0) =
+            OutingLeg(index, 100.0, 70_000, 130.0, endedAtMillis = 70_000L * (index + 1), ascentMeters = ascent)
+        val batch = LedgerBatch(listOf(MinuteSteps(100, day, 120)), TrackerState(1, 500, 2L, 3L), emptyList())
+
+        tracking.persist(batch, nowWallMillis = 70_000L, session = started.copy(legs = (0..2).map { leg(it) }))
+        // «Keep going» lays a quarter of an hour's legs at once, and a climb lands on the first.
+        val grown = listOf(leg(0, ascent = 6.0)) + (1..14).map { leg(it) }
+        tracking.persist(batch, nowWallMillis = 140_000L, session = started.copy(legs = grown))
+
+        assertThat(checkNotNull(repository.session(started.id)).legs).isEqualTo(grown)
+    }
+
+    @Test
     fun `the summary seen is remembered`() = runTest {
         assertThat(repository.summarySeen.first()).isNull()
         repository.setSummarySeen(42)

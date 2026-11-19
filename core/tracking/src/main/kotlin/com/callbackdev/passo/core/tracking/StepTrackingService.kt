@@ -209,9 +209,11 @@ class StepTrackingService : Service() {
     // What the receiver and the type did during the outing under way, for its one log row.
     private val gpsLog = GpsLog()
 
-    // The moment through which the receiver was asked for its fixes, while the answer is awaited:
-    // the meter settles through it once they are in (or the wait gives up).
-    private var settleThroughMillis: Long? = null
+    // The moments through which the receiver was asked for its fixes, oldest first, while the
+    // answers are awaited: each flush it completes brings the fixes through its own request,
+    // and the meter settles through that one, never through a later request still on its way
+    // (or through all of them, once the wait gives up).
+    private val settleRequests = ArrayDeque<Long>()
     private var settleJob: Job? = null
 
     // A command waiting for the receiver's fixes before it acts (a pause, a stop).
@@ -379,12 +381,25 @@ class StepTrackingService : Service() {
         // after the last write, and show the count it stopped at.
         val batch = ledger?.drain()
         val outing = tracker?.takeIf { it.session.live }
+        // An outing with GPS: its line is cut here, every step up to it settled with the fixes
+        // in hand, as at a pause; its distance goes with the outing below, and its last points
+        // with its route. The next start draws a line of its own.
+        outing?.cutRoute()
+        val harvest = outing?.takeIf { it.measuring }?.takeRoute()
         FinalWrites.launch {
             persistMutex.withLock {
                 if (batch != null) {
                     repository.persist(batch, System.currentTimeMillis(), outing?.session)
                 } else if (outing != null) {
                     sessions.save(outing.session)
+                }
+                if (outing != null && harvest != null) {
+                    try {
+                        writeHarvest(outing, harvest, ending = true)
+                        sessions.save(outing.session)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Writing the route as the service went failed", e)
+                    }
                 }
                 // Counting paused by the reader: an outing cannot go on without its steps. A
                 // service the system stopped keeps it, and the next start picks it up.
@@ -496,7 +511,7 @@ class StepTrackingService : Service() {
     // --- Persistence (PLANNING.md §4.5) --------------------------------------------------------
 
     /** Writes the buffer in one transaction. Never cancelled halfway, so never half-counted. */
-    private suspend fun persist() = withContext(NonCancellable) {
+    private suspend fun persist(final: Boolean = false) = withContext(NonCancellable) {
         persistMutex.withLock {
             val ledger = ledger ?: return@withLock
             val batch = ledger.drain()
@@ -526,7 +541,7 @@ class StepTrackingService : Service() {
             }
             // After the step batch's transaction, never inside it: `passo.db` is the truth, and
             // a route that loses a chunk is a shorter line, not a lost outing.
-            writeRoute()
+            writeRoute(final)
             refreshStoredTodayLocked()
             inFlightToday = 0
             publishLive()
@@ -536,9 +551,10 @@ class StepTrackingService : Service() {
     /**
      * Writes what the outing with GPS has to keep since it was last asked: the route's points,
      * their altitude turned to mean sea level, as a chunk of `routes.db`, and what its clean
-     * stretches said of the step, in `passo.db`. Under [persistMutex].
+     * stretches said of the step, in `passo.db`. Under [persistMutex]. [final]: no pressure is
+     * waited for, every point is written now.
      */
-    private suspend fun writeRoute() {
+    private suspend fun writeRoute(final: Boolean = false) {
         val current = tracker ?: return
         val harvest = current.takeRoute()
         if (harvest.isEmpty &&
@@ -547,7 +563,7 @@ class StepTrackingService : Service() {
             return
         }
         try {
-            writeHarvest(current, harvest, ending = false)
+            writeHarvest(current, harvest, ending = final)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
@@ -636,7 +652,7 @@ class StepTrackingService : Service() {
             if (on) {
                 // What was batched while the screen was off, then live events.
                 flushSensor()
-                locationSource.requestFlush()
+                askForFixes(System.currentTimeMillis())
                 catchUpDay()
                 checkSession()
                 applyRegistration()
@@ -666,7 +682,13 @@ class StepTrackingService : Service() {
                         if (flushed) "flushed" else "flush timed out",
                     ),
                 )
-                persist()
+                // An outing with GPS: its line cut where it stands, and its last points written
+                // with their heights, the phone going down before their pressure could come.
+                tracker?.takeIf { it.session.live && it.measuring }?.let {
+                    it.cutRoute()
+                    sessionDirty = true
+                }
+                persist(final = true)
             } finally {
                 pending.finish()
             }
@@ -1069,16 +1091,25 @@ class StepTrackingService : Service() {
         val now = System.currentTimeMillis()
         // In the wake the step batch made: the pressure's readings too, for the points' heights.
         pressureSource.requestFlush()
-        if (!locationSource.requestFlush()) {
+        if (!askForFixes(now)) {
             settleRoute(now)
             return
         }
-        settleThroughMillis = now
         if (settleJob?.isActive == true) return
         settleJob = scope.launch {
             delay(FLUSH_TIMEOUT_MS)
-            settleNow()
+            settleAll()
         }
+    }
+
+    /**
+     * Asks the receiver for the fixes it holds through [nowMillis], kept in line for the meter
+     * of an outing with GPS. False when no answer will come (nothing batched), and nothing waits.
+     */
+    private fun askForFixes(nowMillis: Long): Boolean {
+        if (!locationSource.requestFlush()) return false
+        if (tracker?.measuring == true) settleRequests.addLast(nowMillis)
+        return true
     }
 
     /**
@@ -1096,21 +1127,31 @@ class StepTrackingService : Service() {
             withTimeoutOrNull(FLUSH_TIMEOUT_MS) { done.await() }
             pendingRouteFlush = null
         }
-        settleThroughMillis = null
+        settleRequests.clear()
         settleJob?.cancel()
         settleRoute(System.currentTimeMillis())
     }
 
+    /** A flush completed: the fixes are in through the oldest request still awaited. */
     private fun settleNow() {
-        val through = settleThroughMillis ?: return
-        settleThroughMillis = null
-        settleJob?.cancel()
+        val through = settleRequests.removeFirstOrNull() ?: return
+        if (settleRequests.isEmpty()) settleJob?.cancel()
+        settleRoute(through)
+    }
+
+    /** The wait gave up: through the latest request, the meter measuring a late fix as any other. */
+    private fun settleAll() {
+        val through = settleRequests.lastOrNull() ?: return
+        settleRequests.clear()
         settleRoute(through)
     }
 
     /** Settles the outing's distance through [throughMillis], and tells what the settled metres crossed. */
     private fun settleRoute(throughMillis: Long) {
-        val current = tracker ?: return
+        val current = tracker?.takeIf { it.measuring } ?: run {
+            settleRequests.clear()
+            return
+        }
         val signals = current.settle(throughMillis, System.currentTimeMillis())
         sessionDirty = true
         onSessionSignals(signals)
@@ -1417,7 +1458,7 @@ class StepTrackingService : Service() {
      */
     private fun tellCapAhead() {
         val session = tracker?.session?.takeIf { it.live } ?: return
-        val asked = SessionAnnouncement.capAhead()
+        val asked = SessionAnnouncement.capAhead(session, System.currentTimeMillis()) ?: return
         sessionNotifications.postCapAhead(sessionNotifications.capAhead(session, asked.minutes))
         if (sessionNotifications.signalsAllowed()) {
             if (session.vibrate) SessionHaptics.playEndedStill(this)

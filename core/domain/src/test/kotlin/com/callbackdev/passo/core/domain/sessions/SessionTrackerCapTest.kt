@@ -90,6 +90,52 @@ class SessionTrackerCapTest {
     }
 
     @Test
+    fun `asked late, after a sit at a café, the question says the minutes really left`() {
+        val tracker = tracker()
+        tracker.walk(start, cap - 16 * MINUTE)
+
+        // Thirteen minutes at a table, under the end by stillness; then the walk again.
+        val asked = tracker.onSteps(cap - 3 * MINUTE, 100)
+
+        assertThat(asked).containsExactly(SessionSignal.CapAhead(cap))
+        assertThat(SessionAnnouncement.capAhead(tracker.session, cap - 3 * MINUTE))
+            .isEqualTo(SessionAnnouncement.CapAhead(minutes = 3))
+    }
+
+    @Test
+    fun `paused across the cap, the reader who resumes is asked before it ends, not ended unasked`() {
+        val tracker = tracker()
+        tracker.walk(start, cap - 20 * MINUTE)
+        tracker.pause(cap - 20 * MINUTE)
+
+        // Forty minutes at lunch, then on.
+        assertThat(tracker.resume(cap + 20 * MINUTE)).isTrue()
+        val moved = cap + 40 * MINUTE
+        assertThat(tracker.session.capAtMillis).isEqualTo(moved)
+
+        val onward = tracker.walk(cap + 20 * MINUTE, moved - CAP_WARNING_MILLIS - MINUTE)
+        assertThat(onward).isEmpty()
+        assertThat(tracker.session.state).isEqualTo(SessionState.ACTIVE)
+        val asked = tracker.walk(moved - CAP_WARNING_MILLIS - MINUTE, moved - MINUTE)
+        assertThat(asked).containsExactly(SessionSignal.CapAhead(moved))
+    }
+
+    @Test
+    fun `a question open before a pause stays open after it, and is not asked twice`() {
+        val tracker = tracker()
+        tracker.walk(start, cap - 10 * MINUTE)
+        assertThat(tracker.session.capAskedForMillis).isEqualTo(cap)
+
+        tracker.pause(cap - 10 * MINUTE)
+        tracker.resume(cap - 5 * MINUTE)
+        val moved = cap + 5 * MINUTE
+
+        assertThat(tracker.session.capAskedForMillis).isEqualTo(moved)
+        assertThat(tracker.walk(cap - 5 * MINUTE, moved - MINUTE)).isEmpty()
+        assertThat(tracker.goOn(moved - MINUTE)).isTrue()
+    }
+
+    @Test
     fun `there is no cap to move before the question is asked`() {
         val tracker = tracker()
         tracker.walk(start, start + 60 * MINUTE)

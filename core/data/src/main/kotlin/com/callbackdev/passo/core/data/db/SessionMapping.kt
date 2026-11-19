@@ -182,15 +182,6 @@ internal fun Session.legEntities(): List<SessionLegEntity> = if (id == 0L) {
     }
 }
 
-/**
- * The legs a batch of steps can have changed: the one under way and the few before it, a climb
- * being counted a moment after the metres it belongs to. The ones before them were written
- * when they were the last, and an outing's end writes them all.
- */
-internal fun Session.recentLegEntities(): List<SessionLegEntity> = legEntities().takeLast(RECENT_LEGS)
-
-private const val RECENT_LEGS = 5
-
 /** An outing's intervals as rows; none for any other outing, or one not yet written. */
 internal fun Session.intervalEntities(): List<SessionIntervalEntity> = if (id == 0L) {
     emptyList()

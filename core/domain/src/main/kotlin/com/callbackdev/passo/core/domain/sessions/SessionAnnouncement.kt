@@ -1,5 +1,6 @@
 package com.callbackdev.passo.core.domain.sessions
 
+import com.callbackdev.passo.core.domain.routes.capQuestionMinutes
 import com.callbackdev.passo.core.domain.ways.NextPlace
 import com.callbackdev.passo.core.domain.ways.WalkPlaces
 import com.callbackdev.passo.core.domain.ways.WayStop
@@ -140,7 +141,12 @@ sealed interface SessionAnnouncement {
 
         fun endedStill(session: Session): EndedStill = EndedStill(session.totals.steps)
 
-        fun capAhead(): CapAhead = CapAhead((SessionConstants.CAP_WARNING_MILLIS / MILLIS_PER_MINUTE).toInt())
+        /**
+         * The question before [session]'s cap, at [nowMillis]: the minutes really left, which
+         * are fewer than the warning's quarter of an hour when the first steps within it came
+         * late (a sit at a café). Null when there is no question open.
+         */
+        fun capAhead(session: Session, nowMillis: Long): CapAhead? = session.capQuestionMinutes(nowMillis)?.let(::CapAhead)
 
         fun endedAtCap(session: Session): EndedAtCap = EndedAtCap(session.totals.steps)
 

@@ -188,7 +188,7 @@ class SpokenTextTest {
     @Test
     @Config(qualifiers = "en-rUS")
     fun `before the longest an outing stays open, it asks aloud`() {
-        assertThat(say(SessionAnnouncement.capAhead(), walk)).isEqualTo(
+        assertThat(say(SessionAnnouncement.CapAhead(minutes = 15), walk)).isEqualTo(
             "Still walking? This outing ends in 15 minutes. Touch Keep going on the notification to carry on.",
         )
     }
@@ -196,7 +196,7 @@ class SpokenTextTest {
     @Test
     @Config(qualifiers = "it-rIT")
     fun `in Italian, the question before the longest outing`() {
-        assertThat(say(SessionAnnouncement.capAhead(), walk)).isEqualTo(
+        assertThat(say(SessionAnnouncement.CapAhead(minutes = 15), walk)).isEqualTo(
             "Stai ancora camminando? Questa uscita si chiude tra 15 minuti. " +
                 "Tocca Continua sulla notifica per andare avanti.",
         )

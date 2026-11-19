@@ -71,7 +71,10 @@ data class RouteSettlement(
  * **Steps ahead of their fixes.** The two streams arrive in batches of their own. A batch of
  * steps is held *open* until the fixes are known to be in through its end ([settle]); only then
  * is it measured. Nothing is told, and no outing ended, on metres the fixes could take back, and
- * what is settled never goes down.
+ * what is settled never goes down. A fix that comes after the batch holding its moment was
+ * settled anyway (the receiver's own delay behind a settle through now) finds its steps already
+ * in the carry: it is measured from the line's end like any other, never read as stillness, or
+ * the metres to it would be lost.
  *
  * Not thread-safe: the tracker drives it from one thread.
  *
@@ -109,6 +112,13 @@ class RouteMeter(private val allowMock: Boolean = false) {
     private var carrySteps = 0.0
     private var carryMeters = 0.0
     private var carryCounted = 0.0
+
+    // The part of the carry walked after the last fix in time, span by span: no fix has seen it
+    // yet, so none can measure it at the end of a stretch, and a fix late for its batch covers
+    // only what was walked before its own moment.
+    private val tail = ArrayDeque<Span>()
+    private val tailSteps: Double get() = tail.sumOf { it.steps }
+    private val tailMeters: Double get() = tail.sumOf { it.meters }
 
     // A run of batches measured from end to end at a steady cadence: a step-length sample.
     private var cleanSteps = 0.0
@@ -202,8 +212,11 @@ class RouteMeter(private val allowMock: Boolean = false) {
             // No fix covered them: the steps'.
             out.add(carryMeters - carryCounted, measured = false, cadence = null)
         } else if (carrySteps > 0) {
-            // The fixes covered them and the line's end did not move a grain: what it did move.
-            out.add(minOf(Geodesy.meters(end, seen), carryMeters), measured = true, cadence = null)
+            // Up to the last fix the fixes covered them, and the line's end did not move a grain:
+            // what it did move. After it, under an arcade before a stop, no fix has seen them,
+            // and none will: the steps'.
+            out.add(minOf(Geodesy.meters(end, seen), carryMeters - tailMeters), measured = true, cadence = null)
+            out.add(tailMeters, measured = false, cadence = null)
         }
         // The last metres, whose steps and time their batches have already given.
         if (out.meters > before) {
@@ -242,14 +255,19 @@ class RouteMeter(private val allowMock: Boolean = false) {
 
         while (fixes.isNotEmpty() && fixes.first().atMillis <= batch.toMillis) {
             val fix = fixes.removeFirst()
-            val walking = fix.atMillis > motionFrom
-            if (walking) {
+            // A fix of a moment already settled: the steps walked to it are in the carry.
+            val late = fix.atMillis <= settledThroughMillis
+            val inMotion = fix.atMillis > motionFrom
+            val walking = inMotion || (late && carrySteps > 0)
+            if (inMotion) {
                 // The steps are laid evenly over the batch's time in motion, as the tracker lays them.
                 val share = (fix.atMillis - cursor).coerceAtLeast(0L) / span
                 carrySteps += batch.steps * share
                 carryMeters += batch.stepsMeters * share
                 cursor = maxOf(cursor, fix.atMillis)
             }
+            // A fix has seen every step walked before its moment; a late one, not those after it.
+            trimTail(fix.atMillis)
             val end = anchor
             val seen = lastFix
             when {
@@ -296,13 +314,16 @@ class RouteMeter(private val allowMock: Boolean = false) {
                         place(fix, RoutePointKind.START, out.points)
                     } else if (moved >= grain || slow) {
                         walked += moved
-                        walkedSteps += carrySteps
-                        walkedEstimate += carryMeters
+                        walkedSteps += carrySteps - tailSteps
+                        walkedEstimate += carryMeters - tailMeters
                         carried(end)?.let { pending += it }
                         anchor = fix
                         lastKept = fix
                         pending += point(fix, RoutePointKind.MEASURED)
-                        clearCarry()
+                        // The steps after a late fix are still to measure, from it.
+                        carrySteps = tailSteps
+                        carryMeters = tailMeters
+                        carryCounted = 0.0
                     }
                 }
             }
@@ -310,9 +331,10 @@ class RouteMeter(private val allowMock: Boolean = false) {
         }
 
         // The steps after the last fix of the batch: measured by the next fix, or a hole's.
-        val tail = (batch.toMillis - cursor).coerceAtLeast(0L) / span
-        carrySteps += batch.steps * tail
-        carryMeters += batch.stepsMeters * tail
+        val after = (batch.toMillis - cursor).coerceAtLeast(0L) / span
+        carrySteps += batch.steps * after
+        carryMeters += batch.stepsMeters * after
+        if (after > 0) tail.addLast(Span(cursor, batch.toMillis, batch.steps * after, batch.stepsMeters * after))
         settledThroughMillis = maxOf(settledThroughMillis, batch.toMillis)
 
         var clean = walked > 0
@@ -372,6 +394,21 @@ class RouteMeter(private val allowMock: Boolean = false) {
         carrySteps = 0.0
         carryMeters = 0.0
         carryCounted = 0.0
+        clearTail()
+    }
+
+    private fun clearTail() = tail.clear()
+
+    /** Drops from the tail what was walked by [atMillis], the steps laid evenly over each span. */
+    private fun trimTail(atMillis: Long) {
+        while (tail.isNotEmpty() && tail.first().fromMillis < atMillis) {
+            val span = tail.removeFirst()
+            if (span.toMillis > atMillis) {
+                val left = (span.toMillis - atMillis).toDouble() / (span.toMillis - span.fromMillis)
+                tail.addFirst(Span(atMillis, span.toMillis, span.steps * left, span.meters * left))
+                return
+            }
+        }
     }
 
     /** The farthest so many steps can have taken the reader, with the room two fixes may add. */
@@ -435,6 +472,9 @@ class RouteMeter(private val allowMock: Boolean = false) {
         accuracyMeters = fix.accuracyMeters?.roundToInt() ?: 0,
         kind = kind,
     )
+
+    /** Steps walked between two moments, and what they estimate. */
+    private class Span(val fromMillis: Long, val toMillis: Long, val steps: Double, val meters: Double)
 
     private class Out {
         val stretches = ArrayList<RouteStretch>()

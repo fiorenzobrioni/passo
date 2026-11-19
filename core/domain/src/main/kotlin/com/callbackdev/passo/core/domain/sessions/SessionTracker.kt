@@ -239,15 +239,18 @@ class SessionTracker(
      * altitudes of the points it keeps ([upMeters], [downMeters]; both zero says only that its
      * height is now known). The climb goes to the leg that was being walked at [atMillis], and
      * what it cost to the outing's energy: the slope's term, over and above the flat's
-     * (PLANNING.md §11 Phase 16, «Energy on a slope»). Nothing for an outing without GPS: its
-     * energy, like the day's, is the steps' alone.
+     * (PLANNING.md §11 Phase 16, «Energy on a slope»), at the cadence that leg was walked at, the
+     * climb being told up to a minute and a half after it (its points wait for their pressure)
+     * and the reader may have gone from a run to a walk meanwhile. Nothing for an outing without
+     * GPS: its energy, like the day's, is the steps' alone.
      */
     fun addClimb(atMillis: Long, upMeters: Double, downMeters: Double) {
         if (route == null) return
         val up = upMeters.coerceAtLeast(0.0)
         val down = downMeters.coerceAtLeast(0.0)
         val current = session
-        val cost = up * weightKg * MetricsCalculator.kcalPerKgPerMeterClimbed(measuredCadence ?: 0)
+        val cadence = Legs.at(current.legs, atMillis)?.let(Legs::cadenceOf) ?: cadenceAt(atMillis)
+        val cost = up * weightKg * MetricsCalculator.kcalPerKgPerMeterClimbed(cadence ?: 0)
         session = current.copy(
             ascentMeters = (current.ascentMeters ?: 0.0) + up,
             descentMeters = (current.descentMeters ?: 0.0) + down,
@@ -315,14 +318,34 @@ class SessionTracker(
         return true
     }
 
-    /** Counting again from now: the pause is neither motion nor stillness. */
+    /**
+     * The service is going (stopped by the system, or the phone shutting down): the line of an
+     * outing with GPS is cut where it stands, every step up to it settled with the fixes in hand,
+     * as at a pause, so no metre the meter held in memory goes with it. The outing counts on, and
+     * the next start draws a line of its own.
+     */
+    fun cutRoute() {
+        if (session.state != SessionState.ACTIVE) return
+        route?.let { absorb(it.close()) }
+    }
+
+    /**
+     * Counting again from now: the pause is neither motion nor stillness, nor time towards the
+     * cap. The cap moves on by the pause, so a reader who paused across it is asked as any other
+     * before it ends (no cap ends a walk unasked); a question already open stays open for it.
+     */
     fun resume(nowMillis: Long): Boolean {
-        if (session.state != SessionState.PAUSED) return false
-        session = session.copy(
+        val current = session
+        if (current.state != SessionState.PAUSED) return false
+        val pausedFor = (nowMillis - (current.pausedAtMillis ?: nowMillis)).coerceAtLeast(0L)
+        val cap = current.capMillis + pausedFor
+        session = current.copy(
             state = SessionState.ACTIVE,
             pausedAtMillis = null,
             lastEventAtMillis = nowMillis,
             lastStepAtMillis = nowMillis,
+            capAtMillis = cap,
+            capAskedForMillis = if (current.capAskedForMillis == current.capMillis) cap else current.capAskedForMillis,
         )
         window.clear()
         windowFrom = nowMillis

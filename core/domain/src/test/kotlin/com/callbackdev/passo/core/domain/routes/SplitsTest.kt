@@ -80,6 +80,16 @@ class SplitsTest {
     }
 
     @Test
+    fun `a new leg is numbered after the last, never by how many there are`() {
+        // Legs read back with some missing: the next must not take an index already stored.
+        val read = listOf(OutingLeg(index = 7, meters = 100.0, endedAtMillis = 70_000))
+
+        val laid = walk(100, from = read, startAt = 70_000)
+
+        assertThat(laid.map { it.index }).containsExactly(7, 8, 9).inOrder()
+    }
+
+    @Test
     fun `an empty piece changes nothing`() {
         val legs = walk(60)
 

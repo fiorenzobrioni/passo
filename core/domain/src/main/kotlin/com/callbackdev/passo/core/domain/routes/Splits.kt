@@ -53,7 +53,9 @@ object Legs {
         var laid = 0.0
         while (left > EPSILON_METERS) {
             val open = out.lastOrNull()?.takeIf { it.meters < LEG_METERS - EPSILON_METERS }
-            val leg = open ?: OutingLeg(index = out.size, meters = 0.0, endedAtMillis = piece.fromMillis)
+            // Numbered after the last, not by count: a leg list read back short never reuses an index.
+            val next = (out.lastOrNull()?.index ?: -1) + 1
+            val leg = open ?: OutingLeg(index = next, meters = 0.0, endedAtMillis = piece.fromMillis)
             if (open != null) out.removeLast()
             val take = minOf(left, LEG_METERS - leg.meters)
             val share = take / piece.meters
@@ -78,7 +80,7 @@ object Legs {
      */
     fun climb(legs: List<OutingLeg>, atMillis: Long, upMeters: Double, downMeters: Double): List<OutingLeg> {
         if (legs.isEmpty() || (upMeters <= 0.0 && downMeters <= 0.0)) return legs
-        val at = legs.indexOfFirst { it.endedAtMillis >= atMillis }.takeIf { it >= 0 } ?: legs.lastIndex
+        val at = indexAt(legs, atMillis)
         return legs.mapIndexed { index, leg ->
             if (index != at) {
                 leg
@@ -88,7 +90,26 @@ object Legs {
         }
     }
 
+    /** The leg that was being walked at [atMillis], as [climb] finds it; null with no leg. */
+    fun at(legs: List<OutingLeg>, atMillis: Long): OutingLeg? = legs.getOrNull(indexAt(legs, atMillis))
+
+    /**
+     * The steps a minute [leg] was walked at, counted from its own steps and time in motion;
+     * null for a leg with too little of either to be a pace.
+     */
+    fun cadenceOf(leg: OutingLeg): Int? {
+        if (leg.movingMillis < MIN_CADENCE_MILLIS || leg.steps <= 0.0) return null
+        return (leg.steps * MILLIS_PER_MINUTE / leg.movingMillis).roundToInt()
+    }
+
+    private fun indexAt(legs: List<OutingLeg>, atMillis: Long): Int =
+        legs.indexOfFirst { it.endedAtMillis >= atMillis }.takeIf { it >= 0 } ?: legs.lastIndex
+
     private const val EPSILON_METERS = 1e-6
+    private const val MILLIS_PER_MINUTE = 60_000.0
+
+    /** Under this, a leg's own cadence is the dust of a piece shared by the metres. */
+    private const val MIN_CADENCE_MILLIS = 10_000L
 }
 
 /**

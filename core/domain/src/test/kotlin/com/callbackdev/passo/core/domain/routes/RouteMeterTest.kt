@@ -415,6 +415,40 @@ class RouteMeterTest {
     }
 
     @Test
+    fun `a pause after a few seconds under an arcade keeps the steps the fixes never saw`() {
+        val walk = Walk()
+        walk.go(60, batch = 1)
+
+        // Twelve seconds with no fix (not long enough to be a hole), then the pause.
+        walk.go(12, fixes = false, batch = 1)
+        walk.close()
+
+        // 84 m measured, then 12 s of steps at 110 a minute and 0.75 m: 16.5 m.
+        assertThat(walk.settledMeters).isWithin(4.0).of(84.0 + 16.5)
+    }
+
+    @Test
+    fun `fixes that come after their steps were settled still measure the walk`() {
+        val meter = RouteMeter()
+        val walk = Walk(meter)
+
+        // The screen on: each second's steps are settled through now, and the fix of that
+        // second reaches the meter a moment later, the receiver's own delay.
+        repeat(120) {
+            walk.seconds++
+            walk.north += WALK_SPEED
+            meter.onSteps(walk.nowMillis - 1_000, walk.nowMillis, 2, 1_000, 1.5, 120)
+            walk.take(meter.settle(walk.nowMillis))
+            meter.onFix(walk.fixAt(walk.north), 120)
+        }
+        walk.close()
+
+        // 168 m walked, measured: the steps alone (1.5 m a second) would say 180.
+        assertThat(walk.settledMeters).isWithin(5.0).of(168.0)
+        assertThat(walk.share).isAtLeast(0.9)
+    }
+
+    @Test
     fun `a stretch measured from end to end at a steady cadence says how long the step is`() {
         val walk = Walk()
 
