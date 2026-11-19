@@ -3,6 +3,7 @@ package com.callbackdev.passo.feature.sessions
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.callbackdev.passo.core.data.learning.StepLearningRepository
 import com.callbackdev.passo.core.data.routes.RouteRepository
 import com.callbackdev.passo.core.data.sessions.LiveSession
 import com.callbackdev.passo.core.data.sessions.SessionRepository
@@ -52,6 +53,10 @@ class DrawnRoute(val shape: RouteShape, val ground: WayMap?, val altitudes: Alti
  * @property over the outing is over for good: not counting, and no «Keep going» or «Resume»
  *   can take it back any more. Only then is its route the reader's to share, save or delete:
  *   before, the line may still grow.
+ * @property stepAtPace the step this outing measured, its samples' metres over their steps; null
+ *   without a sample (PLANNING.md §11 Phase 17).
+ * @property stepReady this is the outing whose samples made the learnt step's proposal ready, and
+ *   the proposal still waits: its page offers it.
  */
 @Immutable
 data class OutingUiState(
@@ -59,6 +64,8 @@ data class OutingUiState(
     val route: DrawnRoute?,
     val units: UnitPreference,
     val over: Boolean = !session.live,
+    val stepAtPace: Double? = null,
+    val stepReady: Boolean = false,
 )
 
 /**
@@ -76,6 +83,7 @@ constructor(
     private val routes: RouteRepository,
     settingsRepository: SettingsRepository,
     live: LiveSession,
+    learning: StepLearningRepository,
 ) : ViewModel() {
     private val opened = MutableStateFlow<Long?>(null)
 
@@ -88,8 +96,27 @@ constructor(
                 val units = settingsRepository.settings.map { it.units }.distinctUntilChanged()
                 // Ended a moment ago, and the service can still take it back: not over yet.
                 val reopenable = live.current.map { it?.session?.id == id && it.canKeepGoing }.distinctUntilChanged()
-                combine(sessions.observeSession(id), route, units, reopenable) { session, drawn, unit, canReopen ->
-                    session?.let { OutingUiState(it, drawn, unit, over = !it.live && !canReopen) }
+                val step = combine(
+                    learning.stepOf(id),
+                    learning.learning.map { it.proposed && it.readyOutingId == id }.distinctUntilChanged(),
+                ) { atPace, ready -> atPace to ready }
+                combine(sessions.observeSession(id), route, units, reopenable, step) {
+                        session,
+                        drawn,
+                        unit,
+                        canReopen,
+                        (atPace, ready),
+                    ->
+                    session?.let {
+                        OutingUiState(
+                            it,
+                            drawn,
+                            unit,
+                            over = !it.live && !canReopen,
+                            stepAtPace = atPace,
+                            stepReady = ready,
+                        )
+                    }
                 }
             }
         }

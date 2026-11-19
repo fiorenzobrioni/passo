@@ -72,6 +72,7 @@
         <item quantity="other">%1$s uscite aggiunte</item>
     </plurals>
     <string name="data_imported_preferences">profilo e impostazioni presi dal file</string>
+    <string name="data_imported_step_fallback">La lunghezza del passo era impostata in un modo che questa versione di Passo non sa leggere, quindi il tuo passo è stimato dall’altezza. Puoi cambiarlo nelle Impostazioni.</string>
     <string name="data_imported_nothing">Tutto quello che conteneva era già qui.</string>
 
     <string name="data_failed_write_title">Non è stato possibile scrivere il file</string>

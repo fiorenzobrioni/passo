@@ -159,6 +159,16 @@ abstract class SessionDao {
     @Query("SELECT * FROM step_length_sample ORDER BY id")
     abstract suspend fun allStepLengthSamples(): List<StepLengthSampleEntity>
 
+    /**
+     * Every sample with its outing's start, as they change: what the step that learns reads
+     * (PLANNING.md §11 Phase 17). A sample goes with its outing.
+     */
+    @Query(
+        "SELECT s.sessionId, se.startedAtMillis, s.cadence, s.steps, s.meters FROM step_length_sample s " +
+            "JOIN session se ON se.id = s.sessionId ORDER BY se.startedAtMillis, s.id",
+    )
+    abstract fun observeStepLengthSamples(): Flow<List<OutingSampleRow>>
+
     /** Each outing's id with its start: what the routes' database is checked against. */
     @Query("SELECT id, startedAtMillis FROM session")
     abstract suspend fun sessionStarts(): List<SessionStart>

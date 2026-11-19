@@ -54,6 +54,8 @@ data class DataContents(
  * @property mergedDays days both had, where the file added steps.
  * @property unchangedDays days the phone already had whole.
  * @property preferences the file's profile and settings were taken.
+ * @property stepFallback the profile taken had a step length this version cannot read (a newer
+ *   Passo's): the height's estimate is in use instead, and the summary says so.
  */
 data class ImportReport(
     val addedDays: Int,
@@ -64,6 +66,7 @@ data class ImportReport(
     val preferences: Boolean,
     val addedWays: Int = 0,
     val addedRoutes: Int = 0,
+    val stepFallback: Boolean = false,
 )
 
 /**
@@ -245,6 +248,7 @@ constructor(
             preferences = withPreferences,
             addedWays = ways.size,
             addedRoutes = added.size,
+            stepFallback = withPreferences && backup.stepFallback,
         )
     }
 

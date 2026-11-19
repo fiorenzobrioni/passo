@@ -48,10 +48,12 @@ so they are uniform"):
 - **Built, on a branch of its own from Phase 15's** (18 Nov 2026): Phase 16, the outing's
   page (the route on a map that moves, the kilometres, the climb, GPX and image, Your data;
   archive 04, «Phase 16, the outing's page»). Left: its check on a phone (the box in «Open»). 15 and
-  16 are released together or not at all. **Next: Phase 17**, the step that learns (§11),
-  on a branch of its own from Phase 16's. Phases 17, 18 (re-planned on 19 Nov 2026: a city walk
-  measured with GPS) and 20 (reviewed on 19 Nov 2026: the usual round alone): not started.
-  Phase 19 dropped.
+  16 are released together or not at all.
+- **Built, on the branch of PR #74** (19 Nov 2026): Phase 17, the step that learns (§11; §15,
+  «Phase 17 built: the step that learns»), committed on the review's branch at the owner's
+  choice, merged into `main` once with the rest. Left: its check on a phone (the box in «Open»).
+  **Next: Phase 18**, a city walk measured with GPS (re-planned on 19 Nov 2026), then 20
+  (reviewed on 19 Nov 2026: the usual round alone): not started. Phase 19 dropped.
 
 ## Open
 
@@ -126,6 +128,15 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
   apps; «With the routes» in a backup, imported on the other phone; «Delete this route» and
   «Delete all routes»; the page at a large text size, in both themes, on the open foldable,
   with TalkBack. On a phone with no barometer, if one is at hand: the climb said as rough.
+
+- [ ] **On a device (owner): Phase 17's step that learns** (§11 Phase 17; §15, «Phase 17 built:
+  the step that learns», 19 Nov 2026): after three or more outings with GPS at the usual pace,
+  the line «Your step at this pace» on each finished page, and on the one that made it ready the
+  line to the card; the proposal's figures against the wizard's own measure; «Use it», then a
+  walk without GPS on a known distance reads closer than before; «Apply to past days too» and
+  History; «Not now», the quiet row on the calibration page, the card opened again; «Go back»
+  to the step measured, typed or estimated; the card in both themes, at a large text size and
+  with TalkBack on the chart.
 
 Read again on 2 Nov 2026, at archive 01 and 02: the boxes above are the ones the phases done had
 left open, and the review's device check. Read again at 1.1.0's tag: the owner's checks of the
@@ -485,7 +496,8 @@ data class DiagnosticsEventEntity(
 
 ### DataStore (Preferences)
 
-- Profile: height, weight, sex (optional), step length mode (auto, manual or calibrated), walking step length, running step length.
+- Profile: height, weight, sex (optional), step length mode (auto, manual, calibrated or learned), walking step length, running step length, and the learnt step in use (`profile_learned_step`, Phase 17: its points of cadence and length, the usual cadence, the metres and outings it came from, the latest outing it holds, the mode it replaced, whether its running part is in use), written as one line of text (`LearnedStepText`); the backup's `ProfileDto` carries it as `learnedStep`.
+- The learnt step last proposed and put away (`step_curve_put_away`, Phase 17): the phone's state, never in the backup's file, what a new proposal must move 2% from.
 - Goal, units, first day of week, theme, dynamic color, notification opt-ins, reminder time and threshold, tracking enabled.
 - The last day whose goal was seen reached (not a setting: the record that keeps "goal reached" once a day).
 - Walk detection enabled (default on), minimum walk duration (5, 10 or 15 min; default 10), typical-day line shown (default on), Today's "Start an outing" button shown (default on).
@@ -499,6 +511,7 @@ All constants live in one file (`MetricsConstants.kt`) with comments that cite t
 
 - **Default walking step length:** `height × 0.415` (`× 0.413` when the profile says female). If height is unknown, 0.70 m.
 - **Running step length:** default `walking × 1.3`, user-editable. It applies to minutes with a cadence of at least `RUNNING_CADENCE` (140 spm).
+- **The step learnt** (Phase 17, `StepLengthLearner`): once accepted, `stepLength(cadence)` reads its curve where it has a part for the gait (walking below 140, running from it; a straight line between its points, flat beyond them), and the lengths above elsewhere.
 - **Distance:** the sum over minutes of `steps × stepLength(cadence)`.
 - **Active calories (net):** the sum over minutes of `distanceKm × weightKg × k(cadence)`.
   - `k_walk ≈ 0.5 kcal/kg/km`, rising slightly for brisk cadences: flat up to 100 spm, then linearly to 0.6 just below 140 spm (Phase 2, §15).
@@ -1181,7 +1194,7 @@ no GPS comes closer to the truth (ADR 0016 decision 12).
 (`ProfileDto`), `CalibrationScreen.kt`, `CalibrationViewModel.kt`, `SettingsScreen.kt` (the
 step length's rows).
 
-- [ ] **The learner** (`:core:domain/calibration`, `StepLengthLearner`, pure). From the samples:
+- [x] **The learner** (`:core:domain/calibration`, `StepLengthLearner`, pure). From the samples:
   bins of 10 steps a minute from 80 to 180; a bin counts with 400 m or more in all, from at
   least two outings; its length is the median of its samples' (metres over steps), each sample
   within `ProfileLimits` for its gait (the walking step's below `RUNNING_CADENCE`, 140, the
@@ -1194,7 +1207,7 @@ step length's rows).
   cadence (the median step count of their active minutes, 40 steps or more, over the last 28
   days), the curve's length there, and what the curve would change: the last 28 days' distance
   with it against the lengths in use.
-- [ ] **The profile.** `StepLengthMode.LEARNED` and the curve in `Profile` and DataStore: its
+- [x] **The profile.** `StepLengthMode.LEARNED` and the curve in `Profile` and DataStore: its
   bins (cadence and length pairs), its usual cadence and the length there, the kilometres and
   outings it was learnt from. `walkingStepLengthMeters` and `runningStepLengthMeters` keep what
   the reader had: a length measured or typed is not lost by accepting; the curve remembers the
@@ -1211,7 +1224,7 @@ step length's rows).
   under way keeps the lengths it started with, as today. A running length the reader sets
   after accepting (typed, or the wizard's running walk, which changes no mode) wins over the
   curve's running part: the last one chosen is the one in use, gait by gait.
-- [ ] **The backup.** `ProfileDto` gains the curve as an added field and writes `LEARNED` as
+- [x] **The backup.** `ProfileDto` gains the curve as an added field and writes `LEARNED` as
   its mode. 1.1.0 was read for it (tag `v1.1.0`, `BackupCodec`): it ignores unknown fields and
   reads a mode it does not know as the height's estimate, without failing, so no other mode is
   written in its place; a file from this version imported by 1.1.0 falls back to the height,
@@ -1220,7 +1233,7 @@ step length's rows).
   last curve proposed (the proposal's box) is the phone's state, not the reader's choice: in
   DataStore, never in the file, like the first run; on a new phone the proposal comes once
   more.
-- [ ] **The proposal** (`:feature:settings`). When the bin holding the reader's usual walking
+- [x] **The proposal** (`:feature:settings`). When the bin holding the reader's usual walking
   cadence counts (the two around it, if it falls between two), and the curve would move the
   last 28 days' distance by 2% or more: a card at the step length's rows and on the
   calibration page, sentence first («Passo has measured your step on 14 km of your outings:
@@ -1256,17 +1269,17 @@ step length's rows).
   has just measured, where a card in Settings may never be seen. Shown while the proposal
   waits, gone once it is used or put away, on no other outing's page; never a notification
   (owner, 19 Nov 2026).
-- [ ] The wizard stays: a reader without GPS measures their step on a known distance as today.
+- [x] The wizard stays: a reader without GPS measures their step on a known distance as today.
   A length measured by the wizard and a learnt curve do not fight: the last one the reader
   chose is the one in use, and the row says which (a choice puts the curve away: the
   proposal's box).
-- [ ] **Tests.** `StepLengthLearnerTest`, `StepLengthsTest` with a curve (each part learnt or
+- [x] **Tests.** `StepLengthLearnerTest`, `StepLengthsTest` with a curve (each part learnt or
   not, a running length set after), the repository's (accepting freezes the past first), the
   backup's round trip, an older file and a mode unknown, the settings' UI tests with the card
   in each state and the calibration page's row (shown, not shown, opening the card), Today's
   line and a city walk's steps in `LEARNED`, the way back to each mode, «Apply to past days
   too», the outing page's line to the card (shown, gone after a choice).
-- [ ] Strings in English and Italian; CHANGELOG; the guide («Estimates, and what they rest on»
+- [x] Strings in English and Italian; CHANGELOG; the guide («Estimates, and what they rest on»
   in Today and «With GPS» in Outings gain the step that outings with GPS measure; the guide has
   no «Measure your step», which is the calibration page's title); README: `calibration.png`
   regenerated if its screen changed, and its caption (today it says "no GPS").
@@ -1870,6 +1883,72 @@ This log starts with Phase 16 built (18 Nov 2026); its entries are written below
     their own rounds.
   - **The twelve hours** of decision 14 now start no outing: they were for a way walked on the
     spot and a followed route, both dropped. Every outing keeps four, «Keep going» as before.
+
+- **19 Nov 2026.** **Phase 17 built: the step that learns** (owner: "implement Phase 17,
+  following CLAUDE.md", in plan mode first, the plan approved). §11 Phase 17's boxes are ticked
+  but the phone's, which opens in «Open».
+  - **One branch, by the owner's choice.** The phase was built on the branch of PR #74 (the
+    review of Phases 15 and 16), not on a branch of its own as «One phase, one session» says:
+    the owner wants that branch merged into `main` once, at the end, with all it holds. The PR's
+    title and description say it holds Phase 17 too.
+  - **Built.** `StepLengthLearner` (`:core:domain/calibration`, pure): the bins, the 400 m from
+    two outings, the median, the curve made non-decreasing, the usual cadence, the share of the
+    last 28 days' distance, the proposal and the outing that made it ready. `LearnedStep` and
+    `StepPoint` in `Profile` (`:core:model`), `StepLengthMode.LEARNED`; `StepLengths` reads the
+    curve where a part is learnt, and `walkingMeters` is the curve's length at the usual cadence,
+    so Today's line, a city walk's steps, the onboarding's figure and the step's rows follow with
+    no change of their own. `LearnedSteps`: accepting, the way back, a length chosen in a dialog,
+    the wizard's (`StepCalibration.apply`). `LearnedStepText` writes the curve in DataStore
+    (`profile_learned_step`), and the curve put away (`step_curve_put_away`, never in the file).
+    `StepLearningRepository` (`:core:data/learning`): what the samples teach, read while a page
+    shows it, and the answers, every profile change through `TrackingRepository.changeProfile`.
+    The backup's `ProfileDto.learnedStep`; `Backup.stepFallback` and `ImportReport.stepFallback`,
+    said in the import's summary. `StepCurveChart` (`:core:designsystem`, Canvas). The card, the
+    note after «Use it», the quiet row and the way back (`StepLearningViews`, `:feature:settings`);
+    the outing's page's line and its way to the card (`CalibrationKey.card`, through `:app`).
+  - **Made exact on the way**, each in the code with its reason:
+    - the usual walking cadence is the median of the active minutes below the running cadence
+      (a run is not a pace to name a walking step at), over the 28 days that end today; the
+      minutes are read when a page opens, not followed, so a card does not change under the
+      reader's eyes;
+    - a usual cadence under 80 is read in the first bin: the curve is flat there, so the length
+      the card names is that bin's, and a slow walker would otherwise never be offered one;
+    - a bin's point sits at its samples' mean cadence, weighted by their steps; the pooling runs
+      along the whole curve, so the step never shortens across the running cadence either;
+    - the length at the usual cadence is read from the curve, not stored beside it: one number
+      cannot drift from the other;
+    - the quiet row needs the curve to count at the usual pace, not the 2%: a reader who asks
+      sees today's curve even when it would change little, and the card says so («close to the
+      74 cm in use, so distances and calories would hardly change»);
+    - with a curve in use, the reference for another 2% is the curve in use: an updated curve
+      is proposed when the outings move it that far, and a curve in use never changes unasked;
+    - the outing that made the proposal ready is the first, in the order they were walked, whose
+      samples with those before it would have made it; after «Not now» or «Go back» only the
+      outings after the curve put away count (`LearnedStep.throughMillis`), so the line never
+      lands on an old outing's page; and only once the outing is over for good;
+    - the running row names the running part halfway along it; the step's dialogs offer «Learnt
+      from your outings» first, and the measured or typed length kept there over a learnt step is
+      the way back to it; in Settings the way back is a row under the step's, with what it does
+      («From today, distances use it again; past days keep theirs»), on the calibration page a
+      button under «Now»;
+    - an import whose learnt step cannot be read falls back to the height's estimate and says so,
+      like a mode not known; the backup's profile is read through `sanitized()`.
+  - **The README.** `calibration.png` showed the wizard's result, which did not change; it is
+    redrawn on the calibration page with the learnt step's card, the phase's view, so the set
+    stays as small (owner's rule), and its caption no longer says "no GPS"; the feature line says
+    both ways of measuring the step. The card says, under the chart, that it is still an
+    estimate.
+  - **Checked**: `spotlessCheck`, `test`, `:app:lintDebug`, `:app:checkForbiddenPermissions`
+    (green here but the seven tests that walk a Room migration, which fail on Windows by a path
+    comparison and are CI's to prove; no schema changed). New tests: `StepLengthLearnerTest`, `StepLengthsTest`, `LearnedStepsTest`,
+    `LearnedStepTextTest`, `BackupCodecTest` (a curve, a file from before, 1.1.0, a mode unknown),
+    `StepLearningRepositoryTest` (accepting freezes the past first, «Apply to past days too», «Not
+    now», «Go back», a length chosen, an outing deleted, the settings file),
+    `CalibrationScreenTest`, `SettingsScreenTest` and `OutingScreenTest` (the card in each state,
+    the row shown, not shown and opening the card, the note and its dialog, the way back, the
+    outing's line shown and gone; both themes, twice the text size, Italian, an open foldable);
+    the screenshots looked at. CHANGELOG, the guide in English and Italian («Estimates, and what
+    they rest on», «With GPS»), VISION, CLAUDE.md.
 
 ### Open
 

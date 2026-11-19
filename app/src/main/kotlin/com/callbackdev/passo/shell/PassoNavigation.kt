@@ -56,9 +56,13 @@ data object SessionsKey : NavKey
 @Serializable
 data object GuideKey : NavKey
 
-/** Measuring the walking or the running step, from Settings (PLANNING.md §11 Phase 7). */
+/**
+ * Measuring the walking or the running step, from Settings (PLANNING.md §11 Phase 7); with
+ * [card], open on the step learnt from the outings with GPS (Phase 17), from the outing whose
+ * samples made it ready.
+ */
 @Serializable
-data class CalibrationKey(val step: CalibratedStep) : NavKey
+data class CalibrationKey(val step: CalibratedStep, val card: Boolean = false) : NavKey
 
 /** The editor of one outing; a new one when [planId] is null. */
 @Serializable

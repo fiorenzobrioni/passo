@@ -67,7 +67,8 @@ Passo does one thing and does it well. It counts steps with the phone's own hard
 ### Derived metrics (estimates)
 
 - **Distance:** steps × step length.
-  - The step length is either derived from height, set manually, or calibrated.
+  - The step length is either derived from height, set manually, calibrated, or learnt pace by
+    pace from the outings with GPS and accepted by the reader (Phase 17).
   - A separate running step length is used for high-cadence minutes.
 - **Active calories:** net energy from walking and running, based on distance, body weight and cadence.
 - **Active minutes:** minutes with sustained stepping.
@@ -193,7 +194,8 @@ Android's cloud backup.
   the reader moves, the fixes how far, so a stop, a bus or a tunnel does not fool it.
 - **The step that learns** («Il passo che impara», Phase 17): each outing with GPS says how
   long the reader's step is at each pace; Passo proposes the result, and every day without GPS
-  reads truer for it.
+  reads truer for it. Built (19 Nov 2026): the reader accepts it or not, past days keep theirs
+  unless asked, and the way back to the step used before is one touch.
 - **City walks measured** («Passeggiate misurate», Phase 18): a city walk stays imaginary, but
   with «Measure with GPS» on its page its distance is measured on the reader's own streets and
   their real route is kept, so one walk gives the story and the measure. The city's map shows

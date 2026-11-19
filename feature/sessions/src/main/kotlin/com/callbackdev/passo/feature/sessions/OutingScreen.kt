@@ -3,14 +3,17 @@ package com.callbackdev.passo.feature.sessions
 import android.content.res.Resources
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
@@ -38,7 +41,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.layer.GraphicsLayer
@@ -52,6 +57,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -118,11 +124,17 @@ class OutingActions(
     val shareGpx: () -> Unit = {},
     val saveGpx: () -> Unit = {},
     val deleteRoute: () -> Unit = {},
+    val openStepCard: () -> Unit = {},
 )
 
 /** An outing's page with its state, and the sharing and saving of its route. */
 @Composable
-fun OutingRoute(sessionId: Long, onBack: () -> Unit, viewModel: OutingViewModel = hiltViewModel()) {
+fun OutingRoute(
+    sessionId: Long,
+    onBack: () -> Unit,
+    onOpenStepCard: () -> Unit = {},
+    viewModel: OutingViewModel = hiltViewModel(),
+) {
     LaunchedEffect(sessionId) { viewModel.open(sessionId) }
     DisposableEffect(Unit) { onDispose { viewModel.close() } }
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -172,6 +184,7 @@ fun OutingRoute(sessionId: Long, onBack: () -> Unit, viewModel: OutingViewModel 
             },
             saveGpx = { runCatching { save.launch("$file.gpx") } },
             deleteRoute = viewModel::deleteRoute,
+            openStepCard = onOpenStepCard,
         ),
     )
 }
@@ -292,6 +305,12 @@ private fun OutingPage(state: OutingUiState, format: MeasureFormatter, actions: 
             }
         }
         item(key = "numbers") { Numbers(session, route?.altitudes, format) }
+        // What this outing measured of the step, once it is over: from its own samples, not from
+        // the curve, and absent without one (PLANNING.md §11 Phase 17).
+        val step = state.stepAtPace
+        if (state.over && session.gps && step != null) {
+            item(key = "step") { StepLine(step, state.stepReady, format, actions.openStepCard) }
+        }
         if (session.intervals != null && session.splits.any { it.fast }) {
             item(key = "intervals") {
                 Group { IntervalBars(session, MaterialTheme.colorScheme.primary) }
@@ -641,6 +660,48 @@ private fun Title(text: String) {
     Text(text, style = MaterialTheme.typography.titleMedium, modifier = Modifier.semantics { heading() })
 }
 
+/**
+ * «Your step at this pace», and on the outing whose samples made the learnt step ready, while it
+ * waits, the way to it: the moment the reader has just measured, where a card in Settings might
+ * never be seen. Never a notification.
+ */
+@Composable
+private fun StepLine(meters: Double, ready: Boolean, format: MeasureFormatter, onOpen: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.padding(horizontal = ScreenMargin)) {
+        Note(
+            stringResource(R.string.outing_step_at_pace, format.stepLength(meters).text()),
+            Modifier.padding(horizontal = 4.dp).testTag(OutingTags.STEP),
+        )
+        if (ready) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(GroupShape)
+                    .clickable(role = Role.Button, onClick = onOpen)
+                    .heightIn(min = 48.dp)
+                    .padding(horizontal = 4.dp, vertical = 8.dp)
+                    .testTag(OutingTags.STEP_READY),
+            ) {
+                Icon(
+                    PassoIcons.Gps,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp),
+                )
+                Text(
+                    stringResource(R.string.outing_step_ready),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f),
+                )
+                Icon(PassoIcons.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            }
+        }
+    }
+}
+
 @Composable
 private fun Note(text: String, modifier: Modifier = Modifier) {
     Text(
@@ -717,4 +778,6 @@ object OutingTags {
     const val SAVE_GPX = "outing_save_gpx"
     const val DELETE_ROUTE = "outing_delete_route"
     const val DELETE_CONFIRM = "outing_delete_confirm"
+    const val STEP = "outing_step"
+    const val STEP_READY = "outing_step_ready"
 }

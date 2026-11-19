@@ -45,6 +45,17 @@ abstract class TrackingDao {
     @Query("SELECT * FROM minute_steps WHERE localEpochDay BETWEEN :fromDay AND :toDay")
     abstract suspend fun minutesBetween(fromDay: Long, toDay: Long): List<MinuteStepsEntity>
 
+    /**
+     * How many minutes had each step count, from [fromDay] to [toDay] included: four weeks of
+     * paces in a few hundred rows, what the step that learns names a usual pace from and weighs a
+     * curve on (PLANNING.md §11 Phase 17).
+     */
+    @Query(
+        "SELECT steps, COUNT(*) AS minutes FROM minute_steps " +
+            "WHERE localEpochDay BETWEEN :fromDay AND :toDay AND steps > 0 GROUP BY steps",
+    )
+    abstract suspend fun stepCounts(fromDay: Long, toDay: Long): List<StepCount>
+
     /** The first day with steps recorded; null before the first. */
     @Query("SELECT MIN(localEpochDay) FROM daily_summary")
     abstract fun observeFirstRecordedDay(): Flow<Long?>

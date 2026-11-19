@@ -47,6 +47,16 @@ All notable changes to Passo are documented here. The format follows
   four hours more. Unanswered, it ends there, says so, and can
   be taken back for a quarter of an hour.
 
+- **Your step, learnt from your outings with GPS.** Each outing with GPS measures how long your
+  step is at the pace you walked it, and its page says so («Your step at this pace: 79 cm»).
+  Once a few outings agree at your usual pace, and the difference is worth it, Passo shows what
+  they measured, pace by pace, against the step in use, and offers it for every estimate:
+  «Use it» or «Not now», on the calibration page and in Settings, never a notification. Accepted,
+  the distance and calories of every day from then on come closer to the truth, the days
+  without GPS too; past days keep theirs, unless you ask to apply it to them as well. A way
+  back to the step you used before, measured, typed or estimated, is always one touch away, and
+  measuring your step by walking still works as before. A backup carries the step learnt.
+
 ### Private and light
 
 - **Location, only for an outing that asks for it.** Passo now holds the location permission,

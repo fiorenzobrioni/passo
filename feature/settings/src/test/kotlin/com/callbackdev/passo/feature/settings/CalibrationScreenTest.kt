@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -13,12 +14,17 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.callbackdev.passo.core.designsystem.components.STEP_CURVE_TAG
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.calibration.CalibratedStep
 import com.callbackdev.passo.core.domain.calibration.CalibrationResult
+import com.callbackdev.passo.core.domain.calibration.LearnedSteps
 import com.callbackdev.passo.core.domain.calibration.StepCalibration
+import com.callbackdev.passo.core.model.LearnedStep
 import com.callbackdev.passo.core.model.Profile
+import com.callbackdev.passo.core.model.StepLengthMode
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.testing.assertAccessible
 import com.callbackdev.passo.core.testing.walkPage
@@ -27,6 +33,7 @@ import com.callbackdev.passo.feature.settings.calibration.CalibrationPhase
 import com.callbackdev.passo.feature.settings.calibration.CalibrationScreen
 import com.callbackdev.passo.feature.settings.calibration.CalibrationTags
 import com.callbackdev.passo.feature.settings.calibration.CalibrationUiState
+import com.callbackdev.passo.feature.settings.learning.StepLearningTags
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -60,8 +67,124 @@ class CalibrationScreenTest {
         actions: CalibrationActions = CalibrationActions(),
         onBack: () -> Unit = {
         },
+        dark: Boolean = false,
     ) {
-        compose.setContent { PassoTheme { CalibrationScreen(state, onBack = onBack, actions = actions) } }
+        compose.setContent {
+            PassoTheme(darkTheme = dark) { CalibrationScreen(state, onBack = onBack, actions = actions) }
+        }
+    }
+
+    private val proposed = setup.copy(learning = LearningFixtures.proposed(setup.profile))
+    private val putAway = setup.copy(learning = LearningFixtures.proposed(setup.profile).copy(proposed = false))
+
+    @Test
+    fun `a proposal waiting opens the page with its card, the sentence first`() {
+        var used: LearnedStep? = null
+        var notNow: LearnedStep? = null
+        show(proposed, CalibrationActions(useStep = { used = it }, notNow = { notNow = it }))
+
+        compose.onNodeWithTag(StepLearningTags.SENTENCE).assertTextEquals(
+            "Passo has measured your step on 14.2\u00A0km of your outings: " +
+                "at your usual pace it is 78\u00A0cm, not 73\u00A0cm, " +
+                "so distances and calories read 6% higher.",
+        )
+        compose.onNodeWithTag(STEP_CURVE_TAG).assertExists()
+        snapshot("calibration_learning_card")
+        compose.onNodeWithTag(StepLearningTags.USE).performScrollTo().performClick()
+        assertThat(used).isEqualTo(LearningFixtures.curve)
+        compose.onNodeWithTag(StepLearningTags.NOT_NOW).performScrollTo().performClick()
+        assertThat(notNow).isEqualTo(LearningFixtures.curve)
+    }
+
+    @Test
+    fun `the card in the dark`() {
+        show(proposed, dark = true)
+        snapshot("calibration_learning_card_dark")
+    }
+
+    @Test
+    fun `not now leaves a quiet row, and touching it opens the card again`() {
+        var opened = false
+        show(putAway, CalibrationActions(openCard = { opened = true }))
+
+        compose.onNodeWithTag(StepLearningTags.CARD).assertDoesNotExist()
+        compose.onNodeWithText(
+            "Passo has learnt your step on 14.2\u00A0km of your outings with GPS",
+        ).assertIsDisplayed()
+        snapshot("calibration_learning_row")
+        compose.onNodeWithTag(StepLearningTags.ROW).performClick()
+        assertThat(opened).isTrue()
+    }
+
+    @Test
+    fun `the card asked for opens with the curve as it is today`() {
+        show(putAway.copy(cardOpen = true))
+
+        compose.onNodeWithTag(StepLearningTags.CARD).assertExists()
+        compose.onNodeWithTag(StepLearningTags.ROW).assertDoesNotExist()
+    }
+
+    @Test
+    fun `with no curve that counts there is no row and no card`() {
+        show(setup)
+
+        compose.onNodeWithTag(StepLearningTags.ROW).assertDoesNotExist()
+        compose.onNodeWithTag(StepLearningTags.CARD).assertDoesNotExist()
+    }
+
+    @Test
+    fun `use it says what changed, and the past days are offered, asked first`() {
+        var applied = false
+        show(proposed.copy(stepUsed = true), CalibrationActions(applyPast = { applied = true }))
+
+        compose.onNodeWithText(
+            "From today, distances use your measured step. Past days keep theirs.",
+        ).assertIsDisplayed()
+        snapshot("calibration_learning_used")
+        compose.onNodeWithTag(StepLearningTags.APPLY_PAST).performClick()
+        assertThat(applied).isFalse()
+        compose.onNodeWithText("Recompute").performClick()
+        assertThat(applied).isTrue()
+    }
+
+    @Test
+    fun `the learnt step in use says where it comes from, with the way back named as it was`() {
+        var back = false
+        val measured =
+            Profile(heightMeters = 1.76, stepLengthMode = StepLengthMode.CALIBRATED, walkingStepLengthMeters = 0.76)
+        val learned = LearnedSteps.accept(measured, LearningFixtures.curve)
+        show(
+            setup.copy(profile = learned, learning = LearningFixtures.proposed(learned).copy(proposed = false)),
+            CalibrationActions(goBackStep = { back = true }),
+        )
+
+        compose.onNodeWithText("Now · 78 cm, learnt from 14.2 km of your outings").assertIsDisplayed()
+        // A curve in use has no quiet row: it is the step in use.
+        compose.onNodeWithTag(StepLearningTags.ROW).assertDoesNotExist()
+        snapshot("calibration_learning_in_use")
+        compose.onNodeWithText("Go back to your measured step (76 cm)").performClick()
+        assertThat(back).isTrue()
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
+    fun `at twice the text size the card still reads`() {
+        show(proposed)
+        compose.walkPage(hasTestTag(CalibrationTags.PAGE), "calibration_learning_large_text")
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT-w360dp-h740dp-xxhdpi")
+    fun `in Italian on a small phone the card reads`() {
+        show(proposed)
+        compose.walkPage(hasTestTag(CalibrationTags.PAGE), "calibration_learning_it")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w841dp-h701dp-xhdpi")
+    fun `on an open foldable the card is in the middle column`() {
+        show(proposed)
+        compose.walkPage(hasTestTag(CalibrationTags.PAGE), "calibration_learning_foldable")
     }
 
     @Test

@@ -74,7 +74,7 @@ calories are estimates, and Passo says so.
   <tr>
     <td align="center"><img src="docs/screenshots/onboarding-goal.png" width="250" alt="The first run: the daily goal, with what it means in distance and time"><br><sub><b>A goal</b> in kilometres and minutes</sub></td>
     <td align="center"><img src="docs/screenshots/settings-appearance.png" width="250" alt="Settings: appearance, with a live preview"><br><sub><b>Appearance</b>: palettes and typefaces</sub></td>
-    <td align="center"><img src="docs/screenshots/calibration.png" width="250" alt="Measure your step: 131 steps over 100 m make a walking step of 76 cm, against 74 cm estimated from the height, so distances read 3% longer"><br><sub><b>Measure your step</b>, no GPS</sub></td>
+    <td align="center"><img src="docs/screenshots/calibration.png" width="250" alt="Your step, measured on your outings: six outings with GPS put it at 78 cm at the usual pace, not the 74 cm estimated from the height, drawn by cadence against the step in use, with Use it and Not now"><br><sub><b>Your step</b>, learnt from your outings with GPS</sub></td>
   </tr>
   <tr>
     <td align="center"><img src="docs/screenshots/settings-data.png" width="250" alt="Settings, your data: a backup saved with 412 days and 38 outings, and the rows to back up, import and export for a spreadsheet"><br><sub><b>Your data</b>, in a file you keep</sub></td>
@@ -104,7 +104,7 @@ Italian). The phone's status bar is not in the pictures. The command that redraw
 - 🗓️ **Your year on foot**: a year told in pages, from your own days: the steps and how far they went, the months, your best day, your day of the week and your hour, the goal, the outings and the ways, against the year before. Open it from Insights or History any time; in December it waits for you on Today. Share a page as an image, through an app you pick.
 - 🗺️ **Ways**: long ways (Via degli Dei, Camino Portugués, Via di Francesco, Camino Francés, Via Francigena, Kumano Kodō, Great Ocean Walk, Inca Trail, John Muir Trail, Kilimanjaro), listed by continent and walked from home, stage by stage, with a stamp for each. No location: only your distance.
 - 🏛️ **City walks**: Milan, Rome, Paris, London, Madrid, Berlin, Vienna, Porto, Amsterdam and Prague in Europe, Lima, Cusco, New York, Rio de Janeiro, Mexico City, Buenos Aires, San Francisco, Québec, Havana and Cartagena in the Americas, Tokyo, Sydney, Seoul, Beijing, Hong Kong, Singapore, Bangkok, Kyoto, Hanoi and Melbourne in Asia and Oceania, Cairo, Cape Town, Marrakech, Tunis, Alexandria, Dakar, Addis Ababa, Fez, Zanzibar and Luxor in Africa, walked where you are in one outing or a few, about 5 km or about 10. Each continent has its page, with a map of where its cities are and which you have walked. Each place is told as your steps reach it, with a short vibration and, if you like, a line about it in your headphones.
-- 📏 **Measure your step**: walk a distance you know and Passo works out your step length. No GPS.
+- 📏 **Measure your step**: walk a distance you know and Passo works out your step length, with no GPS. Or let your outings with GPS measure it: once they have enough, Passo shows your step pace by pace and offers it for every estimate, yours to accept or not. Past days keep theirs unless you ask.
 - 🏠 **Two widgets**: At a glance and In words, resizable, in seven colours (green by default) and any opacity.
 - 🔔 **Notifications**: goal reached, an evening reminder, a weekly summary. Each one optional.
 - ⚡ **Quick Settings tile**: today's steps and the share of the goal.

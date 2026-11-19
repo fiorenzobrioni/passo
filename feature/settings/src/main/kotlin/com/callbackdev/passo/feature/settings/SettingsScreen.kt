@@ -82,15 +82,20 @@ import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
 import com.callbackdev.passo.core.designsystem.theme.padding
 import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.domain.calibration.CalibratedStep
+import com.callbackdev.passo.core.domain.calibration.LearnedSteps
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.goals.GoalSchedule
+import com.callbackdev.passo.core.domain.metrics.MetricsConstants
 import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.metrics.namedRunning
+import com.callbackdev.passo.core.domain.metrics.runningPoints
 import com.callbackdev.passo.core.domain.settings.InputScale
 import com.callbackdev.passo.core.domain.settings.ProfileInputs
 import com.callbackdev.passo.core.domain.settings.firstDayOfWeek
 import com.callbackdev.passo.core.domain.settings.resolve
 import com.callbackdev.passo.core.model.AppFont
 import com.callbackdev.passo.core.model.AppPalette
+import com.callbackdev.passo.core.model.LearnedStep
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.Sex
 import com.callbackdev.passo.core.model.StepLengthMode
@@ -110,6 +115,10 @@ import com.callbackdev.passo.feature.settings.data.DataGroup
 import com.callbackdev.passo.feature.settings.data.DataUiState
 import com.callbackdev.passo.feature.settings.data.DataViewModel
 import com.callbackdev.passo.feature.settings.data.rememberDataFiles
+import com.callbackdev.passo.feature.settings.learning.StepLearningTags
+import com.callbackdev.passo.feature.settings.learning.StepProposalCard
+import com.callbackdev.passo.feature.settings.learning.StepUsedNote
+import com.callbackdev.passo.feature.settings.learning.wayBackLabel
 import java.time.DayOfWeek
 import java.time.LocalTime
 import java.time.format.TextStyle
@@ -132,6 +141,12 @@ fun SettingsRoute(
             updateSettings = viewModel::updateSettings,
             updateProfile = viewModel::updateProfile,
             applyProfileToPastDays = viewModel::applyProfileToPastDays,
+            chooseWalking = viewModel::chooseWalking,
+            chooseRunning = viewModel::chooseRunning,
+            useStep = viewModel::useStep,
+            notNow = viewModel::notNow,
+            goBackStep = viewModel::goBackStep,
+            dismissStepUsed = viewModel::dismissStepUsed,
             setTracking = viewModel::setTracking,
             calibrate = onCalibrate,
             openSessions = onOpenSessions,
@@ -157,6 +172,12 @@ class SettingsActions(
     val updateSettings: ((UserSettings) -> UserSettings) -> Unit = {},
     val updateProfile: ((Profile) -> Profile) -> Unit = {},
     val applyProfileToPastDays: () -> Unit = {},
+    val chooseWalking: (own: Double?, keepLearned: Boolean) -> Unit = { _, _ -> },
+    val chooseRunning: (own: Double?, learnedRunning: Boolean) -> Unit = { _, _ -> },
+    val useStep: (LearnedStep) -> Unit = {},
+    val notNow: (LearnedStep) -> Unit = {},
+    val goBackStep: () -> Unit = {},
+    val dismissStepUsed: () -> Unit = {},
     val setTracking: (Boolean) -> Unit = {},
     val calibrate: (CalibratedStep) -> Unit = {},
     val openSessions: () -> Unit = {},
@@ -272,10 +293,24 @@ private fun SettingsList(
                     value = stepLengthValue(profile, lengths, format),
                     onClick = { dialog = Dialog.STEP_LENGTH },
                 )
+                wayBackLabel(profile, format)?.let { back ->
+                    GroupDivider()
+                    ValueRow(
+                        label = back,
+                        value = stringResource(R.string.settings_step_back_note),
+                        onClick = actions.goBackStep,
+                        modifier = Modifier.testTag(StepLearningTags.WAY_BACK),
+                    )
+                }
                 GroupDivider()
                 ValueRow(
                     label = stringResource(R.string.settings_running_step_length),
-                    value = if (profile.runningStepLengthMeters != null) {
+                    value = if (lengths.learned?.takeIf { it.running }?.runningPoints?.isNotEmpty() == true) {
+                        stringResource(
+                            R.string.settings_running_learned,
+                            format.stepLength(lengths.runningMeters).text(),
+                        )
+                    } else if (profile.runningStepLengthMeters != null) {
                         stringResource(
                             R.string.settings_running_manual,
                             format.stepLength(lengths.runningMeters).text(),
@@ -298,6 +333,28 @@ private fun SettingsList(
                     label = stringResource(R.string.settings_apply_past),
                     value = stringResource(R.string.settings_apply_past_note),
                     onClick = { dialog = Dialog.APPLY_PAST },
+                )
+            }
+        }
+
+        val offer = state.learning.offer
+        if (state.stepUsed) {
+            item(key = "step-used") {
+                StepUsedNote(
+                    onApplyPast = { dialog = Dialog.APPLY_PAST },
+                    onDone = actions.dismissStepUsed,
+                    modifier = Modifier.padding(top = 12.dp),
+                )
+            }
+        } else if (offer != null && state.learning.proposed) {
+            item(key = "step-proposal") {
+                StepProposalCard(
+                    offer = offer,
+                    profile = profile,
+                    format = format,
+                    onUse = { actions.useStep(offer.curve) },
+                    onNotNow = { actions.notNow(offer.curve) },
+                    modifier = Modifier.padding(top = 12.dp),
                 )
             }
         }
@@ -562,19 +619,17 @@ private fun SettingsList(
         Dialog.STEP_LENGTH -> LengthDialog(
             title = stringResource(R.string.settings_step_length),
             scale = ProfileInputs.walkingStepLength(format.units),
-            own = profile.walkingStepLengthMeters.takeIf { profile.stepLengthMode != StepLengthMode.AUTO },
-            estimate = StepLengths.of(profile.copy(stepLengthMode = StepLengthMode.AUTO)).walkingMeters,
+            own = profile.walkingStepLengthMeters.takeIf { ownWalking(profile) },
+            estimate = StepLengths.of(
+                profile.copy(stepLengthMode = StepLengthMode.AUTO, learnedStep = null),
+            ).walkingMeters,
+            learned = lengths.walkingMeters.takeIf { lengths.learned != null },
             format = format,
-            onSave = { own ->
-                actions.updateProfile {
-                    when {
-                        own == null -> it.copy(stepLengthMode = StepLengthMode.AUTO, walkingStepLengthMeters = null)
-
-                        // Kept as it was: a measured step stays measured.
-                        own == it.walkingStepLengthMeters && it.stepLengthMode != StepLengthMode.AUTO -> it
-
-                        else -> it.copy(stepLengthMode = StepLengthMode.MANUAL, walkingStepLengthMeters = own)
-                    }
+            onSave = { choice ->
+                when (choice) {
+                    LengthChoice.Learned -> actions.chooseWalking(null, true)
+                    LengthChoice.Estimate -> actions.chooseWalking(null, false)
+                    is LengthChoice.Own -> actions.chooseWalking(choice.meters, false)
                 }
             },
             measure = stringResource(R.string.settings_measure_walking),
@@ -589,9 +644,17 @@ private fun SettingsList(
             title = stringResource(R.string.settings_running_step_length),
             scale = ProfileInputs.runningStepLength(format.units),
             own = profile.runningStepLengthMeters,
-            estimate = StepLengths.of(profile.copy(runningStepLengthMeters = null)).runningMeters,
+            estimate = lengths.walkingMeters * MetricsConstants.RUNNING_STEP_LENGTH_FACTOR,
+            learned = lengths.learned?.namedRunning,
+            learnedInUse = lengths.learned?.running == true,
             format = format,
-            onSave = { own -> actions.updateProfile { it.copy(runningStepLengthMeters = own) } },
+            onSave = { choice ->
+                when (choice) {
+                    LengthChoice.Learned -> actions.chooseRunning(null, true)
+                    LengthChoice.Estimate -> actions.chooseRunning(null, false)
+                    is LengthChoice.Own -> actions.chooseRunning(choice.meters, false)
+                }
+            },
             measure = stringResource(R.string.settings_measure_running),
             onMeasure = {
                 dialog = null
@@ -727,7 +790,11 @@ private fun SettingsList(
 @Composable
 private fun stepLengthValue(profile: Profile, lengths: StepLengths, format: MeasureFormatter): String {
     val shown = format.stepLength(lengths.walkingMeters).text()
+    val learned = lengths.learned
     return when {
+        learned != null ->
+            stringResource(R.string.settings_step_length_learned, format.distance(learned.learntMeters).text(), shown)
+
         profile.stepLengthMode == StepLengthMode.CALIBRATED && profile.walkingStepLengthMeters != null ->
             stringResource(R.string.settings_step_length_calibrated, shown)
 
@@ -1108,9 +1175,33 @@ private fun TimeDialog(
     )
 }
 
+/** What a step length's dialog saves. */
+private sealed interface LengthChoice {
+    data object Learned : LengthChoice
+
+    data object Estimate : LengthChoice
+
+    data class Own(val meters: Double) : LengthChoice
+}
+
+/** A typed or measured walking step is the reader's own, also beside a learnt step in use. */
+private fun ownWalking(profile: Profile): Boolean = when (profile.stepLengthMode) {
+    StepLengthMode.MANUAL, StepLengthMode.CALIBRATED -> true
+
+    StepLengthMode.LEARNED -> LearnedSteps.wayBack(profile).let {
+        it == StepLengthMode.MANUAL ||
+            it == StepLengthMode.CALIBRATED
+    }
+
+    StepLengthMode.AUTO -> false
+}
+
 /**
- * A step length: estimated, or the reader's own. The estimate is shown with its value, so the
- * choice is between two numbers rather than between two words.
+ * A step length: learnt from the outings (when there is a learnt step), estimated, or the reader's
+ * own. Each is shown with its value, so the choice is between numbers rather than words.
+ *
+ * @param learned the learnt step's length, offered first; [learnedInUse] whether it is the one in
+ *   use (the walking one always is; a running length chosen after it wins over its running part).
  */
 @Composable
 private fun LengthDialog(
@@ -1119,12 +1210,15 @@ private fun LengthDialog(
     own: Double?,
     estimate: Double,
     format: MeasureFormatter,
-    onSave: (Double?) -> Unit,
+    onSave: (LengthChoice) -> Unit,
     measure: String,
     onMeasure: () -> Unit,
     onDismiss: () -> Unit,
+    learned: Double? = null,
+    learnedInUse: Boolean = learned != null,
 ) {
-    var mine by remember { mutableStateOf(own != null) }
+    var learnt by remember { mutableStateOf(learned != null && learnedInUse) }
+    var mine by remember { mutableStateOf(!learnt && own != null) }
     var value by remember { mutableDoubleStateOf(scale.snap(own ?: estimate)) }
     // A length of the reader's own that the stepper was not moved from is saved as it is, not
     // rounded to the stepper's centimetre: a measured 72.6 cm stays 72.6.
@@ -1138,16 +1232,29 @@ private fun LengthDialog(
         title = { Text(title) },
         text = {
             Column(Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                if (learned != null) {
+                    ChoiceRow(
+                        selected = learnt,
+                        label = stringResource(R.string.settings_choice_learned, format.stepLength(learned).text()),
+                        onClick = {
+                            learnt = true
+                            mine = false
+                        },
+                    )
+                }
                 ChoiceRow(
-                    selected = !mine,
+                    selected = !learnt && !mine,
                     label = "${stringResource(
                         R.string.settings_choice_estimate,
                     )} · ${format.stepLength(estimate).text()}",
-                    onClick = { mine = false },
+                    onClick = {
+                        learnt = false
+                        mine = false
+                    },
                 )
                 ChoiceRow(selected = mine, label = stringResource(R.string.settings_choice_mine), onClick = {
-                    mine =
-                        true
+                    learnt = false
+                    mine = true
                 })
                 if (mine) {
                     ValueStepper(
@@ -1173,12 +1280,11 @@ private fun LengthDialog(
         confirmButton = {
             TextButton(onClick = {
                 onSave(
-                    if (!mine) {
-                        null
-                    } else if (moved || own == null) {
-                        value
-                    } else {
-                        own
+                    when {
+                        learnt -> LengthChoice.Learned
+                        !mine -> LengthChoice.Estimate
+                        moved || own == null -> LengthChoice.Own(value)
+                        else -> LengthChoice.Own(own)
                     },
                 )
                 onDismiss()

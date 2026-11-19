@@ -295,6 +295,57 @@ class OutingScreenTest {
     }
 
     @Test
+    fun `an outing with GPS says the step it measured at its pace`() {
+        show(OutingSamples.state().copy(stepAtPace = 0.79))
+
+        page().performScrollToNode(hasTestTag(OutingTags.STEP))
+        compose.onNodeWithText("Your step at this pace: 79 cm").assertIsDisplayed()
+        // Not the outing that made the proposal ready: no way to it here.
+        compose.onNodeWithTag(OutingTags.STEP_READY).assertDoesNotExist()
+    }
+
+    @Test
+    fun `an outing with GPS and no sample has no step line`() {
+        show(OutingSamples.state().copy(stepAtPace = null))
+
+        compose.onNodeWithTag(OutingTags.STEP).assertDoesNotExist()
+    }
+
+    @Test
+    fun `the outing that made the curve ready opens the card, while the proposal waits`() {
+        var opened = false
+        show(
+            OutingSamples.state().copy(stepAtPace = 0.79, stepReady = true),
+            actions = OutingActions(openStepCard = {
+                opened =
+                    true
+            }),
+        )
+
+        page().performScrollToNode(hasTestTag(OutingTags.STEP_READY))
+        compose.onNodeWithText("Passo can now use your measured step for every estimate").assertIsDisplayed()
+        snapshot("outing_step_ready")
+        compose.onNodeWithTag(OutingTags.STEP_READY).performClick()
+        assertThat(opened).isTrue()
+    }
+
+    @Test
+    fun `once the proposal is used or put away, the line to it is gone`() {
+        show(OutingSamples.state().copy(stepAtPace = 0.79, stepReady = false))
+
+        page().performScrollToNode(hasTestTag(OutingTags.STEP))
+        compose.onNodeWithTag(OutingTags.STEP_READY).assertDoesNotExist()
+    }
+
+    @Test
+    fun `while the outing can still be taken back, its step is not told yet`() {
+        show(OutingSamples.state().copy(stepAtPace = 0.79, stepReady = true, over = false))
+
+        compose.onNodeWithTag(OutingTags.STEP).assertDoesNotExist()
+        compose.onNodeWithTag(OutingTags.STEP_READY).assertDoesNotExist()
+    }
+
+    @Test
     fun `an outing without GPS - the same page without the route's parts, and no empty box`() {
         show(OutingSamples.state(session = OutingSamples.onSteps, route = null))
 

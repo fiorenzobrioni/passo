@@ -32,6 +32,9 @@ data class BackupDay(val summary: DailySummary, val minutes: List<MinuteSteps>)
  * @property routes where the outings measured with GPS went, by the outing's start: only when
  *   the reader asked for them («With the routes», off by default; docs/adr/0016-location.md,
  *   decision 9). Empty in every other backup: the one thing of this file that is a place.
+ * @property stepFallback the file's step length was set in a way this build cannot read (a mode
+ *   from a newer Passo, a learnt step damaged): its profile has the height's estimate instead,
+ *   and the import says so.
  */
 data class Backup(
     val exportedAtMillis: Long,
@@ -46,6 +49,7 @@ data class Backup(
     val journeys: List<WayJourney> = emptyList(),
     val stepLengthSamples: Map<Long, List<StepLengthSample>> = emptyMap(),
     val routes: Map<Long, Route> = emptyMap(),
+    val stepFallback: Boolean = false,
 ) {
     /** The first and last day with steps, null for a backup without any. */
     val firstDay: Long? get() = days.minOfOrNull { it.summary.localEpochDay }

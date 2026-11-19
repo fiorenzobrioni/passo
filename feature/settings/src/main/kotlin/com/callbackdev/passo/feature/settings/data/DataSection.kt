@@ -531,10 +531,16 @@ private fun outcomeText(outcome: DataOutcome, format: MeasureFormatter): Pair<St
             }
             val nothingNew = report.addedDays == 0 && report.mergedDays == 0 && report.addedOutings == 0 &&
                 !report.preferences
-            stringResource(R.string.data_imported_title) to if (nothingNew) {
+            val summary = if (nothingNew) {
                 stringResource(R.string.data_imported_nothing)
             } else {
                 parts.joinToString(", ").replaceFirstChar { it.titlecase(locale) } + "."
+            }
+            // A step this version cannot read is not silently replaced: said, with what stands in.
+            stringResource(R.string.data_imported_title) to if (report.stepFallback) {
+                summary + " " + stringResource(R.string.data_imported_step_fallback)
+            } else {
+                summary
             }
         }
 

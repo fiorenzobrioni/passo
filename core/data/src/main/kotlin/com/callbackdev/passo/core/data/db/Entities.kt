@@ -142,6 +142,18 @@ data class StepLengthSampleEntity(
     val meters: Double,
 )
 
+/** A sample with its outing's start, as the step that learns reads it. */
+data class OutingSampleRow(
+    val sessionId: Long,
+    val startedAtMillis: Long,
+    val cadence: Int,
+    val steps: Int,
+    val meters: Double,
+)
+
+/** How many minutes had [steps] steps. */
+data class StepCount(val steps: Int, val minutes: Int)
+
 /** An outing's id with its start, the pair a route is matched to its outing by. */
 data class SessionStart(val id: Long, val startedAtMillis: Long)
 

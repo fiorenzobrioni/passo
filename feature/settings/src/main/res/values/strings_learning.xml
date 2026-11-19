@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The step that learns (PLANNING.md §11 Phase 17): the proposal, its chart, the way back. -->
+<resources>
+    <string name="learning_title">Your step, measured on your outings</string>
+    <string name="learning_longer">Passo has measured your step on %1$s of your outings: at your usual pace it is %2$s, not %3$s, so distances and calories read %4$s higher.</string>
+    <string name="learning_shorter">Passo has measured your step on %1$s of your outings: at your usual pace it is %2$s, not %3$s, so distances and calories read %4$s lower.</string>
+    <string name="learning_same">Passo has measured your step on %1$s of your outings: at your usual pace it is %2$s, close to the %3$s in use, so distances and calories would hardly change.</string>
+    <string name="learning_curve_name">Measured on your outings with GPS</string>
+    <string name="learning_in_use_height">In use: estimated from your height</string>
+    <string name="learning_in_use_default">In use: the average step, without a height</string>
+    <string name="learning_in_use_measured">In use: the step you measured by walking</string>
+    <string name="learning_in_use_manual">In use: the step you typed</string>
+    <string name="learning_in_use_learned">In use: the step learnt before</string>
+    <string name="learning_chart_one">Your step as your outings measured it: %1$s at %2$s steps a minute. %3$s, %4$s.</string>
+    <string name="learning_chart_span">Your step as your outings measured it: %1$s at %2$s steps a minute, rising to %3$s at %4$s. %5$s, %6$s.</string>
+    <string name="learning_use">Use it</string>
+    <string name="learning_not_now">Not now</string>
+    <string name="learning_used">From today, distances use your measured step. Past days keep theirs.</string>
+    <string name="learning_apply_past">Apply to past days too</string>
+    <string name="learning_done">Done</string>
+    <string name="learning_row">Passo has learnt your step on %1$s of your outings with GPS</string>
+    <string name="learning_row_note">See what it would change</string>
+    <string name="learning_estimates_note">An estimate still: the satellites measure each outing within a few metres, and your step changes with the ground and the day.</string>
+    <string name="settings_step_length_learned">Learnt from %1$s of your outings: %2$s</string>
+    <string name="settings_running_learned">Learnt from your outings: %1$s</string>
+    <string name="settings_choice_learned">Learnt from your outings · %1$s</string>
+    <string name="settings_step_back_measured">Go back to your measured step (%1$s)</string>
+    <string name="settings_step_back_manual">Go back to the step you typed (%1$s)</string>
+    <string name="settings_step_back_height">Go back to the estimate from your height</string>
+    <string name="settings_step_back_default">Go back to the average step (%1$s)</string>
+    <string name="settings_step_back_note">From today, distances use it again; past days keep theirs.</string>
+    <string name="calibration_now_learned">%1$s, learnt from %2$s of your outings</string>
+</resources>

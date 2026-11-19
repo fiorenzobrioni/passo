@@ -12,11 +12,13 @@ import com.callbackdev.passo.core.model.DiagnosticsEvent
 import com.callbackdev.passo.core.model.DiagnosticsType
 import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.IntervalSplit
+import com.callbackdev.passo.core.model.LearnedStep
 import com.callbackdev.passo.core.model.OutingLeg
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.Sex
 import com.callbackdev.passo.core.model.StepLengthMode
 import com.callbackdev.passo.core.model.StepLengthSample
+import com.callbackdev.passo.core.model.StepPoint
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.UserSettings
 import com.google.common.truth.Truth.assertThat
@@ -58,6 +60,61 @@ class BackupCodecTest {
         val read = BackupCodec.decode(BackupCodec.encode(full))
 
         assertThat(read).isEqualTo(BackupRead.Ok(full))
+    }
+
+    private val learned = BackupFixtures.profile.copy(
+        stepLengthMode = StepLengthMode.LEARNED,
+        walkingStepLengthMeters = 0.742,
+        learnedStep = LearnedStep(
+            points = listOf(StepPoint(94.5, 0.76), StepPoint(116.0, 0.81), StepPoint(161.0, 1.04)),
+            usualCadence = 104,
+            learntMeters = 14_230.0,
+            outings = 6,
+            throughMillis = 1_790_000_000_000,
+            replaced = StepLengthMode.CALIBRATED,
+            running = false,
+        ),
+    )
+
+    @Test
+    fun `a learnt step reads back with its curve and its way back`() {
+        val withCurve = full.copy(profile = learned)
+
+        assertThat(BackupCodec.decode(BackupCodec.encode(withCurve))).isEqualTo(BackupRead.Ok(withCurve))
+        assertThat(BackupCodec.encode(withCurve)).contains("\"stepLengthMode\":\"LEARNED\"")
+    }
+
+    @Test
+    fun `a file from before the step learnt reads without a curve`() {
+        val read = BackupCodec.decode(BackupCodec.encode(full)) as BackupRead.Ok
+
+        assertThat(read.backup.profile.learnedStep).isNull()
+        assertThat(read.backup.stepFallback).isFalse()
+    }
+
+    @Test
+    fun `a file of this version imported by 1_1_0 falls back to the height's estimate`() {
+        // What 1.1.0 does with this file: it skips the curve it does not know, and reads the mode
+        // `LEARNED`, unknown to it, as the height's estimate (tag v1.1.0, BackupCodec).
+        val text = BackupCodec.encode(full.copy(profile = learned))
+            .replace(Regex("\"learnedStep\":\\{.*?\\]\\s*,.*?\\}"), "\"skipped\":0")
+        val read = BackupCodec.decode(text) as BackupRead.Ok
+
+        assertThat(text).doesNotContain("learnedStep")
+        assertThat(read.backup.profile.stepLengthMode).isEqualTo(StepLengthMode.AUTO)
+        assertThat(read.backup.profile.learnedStep).isNull()
+    }
+
+    @Test
+    fun `a mode it does not know falls back to the height's estimate and says so`() {
+        val text = BackupCodec.encode(
+            full,
+        ).replace("\"stepLengthMode\":\"CALIBRATED\"", "\"stepLengthMode\":\"DREAMED\"")
+        val read = BackupCodec.decode(text) as BackupRead.Ok
+
+        assertThat(read.backup.profile.stepLengthMode).isEqualTo(StepLengthMode.AUTO)
+        assertThat(read.backup.stepFallback).isTrue()
+        assertThat((BackupCodec.decode(BackupCodec.encode(full)) as BackupRead.Ok).backup.stepFallback).isFalse()
     }
 
     @Test

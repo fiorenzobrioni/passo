@@ -80,4 +80,6 @@
     <string name="outing_delete_route_confirm">Elimina</string>
     <string name="outing_delete_route_cancel">Annulla</string>
     <string name="outing_image_signature">Passo</string>
+    <string name="outing_step_at_pace">Il tuo passo a questo ritmo: %1$s</string>
+    <string name="outing_step_ready">Ora Passo può usare il passo misurato per ogni stima</string>
 </resources>

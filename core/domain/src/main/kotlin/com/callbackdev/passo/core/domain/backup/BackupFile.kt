@@ -32,7 +32,27 @@ internal data class ProfileDto(
     val stepLengthMode: String? = null,
     val walkingStepLengthMeters: Double? = null,
     val runningStepLengthMeters: Double? = null,
+    val learnedStep: LearnedStepDto? = null,
 )
+
+/**
+ * The step learnt from the outings with GPS and accepted (Phase 17): an added field, no new
+ * version. 1.1.0 skips it and reads the mode `LEARNED`, which it does not know, as the height's
+ * estimate: a downgrade costs the curve, and nothing else. Numbers, never places.
+ */
+@Serializable
+internal data class LearnedStepDto(
+    val points: List<StepPointDto> = emptyList(),
+    val usualCadence: Int = 0,
+    val learntMeters: Double = 0.0,
+    val outings: Int = 0,
+    val throughMillis: Long = 0,
+    val replaced: String? = null,
+    val running: Boolean = true,
+)
+
+@Serializable
+internal data class StepPointDto(val cadence: Double = 0.0, val meters: Double = 0.0)
 
 /** The reader's choices; not whether this phone is counting, nor whether its first run is done. */
 @Serializable

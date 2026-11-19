@@ -1,5 +1,6 @@
 package com.callbackdev.passo.core.domain.backup
 
+import com.callbackdev.passo.core.domain.metrics.sanitized
 import com.callbackdev.passo.core.domain.routes.Legs
 import com.callbackdev.passo.core.domain.routes.RouteCodec
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
@@ -11,6 +12,7 @@ import com.callbackdev.passo.core.model.DiagnosticsEvent
 import com.callbackdev.passo.core.model.DiagnosticsType
 import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.IntervalSplit
+import com.callbackdev.passo.core.model.LearnedStep
 import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.OutingLeg
 import com.callbackdev.passo.core.model.Profile
@@ -28,6 +30,7 @@ import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.Sex
 import com.callbackdev.passo.core.model.StepLengthMode
 import com.callbackdev.passo.core.model.StepLengthSample
+import com.callbackdev.passo.core.model.StepPoint
 import com.callbackdev.passo.core.model.ThemeMode
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.UserSettings
@@ -144,6 +147,17 @@ private fun Backup.toFile() = BackupFile(
         stepLengthMode = profile.stepLengthMode.name,
         walkingStepLengthMeters = profile.walkingStepLengthMeters,
         runningStepLengthMeters = profile.runningStepLengthMeters,
+        learnedStep = profile.learnedStep?.let { step ->
+            LearnedStepDto(
+                points = step.points.map { StepPointDto(it.cadence, it.meters) },
+                usualCadence = step.usualCadence,
+                learntMeters = step.learntMeters,
+                outings = step.outings,
+                throughMillis = step.throughMillis,
+                replaced = step.replaced.name,
+                running = step.running,
+            )
+        },
     ),
     settings = SettingsDto(
         dailyGoalSteps = settings.dailyGoalSteps,
@@ -257,18 +271,33 @@ private fun Backup.toFile() = BackupFile(
 
 private fun BackupFile.toBackup(): Backup {
     val defaults = UserSettings()
+    // A mode this build does not know (from a newer Passo), or a learnt step that cannot be read,
+    // is the height's estimate: said in the import's summary, never a failure.
+    val stepProfile = Profile(
+        heightMeters = profile.heightMeters,
+        weightKg = profile.weightKg,
+        sex = profile.sex.toEnumOrNull<Sex>(),
+        stepLengthMode = profile.stepLengthMode.toEnumOrNull<StepLengthMode>() ?: StepLengthMode.AUTO,
+        walkingStepLengthMeters = profile.walkingStepLengthMeters,
+        runningStepLengthMeters = profile.runningStepLengthMeters,
+        learnedStep = profile.learnedStep?.let { step ->
+            LearnedStep(
+                points = step.points.map { StepPoint(it.cadence, it.meters) },
+                usualCadence = step.usualCadence,
+                learntMeters = step.learntMeters,
+                outings = step.outings,
+                throughMillis = step.throughMillis,
+                replaced = step.replaced.toEnumOrNull<StepLengthMode>() ?: StepLengthMode.AUTO,
+                running = step.running,
+            )
+        },
+    ).sanitized()
     return Backup(
         exportedAtMillis = exportedAtMillis ?: 0L,
         zone = zone.orEmpty(),
         appVersion = app.orEmpty(),
-        profile = Profile(
-            heightMeters = profile.heightMeters,
-            weightKg = profile.weightKg,
-            sex = profile.sex.toEnumOrNull<Sex>(),
-            stepLengthMode = profile.stepLengthMode.toEnumOrNull<StepLengthMode>() ?: StepLengthMode.AUTO,
-            walkingStepLengthMeters = profile.walkingStepLengthMeters,
-            runningStepLengthMeters = profile.runningStepLengthMeters,
-        ),
+        profile = stepProfile,
+        stepFallback = profile.stepLengthMode != null && stepProfile.stepLengthMode.name != profile.stepLengthMode,
         settings = UserSettings(
             dailyGoalSteps = settings.dailyGoalSteps ?: defaults.dailyGoalSteps,
             units = settings.units.toEnumOrNull<UnitPreference>() ?: defaults.units,

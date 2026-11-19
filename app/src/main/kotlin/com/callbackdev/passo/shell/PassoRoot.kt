@@ -54,6 +54,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.callbackdev.passo.core.designsystem.theme.PassoMotion
 import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.designsystem.theme.reducedMotion
+import com.callbackdev.passo.core.domain.calibration.CalibratedStep
 import com.callbackdev.passo.core.domain.routes.GpsStartStep
 import com.callbackdev.passo.core.tracking.Gps
 import com.callbackdev.passo.core.tracking.OutingStarter
@@ -248,7 +249,7 @@ private fun MainPages(
             )
         }
         entry<GuideKey> { GuideRoute(onBack = nav::goBack) }
-        entry<CalibrationKey> { key -> CalibrationRoute(step = key.step, onDone = nav::goBack) }
+        entry<CalibrationKey> { key -> CalibrationRoute(step = key.step, onDone = nav::goBack, card = key.card) }
         entry<SessionsKey> {
             SessionsRoute(
                 onBack = nav::goBack,
@@ -257,7 +258,13 @@ private fun MainPages(
                 onOpenOuting = { open(OutingKey(it)) },
             )
         }
-        entry<OutingKey> { key -> OutingRoute(sessionId = key.sessionId, onBack = nav::goBack) }
+        entry<OutingKey> { key ->
+            OutingRoute(
+                sessionId = key.sessionId,
+                onBack = nav::goBack,
+                onOpenStepCard = { open(CalibrationKey(CalibratedStep.WALKING, card = true)) },
+            )
+        }
         entry<PlanEditorKey> { key -> PlanEditorRoute(planId = key.planId, onDone = nav::goBack) }
         entry<GpsIntroKey> {
             // Back, by the bar's arrow or the system's, is neither answer: nothing is

@@ -64,6 +64,7 @@
         <item quantity="other">%1$s outings added</item>
     </plurals>
     <string name="data_imported_preferences">profile and settings taken from the file</string>
+    <string name="data_imported_step_fallback">Its step length was set in a way this version of Passo cannot read, so your step is estimated from your height. You can change it in Settings.</string>
     <string name="data_imported_nothing">Everything in it was already here.</string>
 
     <string name="data_failed_write_title">The file could not be written</string>

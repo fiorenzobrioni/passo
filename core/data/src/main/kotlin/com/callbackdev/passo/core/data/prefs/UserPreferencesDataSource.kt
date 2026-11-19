@@ -10,11 +10,13 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.callbackdev.passo.core.domain.calibration.LearnedStepText
 import com.callbackdev.passo.core.domain.goals.GoalReached
 import com.callbackdev.passo.core.domain.metrics.sanitized
 import com.callbackdev.passo.core.domain.routes.GpsAnswer
 import com.callbackdev.passo.core.model.AppFont
 import com.callbackdev.passo.core.model.AppPalette
+import com.callbackdev.passo.core.model.LearnedStep
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.Sex
@@ -197,6 +199,28 @@ constructor(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it[Keys.YEAR_CARD_CLOSED] = year }
     }
 
+    /**
+     * The learnt step last proposed and put away («Not now», «Go back», another length chosen):
+     * a new proposal waits until the outings move the step 2% from it (PLANNING.md §11 Phase 17).
+     * The phone's state, not the reader's choice: not in the backup's file, so on a new phone the
+     * proposal comes once more.
+     */
+    val stepPutAway: Flow<LearnedStep?> = dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { LearnedStepText.decode(it[Keys.STEP_PUT_AWAY]) }
+
+    suspend fun setStepPutAway(step: LearnedStep?) {
+        dataStore.edit {
+            if (step ==
+                null
+            ) {
+                it.remove(Keys.STEP_PUT_AWAY)
+            } else {
+                it[Keys.STEP_PUT_AWAY] = LearnedStepText.encode(step)
+            }
+        }
+    }
+
     private fun readProfile(prefs: Preferences) = Profile(
         heightMeters = prefs[Keys.HEIGHT_M],
         weightKg = prefs[Keys.WEIGHT_KG],
@@ -204,6 +228,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
         stepLengthMode = prefs[Keys.STEP_LENGTH_MODE].toEnumOrNull<StepLengthMode>() ?: StepLengthMode.AUTO,
         walkingStepLengthMeters = prefs[Keys.WALKING_STEP_LENGTH_M],
         runningStepLengthMeters = prefs[Keys.RUNNING_STEP_LENGTH_M],
+        learnedStep = LearnedStepText.decode(prefs[Keys.LEARNED_STEP]),
     ).sanitized()
 
     private fun writeProfile(prefs: MutablePreferences, old: Profile, new: Profile) {
@@ -213,6 +238,11 @@ constructor(private val dataStore: DataStore<Preferences>) {
         prefs.write(Keys.STEP_LENGTH_MODE, old.stepLengthMode.name, new.stepLengthMode.name, StepLengthMode.AUTO.name)
         prefs.write(Keys.WALKING_STEP_LENGTH_M, old.walkingStepLengthMeters, new.walkingStepLengthMeters)
         prefs.write(Keys.RUNNING_STEP_LENGTH_M, old.runningStepLengthMeters, new.runningStepLengthMeters)
+        prefs.write(
+            Keys.LEARNED_STEP,
+            old.learnedStep?.let(LearnedStepText::encode),
+            new.learnedStep?.let(LearnedStepText::encode),
+        )
     }
 
     private fun readSettings(prefs: Preferences): UserSettings {
@@ -305,6 +335,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
         val STEP_LENGTH_MODE = stringPreferencesKey("profile_step_length_mode")
         val WALKING_STEP_LENGTH_M = doublePreferencesKey("profile_walking_step_length_m")
         val RUNNING_STEP_LENGTH_M = doublePreferencesKey("profile_running_step_length_m")
+        val LEARNED_STEP = stringPreferencesKey("profile_learned_step")
 
         val DAILY_GOAL = intPreferencesKey("daily_goal_steps")
         val UNITS = stringPreferencesKey("units")
@@ -335,6 +366,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
         val YEAR_CARD_CLOSED = intPreferencesKey("year_card_closed")
         val GPS_ANSWER = stringPreferencesKey("gps_answer")
         val GPS_ON_STEPS_TOLD = booleanPreferencesKey("gps_on_steps_told")
+        val STEP_PUT_AWAY = stringPreferencesKey("step_curve_put_away")
     }
 
     companion object {

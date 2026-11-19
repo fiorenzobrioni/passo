@@ -100,4 +100,6 @@
     <string name="outing_delete_route_cancel">Cancel</string>
     <!-- The image shared: Passo's name at its foot. -->
     <string name="outing_image_signature">Passo</string>
+    <string name="outing_step_at_pace">Your step at this pace: %1$s</string>
+    <string name="outing_step_ready">Passo can now use your measured step for every estimate</string>
 </resources>
