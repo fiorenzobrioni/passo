@@ -295,7 +295,8 @@ to be proven on a device in Phase 15):
     with «Measure with GPS» on its
     page, a city walk from home is an outing with GPS, its distance the fused one (decision 5),
     and the outing keeps the reader's real route. The walk stays imaginary: the city's map
-    never shows where the reader is, no place is told by where they stand, and no word places
+    shows the reader's point on the walk by the distance walked, as from home, never their
+    real position; no place is told by where they stand, and no word places
     them in the city, so it does not read as the navigation the paragraph above feared. What
     it gives is not having to choose between the walk's story and the outing's measure. With
     the switch off, as by default, the paragraph above holds unchanged; a way from home never

@@ -1333,15 +1333,20 @@ note, to reuse, not to copy), `SessionTracker.kt` (`placesPassed`), `WalkPlaces.
   distance is the fused one (ADR 0016 decision 5), and `placesPassed`, `WalkPlaces` and
   `WalkDays` read that distance, so the places are told by the measured kilometres and the walk
   goes on from where it stands, measured or not. Proven by tests, not assumed. The walk's page
-  and its map stay the walk's (the city, the place ahead, never a point of the reader's); the
+  and its map stay the walk's (the city, the place ahead, and the reader's point on the walk
+  set by the distance walked, as from home, the measured distance now; never their real
+  position: owner, 19 Nov 2026, the sentence made plain); the
   outing's card shows «measured», the pace and the receiver's line as any outing with GPS does;
   the outing's page is Phase 16's (the reader's real route, on their own city's map where Passo
   carries it, on plain ground elsewhere), with one line naming the walk it moved on («From the
   Duomo to the Navigli: 3.2 km of it, measured on your streets»).
 - [ ] **The words.** The Ways' sentence «No location, only your steps» stays true of every way
   and of a city walk with the switch off; where a page says it of a city walk, it says what
-  holds with the switch on. «Measured» only as Phase 15 allows (nine tenths from fixes). Never a
-  word that places the reader in the city: the city is imaginary, the measure is real.
+  holds with the switch on. «Measured» only as Phase 15 allows (nine tenths from fixes). Never
+  the reader's real position on the city's map, nor a word that places them in the city: the
+  city is imaginary, the measure is real. A reader who is in that very city with the switch on
+  sees their point move by the distance, not by the street they take: following the streets
+  was «On the spot», dropped; their real route is on the outing's page.
 - [ ] **Tests.** The tracker's (a walk replayed with fixes: each place at its measured
   distance; no fix at all: the steps, as today; a walk measured and then continued from home,
   and the reverse, adding up), the start through the door (each answer), `WalkScreen`'s UI
@@ -1354,8 +1359,8 @@ note, to reuse, not to copy), `SessionTracker.kt` (`placesPassed`), `WalkPlaces.
   afterwards, the walk going on from there the next day with the switch off.
 
 **Acceptance:** a city walk with GPS on tells its places by the measured distance and leaves an
-outing with the reader's real route; with the switch off nothing changes; the city's map never
-shows where the reader is.
+outing with the reader's real route; with the switch off nothing changes; the city's map shows
+the reader's point on the walk by the distance walked, never their real position.
 
 **Edge cases** (`SessionTrackerTest`, the door's tests, `WalkScreenTest`):
 
@@ -1814,8 +1819,9 @@ This log starts with Phase 16 built (18 Nov 2026); its entries are written below
     Its cost is small: the fused distance is already what `placesPassed`, `WalkPlaces` and
     `WalkDays` read in an outing with GPS (decision 5), so the phase is the switch, the start
     through the one door, and the words. It changes what decision 13 made plain on 18 Nov
-    2026 (a city walk from home never reads the satellites): the city's map still never shows
-    the reader, so nothing reads as the navigation that decision feared.
+    2026 (a city walk from home never reads the satellites): the city's map still shows the
+    reader's point on the walk by the distance walked, never their real position, so nothing
+    reads as the navigation that decision feared.
   - **Phase 20 stays, to review before it starts**: its section says what it took from the
     dropped phases and must now build or write out itself, and what their review found that
     holds for following any line. Phase 19's number stays, so the documents keep their names;

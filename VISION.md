@@ -196,8 +196,8 @@ Android's cloud backup.
   reads truer for it.
 - **City walks measured** («Passeggiate misurate», Phase 18): a city walk stays imaginary, but
   with «Measure with GPS» on its page its distance is measured on the reader's own streets and
-  their real route is kept, so one walk gives the story and the measure. The city's map never
-  shows where the reader is. A way from home stays as it is, with no location; Phase 17 makes
+  their real route is kept, so one walk gives the story and the measure. The city's map shows
+  the reader's point on the walk by the distance walked, never their real position. A way from home stays as it is, with no location; Phase 17 makes
   its kilometres truer. «On the spot», a city walk or a way walked where it is, was weighed and
   dropped (owner, 19 Nov 2026): real value for few readers, a high cost for all
   (`docs/adr/0016-location.md`, decision 13, amended).

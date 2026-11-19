@@ -116,8 +116,9 @@ other. All business logic lives in `:core:domain`, with unit tests.
   Google Play services, no fused provider. Asked in context, the first time such an outing
   starts; never in the first run. A way from home never reads them, nor does a city walk
   unless its page's «Measure with GPS» is on (Phase 18, as re-planned on 19 Nov 2026): then it
-  is an outing with GPS, measured and its route kept, and the city's map still never shows
-  where the reader is. Nothing in the app depends on it: with the switch off, every screen, number and wake is as before.
+  is an outing with GPS, measured and its route kept, and the city's map shows the reader's
+  point on the walk by the distance walked, never their real position. Nothing in the app
+  depends on it: with the switch off, every screen, number and wake is as before.
   Say "Passo sends nothing" and "cannot send"; never "Passo cannot know where the phone is".
 - **The day stays the steps'.** A day's distance, History, Insights, the ways from home and
   Your year on foot are computed from the steps, with or without outings measured with GPS.
