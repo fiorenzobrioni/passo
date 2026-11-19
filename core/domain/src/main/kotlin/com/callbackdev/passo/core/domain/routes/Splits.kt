@@ -93,8 +93,16 @@ object Legs {
         }
     }
 
-    /** The leg that was being walked at [atMillis], as [climb] finds it; null with no leg. */
-    fun at(legs: List<OutingLeg>, atMillis: Long): OutingLeg? = legs.getOrNull(indexAt(legs, atMillis))
+    /**
+     * The steps a minute the reader walked at, at [atMillis]: the cadence of the leg being walked
+     * then, or of the nearest before it that has one (a leg just opened, by a few steps or by
+     * the last metres of a cut line, has too little to say); null with none.
+     */
+    fun cadenceAt(legs: List<OutingLeg>, atMillis: Long): Int? {
+        if (legs.isEmpty()) return null
+        for (index in indexAt(legs, atMillis) downTo 0) cadenceOf(legs[index])?.let { return it }
+        return null
+    }
 
     /**
      * The steps a minute [leg] was walked at, counted from its own steps and time in motion;
@@ -181,7 +189,10 @@ object Splits {
         for (leg in legs) {
             // Never longer than a leg, as laid: one that says otherwise (a damaged import) is
             // not cut into splits, or a figure of thirteen digits would be cut for ever.
-            if (!leg.meters.isFinite() || leg.meters > Legs.MAX_METERS) continue
+            if (!leg.meters.isFinite() || leg.meters > Legs.MAX_METERS) {
+                previousEnd = leg.endedAtMillis
+                continue
+            }
             var left = leg.meters
             var taken = 0.0
             if (left <= 0.0) {

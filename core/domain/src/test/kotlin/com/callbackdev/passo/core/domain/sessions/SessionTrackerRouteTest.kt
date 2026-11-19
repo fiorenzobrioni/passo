@@ -202,13 +202,31 @@ class SessionTrackerRouteTest {
         val walker = walker(started(plan(SessionGoalKind.TIME, 60)))
         walker.go(115, settle = false)
 
-        walker.tracker.cutRoute()
+        walker.tracker.cutRoute(walker.at)
 
         val session = walker.tracker.session
         assertThat(session.state).isEqualTo(SessionState.ACTIVE)
         assertThat(session.totals.distanceMeters).isWithin(12.0).of(1.4 * 115)
         assertThat(walker.tracker.takeRoute().points).isNotEmpty()
         assertThat(walker.tracker.openMeters).isEqualTo(0.0)
+    }
+
+    @Test
+    fun `the last metres a cut settles are told, and a goal they reach ends the outing there`() {
+        // A kilometre to walk; the line cut (a pause) at 1,022 m, of which the last 28 m open.
+        val walker = walker(started(plan(SessionGoalKind.DISTANCE, 1_000, setOf(SessionMilestone.HALF))))
+        walker.go(730, settle = false)
+        walker.tracker.settle(walker.at - 20_000, walker.at)
+        assertThat(walker.tracker.session.totals.distanceMeters).isLessThan(1_000.0)
+
+        assertThat(walker.tracker.pause(walker.at)).isTrue()
+
+        val told = walker.tracker.takeHeldSignals()
+        assertThat(told.filterIsInstance<SessionSignal.Milestone>().map { it.milestone })
+            .containsExactly(SessionMilestone.GOAL)
+        assertThat(walker.tracker.session.end).isEqualTo(SessionEnd.GOAL)
+        assertThat(walker.tracker.session.state).isEqualTo(SessionState.FINISHED)
+        assertThat(walker.tracker.takeHeldSignals()).isEmpty()
     }
 
     @Test

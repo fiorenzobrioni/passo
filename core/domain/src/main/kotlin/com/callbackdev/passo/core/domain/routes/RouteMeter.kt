@@ -255,10 +255,12 @@ class RouteMeter(private val allowMock: Boolean = false) {
 
         while (fixes.isNotEmpty() && fixes.first().atMillis <= batch.toMillis) {
             val fix = fixes.removeFirst()
-            // A fix of a moment already settled: the steps walked to it are in the carry.
+            // A fix of a moment already settled: the steps walked to it are in the carry. And a
+            // fix after steps no fix has seen (the tail) was reached by them, though it falls in
+            // a still moment before this batch's motion: a stop at a crossing is not a jump.
             val late = fix.atMillis <= settledThroughMillis
             val inMotion = fix.atMillis > motionFrom
-            val walking = inMotion || (late && carrySteps > 0)
+            val walking = inMotion || ((late || tail.isNotEmpty()) && carrySteps > 0)
             if (inMotion) {
                 // The steps are laid evenly over the batch's time in motion, as the tracker lays them.
                 val share = (fix.atMillis - cursor).coerceAtLeast(0L) / span

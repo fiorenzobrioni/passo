@@ -193,7 +193,7 @@ constructor(
             )
         }
         for ((sessionId, route) in added) {
-            routes.append(sessionId, route.sessionStartedAtMillis, route.points, route.altitudes)
+            routes.restore(sessionId, route.sessionStartedAtMillis, route.points, route.altitudes)
         }
         // An outing walked on the other phone today is history here, not one just over: Today's
         // card for the last outing stays put away.

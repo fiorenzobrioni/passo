@@ -204,6 +204,17 @@ class RouteRepositoryTest {
     }
 
     @Test
+    fun `a route deleted and then put back from the reader's own file is there again`() = runTest {
+        val walk = outing()
+        routes.append(walk.id, walk.startedAtMillis, points(10))
+        routes.deleteAll()
+
+        routes.restore(walk.id, walk.startedAtMillis, points(10), AltitudeSource.BAROMETER)
+
+        assertThat(routes.route(walk.id, walk.startedAtMillis)?.points).hasSize(10)
+    }
+
+    @Test
     fun `deleting every route keeps the one still being written`() = runTest {
         val before = outing(startedAtMillis = START_SECOND * 1_000 - 86_400_000)
         val underWay = outing()

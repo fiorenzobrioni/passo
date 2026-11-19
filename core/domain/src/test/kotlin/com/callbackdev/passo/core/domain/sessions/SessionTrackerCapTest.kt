@@ -1,6 +1,7 @@
 package com.callbackdev.passo.core.domain.sessions
 
 import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.routes.capQuestionMinutes
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.CAP_EXTENSION_MILLIS
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.CAP_WARNING_MILLIS
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.KEEP_GOING_MILLIS
@@ -133,6 +134,28 @@ class SessionTrackerCapTest {
         assertThat(tracker.session.capAskedForMillis).isEqualTo(moved)
         assertThat(tracker.walk(cap - 5 * MINUTE, moved - MINUTE)).isEmpty()
         assertThat(tracker.goOn(moved - MINUTE)).isTrue()
+    }
+
+    @Test
+    fun `after an hour's pause the open question says the minutes left before it, not more`() {
+        val tracker = tracker()
+        tracker.walk(start, cap - 10 * MINUTE)
+        tracker.pause(cap - 10 * MINUTE)
+
+        // An hour at lunch: the cap moves on by the hour, and ten minutes are still left.
+        tracker.resume(cap + 50 * MINUTE)
+
+        assertThat(tracker.session.capQuestionMinutes(cap + 50 * MINUTE)).isEqualTo(10)
+    }
+
+    @Test
+    fun `a batch handed over after the cap still asks, at one minute`() {
+        val tracker = tracker()
+        tracker.walk(start, cap - 16 * MINUTE)
+        tracker.onSteps(cap - MINUTE / 6, 20)
+
+        assertThat(SessionAnnouncement.capAhead(tracker.session, cap + MINUTE / 3))
+            .isEqualTo(SessionAnnouncement.CapAhead(minutes = 1))
     }
 
     @Test

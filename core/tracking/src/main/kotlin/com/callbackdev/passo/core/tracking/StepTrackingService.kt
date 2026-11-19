@@ -209,15 +209,13 @@ class StepTrackingService : Service() {
     // What the receiver and the type did during the outing under way, for its one log row.
     private val gpsLog = GpsLog()
 
-    // The moments through which the receiver was asked for its fixes, oldest first, while the
-    // answers are awaited: each flush it completes brings the fixes through its own request,
-    // and the meter settles through that one, never through a later request still on its way
-    // (or through all of them, once the wait gives up).
-    private val settleRequests = ArrayDeque<Long>()
+    // Each time the receiver was asked for its fixes, oldest first, while the answers are
+    // awaited: the receiver completes its flushes in the order asked, so each completion is the
+    // answer to the oldest, and the meter settles through that one's moment, never through a
+    // later request still on its way (or through all of them, once the wait gives up). A
+    // command waiting for the fixes before it acts (a pause, a stop) waits for its own.
+    private val settleRequests = ArrayDeque<FixRequest>()
     private var settleJob: Job? = null
-
-    // A command waiting for the receiver's fixes before it acts (a pause, a stop).
-    private var pendingRouteFlush: CompletableDeferred<Unit>? = null
 
     private var ledger: StepLedger? = null
     private var started = false
@@ -384,7 +382,10 @@ class StepTrackingService : Service() {
         // An outing with GPS: its line is cut here, every step up to it settled with the fixes
         // in hand, as at a pause; its distance goes with the outing below, and its last points
         // with its route. The next start draws a line of its own.
-        outing?.cutRoute()
+        // What the cut crossed cannot be told by a service going; the outing keeps it all the
+        // same (a goal reached ends it there, and is written so).
+        outing?.cutRoute(System.currentTimeMillis())
+        outing?.takeHeldSignals()
         val harvest = outing?.takeIf { it.measuring }?.takeRoute()
         FinalWrites.launch {
             persistMutex.withLock {
@@ -542,6 +543,18 @@ class StepTrackingService : Service() {
             // After the step batch's transaction, never inside it: `passo.db` is the truth, and
             // a route that loses a chunk is a shorter line, not a lost outing.
             writeRoute(final)
+            // The phone going down: what the last points climbed is written now, not with a
+            // next batch that will not come.
+            if (final && sessionDirty) {
+                tracker?.session?.let { outing ->
+                    try {
+                        sessions.save(outing)
+                        sessionDirty = false
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Writing the outing's last climb failed", e)
+                    }
+                }
+            }
             refreshStoredTodayLocked()
             inFlightToday = 0
             publishLive()
@@ -682,11 +695,16 @@ class StepTrackingService : Service() {
                         if (flushed) "flushed" else "flush timed out",
                     ),
                 )
-                // An outing with GPS: its line cut where it stands, and its last points written
-                // with their heights, the phone going down before their pressure could come.
-                tracker?.takeIf { it.session.live && it.measuring }?.let {
-                    it.cutRoute()
-                    sessionDirty = true
+                // An outing with GPS: the receiver's fixes up to now, its line cut where it
+                // stands, what that crossed told, and its last points written with their
+                // heights, the phone going down before more pressure could come.
+                if (tracker?.session?.live == true) {
+                    flushRoute()
+                    tracker?.takeIf { it.measuring }?.let {
+                        it.cutRoute(System.currentTimeMillis())
+                        sessionDirty = true
+                        onSessionSignals(it.takeHeldSignals())
+                    }
                 }
                 persist(final = true)
             } finally {
@@ -1070,11 +1088,7 @@ class StepTrackingService : Service() {
             }
 
             // The receiver has handed over everything it held when it was asked.
-            LocationReading.FlushCompleted -> {
-                pendingRouteFlush?.complete(Unit)
-                pendingRouteFlush = null
-                settleNow()
-            }
+            LocationReading.FlushCompleted -> settleNow()
         }
     }
 
@@ -1106,9 +1120,9 @@ class StepTrackingService : Service() {
      * Asks the receiver for the fixes it holds through [nowMillis], kept in line for the meter
      * of an outing with GPS. False when no answer will come (nothing batched), and nothing waits.
      */
-    private fun askForFixes(nowMillis: Long): Boolean {
+    private fun askForFixes(nowMillis: Long, done: CompletableDeferred<Unit>? = null): Boolean {
         if (!locationSource.requestFlush()) return false
-        if (tracker?.measuring == true) settleRequests.addLast(nowMillis)
+        if (tracker?.measuring == true) settleRequests.addLast(FixRequest(nowMillis, done))
         return true
     }
 
@@ -1122,34 +1136,40 @@ class StepTrackingService : Service() {
         // The pressure up to the touch too: the points about to be written take their height
         // from it.
         flushPressure()
-        if (locationSource.requestFlush()) {
-            val done = pendingRouteFlush ?: CompletableDeferred<Unit>().also { pendingRouteFlush = it }
-            withTimeoutOrNull(FLUSH_TIMEOUT_MS) { done.await() }
-            pendingRouteFlush = null
-        }
-        settleRequests.clear()
+        val done = CompletableDeferred<Unit>()
+        if (askForFixes(System.currentTimeMillis(), done)) withTimeoutOrNull(FLUSH_TIMEOUT_MS) { done.await() }
+        dropRequests()
         settleJob?.cancel()
         settleRoute(System.currentTimeMillis())
     }
 
     /** A flush completed: the fixes are in through the oldest request still awaited. */
     private fun settleNow() {
-        val through = settleRequests.removeFirstOrNull() ?: return
+        val answered = settleRequests.removeFirstOrNull() ?: return
         if (settleRequests.isEmpty()) settleJob?.cancel()
-        settleRoute(through)
+        settleRoute(answered.atMillis)
+        answered.done?.complete(Unit)
     }
 
     /** The wait gave up: through the latest request, the meter measuring a late fix as any other. */
     private fun settleAll() {
-        val through = settleRequests.lastOrNull() ?: return
+        val latest = settleRequests.lastOrNull() ?: return
+        val waiting = settleRequests.mapNotNull { it.done }
         settleRequests.clear()
-        settleRoute(through)
+        settleRoute(latest.atMillis)
+        waiting.forEach { it.complete(Unit) }
+    }
+
+    /** Forgets every request awaited, none left waiting: the meter is settled through now anyway. */
+    private fun dropRequests() {
+        settleRequests.forEach { it.done?.complete(Unit) }
+        settleRequests.clear()
     }
 
     /** Settles the outing's distance through [throughMillis], and tells what the settled metres crossed. */
     private fun settleRoute(throughMillis: Long) {
         val current = tracker?.takeIf { it.measuring } ?: run {
-            settleRequests.clear()
+            dropRequests()
             return
         }
         val signals = current.settle(throughMillis, System.currentTimeMillis())
@@ -1458,7 +1478,7 @@ class StepTrackingService : Service() {
      */
     private fun tellCapAhead() {
         val session = tracker?.session?.takeIf { it.live } ?: return
-        val asked = SessionAnnouncement.capAhead(session, System.currentTimeMillis()) ?: return
+        val asked = SessionAnnouncement.capAhead(session, System.currentTimeMillis())
         sessionNotifications.postCapAhead(sessionNotifications.capAhead(session, asked.minutes))
         if (sessionNotifications.signalsAllowed()) {
             if (session.vibrate) SessionHaptics.playEndedStill(this)
@@ -1593,6 +1613,8 @@ class StepTrackingService : Service() {
         val tracker = tracker ?: return false
         if (!change(tracker)) return false
         sessionDirty = true
+        // A pause cuts the line of an outing with GPS: what its last metres crossed is told.
+        onSessionSignals(tracker.takeHeldSignals())
         persist()
         applyRegistration(mayEngageGps = mayEngageGps)
         notifyNow()
@@ -1732,6 +1754,9 @@ class StepTrackingService : Service() {
     private class OnSteps(val sessionId: Long, val reason: GpsReadiness)
 
     private class OutingHeights(val sessionId: Long, val heights: RouteHeights)
+
+    /** The receiver asked for its fixes through [atMillis]; [done] for one a command waits on. */
+    private class FixRequest(val atMillis: Long, val done: CompletableDeferred<Unit>?)
 
     private class StoredMinutes(val day: Long, val version: Long, val minutes: List<MinuteSteps>)
 

@@ -148,6 +148,9 @@ class SessionTracker(
     private val asideSamples = ArrayList<StepLengthSample>()
     private val asidePieces = ArrayList<LegPiece>()
 
+    // What a cut of the line crossed (a pause, the service going), for the service to tell.
+    private val held = ArrayList<SessionSignal>()
+
     // The last interval whose start was told: the one under way when the tracker was made (its
     // start was told then, or by the process before this one), then each change as it is told.
     private var toldInterval: Int = IntervalSchedule.of(initial)?.indexAt(initial.totals.movingMillis) ?: 0
@@ -249,7 +252,7 @@ class SessionTracker(
         val up = upMeters.coerceAtLeast(0.0)
         val down = downMeters.coerceAtLeast(0.0)
         val current = session
-        val cadence = Legs.at(current.legs, atMillis)?.let(Legs::cadenceOf) ?: cadenceAt(atMillis)
+        val cadence = Legs.cadenceAt(current.legs, atMillis) ?: measuredCadence
         val cost = up * weightKg * MetricsCalculator.kcalPerKgPerMeterClimbed(cadence ?: 0)
         session = current.copy(
             ascentMeters = (current.ascentMeters ?: 0.0) + up,
@@ -313,7 +316,9 @@ class SessionTracker(
     fun pause(nowMillis: Long): Boolean {
         if (session.state != SessionState.ACTIVE) return false
         // The line is cut at a pause: what was walked up to it is settled with the fixes in hand.
-        route?.let { absorb(it.close()) }
+        // Its last metres may reach the goal: the outing then ended there, and is not paused.
+        cutLine(nowMillis)
+        if (session.state != SessionState.ACTIVE) return true
         session = session.copy(state = SessionState.PAUSED, pausedAtMillis = nowMillis)
         return true
     }
@@ -324,15 +329,30 @@ class SessionTracker(
      * as at a pause, so no metre the meter held in memory goes with it. The outing counts on, and
      * the next start draws a line of its own.
      */
-    fun cutRoute() {
+    fun cutRoute(atMillis: Long) = cutLine(atMillis)
+
+    /**
+     * What the last cut of the line crossed, as the metres it settled are told: a milestone, a
+     * walk's place, the goal, which ends the outing there. Taken once.
+     */
+    fun takeHeldSignals(): List<SessionSignal> = held.toList().also { held.clear() }
+
+    /**
+     * Cuts the line of an outing with GPS that counts: every step up to [atMillis] settled with
+     * the fixes in hand, and taken as any settled metres are, so what they cross is told (held
+     * for the service, [takeHeldSignals]) and a goal they reach ends the outing at it.
+     */
+    private fun cutLine(atMillis: Long) {
+        val meter = route ?: return
         if (session.state != SessionState.ACTIVE) return
-        route?.let { absorb(it.close()) }
+        held += take(meter.close(), atMillis)
     }
 
     /**
      * Counting again from now: the pause is neither motion nor stillness, nor time towards the
      * cap. The cap moves on by the pause, so a reader who paused across it is asked as any other
-     * before it ends (no cap ends a walk unasked); a question already open stays open for it.
+     * before it ends (no cap ends a walk unasked). A question already open stays open: the cap
+     * is as far after the pause as it was before it, within the quarter of an hour it was asked in.
      */
     fun resume(nowMillis: Long): Boolean {
         val current = session

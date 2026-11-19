@@ -126,6 +126,20 @@ constructor(private val dao: RouteDao, private val file: RouteFile = RouteFile {
         delete(sessionId)
     }
 
+    /**
+     * The reader puts a route back from a file of their own: written even if they deleted it in
+     * this process, which is what the file is for. [append]'s arguments.
+     */
+    suspend fun restore(
+        sessionId: Long,
+        sessionStartedAtMillis: Long,
+        points: List<RoutePoint>,
+        altitudes: AltitudeSource?,
+    ) {
+        forgotten -= sessionId to sessionStartedAtMillis
+        append(sessionId, sessionStartedAtMillis, points, altitudes)
+    }
+
     /** Deletes the route of the outing [sessionId]; the outing and its numbers are untouched. */
     suspend fun delete(sessionId: Long) {
         if (file.exists()) dao.delete(sessionId)

@@ -90,6 +90,18 @@ class SplitsTest {
     }
 
     @Test
+    fun `a leg too short to say its pace lends the one before it`() {
+        val legs = listOf(
+            OutingLeg(0, 100.0, 40_000, 100.0, endedAtMillis = 40_000),
+            OutingLeg(1, 2.0, 0, 0.0, endedAtMillis = 41_000),
+        )
+
+        assertThat(Legs.cadenceAt(legs, 41_000)).isEqualTo(150)
+        assertThat(Legs.cadenceAt(legs, 20_000)).isEqualTo(150)
+        assertThat(Legs.cadenceAt(emptyList(), 0)).isNull()
+    }
+
+    @Test
     fun `an empty piece changes nothing`() {
         val legs = walk(60)
 

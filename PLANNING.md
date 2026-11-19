@@ -1648,6 +1648,20 @@ This log starts with Phase 16 built (18 Nov 2026); its entries are written below
     «0 m»; `Fix.altitudeMeters` documented as above the ellipsoid; the manifest's comment
     keeps to the words §10 allows. `:core:designsystem` gets its `robolectric.properties`, for
     its first Robolectric test.
+  - **The control review** of these fixes (the same day) found nine more, eight mended:
+    an import puts back a route the reader deleted in this process (`RouteRepository.restore`;
+    the guard is for the service's writes); the metres a cut of the line settles (a pause, the
+    service going) are taken as any settled metres, so what they cross is told and a goal they
+    reach ends the outing there (`SessionTracker.takeHeldSignals`; a pause had the same silence
+    before); the phone going down asks the receiver for its fixes first, and writes the climb
+    of the last points; every request for the fixes is in line with its own answer, a command's
+    too (`FixRequest`); «Still walking?» is asked even from a batch handed over after the cap,
+    at one minute; a fix at a stop after steps no fix saw measures them instead of moving the
+    line's end (a pre-existing case beside the late fix); a climb on a leg too short to say its
+    pace takes the one before it (`Legs.cadenceAt`); a damaged leg skipped keeps the next split's
+    time right. Not changed: an open question cannot read «15 minutes» for an hour after a long
+    pause, since the cap moves by the pause and the minutes left are those before it (pinned by
+    a test).
   - Tests for each: `RouteMeterTest`, `SessionTrackerCapTest`, `SessionTrackerRouteTest`,
     `SplitsTest`, `RouteHeightsTest`, `BackupCodecTest`, `MeasureFormatterTest`,
     `SessionRepositoryTest`, `RouteRepositoryTest`, `OutingScreenTest`, `DataSectionTest`,

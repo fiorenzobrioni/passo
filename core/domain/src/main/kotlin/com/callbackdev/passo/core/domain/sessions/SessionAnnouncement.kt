@@ -144,10 +144,10 @@ sealed interface SessionAnnouncement {
         /**
          * The question before [session]'s cap, at [nowMillis]: the minutes really left, which
          * are fewer than the warning's quarter of an hour when the first steps within it came
-         * late (a sit at a café). Null when there is no question open.
+         * late (a sit at a café). Never none: a batch handed over after the cap (the counter's
+         * own delay) still asks, at one minute, and the outing can be taken back from its end.
          */
-        fun capAhead(session: Session, nowMillis: Long): CapAhead? =
-            session.capQuestionMinutes(nowMillis)?.let(::CapAhead)
+        fun capAhead(session: Session, nowMillis: Long): CapAhead = CapAhead(session.capQuestionMinutes(nowMillis) ?: 1)
 
         fun endedAtCap(session: Session): EndedAtCap = EndedAtCap(session.totals.steps)
 

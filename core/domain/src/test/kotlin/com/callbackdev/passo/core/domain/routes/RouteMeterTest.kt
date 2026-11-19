@@ -428,6 +428,33 @@ class RouteMeterTest {
     }
 
     @Test
+    fun `a stop at a crossing after steps no fix saw does not make the line jump`() {
+        val meter = RouteMeter()
+        val walk = Walk(meter)
+        // Thirty seconds measured, then ten more walked with no fix: 14 m only the steps saw.
+        walk.go(30, batch = 30, settle = false)
+        walk.go(10, fixes = false, batch = 10, settle = false)
+        walk.take(meter.settle(walk.nowMillis))
+        // Fifteen seconds still at a crossing, the receiver back on it.
+        repeat(15) {
+            walk.seconds++
+            meter.onFix(walk.fixAt(walk.north), null)
+        }
+        // Then on: the next batch's time in motion begins after the stop.
+        repeat(25) {
+            walk.seconds++
+            walk.north += WALK_SPEED
+            meter.onFix(walk.fixAt(walk.north), 110)
+        }
+        meter.onSteps(40_000, walk.nowMillis, 46, 25_000, 34.5, 110)
+        walk.take(meter.settle(walk.nowMillis))
+        walk.close()
+
+        // 42 m, the 14 m to the crossing, 35 m after it: never the 14 m lost.
+        assertThat(walk.settledMeters).isWithin(5.0).of(91.0)
+    }
+
+    @Test
     fun `fixes that come after their steps were settled still measure the walk`() {
         val meter = RouteMeter()
         val walk = Walk(meter)
