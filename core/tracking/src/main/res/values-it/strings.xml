@@ -99,11 +99,7 @@
     <string name="session_goal_title">%1$s: obiettivo raggiunto</string>
     <string name="session_ended_still_title">%1$s: chiusa dopo una lunga sosta</string>
     <string name="session_cap_ahead_title">%1$s: stai ancora camminando?</string>
-    <plurals name="session_cap_ahead_text">
-        <item quantity="one">Questa uscita si chiude tra %1$d minuto. Tocca Continua per andare avanti.</item>
-        <item quantity="many">Questa uscita si chiude tra %1$d minuti. Tocca Continua per andare avanti.</item>
-        <item quantity="other">Questa uscita si chiude tra %1$d minuti. Tocca Continua per andare avanti.</item>
-    </plurals>
+    <string name="session_cap_ahead_text">Questa uscita si chiude alle %1$s. Tocca Continua per andare avanti.</string>
     <string name="session_ended_cap_title">%1$s: chiusa per limite di tempo</string>
     <string name="session_gps_stopped_title">%1$s: GPS fermo</string>
     <string name="session_gps_stopped_text">L’uscita continua dai tuoi passi. Tocca Riprendi GPS per misurarla di nuovo.</string>

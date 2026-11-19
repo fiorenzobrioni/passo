@@ -105,6 +105,10 @@ abstract class RouteDao {
     @Query("SELECT COALESCE(SUM(LENGTH(bytes)), 0) FROM route_chunk")
     abstract suspend fun routeBytes(): Long
 
+    /** The same but for the route of the outing [sessionId]. */
+    @Query("SELECT COALESCE(SUM(LENGTH(bytes)), 0) FROM route_chunk WHERE sessionId != :sessionId")
+    abstract suspend fun routeBytesExcept(sessionId: Long): Long
+
     /** The same, as they change: a route written or deleted. */
     @Query("SELECT COUNT(*) FROM route")
     abstract fun observeRouteCount(): Flow<Int>

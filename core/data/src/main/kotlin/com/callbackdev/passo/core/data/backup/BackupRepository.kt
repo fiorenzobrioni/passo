@@ -29,13 +29,20 @@ import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** What this phone holds, as the data rows of Settings say it before an export. */
+/**
+ * What this phone holds, as the data rows of Settings say it before an export.
+ *
+ * @property routes the routes kept, the one of an outing under way included: what «With the
+ *   routes» would put in a backup.
+ * @property deletableRoutes of them, those «Delete all routes» deletes: every one but the route
+ *   still being written; [deletableBytes] what they weigh.
+ */
 data class DataContents(
     val days: Int,
     val outings: Int,
     val routes: Int = 0,
-    val routeBytes: Long = 0,
-    val routeUnderWay: Boolean = false,
+    val deletableRoutes: Int = routes,
+    val deletableBytes: Long = 0,
 )
 
 /**
@@ -77,10 +84,19 @@ constructor(
     val contents: Flow<DataContents> = combine(
         tracking.observeDayCount(),
         sessionDao.observeSessionCount(),
-        routes.count,
-        sessionDao.observeLiveSession().map { it?.session?.gps == true }.distinctUntilChanged(),
+        routes.routeIds,
+        sessionDao.observeLiveSession().map { row -> row?.session?.takeIf { it.gps }?.id }.distinctUntilChanged(),
     ) { days, outings, kept, underWay ->
-        DataContents(days, outings, kept, if (kept > 0) routes.bytes() else 0, routeUnderWay = underWay)
+        // The route still being written is not the reader's to delete yet: «Delete all routes»
+        // counts and weighs the others, and is not offered for that one alone.
+        val deletable = kept.count { it != underWay }
+        DataContents(
+            days = days,
+            outings = outings,
+            routes = kept.size,
+            deletableRoutes = deletable,
+            deletableBytes = if (deletable > 0) routes.bytes(except = underWay) else 0,
+        )
     }
 
     /**

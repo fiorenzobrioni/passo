@@ -183,7 +183,7 @@ internal fun DataGroup(state: DataUiState, format: MeasureFormatter, files: Data
                 onClick = files.chooseTable,
                 modifier = Modifier.testTag(DataTags.TABLE),
             )
-            if (state.contents.routes > 0) {
+            if (state.contents.deletableRoutes > 0) {
                 GroupDivider()
                 ValueRow(
                     label = stringResource(R.string.data_delete_routes),
@@ -191,10 +191,10 @@ internal fun DataGroup(state: DataUiState, format: MeasureFormatter, files: Data
                         R.string.data_delete_routes_note,
                         pluralStringResource(
                             R.plurals.data_routes,
-                            state.contents.routes,
-                            format.steps(state.contents.routes),
+                            state.contents.deletableRoutes,
+                            format.steps(state.contents.deletableRoutes),
                         ),
-                        Formatter.formatShortFileSize(LocalContext.current, state.contents.routeBytes),
+                        Formatter.formatShortFileSize(LocalContext.current, state.contents.deletableBytes),
                     ),
                     icon = PassoIcons.Trash,
                     enabled = idle,
@@ -228,11 +228,7 @@ internal fun DataDialogs(state: DataUiState, format: MeasureFormatter, files: Da
         AlertDialog(
             onDismissRequest = { files.deleteRoutesDialog.value = false },
             title = { Text(stringResource(R.string.data_delete_routes_title)) },
-            text = {
-                val text = stringResource(R.string.data_delete_routes_text)
-                val underWay = stringResource(R.string.data_delete_routes_under_way)
-                Text(if (state.contents.routeUnderWay) "$text $underWay" else text)
-            },
+            text = { Text(stringResource(R.string.data_delete_routes_text)) },
             confirmButton = {
                 TextButton(
                     onClick = {

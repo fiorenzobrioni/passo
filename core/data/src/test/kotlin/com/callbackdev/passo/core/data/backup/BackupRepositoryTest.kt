@@ -16,6 +16,7 @@ import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.domain.backup.BackupCodec
 import com.callbackdev.passo.core.domain.backup.BackupRead
 import com.callbackdev.passo.core.domain.backup.CsvTable
+import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.tracking.LedgerBatch
 import com.callbackdev.passo.core.model.AltitudeSource
 import com.callbackdev.passo.core.model.MinuteSteps
@@ -339,6 +340,28 @@ class BackupRepositoryTest {
 
         assertThat(old.backups.contents.first().routes).isEqualTo(1)
         assertThat(new.backups.contents.first().routes).isEqualTo(0)
+    }
+
+    @Test
+    fun `the route still being written is kept, and is not among those Delete all routes counts`() = runTest {
+        val walked = measuredHistory()
+        val finishedOnly = old.backups.contents.first()
+        val plan = SessionPlans.NEW.copy(gps = true)
+        val started = checkNotNull(SessionPlans.start(plan, 1_800_000_000_000, today, 0, 8_000, withGps = true))
+        val live = started.copy(id = old.database.sessionDao().insertSession(started.toEntity()))
+        old.routes.append(live.id, live.startedAtMillis, walked.take(10))
+
+        val underWay = old.backups.contents.first()
+        assertThat(underWay.routes).isEqualTo(2)
+        assertThat(underWay.deletableRoutes).isEqualTo(1)
+        assertThat(underWay.deletableBytes).isEqualTo(finishedOnly.deletableBytes)
+
+        old.backups.deleteRoutes()
+        val after = old.backups.contents.first()
+        assertThat(after.routes).isEqualTo(1)
+        assertThat(after.deletableRoutes).isEqualTo(0)
+        assertThat(after.deletableBytes).isEqualTo(0)
+        assertThat(old.routes.route(live.id, live.startedAtMillis)).isNotNull()
     }
 
     @Test

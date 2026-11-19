@@ -111,7 +111,6 @@
     <string name="data_delete_routes_note">%1$s, %2$s su questo telefono. Mai nel backup di Android nel cloud.</string>
     <string name="data_delete_routes_title">Eliminare tutti i percorsi?</string>
     <string name="data_delete_routes_text">Ogni linea, con i luoghi che attraversa, viene eliminata da questo telefono. Le uscite e i loro numeri restano: la distanza, l’andatura, i chilometri, la salita.</string>
-    <string name="data_delete_routes_under_way">L’uscita in corso tiene il suo percorso finché non è finita.</string>
     <string name="data_delete_routes_confirm">Elimina</string>
     <string name="data_delete_routes_cancel">Annulla</string>
 </resources>

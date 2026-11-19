@@ -92,10 +92,8 @@
     <string name="session_ended_still_title">%1$s: ended after a long stop</string>
     <!-- Before the longest an outing stays open: «Brisk walk: still walking?», and what happens if nobody answers. -->
     <string name="session_cap_ahead_title">%1$s: still walking?</string>
-    <plurals name="session_cap_ahead_text">
-        <item quantity="one">This outing ends in %1$d minute. Keep going to carry on.</item>
-        <item quantity="other">This outing ends in %1$d minutes. Keep going to carry on.</item>
-    </plurals>
+    <!-- «This outing ends at 14:05.»: a clock time, true however late it is read; the countdown is beside it. -->
+    <string name="session_cap_ahead_text">This outing ends at %1$s. Keep going to carry on.</string>
     <!-- The question went unanswered: «Brisk walk: ended at its time limit». It can still be taken back. -->
     <string name="session_ended_cap_title">%1$s: ended at its time limit</string>
     <!-- An outing with GPS whose receiver stopped: «Brisk walk: GPS stopped». Told once. -->

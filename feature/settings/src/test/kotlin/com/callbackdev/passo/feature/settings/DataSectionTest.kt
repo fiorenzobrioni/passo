@@ -88,7 +88,7 @@ class DataSectionTest {
 
     @Test
     fun `with routes kept - the backup can hold them, off unless asked, and says what that means`() {
-        show(DataUiState(contents = contents.copy(routes = 3, routeBytes = 28_400)))
+        show(DataUiState(contents = contents.copy(routes = 3, deletableRoutes = 3, deletableBytes = 28_400)))
 
         compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(DataTags.WITH_ROUTES))
         compose.onNodeWithText("With the routes").assertIsDisplayed()
@@ -103,7 +103,7 @@ class DataSectionTest {
     fun `deleting all routes says how many and what they weigh, and asks first`() {
         var deleted = 0
         show(
-            DataUiState(contents = contents.copy(routes = 3, routeBytes = 28_400)),
+            DataUiState(contents = contents.copy(routes = 3, deletableRoutes = 3, deletableBytes = 28_400)),
             DataActions(deleteRoutes = { deleted++ }),
         )
 
@@ -120,14 +120,20 @@ class DataSectionTest {
     }
 
     @Test
-    fun `while an outing with GPS is under way, the dialog says its route is kept`() {
-        show(DataUiState(contents = contents.copy(routes = 2, routeBytes = 9_100, routeUnderWay = true)))
-
+    fun `the route still being written is not offered for deletion, and is not counted`() {
+        // Two routes kept, one of them the outing's under way.
+        show(DataUiState(contents = contents.copy(routes = 2, deletableRoutes = 1, deletableBytes = 9_100)))
         compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(DataTags.DELETE_ROUTES))
-        compose.onNodeWithTag(DataTags.DELETE_ROUTES).performClick()
+        compose.onNodeWithText("1 route, ", substring = true).assertIsDisplayed()
+    }
 
-        compose.onNodeWithText("The outing under way keeps its route until it is over.", substring = true)
-            .assertIsDisplayed()
+    @Test
+    fun `with only the route still being written, there is nothing to delete, and no row for it`() {
+        show(DataUiState(contents = contents.copy(routes = 1, deletableRoutes = 0)))
+
+        compose.onNodeWithTag(DataTags.DELETE_ROUTES).assertDoesNotExist()
+        // The backup can still carry it.
+        compose.onNodeWithTag(DataTags.WITH_ROUTES).assertExists()
     }
 
     @Test

@@ -52,6 +52,7 @@ import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.sessions.SessionSignal
 import com.callbackdev.passo.core.domain.sessions.SessionTracker
 import com.callbackdev.passo.core.domain.sessions.SignalWake
+import com.callbackdev.passo.core.domain.sessions.capMillis
 import com.callbackdev.passo.core.domain.sessions.intervalAt
 import com.callbackdev.passo.core.domain.today.DayMinute
 import com.callbackdev.passo.core.domain.today.TodayOverview
@@ -1478,8 +1479,9 @@ class StepTrackingService : Service() {
      */
     private fun tellCapAhead() {
         val session = tracker?.session?.takeIf { it.live } ?: return
-        val asked = SessionAnnouncement.capAhead(session, System.currentTimeMillis())
-        sessionNotifications.postCapAhead(sessionNotifications.capAhead(session, asked.minutes))
+        val now = System.currentTimeMillis()
+        val asked = SessionAnnouncement.capAhead(session, now)
+        sessionNotifications.postCapAhead(sessionNotifications.capAhead(session, now))
         if (sessionNotifications.signalsAllowed()) {
             if (session.vibrate) SessionHaptics.playEndedStill(this)
             if (session.voice != SessionVoice.OFF) speak(asked, session)
@@ -1549,10 +1551,25 @@ class StepTrackingService : Service() {
                     if (walk != null) startWalk(walk, command.getBooleanExtra(SessionControl.EXTRA_AGAIN, false))
                 }
 
-                SessionControl.ACTION_PAUSE -> changeSession { tracker -> tracker.pause(System.currentTimeMillis()) }
+                // A paused outing's cap waits with it: the question's countdown would run on
+                // a time that is not passing, so it is put away and comes back at the resume.
+                SessionControl.ACTION_PAUSE -> if (changeSession { tracker ->
+                        tracker.pause(System.currentTimeMillis())
+                    }
+                ) {
+                    sessionNotifications.cancelCapAhead()
+                }
 
-                SessionControl.ACTION_RESUME ->
-                    changeSession(mayEngageGps = true) { tracker -> tracker.resume(System.currentTimeMillis()) }
+                SessionControl.ACTION_RESUME -> {
+                    val resumed = changeSession(mayEngageGps = true) { tracker ->
+                        tracker.resume(System.currentTimeMillis())
+                    }
+                    // Asked already, and not answered: the same question, with the cap the pause
+                    // moved, and without the pulses a second time.
+                    tracker?.session?.takeIf { resumed && it.live && it.capAskedForMillis == it.capMillis }?.let {
+                        sessionNotifications.postCapAhead(sessionNotifications.capAhead(it, System.currentTimeMillis()))
+                    }
+                }
 
                 // «Keep going» to the question before the cap: the cap moves on, nothing stops.
                 SessionControl.ACTION_KEEP_GOING if tracker?.session?.state == SessionState.ACTIVE -> {

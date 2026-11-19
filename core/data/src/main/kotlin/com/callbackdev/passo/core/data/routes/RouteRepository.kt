@@ -102,7 +102,11 @@ constructor(private val dao: RouteDao, private val file: RouteFile = RouteFile {
     val count: Flow<Int> = whenPresent(0) { dao.observeRouteCount() }
 
     /** The bytes the routes' points take: what Your data says they weigh. */
-    suspend fun bytes(): Long = if (file.exists()) dao.routeBytes() else 0L
+    suspend fun bytes(except: Long? = null): Long = when {
+        !file.exists() -> 0L
+        except == null -> dao.routeBytes()
+        else -> dao.routeBytesExcept(except)
+    }
 
     /**
      * The reader forgets every route but [keep]'s, the outing under way, whose route is still

@@ -230,7 +230,10 @@ fun OutingScreen(
         if (state != null) {
             Box(Modifier.fillMaxSize().padding(padding)) {
                 val format = rememberMeasureFormatter(state.units)
-                if (shareLayer != null && state.route != null) ShareCard(state, state.route, format, shareLayer)
+                // What is shared is an outing that is over: its card, its whole map, its numbers.
+                if (shareLayer != null && state.route != null && !state.session.live) {
+                    ShareCard(state, state.route, format, shareLayer)
+                }
                 OutingPage(state, format, actions)
             }
         }
@@ -272,8 +275,14 @@ private fun OutingPage(state: OutingUiState, format: MeasureFormatter, actions: 
                 }
             }
         } else if (session.gps && (session.measuredShare ?: 0.0) <= 0.0) {
-            // Asked to measure, and never a fix: said, where the map would have been.
-            item(key = "no-fix") { Note(stringResource(R.string.outing_no_fix), Modifier.padding(horizontal = 20.dp)) }
+            // Asked to measure, and no fix: said, where the map would have been. While the
+            // outing counts, the satellites may still answer, and the route comes in its place.
+            item(key = "no-fix") {
+                Note(
+                    stringResource(if (session.live) R.string.outing_no_fix_yet else R.string.outing_no_fix),
+                    Modifier.padding(horizontal = 20.dp),
+                )
+            }
         }
         item(key = "numbers") { Numbers(session, route?.altitudes, format) }
         if (session.intervals != null && session.splits.any { it.fast }) {
@@ -288,8 +297,10 @@ private fun OutingPage(state: OutingUiState, format: MeasureFormatter, actions: 
         if (profile.size >= MIN_PROFILE_POINTS && session.ascentMeters != null) {
             item(key = "profile") { ProfileSection(profile, session.totals.distanceMeters, format) }
         }
-        if (route != null) {
-            item(key = "route") { RouteActions(actions, canDelete = !session.live, onDelete = { deleting = true }) }
+        // What a route can do (share, save, delete) is for an outing that is over: while it
+        // counts, the line is still being drawn, and its page is to follow it.
+        if (route != null && !session.live) {
+            item(key = "route") { RouteActions(actions, onDelete = { deleting = true }) }
         }
     }
     if (deleting) {
@@ -363,6 +374,12 @@ private fun Numbers(session: Session, altitudes: AltitudeSource?, format: Measur
         distance.annotated(unit),
         when (session.distanceKind()) {
             DistanceKind.MEASURED -> stringResource(R.string.outing_distance_measured, stepsSaid)
+
+            // No fix at all: the steps' estimate, said as one. «100% of it from your steps» and
+            // «your steps alone said» the same figure would say it twice, under the note that
+            // already says why.
+            DistanceKind.PARTLY_MEASURED if (session.measuredShare ?: 0.0) <= 0.0 ->
+                stringResource(R.string.outing_distance_estimated)
 
             DistanceKind.PARTLY_MEASURED ->
                 stringResource(R.string.outing_distance_partly, format.percent(session.stepsShare() ?: 1.0), stepsSaid)
@@ -520,7 +537,7 @@ private fun ProfileSection(profile: List<Pair<Double, Double>>, distanceMeters: 
 
 /** What the route can do: share, save, delete. The GPX's choice says what the file holds, once, here. */
 @Composable
-private fun RouteActions(actions: OutingActions, canDelete: Boolean, onDelete: () -> Unit) {
+private fun RouteActions(actions: OutingActions, onDelete: () -> Unit) {
     Group {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Title(stringResource(R.string.outing_route))
@@ -538,16 +555,10 @@ private fun RouteActions(actions: OutingActions, canDelete: Boolean, onDelete: (
                 modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag(OutingTags.SAVE_GPX),
             ) { Text(stringResource(R.string.outing_save_gpx)) }
             Note(stringResource(R.string.outing_gpx_note))
-            // Not while the outing counts: the service is still drawing the line, and a route
-            // deleted now would be drawn again from the next point.
-            if (canDelete) {
-                TextButton(
-                    onClick = onDelete,
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag(OutingTags.DELETE_ROUTE),
-                ) { Text(stringResource(R.string.outing_delete_route), color = MaterialTheme.colorScheme.error) }
-            } else {
-                Note(stringResource(R.string.outing_delete_route_live))
-            }
+            TextButton(
+                onClick = onDelete,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag(OutingTags.DELETE_ROUTE),
+            ) { Text(stringResource(R.string.outing_delete_route), color = MaterialTheme.colorScheme.error) }
         }
     }
 }

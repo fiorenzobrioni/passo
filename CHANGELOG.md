@@ -30,19 +30,21 @@ All notable changes to Passo are documented here. The format follows
   with no satellite. Under it, each kilometre (or mile) with its pace and its cadence, the
   fastest marked, and how much you climbed, as a figure and as a shape.
 
-- **Your route is yours to take or to delete.** Share it as an image (the line, with no
-  street in it) or as a GPX file for a map app, save the GPX where you like, or delete the
-  route and keep the outing's numbers. In Settings, your backup holds the routes only if you
-  tick «With the routes», and «Delete all routes» removes every one at once.
+- **Your route is yours to take or to delete.** Once the outing is over, share it as an image
+  (the line, with no street in it) or as a GPX file for a map app, save the GPX where you like,
+  or delete the route and keep the outing's numbers. In Settings, your backup holds the routes
+  only if you tick «With the routes», and «Delete all routes» removes every one at once (but
+  the route of an outing still under way).
 
 - **The climb, and what it cost.** An outing with GPS says about how much you climbed and
   came down, from the phone's pressure sensor steadied by the satellites (the satellites alone
   on a phone without one), and its calories count the slope. The day's own calories stay
   computed from your steps.
 
-- **No outing ends a walk unasked.** Four hours is still the longest an outing stays open, but
-  a quarter of an hour before it asks «Still walking?», with a vibration, a notification and
-  its card; «Keep going» gives it four hours more. Unanswered, it ends there, says so, and can
+- **No outing ends a walk unasked.** Four hours is still the longest an outing stays open (the
+  time paused not counted), but a quarter of an hour before it asks «Still walking?», with a
+  vibration, a notification that counts down to the end, and its card; «Keep going» gives it
+  four hours more. Unanswered, it ends there, says so, and can
   be taken back for a quarter of an hour.
 
 ### Private and light

@@ -23,6 +23,7 @@
     <string name="outing_map_plain">Passo non ha una mappa delle strade: il tuo percorso è una linea su fondo neutro. I tratteggi sono i tratti coperti dai tuoi passi, senza satelliti.</string>
     <string name="outing_map_city">Disegnato sulla mappa della città che Passo ha con sé. I tratteggi sono i tratti coperti dai tuoi passi, senza satelliti.</string>
     <string name="outing_no_fix">I satelliti non hanno mai risposto durante questa uscita: è stata contata dai tuoi passi, e non ha un percorso.</string>
+    <string name="outing_no_fix_yet">Nessun satellite ha ancora risposto. I tuoi passi stanno contando l’uscita, e il percorso comparirà qui appena uno risponde.</string>
     <string name="outing_bead">%1$s · %2$s</string>
 
     <string name="outing_numbers">I numeri</string>
@@ -73,7 +74,6 @@
     <string name="outing_saved">Salvato.</string>
     <string name="outing_save_failed">Non è stato possibile salvarlo lì.</string>
     <string name="outing_delete_route">Elimina questo percorso</string>
-    <string name="outing_delete_route_live">Finita l’uscita, potrai eliminarne il percorso da qui.</string>
     <string name="outing_delete_route_title">Eliminare questo percorso?</string>
     <string name="outing_delete_route_text">La linea e i suoi luoghi vengono eliminati da questo telefono. L’uscita e i suoi numeri restano.</string>
     <string name="outing_delete_route_confirm">Elimina</string>

@@ -316,11 +316,14 @@ to be proven on a device in Phase 15):
       stop) and its points are kept aside; putting the card away, a new outing or the end of
       the 15 minutes stops it and drops them. The price is at most 15 minutes of the receiver
       after an outing, paid only by a reader who walks on and leaves the card where it is.
-      *Amended 19 Nov 2026 (the review of Phases 15 and 16):* the question says the minutes
-      really left, fewer than fifteen when the first steps within them came late. A pause is
-      not time towards the cap: resuming moves the cap on by the pause, and a question already
-      open stays open, so an outing paused across its cap is asked before it ends, never ended
-      at the first step after it.
+      *Amended 19 Nov 2026 (the review of Phases 15 and 16; the pause confirmed by the owner
+      the same day):* the question says the minutes really left, fewer than fifteen when the
+      first steps within them came late. A pause is not time towards the cap: resuming moves
+      the cap on by the pause, and a question already open stays open, so an outing paused
+      across its cap is asked before it ends, never ended at the first step after it. The
+      notification states the cap's clock time and counts down to it (the system draws it, no
+      timer of Passo's), goes by itself at the cap, is put away at a pause and comes back,
+      silent, at the resume.
     Two outings start with twelve hours instead of four, so that a long day is not interrupted
     by the question at all: one on a way walked on the spot, and one that follows a route
     (Phase 20), a day's stage being six to eight hours with its stops; they ask before twelve

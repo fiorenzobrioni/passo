@@ -1667,6 +1667,38 @@ This log starts with Phase 16 built (18 Nov 2026); its entries are written below
     `SessionRepositoryTest`, `RouteRepositoryTest`, `OutingScreenTest`, `DataSectionTest`,
     `SharedFilesTest`. Phases 15 and 16 stay open for their checks on a device.
 
+- **19 Nov 2026.** **The fixes reviewed for what the reader sees** (owner: a critical review of
+  the fixes above for function and UI, then "do points 1, 2 and 4, with premium finishes", and
+  point 3, the pause that moves the cap, accepted as decided). Each changes what the entry
+  above built:
+  - **«Delete all routes» never runs empty.** Its row counts and weighs the routes the reader
+    can delete, every one but the route still being written (`DataContents.deletableRoutes`,
+    `deletableBytes`; `routes` still counts them all, for «With the routes»), and is not shown
+    for that one alone. Before, the row stayed after the deletion with «1 route», and a second
+    touch deleted nothing. The dialog's extra sentence goes with the problem it explained.
+  - **The question before the cap is never stale.** Its notification states the cap's clock
+    time («ends at 14:05»), not minutes counted when it was posted, and the system counts down
+    to it in its header (`setUsesChronometer`, `setChronometerCountDown`: drawn by Android, no
+    timer of Passo's, §9 untouched); it goes by itself at the cap (`setTimeoutAfter`), is put
+    away at a pause, whose time is not passing for the cap, and posted again at the resume
+    while the question is open, silent (the channel is). The voice still says minutes: said
+    once, at that moment, they are true.
+  - **An outing's page follows the outing while it counts**: what a route can do (share, save,
+    delete) appears once it is over, all together, and the note saying when deletion would be
+    possible goes. The image shared is a summary of an outing that is over, and no longer
+    recorded for a live one.
+  - **Two finishes found on the way** (screenshots looked at): while the outing counts and no
+    satellite has answered yet, the page no longer says «The satellites never answered during
+    this outing», but that the route will appear there as soon as one does
+    (`outing_no_fix_yet`); and an outing with no fix at all says its distance once, as the
+    estimate it is, not «100% of it from your steps» over the same figure.
+  - **Point 3 checked to its end**: the wake lock of a phone with no wake-up counter is bounded
+    by the cap; it is let go at a pause and taken again at the resume with the moved cap
+    (`applyRegistration`), so the moved cap leaves nothing behind. ADR 0016 decision 14's
+    amendment says the owner confirmed it, and the notification's new shape.
+  - The guide (the end of an outing, a route), CHANGELOG and VISION say so. Tests:
+    `SessionNotificationsTest`, `OutingScreenTest`, `DataSectionTest`, `BackupRepositoryTest`.
+
 ### Open
 
 - [ ] **On a device (owner): the shortcuts after an update** (archive 04, 15 Nov 2026, «The shortcuts

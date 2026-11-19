@@ -9,6 +9,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.domain.routes.GpsLine
 import com.callbackdev.passo.core.domain.routes.LiveMeasure
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
+import com.callbackdev.passo.core.domain.sessions.capMillis
 import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
@@ -24,6 +25,8 @@ import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
+import java.time.Instant
+import java.time.ZoneId
 
 @RunWith(AndroidJUnit4::class)
 @Config(qualifiers = "en-rUS")
@@ -143,13 +146,27 @@ class SessionNotificationsTest {
     @Test
     fun `before the longest an outing stays open it asks, with keep going`() {
         val sessions = SessionNotifications(context)
-        val notification = sessions.capAhead(session, minutes = 15)
+        val cap = session.capMillis
+        val notification = sessions.capAhead(session, nowMillis = cap - 10 * 60_000L)
 
         assertThat(NotificationCompat.getContentTitle(notification).toString())
             .isEqualTo("Brisk walk: still walking?")
+        val clock = context.clockTime(Instant.ofEpochMilli(cap).atZone(ZoneId.systemDefault()).toLocalTime())
         assertThat(NotificationCompat.getContentText(notification).toString())
-            .isEqualTo("This outing ends in 15 minutes. Keep going to carry on.")
+            .isEqualTo("This outing ends at $clock. Keep going to carry on.")
         assertThat(notification.actions.single().title.toString()).isEqualTo("Keep going")
+    }
+
+    @Test
+    fun `the question's time is the cap's own - a countdown to it, and gone when it comes`() {
+        val cap = session.capMillis
+        val notification = SessionNotifications(context).capAhead(session, nowMillis = cap - 10 * 60_000L)
+
+        // However late it is read, it is not a figure counted when it was posted.
+        assertThat(notification.`when`).isEqualTo(cap)
+        assertThat(notification.extras.getBoolean(Notification.EXTRA_SHOW_CHRONOMETER)).isTrue()
+        assertThat(notification.extras.getBoolean(Notification.EXTRA_CHRONOMETER_COUNT_DOWN)).isTrue()
+        assertThat(notification.timeoutAfter).isEqualTo(10 * 60_000L)
     }
 
     @Test

@@ -27,6 +27,7 @@ import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.routes.GpsLine
 import com.callbackdev.passo.core.domain.routes.LiveMeasure
 import com.callbackdev.passo.core.domain.sessions.IntervalSchedule
+import com.callbackdev.passo.core.domain.sessions.capMillis
 import com.callbackdev.passo.core.domain.sessions.fraction
 import com.callbackdev.passo.core.domain.sessions.intervalAt
 import com.callbackdev.passo.core.domain.sessions.progress
@@ -35,6 +36,8 @@ import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.UnitPreference
+import java.time.Instant
+import java.time.ZoneId
 import kotlin.math.roundToInt
 
 /**
@@ -274,15 +277,27 @@ internal class SessionNotifications(private val context: Context) {
      * «Still walking?»: the outing is within a quarter of an hour of the longest it stays open,
      * and the reader is walking (docs/adr/0016-location.md, decision 14). «Keep going» moves that
      * on; unanswered, the outing ends there, says so, and can still be taken back.
+     *
+     * Its time is the cap's own, never minutes counted when it was posted: the clock time in its
+     * words, and the system's countdown in its header, both true however late it is read, and no
+     * timer of Passo's to keep them so. It goes by itself at the cap, where it has nothing left
+     * to ask ([nowMillis] measures the wait).
      */
-    fun capAhead(session: Session, minutes: Int): android.app.Notification {
+    fun capAhead(session: Session, nowMillis: Long): android.app.Notification {
         val res = context.resources
-        val text = res.getQuantityString(R.plurals.session_cap_ahead_text, minutes, minutes)
+        val cap = session.capMillis
+        val at = Instant.ofEpochMilli(cap).atZone(ZoneId.systemDefault()).toLocalTime()
+        val text = context.getString(R.string.session_cap_ahead_text, context.clockTime(at))
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_steps)
             .setContentTitle(context.getString(R.string.session_cap_ahead_title, res.sessionName(session)))
             .setContentText(text)
             .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setWhen(cap)
+            .setShowWhen(true)
+            .setUsesChronometer(true)
+            .setChronometerCountDown(true)
+            .setTimeoutAfter((cap - nowMillis).coerceAtLeast(1L))
             .setContentIntent(context.openAppIntent(REQUEST_GOAL))
             .setAutoCancel(true)
             .setCategory(NotificationCompat.CATEGORY_WORKOUT)

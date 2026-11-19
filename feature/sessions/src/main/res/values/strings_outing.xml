@@ -29,6 +29,8 @@
     <string name="outing_map_city">Drawn on Passo’s own map of the city. Dashes are stretches your steps covered, with no satellite.</string>
     <!-- An outing with GPS that never got a fix. -->
     <string name="outing_no_fix">The satellites never answered during this outing: it was counted from your steps, and has no route.</string>
+    <!-- The same place while the outing still counts: the satellites may yet answer. -->
+    <string name="outing_no_fix_yet">No satellite has answered yet. Your steps are counting this outing, and the route will appear here as soon as one does.</string>
     <!-- A bead on the map, touched: «3 km · 9:40 min/km». -->
     <string name="outing_bead">%1$s · %2$s</string>
 
@@ -90,8 +92,6 @@
     <string name="outing_saved">Saved.</string>
     <string name="outing_save_failed">It could not be saved there.</string>
     <string name="outing_delete_route">Delete this route</string>
-    <!-- In place of the button above while the outing is under way: its route is still being drawn. -->
-    <string name="outing_delete_route_live">Once the outing is over, its route can be deleted here.</string>
     <string name="outing_delete_route_title">Delete this route?</string>
     <string name="outing_delete_route_text">The line and its places are deleted from this phone. The outing and its numbers stay.</string>
     <string name="outing_delete_route_confirm">Delete</string>

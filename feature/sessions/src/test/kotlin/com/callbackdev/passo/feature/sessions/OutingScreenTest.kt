@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
@@ -17,6 +18,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.designsystem.components.OutingChartTags
@@ -146,19 +148,57 @@ class OutingScreenTest {
     }
 
     @Test
-    fun `while the outing counts, its route cannot be deleted, and the page says when it can`() {
+    fun `while the outing counts, the page follows its route, and offers nothing to do with it yet`() {
         val live = OutingSamples.measured.copy(
             state = SessionState.ACTIVE,
             end = null,
             endedAtMillis = null,
             reachedAtMillis = null,
         )
-        show(OutingSamples.state(session = live))
+        show(OutingSamples.state(session = live), actions = OutingActions())
 
-        page().performScrollToNode(hasText("Once the outing is over, its route can be deleted here."))
-        compose.onNodeWithText("Once the outing is over, its route can be deleted here.").assertIsDisplayed()
-        compose.onNodeWithTag(OutingTags.DELETE_ROUTE).assertDoesNotExist()
-        compose.onNodeWithTag(OutingTags.SHARE_GPX).assertExists()
+        compose.onNodeWithTag(RouteMapTags.MAP).assertExists()
+        // To the page's last item: what a route can do would be there.
+        val items = page().fetchSemanticsNode().config[SemanticsProperties.CollectionInfo].rowCount
+        page().performScrollToIndex(items - 1)
+        for (tag in listOf(
+            OutingTags.SHARE_IMAGE,
+            OutingTags.SHARE_GPX,
+            OutingTags.SAVE_GPX,
+            OutingTags.DELETE_ROUTE,
+        )) {
+            compose.onNodeWithTag(tag).assertDoesNotExist()
+        }
+    }
+
+    @Test
+    fun `while the outing counts and no satellite has answered, the page says the route is to come`() {
+        // A quarter of an hour in, under a sky the receiver has not found yet.
+        val waiting = OutingSamples.onSteps.copy(
+            gps = true,
+            totals = SessionTotals(
+                steps = 1_820,
+                movingMillis = 16 * 60_000L,
+                zoneMillis = 14 * 60_000L,
+                distanceMeters = 1_300.0,
+                activeKcal = 48.0,
+            ),
+            stepsMeters = 1_300.0,
+            measuredShare = 0.0,
+            state = SessionState.ACTIVE,
+            end = null,
+            endedAtMillis = null,
+            reachedAtMillis = null,
+        )
+        show(OutingSamples.state(session = waiting, route = null))
+
+        compose.onNodeWithText("the route will appear here as soon as one does", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("never answered", substring = true).assertDoesNotExist()
+        // Its distance said once, as the estimate it is.
+        compose.onNode(hasContentDescription("Distance: 1.30 km. An estimate, from your steps and your step length."))
+            .assertExists()
+        compose.onNode(hasContentDescription("of it from your steps", substring = true)).assertDoesNotExist()
+        snapshot("outing_no_fix_yet")
     }
 
     @Test
@@ -265,6 +305,8 @@ class OutingScreenTest {
 
         compose.onNodeWithText("The satellites never answered during this outing", substring = true).assertIsDisplayed()
         compose.onNodeWithTag(RouteMapTags.MAP).assertDoesNotExist()
+        compose.onNode(hasContentDescription("Distance: 4.10 km. An estimate, from your steps and your step length."))
+            .assertExists()
         snapshot("outing_no_fix")
     }
 
