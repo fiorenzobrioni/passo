@@ -50,7 +50,8 @@ so they are uniform"):
   archive 04, «Phase 16, the outing's page»). Left: its check on a phone (the box in «Open»). 15 and
   16 are released together or not at all. **Next: Phase 17**, the step that learns (§11),
   on a branch of its own from Phase 16's. Phases 17, 18 (re-planned on 19 Nov 2026: a city walk
-  measured with GPS) and 20 (to review before it starts): not started. Phase 19 dropped.
+  measured with GPS) and 20 (reviewed on 19 Nov 2026: the usual round alone): not started.
+  Phase 19 dropped.
 
 ## Open
 
@@ -697,7 +698,7 @@ cloud backup never carries; the day's distance stays the steps'.
 | 17 | The step that learns («Il passo che impara») | The step length by cadence, from the outings with GPS | 15 |
 | 18 | City walks measured with GPS («Passeggiate misurate») | A city walk's distance measured on the reader's own streets, and their real route kept; the walk stays imaginary | 15, 16 |
 | 19 | Dropped (owner, 19 Nov 2026) | Was «On the spot: the ways»; the first Phase 18, «On the spot: the cities», went with it | |
-| 20 | Your routes («I tuoi percorsi») | Follow a route (a GPX, a past outing), the usual round; to review before it starts | 16 |
+| 20 | Your usual round («Il tuo giro solito») | A walk the reader repeats, known without being told and compared with their usual; Your rounds | 16 |
 
 **One phase, one session.** Each section is written to be enough for a session that has read
 CLAUDE.md, ADR 0016 and that section: it names the files to read first, the steps in order, the
@@ -1105,8 +1106,8 @@ app's own provider); `DataSection.kt`, `DataViewModel.kt`, `BackupRepository.kt`
   elsewhere the ground is plain, and the page says in a line that Passo carries no street map.
   A touch names the kilometre and its pace. One sentence to TalkBack («Your route: 5.2 km,
   from north to south, 3 stops»); the splits below are its words. Its gestures are a piece of
-  their own, since Phase 20 may reuse them (Phases 18 and 19 «On the spot», which would have,
-  were dropped on 19 Nov 2026). Drawn in every theme and dress in a gallery
+  their own, since Phase 20 reuses them on a round's page (Phases 18 and 19 «On the spot»,
+  which would have too, were dropped on 19 Nov 2026). Drawn in every theme and dress in a gallery
   test, as the ways' maps are.
 - [x] **The outing's page** (`:feature:sessions`, a new entry in `PassoNavigation.kt`), for
   every outing, with or without GPS: the sentence first (what it was and how it went against
@@ -1381,86 +1382,102 @@ Phase 17 makes truer, and a way walked in person is not built. The number stays,
 20 and the documents that cite the phases keep their names. The text of both dropped phases is
 in `git show b842547:PLANNING.md`.
 
-### Phase 20 — Your routes («I tuoi percorsi»)
+### Phase 20 — Your usual round («Il tuo giro solito»)
 
-The same guidance for any line the reader brings: a GPX from elsewhere, or an outing they walked
-before. And for the walk most readers repeat, Passo's own question asked of a route: am I ahead
-of my usual or behind it?
+Most readers repeat a walk: round the park, to the station and back. Passo knows it without
+being told, and asks of it its own question, the one Today asks of a day: am I ahead of my usual
+or behind it? Rounds are found among the reader's own outings with GPS; nothing is imported,
+followed or guided (owner, 19 Nov 2026: following a route, a GPX or «Walk it again», is not
+built and not planned; §15, «Phase 20 reviewed: the usual round alone»).
 
-**To review before it starts** (owner, 19 Nov 2026: the phase stays, and is reviewed before it
-is built; §15, «The places on the spot dropped, the city walk measured»). It was written on
-Phases 18 and 19 «On the spot», now dropped, and no longer finds built what it reads first. The
-review rewrites it to stand alone:
-- it builds itself what it took from them: `LineSnap` (the nearest point of a line to a fix,
-  as metres along and aside), the following of a line (off the route and back on it, the
-  progress that only moves forward, the steps carrying the position under an arcade), the two
-  vibrations of their own (off the route, back on it), and the twelve hours of ADR 0016
-  decision 14;
-- it writes out the rules it cites as «Phase 18's» (the corridor, its return threshold);
-- it weighs what the review of the dropped Phase 18 found, which holds for following any line:
-  with the screen off the steps and the fixes come every 30 s (about 40 m at a walk), so a
-  signal at a point of the line needs the interval walk's window of 2 s before it (a widening
-  of §9, the owner's to decide) or an acceptance that says so; a signal told by proximity must
-  move the stored progress, or a restart tells it twice; the start goes through the one door
-  and needs the precise permission; `LineSnap` searches near the last position, forward, and
-  after a gap forward only; the steps under an arcade carry the position at nine tenths of
-  their length, so that it lags rather than leads;
-- it may split the phase in two, the usual round first (pure, the outing's page and the card's
-  line) and the following of a route after.
-The text of the dropped phases is in `git show b842547:PLANNING.md`.
-
-**Read first:** ADR 0016 (decisions 11, 13, 14 and 16), Phase 16 here and its code
-(`GpxCodec`, `RouteMapView`, `MapViewport`), the note above;
+**Read first:** ADR 0016 (decisions 6, 9, 11 and 16), Phase 16 here and its code (`RouteShape`,
+`RouteMapView`, `MapViewport`, `Legs`, `Splits`, `RouteRepository`, `RouteFile`);
 `TypicalDayCalculator.kt` and `TodayOverview.kt` (how "ahead of your usual" is said for a day);
-`SessionsScreen.kt` (the door to the cities), `SessionPlans.kt`.
+`SessionsScreen.kt` (`CitiesDoor`, the door this phase's mirrors), `OutingScreen.kt`,
+`SessionCard.kt`; `BackupCodec.kt`, `DataSection` (Your data).
 
-- [ ] **A route kept** (`routes.db`: `saved_route`, its name, length, climb and line in chunks;
-  simplified to 5 m with its metres along). From an outing's page, «Walk it again»; from a
-  file, «Open a GPX» through the system's picker, and Passo offered for a `.gpx` opened from a
-  file manager (an intent filter on the activity; no permission). `GpxCodec` reads what the
-  world writes: a track or a route, several segments, with or without times and elevations;
-  a file with no line, or broken, is told as such; a very large one is simplified, never
-  refused for its size alone. The reader names it, or it keeps the file's name.
-- [ ] **Following it.** The Outings page gains «Your routes», a door like the cities': each
-  route with its small map, its length and climb. Start, or «The other way round». The outing
-  follows the line (the rules the note above asks for, a 60 m corridor, the twelve hours): the
-  distance left, the shares of the route as its signals if the reader chose them, off the route
-  and back on it, the arrival. Its page afterwards is an outing's, with the route followed drawn faint
-  under the one walked.
-- [ ] **The usual round** (`:core:domain/routes`, `RouteMatch`, pure). Two outings with GPS are
-  the same round when they start within 100 m of each other, their lengths are within a tenth,
-  and four fifths of each lies within 40 m of the other; rounds are found when an outing ends,
-  from its box first, and kept (`round`, in `routes.db`). From the third time on, the outing's
-  page says it, sentence first («Your usual round, the sixth time: 2 minutes faster than
-  usual»), against the median of the times in motion before; and while a free outing with GPS
-  that began where a round begins is still on it after 500 m, the card says at each kilometre
-  how far ahead or behind the usual it is, in the day's own words. The reader may name a round
-  or tell Passo that two are not the same. Never a record board, never a segment: one reader,
-  their own walks.
-- [ ] **Tests.** `GpxCodecTest` (files as other apps write them, kept as test resources: check
-  each one's licence, or write them by hand), `RouteMatchTest`, the follow's replays, the
-  Outings page's and the route pages' UI tests.
-- [ ] Strings in English and Italian; CHANGELOG; the guide; README: the feature line and a
-  screenshot if one earns its place.
-- [ ] On a device (owner): a GPX from another app followed from start to end; a usual walk
-  taken three times, then the fourth with the card's line; the other way round.
+- [ ] **The match** (`:core:domain/routes`, `RouteMatch`, pure). Two outings with GPS are the
+  same round when they start within 100 m of each other, their lengths are within a tenth, four
+  fifths of each lies within 40 m of the other, **and in the same direction**: the points of
+  one fall in the same order along the other (review, 19 Nov 2026: a loop walked the other way
+  round starts at the same door, has the same length and lies wholly within 40 m, and the four
+  fifths alone would call it the same round). Only an outing whose route is kept and measured
+  (nine tenths from fixes) is matched. A loop started at another point of it is another round:
+  rounds begin at the reader's door, not anywhere on the loop. Searched when an outing with GPS
+  ends, the routes' boxes first, so a year of outings costs a few reads.
+- [ ] **The rounds** (`passo.db`, by auto-migration). `round` (its id, the name the reader gave
+  it, if any) and `round_member` (round, outing), and the pairs the reader said are not the
+  same: numbers and names, never a place, so they are in `passo.db` and in Android's backup like
+  the outings. A round holds no line of its own: its map and its start are read from its
+  members' routes in `routes.db`, so no place outlives its outing (CLAUDE.md, «Backup is an
+  allowlist»). A member whose route is deleted stays a member for its times (they are its legs,
+  in `passo.db`) and no longer gives the round its map; a round whose members all lost their
+  routes keeps its history and is found again by no new outing until one is walked with GPS.
+  The JSON backup carries the rounds with the outings (added fields; their names and the pairs
+  not the same); «Delete all routes» leaves them, and its dialog says the history stays.
+- [ ] **The comparison, honest.** A round's usual is the median of its members' times in
+  motion before this one, each brought to the round's usual length (time × usual length ÷ its
+  length): a shortcut of 300 m does not read as a faster walk (review, 19 Nov 2026). By the
+  kilometre, the usual time at each kilometre is the median of the members' times there, from
+  their legs (`Splits`), so the comparison holds for a member whose route was deleted.
+- [ ] **The outing's page.** From the third walk of a round, the page says it, sentence first
+  («Your usual round, the sixth time: 2 minutes faster than usual»), against the usual above,
+  with «Not the same round» (the pair is kept, the outing leaves the round) and the round's
+  name, touched to open its page.
+- [ ] **The card, while it counts.** A free outing with GPS that began within 100 m of where a
+  round with two walks or more begins, and is still on it after 500 m (four fifths of its
+  points so far within 40 m of the round's line, in order), says at each kilometre how far
+  ahead or behind the usual it is, in the day's own words («30 seconds ahead of your usual»).
+  It rides on the step batches as every line of the card does: no wake of its own, no change to
+  §9 (review, 19 Nov 2026: a line at a kilometre is a signal of distance, told at the batch
+  like an outing's goal). Off the round for 200 m, the line says so once and stops; no
+  vibration, no voice: it is a line to read, not a signal. The service reads the rounds and
+  their members' routes once, at the outing's start, from `routes.db` (never making it:
+  `RouteFile`).
+- [ ] **Your rounds** («I tuoi giri», `:feature:sessions`). A door on the Outings page, as the
+  cities' is, shown once there is a round. Each round: its name (or «Your round of 3.2 km»
+  until it has one), its small map from its latest member's route (on its city's map where
+  Passo carries it, on plain ground elsewhere, still: no gestures in a list), its length, how
+  many times it was walked, its usual time. A round's page: the map with Phase 16's gestures,
+  each walk with its day and its time brought to the usual length, a small Canvas chart of
+  those times over the weeks with the usual as a line (one sentence for TalkBack: «Six walks
+  since March; the last three faster than usual»), rename, and «Forget this round» (the
+  outings stay, as they are; the round and its pairs go, asked first). Never a record board, no
+  fastest mark, no medal, never a segment, never anyone else's walk: one reader and their own
+  rounds (ADR 0016 decision 16).
+- [ ] **Tests.** `RouteMatchTest` (the cases below, routes written by hand), the comparison's
+  (lengths brought to the usual, the median, a member without route), the repository's (the
+  migration, a member's outing deleted, «Delete all routes» leaving the rounds), the backup's
+  round trip, the card's line (on the round, left, a round of two walks), the outing page's and
+  Your rounds' UI tests, in Italian on a small phone and at twice the text size; the chart in
+  both themes.
+- [ ] Strings in English and Italian, with plurals; CHANGELOG; the guide (a part in
+  «Outings»); README: the feature line, and a screenshot of a round's page if it earns its
+  place.
+- [ ] On a device (owner): a usual walk taken three times, then the fourth with the card's
+  line at each kilometre; the same walk the other way round, not called the same; a shortcut,
+  compared honestly; Your rounds in both themes and at a large text size.
 
-**Acceptance:** a GPX made by another app is followed with its signals (off the route, back on
-it, the arrival) at the times the review settles; the
-third time a round is walked Passo knows it without being told, and is right about which walks
-are the same one.
+**Acceptance:** the third time a round is walked Passo knows it without being told, and is right
+about which walks are the same one, direction included; «faster» and «slower» are true of the
+pace, not of a shortcut; a reader who never walks with GPS sees nothing new.
 
-**Edge cases** (`GpxCodecTest`, `RouteMatchTest`):
+**Edge cases** (`RouteMatchTest`, the comparison's tests, the repository's):
 
 | Case | Expected behavior |
 |---|---|
-| A GPX with waypoints only | Told: there is no line to follow |
-| A GPX of 200 km | Kept, simplified; started from wherever the reader joins it |
-| The same streets walked the other way | Not the same round |
-| A round with a detour of 300 m one day | Still the round (four fifths), its time compared |
+| The same streets walked the other way | Not the same round: the order of the points differs |
+| A loop started from another point of it | Another round: they begin at the door |
+| A round with a detour of 300 m one day | Still the round (four fifths); its time brought to the usual length |
+| A shortcut that leaves out a tenth | Within the lengths' tenth, the round; brought to the usual length, not «faster» for it |
 | Two rounds from the same door | Told apart by their lines, not by their start |
-| A round walked once with a long pause | Compared by time in motion, as every outing |
-| A route's source outing deleted | The kept route stays: it is its own copy |
+| A round walked with a long pause | Compared by time in motion, as every outing |
+| An outing measured under nine tenths | Not matched: its line is too much the steps' |
+| A member's route deleted | Still a member, for its times; the map from another member |
+| Every member's route deleted | The history stays; no new walk is matched until one with GPS is kept |
+| A member's outing deleted | It leaves the round; under two members, the round is forgotten |
+| «Not the same round» | The pair is kept; the two are never matched again |
+| The reader leaves the round at the third kilometre | The card says so once and the line stops; the outing goes on as any |
 
 ---
 
@@ -1826,6 +1843,33 @@ This log starts with Phase 16 built (18 Nov 2026); its entries are written below
     dropped phases and must now build or write out itself, and what their review found that
     holds for following any line. Phase 19's number stays, so the documents keep their names;
     the dropped text is in the plan's history (`git show b842547:PLANNING.md`).
+
+- **19 Nov 2026.** **Phase 20 reviewed: the usual round alone** (owner, after a technical and a
+  functional review of Phase 20: "only the usual round, as Phase 20; the following of a route I
+  never want to build, and not even keep in the plan; one day perhaps something like it,
+  designed from nothing"). §11 Phase 20 is rewritten; ADR 0016 decision 14 is amended, CLAUDE.md
+  and VISION follow.
+  - **Following a route is not built and not planned**: a GPX from another app, «Walk it
+    again», «The other way round», off the route and back on it. It carried the costliest part
+    of the old plan (`LineSnap`, a line followed with the screen off, a start far from it, the
+    signals' own page) for little: Passo draws no ground outside its forty cities, a map app
+    follows a GPX far better (decision 11 already sends the reader there), and a reader's own
+    streets need no guide. A GPX from elsewhere was also «anyone else's route», which decision
+    16 leaves out. The note «To review before it starts» goes with it.
+  - **The usual round stays, and is the phase.** What the review changed in it: the match
+    asks for the same direction (a loop walked the other way round matched by the four fifths
+    alone); the comparison brings each time to the round's usual length (a shortcut read as a
+    faster walk); the line at each kilometre needs no widening of §9 (a signal of distance,
+    told at the batch like a goal; the dropped Phase 18's window of 2 s was for places along a
+    line, which a round has none of); the rounds live in `passo.db` as numbers and names, with
+    no line of their own, so no place outlives its outing and the history survives a route
+    deleted.
+  - **Your rounds** (the functional review): a round found is listed by itself, under a door
+    on the Outings page, with its walks and a small chart of their times, so the comparison
+    has a home besides the outing's page. No record board, no fastest mark: one reader and
+    their own rounds.
+  - **The twelve hours** of decision 14 now start no outing: they were for a way walked on the
+    spot and a followed route, both dropped. Every outing keeps four, «Keep going» as before.
 
 ### Open
 

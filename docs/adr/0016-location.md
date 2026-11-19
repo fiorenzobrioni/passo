@@ -348,6 +348,10 @@ to be proven on a device in Phase 15):
     *Amended 19 Nov 2026 (owner):* with on the spot dropped (decision 13), only the outing that
     follows a route (Phase 20) starts with twelve hours; a city walk measured with GPS keeps
     four, as every walk.
+    *Amended again 19 Nov 2026 (owner; PLANNING.md §15, «Phase 20 reviewed: the usual round
+    alone»):* following a route is not built either, so the twelve hours start no outing:
+    every outing has four, and «Keep going» moves them on as above. Should a long outing come
+    back, designed anew, this is where its cap is decided.
 
 15. **One APK.** A second build without the permission would keep "cannot" for the reader who
     wants it, at the price of two artifacts to test, sign and explain at every release, and of
@@ -359,6 +363,10 @@ to be proven on a device in Phase 15):
     walks, an outing that starts by itself where the reader is, reminders tied to a place, and
     `ACCESS_BACKGROUND_LOCATION` for any reason. Passo is a step counter that can measure a
     walk.
+    *Amended 19 Nov 2026 (owner):* following a route, a GPX from elsewhere or one of the
+    reader's own, is left out too: with no ground to draw outside its forty cities a map app
+    does it better, and the reader's own streets need no guide. The usual round (Phase 20)
+    compares a walk with the reader's own; it never guides one.
 
 ## Why this is acceptable now
 

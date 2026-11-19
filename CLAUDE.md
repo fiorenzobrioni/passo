@@ -44,9 +44,9 @@ and 16 are built** (18 Nov 2026), on branches in cascade, and wait for a phone: 
 and decided is in their boxes and in archive 04 (`docs/planning/README.md`, from «Location, for
 an outing that asks for it» on); their proofs on a phone (the boxes in «Open») come before any
 release. **Phase 17 is next.** On 19 Nov 2026 the owner dropped Phases 18 and 19 «On the spot»:
-Phase 18 is now a city walk measured with GPS (small), Phase 19 is dropped, and Phase 20 stays,
-to be reviewed before it starts (PLANNING.md §15, «The places on the spot dropped, the city walk
-measured»).
+Phase 18 is now a city walk measured with GPS (small), Phase 19 is dropped, and Phase 20 is the
+usual round alone: no route is followed, no GPX imported (PLANNING.md §15, «The places on the spot
+dropped, the city walk measured» and «Phase 20 reviewed: the usual round alone»).
 
 ## Build and commands
 

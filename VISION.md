@@ -201,11 +201,14 @@ Android's cloud backup.
   its kilometres truer. «On the spot», a city walk or a way walked where it is, was weighed and
   dropped (owner, 19 Nov 2026): real value for few readers, a high cost for all
   (`docs/adr/0016-location.md`, decision 13, amended).
-- **Your routes** («I tuoi percorsi», Phase 20): the same guidance along a GPX or a past
-  outing, and a round the reader repeats compared with their usual.
+- **Your usual round** («Il tuo giro solito», Phase 20): a walk the reader repeats, known
+  without being told among their own outings with GPS, and compared with their usual, honestly
+  (the same direction, the time brought to the usual length): a sentence on the outing's page,
+  a line at each kilometre while it counts, and the rounds listed with their walks.
 
 Still out: a catalogue of sports, cycling, training plans, segments, rankings, friends, live
-sharing, an outing that starts by itself, and location in the background for any reason.
+sharing, an outing that starts by itself, following a route or a GPX from elsewhere (weighed
+and left out on 19 Nov 2026), and location in the background for any reason.
 
 ### Possible post-1.0 ideas (not committed)
 
