@@ -5,12 +5,14 @@ import com.callbackdev.passo.core.domain.backup.BackupFixtures.backup
 import com.callbackdev.passo.core.domain.backup.BackupFixtures.day
 import com.callbackdev.passo.core.domain.backup.BackupFixtures.minutes
 import com.callbackdev.passo.core.domain.backup.BackupFixtures.session
+import com.callbackdev.passo.core.domain.routes.Splits
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.model.AppPalette
 import com.callbackdev.passo.core.model.DiagnosticsEvent
 import com.callbackdev.passo.core.model.DiagnosticsType
 import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.IntervalSplit
+import com.callbackdev.passo.core.model.OutingLeg
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.Sex
 import com.callbackdev.passo.core.model.StepLengthMode
@@ -119,6 +121,25 @@ class BackupCodecTest {
         // A share is between nothing and all; a sample with no steps says nothing of a step.
         assertThat(read.sessions.single().measuredShare).isEqualTo(1.0)
         assertThat(read.stepLengthSamples).isEmpty()
+    }
+
+    @Test
+    fun `a leg no outing can have is dropped, and its splits are cut from the rest`() {
+        val legs = listOf(
+            OutingLeg(0, 100.0, 70_000, 130.0, endedAtMillis = 1_790_000_070_000),
+            OutingLeg(1, 100.0, 70_000, 130.0, endedAtMillis = 1_790_000_140_000),
+        )
+        val outing = session(1_790_000_000_000).copy(gps = true, stepsMeters = 210.0, measuredShare = 0.96, legs = legs)
+        val text = BackupCodec.encode(full.copy(sessions = listOf(outing)))
+        // A damaged or hand-edited file: a leg of ten thousand billion metres.
+        val broken = text.replaceFirst(Regex("\"meters\"\\s*:\\s*100(\\.0)?"), "\"meters\": 1e13")
+        assertThat(broken).contains("1e13")
+
+        val read = (BackupCodec.decode(broken) as BackupRead.Ok).backup.sessions.single()
+
+        assertThat(read.legs.map { it.meters }).containsExactly(100.0)
+        assertThat(read.legs.single().index).isEqualTo(0)
+        assertThat(Splits.of(read.legs, 1_000.0).single().meters).isEqualTo(100.0)
     }
 
     @Test

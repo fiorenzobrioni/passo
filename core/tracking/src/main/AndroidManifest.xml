@@ -15,7 +15,7 @@
   Nothing else is held, and the build proves it: `checkForbiddenPermissions` fails unless the
   merged manifest requests exactly the list written in build-logic (these, and the two the
   libraries bring). INTERNET and ACCESS_BACKGROUND_LOCATION fail it by name: Passo cannot send
-  anything, and cannot know where the phone is with no outing that asked. The goal alarms are
+  anything, and the receiver is held only for an outing that asked for it. The goal alarms are
   inexact and need no permission, and the Quick Settings tile needs none either.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">

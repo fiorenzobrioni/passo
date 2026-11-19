@@ -87,6 +87,7 @@ import com.callbackdev.passo.core.designsystem.format.unitOf
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.share.ShareImage
 import com.callbackdev.passo.core.designsystem.share.SharedFiles
+import com.callbackdev.passo.core.designsystem.share.writeDocument
 import com.callbackdev.passo.core.designsystem.theme.GroupShape
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
@@ -142,7 +143,7 @@ fun OutingRoute(sessionId: Long, onBack: () -> Unit, viewModel: OutingViewModel 
         if (uri != null) {
             scope.launch {
                 val gpx = viewModel.gpx(name)
-                val ok = gpx != null && SharedFiles.save(context, uri) { it.write(gpx.toByteArray()) }
+                val ok = gpx != null && SharedFiles.save(context, uri) { it.writeDocument(gpx) }
                 // Said on the page, where it can be read: a toast is gone before it is.
                 messages.showSnackbar(if (ok) saved else saveFailed)
             }
@@ -164,7 +165,7 @@ fun OutingRoute(sessionId: Long, onBack: () -> Unit, viewModel: OutingViewModel 
             shareGpx = {
                 scope.launch {
                     val gpx = viewModel.gpx(name) ?: return@launch
-                    SharedFiles.cache(context, "$file.gpx") { it.write(gpx.toByteArray()) }
+                    SharedFiles.cache(context, "$file.gpx") { it.writeDocument(gpx) }
                         ?.let { SharedFiles.share(context, it, GPX_MIME, chooser) }
                 }
             },

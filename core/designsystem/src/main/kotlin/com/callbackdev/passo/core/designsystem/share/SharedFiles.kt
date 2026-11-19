@@ -20,17 +20,22 @@ import java.io.OutputStream
  */
 object SharedFiles {
     /**
-     * Writes a file named [name] to the cache's share folder with [write]; its content Uri, or
-     * null if it could not be written. One file at a time: the last share's is no longer needed.
+     * Writes a file named [name] to the cache's share folder with [write], which says whether
+     * it wrote it; its content Uri, or null if it could not be written. One file at a time: the
+     * last share's is no longer needed.
      */
-    suspend fun cache(context: Context, name: String, write: (OutputStream) -> Unit): Uri? =
+    suspend fun cache(context: Context, name: String, write: (OutputStream) -> Boolean): Uri? =
         withContext(Dispatchers.IO) {
             try {
                 val folder = File(context.cacheDir, FOLDER).apply { mkdirs() }
                 folder.listFiles()?.forEach { it.delete() }
                 val file = File(folder, name)
-                file.outputStream().use(write)
-                FileProvider.getUriForFile(context, "${context.packageName}$AUTHORITY_SUFFIX", file)
+                if (file.outputStream().use(write)) {
+                    FileProvider.getUriForFile(context, "${context.packageName}$AUTHORITY_SUFFIX", file)
+                } else {
+                    file.delete()
+                    null
+                }
             } catch (e: IOException) {
                 null
             } catch (e: IllegalArgumentException) {
@@ -48,13 +53,13 @@ object SharedFiles {
         runCatching { context.startActivity(Intent.createChooser(send, title).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
     }
 
-    /** Writes with [write] where the reader chose (the Storage Access Framework); false if it could not. */
-    suspend fun save(context: Context, uri: Uri, write: (OutputStream) -> Unit): Boolean = withContext(Dispatchers.IO) {
+    /**
+     * Writes with [write], which says whether it wrote it, where the reader chose (the Storage
+     * Access Framework); false if it could not: a stream that opened is not a file written.
+     */
+    suspend fun save(context: Context, uri: Uri, write: (OutputStream) -> Boolean): Boolean = withContext(Dispatchers.IO) {
         try {
-            context.contentResolver.openOutputStream(uri)?.use {
-                write(it)
-                true
-            } == true
+            context.contentResolver.openOutputStream(uri)?.use(write) == true
         } catch (e: IOException) {
             false
         } catch (e: SecurityException) {
@@ -64,4 +69,10 @@ object SharedFiles {
 
     private const val FOLDER = "share"
     private const val AUTHORITY_SUFFIX = ".share"
+}
+
+/** Writes [text] as UTF-8, for [SharedFiles]: a document, unlike an image, cannot fail to encode. */
+fun OutputStream.writeDocument(text: String): Boolean {
+    write(text.toByteArray(Charsets.UTF_8))
+    return true
 }

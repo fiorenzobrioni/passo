@@ -46,8 +46,6 @@ object ShareImage {
         return image
     }
 
-    /** Writes [image] to [out] as a PNG. */
-    fun write(image: Bitmap, out: OutputStream) {
-        image.compress(Bitmap.CompressFormat.PNG, QUALITY, out)
-    }
+    /** Writes [image] to [out] as a PNG; false when it could not be encoded. */
+    fun write(image: Bitmap, out: OutputStream): Boolean = image.compress(Bitmap.CompressFormat.PNG, QUALITY, out)
 }

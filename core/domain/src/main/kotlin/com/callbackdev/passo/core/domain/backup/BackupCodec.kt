@@ -1,5 +1,6 @@
 package com.callbackdev.passo.core.domain.backup
 
+import com.callbackdev.passo.core.domain.routes.Legs
 import com.callbackdev.passo.core.domain.routes.RouteCodec
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.model.AltitudeSource
@@ -432,9 +433,11 @@ private fun OutingDto.toSession(): Session? {
         measuredShare = measuredShare?.takeIf { gps && !it.isNaN() }?.coerceIn(0.0, 1.0),
         ascentMeters = ascentMeters?.nonNegative().takeIf { gps },
         descentMeters = descentMeters?.nonNegative().takeIf { gps },
-        // A leg with no length says nothing; the rest in the file's order, numbered anew.
+        // A leg with no length says nothing, and one longer than a leg is not one (a damaged
+        // file, or a hand-edited one): the splits are cut from them, on the page as it opens.
+        // The rest in the file's order, numbered anew.
         legs = legs.takeIf { gps }.orEmpty()
-            .filter { it.meters > 0 && !it.meters.isNaN() }
+            .filter { it.meters > 0 && it.meters <= Legs.MAX_METERS }
             .mapIndexed { index, leg ->
                 OutingLeg(
                     index = index,
@@ -471,7 +474,7 @@ private fun Set<SessionMilestone>.percents(): List<Int> = map { it.percent }.sor
 private fun List<Int>.toMilestones(): Set<SessionMilestone> =
     mapNotNull { percent -> SessionMilestone.entries.firstOrNull { it.percent == percent } }.toSet()
 
-private fun Double.nonNegative(): Double = if (isNaN() || this < 0) 0.0 else this
+private fun Double.nonNegative(): Double = if (!isFinite() || this < 0) 0.0 else this
 
 /** A route's points from the file's Base64; none where it is not Base64, or not a route. */
 private fun String.toRoutePoints(): List<RoutePoint> = try {

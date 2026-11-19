@@ -13,7 +13,9 @@ import kotlin.math.sqrt
  *   wall time the way a step sample's is, never the satellites' own time, which can stand
  *   seconds from the phone's. Steps and fixes are interleaved on this one clock.
  * @property accuracyMeters the radius the receiver gives it; null when it gives none.
- * @property altitudeMeters above mean sea level; null when the fix has none.
+ * @property altitudeMeters above the WGS84 ellipsoid, as the receiver gives it (tens of metres
+ *   from the height above mean sea level: the geoid's separation); null when the fix has none.
+ *   Only the points kept are turned to mean sea level, as they are written.
  * @property mock set by a test provider (the system's mock-location setting), not by satellites.
  */
 data class Fix(

@@ -95,9 +95,12 @@ class MeasureFormatter(private val locale: Locale, val units: UnitSystem) {
      * it is an estimate, and says so in the words around it.
      */
     fun elevation(meters: Double): Measure = when (units) {
-        UnitSystem.METRIC -> Measure(decimal(meters, 0, 0), MeasureUnit.METER)
-        UnitSystem.IMPERIAL -> Measure(decimal(meters * FEET_PER_METER, 0, 0), MeasureUnit.FOOT)
+        UnitSystem.METRIC -> Measure(decimal(wholeOrZero(meters), 0, 0), MeasureUnit.METER)
+        UnitSystem.IMPERIAL -> Measure(decimal(wholeOrZero(meters * FEET_PER_METER), 0, 0), MeasureUnit.FOOT)
     }
+
+    /** [value] rounded whole, a zero being a zero: a seafront 3 dm below the sea is «0 m», not «-0 m». */
+    private fun wholeOrZero(value: Double): Double = Math.round(value).toDouble()
 
     /** The same pace as whole minutes and seconds, for a sentence said aloud. */
     fun paceParts(secondsPerKm: Double): Pair<Int, Int> {

@@ -106,7 +106,7 @@ class Altitude {
         val change = current - (before ?: current)
         val climbed = (relative ?: current) + if (pressure != null && warming) change + driftChange else change
         relative = climbed
-        return Height(meters = current, relative = climbed)
+        return Height(meters = current, relative = climbed, fromPressure = pressure != null)
     }
 
     /**
@@ -115,8 +115,10 @@ class Altitude {
      * @property meters above mean sea level: what the point keeps, and the profile draws.
      * @property relative the series the climb is counted on: [meters], less the settling of the
      *   level in a walk's first minutes.
+     * @property fromPressure it moved with the pressure; false where the satellites were alone,
+     *   on a phone with no sensor or for want of a reading near the point.
      */
-    data class Height(val meters: Double, val relative: Double)
+    data class Height(val meters: Double, val relative: Double, val fromPressure: Boolean = false)
 
     companion object {
         /**
@@ -164,19 +166,23 @@ class Altitude {
 class Climb(private val thresholdMeters: Double) {
     private var from: Double? = null
 
-    /** What [altitudeMeters] adds: metres up or metres down, and most often neither. */
-    fun next(altitudeMeters: Double): Step {
+    /**
+     * What [altitudeMeters] adds: metres up or metres down, and most often neither. [threshold]
+     * is the one its height deserves: a phone with a barometer gives some heights from the
+     * satellites alone (the sensor's readings lost or late), and those wander as any.
+     */
+    fun next(altitudeMeters: Double, threshold: Double = thresholdMeters): Step {
         val reference = from
         if (reference == null) {
             from = altitudeMeters
             return Step.NONE
         }
         val change = altitudeMeters - reference
-        if (change >= thresholdMeters) {
+        if (change >= threshold) {
             from = altitudeMeters
             return Step(up = change, down = 0.0)
         }
-        if (change <= -thresholdMeters) {
+        if (change <= -threshold) {
             from = altitudeMeters
             return Step(up = 0.0, down = -change)
         }

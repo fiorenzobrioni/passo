@@ -113,6 +113,13 @@ class MeasureFormatterTest {
     }
 
     @Test
+    fun `a height a little below the sea is nought, never minus nought`() {
+        assertThat(english.elevation(-0.4)).isEqualTo(Measure("0", MeasureUnit.METER))
+        assertThat(imperial.elevation(-0.1)).isEqualTo(Measure("0", MeasureUnit.FOOT))
+        assertThat(english.elevation(-2.6)).isEqualTo(Measure("-3", MeasureUnit.METER))
+    }
+
+    @Test
     fun `the goal share is floored and not capped`() {
         assertThat(english.percent(0.999)).isEqualTo("99%")
         assertThat(english.percent(1.2)).isEqualTo("120%")

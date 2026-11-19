@@ -32,6 +32,9 @@ object Legs {
     /** A leg's length: fine enough to cut a kilometre or a mile within a few metres. */
     const val LEG_METERS: Double = 100.0
 
+    /** The most a leg can say it is: [LEG_METERS], and the rounding of the pieces laid on it. */
+    const val MAX_METERS: Double = LEG_METERS + 0.01
+
     /**
      * [legs] with [piece] laid on them: the leg under way is filled to [LEG_METERS], and what is
      * left of the piece opens the next, its steps and its time shared by the metres. Steps that
@@ -176,6 +179,9 @@ object Splits {
         var open = Open(0)
         var previousEnd = legs.firstOrNull()?.endedAtMillis ?: 0L
         for (leg in legs) {
+            // Never longer than a leg, as laid: one that says otherwise (a damaged import) is
+            // not cut into splits, or a figure of thirteen digits would be cut for ever.
+            if (!leg.meters.isFinite() || leg.meters > Legs.MAX_METERS) continue
             var left = leg.meters
             var taken = 0.0
             if (left <= 0.0) {

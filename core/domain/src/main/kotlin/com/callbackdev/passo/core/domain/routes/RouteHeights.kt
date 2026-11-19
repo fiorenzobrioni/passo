@@ -75,9 +75,11 @@ data class Climbed(val atMillis: Long, val upMeters: Double, val downMeters: Dou
  * the moment it was ([Climb]).
  *
  * The two streams arrive apart: the points with the step batches, the pressure in batches of
- * its own. A point waits here until the readings reach its second, so that it is never given
- * its height from the satellites alone for want of a reading that was on its way; a point that
- * has waited [MAX_WAIT_MILLIS], or the outing's end, takes what there is.
+ * its own. A point waits here until the readings reach its own second, so that it is never
+ * given its height from the satellites alone, or from the readings before it only, for want of
+ * those on their way; a point that has waited
+ * [MAX_WAIT_MILLIS], or the outing's end, takes what there is. A height that then comes from
+ * the satellites alone is counted past their own threshold, as on a phone with no barometer.
  *
  * Pure; not thread-safe.
  *
@@ -121,7 +123,7 @@ class RouteHeights(private val barometer: Boolean) {
         while (waiting.isNotEmpty()) {
             val point = waiting.first()
             val atMillis = point.epochSecond * MILLIS_PER_SECOND
-            val covered = reach != null && atMillis <= reach + PressureTrack.WINDOW_MILLIS
+            val covered = reach != null && reach >= atMillis
             if (barometer && !all && !covered && nowMillis - atMillis <= MAX_WAIT_MILLIS) break
             waiting.removeAt(0)
             // A stretch begins: no climb across a pause or a ride.
@@ -139,7 +141,10 @@ class RouteHeights(private val barometer: Boolean) {
                 known = true
                 climbed += Climbed(atMillis, 0.0, 0.0)
             }
-            val step = climb.next(height.relative)
+            val step = climb.next(
+                height.relative,
+                if (height.fromPressure) Climb.BAROMETER_THRESHOLD_METERS else Climb.SATELLITE_THRESHOLD_METERS,
+            )
             if (!step.isNone) climbed += Climbed(atMillis, step.up, step.down)
             out += point.copy(altitudeDm = (height.meters * DECIMETERS).roundToInt())
         }

@@ -92,13 +92,14 @@ class RouteHeightsTest {
 
         val first = heights.take(points, track, nowMillis = 60_000)
 
-        assertThat(first.points.last().epochSecond).isEqualTo(32)
+        // Up to the last reading's second, never past it on the readings before it alone.
+        assertThat(first.points.last().epochSecond).isEqualTo(30)
         assertThat(heights.hasWaiting).isTrue()
         // The readings arrive: the points that waited are given theirs, with none from the
         // satellites alone.
         track.read(31, 60) { 100.0 }
         val second = heights.take(emptyList(), track, nowMillis = 61_000)
-        assertThat(second.points.map { it.epochSecond }).containsExactlyElementsIn((34L..60L step 2)).inOrder()
+        assertThat(second.points.map { it.epochSecond }).containsExactlyElementsIn((32L..60L step 2)).inOrder()
         assertThat(heights.hasWaiting).isFalse()
         assertThat((first.climbed + second.climbed).up()).isEqualTo(0.0)
     }
@@ -142,6 +143,23 @@ class RouteHeightsTest {
         assertThat(result.climbed.up()).isWithin(15.0).of(60.0)
         // Counted ten metres at a time, not three.
         assertThat(result.climbed.filter { it.upMeters > 0 }.all { it.upMeters >= 10.0 }).isTrue()
+    }
+
+    @Test
+    fun `with a barometer, heights the satellites gave alone are counted past their own threshold`() {
+        val heights = RouteHeights(barometer = true)
+        val track = PressureTrack()
+        // A flat walk: the first minute with the pressure, then its readings lost (the screen
+        // off, the sensor's batch too short), the satellites wandering five metres either way.
+        track.read(0, 60) { 100.0 }
+        val wander = { second: Int -> 100.0 + 5.0 * kotlin.math.sin(second / 20.0) }
+        val points = (0..600 step 2).map { point(it.toLong(), if (it <= 60) 100.0 else wander(it)) }
+
+        val result = heights.take(points, track, nowMillis = 600_000, all = true)
+
+        assertThat(result.points).hasSize(points.size)
+        assertThat(result.climbed.up()).isEqualTo(0.0)
+        assertThat(result.climbed.down()).isEqualTo(0.0)
     }
 
     @Test
