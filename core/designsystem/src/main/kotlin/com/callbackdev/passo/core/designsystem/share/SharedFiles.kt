@@ -57,15 +57,16 @@ object SharedFiles {
      * Writes with [write], which says whether it wrote it, where the reader chose (the Storage
      * Access Framework); false if it could not: a stream that opened is not a file written.
      */
-    suspend fun save(context: Context, uri: Uri, write: (OutputStream) -> Boolean): Boolean = withContext(Dispatchers.IO) {
-        try {
-            context.contentResolver.openOutputStream(uri)?.use(write) == true
-        } catch (e: IOException) {
-            false
-        } catch (e: SecurityException) {
-            false
+    suspend fun save(context: Context, uri: Uri, write: (OutputStream) -> Boolean): Boolean =
+        withContext(Dispatchers.IO) {
+            try {
+                context.contentResolver.openOutputStream(uri)?.use(write) == true
+            } catch (e: IOException) {
+                false
+            } catch (e: SecurityException) {
+                false
+            }
         }
-    }
 
     private const val FOLDER = "share"
     private const val AUTHORITY_SUFFIX = ".share"

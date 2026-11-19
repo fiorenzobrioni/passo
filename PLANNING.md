@@ -1598,6 +1598,61 @@ This log starts with Phase 16 built (18 Nov 2026); its entries are written below
     approximate alone), `PlanEditorScreenTest` (each note, off and on, Italian on a small
     phone), screenshots looked at.
 
+- **19 Nov 2026.** **The review of Phases 15 and 16, and its fixes** (owner: a full review of
+  the two branches not yet in `main`, then "fix every bug, major and minor, with the tests",
+  keeping the app premium). The two branches were reviewed against `main` and against each
+  other; the fixes sit on a branch of their own on top of Phase 16, so the three merge in
+  order with nothing rewritten. Seventeen findings, sixteen fixed; one was already mended by
+  Phase 16 (deleting a short outing no longer makes `routes.db`: `RouteFile`).
+  - **No metre lost by the meter** (`RouteMeter`). A fix late for its batch (the receiver's
+    own delay behind a settle through now, with the screen on) was read as stillness: the
+    line's end jumped to it and the metres to it were lost. It is now measured from the line's
+    end as any other. The steps after the last fix are kept span by span (the tail): a late
+    fix covers only what was walked before its moment, and a pause or a stop after a few
+    seconds under an arcade counts them as the steps' instead of dropping them. The service
+    asks the receiver for its fixes in line (`settleRequests`) and settles through the request
+    each completed flush answers, never through a later one still on its way. §4.6's spirit:
+    `RouteMeterTest` (late fixes, a pause under an arcade).
+  - **The cap** (ADR 0016 decision 14, amended the same day). «Still walking?» says the
+    minutes really left (`SessionAnnouncement.capAhead(session, now)`): asked late, after a
+    sit at a café, it said fifteen. A pause is no longer time towards the cap: `resume` moves
+    it on by the pause, and a question already open stays open for it, so an outing paused
+    across its cap is asked before it ends instead of ending at the first step, unasked.
+  - **The service's last write.** As it goes (stopped by the system, counting turned off, the
+    phone shutting down), an outing with GPS has its line cut where it stands
+    (`SessionTracker.cutRoute`), its distance written with it and its last points with the
+    route; before, the open batches' metres and the points not yet written went with the
+    process.
+  - **The legs** are written whenever they changed: a batch writes every leg changed since the
+    last write (`TrackingRepository`, a cache of what it wrote, lost with the process, so the
+    first batch after one writes them all), not the last five; «Keep going» lays a quarter of
+    an hour's at once. `Legs.lay` numbers a new leg after the last, never by count.
+  - **A deleted route stays deleted.** An outing's page offers «Delete this route» only once
+    the outing is over (while it counts it says when it can); `RouteRepository.forget` keeps
+    the route deleted in this process, by the outing's id and start (an outing reopened by
+    «Keep going» writes nothing to it). «Delete all routes» keeps the one still being written,
+    and its dialog says so while there is one. New strings, English and Italian.
+  - **The first route seen as it comes.** What watches the routes (the outing's page, Your
+    data) watches for `routes.db` too: it decided once whether the file was there, so on the
+    first outing with GPS a page already open never showed the route.
+  - **The climb.** On a phone with a barometer, a height the satellites gave alone (readings
+    lost or late) is counted past the satellites' ten metres, not three
+    (`Altitude.Height.fromPressure`); a point waits for the readings to reach its own second;
+    a climb is priced at the cadence of the leg it was walked in (`Legs.cadenceOf`), not the
+    latest batch's: a hill run up and told after the walk began again cost the walk's rate.
+  - **A damaged backup stays harmless**: a leg longer than a leg is dropped on import and never
+    cut into splits (`Legs.MAX_METERS`): a figure of thirteen digits hung the outing's page.
+    A non-finite number reads as none.
+  - **Small ones**: saving or sharing an image says it failed when it could not be encoded
+    (`SharedFiles`, its writers say whether they wrote); a height just below the sea reads
+    «0 m»; `Fix.altitudeMeters` documented as above the ellipsoid; the manifest's comment
+    keeps to the words §10 allows. `:core:designsystem` gets its `robolectric.properties`, for
+    its first Robolectric test.
+  - Tests for each: `RouteMeterTest`, `SessionTrackerCapTest`, `SessionTrackerRouteTest`,
+    `SplitsTest`, `RouteHeightsTest`, `BackupCodecTest`, `MeasureFormatterTest`,
+    `SessionRepositoryTest`, `RouteRepositoryTest`, `OutingScreenTest`, `DataSectionTest`,
+    `SharedFilesTest`. Phases 15 and 16 stay open for their checks on a device.
+
 ### Open
 
 - [ ] **On a device (owner): the shortcuts after an update** (archive 04, 15 Nov 2026, «The shortcuts

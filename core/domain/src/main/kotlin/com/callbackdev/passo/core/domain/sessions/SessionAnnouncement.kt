@@ -146,7 +146,8 @@ sealed interface SessionAnnouncement {
          * are fewer than the warning's quarter of an hour when the first steps within it came
          * late (a sit at a café). Null when there is no question open.
          */
-        fun capAhead(session: Session, nowMillis: Long): CapAhead? = session.capQuestionMinutes(nowMillis)?.let(::CapAhead)
+        fun capAhead(session: Session, nowMillis: Long): CapAhead? =
+            session.capQuestionMinutes(nowMillis)?.let(::CapAhead)
 
         fun endedAtCap(session: Session): EndedAtCap = EndedAtCap(session.totals.steps)
 
