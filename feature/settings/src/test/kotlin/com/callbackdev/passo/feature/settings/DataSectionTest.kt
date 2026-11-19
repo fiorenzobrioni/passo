@@ -120,6 +120,17 @@ class DataSectionTest {
     }
 
     @Test
+    fun `while an outing with GPS is under way, the dialog says its route is kept`() {
+        show(DataUiState(contents = contents.copy(routes = 2, routeBytes = 9_100, routeUnderWay = true)))
+
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(DataTags.DELETE_ROUTES))
+        compose.onNodeWithTag(DataTags.DELETE_ROUTES).performClick()
+
+        compose.onNodeWithText("The outing under way keeps its route until it is over.", substring = true)
+            .assertIsDisplayed()
+    }
+
+    @Test
     fun `while a file is written the rows say so and wait`() {
         show(DataUiState(contents = contents, task = DataTask.WRITING_BACKUP))
 

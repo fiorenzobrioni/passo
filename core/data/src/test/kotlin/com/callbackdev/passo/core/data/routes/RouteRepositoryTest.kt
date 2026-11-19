@@ -16,9 +16,14 @@ import com.callbackdev.passo.core.model.RoutePointKind
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.StepLengthSample
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -27,6 +32,7 @@ import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.w3c.dom.Element
 import java.io.File
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.xml.parsers.DocumentBuilderFactory
 
 /**
@@ -153,6 +159,63 @@ class RouteRepositoryTest {
 
         assertThat(routes.route(outing.id, outing.startedAtMillis)).isNull()
         assertThat(routeDatabase.routeDao().routes()).isEmpty()
+    }
+
+    @Test
+    fun `a page watching before the first route is written sees it come`() = runTest {
+        val made = AtomicBoolean(false)
+        val first = RouteRepository(routeDatabase.routeDao(), RouteFile { made.get() })
+        val outing = outing()
+        val pointCount = CompletableDeferred<Int>()
+        val kept = CompletableDeferred<Int>()
+        val watching = listOf(
+            launch(Dispatchers.Default) {
+                first.observePointCount(outing.id).collect { if (it != null) pointCount.complete(it) }
+            },
+            launch(Dispatchers.Default) { first.count.collect { if (it > 0) kept.complete(it) } },
+        )
+
+        // The first chunk makes the file, the pages already watching.
+        made.set(true)
+        first.append(outing.id, outing.startedAtMillis, points(4))
+
+        withContext(Dispatchers.Default) {
+            withTimeout(5_000) {
+                assertThat(pointCount.await()).isEqualTo(4)
+                assertThat(kept.await()).isEqualTo(1)
+            }
+        }
+        watching.forEach { it.cancel() }
+    }
+
+    @Test
+    fun `a route the reader deleted is never written again, should a point of it still come`() = runTest {
+        val walk = outing()
+        routes.append(walk.id, walk.startedAtMillis, points(10))
+
+        routes.forget(walk.id, walk.startedAtMillis)
+        // «Keep going» taken after the delete, or a chunk on its way as the reader tapped.
+        routes.append(walk.id, walk.startedAtMillis, points(5, from = 10))
+
+        assertThat(routes.route(walk.id, walk.startedAtMillis)).isNull()
+        // An outing that comes to hold the same id is another outing: its route is written.
+        routes.append(walk.id, walk.startedAtMillis + 60_000, points(5))
+        assertThat(routes.route(walk.id, walk.startedAtMillis + 60_000)).isNotNull()
+    }
+
+    @Test
+    fun `deleting every route keeps the one still being written`() = runTest {
+        val before = outing(startedAtMillis = START_SECOND * 1_000 - 86_400_000)
+        val underWay = outing()
+        routes.append(before.id, before.startedAtMillis, points(10))
+        routes.append(underWay.id, underWay.startedAtMillis, points(10))
+
+        routes.deleteAll(keep = underWay.id)
+        routes.append(underWay.id, underWay.startedAtMillis, points(5, from = 10))
+        routes.append(before.id, before.startedAtMillis, points(5, from = 10))
+
+        assertThat(routes.route(underWay.id, underWay.startedAtMillis)?.points).hasSize(15)
+        assertThat(routes.route(before.id, before.startedAtMillis)).isNull()
     }
 
     @Test

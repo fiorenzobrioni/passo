@@ -73,6 +73,7 @@
     <string name="outing_saved">Salvato.</string>
     <string name="outing_save_failed">Non è stato possibile salvarlo lì.</string>
     <string name="outing_delete_route">Elimina questo percorso</string>
+    <string name="outing_delete_route_live">Finita l’uscita, potrai eliminarne il percorso da qui.</string>
     <string name="outing_delete_route_title">Eliminare questo percorso?</string>
     <string name="outing_delete_route_text">La linea e i suoi luoghi vengono eliminati da questo telefono. L’uscita e i suoi numeri restano.</string>
     <string name="outing_delete_route_confirm">Elimina</string>

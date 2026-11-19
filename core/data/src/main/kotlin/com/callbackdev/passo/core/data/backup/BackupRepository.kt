@@ -20,7 +20,9 @@ import com.callbackdev.passo.core.model.StepLengthSample
 import com.callbackdev.passo.core.model.UnitSystem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -28,7 +30,13 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /** What this phone holds, as the data rows of Settings say it before an export. */
-data class DataContents(val days: Int, val outings: Int, val routes: Int = 0, val routeBytes: Long = 0)
+data class DataContents(
+    val days: Int,
+    val outings: Int,
+    val routes: Int = 0,
+    val routeBytes: Long = 0,
+    val routeUnderWay: Boolean = false,
+)
 
 /**
  * What an import did (ADR 0011).
@@ -66,13 +74,20 @@ constructor(
     private val tracking: TrackingRepository,
     private val routes: RouteRepository,
 ) {
-    val contents: Flow<DataContents> =
-        combine(tracking.observeDayCount(), sessionDao.observeSessionCount(), routes.count) { days, outings, kept ->
-            DataContents(days, outings, kept, if (kept > 0) routes.bytes() else 0)
-        }
+    val contents: Flow<DataContents> = combine(
+        tracking.observeDayCount(),
+        sessionDao.observeSessionCount(),
+        routes.count,
+        sessionDao.observeLiveSession().map { it?.session?.gps == true }.distinctUntilChanged(),
+    ) { days, outings, kept, underWay ->
+        DataContents(days, outings, kept, if (kept > 0) routes.bytes() else 0, routeUnderWay = underWay)
+    }
 
-    /** Forgets every route kept on this phone; the outings and their numbers stay. */
-    suspend fun deleteRoutes() = routes.deleteAll()
+    /**
+     * Forgets every route kept on this phone but the one of an outing with GPS still under way,
+     * which the service is writing; the outings and their numbers stay.
+     */
+    suspend fun deleteRoutes() = routes.deleteAll(keep = sessionDao.liveSession()?.session?.takeIf { it.gps }?.id)
 
     /**
      * Everything a new phone could not rebuild, read as it stands now.

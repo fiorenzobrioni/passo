@@ -91,10 +91,13 @@ constructor(
         opened.value = null
     }
 
-    /** Forgets the open outing's route: the line and its places. The outing and its numbers stay. */
+    /**
+     * Forgets the open outing's route: the line and its places, never to be written again. The
+     * outing and its numbers stay. Not while it counts: its page offers it once it is over.
+     */
     fun deleteRoute() {
-        val id = opened.value ?: return
-        viewModelScope.launch { routes.delete(id) }
+        val session = state.value?.session?.takeIf { !it.live } ?: return
+        viewModelScope.launch { routes.forget(session.id, session.startedAtMillis) }
     }
 
     /** The open outing's route as a GPX document named [name]; null when it has none. */

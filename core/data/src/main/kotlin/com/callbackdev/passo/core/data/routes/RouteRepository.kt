@@ -6,10 +6,16 @@ import com.callbackdev.passo.core.model.AltitudeSource
 import com.callbackdev.passo.core.model.Route
 import com.callbackdev.passo.core.model.RouteBox
 import com.callbackdev.passo.core.model.RoutePoint
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -28,12 +34,32 @@ fun interface RouteFile {
  *
  * A reader who never measures with GPS never has the routes' file: only a route written makes
  * it. Every read, and every deletion, asks [file] first and answers "nothing" without opening
- * a database that is not there.
+ * a database that is not there; what is watched watches for the file too, so a page open as the
+ * first route is written sees it come.
  */
 @Singleton
 class RouteRepository
 @Inject
 constructor(private val dao: RouteDao, private val file: RouteFile = RouteFile { true }) {
+    // The routes the reader deleted in this process, each by its outing's id and start: never
+    // written again, should the service still hold points of it (an outing reopened by «Keep
+    // going», a chunk on its way as the reader tapped). By the start too, as an id can come back.
+    private val forgotten: MutableSet<Pair<Long, Long>> = ConcurrentHashMap.newKeySet()
+
+    // Whether the file is known to be there: from [file] when someone watches, and from the
+    // first chunk this process appends, which makes it.
+    private val made = MutableStateFlow(false)
+
+    private val present: Flow<Boolean> = flow {
+        if (!made.value && file.exists()) made.value = true
+        emitAll(made)
+    }.distinctUntilChanged()
+
+    /** [read] once the file is there, [none] until then: never a database opened to make it. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun <T> whenPresent(none: T, read: () -> Flow<T>): Flow<T> =
+        present.flatMapLatest { if (it) read() else flowOf(none) }
+
     /**
      * Adds [points] to the route of the outing [sessionId], which started at
      * [sessionStartedAtMillis]; [altitudes] says where their heights came from, if they have any.
@@ -45,7 +71,9 @@ constructor(private val dao: RouteDao, private val file: RouteFile = RouteFile {
         altitudes: AltitudeSource? = null,
     ) {
         val box = RouteBox.of(points) ?: return
+        if (sessionId to sessionStartedAtMillis in forgotten) return
         dao.append(sessionId, sessionStartedAtMillis, RouteCodec.encode(points), points.size, box, altitudes?.name)
+        made.value = true
     }
 
     /**
@@ -65,27 +93,40 @@ constructor(private val dao: RouteDao, private val file: RouteFile = RouteFile {
      * How many points the route of the outing [sessionId] holds, as it changes: what its page
      * reads the route again at. Null with no route.
      */
-    fun observePointCount(sessionId: Long): Flow<Int?> = flow {
-        if (file.exists()) emitAll(dao.observePointCount(sessionId)) else emit(null)
-    }
+    fun observePointCount(sessionId: Long): Flow<Int?> = whenPresent(null) { dao.observePointCount(sessionId) }
 
     /** The outings that have a route, as they change: a route written, or deleted by the reader. */
-    val routeIds: Flow<Set<Long>> = flow {
-        if (file.exists()) emitAll(dao.observeRouteIds().map { it.toSet() }) else emit(emptySet())
-    }
+    val routeIds: Flow<Set<Long>> = whenPresent(emptySet()) { dao.observeRouteIds().map { it.toSet() } }
 
     /** How many routes are kept, as it changes. */
-    val count: Flow<Int> = flow { if (file.exists()) emitAll(dao.observeRouteCount()) else emit(0) }
+    val count: Flow<Int> = whenPresent(0) { dao.observeRouteCount() }
 
     /** The bytes the routes' points take: what Your data says they weigh. */
     suspend fun bytes(): Long = if (file.exists()) dao.routeBytes() else 0L
 
-    /** Forgets every route; the outings and their numbers are untouched. */
-    suspend fun deleteAll() {
-        if (file.exists()) dao.deleteAll()
+    /**
+     * The reader forgets every route but [keep]'s, the outing under way, whose route is still
+     * being written and is theirs to delete once it is over. The outings and their numbers are
+     * untouched.
+     */
+    suspend fun deleteAll(keep: Long? = null) {
+        if (!file.exists()) return
+        val gone = dao.routes().filter { it.sessionId != keep }
+        gone.forEach { forgotten += it.sessionId to it.sessionStartedAtMillis }
+        if (keep == null) dao.deleteAll() else gone.forEach { dao.delete(it.sessionId) }
     }
 
-    /** Forgets the route of the outing [sessionId]; the outing and its numbers are untouched. */
+    /**
+     * The reader forgets the route of the outing [sessionId], which started at
+     * [sessionStartedAtMillis]: deleted, and never written again. The outing and its numbers
+     * are untouched.
+     */
+    suspend fun forget(sessionId: Long, sessionStartedAtMillis: Long) {
+        forgotten += sessionId to sessionStartedAtMillis
+        delete(sessionId)
+    }
+
+    /** Deletes the route of the outing [sessionId]; the outing and its numbers are untouched. */
     suspend fun delete(sessionId: Long) {
         if (file.exists()) dao.delete(sessionId)
     }

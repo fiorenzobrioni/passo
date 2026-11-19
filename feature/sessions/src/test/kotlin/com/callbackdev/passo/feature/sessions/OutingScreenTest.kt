@@ -10,6 +10,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -142,6 +143,22 @@ class OutingScreenTest {
         assertThat(asked).containsExactly("image", "gpx", "save").inOrder()
         compose.onNodeWithTag(OutingTags.DELETE_CONFIRM).performClick()
         assertThat(asked).containsExactly("image", "gpx", "save", "delete").inOrder()
+    }
+
+    @Test
+    fun `while the outing counts, its route cannot be deleted, and the page says when it can`() {
+        val live = OutingSamples.measured.copy(
+            state = SessionState.ACTIVE,
+            end = null,
+            endedAtMillis = null,
+            reachedAtMillis = null,
+        )
+        show(OutingSamples.state(session = live))
+
+        page().performScrollToNode(hasText("Once the outing is over, its route can be deleted here."))
+        compose.onNodeWithText("Once the outing is over, its route can be deleted here.").assertIsDisplayed()
+        compose.onNodeWithTag(OutingTags.DELETE_ROUTE).assertDoesNotExist()
+        compose.onNodeWithTag(OutingTags.SHARE_GPX).assertExists()
     }
 
     @Test

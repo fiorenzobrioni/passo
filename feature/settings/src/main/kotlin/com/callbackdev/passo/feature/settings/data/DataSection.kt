@@ -228,7 +228,11 @@ internal fun DataDialogs(state: DataUiState, format: MeasureFormatter, files: Da
         AlertDialog(
             onDismissRequest = { files.deleteRoutesDialog.value = false },
             title = { Text(stringResource(R.string.data_delete_routes_title)) },
-            text = { Text(stringResource(R.string.data_delete_routes_text)) },
+            text = {
+                val text = stringResource(R.string.data_delete_routes_text)
+                val underWay = stringResource(R.string.data_delete_routes_under_way)
+                Text(if (state.contents.routeUnderWay) "$text $underWay" else text)
+            },
             confirmButton = {
                 TextButton(
                     onClick = {

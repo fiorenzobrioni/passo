@@ -90,6 +90,8 @@
     <string name="outing_saved">Saved.</string>
     <string name="outing_save_failed">It could not be saved there.</string>
     <string name="outing_delete_route">Delete this route</string>
+    <!-- In place of the button above while the outing is under way: its route is still being drawn. -->
+    <string name="outing_delete_route_live">Once the outing is over, its route can be deleted here.</string>
     <string name="outing_delete_route_title">Delete this route?</string>
     <string name="outing_delete_route_text">The line and its places are deleted from this phone. The outing and its numbers stay.</string>
     <string name="outing_delete_route_confirm">Delete</string>

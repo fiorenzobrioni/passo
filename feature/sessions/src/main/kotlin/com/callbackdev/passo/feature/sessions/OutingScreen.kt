@@ -288,7 +288,7 @@ private fun OutingPage(state: OutingUiState, format: MeasureFormatter, actions: 
             item(key = "profile") { ProfileSection(profile, session.totals.distanceMeters, format) }
         }
         if (route != null) {
-            item(key = "route") { RouteActions(actions, onDelete = { deleting = true }) }
+            item(key = "route") { RouteActions(actions, canDelete = !session.live, onDelete = { deleting = true }) }
         }
     }
     if (deleting) {
@@ -519,7 +519,7 @@ private fun ProfileSection(profile: List<Pair<Double, Double>>, distanceMeters: 
 
 /** What the route can do: share, save, delete. The GPX's choice says what the file holds, once, here. */
 @Composable
-private fun RouteActions(actions: OutingActions, onDelete: () -> Unit) {
+private fun RouteActions(actions: OutingActions, canDelete: Boolean, onDelete: () -> Unit) {
     Group {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Title(stringResource(R.string.outing_route))
@@ -537,10 +537,16 @@ private fun RouteActions(actions: OutingActions, onDelete: () -> Unit) {
                 modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag(OutingTags.SAVE_GPX),
             ) { Text(stringResource(R.string.outing_save_gpx)) }
             Note(stringResource(R.string.outing_gpx_note))
-            TextButton(
-                onClick = onDelete,
-                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag(OutingTags.DELETE_ROUTE),
-            ) { Text(stringResource(R.string.outing_delete_route), color = MaterialTheme.colorScheme.error) }
+            // Not while the outing counts: the service is still drawing the line, and a route
+            // deleted now would be drawn again from the next point.
+            if (canDelete) {
+                TextButton(
+                    onClick = onDelete,
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).testTag(OutingTags.DELETE_ROUTE),
+                ) { Text(stringResource(R.string.outing_delete_route), color = MaterialTheme.colorScheme.error) }
+            } else {
+                Note(stringResource(R.string.outing_delete_route_live))
+            }
         }
     }
 }
