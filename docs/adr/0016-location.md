@@ -286,6 +286,20 @@ to be proven on a device in Phase 15):
     privacy: an outing of the reader's own, started at their door with GPS on, is measured
     from its first step. The Ways' sentence, "No location, only your steps", stays true of
     every way from home.
+    *Amended 19 Nov 2026 (owner; PLANNING.md §15, «The places on the spot dropped, the city walk
+    measured»):* **on the spot is not built.** Its value is real and rare (a reader in one of
+    forty cities, or on a way, a few times a year), and its cost fell on every reader: a city
+    walk's progress made a place on the line instead of a sum of distances, and, with the
+    screen off, promises that needed a widening of the battery rules' exceptions (PLANNING.md
+    §9). Phases 18 and 19 «On the spot» are dropped. **A city walk may be measured instead**:
+    with «Measure with GPS» on its
+    page, a city walk from home is an outing with GPS, its distance the fused one (decision 5),
+    and the outing keeps the reader's real route. The walk stays imaginary: the city's map
+    never shows where the reader is, no place is told by where they stand, and no word places
+    them in the city, so it does not read as the navigation the paragraph above feared. What
+    it gives is not having to choose between the walk's story and the outing's measure. With
+    the switch off, as by default, the paragraph above holds unchanged; a way from home never
+    reads the satellites, and goes on by the day's steps, which decision 12 makes truer.
 
 14. **The longest outing: asked before it ends, and the reader may go on.** Four hours stays
     the cap for every outing, GPS or not: beside the end by stillness it is what stops an
@@ -330,6 +344,9 @@ to be proven on a device in Phase 15):
     in the same way. The end after 15 minutes still and after an hour paused are unchanged
     everywhere. This amends `docs/adr/0009-sessions.md`, decision 6 ("at four hours"), in the
     change that builds Phase 15.
+    *Amended 19 Nov 2026 (owner):* with on the spot dropped (decision 13), only the outing that
+    follows a route (Phase 20) starts with twelve hours; a city walk measured with GPS keeps
+    four, as every walk.
 
 15. **One APK.** A second build without the permission would keep "cannot" for the reader who
     wants it, at the price of two artifacts to test, sign and explain at every release, and of

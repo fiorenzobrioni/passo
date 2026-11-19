@@ -178,7 +178,8 @@ Asked for and approved by the owner on 18 Nov 2026, after weighing it a second t
 (`docs/adr/0016-location.md`; the phases are in PLANNING §11, 15 to 20). **Phase 15 is built**
 (18 Nov 2026; not released: it goes out with Phase 16 or not at all, and its proof on a phone
 comes first), and with it the principles, the non-goals and the success criteria above were
-amended, each where it changed. Phases 16 to 20 are planned.
+amended, each where it changed. Phase 16 is built too, waiting for the same proof; Phases 17,
+18 and 20 are planned, and Phase 19 was dropped with the first Phase 18 (owner, 19 Nov 2026).
 
 Location enters as a measuring tape, never as a tracker: it is read only inside an outing the
 reader started with «Measure with GPS» on. A reader who never turns it on is asked for nothing,
@@ -193,10 +194,13 @@ Android's cloud backup.
 - **The step that learns** («Il passo che impara», Phase 17): each outing with GPS says how
   long the reader's step is at each pace; Passo proposes the result, and every day without GPS
   reads truer for it.
-- **On the spot** («Sul posto», Phases 18 and 19): a city walk or a way walked where it is, for
-  a reader who goes there: a place told on arrival, a vibration when the route is left, a stamp
-  in a second ink, the stretches of a way walked in person kept over the years. From home,
-  both stay as they are, with no location.
+- **City walks measured** («Passeggiate misurate», Phase 18): a city walk stays imaginary, but
+  with «Measure with GPS» on its page its distance is measured on the reader's own streets and
+  their real route is kept, so one walk gives the story and the measure. The city's map never
+  shows where the reader is. A way from home stays as it is, with no location; Phase 17 makes
+  its kilometres truer. «On the spot», a city walk or a way walked where it is, was weighed and
+  dropped (owner, 19 Nov 2026): real value for few readers, a high cost for all
+  (`docs/adr/0016-location.md`, decision 13, amended).
 - **Your routes** («I tuoi percorsi», Phase 20): the same guidance along a GPX or a past
   outing, and a round the reader repeats compared with their usual.
 

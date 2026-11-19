@@ -43,7 +43,10 @@ work is measured against: read the ADR and the phase's section before planning. 
 and 16 are built** (18 Nov 2026), on branches in cascade, and wait for a phone: what was built
 and decided is in their boxes and in archive 04 (`docs/planning/README.md`, from «Location, for
 an outing that asks for it» on); their proofs on a phone (the boxes in «Open») come before any
-release. **Phase 17 is next.**
+release. **Phase 17 is next.** On 19 Nov 2026 the owner dropped Phases 18 and 19 «On the spot»:
+Phase 18 is now a city walk measured with GPS (small), Phase 19 is dropped, and Phase 20 stays,
+to be reviewed before it starts (PLANNING.md §15, «The places on the spot dropped, the city walk
+measured»).
 
 ## Build and commands
 
@@ -111,8 +114,10 @@ other. All business logic lives in `:core:domain`, with unit tests.
   taken back. Never for the day's count, never with no outing, never in the background, never
   by a timer or a geofence. Satellites only, through the platform's `LocationManager`: no
   Google Play services, no fused provider. Asked in context, the first time such an outing
-  starts; never in the first run. A way or a city walk from home never reads them. Nothing in
-  the app depends on it: with the switch off, every screen, number and wake is as before.
+  starts; never in the first run. A way from home never reads them, nor does a city walk
+  unless its page's «Measure with GPS» is on (Phase 18, as re-planned on 19 Nov 2026): then it
+  is an outing with GPS, measured and its route kept, and the city's map still never shows
+  where the reader is. Nothing in the app depends on it: with the switch off, every screen, number and wake is as before.
   Say "Passo sends nothing" and "cannot send"; never "Passo cannot know where the phone is".
 - **The day stays the steps'.** A day's distance, History, Insights, the ways from home and
   Your year on foot are computed from the steps, with or without outings measured with GPS.

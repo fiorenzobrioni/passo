@@ -49,7 +49,8 @@ so they are uniform"):
   page (the route on a map that moves, the kilometres, the climb, GPX and image, Your data;
   archive 04, «Phase 16, the outing's page»). Left: its check on a phone (the box in «Open»). 15 and
   16 are released together or not at all. **Next: Phase 17**, the step that learns (§11),
-  on a branch of its own from Phase 16's. Phases 17 to 20: not started.
+  on a branch of its own from Phase 16's. Phases 17, 18 (re-planned on 19 Nov 2026: a city walk
+  measured with GPS) and 20 (to review before it starts): not started. Phase 19 dropped.
 
 ## Open
 
@@ -694,9 +695,9 @@ cloud backup never carries; the day's distance stays the steps'.
 | 15 | The measured outing («Uscita misurata») | Permissions and the gate, the receiver, the fusion, the storage, the switch, the numbers | nothing before it |
 | 16 | The outing's page | The route drawn, splits, climb, GPX and image, Your data | 15 |
 | 17 | The step that learns («Il passo che impara») | The step length by cadence, from the outings with GPS | 15 |
-| 18 | On the spot: the cities («Sul posto») | A city walk walked there: real arrivals, off the route, back on it | 15, 16 |
-| 19 | On the spot: the ways | A way walked in person: a fine line, stamps in a second ink, the stretches walked there | 18 |
-| 20 | Your routes («I tuoi percorsi») | Follow a route (a GPX, a past outing), the usual round | 16, 18 |
+| 18 | City walks measured with GPS («Passeggiate misurate») | A city walk's distance measured on the reader's own streets, and their real route kept; the walk stays imaginary | 15, 16 |
+| 19 | Dropped (owner, 19 Nov 2026) | Was «On the spot: the ways»; the first Phase 18, «On the spot: the cities», went with it | |
+| 20 | Your routes («I tuoi percorsi») | Follow a route (a GPX, a past outing), the usual round; to review before it starts | 16 |
 
 **One phase, one session.** Each section is written to be enough for a session that has read
 CLAUDE.md, ADR 0016 and that section: it names the files to read first, the steps in order, the
@@ -707,7 +708,8 @@ checked) and opening its device box in «Open». A decision that departs from AD
 there as an amendment, with its date and reason, before the code that needs it.
 
 **Releases.** Phases 15 and 16 are released together or not at all (ADR 0016, consequences);
-17 to 20 may each follow in a release of their own, in this order unless the owner changes it.
+17 to 20 may each follow in a release of their own, in this order unless the owner changes it;
+18, being small, may go out with 17.
 
 **The bar** (owner, 18 Nov 2026: "precise work, premium quality as this app is; no compromises,
 no shortcuts, complete and feasible features, premium in the code and in the design and
@@ -1058,7 +1060,7 @@ fails on any permission outside the list.
 | Not taken back | The receiver stops 15 minutes after the cap; the points kept aside are dropped |
 | 3 h 45 min into an outing, sitting since 3 h 35 | Not asked: no step brings the question, and the stillness ends it at 3 h 50 as always |
 | The process restarted after «Keep going» | The moved cap is read from what was stored |
-| A city walk from home | Never with GPS (ADR 0016 decision 13, made plain): its outing has `gps` false, and no switch offers it; on the spot is Phase 18 |
+| A city walk from home | Never with GPS (ADR 0016 decision 13, made plain): its outing has `gps` false, and no switch offers it; Phase 18, re-planned on 19 Nov 2026, gives the walk's page a switch of its own |
 | A mock fix in a release build | Refused |
 
 ### Phase 16 — The outing's page: the route, the splits, the climb
@@ -1103,7 +1105,8 @@ app's own provider); `DataSection.kt`, `DataViewModel.kt`, `BackupRepository.kt`
   elsewhere the ground is plain, and the page says in a line that Passo carries no street map.
   A touch names the kilometre and its pace. One sentence to TalkBack («Your route: 5.2 km,
   from north to south, 3 stops»); the splits below are its words. Its gestures are a piece of
-  their own, since Phases 18 and 19 reuse them. Drawn in every theme and dress in a gallery
+  their own, since Phase 20 may reuse them (Phases 18 and 19 «On the spot», which would have,
+  were dropped on 19 Nov 2026). Drawn in every theme and dress in a gallery
   test, as the ways' maps are.
 - [x] **The outing's page** (`:feature:sessions`, a new entry in `PassoNavigation.kt`), for
   every outing, with or without GPS: the sentence first (what it was and how it went against
@@ -1295,167 +1298,83 @@ they ask.
 | «Not now», then a change of mind | The calibration page's row opens the card again, with today's curve |
 | An outing deleted | Its samples go with it; the curve in use is not recomputed behind the reader's back |
 
-### Phase 18 — On the spot: the cities («Sul posto»)
+### Phase 18 — City walks measured with GPS («Passeggiate misurate»)
 
-A city walk is imaginary and says so. A reader who is in the city can now walk it for real:
-«I'm here» / «Sono qui» binds the outing to the route itself, so a place is told when the
-reader reaches it, the point on the map is theirs, and a vibration of its own says the route
-was left and another that it was found again (ADR 0016 decision 13).
+A city walk stays imaginary: the city on its map, its places told by the distance the reader
+walks wherever they are. With «Measure with GPS» on, that distance is measured instead of
+estimated, and the outing keeps the reader's real route, as every outing with GPS does: one walk
+gives the story and the measure, where today the reader must choose one of the two (owner,
+19 Nov 2026; ADR 0016 decision 13, amended). It replaces «On the spot: the cities», dropped with
+Phase 19 the same day (§15, «The places on the spot dropped, the city walk measured»).
 
-**Read first:** ADR 0016 (decisions 4, 5 and 13), `docs/adr/0015-city-walks.md` (all),
-`docs/adr/0010-voice.md`. In the code: `SessionTracker.kt` (`placesPassed`), `WalkPlaces.kt`,
-`WalkDays`, `WayProgress.kt`, `Geo.kt` (`WayLine`), `WayProjection.kt`, `Way.kt`;
-`WayRepository.kt`, `WayDao.kt`; `SessionControl.kt` (`startWalk`), `SessionHaptics.kt`,
-`SessionSpeech.kt`, `SessionAnnouncement.kt`; `WalkScreen.kt`, `WaysViewModel.kt`,
-`WayMap.kt`, `WayStamp.kt`, `SessionCard.kt` (the walk's small map); Phase 16's `RouteMapView`
-and its gestures; `tools/build_ways.py` (`LINE_TOLERANCE`) and `tools/walks/`.
+**Read first:** ADR 0016 (decisions 2, 5 and 13, with their amendments),
+`docs/adr/0015-city-walks.md`; here Phase 15 (the switch, the one door, `GpsReadiness`) and
+Phase 16 (the outing's page). In the code: `WalkScreen.kt`, `WaysViewModel.kt`,
+`SessionControl.kt` (`startWalk`), `StepTrackingService.startWalk`, `SessionPlans.startWalk`,
+`OutingStarter.kt`, `GpsStart.kt`, `GpsSwitchNote`, `PlanEditorScreen.kt` (the switch and its
+note, to reuse, not to copy), `SessionTracker.kt` (`placesPassed`), `WalkPlaces.kt`, `WalkDays`,
+`SessionCard.kt`, `OutingScreen.kt`.
 
-- [ ] **The line is fine enough, proven.** A city's line is simplified to a 4,000th of its
-  frame's diagonal, a metre or two: a data test measures, for every walk, the largest distance
-  between the committed route (`tools/walks/*.geojson`) and the line in `WayData.kt`, and fails
-  over 5 m. No data changes if it passes.
-- [ ] **`LineSnap`** (`:core:domain/routes`, pure): the nearest point of a `WayLine` to a fix,
-  as metres along and metres aside; searched near the last place first, so a route that
-  crosses itself or comes back along a street does not jump; the whole line at the start and
-  after a long gap. Progress along the line only moves forward.
-- [ ] **The outing on the spot.** `Session.onTheSpot` and `Session.walkAtMeters` (the furthest
-  point reached), stored with each batch. A place is told when the position passes it within
-  the corridor, or comes within 30 m of the place itself; the goal is the last place reached,
-  not a distance covered. Off the route: more than 40 m aside for three accepted fixes and
-  15 s, told once; back within 25 m, told once; while off, the progress waits and the outing's
-  own distance still counts. With no fix (an arcade), the position goes on along the line by
-  the steps until the fixes return. Never told twice across a restart: the progress is read
-  from what was stored.
-- [ ] **Two vibrations of their own**, unlike the seven there are (one, two, three short; the
-  goal's long one; the stillness's two long; "faster", four quick taps; "slower", a long and a
-  short): proposed, "off the route" short, long, short (120, 450, 120 ms) and "back on it" two
-  quick taps (70 ms, 80 ms apart); the owner confirms them in the editor's "Try them" on the
-  phone. With the voice: «You have left the route», «Back on the route», and each place as
-  today.
-- [ ] **The start** (`WalkScreen`). «I'm here» beside Start, shown only where GPS can be used
-  (Phase 15's readiness), with one line saying what changes. The first fix decides: within the
-  corridor of the route, the walk begins at that point of it («You are by San Babila: the walk
-  goes on from here»); within 2 km, it waits for the route, the card saying how far the
-  nearest place is; farther, the outing says the walk is not near and goes on as from home, by
-  the steps, with nothing lost. No way to the start is drawn or spoken: Passo has no streets
-  to route on.
-- [ ] **The map under way.** The walk's page and the outing's card show the reader's own point
-  with its accuracy as a halo, the trace walked over the route, the next place named; the page's
-  map moves with Phase 16's gestures and can follow the point. One sentence to TalkBack, kept
-  true as the walk goes («On the route, 300 m to the Duomo»).
-- [ ] **The record.** A walk finished on the spot is stamped in a second ink, «walked there»
-  with its day (`WayStamp`; an ink that holds its contrast in both dresses, in `ContrastTest`);
-  a walk's progress (`WalkDays`) reads `walkAtMeters` for an outing on the spot and the
-  distance for one from home, so a walk may be continued either way. Schema by
-  auto-migration; the backup's added fields.
-- [ ] **Tests.** `LineSnapTest`, the tracker's on the spot (routes replayed from
-  `tools/walks/`, with noise, a detour, a gap), the data test above, the walk page's UI tests in
-  each state, the stamps' gallery.
-- [ ] Strings in English and Italian; CHANGELOG; the guide's chapter on the cities; README: a
-  screenshot of a walk on the spot if it reads well (`walk-on-the-spot.png`).
-- [ ] On a device (owner): the Milan walk on the spot, or part of it: each place told at the
-  place, a street left on purpose and found again, an arcade or a gallery crossed, the start
-  from the middle of the route, the voice through headphones with the screen off; the battery
-  against Phase 15's figure.
+- [ ] **The switch** (`:feature:ways`, `WalkScreen`). «Measure with GPS» beside Start on a
+  walk's page, the outing editor's own switch and note (`GpsSwitchNote`: what it gives and
+  costs, when Android asks, what holds after a refusal): off by default, one choice for every
+  city walk, remembered (`walkGps` in DataStore, beside `walkVoice`; in the JSON backup with the
+  other settings, an added field). Shown only where GPS can be used on this phone (Phase 15's
+  readiness). One line says what changes: the city stays on its map, the distance is measured
+  on the reader's own streets, and their route is kept as an outing's.
+- [ ] **The start, through the one door** (`OutingStarter`, `:app`). A walk with the switch on
+  starts through the door every outing with GPS goes through, never a second way to ask: asked
+  in context the first time, a refusal remembered, approximate alone answered as for a plan,
+  location off on the phone said with the way to the system's switch; in each of those the walk
+  starts on the steps and its card says so once. `SessionControl.startWalk`,
+  `StepTrackingService.startWalk` and `SessionPlans.startWalk` gain `gps`; the service's
+  `location` type and `GpsDuty` then do for a walk what they do for any outing.
+- [ ] **The walk measured.** Nothing new to measure: in an outing with GPS the outing's
+  distance is the fused one (ADR 0016 decision 5), and `placesPassed`, `WalkPlaces` and
+  `WalkDays` read that distance, so the places are told by the measured kilometres and the walk
+  goes on from where it stands, measured or not. Proven by tests, not assumed. The walk's page
+  and its map stay the walk's (the city, the place ahead, never a point of the reader's); the
+  outing's card shows «measured», the pace and the receiver's line as any outing with GPS does;
+  the outing's page is Phase 16's (the reader's real route, on their own city's map where Passo
+  carries it, on plain ground elsewhere), with one line naming the walk it moved on («From the
+  Duomo to the Navigli: 3.2 km of it, measured on your streets»).
+- [ ] **The words.** The Ways' sentence «No location, only your steps» stays true of every way
+  and of a city walk with the switch off; where a page says it of a city walk, it says what
+  holds with the switch on. «Measured» only as Phase 15 allows (nine tenths from fixes). Never a
+  word that places the reader in the city: the city is imaginary, the measure is real.
+- [ ] **Tests.** The tracker's (a walk replayed with fixes: each place at its measured
+  distance; no fix at all: the steps, as today; a walk measured and then continued from home,
+  and the reverse, adding up), the start through the door (each answer), `WalkScreen`'s UI
+  tests with the switch in each state, Italian on a small phone, the backup's round trip with
+  `walkGps`.
+- [ ] Strings in English and Italian; CHANGELOG; the guide («City walks», «With GPS»); README:
+  the city walks' line if it changes.
+- [ ] On a device (owner): a city walk with the switch on, walked in the reader's own streets:
+  the places told as the measured kilometres pass, the outing's page with the real route
+  afterwards, the walk going on from there the next day with the switch off.
 
-**Acceptance:** on the route, every place is told within 30 m of it and none twice; leaving the
-route is felt within about 20 s and finding it again as soon; away from the city the same walk
-still works from home exactly as before.
+**Acceptance:** a city walk with GPS on tells its places by the measured distance and leaves an
+outing with the reader's real route; with the switch off nothing changes; the city's map never
+shows where the reader is.
 
-**Edge cases** (`LineSnapTest`, `SessionTrackerTest`):
+**Edge cases** (`SessionTrackerTest`, the door's tests, `WalkScreenTest`):
 
 | Case | Expected behavior |
 |---|---|
-| A route that returns along the same street | The position does not jump to the later stretch: the search stays near the last place |
-| A shortcut that skips a place | The place is not told; the next one is, when reached; the walk can still be finished |
-| A square crossed 50 m from the line | Told as off the route only after 15 s there; back on it at the far side |
-| Fixes lost for two minutes under an arcade | The position goes on by the steps; no "off the route" from silence |
-| Started 5 km from the city | Goes on as from home, said once; the flag is cleared in what is stored |
-| Paused in a café for forty minutes | As every outing: a pause, or the end by stillness with "Resume"; the next outing continues from the place reached |
-| The reader walks the route backwards | Off the route is not said (they are on it); no place is told; the card says which way the walk goes |
-| The process restarted | Places already told stay told; the position is found again from the first fix |
+| The permission refused, or approximate alone | The walk starts on the steps, said once on its card, as any outing with GPS |
+| Location off on the phone | The same, with the way to the system's switch |
+| No fix in the whole walk | The places told by the steps; the outing's page says the satellites never answered |
+| A walk measured, continued from home the next day | Goes on from the place reached; the places ahead told by the steps |
+| The measured share under nine tenths | Not called measured; the places told by the fused distance as it is |
+| The walk's last place reached | Its goal, as today; the receiver follows Phase 15's rules for an end that can be taken back |
 
-### Phase 19 — On the spot: the ways
+### Phase 19 — Dropped («On the spot: the ways»)
 
-A way is walked from home over months. A reader who goes there walks it for real, a stage or a
-week at a time, perhaps over years: the outing follows a line fine enough to follow on a path,
-each stage reached on foot is stamped in the second ink, and the stretches walked in person are
-kept and drawn, beside and independent of the journey from home (ADR 0016 decisions 13 and 14).
-
-**Read first:** ADR 0016 (decisions 13 and 14), `docs/adr/0014-ways.md` (all), Phase 18's
-section and its code (`LineSnap`, the outing on the spot, the two vibrations),
-`tools/CITY_WALKS.md`. In the code: `tools/build_ways.py` (how a way's path is built, the
-cache in `tools/ways-cache/`, `LINE_TOLERANCE`, `splice`), `tools/ways_content.py`; `WayData.kt`
-(generated, never edited), `Way.kt`, `Polyline.kt`, `WaysDataTest.kt`; `WayScreen.kt`,
-`WayMap.kt`, `WayStamp.kt`; `SessionConstants.kt` (`MAX_SESSION_MILLIS`), `SignalWake.kt`,
-`WayNotifier.kt`.
-
-- [ ] **A fine line for each way** (the script, then its output). A way's line is simplified to
-  a 4,000th of its frame's diagonal, about 250 m on the longest: right for a map of a country,
-  useless on a path. `build_ways.py` writes, beside it, the same path simplified to 5 m, with
-  the same metres along it, as generated data of its own that is decoded only when a way is
-  walked on the spot (a generated Kotlin file in chunks, or a resource of `:core:domain`,
-  whichever keeps the build and the first decode fast: measure both). The two lines must come
-  from the same fetched path: if `tools/ways-cache/` no longer holds the relations the ways
-  were built from, a fetch moves the lines with OpenStreetMap's edits since (ADR 0014 decision
-  14), so the coarse line, the stops' metres and the fine line are then rebuilt together, way
-  by way, and a test proves that no stage of any way moved by more than 200 m along it. The
-  APK's growth is measured and written here; over 2 MB, the tolerance becomes 8 m.
-- [ ] **The outing on a way.** `session.walk` may name a way; on the spot only (a way from home
-  is the days', as before). Its goal is the next stage, reached when the reader is within
-  300 m of its stop or passes it on the line; "Keep going" then makes the stage after it the
-  goal, so a day of two stages is one outing. The corridor is 60 m (a path is mapped less
-  exactly than a street). Its signals: a stage or a place reached (its name and its sentence,
-  as the ways' notifications say them), off the way, back on it. The start needs the first
-  fix within 500 m of the way: otherwise the page says how far the way is and offers an
-  ordinary outing.
-- [ ] **The longest outing** (ADR 0016 decision 14). An outing on a way on the spot (and
-  Phase 20's followed route) starts with a cap of twelve hours instead of four, so a day's
-  stage is not interrupted by Phase 15's question; before twelve it asks in the same way, and
-  «Keep going» moves it four hours on. The end after 15 minutes still and after an hour paused
-  are unchanged: a lunch ends the outing, and the next one starts from where the reader is.
-- [ ] **What was walked in person** (`passo.db`, by auto-migration; numbers along a public
-  line, never coordinates): `way_stretch` (way, from and to in metres, the day) merged as they
-  touch, and `way_visit` (way, stop, the day) for each stage reached on foot. The way's page
-  says «37 of 123 km walked there» when there is any, draws those stretches in the walked
-  colour at full weight over the faint line, and sets the second ink's stamp, with its day, on
-  each stage visited, beside the stamp from home if there is one. A journey from home is not
-  needed, not started and not moved by a walk on the spot: the two never touch. The backup
-  carries both tables as added fields.
-- [ ] **The stage's map.** Under way, the page shows the stretch around the reader (about 2 km
-  across, Phase 16's gestures, north up): the fine line, the stops, the reader's point and
-  halo, the way's own ground (its rivers, lakes, parks and towns, drawn for a country's scale)
-  and one line that says what it is: «A line to follow, not a map of the ground».
-- [ ] **The words.** Nothing here names a faith or calls the reader a pilgrim (CLAUDE.md, «The
-  Ways' words»): «walked there» / «percorso sul posto», «on the way» / «sul cammino».
-- [ ] **Tests.** The data tests (both lines of each way agree in length and in each stop's
-  metres; the stage test above), the tracker's on a way (a stage replayed with noise, a
-  variant taken and left, a day of two stages, the cap told), the stretches' merge, the way
-  page's UI tests with stretches and both inks, the stage map's gallery.
-- [ ] Strings in English and Italian; CHANGELOG; the guide's chapter on the Ways; README: the
-  Ways' line and a screenshot of a way with stretches walked there.
-- [ ] On a device (owner): a stretch of a way within reach, or the same replayed with the
-  system's mock-location setting on a debug build: a stage reached, the way left and found,
-  the stretches and the stamp on the page afterwards; a long outing's battery, written in
-  `docs/battery/` with what a full stage would cost.
-
-**Acceptance:** on a way, the reader's place is on the line within what the receiver allows,
-leaving the path is felt within about 30 s, each stage reached on foot is stamped once, and
-what was walked there over any number of visits adds up on the way's page; a reader at home
-sees the ways exactly as before.
-
-**Edge cases** (`SessionTrackerTest`, `WaysDataTest`, the stretches' tests):
-
-| Case | Expected behavior |
-|---|---|
-| A variant of the way, off the mapped line for 3 km | Off the way, told once; the stretch is not counted as walked there; back on it where it joins |
-| The same stretch walked twice, a year apart | One stretch in the total; the earlier day kept |
-| Two stretches that meet | Merged into one |
-| A stage reached from home and on foot | Two stamps, two inks, two days |
-| Kilimanjaro, whose line goes up and down the same path | The search near the last place keeps the climb and the descent apart |
-| The outing nears twelve hours | Asked as every outing is before its cap; unanswered, ended and told, the stretches up to there kept |
-| Lunch of forty minutes | Ended by stillness as always, with "Resume" for 15 minutes; a new outing continues the same day's stretch |
-| A way deleted from Your ways | The journey from home goes, as today; what was walked there stays unless the reader deletes it too, asked apart |
+Dropped by the owner on 19 Nov 2026, with the first Phase 18 (§15, «The places on the spot
+dropped, the city walk measured»): a way walked from home goes on by the day's steps, which
+Phase 17 makes truer, and a way walked in person is not built. The number stays, so that Phase
+20 and the documents that cite the phases keep their names. The text of both dropped phases is
+in `git show b842547:PLANNING.md`.
 
 ### Phase 20 — Your routes («I tuoi percorsi»)
 
@@ -1463,8 +1382,30 @@ The same guidance for any line the reader brings: a GPX from elsewhere, or an ou
 before. And for the walk most readers repeat, Passo's own question asked of a route: am I ahead
 of my usual or behind it?
 
-**Read first:** ADR 0016 (decisions 11, 13, 14 and 16), Phases 16, 18 and 19 here and their code
-(`GpxCodec`, `RouteMapView`, `LineSnap`, the outing on the spot, the twelve hours);
+**To review before it starts** (owner, 19 Nov 2026: the phase stays, and is reviewed before it
+is built; §15, «The places on the spot dropped, the city walk measured»). It was written on
+Phases 18 and 19 «On the spot», now dropped, and no longer finds built what it reads first. The
+review rewrites it to stand alone:
+- it builds itself what it took from them: `LineSnap` (the nearest point of a line to a fix,
+  as metres along and aside), the following of a line (off the route and back on it, the
+  progress that only moves forward, the steps carrying the position under an arcade), the two
+  vibrations of their own (off the route, back on it), and the twelve hours of ADR 0016
+  decision 14;
+- it writes out the rules it cites as «Phase 18's» (the corridor, its return threshold);
+- it weighs what the review of the dropped Phase 18 found, which holds for following any line:
+  with the screen off the steps and the fixes come every 30 s (about 40 m at a walk), so a
+  signal at a point of the line needs the interval walk's window of 2 s before it (a widening
+  of §9, the owner's to decide) or an acceptance that says so; a signal told by proximity must
+  move the stored progress, or a restart tells it twice; the start goes through the one door
+  and needs the precise permission; `LineSnap` searches near the last position, forward, and
+  after a gap forward only; the steps under an arcade carry the position at nine tenths of
+  their length, so that it lags rather than leads;
+- it may split the phase in two, the usual round first (pure, the outing's page and the card's
+  line) and the following of a route after.
+The text of the dropped phases is in `git show b842547:PLANNING.md`.
+
+**Read first:** ADR 0016 (decisions 11, 13, 14 and 16), Phase 16 here and its code
+(`GpxCodec`, `RouteMapView`, `MapViewport`), the note above;
 `TypicalDayCalculator.kt` and `TodayOverview.kt` (how "ahead of your usual" is said for a day);
 `SessionsScreen.kt` (the door to the cities), `SessionPlans.kt`.
 
@@ -1477,9 +1418,9 @@ of my usual or behind it?
   refused for its size alone. The reader names it, or it keeps the file's name.
 - [ ] **Following it.** The Outings page gains «Your routes», a door like the cities': each
   route with its small map, its length and climb. Start, or «The other way round». The outing
-  is one on the spot (Phase 18's rules, a 60 m corridor, the twelve hours): the distance left,
-  the shares of the route as its signals if the reader chose them, off the route and back on
-  it, the arrival. Its page afterwards is an outing's, with the route followed drawn faint
+  follows the line (the rules the note above asks for, a 60 m corridor, the twelve hours): the
+  distance left, the shares of the route as its signals if the reader chose them, off the route
+  and back on it, the arrival. Its page afterwards is an outing's, with the route followed drawn faint
   under the one walked.
 - [ ] **The usual round** (`:core:domain/routes`, `RouteMatch`, pure). Two outings with GPS are
   the same round when they start within 100 m of each other, their lengths are within a tenth,
@@ -1499,7 +1440,8 @@ of my usual or behind it?
 - [ ] On a device (owner): a GPX from another app followed from start to end; a usual walk
   taken three times, then the fourth with the card's line; the other way round.
 
-**Acceptance:** a GPX made by another app is followed with the same signals as a city walk; the
+**Acceptance:** a GPX made by another app is followed with its signals (off the route, back on
+it, the arrival) at the times the review settles; the
 third time a round is walked Passo knows it without being told, and is right about which walks
 are the same one.
 
@@ -1845,6 +1787,39 @@ This log starts with Phase 16 built (18 Nov 2026); its entries are written below
     after, not History's; the step of 6% between yesterday and today would read as a fault.
     One line says so, with the action that already exists in Settings, asking as it does
     there. Past days change only when the reader asks, as before.
+
+- **19 Nov 2026.** **The places on the spot dropped, the city walk measured** (owner, after a
+  technical and a functional review of Phase 18 and a look at Phases 15 to 20 together: "18
+  and 19 I leave out; 20 I keep, and we review it later"; then, on the counter-proposal, "I
+  agree, go ahead"). ADR 0016 decisions 13 and 14 are amended with it, CLAUDE.md and VISION
+  follow.
+  - **Phases 18 and 19 «On the spot» are dropped.** Their value is real and rare: a reader must
+    be in one of forty cities, or on a way, a few times a year if ever. Their cost was high and
+    fell on every reader: the first Phase 18 changed what a city walk's progress is (a sum of
+    distances, `WalkDays`, to a place on the line), code every walk from home runs, and with
+    the screen off its promises (a place told within 30 m, the route's leaving felt in 20 s)
+    needed a widening of §9's exceptions. Phase 19 needed the first Phase 18's engine and a
+    fine line for every way.
+  - **Not done instead: a way's kilometres from GPS** (the owner's first proposal). A way from
+    home goes on by the day's distance, all its steps; an outing with GPS would correct a few
+    percent of a small part of them, and make the way and History say two numbers (ADR 0016
+    decision 6: the day stays the steps'). Phase 17 corrects every step of every day, the
+    way's included: it is the answer to that wish.
+  - **Done instead: a city walk measured with GPS** (the owner's second proposal, as the new
+    Phase 18). The walk stays imaginary; with «Measure with GPS» on its page, its distance is
+    the fused one and the outing keeps the reader's real route. The value is not the precision
+    (the places are imagined; after Phase 17 the steps are within a few percent) but not having
+    to choose: today a reader who walks 5 km has either the walk (the story, the places, the
+    stamp) or an outing with GPS (the map, the kilometres, the pace, the climb), never both.
+    Its cost is small: the fused distance is already what `placesPassed`, `WalkPlaces` and
+    `WalkDays` read in an outing with GPS (decision 5), so the phase is the switch, the start
+    through the one door, and the words. It changes what decision 13 made plain on 18 Nov
+    2026 (a city walk from home never reads the satellites): the city's map still never shows
+    the reader, so nothing reads as the navigation that decision feared.
+  - **Phase 20 stays, to review before it starts**: its section says what it took from the
+    dropped phases and must now build or write out itself, and what their review found that
+    holds for following any line. Phase 19's number stays, so the documents keep their names;
+    the dropped text is in the plan's history (`git show b842547:PLANNING.md`).
 
 ### Open
 
