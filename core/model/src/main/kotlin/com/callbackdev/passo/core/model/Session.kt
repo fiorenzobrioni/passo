@@ -283,7 +283,10 @@ data class SessionTotals(
  *   and until an altitude is known.
  * @property legs an outing with GPS, a hundred metres at a time: what its splits are cut from.
  * @property pauses its pauses that ended inside it, in order (Phase 21): none for an outing from
- *   before they were kept, which no page can then tell from one never paused.
+ *   before they were kept, which only [pausesKept] tells from one never paused.
+ * @property pausesKept its pauses are known (Phase 21.3): it was walked by a Passo that keeps them,
+ *   so an empty [pauses] means it was never paused, and its minutes can be drawn with their gaps.
+ *   False for an outing from before, whose minutes in a pause would be drawn as walked.
  * @property marks an open outing's signal on the way (Phase 21.2), frozen at its start as the goal
  *   is; [SessionMarks.NONE] for every other outing, which tells shares of its goal instead.
  * @property markMiles its distance marks are miles, the reader walking in miles when it started:
@@ -326,6 +329,7 @@ data class Session(
     val descentMeters: Double? = null,
     val legs: List<OutingLeg> = emptyList(),
     val pauses: List<SessionPause> = emptyList(),
+    val pausesKept: Boolean = false,
     val marks: SessionMarks = SessionMarks.NONE,
     val markMiles: Boolean = false,
     val toldMarks: Int = 0,

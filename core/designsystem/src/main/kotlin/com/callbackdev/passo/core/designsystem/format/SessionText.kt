@@ -11,6 +11,8 @@ import com.callbackdev.passo.core.domain.routes.GpsLine
 import com.callbackdev.passo.core.domain.routes.distanceKind
 import com.callbackdev.passo.core.domain.routes.pace
 import com.callbackdev.passo.core.domain.routes.stepsShare
+import com.callbackdev.passo.core.domain.sessions.OutingMinutes
+import com.callbackdev.passo.core.domain.sessions.OutingShape
 import com.callbackdev.passo.core.domain.sessions.SessionAmount
 import com.callbackdev.passo.core.domain.sessions.SessionHeadline
 import com.callbackdev.passo.core.domain.sessions.cadenceFloor
@@ -293,7 +295,10 @@ fun Resources.sessionHeadline(
             countdown(headline.position.leftMillis),
         )
 
-        is SessionHeadline.Reached -> getString(R.string.session_headline_reached, sessionAmount(headline.goal, format))
+        // Taken on past it (Phase 21.3), what went beyond: «Goal reached, and 20 minutes more».
+        is SessionHeadline.Reached -> headline.beyond?.let {
+            getString(R.string.session_headline_reached_beyond, beyondWords(it, format))
+        } ?: getString(R.string.session_headline_reached, sessionAmount(headline.goal, format))
 
         is SessionHeadline.Ended -> getString(
             when (headline.end) {
@@ -333,6 +338,12 @@ fun Resources.sessionHeadline(
             }
         }
     }
+}
+
+/** An amount beyond a goal in words: minutes said in full («20 minutes»), steps and distance as written. */
+private fun Resources.beyondWords(amount: SessionAmount, format: MeasureFormatter): String = when (amount.kind) {
+    SessionGoalKind.TIME, SessionGoalKind.INTERVALS -> durationWords(amount.value.roundToInt())
+    else -> sessionAmount(amount, format)
 }
 
 private val SessionHeadline.going: Boolean
@@ -598,3 +609,72 @@ private const val SECONDS_PER_MINUTE = 60L
 
 /** The protocol's minutes, slow and fast (Nemoto et al., 2007): what makes an interval walk Japanese. */
 private const val PROTOCOL_MINUTES = 3
+
+/**
+ * An outing's strip in one sentence (Phase 21.3): «41 minutes on your feet, 30 of them brisk, one
+ * pause», and past its goal «the goal reached at minute 30». The time is the outing's own in
+ * motion, as its card says it; the minutes at the pace are its strip's, never more than that time.
+ */
+fun Resources.minuteStripSpoken(session: Session, minutes: OutingMinutes): String {
+    val moving = session.movingMinutes()
+    val time = durationWords(moving)
+    val first = getString(
+        if (session.intensity ==
+            SessionIntensity.RUN
+        ) {
+            R.string.session_shape_running
+        } else {
+            R.string.session_shape_walking
+        },
+        time,
+    )
+    val atPace = minutes.atPaceMinutes.coerceAtMost(moving)
+    val pace = getQuantityString(
+        when (session.intensity) {
+            SessionIntensity.FREE, SessionIntensity.BRISK -> R.plurals.session_shape_brisk
+            SessionIntensity.VIGOROUS -> R.plurals.session_shape_vigorous
+            SessionIntensity.RUN -> R.plurals.session_shape_run
+        },
+        atPace,
+        atPace,
+    )
+    val pauses = minutes.pauses.takeIf { it > 0 }?.let { getQuantityString(R.plurals.session_shape_pauses, it, it) }
+    val goal = minutes.goalAt?.let { getString(R.string.session_shape_goal, it.roundToInt().coerceAtLeast(1)) }
+    return listOfNotNull(first, pace, pauses, goal).joinToString(", ")
+}
+
+/**
+ * The walk's share of its day's goal (Phase 21.3), from its own steps alone: «34% of today's goal»,
+ * and «All of today's goal, by itself» from the whole of it; «of the day's goal» for an outing
+ * whose day is not today (its page, a walk across midnight). Null without a goal to measure
+ * against, or before its first step.
+ */
+fun Resources.dayShareText(session: Session, shape: OutingShape, format: MeasureFormatter): String? {
+    val steps = session.totals.steps
+    if (steps <= 0) return null
+    val share = shape.dayShare(steps) ?: return null
+    if (share >= 1.0) {
+        return getString(if (shape.today) R.string.session_share_whole_today else R.string.session_share_whole_day)
+    }
+    // A walk of a few steps is still some of the day: never «0%».
+    val shown = share.coerceAtLeast(MIN_SHARE)
+    val percent = (shown * PERCENT).toInt()
+    // Italian writes «l'8%», «l'11%», «l'80%»: a number said with a vowel takes the article apart.
+    val elided = percent == 1 || percent == 8 || percent == 11 || percent in 80..89
+    val id = when {
+        shape.today && elided -> R.string.session_share_today_elided
+        shape.today -> R.string.session_share_today
+        elided -> R.string.session_share_day_elided
+        else -> R.string.session_share_day
+    }
+    return getString(id, format.percent(shown))
+}
+
+/** A still route's sentence on a card: «Your route so far: 2.30 km», or once over, «Your route: 3.20 km». */
+fun Resources.stillRouteSpoken(session: Session, format: MeasureFormatter): String = getString(
+    if (session.live) R.string.session_route_so_far else R.string.session_route_whole,
+    format(format.distance(session.totals.distanceMeters)),
+)
+
+private const val MIN_SHARE = 0.01
+private const val PERCENT = 100

@@ -309,6 +309,7 @@ private fun SessionsList(
                     format = format,
                     actions = actions.card,
                     measure = live.measure,
+                    shape = state.shape,
                     modifier = Modifier
                         .animateItem(
                             fadeInSpec = PassoMotion.effects(reduced),

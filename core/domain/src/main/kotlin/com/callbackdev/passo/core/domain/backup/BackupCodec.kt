@@ -101,6 +101,10 @@ sealed interface BackupRead {
  *   follows its `gps`. On an open outing it is the mark frozen at its start, with `markMiles`
  *   (its distance marks were miles) and `toldMarks` (how many were told); absent, it has none,
  *   as every outing from before. A build without them reads the plan and the outing without.
+ * - `pausesKept` (added with the outing's shape, Phase 21.3) on an outing: its `pauses` are all it
+ *   had, so it can be drawn minute by minute with their gaps. Absent, they are known only where
+ *   nothing else could have written the outing (an open one, or one with a pause), as in the
+ *   database; a build without it reads the outing without its shape.
  * - `route` (Phase 16) on an outing with GPS, **only in a file exported «With the routes»**:
  *   where it went. `points` is Base64 of the app's own compact form, `altitudes` where their
  *   heights came from (`BAROMETER` or `SATELLITES`). The one field of this file that is a place.
@@ -267,6 +271,7 @@ private fun Backup.toFile() = BackupFile(
                 )
             },
             pauses = session.pauses.map { PauseDto(it.fromMillis, it.toMillis) },
+            pausesKept = session.pausesKept,
             marks = session.marks.takeIf { it != SessionMarks.NONE }?.name,
             markMiles = session.markMiles,
             toldMarks = session.toldMarks,
@@ -504,6 +509,9 @@ private fun OutingDto.toSession(): Session? {
             .distinctBy { it.fromMillis }
             .sortedBy { it.fromMillis }
             .map { SessionPause(it.fromMillis, it.toMillis) },
+        // A file from before the field still proves it where only a Passo that kept the pauses
+        // could have written the outing, as the database's migration does (v11).
+        pausesKept = pausesKept || kind == SessionGoalKind.OPEN || pauses.isNotEmpty(),
         // An open outing's mark as it was frozen; none for any other, which tells shares instead.
         marks = marks.toEnumOrNull<SessionMarks>()?.takeIf { kind == SessionGoalKind.OPEN } ?: SessionMarks.NONE,
         markMiles = markMiles,

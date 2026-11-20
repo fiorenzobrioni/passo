@@ -233,6 +233,8 @@ class BackupCodecTest {
                 SessionPause(start + 10 * 60_000, start + 15 * 60_000),
                 SessionPause(start + 25 * 60_000, start + 28 * 60_000),
             ),
+            // An open outing is walked by a Passo that keeps the pauses, always.
+            pausesKept = true,
         )
         val withOpen = full.copy(plans = full.plans + plan, sessions = full.sessions + outing)
 
@@ -253,6 +255,7 @@ class BackupCodecTest {
             marks = SessionMarks.DISTANCE,
             markMiles = true,
             toldMarks = 3,
+            pausesKept = true,
         )
         val withMarks = full.copy(plans = full.plans + chosen + following, sessions = full.sessions + outing)
 
@@ -288,6 +291,33 @@ class BackupCodecTest {
         assertThat(
             (BackupCodec.decode(odd) as BackupRead.Ok).backup.sessions.single().marks,
         ).isEqualTo(SessionMarks.NONE)
+    }
+
+    @Test
+    fun `an outing's pauses known are carried, and a file from before proves them where it can`() {
+        val start = 1_790_000_000_000
+        val kept = session(start).copy(pausesKept = true)
+        val text = BackupCodec.encode(full.copy(sessions = listOf(kept)))
+        assertThat(text).contains("\"pausesKept\":true")
+        assertThat((BackupCodec.decode(text) as BackupRead.Ok).backup.sessions.single().pausesKept).isTrue()
+
+        val day = 86_400_000L
+        // A file from before the field: a goal outing with no pause cannot tell, an open one or one
+        // with a pause can only come from a Passo that kept them, as the database's migration says.
+        val before = BackupCodec.encode(
+            full.copy(
+                sessions = listOf(
+                    session(start),
+                    session(start + day).copy(goalKind = SessionGoalKind.OPEN, goalValue = 0, milestones = emptySet()),
+                    session(start + 2 * day).copy(
+                        pauses = listOf(SessionPause(start + 2 * day + 60_000, start + 2 * day + 120_000)),
+                    ),
+                ),
+            ),
+        ).replace("\"pausesKept\":false,", "").replace(",\"pausesKept\":false", "")
+        assertThat(before).doesNotContain("pausesKept")
+        val read = (BackupCodec.decode(before) as BackupRead.Ok).backup.sessions.sortedBy { it.startedAtMillis }
+        assertThat(read.map { it.pausesKept }).containsExactly(false, true, true).inOrder()
     }
 
     @Test

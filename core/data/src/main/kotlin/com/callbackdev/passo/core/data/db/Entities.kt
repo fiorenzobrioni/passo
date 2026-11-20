@@ -128,6 +128,7 @@ data class SessionEntity(
     @ColumnInfo(defaultValue = "NONE") val marks: String = "NONE",
     @ColumnInfo(defaultValue = "0") val markMiles: Boolean = false,
     @ColumnInfo(defaultValue = "0") val toldMarks: Int = 0,
+    @ColumnInfo(defaultValue = "0") val pausesKept: Boolean = false,
 )
 
 /**

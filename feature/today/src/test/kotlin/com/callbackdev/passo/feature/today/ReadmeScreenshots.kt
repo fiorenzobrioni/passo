@@ -19,9 +19,15 @@ import com.callbackdev.passo.core.designsystem.components.SessionCardTags
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.insights.StreakSoFar
 import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.routes.RouteShape
+import com.callbackdev.passo.core.domain.sessions.OutingMinutes
+import com.callbackdev.passo.core.domain.sessions.OutingShape
 import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.today.TypicalDayCalculator
+import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.Profile
+import com.callbackdev.passo.core.model.RoutePoint
+import com.callbackdev.passo.core.model.RoutePointKind
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
@@ -37,6 +43,13 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.io.File
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.hypot
+import kotlin.math.roundToInt
+import kotlin.math.sin
 
 /**
  * The README's pictures of Today (docs/screenshots), drawn from realistic sample days. Run with
@@ -136,6 +149,95 @@ class ReadmeScreenshots {
         compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(SessionCardTags.CARD))
         compose.waitForIdle()
         save("today-outing")
+    }
+
+    /**
+     * A walk with no goal round a city park, measured with GPS, looked at halfway (PLANNING.md §11
+     * Phase 21, step 21.3): its route so far on its card, since when, and its share of the day.
+     */
+    @Test
+    fun todayOpenOuting() {
+        val zone = ZoneId.systemDefault()
+        val start = LocalDateTime.of(2026, 9, 24, 10, 12).atZone(zone).toInstant().toEpochMilli()
+        val seconds = 27 * 60
+        val points = parkWalk(start / 1_000, seconds)
+        val walk = Session(
+            id = 1,
+            planId = 1,
+            name = null,
+            goalKind = SessionGoalKind.OPEN,
+            goalValue = 0,
+            intensity = SessionIntensity.FREE,
+            milestones = emptySet(),
+            vibrate = true,
+            localEpochDay = LocalDate.of(2026, 9, 24).toEpochDay(),
+            startedAtMillis = start,
+            totals = SessionTotals(
+                steps = 3_040,
+                movingMillis = seconds * 1_000L,
+                zoneMillis = seconds * 1_000L,
+                distanceMeters = 2_270.0,
+                activeKcal = 118.0,
+            ),
+            lastStepAtMillis = start + seconds * 1_000L,
+            lastEventAtMillis = start + seconds * 1_000L,
+            gps = true,
+            stepsMeters = 2_190.0,
+            measuredShare = 0.97,
+            pausesKept = true,
+        )
+        val minutes = (0 until 28).map { MinuteSteps(start / 60_000 + it, walk.localEpochDay, 104 + (it * 7) % 15) }
+        val state = state(nowMinute = 10 * 60 + 40).copy(
+            session = LiveSessionState(walk, cadence = 114, canKeepGoing = false, alertsWhileScreenOff = true),
+            sessionShape = OutingShape(
+                sessionId = walk.id,
+                minutes = OutingMinutes.of(walk, minutes, nowMillis = walk.lastEventAtMillis),
+                route = RouteShape.of(points),
+                dayGoalSteps = 10_000,
+            ),
+        )
+        show(state)
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(SessionCardTags.CARD))
+        compose.waitForIdle()
+        save("outing-open")
+    }
+
+    /**
+     * Three quarters of a loop round a park in Milan, a fix a second at a steady walk, with the
+     * small wander of a receiver under trees: a line a reader would recognise as their own.
+     */
+    private fun parkWalk(fromSecond: Long, seconds: Int): List<RoutePoint> {
+        val centreLat = 45.4728
+        val centreLon = 9.1760
+        val metersPerLat = 111_320.0
+        val metersPerLon = metersPerLat * cos(centreLat * PI / 180)
+        fun shape(t: Double): Pair<Double, Double> {
+            val r = 420.0 * (1 + 0.16 * sin(3 * t + 0.6) + 0.07 * cos(5 * t))
+            return r * cos(t) * 1.25 to r * sin(t)
+        }
+        // The loop's arc length, so that each second walks the same 1.4 m along it.
+        val steps = 4_000
+        val along = DoubleArray(steps + 1)
+        for (i in 1..steps) {
+            val (x0, y0) = shape(2 * PI * (i - 1) / steps)
+            val (x1, y1) = shape(2 * PI * i / steps)
+            along[i] = along[i - 1] + hypot(x1 - x0, y1 - y0)
+        }
+        var index = 0
+        return (0 until seconds).map { second ->
+            val walked = second * 1.4
+            while (index < steps && along[index + 1] < walked) index++
+            val (x, y) = shape(2 * PI * index / steps + PI * 0.9)
+            val wander = 2.5 * sin(second / 17.0) + 1.5 * cos(second / 7.0)
+            RoutePoint(
+                epochSecond = fromSecond + second,
+                latitudeE6 = ((centreLat + (y + wander) / metersPerLat) * 1e6).roundToInt(),
+                longitudeE6 = ((centreLon + (x - wander) / metersPerLon) * 1e6).roundToInt(),
+                altitudeDm = 1_220,
+                accuracyMeters = 6,
+                kind = if (second == 0) RoutePointKind.START else RoutePointKind.MEASURED,
+            )
+        }
     }
 
     @Test

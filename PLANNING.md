@@ -52,10 +52,10 @@ so they are uniform"):
 - **Built, on the branch of PR #74** (19 Nov 2026): Phase 17, the step that learns (§11; §15,
   «Phase 17 built: the step that learns»), committed on the review's branch at the owner's
   choice, merged into `main` once with the rest. Left: its check on a phone (the box in «Open»).
-  **Phase 21, the open outing** (planned on 20 Nov 2026, in three steps; §11): **steps 21.1 and
-  21.2 are built** (20 Nov 2026, on the branch of PR #76; §15, «Phase 21.1 built: the open outing»
-  and «Phase 21.2 built: the marks on the way»), and wait for a phone (the boxes in «Open»).
-  **Next: step 21.3**, the shape on the card, then 23, the
+  **Phase 21, the open outing** (planned on 20 Nov 2026, in three steps; §11): **built, its three
+  steps** (20 Nov 2026, on the branch of PR #76; §15, «Phase 21.1 built: the open outing», «Phase
+  21.2 built: the marks on the way» and «Phase 21.3 built: the shape on the card»), and waits for
+  a phone (the boxes in «Open»). **Next: 23**, the
   doors (two steps), then 18, a city walk measured with GPS (re-planned on 19 Nov 2026), then 20
   (reviewed on 19 Nov 2026: the usual round alone; it builds on 21): not started. Phase 19 dropped; Phase 22, the walk already
   begun, later, when the owner asks.
@@ -164,6 +164,20 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
   - one without GPS: the ten minutes, and a pause inside them;
   - the editor's group «Signals» for «None» (in Italian too), its «Try it» felt and heard;
   - the battery note of §9 unchanged: no wake beyond the signals' own.
+
+- [ ] **On a device (owner): Phase 21.3's shape on the card** (§11 Phase 21, step 21.3; §15, «Phase
+  21.3 built: the shape on the card», 20 Nov 2026). Step 21.3's own box «On a device (owner)» says
+  it all; in short:
+  - an open outing with GPS at a park, halfway: the strip before the first fixes, then the route
+    taking its place with a fade, growing as you walk; a touch on it opens the page;
+  - one without GPS, with a pause: its strip, the pause a gap, the minutes growing to the right;
+  - the day's share against Today's ring, and after a change of the day's goal;
+  - a goal outing taken on with «Keep going»: «Goal reached, and 20 minutes more», the strip with
+    the goal's line where the bar stood;
+  - a long walk's card and page (scrolling smooth, the route drawn at once);
+  - «The shape of the walk» on an outing's page, and none on an outing from before;
+  - in both themes, at a large text size, on the open foldable, with TalkBack on the strip and the
+    route.
 
 Read again on 2 Nov 2026, at archive 01 and 02: the boxes above are the ones the phases done had
 left open, and the review's device check. Read again at 1.1.0's tag: the owner's checks of the
@@ -1998,7 +2012,7 @@ motion. It is told by a pulse, and by the voice where the outing speaks.
 
 #### Step 21.3 — The shape on the card
 
-- [ ] **The minutes** (`OutingMinutes`, `:core:domain`, pure). From `minute_steps`, over the
+- [x] **The minutes** (`OutingMinutes`, `:core:domain`, pure). From `minute_steps`, over the
   outing's span, less its pauses (`session_pause`, kept since 21.1).
   - **One value a minute:** the steps in it.
   - **Grouped** so that a bar stays at least 2 dp wide at the width given: 1, 2, 5, 10 or 15
@@ -2008,19 +2022,19 @@ motion. It is told by a pulse, and by the voice where the outing speaks.
     floor. For an outing at any pace that floor is brisk, 100, the day's own brisk minute.
   - **The pauses are gaps.**
   - **One sentence for TalkBack:** «41 minutes on your feet, 30 of them brisk, one pause».
-- [ ] **The strip** (`MinuteStrip`, `:core:designsystem`, Canvas).
+- [x] **The strip** (`MinuteStrip`, `:core:designsystem`, Canvas).
   - **Its bars**, from the start to now: the accent for those at the pace, the muted ink for
     the others.
   - **It grows to the right.** Under reduced motion it jumps, with no growth.
   - **Drawn only while on screen**, as every chart here.
-- [ ] **The still route** (`:core:designsystem`). A route drawn as `RouteMapView` draws it
+- [x] **The still route** (`:core:designsystem`). A route drawn as `RouteMapView` draws it
   (plain ground, its dashes), without gestures.
   - On a card, a touch opens the outing's page.
   - **One component**, which Phase 20's list of rounds reuses.
   - **Thinned to the pixels it is drawn in.**
   - **A twelve-hour route,** about 43,000 points at one fix a second, is read, shaped and
     drawn without a dropped frame. Measure it in a test that logs the time, and on the phone.
-- [ ] **The card of an open outing**, in the bar's place:
+- [x] **The card of an open outing**, in the bar's place:
   - **With GPS:** the route so far, still. The strip shows until the route has a line (the
     first fixes); then the route takes its place, with a fade.
   - **Without GPS:** the strip.
@@ -2028,14 +2042,14 @@ motion. It is told by a pulse, and by the voice where the outing speaks.
     - «34% of today's goal» / «Il 34% del tuo obiettivo di oggi»: the outing's steps over the
       goal stored for its day.
     - «All of today's goal, by itself» / «Da sola, tutto l'obiettivo di oggi» at 100% or more.
-- [ ] **How the card reads them.** The card's ViewModels (Today, the Outings page, a city
+- [x] **How the card reads them.** The card's ViewModels (Today, the Outings page, a city
   walk's page) read only while the card is on screen (`WhileSubscribed`).
   - **The route** is read again only when its point count changes, as `OutingViewModel` does,
     off the main thread.
   - **The minutes** come from the flow the day's chart already reads (Today), or from the
     outing's span elsewhere.
   - **Nothing runs with the screen off** (§9).
-- [ ] **Past its goal** (owner, 20 Nov 2026, explained in §15 «The open outing's plan
+- [x] **Past its goal** (owner, 20 Nov 2026, explained in §15 «The open outing's plan
   reviewed»). This is for a goal outing taken on with «Keep going» past its goal: for instance
   30 minutes of brisk walking, and then 20 more.
   - Today its card shows a bar full since the 30th minute, «50 min» at one end and «30 min» at
@@ -2046,18 +2060,18 @@ motion. It is told by a pulse, and by the voice where the outing speaks.
     more» / «Obiettivo raggiunto, e 20 minuti in più».
   - The goal's mark on the bar is not lost: the strip marks the minute the goal was reached,
     with a thin line in the goal's colour.
-- [ ] **The outing's page.** A section, «The shape of the walk» / «La forma della camminata»,
+- [x] **The outing's page.** A section, «The shape of the walk» / «La forma della camminata»,
   holds the strip and the day's share, for every outing with its pauses kept, that is, every
   outing walked since 21.1.
   - With GPS, it comes after the map.
   - On an outing from before, its pauses unknown, it is not shown.
-- [ ] **Tests.**
+- [x] **Tests.**
   - `OutingMinutesTest`: the grouping, the pauses, across midnight, a twelve-hour walk.
   - `MinuteStrip` and the still route in the galleries, in both themes.
   - The card's UI tests: no fix yet, then the route; without GPS; past a goal.
   - `OutingScreenTest`: the section shown, and not shown for an old outing.
   - `assertAccessible()` and `walkPage()` on each.
-- [ ] **The record.**
+- [x] **The record.**
   - Strings in English and Italian.
   - The CHANGELOG.
   - The guide's «Outings»: the shape.
@@ -2999,6 +3013,89 @@ This log starts with Phase 16 built (18 Nov 2026); its entries are written below
       and Italian, kilometres and miles, plurals), `SessionNotificationsTest` (the pulse),
       `PlanEditorScreenTest` (the group following the switch, a choice kept, «Try it», none, miles,
       the awake note, Italian on a small phone, twice the text size), `SessionsScreenTest`.
+    - The screenshots looked at, in both themes.
+
+- **20 Nov 2026.** **Phase 21.3 built: the shape on the card** (owner: "implement the next step,
+  21.3; carry on on PR 76, which is part of the same phase; premium work"). §11 Phase 21's step
+  21.3 boxes are ticked but the phone's, which opens in «Open». With it Phase 21 is built.
+  - **Built.**
+    - `OutingMinutes` (`:core:domain`, pure): an outing's minutes from `minute_steps`, over its
+      span, less its pauses, the one under way included; grouped by 1, 2, 5, 10 or 15 minutes so a
+      bar stays two dp wide with one between (`groupFor`, `bars`); a bar's height its mean steps a
+      minute, «at the pace» when half its minutes are at the floor (the outing's own, or brisk,
+      100, at any pace), a gap when mostly paused; the goal's minute (`goalAt`), and the count of
+      minutes at the pace and of pauses for TalkBack's sentence.
+    - `RouteTrace` (`:core:domain`): a route's lines projected into a box's pixels and thinned to
+      them in one pass, a line's ends kept and its dashes where they were.
+    - `OutingShape`: the minutes, the route so far and the day's goal, and the share
+      (`dayShare`); `pastGoal` and `beyond()` beside `progress()`.
+    - `MinuteStrip` (Canvas): the bars in the accent at the pace and the quiet ink below it, a stub
+      for a minute walked with no steps, nothing for a pause, the goal's line on an edge of the
+      card's colour; it grows to the right (a sweep at first, a slide at each minute), and jumps
+      under reduced motion.
+    - `StillRouteView`: the route as the map draws it, on plain ground, with no gesture, bead,
+      scale or compass; thinned once for each size and route; one node for TalkBack, and a door
+      where it is given one. Phase 20's list of rounds reuses it.
+    - The card: for an open outing the shape in the bar's place (the strip until the route has a
+      line, then the route with a fade), then 21.1's row, then the day's share after a small ring
+      of the goal's colour (`DayShareLine`); for a goal outing taken on past its goal, the shape in
+      place of the full bar, and the sentence «Goal reached, and 20 minutes more».
+    - `OutingShapes` (`:core:data`): one source for the card on Today, on the Outings page and the
+      outing's page; each part read only while collected, the route again only when its point
+      count changes and off the main thread, the minutes with the service's live count, the day's
+      goal as Today shows it. Today hands it the query its day's chart reads.
+    - The outing's page: «The shape of the walk» («The shape of the run» for a run), after the map
+      or where the map would be, with what a bar is, what the gaps and the line are, and the share.
+    - `passo.db` v11: `pausesKept` on `session`, and the JSON backup's `pausesKept`.
+  - **Made exact on the way**, each in the code with its reason:
+    - **Whether an outing's pauses are known is kept, not guessed** (`pausesKept`, v11). The plan
+      said the section is for «every outing walked since 21.1», but nothing in an outing told that:
+      `pauses` is empty for one never paused and for one from before. The migration's spec
+      (`KeptPauses`) marks known the outings that could only come from a Passo that kept them, an
+      open one and one with a pause written, and so does a backup file from before the field. The
+      goal outings walked on the unreleased 21.1 and 21.2 builds without a pause stay unknown: a
+      test phone's, and a page without a shape is honest where one with a pause drawn as walking
+      is not.
+    - **The beyond is said in the goal's own quantity.** «and 20 minutes more» past a time goal;
+      past a goal of steps or of distance, «and 1,240 steps more», «and 0.80 km more»: the time in
+      motion at the goal is not kept, and the bar's two ends spoke the goal's quantity too. Never
+      for an outing that ended at its goal, whose last batch may run a few steps past.
+    - **The bars are the primary colour on every card, the goal's line the goal's.** Past a goal
+      the card wears the goal's colour; bars in it would hide the line that marks the goal.
+    - **The strip keeps room while it counts**: half an hour wide at least, filled from the left,
+      so the first minutes are not drawn as pillars; ten minutes once over.
+    - **An open outing's card keeps its shape once over**, with its share and without 21.1's row,
+      whose «since when» the state's line already says. A goal outing's finished card keeps its
+      bar: what it came to against its goal.
+    - **A city walk's card keeps its walk's map**, past its end too: the walk's places say more of
+      it than its minutes. So a city walk's page reads no shape, and its ViewModel is unchanged.
+    - **The share in Italian takes its article**: «Il 34%», and «L’8%», «L’11%», «L’80%» where the
+      number is said with a vowel (`session_share_*_elided`; English says them alike). An outing
+      whose day is not today says «of the day's goal», «dell’obiettivo del giorno». A walk of a
+      few steps is never «0%».
+    - **The legend says the floor in steps a minute** («A bar for each minute, in colour at 100
+      steps a minute or more»), and how many minutes a bar holds at the strip's width, rather than
+      a pace's name for each intensity.
+  - **The twelve-hour walk, measured.** On this machine's JVM: 43,200 points decoded in about 6 ms,
+    shaped in 7 ms, thinned to some 6,300 in 4 ms for a 990 by 618 px box (`RouteTraceTest`, which
+    logs it); twelve hours of minutes read and grouped in 12 ms (`OutingMinutesTest`). The phone's
+    measure is the device box's.
+  - **The README.** A new picture, `outing-open.png` (an open walk with GPS on Today, halfway round
+    a park: its route so far, since when, 30% of today's goal), beside `outing-route.png`, with its
+    caption; the outings' feature line says the shape. The other pictures show nothing that
+    changed. CHANGELOG, VISION, the guide's «With no goal», the end and the page in both languages,
+    CLAUDE.md.
+  - **Checked**: `spotlessCheck`, `:app:checkForbiddenPermissions`, `test` and `:app:lintDebug`,
+    as reported with the pull request. On this machine ten tests that walk a Room migration fail by
+    a Windows path comparison: the nine before, and the new «version 10 migrates to 11», CI's to
+    prove.
+    - New tests: `OutingMinutesTest`, `RouteTraceTest`, `PastGoalTest`, `SessionPlansTest` (every
+      outing started keeps its pauses), `BackupCodecTest` (the field carried, a file from before),
+      `SessionRepositoryTest` (read back, the migration), `OutingShapeCardTest` (no fix then the
+      route, without GPS, a touch on the route, GPS stopped, the share in each case, past a goal,
+      before it, an outing from before, Italian on a small phone, twice the text size, the
+      foldable), `OutingScreenTest` (the section, after the map, none for an outing from before, a
+      run's title, Italian).
     - The screenshots looked at, in both themes.
 
 ### Open

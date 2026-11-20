@@ -83,4 +83,13 @@
     <string name="outing_step_ready">Ora Passo può usare il passo misurato per ogni stima</string>
 
     <string name="outing_when_paused">%1$s · %2$s · %3$s, %4$s in pausa</string>
+
+    <string name="outing_shape">La forma della camminata</string>
+    <string name="outing_shape_run">La forma della corsa</string>
+    <plurals name="outing_shape_legend">
+        <item quantity="one">Una barra per ogni minuto, colorata da %2$d passi al minuto in su.</item>
+        <item quantity="other">Una barra ogni %1$d minuti, colorata da %2$d passi al minuto in su.</item>
+    </plurals>
+    <string name="outing_shape_gaps">I vuoti sono le tue pause.</string>
+    <string name="outing_shape_goal_line">La linea segna il tuo obiettivo.</string>
 </resources>

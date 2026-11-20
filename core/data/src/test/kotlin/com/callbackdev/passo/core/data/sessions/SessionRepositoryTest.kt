@@ -145,6 +145,14 @@ class SessionRepositoryTest {
     }
 
     @Test
+    fun `an outing started now is read back with its pauses known, one from before without`() = runTest {
+        val started = repository.insert(checkNotNull(SessionPlans.start(SessionPlans.PRESETS[1], 1_000, day, 0, 8_000)))
+        assertThat(checkNotNull(repository.session(started.id)).pausesKept).isTrue()
+        val before = repository.insert(started.copy(id = 0, startedAtMillis = 5_000, pausesKept = false))
+        assertThat(checkNotNull(repository.session(before.id)).pausesKept).isFalse()
+    }
+
+    @Test
     fun `an outing not kept leaves no pause behind`() = runTest {
         val started = repository.insert(checkNotNull(SessionPlans.start(SessionPlans.OPEN_WALK, 1_000, day, 0, 8_000)))
         repository.save(started.copy(pauses = listOf(SessionPause(5_000, 9_000))))
@@ -221,6 +229,41 @@ class SessionRepositoryTest {
                 assertThat(cursor.getInt(1)).isEqualTo(0)
                 assertThat(cursor.getInt(2)).isEqualTo(0)
                 assertThat(cursor.getInt(3)).isEqualTo(2210)
+            }
+        }
+    }
+
+    @Test
+    fun `version 10 migrates to 11 with the pauses known only where nothing else could have walked it`() {
+        migrations.createDatabase(MIGRATION_DB, 10).use { db ->
+            val columns = "INSERT INTO session (planId, name, goalKind, goalValue, restOfDay, intensity, milestones, " +
+                "vibrate, localEpochDay, startedAtMillis, state, endedAtMillis, endReason, steps, " +
+                "movingMillis, zoneMillis, distanceMeters, activeKcal, lastStepAtMillis, lastEventAtMillis, " +
+                "pausedAtMillis, reachedAtMillis, toldMilestones, voice, gps) VALUES "
+            // A goal outing never paused, an open outing, and a goal outing with a pause written.
+            db.execSQL(
+                columns + "(NULL, NULL, 'TIME', 20, 0, 'BRISK', 0, 1, 20716, 1789990000000, 'FINISHED', " +
+                    "1789991200000, 'GOAL', 2210, 1200000, 1200000, 1630.0, 61.0, 1789991200000, " +
+                    "1789991200000, NULL, 1789991200000, 0, 'OFF', 0)",
+            )
+            db.execSQL(
+                columns + "(NULL, NULL, 'OPEN', 0, 0, 'FREE', 0, 1, 20716, 1789995000000, 'FINISHED', " +
+                    "1789996200000, 'STOPPED', 2210, 1200000, 1200000, 1630.0, 61.0, 1789996200000, " +
+                    "1789996200000, NULL, NULL, 0, 'OFF', 0)",
+            )
+            db.execSQL(
+                columns + "(NULL, NULL, 'TIME', 20, 0, 'BRISK', 0, 1, 20717, 1790080000000, 'FINISHED', " +
+                    "1790081500000, 'GOAL', 2210, 1200000, 1200000, 1630.0, 61.0, 1790081500000, " +
+                    "1790081500000, NULL, 1790081500000, 0, 'OFF', 0)",
+            )
+            db.execSQL(
+                "INSERT INTO session_pause (sessionId, pauseIndex, fromMillis, toMillis) VALUES (3, 0, 1790080600000, 1790080900000)",
+            )
+        }
+        migrations.runMigrationsAndValidate(MIGRATION_DB, 11, true).use { db ->
+            db.query("SELECT pausesKept FROM session ORDER BY id").use { cursor ->
+                val kept = buildList { while (cursor.moveToNext()) add(cursor.getInt(0)) }
+                assertThat(kept).containsExactly(0, 1, 1).inOrder()
             }
         }
     }

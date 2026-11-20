@@ -3,6 +3,8 @@ package com.callbackdev.passo.core.data.db
 import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.migration.AutoMigrationSpec
+import androidx.sqlite.db.SupportSQLiteDatabase
 
 /**
  * Passo's database (PLANNING.md §5). The schema is exported to `core/data/schemas` and
@@ -38,6 +40,10 @@ import androidx.room.RoomDatabase
  *   `session_plan`, none until the reader makes one, the plan then following its GPS switch), and
  *   an outing's mark frozen at its start, its unit and how many were told (`marks`, `markMiles`,
  *   `toldMarks` on `session`: none for every outing before it, as for every goal outing).
+ * - v11: the shape of an outing (Phase 21.3): whether its pauses are known (`pausesKept` on
+ *   `session`), so its minutes are drawn with their gaps; false for every outing before it, whose
+ *   minutes in a pause would be drawn as walked, but for those that could only come from a Passo
+ *   that kept them: an open outing, and one with a pause written ([KeptPauses]).
  */
 @Database(
     entities = [
@@ -53,7 +59,7 @@ import androidx.room.RoomDatabase
         SessionLegEntity::class,
         SessionPauseEntity::class,
     ],
-    version = 10,
+    version = 11,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -65,6 +71,7 @@ import androidx.room.RoomDatabase
         AutoMigration(from = 7, to = 8),
         AutoMigration(from = 8, to = 9),
         AutoMigration(from = 9, to = 10),
+        AutoMigration(from = 10, to = 11, spec = PassoDatabase.KeptPauses::class),
     ],
 )
 abstract class PassoDatabase : RoomDatabase() {
@@ -73,6 +80,21 @@ abstract class PassoDatabase : RoomDatabase() {
     abstract fun sessionDao(): SessionDao
 
     abstract fun wayDao(): WayDao
+
+    /**
+     * An outing from before v11 has its pauses known only where nothing else could have walked
+     * it: an open outing came with the pauses (v9), and a pause written proves the Passo that
+     * wrote it kept them. Any other outing from before is left unknown, its page with no shape
+     * rather than a shape with a pause drawn as walking.
+     */
+    class KeptPauses : AutoMigrationSpec {
+        override fun onPostMigrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "UPDATE session SET pausesKept = 1 " +
+                    "WHERE goalKind = 'OPEN' OR id IN (SELECT DISTINCT sessionId FROM session_pause)",
+            )
+        }
+    }
 
     companion object {
         const val NAME = "passo.db"

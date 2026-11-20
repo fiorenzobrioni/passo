@@ -184,4 +184,16 @@ class SessionPlansTest {
         val walked = base.copy(totals = SessionTotals(movingMillis = 20 * 60_000, zoneMillis = 17 * 60_000))
         assertThat(walked.zoneShare()).isWithin(1e-9).of(0.85)
     }
+
+    @Test
+    fun `every outing started now keeps its pauses, so its minutes can be drawn with their gaps`() {
+        val started = SessionPlans.PRESETS.mapNotNull { plan ->
+            SessionPlans.start(plan, nowMillis = 0, localEpochDay = 0, todaySteps = 0, dailyGoalSteps = 8_000)
+        }
+        assertThat(started).hasSize(SessionPlans.PRESETS.size)
+        assertThat(started.all { it.pausesKept }).isTrue()
+        val walk = com.callbackdev.passo.core.domain.ways.Ways.walks.first()
+        assertThat(SessionPlans.startWalk(walk, 0, com.callbackdev.passo.core.model.SessionVoice.OFF, 0, 0)?.pausesKept)
+            .isTrue()
+    }
 }

@@ -3,6 +3,7 @@ package com.callbackdev.passo.feature.today
 import androidx.compose.runtime.Immutable
 import com.callbackdev.passo.core.data.sessions.LiveSessionState
 import com.callbackdev.passo.core.domain.sessions.Outing
+import com.callbackdev.passo.core.domain.sessions.OutingShape
 import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.walks.Walk
 import com.callbackdev.passo.core.domain.ways.WayToday
@@ -33,6 +34,8 @@ enum class TrackingStatus {
  *   then no walk appears on the screen.
  * @property session the outing under way, paused, or just over and not yet put away: the card
  *   under the date (PLANNING.md §11 Phase 10).
+ * @property sessionShape what the card draws of its outing's shape (Phase 21.3): its route so far,
+ *   its minutes, its day's goal; null where the card draws none.
  * @property outings today's walks and finished outings in one list, by start.
  * @property startOutingButton the reader keeps the way to the Outings page on Today (Settings).
  * @property way the way under way, or arrived today, and today's stretch of it; null with none.
@@ -50,6 +53,7 @@ data class TodayUiState(
     val streakDays: Int = 0,
     val walks: List<Walk>? = null,
     val session: LiveSessionState? = null,
+    val sessionShape: OutingShape? = null,
     val outings: List<Outing> = emptyList(),
     val startOutingButton: Boolean = true,
     val way: WayToday? = null,

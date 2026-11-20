@@ -7,12 +7,14 @@ import androidx.lifecycle.viewModelScope
 import com.callbackdev.passo.core.data.learning.StepLearningRepository
 import com.callbackdev.passo.core.data.routes.RouteRepository
 import com.callbackdev.passo.core.data.sessions.LiveSession
+import com.callbackdev.passo.core.data.sessions.OutingShapes
 import com.callbackdev.passo.core.data.sessions.SessionRepository
 import com.callbackdev.passo.core.data.settings.SettingsRepository
 import com.callbackdev.passo.core.domain.routes.GpsLineAction
 import com.callbackdev.passo.core.domain.routes.GpxCodec
 import com.callbackdev.passo.core.domain.routes.LiveMeasure
 import com.callbackdev.passo.core.domain.routes.RouteShape
+import com.callbackdev.passo.core.domain.sessions.OutingShape
 import com.callbackdev.passo.core.model.AltitudeSource
 import com.callbackdev.passo.core.model.RoutePoint
 import com.callbackdev.passo.core.model.Session
@@ -32,6 +34,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -63,6 +66,8 @@ class DrawnRoute(val shape: RouteShape, val altitudes: AltitudeSource?) {
  * @property measure what the service says of an outing under way beyond its stored numbers (the
  *   line about the satellites, the pace now, the stretch whose fixes are not in yet); null for an
  *   outing that is not the one under way (Phase 21: the page carries the card's lines).
+ * @property shape its minutes and its day's goal, for «The shape of the walk» (Phase 21.3); its
+ *   minutes are null for an outing from before its pauses were kept, and the section is not shown.
  */
 @Immutable
 data class OutingUiState(
@@ -73,6 +78,7 @@ data class OutingUiState(
     val stepAtPace: Double? = null,
     val stepReady: Boolean = false,
     val measure: LiveMeasure? = null,
+    val shape: OutingShape? = null,
 )
 
 /**
@@ -96,6 +102,7 @@ constructor(
     settingsRepository: SettingsRepository,
     live: LiveSession,
     learning: StepLearningRepository,
+    shapes: OutingShapes,
 ) : ViewModel() {
     private val opened = MutableStateFlow<Long?>(null)
 
@@ -109,18 +116,23 @@ constructor(
                 // The service's own state of it while it counts, or while an end can be taken back:
                 // what the card shows, a step batch fresher than what is stored.
                 val running = live.current.map { it?.takeIf { state -> state.session.id == id } }
+                    .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
+                val stored = sessions.observeSession(id)
+                    .shareIn(viewModelScope, SharingStarted.WhileSubscribed(), replay = 1)
+                // Its minutes and its day's goal (Phase 21.3); the route is the map's, read above.
+                val shape = shapes.of(combine(stored, running) { s, l -> l?.session ?: s }, withRoute = false)
                 val step = combine(
                     learning.stepOf(id),
                     learning.learning.map { it.proposed && it.readyOutingId == id }.distinctUntilChanged(),
                 ) { atPace, ready -> atPace to ready }
-                combine(sessions.observeSession(id), route, units, running, step) {
-                        stored,
+                combine(stored, route, combine(units, shape, ::Pair), running, step) {
+                        saved,
                         drawn,
-                        unit,
+                        (unit, outingShape),
                         liveState,
                         (atPace, ready),
                     ->
-                    (liveState?.session ?: stored)?.let {
+                    (liveState?.session ?: saved)?.let {
                         OutingUiState(
                             it,
                             drawn,
@@ -130,6 +142,7 @@ constructor(
                             stepAtPace = atPace,
                             stepReady = ready,
                             measure = liveState?.measure,
+                            shape = outingShape?.takeIf { shape -> shape.sessionId == it.id },
                         )
                     }
                 }

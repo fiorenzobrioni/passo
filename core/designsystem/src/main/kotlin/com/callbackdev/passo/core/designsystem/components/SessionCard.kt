@@ -1,5 +1,7 @@
 package com.callbackdev.passo.core.designsystem.components
 
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -33,6 +35,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
@@ -59,8 +63,10 @@ import com.callbackdev.passo.core.designsystem.R
 import com.callbackdev.passo.core.designsystem.format.annotated
 import com.callbackdev.passo.core.designsystem.format.capQuestion
 import com.callbackdev.passo.core.designsystem.format.clockTime
+import com.callbackdev.passo.core.designsystem.format.dayShareText
 import com.callbackdev.passo.core.designsystem.format.gpsLineAction
 import com.callbackdev.passo.core.designsystem.format.gpsLineText
+import com.callbackdev.passo.core.designsystem.format.minuteStripSpoken
 import com.callbackdev.passo.core.designsystem.format.movingMinutes
 import com.callbackdev.passo.core.designsystem.format.sessionAmount
 import com.callbackdev.passo.core.designsystem.format.sessionCadence
@@ -76,6 +82,7 @@ import com.callbackdev.passo.core.designsystem.format.sessionProgress
 import com.callbackdev.passo.core.designsystem.format.sessionStanding
 import com.callbackdev.passo.core.designsystem.format.sessionSteps
 import com.callbackdev.passo.core.designsystem.format.sessionZone
+import com.callbackdev.passo.core.designsystem.format.stillRouteSpoken
 import com.callbackdev.passo.core.designsystem.format.text
 import com.callbackdev.passo.core.designsystem.format.unbrokenText
 import com.callbackdev.passo.core.designsystem.format.unitOf
@@ -91,11 +98,13 @@ import com.callbackdev.passo.core.domain.routes.GpsLineAction
 import com.callbackdev.passo.core.domain.routes.LiveMeasure
 import com.callbackdev.passo.core.domain.routes.capQuestionMinutes
 import com.callbackdev.passo.core.domain.sessions.IntervalSchedule
+import com.callbackdev.passo.core.domain.sessions.OutingShape
 import com.callbackdev.passo.core.domain.sessions.cadence
 import com.callbackdev.passo.core.domain.sessions.cadenceFloor
 import com.callbackdev.passo.core.domain.sessions.fraction
 import com.callbackdev.passo.core.domain.sessions.goal
 import com.callbackdev.passo.core.domain.sessions.intervalAt
+import com.callbackdev.passo.core.domain.sessions.pastGoal
 import com.callbackdev.passo.core.domain.sessions.pausedMillis
 import com.callbackdev.passo.core.domain.sessions.progress
 import com.callbackdev.passo.core.domain.ways.WalkPlaces
@@ -142,7 +151,10 @@ class SessionCardActions(
  *
  * On a city walk (Phase 11) the bar is the walk's small map, the reader's point on it: drawn
  * only while the card is on screen, like every chart here. An open outing (Phase 21) has no goal
- * and no bar: under its sentence, since when it has been under way and its time in motion.
+ * and no bar: in its place the shape of the walk (step 21.3), its route so far with GPS and its
+ * minutes without; under it, since when it has been under way and its time in motion, then its
+ * share of the day's goal. A goal outing taken on past its goal shows its shape too, where the bar
+ * would stand full and still: past its goal it is open in all but its name.
  *
  * While it counts the card is a door to the outing's own page («See the outing»), which follows it
  * with its route growing, and carries its buttons too.
@@ -158,6 +170,8 @@ class SessionCardActions(
  * @param showMap false where the walk's own map is already on the page.
  * @param measure what an outing with GPS shows beyond its stored numbers, and the line about
  *   the satellites; empty for any other outing.
+ * @param shape its route so far, its minutes and its day's goal, read only while the card is on
+ *   screen; null until read, and where the card shows no shape.
  */
 @Composable
 fun SessionCard(
@@ -169,6 +183,7 @@ fun SessionCard(
     modifier: Modifier = Modifier,
     showMap: Boolean = true,
     measure: LiveMeasure = LiveMeasure(),
+    shape: OutingShape? = null,
 ) {
     val res = LocalResources.current
     val reached = session.reached
@@ -265,12 +280,25 @@ fun SessionCard(
                     modifier = Modifier.testTag(SessionCardTags.SENTENCE),
                 )
             }
-            if (session.open) {
-                // No goal, so no bar to fill: how long it has been walked, and since when. Over,
-                // the state's line above says when it was, and this would say it twice.
-                if (!finished) OpenRow(session, now, format)
-            } else {
-                GoalTrack(session, sentence, format, showMap, now, accent)
+            val share = shape?.let { res.dayShareText(session, it, format) }
+            when {
+                // No goal, so no bar to fill: the walk's shape, then how long it has been walked and
+                // since when (over, the state's line above says when it was, and this would say it
+                // twice), then its share of the day.
+                session.open -> {
+                    shape?.takeIf { it.drawn(session) }?.let { OutingShapeView(session, it, format, actions.onOpen) }
+                    if (!finished || share != null) {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            if (!finished) OpenRow(session, now, format)
+                            if (share != null) DayShareLine(share, shape?.dayShare(session.totals.steps) ?: 0.0)
+                        }
+                    }
+                }
+
+                session.pastGoal && shape?.drawn(session) == true ->
+                    OutingShapeView(session, shape, format, actions.onOpen)
+
+                else -> GoalTrack(session, sentence, format, showMap, now, accent)
             }
             if (finished && session.intervals != null) IntervalBars(session, accent)
             SessionStats(session, cadence, pace, format, measure.openMeters)
@@ -487,6 +515,79 @@ private fun OpenRow(session: Session, nowMillis: Long, format: MeasureFormatter)
         modifier = Modifier.testTag(SessionCardTags.OPEN_ROW),
     )
 }
+
+/** There is a shape to draw: a route with a line, for an outing with GPS, or minutes to draw. */
+private fun OutingShape.drawn(session: Session): Boolean = (route != null && session.gps) || minutes != null
+
+/**
+ * The shape of a walk on its card (Phase 21.3), in the bar's place: with GPS its route so far,
+ * still, which opens the outing's page at a touch; without, its minutes. The minutes stand in
+ * while an outing with GPS has no line yet (no fix, or a single one), and the route takes their
+ * place as it comes, with a fade (under reduced motion too: a fade is the motion that stays).
+ */
+@Composable
+private fun OutingShapeView(session: Session, shape: OutingShape, format: MeasureFormatter, onOpen: (() -> Unit)?) {
+    val res = LocalResources.current
+    val route = shape.route?.takeIf { session.gps }
+    val minutes = shape.minutes
+    val openLabel = stringResource(R.string.session_card_open)
+    Crossfade(
+        targetState = route != null,
+        animationSpec = tween(SHAPE_FADE_MILLIS),
+        // The route is taller than the strip: the card grows to it, unless motion is reduced.
+        modifier = if (reducedMotion()) Modifier else Modifier.animateContentSize(),
+        label = "shape",
+    ) { routed ->
+        if (routed && route != null) {
+            StillRouteView(
+                shape = route,
+                contentDescription = res.stillRouteSpoken(session, format),
+                ratio = CARD_MAP_RATIO,
+                onClick = onOpen,
+                clickLabel = openLabel,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        } else if (minutes != null) {
+            MinuteStrip(minutes = minutes, description = res.minuteStripSpoken(session, minutes))
+        }
+    }
+}
+
+/**
+ * The walk's share of its day's goal (Phase 21.3), «34% of today's goal», after a small ring of
+ * the day's goal in its colour, as Today's ring is: the walk's part of it, never more than whole.
+ * On an outing's card and on its page.
+ */
+@Composable
+fun DayShareLine(text: String, share: Double, modifier: Modifier = Modifier) {
+    val track = MaterialTheme.colorScheme.surfaceContainerHighest
+    val goal = PassoTheme.colors.goal
+    val sweep = (share.coerceIn(0.0, 1.0) * FULL_TURN).toFloat()
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = modifier.testTag(SessionCardTags.SHARE).semantics(mergeDescendants = true) { },
+    ) {
+        Canvas(Modifier.size(SHARE_RING)) {
+            val width = SHARE_RING_WIDTH.toPx()
+            val corner = Offset(width / 2, width / 2)
+            val arc = Size(size.width - width, size.height - width)
+            drawArc(track, 0f, FULL_TURN.toFloat(), false, corner, arc, style = Stroke(width))
+            drawArc(goal, -QUARTER_TURN, sweep, false, corner, arc, style = Stroke(width, cap = StrokeCap.Round))
+        }
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+private val SHARE_RING = 14.dp
+private val SHARE_RING_WIDTH = 2.5.dp
+private const val FULL_TURN = 360.0
+private const val QUARTER_TURN = 90f
+private const val SHAPE_FADE_MILLIS = 400
 
 /**
  * «See the outing», on a card that counts (Phase 21): its own page, which follows it, with the
@@ -909,6 +1010,7 @@ object SessionCardTags {
     const val CLOSE = "session_card_close"
     const val OPEN = "session_card_open"
     const val OPEN_ROW = "session_card_open_row"
+    const val SHARE = "session_card_share"
     const val MAP = "session_card_map"
     const val INTERVALS = "session_card_intervals"
     const val INTERVAL_BARS = "session_card_interval_bars"

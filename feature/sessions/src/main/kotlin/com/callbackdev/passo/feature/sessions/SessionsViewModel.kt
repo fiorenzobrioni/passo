@@ -6,12 +6,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.callbackdev.passo.core.data.sessions.LiveSession
 import com.callbackdev.passo.core.data.sessions.LiveSessionState
+import com.callbackdev.passo.core.data.sessions.OutingShapes
 import com.callbackdev.passo.core.data.sessions.SessionRepository
 import com.callbackdev.passo.core.data.settings.SettingsRepository
 import com.callbackdev.passo.core.data.tracking.LiveSteps
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.routes.GpsLineAction
+import com.callbackdev.passo.core.domain.sessions.OutingShape
+import com.callbackdev.passo.core.domain.sessions.pastGoal
 import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.tracking.OutingStarter
@@ -28,6 +31,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -49,6 +54,7 @@ enum class SessionsStatus {
  * The Outings page.
  *
  * @property live the outing under way, paused, or just ended by its goal.
+ * @property shape what its card draws of its shape (Phase 21.3); null where the card draws none.
  * @property restOfDaySteps what "the rest of the day" means right now.
  * @property alertsWhileScreenOff the phone's step counter can wake it for a signal.
  */
@@ -61,6 +67,7 @@ data class SessionsUiState(
     val restOfDaySteps: Int,
     val status: SessionsStatus,
     val alertsWhileScreenOff: Boolean,
+    val shape: OutingShape? = null,
 )
 
 /**
@@ -76,6 +83,7 @@ constructor(
     private val settingsRepository: SettingsRepository,
     private val control: TrackingControl,
     private val outings: OutingStarter,
+    shapes: OutingShapes,
     tracking: TrackingRepository,
     liveSteps: LiveSteps,
     liveSession: LiveSession,
@@ -95,15 +103,20 @@ constructor(
             live ?: stored?.let {
                 LiveSessionState(it, cadence = null, canKeepGoing = false, alertsWhileScreenOff = true)
             }
-        }
+        }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), replay = 1)
+
+    /** Its card's shape (Phase 21.3), read only for a card that draws one, while the page is seen. */
+    private val shape: Flow<OutingShape?> = shapes.of(
+        live.map { it?.session?.takeIf { session -> session.open || session.pastGoal } },
+    )
 
     val state: StateFlow<SessionsUiState?> = combine(
         sessions.plans,
-        live,
+        combine(live, shape, ::Pair),
         combine(settingsRepository.settings, settingsRepository.profile, ::Pair),
         todaySteps,
         readiness,
-    ) { plans, live, (settings, profile), steps, ready ->
+    ) { plans, (live, shape), (settings, profile), steps, ready ->
         SessionsUiState(
             plans = plans,
             live = live,
@@ -116,6 +129,7 @@ constructor(
                 else -> SessionsStatus.READY
             },
             alertsWhileScreenOff = StepTracking.hasWakeUpStepCounter(context),
+            shape = shape?.takeIf { it.sessionId == live?.session?.id },
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), null)
 

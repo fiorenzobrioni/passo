@@ -149,6 +149,7 @@ internal data class OutingDto(
     val marks: String? = null,
     val markMiles: Boolean = false,
     val toldMarks: Int = 0,
+    val pausesKept: Boolean = false,
 )
 
 /**

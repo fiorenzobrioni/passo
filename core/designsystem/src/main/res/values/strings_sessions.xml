@@ -47,6 +47,9 @@
     </plurals>
     <string name="session_headline_paused">Paused. Resume when you are ready.</string>
     <string name="session_headline_reached">Goal reached: %1$s.</string>
+    <!-- A goal outing taken on past its goal with «Keep going»: what went beyond it, «Goal reached, and 20
+         minutes more», «and 1,240 steps more», «and 0.80 km more». -->
+    <string name="session_headline_reached_beyond">Goal reached, and %1$s more.</string>
     <string name="session_headline_stopped">Stopped at %1$s of the goal.</string>
     <string name="session_headline_idle">Ended by itself at %1$s of the goal, after a long stop.</string>
     <string name="session_headline_closed">Closed at %1$s of the goal.</string>
@@ -231,4 +234,38 @@
     <!-- Under an open outing's sentence, in place of a goal's bar: «Since 10:12 · 41 min in motion». -->
     <string name="session_open_row">Since %1$s · %2$s in motion</string>
     <string name="session_open_row_paused">Since %1$s · %2$s in motion, %3$s paused</string>
+
+    <!-- The shape of an outing (Phase 21.3), its strip said by TalkBack in one sentence: «41 minutes
+         on your feet, 30 of them brisk, one pause», and past its goal «the goal reached at minute 30». -->
+    <string name="session_shape_walking">%1$s on your feet</string>
+    <string name="session_shape_running">%1$s of running</string>
+    <plurals name="session_shape_brisk">
+        <item quantity="one">%1$d of them brisk</item>
+        <item quantity="other">%1$d of them brisk</item>
+    </plurals>
+    <plurals name="session_shape_vigorous">
+        <item quantity="one">%1$d of them at a vigorous pace</item>
+        <item quantity="other">%1$d of them at a vigorous pace</item>
+    </plurals>
+    <plurals name="session_shape_run">
+        <item quantity="one">%1$d of them at a running pace</item>
+        <item quantity="other">%1$d of them at a running pace</item>
+    </plurals>
+    <plurals name="session_shape_pauses">
+        <item quantity="one">one pause</item>
+        <item quantity="other">%1$d pauses</item>
+    </plurals>
+    <string name="session_shape_goal">the goal reached at minute %1$d</string>
+    <!-- The walk's share of its day's goal, from its own steps alone: «34% of today's goal». The
+         «elided» forms are for languages that write the article apart before a number said with a
+         vowel (Italian: «l'8%», «l'11%»); English says them alike. -->
+    <string name="session_share_today">%1$s of today’s goal</string>
+    <string name="session_share_today_elided">%1$s of today’s goal</string>
+    <string name="session_share_day">%1$s of the day’s goal</string>
+    <string name="session_share_day_elided">%1$s of the day’s goal</string>
+    <string name="session_share_whole_today">All of today’s goal, by itself</string>
+    <string name="session_share_whole_day">All of the day’s goal, by itself</string>
+    <!-- A route drawn still, on a card: «Your route so far: 2.30 km», over «Your route: 3.20 km». -->
+    <string name="session_route_so_far">Your route so far: %1$s</string>
+    <string name="session_route_whole">Your route: %1$s</string>
 </resources>

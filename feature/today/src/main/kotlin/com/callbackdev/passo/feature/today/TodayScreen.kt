@@ -256,6 +256,7 @@ fun TodayScreen(
                         format = format,
                         actions = sessionActions(session.session.id),
                         measure = session.measure,
+                        shape = state.sessionShape?.takeIf { it.sessionId == session.session.id },
                         modifier = inColumn.padding(horizontal = ScreenMargin),
                     )
                 }

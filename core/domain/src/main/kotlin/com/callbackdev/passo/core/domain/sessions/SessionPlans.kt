@@ -266,6 +266,7 @@ object SessionPlans {
                 startedAtMillis = nowMillis,
                 gps = withGps && plan.gps,
                 capAtMillis = nowMillis + SessionConstants.OPEN_MAX_SESSION_MILLIS,
+                pausesKept = true,
                 // The plan's switch decides the mark, not what the phone allowed: a plan with GPS
                 // started on the steps still tells its kilometres, estimated.
                 marks = plan.marksInForce,
@@ -288,6 +289,7 @@ object SessionPlans {
                 intervals = intervals.intervals,
                 gps = withGps && plan.gps,
                 capAtMillis = nowMillis + SessionConstants.MAX_SESSION_MILLIS,
+                pausesKept = true,
             )
         }
         return Session(
@@ -304,6 +306,7 @@ object SessionPlans {
             startedAtMillis = nowMillis,
             gps = withGps && plan.gps,
             capAtMillis = nowMillis + SessionConstants.MAX_SESSION_MILLIS,
+            pausesKept = true,
         )
     }
 
@@ -330,6 +333,7 @@ object SessionPlans {
             walk = walk.id,
             walkFromMeters = fromMeters.coerceIn(0, walk.lengthMeters),
             capAtMillis = nowMillis + SessionConstants.MAX_SESSION_MILLIS,
+            pausesKept = true,
         )
     }
 

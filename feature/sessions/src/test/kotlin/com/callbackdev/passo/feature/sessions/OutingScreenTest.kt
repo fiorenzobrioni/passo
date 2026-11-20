@@ -21,6 +21,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.callbackdev.passo.core.designsystem.components.MinuteStripTags
 import com.callbackdev.passo.core.designsystem.components.OutingChartTags
 import com.callbackdev.passo.core.designsystem.components.RouteMapTags
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
@@ -28,6 +29,8 @@ import com.callbackdev.passo.core.designsystem.components.SessionCardTags
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.routes.GpsLine
 import com.callbackdev.passo.core.domain.routes.LiveMeasure
+import com.callbackdev.passo.core.domain.sessions.OutingMinutes
+import com.callbackdev.passo.core.domain.sessions.OutingShape
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.model.AltitudeSource
 import com.callbackdev.passo.core.model.IntervalSplit
@@ -572,6 +575,86 @@ class OutingScreenTest {
     fun `on an open foldable the page is a column in the middle`() {
         show(OutingSamples.state())
         compose.walkPage(hasTestTag(OutingTags.PAGE), "outing_foldable")
+    }
+
+    /** Fifty minutes of a brisk walk, four of them paused, the goal reached at the forty-fifth. */
+    private val shapeMinutes = OutingMinutes(
+        steps = List(50) { if (it in 20..23) 0 else 92 + it * 7 % 24 },
+        paused = List(50) { it in 20..23 },
+        floor = 100,
+        goalAt = 45.0,
+        pauses = 1,
+    )
+
+    @Test
+    fun `the shape of the walk - its minutes, what a bar is, and its share of the day`() {
+        val session = OutingSamples.onSteps
+        show(
+            OutingSamples.state(session = session, route = null)
+                .copy(shape = OutingShape(session.id, shapeMinutes, dayGoalSteps = 8_000, today = false)),
+        )
+
+        compose.onNodeWithTag(OutingTags.SHAPE).assertIsDisplayed()
+        compose.onNodeWithText("The shape of the walk").assertIsDisplayed()
+        compose.onNodeWithTag(MinuteStripTags.STRIP)
+            .assertContentDescriptionContains("on your feet", substring = true)
+        compose.onNodeWithText(
+            "A bar for each minute, in colour at 100 steps a minute or more. The gaps are your pauses. " +
+                "The line marks your goal.",
+        ).assertIsDisplayed()
+        compose.onNodeWithTag(SessionCardTags.SHARE).assertIsDisplayed()
+        compose.onNodeWithText("of the day’s goal", substring = true).assertIsDisplayed()
+        compose.assertAccessible()
+        snapshot("outing_shape")
+    }
+
+    @Test
+    fun `with GPS, the shape of the walk comes after the map`() {
+        show(
+            OutingSamples.state().copy(
+                shape = OutingShape(OutingSamples.measured.id, shapeMinutes, dayGoalSteps = 8_000),
+            ),
+        )
+        page().performScrollToNode(hasTestTag(OutingTags.SHAPE))
+        compose.onNodeWithTag(OutingTags.SHAPE).assertIsDisplayed()
+        page().performScrollToNode(hasTestTag(RouteMapTags.MAP))
+        compose.onNodeWithTag(RouteMapTags.MAP).assertIsDisplayed()
+        snapshot("outing_shape_gps")
+    }
+
+    @Test
+    fun `an outing walked before 21_1, its pauses unknown - no shape section`() {
+        val session = OutingSamples.onSteps
+        show(
+            OutingSamples.state(session = session, route = null)
+                .copy(shape = OutingShape(session.id, minutes = null, dayGoalSteps = 8_000)),
+        )
+        compose.onNodeWithTag(OutingTags.SENTENCE).assertIsDisplayed()
+        compose.onNodeWithTag(OutingTags.SHAPE).assertDoesNotExist()
+        compose.onNodeWithTag(MinuteStripTags.STRIP).assertDoesNotExist()
+    }
+
+    @Test
+    fun `a run's section is the shape of the run`() {
+        val session = OutingSamples.onSteps.copy(intensity = SessionIntensity.RUN)
+        show(
+            OutingSamples.state(session = session, route = null)
+                .copy(shape = OutingShape(session.id, shapeMinutes.copy(floor = 140), dayGoalSteps = 8_000)),
+        )
+        compose.onNodeWithText("The shape of the run").assertIsDisplayed()
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT-w360dp-h740dp-xxhdpi")
+    fun `the shape of the walk in Italian on a small phone`() {
+        val session = OutingSamples.onSteps
+        show(
+            OutingSamples.state(session = session, route = null)
+                .copy(shape = OutingShape(session.id, shapeMinutes, dayGoalSteps = 8_000, today = false)),
+        )
+        compose.onNodeWithText("La forma della camminata").assertIsDisplayed()
+        compose.onNodeWithText("Una barra", substring = true).assertIsDisplayed()
+        snapshot("outing_shape_it")
     }
 
     private fun snapshot(name: String) {

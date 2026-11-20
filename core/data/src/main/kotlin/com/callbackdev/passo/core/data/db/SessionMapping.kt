@@ -128,6 +128,7 @@ internal fun SessionEntity.toModel(
             )
         },
         pauses = pauses.sortedBy { it.pauseIndex }.map { SessionPause(it.fromMillis, it.toMillis) },
+        pausesKept = pausesKept,
         // A mark a newer build knows and this one does not tells nothing here.
         marks = marks.toEnumOrNull<SessionMarks>() ?: SessionMarks.NONE,
         markMiles = markMiles,
@@ -173,6 +174,7 @@ internal fun Session.toEntity() = SessionEntity(
     capAskedForMillis = capAskedForMillis,
     ascentMeters = ascentMeters,
     descentMeters = descentMeters,
+    pausesKept = pausesKept,
     marks = marks.name,
     markMiles = markMiles,
     toldMarks = toldMarks,

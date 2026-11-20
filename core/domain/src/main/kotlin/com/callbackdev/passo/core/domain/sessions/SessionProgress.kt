@@ -61,6 +61,39 @@ fun Session.remaining(): SessionAmount = when (goalKind) {
 /** The goal, in its own quantity; [SessionGoalKind.OPEN]'s nothing for an open outing. */
 fun Session.goal(): SessionAmount = SessionAmount(goalKind, goalValue.toDouble())
 
+/**
+ * A goal outing taken on past its goal with «Keep going» (Phase 21.3), and counting still: open in
+ * all but its name, so its card shows its shape where the bar stood full. A city walk past its end
+ * keeps its walk's map, which says more of it than its minutes.
+ */
+val Session.pastGoal: Boolean get() = reached && live && !open && walk == null
+
+/**
+ * How far an outing taken on past its goal went beyond it, in the goal's own quantity: the minutes
+ * in motion past a time goal, the steps past a goal of steps, the distance past one of distance.
+ * Null before the goal, under one of its units beyond it (a minute, a step, ten metres), for an
+ * open outing, which has no goal to go beyond, and for one that ended at its goal: the batch that
+ * crossed it may run a few steps past, which the reader did not choose to walk on. The time in
+ * motion at the moment of the goal is not kept, so a goal of steps says its steps beyond, not its
+ * minutes: the quantity its bar was counted in.
+ */
+fun Session.beyond(): SessionAmount? {
+    if (!reached || open || (state == SessionState.FINISHED && end == SessionEnd.GOAL)) return null
+    return when (goalKind) {
+        SessionGoalKind.STEPS, SessionGoalKind.REST_OF_DAY ->
+            (totals.steps - goalValue).takeIf { it >= 1 }?.let { SessionAmount(goalKind, it.toDouble()) }
+
+        SessionGoalKind.DISTANCE -> (totals.distanceMeters - goalValue).takeIf { it >= MIN_BEYOND_METERS }
+            ?.let { SessionAmount(goalKind, it) }
+
+        SessionGoalKind.TIME, SessionGoalKind.INTERVALS ->
+            ((totals.movingMillis - goalValue * MILLIS_PER_MINUTE) / MILLIS_PER_MINUTE).takeIf { it >= 1 }
+                ?.let { SessionAmount(SessionGoalKind.TIME, it.toDouble()) }
+
+        SessionGoalKind.OPEN -> null
+    }
+}
+
 /** The share of its moving time spent at the outing's cadence; null before it has moved. */
 fun Session.zoneShare(): Double? =
     if (totals.movingMillis <= 0) null else totals.zoneMillis.toDouble() / totals.movingMillis
@@ -100,8 +133,11 @@ sealed interface SessionHeadline {
 
     data object Paused : SessionHeadline
 
-    /** The goal was reached; the reader may be going on past it. */
-    data class Reached(val goal: SessionAmount) : SessionHeadline
+    /**
+     * The goal was reached; the reader may be going on past it, [beyond] it so far (Phase 21.3),
+     * null until a whole unit of it.
+     */
+    data class Reached(val goal: SessionAmount, val beyond: SessionAmount? = null) : SessionHeadline
 
     /** Over before its goal, at [progress] of it. */
     data class Ended(val progress: Double, val end: SessionEnd) : SessionHeadline
@@ -137,7 +173,7 @@ sealed interface SessionHeadline {
             val progress = session.progress()
             val interval = session.intervalAt(nowMillis)
             return when {
-                session.reached -> Reached(session.goal())
+                session.reached -> Reached(session.goal(), session.beyond())
                 session.state == SessionState.FINISHED -> Ended(progress, session.end ?: SessionEnd.STOPPED)
                 session.state == SessionState.PAUSED -> Paused
                 interval != null -> Interval(interval)
@@ -183,3 +219,6 @@ sealed interface SessionHeadline {
 }
 
 private const val MILLIS_PER_MINUTE = 60_000L
+
+/** Ten metres: the least a distance beyond its goal is said in, its smallest written step. */
+private const val MIN_BEYOND_METERS = 10.0

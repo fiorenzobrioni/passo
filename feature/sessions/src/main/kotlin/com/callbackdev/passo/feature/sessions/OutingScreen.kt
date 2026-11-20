@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -72,8 +73,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.callbackdev.passo.core.designsystem.components.ClimbProfile
+import com.callbackdev.passo.core.designsystem.components.DayShareLine
 import com.callbackdev.passo.core.designsystem.components.IntervalBars
 import com.callbackdev.passo.core.designsystem.components.MetricTile
+import com.callbackdev.passo.core.designsystem.components.MinuteStrip
 import com.callbackdev.passo.core.designsystem.components.RouteBead
 import com.callbackdev.passo.core.designsystem.components.RouteMapView
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
@@ -85,10 +88,13 @@ import com.callbackdev.passo.core.designsystem.components.StatStrip
 import com.callbackdev.passo.core.designsystem.components.StripStat
 import com.callbackdev.passo.core.designsystem.components.TilePair
 import com.callbackdev.passo.core.designsystem.components.duration
+import com.callbackdev.passo.core.designsystem.components.minuteStripBars
 import com.callbackdev.passo.core.designsystem.format.annotated
 import com.callbackdev.passo.core.designsystem.format.clockRange
+import com.callbackdev.passo.core.designsystem.format.dayShareText
 import com.callbackdev.passo.core.designsystem.format.format
 import com.callbackdev.passo.core.designsystem.format.longDate
+import com.callbackdev.passo.core.designsystem.format.minuteStripSpoken
 import com.callbackdev.passo.core.designsystem.format.paceSpoken
 import com.callbackdev.passo.core.designsystem.format.rememberMeasureFormatter
 import com.callbackdev.passo.core.designsystem.format.sessionGoalDescription
@@ -115,10 +121,13 @@ import com.callbackdev.passo.core.domain.routes.Splits
 import com.callbackdev.passo.core.domain.routes.distanceKind
 import com.callbackdev.passo.core.domain.routes.pace
 import com.callbackdev.passo.core.domain.routes.stepsShare
+import com.callbackdev.passo.core.domain.sessions.OutingMinutes
+import com.callbackdev.passo.core.domain.sessions.OutingShape
 import com.callbackdev.passo.core.domain.sessions.cadenceFloor
 import com.callbackdev.passo.core.domain.sessions.pausedMillis
 import com.callbackdev.passo.core.model.AltitudeSource
 import com.callbackdev.passo.core.model.Session
+import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.UnitSystem
 import kotlinx.coroutines.launch
@@ -232,6 +241,8 @@ internal fun fileName(session: Session, zone: ZoneId = ZoneId.systemDefault()): 
  * a measure and which an estimate; an interval outing's intervals; then, with GPS, its
  * kilometres one by one, the shape of its climb, and what its route can do (share, save,
  * delete). Without GPS, the same page without those parts, and no empty box in their place.
+ * Every outing walked since its pauses are kept shows the shape of the walk after the map, or
+ * where the map would be: its minutes, and its share of the day (Phase 21.3).
  *
  * @param shareLayer where the image to share is recorded: the route's card, drawn out of sight.
  */
@@ -355,6 +366,12 @@ private fun OutingPage(state: OutingUiState, format: MeasureFormatter, actions: 
                     Modifier.padding(horizontal = 20.dp),
                 )
             }
+        }
+        // Its minutes, where its pauses are known: an outing from before would draw a pause as walked.
+        val shape = state.shape
+        val minutes = shape?.minutes
+        if (shape != null && minutes != null) {
+            item(key = "shape") { ShapeSection(session, minutes, shape, format) }
         }
         item(key = "numbers") { Numbers(session, route?.altitudes, format) }
         // What this outing measured of the step, once it is over: from its own samples, not from
@@ -558,6 +575,43 @@ private fun Numbers(session: Session, altitudes: AltitudeSource?, format: Measur
             }
         }
         resources.sessionZone(session, format)?.let { Note(it, Modifier.padding(horizontal = 4.dp)) }
+    }
+}
+
+/**
+ * The shape of the walk (Phase 21.3): its minutes as a strip, taller than on its card, with what a
+ * bar is, what a gap is and what the line is where there is one, then its share of its day's goal.
+ */
+@Composable
+private fun ShapeSection(session: Session, minutes: OutingMinutes, shape: OutingShape, format: MeasureFormatter) {
+    val resources = LocalResources.current
+    val share = resources.dayShareText(session, shape, format)
+    Group {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.testTag(OutingTags.SHAPE)) {
+            Title(
+                stringResource(
+                    if (session.intensity == SessionIntensity.RUN) R.string.outing_shape_run else R.string.outing_shape,
+                ),
+            )
+            BoxWithConstraints {
+                // What a bar holds is the strip's to decide, at its width: said under it as it is.
+                val group = minutes.groupFor(minuteStripBars(maxWidth))
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    MinuteStrip(
+                        minutes = minutes,
+                        description = resources.minuteStripSpoken(session, minutes),
+                        height = SHAPE_HEIGHT,
+                    )
+                    val legend = listOfNotNull(
+                        resources.getQuantityString(R.plurals.outing_shape_legend, group, group, minutes.floor),
+                        stringResource(R.string.outing_shape_gaps).takeIf { minutes.pauses > 0 },
+                        stringResource(R.string.outing_shape_goal_line).takeIf { minutes.goalAt != null },
+                    ).joinToString(" ")
+                    Note(legend)
+                }
+            }
+            share?.let { DayShareLine(it, shape.dayShare(session.totals.steps) ?: 0.0) }
+        }
     }
 }
 
@@ -832,6 +886,9 @@ private const val MILLIS_PER_MINUTE = 60_000L
 private const val MINUTES_PER_HOUR = 60
 private const val SHARE_WIDTH = 360
 
+/** The strip on the page: taller than on a card, where it is the walk's whole section. */
+private val SHAPE_HEIGHT = 72.dp
+
 /** Under two known altitudes a profile is a point, not a shape. */
 private const val MIN_PROFILE_POINTS = 2
 
@@ -844,6 +901,7 @@ object OutingTags {
     const val LIVE_BUTTONS = "outing_live_buttons"
     const val SENTENCE = "outing_sentence"
     const val NUMBERS = "outing_numbers"
+    const val SHAPE = "outing_shape"
     const val SHARE_IMAGE = "outing_share_image"
     const val SHARE_GPX = "outing_share_gpx"
     const val SAVE_GPX = "outing_save_gpx"

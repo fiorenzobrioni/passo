@@ -24,6 +24,15 @@ All notable changes to Passo are documented here. The format follows
   four, so a day's hike is not cut in two, and asks «Still walking?» before then as every outing
   does. Your list of outings gets it once, at the top; delete it and it does not come back.
 
+- **The shape of the walk.** Look at an outing with no goal halfway, and its card shows how it
+  has gone: the route so far with GPS (touch it to open the outing's page), or without it your
+  minutes one by one, in colour where they were brisk, your pauses as gaps; under it, how much of
+  today's goal the walk has made by itself. A goal outing taken on past its goal shows its shape
+  too, where the full bar stood, and says how far beyond it you went: «Goal reached, and 20
+  minutes more». Every outing walked from this version on has the shape of the walk on its page.
+  A twelve-hour walk draws as smoothly as a short one, and nothing of it is read while the screen
+  is off.
+
 - **An outing's page while it counts.** «See the outing» is now on the card of an outing under
   way, not only a finished one: its page follows it, with the route growing on a walk with GPS,
   and keeps Stop and Pause at its foot, with the satellites' line and «Still walking?» when there

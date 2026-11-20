@@ -50,6 +50,7 @@ calories are estimates, and Passo says so.
   </tr>
   <tr>
     <td align="center"><img src="docs/screenshots/outing-route.png" width="250" alt="The page of a brisk walk measured with GPS: goal reached, 45 minutes; its route drawn as a line on plain ground, with a dashed stretch covered by the steps and a bead at each kilometre; 4.26 km measured by satellite, 47 minutes in motion, a pace of 11:14 a kilometre"><br><sub><b>An outing's page</b>: where it went, measured</sub></td>
+    <td align="center"><img src="docs/screenshots/outing-open.png" width="250" alt="Today with a walk with no goal under way, measured with GPS: 2.27 km measured in 27 minutes, its route so far drawn on plain ground, since 10:12, 30% of today's goal"><br><sub><b>No goal</b>: the route so far, halfway</sub></td>
   </tr>
   <tr>
     <td align="center"><img src="docs/screenshots/way.png" width="250" alt="The Via Francigena under way: the map from the Great St Bernard Pass to Rome with the part walked, past Monteriggioni, 280 km to Rome"><br><sub><b>Ways</b>: a long way, walked from home</sub></td>
@@ -97,7 +98,7 @@ Italian). The phone's status bar is not in the pictures. The command that redraw
 - 📈 **Your day**: a chart you read with a finger, plus distance, calories, active and brisk minutes, cadence.
 - 📅 **History**: a day, week, month or year at a time, and a calendar of how close each day came.
 - 🚶 **Walks, found for you**: stretches of walking recognised in the steps already counted.
-- 🎯 **Outings**: a walk or run with a goal, with vibrations or a voice at the milestones you choose, or with no goal at all, counted until you stop it, with a pulse at each kilometre or every ten minutes if you like (and ended by itself at your last step if you forget). Turn on «Measure with GPS» for one, and its distance is measured by satellite instead of estimated, with your pace by the kilometre or the mile.
+- 🎯 **Outings**: a walk or run with a goal, with vibrations or a voice at the milestones you choose, or with no goal at all, counted until you stop it, with a pulse at each kilometre or every ten minutes if you like (and ended by itself at your last step if you forget). Its card shows the shape of the walk as you go: the route so far, or your minutes one by one with your pauses as gaps, and what the walk adds to your day's goal. Turn on «Measure with GPS» for one, and its distance is measured by satellite instead of estimated, with your pace by the kilometre or the mile.
 - 🧭 **An outing's page**: every outing has a page of its own, with one sentence and its numbers, each saying whether it is measured or estimated. It follows the outing while it counts, with Stop and Pause at hand. With GPS: the route on a map you can zoom, drawn by Passo with no map service, each kilometre with its pace, and how much you climbed. Share the route as an image or a GPX file, save it, or delete it.
 - ⏱️ **Japanese interval walk**: 3 slow minutes and 3 fast ones, five sets or more, each change told with a vibration of its own so the phone stays in your pocket; at the end, how many fast intervals were at pace.
 - 🏆 **Insights**: your streak, your best day, week and month, and the averages.
