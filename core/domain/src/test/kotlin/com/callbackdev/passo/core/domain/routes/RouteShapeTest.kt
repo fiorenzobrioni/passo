@@ -1,16 +1,14 @@
 package com.callbackdev.passo.core.domain.routes
 
-import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.Measure
 import com.callbackdev.passo.core.model.MeasureUnit
 import com.callbackdev.passo.core.model.RoutePoint
 import com.callbackdev.passo.core.model.RoutePointKind
 import com.callbackdev.passo.core.model.UnitSystem
-import com.callbackdev.passo.core.model.WayId
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
-/** A route as it is drawn, and the ground under it (PLANNING.md §11 Phase 16, «RouteMapView»). */
+/** A route as it is drawn (PLANNING.md §11 Phase 16, «RouteMapView»). */
 class RouteShapeTest {
     /** A point [north] and [east] metres from Milan's cathedral, [second] seconds in. */
     private fun point(
@@ -162,48 +160,12 @@ class RouteShapeTest {
     }
 
     @Test
-    fun `a route inside a city Passo carries lies on that city's map`() {
-        val milan = Ways.walks.first { it.id == WayId.MILAN_DUOMO_NAVIGLI }
-        val frame = milan.frame
-        val inside = (0..50).map { i ->
-            RoutePoint(
-                epochSecond = i * 2L,
-                latitudeE6 = ((frame.south + (frame.north - frame.south) * (0.3 + i * 0.006)) * 1e6).toInt(),
-                longitudeE6 = ((frame.west + frame.east) / 2 * 1e6).toInt(),
-                altitudeDm = null,
-                accuracyMeters = 5,
-                kind = RoutePointKind.MEASURED,
-            )
-        }
+    fun `it knows whether some stretch is drawn dashed`() {
+        val far = point(400, 600.0, kind = RoutePointKind.LAID)
+        val after = (603..900 step 3).mapIndexed { i, at -> point(402 + i * 2L, at.toDouble()) }
 
-        val city = checkNotNull(RouteGround.cityOf(inside))
-        assertThat(city.frame.south).isAtMost(inside.first().latitude)
-        assertThat(city.id.name).startsWith("MILAN")
-    }
-
-    @Test
-    fun `a route half inside a carried city - the plain ground`() {
-        val frame = Ways.walks.first { it.id == WayId.MILAN_DUOMO_NAVIGLI }.frame
-        // From the middle of the frame, far out to the north: well under four fifths inside.
-        val leaving = (0..50).map { i ->
-            RoutePoint(
-                epochSecond = i * 2L,
-                latitudeE6 = ((frame.north - 0.01 + i * 0.002) * 1e6).toInt(),
-                longitudeE6 = ((frame.west + frame.east) / 2 * 1e6).toInt(),
-                altitudeDm = null,
-                accuracyMeters = 5,
-                kind = RoutePointKind.MEASURED,
-            )
-        }
-
-        assertThat(RouteGround.cityOf(leaving)).isNull()
-    }
-
-    @Test
-    fun `a route in the countryside has no city under it`() {
-        assertThat(RouteGround.cityOf(listOf(point(0, 60_000.0, east = 80_000.0), point(2, 60_003.0, east = 80_000.0))))
-            .isNull()
-        assertThat(RouteGround.cityOf(emptyList())).isNull()
+        assertThat(shape(north(900)).hasLaid).isFalse()
+        assertThat(shape(north(300) + far + after).hasLaid).isTrue()
     }
 
     @Test

@@ -23,10 +23,8 @@
     <string name="compass_south_west">south-west</string>
     <string name="compass_west">west</string>
     <string name="compass_north_west">north-west</string>
-    <!-- Under the map, where Passo carries no map of the place. -->
-    <string name="outing_map_plain">Passo carries no street map: your route is a line on plain ground. Dashes are stretches your steps covered, with no satellite.</string>
-    <!-- Under the map, in a city Passo carries. -->
-    <string name="outing_map_city">Drawn on Passo’s own map of the city. Dashes are stretches your steps covered, with no satellite.</string>
+    <!-- Under the map, only when some stretch of the route is drawn dashed. -->
+    <string name="outing_map_dashes">Dashes are stretches your steps covered, with no satellite.</string>
     <!-- An outing with GPS that never got a fix. -->
     <string name="outing_no_fix">The satellites never answered during this outing: it was counted from your steps, and has no route.</string>
     <!-- The same place while the outing still counts: the satellites may yet answer. -->

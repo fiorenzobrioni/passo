@@ -2,7 +2,6 @@ package com.callbackdev.passo.feature.sessions
 
 import com.callbackdev.passo.core.domain.routes.LegPiece
 import com.callbackdev.passo.core.domain.routes.Legs
-import com.callbackdev.passo.core.domain.routes.RouteGround
 import com.callbackdev.passo.core.domain.routes.RouteShape
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.ways.Ways
@@ -24,8 +23,8 @@ import kotlin.math.sin
 
 /**
  * Outings for the page's tests and its README picture: a brisk hour through Milan measured with
- * GPS, on the streets Passo carries, with an arcade laid from the steps and a gentle rise; the
- * same walk far from any city Passo carries; and the same hour counted from the steps alone.
+ * GPS, with an arcade laid from the steps and a gentle rise; the same walk with every fix
+ * answered; and the same hour counted from the steps alone.
  */
 internal object OutingSamples {
     private val zone: ZoneId = ZoneId.systemDefault()
@@ -36,21 +35,23 @@ internal object OutingSamples {
     private const val METERS = 4_260.0
     private const val SPEED = 1.5
 
-    /** A point every three metres along Milan's walk, two seconds apart: [north] degrees moved. */
-    fun points(north: Double = 0.0): List<RoutePoint> {
+    /**
+     * A point every three metres along Milan's walk, two seconds apart; with [arcade], none
+     * between 1.9 and 2.2 km, the far side laid from the steps.
+     */
+    fun points(arcade: Boolean = true): List<RoutePoint> {
         val line = Ways.of(WayId.MILAN_DUOMO_NAVIGLI).map.line
         val out = ArrayList<RoutePoint>()
         var meters = 0.0
         var first = true
         while (meters <= METERS) {
-            // An arcade between 1.9 and 2.2 km: no fix, the far side laid from the steps.
-            val arcade = meters > 1_900 && meters < 2_200
-            if (!arcade) {
+            val underArcade = arcade && meters > 1_900 && meters < 2_200
+            if (!underArcade) {
                 val at = line.pointAt(meters)
-                val afterArcade = out.isNotEmpty() && meters - 3.0 <= 2_200 && meters >= 2_200
+                val afterArcade = arcade && out.isNotEmpty() && meters - 3.0 <= 2_200 && meters >= 2_200
                 out += RoutePoint(
                     epochSecond = startedAt / 1_000 + (meters / SPEED).toLong(),
-                    latitudeE6 = ((at.latitude + north) * 1e6).toInt(),
+                    latitudeE6 = (at.latitude * 1e6).toInt(),
                     longitudeE6 = (at.longitude * 1e6).toInt(),
                     // A rise of some thirty metres to the middle, and down again, with a ripple.
                     altitudeDm = ((121 + 30 * sin(meters / METERS * Math.PI) + 2 * sin(meters / 180)) * 10).toInt(),
@@ -147,10 +148,8 @@ internal object OutingSamples {
         totals = measured.totals.copy(distanceMeters = 4_105.0, activeKcal = 152.0),
     )
 
-    fun route(north: Double = 0.0, altitudes: AltitudeSource? = AltitudeSource.BAROMETER): DrawnRoute {
-        val points = points(north)
-        return DrawnRoute(checkNotNull(RouteShape.of(points)), RouteGround.cityOf(points)?.map, altitudes)
-    }
+    fun route(arcade: Boolean = true, altitudes: AltitudeSource? = AltitudeSource.BAROMETER): DrawnRoute =
+        DrawnRoute(checkNotNull(RouteShape.of(points(arcade))), altitudes)
 
     fun state(
         session: Session = measured,

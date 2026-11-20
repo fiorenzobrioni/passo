@@ -259,6 +259,13 @@ to be proven on a device in Phase 15):
     map is under it. A reader who wants it on a street map shares the GPX with a map app. An
     offline map library was weighed and left out: a large dependency for a job other apps do
     well, and charts and maps are Passo's own Canvas code.
+    *Amended 20 Nov 2026 (owner; PLANNING.md §15, «Every route on plain ground»):* **the
+    ground is always plain**, inside a city Passo carries too. A city's map is drawn for its
+    walk and covers that walk's frame, not the city: it came under a route by a rule the reader
+    could not see (four fifths of the points inside that frame), so two outings a street apart
+    looked different, and a fifth of a route could run off its edge. Every outing's map now
+    reads alike, and why its ground is plain is the guide's to say, once; the page keeps under
+    the map only the line that says what a dash is, and only when the route has one.
 
 12. **The step that learns.** Each outing with GPS has clean stretches (measured from end to
     end, at a steady cadence) that say how long the reader's step is at that cadence. From them

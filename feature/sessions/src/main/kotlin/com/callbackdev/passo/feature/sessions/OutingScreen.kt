@@ -275,17 +275,14 @@ private fun OutingPage(state: OutingUiState, format: MeasureFormatter, actions: 
                 ) {
                     RouteMapView(
                         shape = route.shape,
-                        ground = route.ground,
                         beads = beads(route.shape, splits, format, resources),
                         units = format.units,
                         contentDescription = routeSpoken(route.shape, session, format, resources),
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    Note(
-                        stringResource(
-                            if (route.ground != null) R.string.outing_map_city else R.string.outing_map_plain,
-                        ),
-                    )
+                    // A dash is an estimate drawn among measures: said wherever there is one.
+                    // Why the ground is plain is the guide's to say, once, not every page's.
+                    if (route.shape.hasLaid) Note(stringResource(R.string.outing_map_dashes))
                 }
             }
         } else if (session.gps && (session.measuredShare ?: 0.0) <= 0.0) {
@@ -616,7 +613,6 @@ private fun ShareCard(state: OutingUiState, route: DrawnRoute, format: MeasureFo
             Text(resources.sessionHeadline(session, format), style = MaterialTheme.typography.titleLarge)
             RouteMapView(
                 shape = route.shape,
-                ground = route.ground,
                 beads = emptyList(),
                 units = format.units,
                 contentDescription = "",

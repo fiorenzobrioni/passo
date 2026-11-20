@@ -151,7 +151,7 @@ class ReadmeScreenshots {
         save("intervals-done")
     }
 
-    /** The page of an outing measured with GPS, inside a city Passo carries. */
+    /** The page of an outing measured with GPS, with a stretch laid from the steps. */
     @Test
     fun outingRoute() {
         compose.setContent {

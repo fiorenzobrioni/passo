@@ -46,8 +46,8 @@ import org.robolectric.annotation.GraphicsMode
 import java.io.File
 
 /**
- * An outing's route on its map, drawn in every theme and dress, on a city Passo carries and on
- * the plain ground (PLANNING.md §11 Phase 16, «RouteMapView»), and the map as it moves.
+ * An outing's route on its map, drawn in every theme and dress on its plain ground (PLANNING.md
+ * §11 Phase 16, «RouteMapView»), and the map as it moves.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -69,7 +69,6 @@ class RouteMapGalleryTest {
                     Box(Modifier.padding(16.dp)) {
                         RouteMapView(
                             shape = route.shape,
-                            ground = route.ground,
                             beads = splits.map {
                                 RouteBead(route.shape.at(it.endedAtMillis), "${it.index + 1} km · 11:07 min/km")
                             },
@@ -94,7 +93,6 @@ class RouteMapGalleryTest {
                     Box(Modifier.padding(16.dp)) {
                         RouteMapView(
                             shape = route.shape,
-                            ground = route.ground,
                             beads = emptyList(),
                             units = UnitSystem.METRIC,
                             contentDescription = "Your route",
@@ -115,13 +113,8 @@ class RouteMapGalleryTest {
     }
 
     @Test
-    fun `in a city Passo carries, in every theme and dress`() {
-        gallery(OutingSamples.route(), "route_map_city")
-    }
-
-    @Test
-    fun `on the plain ground, in every theme and dress`() {
-        gallery(OutingSamples.route(north = 1.2), "route_map_plain")
+    fun `in every theme and dress`() {
+        gallery(OutingSamples.route(), "route_map")
     }
 
     @Test

@@ -3,8 +3,6 @@ package com.callbackdev.passo.core.domain.routes
 import com.callbackdev.passo.core.domain.format.UnitConversions
 import com.callbackdev.passo.core.domain.ways.GeoBox
 import com.callbackdev.passo.core.domain.ways.GeoPoint
-import com.callbackdev.passo.core.domain.ways.Way
-import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.Measure
 import com.callbackdev.passo.core.model.MeasureUnit
 import com.callbackdev.passo.core.model.RoutePoint
@@ -84,6 +82,12 @@ class RouteShape private constructor(val points: List<RoutePoint>) {
         }
         out
     }
+
+    /**
+     * Some stretch is drawn dashed, laid from the steps: only then does the map need the line
+     * under it that says what a dash is.
+     */
+    val hasLaid: Boolean get() = lines.any { it.laid }
 
     /** The length of the lines as drawn: the route's own geometry, not the outing's fused distance. */
     val lengthMeters: Double by lazy {
@@ -175,36 +179,6 @@ class RouteShape private constructor(val points: List<RoutePoint>) {
         private const val MILLIS_PER_SECOND = 1_000L
         private const val DECIMETERS = 10.0
     }
-}
-
-/**
- * The ground under a route (docs/adr/0016-location.md, decision 11): where at least
- * [CITY_SHARE] of its points lie inside the frame of a city Passo carries, that city's map
- * (water, parks, streets, as on the walk's page); elsewhere none, a plain ground, since Passo
- * carries no street map and has no network to fetch one with.
- */
-object RouteGround {
-    /** Under four fifths, a city's map would end in the middle of the route. */
-    const val CITY_SHARE: Double = 0.8
-
-    /**
-     * The city walk whose map lies under [points], or null. Of the walks that qualify (a city
-     * has two, and their frames overlap) the one that holds the most of the route, then the
-     * smaller frame: the finer ground.
-     */
-    fun cityOf(points: List<RoutePoint>, walks: List<Way> = Ways.walks): Way? {
-        if (points.isEmpty()) return null
-        return walks
-            .map { walk -> walk to points.count { walk.frame.holds(it) }.toDouble() / points.size }
-            .filter { it.second >= CITY_SHARE }
-            .sortedWith(compareByDescending<Pair<Way, Double>> { it.second }.thenBy { it.first.frame.area() })
-            .firstOrNull()?.first
-    }
-
-    private fun GeoBox.holds(point: RoutePoint): Boolean =
-        point.latitude in south..north && point.longitude in west..east
-
-    private fun GeoBox.area(): Double = (north - south) * (east - west)
 }
 
 /**

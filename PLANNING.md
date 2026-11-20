@@ -1114,10 +1114,9 @@ app's own provider); `DataSection.kt`, `DataViewModel.kt`, `BackupRepository.kt`
   and double tap to zoom, drag to pan, a button back to the whole route; under reduced motion
   no glide. The line in the goal's colour, dashed where it was laid from the steps (the honest
   mark), a ring at the start, a bead at the end, a small bead each kilometre, a scale bar in
-  the reader's units. Where at least four fifths of the route lies inside the frame of a city
-  Passo carries, that city's map is the ground (water, parks, streets, as on the walk's page);
-  elsewhere the ground is plain, and the page says in a line that Passo carries no street map.
-  A touch names the kilometre and its pace. One sentence to TalkBack («Your route: 5.2 km,
+  the reader's units. The ground is plain, everywhere (amended 20 Nov 2026, §15 «Every route
+  on plain ground»: a carried city's map under a route inside its frame came out); under the
+  map, one line says what a dash is, only when the route has one. A touch names the kilometre and its pace. One sentence to TalkBack («Your route: 5.2 km,
   from north to south, 3 stops»); the splits below are its words. Its gestures are a piece of
   their own, since Phase 20 reuses them on a round's page (Phases 18 and 19 «On the spot»,
   which would have too, were dropped on 19 Nov 2026). Drawn in every theme and dress in a gallery
@@ -1154,8 +1153,8 @@ app's own provider); `DataSection.kt`, `DataViewModel.kt`, `BackupRepository.kt`
   in `AltitudeTest` and `RouteHeightsTest`, the map's gallery is `RouteMapGalleryTest`, the
   page's forms `OutingScreenTest`.
 - [x] Strings in English and Italian; CHANGELOG; the guide (the outing's page in the outings
-  chapter); README: one screenshot, `outing-route.png`, the page of an outing with GPS inside
-  a city Passo carries, with its caption, and the feature list's line.
+  chapter); README: one screenshot, `outing-route.png`, the page of an outing with GPS (on
+  plain ground since 20 Nov 2026), with its caption, and the feature list's line.
 - [ ] On a device (owner): a walk with a hill and a tunnel or an arcade, then its page: the
   line where it was walked, the dashed stretch, the climb against a known figure; the GPX
   opened in a map app; the image shared to two apps; the page at a large text size, in both
@@ -1174,7 +1173,7 @@ phone only by the reader's hand or in a phone-to-phone transfer.
 | A phone with no barometer | Satellites alone, the higher threshold, the same sentence, said as an estimate |
 | An outing shorter than 1 km | One partial split; no "fastest" mark |
 | A route with no accepted fix at all | The page of an outing without a map, with a line saying the satellites never answered |
-| A route half inside a carried city | The plain ground: under four fifths, a city's map would end mid-route |
+| A route with every fix answered | No dash, and no line under the map (20 Nov 2026: was «a route half inside a carried city», gone with the city's map) |
 | An outing whose route was deleted | Its numbers stay; the page has no map and no empty box |
 | An import with routes for outings this phone lacks | The outings come first (as today), their routes with them |
 | A pause of ten minutes | A new segment in the GPX; no line drawn across a place not walked |
@@ -1949,6 +1948,39 @@ This log starts with Phase 16 built (18 Nov 2026); its entries are written below
     outing's line shown and gone; both themes, twice the text size, Italian, an open foldable);
     the screenshots looked at. CHANGELOG, the guide in English and Italian («Estimates, and what
     they rest on», «With GPS»), VISION, CLAUDE.md.
+
+- **20 Nov 2026.** **Every route on plain ground** (owner, reading PR #74's map: "better not to
+  put the maps we have under it in any case, and keep the GPS track always drawn the same, so
+  it is coherent for every outing"; and of the line under the map, "only the explanation of
+  what is missing can go, which once read seems noise; the legend of the dashes stays, and that
+  is important"). ADR 0016 decision 11 is amended; §11 Phase 16's `RouteMapView` box, its
+  README box and one edge case follow. It changes archive 04's «Phase 16, the outing's page:
+  the route, the splits, the climb» (`docs/planning/04-decisions-2-to-18-nov-2026.md`, the
+  `RouteMapView` item), where the city's ground was built.
+  - **No city's map under a route.** `RouteGround` came out, and with it the ground's layers
+    in `RouteMapView` (land, parks, lakes, canals, streets, the sea), their three colours, and
+    the decoding of a city's map when the page opens. Why: that ground was a city walk's map,
+    covering the walk's frame (Milan's: some 3 by 2.5 km around the Duomo and the Navigli), not
+    the city; it came under a route by a rule the reader could not see (four fifths of the
+    points inside that frame), so two outings a street apart looked different, and a fifth of
+    a route could run off its edge. It reached few outings anyway: the plain ground is the map
+    almost every reader sees, and it is now the only one, the same on the page and in the
+    image shared.
+  - **Under the map, the dashes' line alone, and only when a stretch is dashed**
+    (`RouteShape.hasLaid`): a dash is an estimate drawn among measures, and says so where it
+    is. «Passo carries no street map» goes to the guide («An outing's own page», in English and
+    Italian), once, with the way to a street map: the GPX, shared with a map app.
+  - **Phases 18 and 20 are not touched** (owner: Phase 18 stays as written, and whether to
+    build it is for later). Their sections still say a route lies on its city's map where
+    Passo carries it (Phase 18, «The walk measured»; Phase 20, «Your rounds»): that line is to
+    be read against this entry when either phase is taken up.
+  - **The README.** `outing-route.png` redrawn on plain ground, its alt text with it; the
+    feature line no longer names a city's map. CHANGELOG, CLAUDE.md (`:core:domain`'s row).
+  - **Checked**: `spotlessCheck`, `test`, `:app:lintDebug`, `:app:checkForbiddenPermissions`
+    (green here but the seven tests that walk a Room migration, CI's to prove; no schema
+    changed). `RouteShapeTest` loses `RouteGround`'s three tests and gains `hasLaid`'s;
+    `OutingScreenTest` checks the dashes' line under a route with a laid stretch and none under
+    one without; `RouteMapGalleryTest` draws one gallery, plain; the screenshots looked at.
 
 ### Open
 

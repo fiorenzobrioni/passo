@@ -9,9 +9,7 @@ import com.callbackdev.passo.core.data.sessions.LiveSession
 import com.callbackdev.passo.core.data.sessions.SessionRepository
 import com.callbackdev.passo.core.data.settings.SettingsRepository
 import com.callbackdev.passo.core.domain.routes.GpxCodec
-import com.callbackdev.passo.core.domain.routes.RouteGround
 import com.callbackdev.passo.core.domain.routes.RouteShape
-import com.callbackdev.passo.core.domain.ways.WayMap
 import com.callbackdev.passo.core.model.AltitudeSource
 import com.callbackdev.passo.core.model.RoutePoint
 import com.callbackdev.passo.core.model.Session
@@ -37,11 +35,10 @@ import javax.inject.Inject
  * An outing's route as its page draws it.
  *
  * @property shape its lines, its frame and what one sentence says of it.
- * @property ground the map of the city it lies in, where Passo carries one; null for a plain ground.
  * @property altitudes where its heights came from, for the line under the climb.
  */
 @Immutable
-class DrawnRoute(val shape: RouteShape, val ground: WayMap?, val altitudes: AltitudeSource?) {
+class DrawnRoute(val shape: RouteShape, val altitudes: AltitudeSource?) {
     val points: List<RoutePoint> get() = shape.points
 }
 
@@ -72,7 +69,7 @@ data class OutingUiState(
  * An outing's page (PLANNING.md §11 Phase 16). The pages share this one model, as every page of
  * the app does: it is told which outing is open ([open]), and its state runs only while a page
  * collects it. The route is read again only when it changes (a route still being written, one
- * the reader deletes), off the main thread, with the city's map under it if there is one.
+ * the reader deletes), off the main thread.
  */
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -149,10 +146,7 @@ constructor(
         val session = sessions.session(sessionId) ?: return null
         val route = routes.route(sessionId, session.startedAtMillis) ?: return null
         return withContext(Dispatchers.Default) {
-            RouteShape.of(route.points)?.let { shape ->
-                // The city's map is decoded here, the first time: a few thousand points.
-                DrawnRoute(shape, RouteGround.cityOf(route.points)?.map, route.altitudes)
-            }
+            RouteShape.of(route.points)?.let { shape -> DrawnRoute(shape, route.altitudes) }
         }
     }
 

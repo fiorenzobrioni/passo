@@ -44,8 +44,8 @@ import org.robolectric.annotation.GraphicsMode
 import java.io.File
 
 /**
- * An outing's own page, in each of its forms (PLANNING.md §11 Phase 16): with GPS in a city
- * Passo carries and outside one, without GPS, with a route deleted, with never a fix.
+ * An outing's own page, in each of its forms (PLANNING.md §11 Phase 16): with GPS, with a
+ * stretch laid from the steps and with none, without GPS, with a route deleted, with never a fix.
  */
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -72,8 +72,10 @@ class OutingScreenTest {
         // The map is one sentence to TalkBack: how far, which way, how many stops.
         compose.onNodeWithTag(RouteMapTags.MAP)
             .assertContentDescriptionContains("Your route: 4.26 km, from", substring = true)
-        // Inside Milan, on the city's own map: said under it.
-        compose.onNodeWithText("Drawn on Passo’s own map of the city.", substring = true).assertIsDisplayed()
+        // An arcade laid from the steps, drawn dashed: the line under the map says what a dash is,
+        // and nothing more.
+        compose.onNodeWithText("Dashes are stretches your steps covered, with no satellite.").assertIsDisplayed()
+        compose.onNodeWithText("street map", substring = true).assertDoesNotExist()
         snapshot("outing_route")
     }
 
@@ -261,15 +263,16 @@ class OutingScreenTest {
     }
 
     @Test
-    fun `outside a city Passo carries - the plain ground, and a line that says so`() {
-        show(OutingSamples.state(route = OutingSamples.route(north = 1.2)))
+    fun `every fix answered - no dash, and no line under the map`() {
+        show(OutingSamples.state(route = OutingSamples.route(arcade = false)))
 
-        compose.onNodeWithText("Passo carries no street map", substring = true).assertIsDisplayed()
-        snapshot("outing_route_plain")
+        compose.onNodeWithTag(RouteMapTags.MAP).assertIsDisplayed()
+        compose.onNodeWithText("Dashes are", substring = true).assertDoesNotExist()
+        snapshot("outing_route_no_dash")
     }
 
     @Test
-    fun `in the dark, in a city`() {
+    fun `in the dark`() {
         show(OutingSamples.state(), dark = true)
         snapshot("outing_route_dark")
     }
