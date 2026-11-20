@@ -1116,11 +1116,11 @@ app's own provider); `DataSection.kt`, `DataViewModel.kt`, `BackupRepository.kt`
   mark), a ring at the start, a bead at the end, a small bead each kilometre, a scale bar in
   the reader's units. The ground is plain, everywhere (amended 20 Nov 2026, §15 «Every route
   on plain ground»: a carried city's map under a route inside its frame came out); under the
-  map, one line says what a dash is, only when the route has one. A touch names the kilometre and its pace. One sentence to TalkBack («Your route: 5.2 km,
-  from north to south, 3 stops»); the splits below are its words. Its gestures are a piece of
-  their own, since Phase 20 reuses them on a round's page (Phases 18 and 19 «On the spot»,
-  which would have too, were dropped on 19 Nov 2026). Drawn in every theme and dress in a gallery
-  test, as the ways' maps are.
+  map, one line says what a dash is, only when the route has one. A touch names the kilometre
+  and its pace. One sentence to TalkBack («Your route: 5.2 km, from north to south, 3 stops»);
+  the splits below are its words. Its gestures are a piece of their own, since Phase 20 reuses
+  them on a round's page (Phases 18 and 19 «On the spot», which would have too, were dropped
+  on 19 Nov 2026). Drawn in every theme and dress in a gallery test, as the ways' maps are.
 - [x] **The outing's page** (`:feature:sessions`, a new entry in `PassoNavigation.kt`), for
   every outing, with or without GPS: the sentence first (what it was and how it went against
   its goal), then its numbers, each with its line; for an interval outing its intervals, as

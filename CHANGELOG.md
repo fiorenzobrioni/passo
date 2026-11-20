@@ -26,8 +26,8 @@ All notable changes to Passo are documented here. The format follows
   it opens on a page of its own: one sentence of how it went, then its numbers, each saying
   whether it is measured or an estimate. An outing with GPS also shows its route on a map you
   can zoom and drag, drawn by Passo itself with no map service, on plain ground, dashed where
-  your steps covered a stretch with no satellite. Under it, each kilometre (or mile) with its pace and its cadence, the
-  fastest marked, and how much you climbed, as a figure and as a shape.
+  your steps covered a stretch with no satellite. Under it, each kilometre (or mile) with its
+  pace and its cadence, the fastest marked, and how much you climbed, as a figure and as a shape.
 
 - **Your route is yours to take or to delete.** Once the outing is over, share it as an image
   (the line, with no street in it) or as a GPX file for a map app, save the GPX where you like,
