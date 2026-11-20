@@ -3,7 +3,7 @@
 <resources>
     <string name="sessions_title">Outings</string>
     <string name="sessions_back">Back</string>
-    <string name="sessions_intro">A walk with a goal: start one and keep the phone in your pocket.</string>
+    <string name="sessions_intro">A walk with a goal, or with none: start one and keep the phone in your pocket.</string>
     <string name="sessions_yours">Your outings</string>
     <!-- The start button is its icon alone: what TalkBack says for it, «Start Brisk walk». -->
     <string name="sessions_start_named">Start %1$s</string>
@@ -157,4 +157,9 @@
     <string name="gps_intro_next">Android will now ask for your location. Choose “Precise”: an approximate position cannot measure a walk. Whatever you answer, your outing starts: without GPS it counts from your steps, as always.</string>
     <string name="gps_intro_continue">Continue</string>
     <string name="gps_intro_not_now">Not now</string>
+
+    <!-- The open outing (Phase 21): «None» in the editor's Kind. -->
+    <string name="editor_kind_open">None</string>
+    <string name="editor_open_about">No goal: it counts until you stop it, and ends by itself at your last step if you forget it.</string>
+    <string name="editor_open_signals_note">No signal on the way: an outing with no goal has no halfway. If it ends by itself after a long stop, or is about to after twelve hours, it tells you.</string>
 </resources>

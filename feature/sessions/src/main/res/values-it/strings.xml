@@ -3,7 +3,7 @@
 <resources>
     <string name="sessions_title">Uscite</string>
     <string name="sessions_back">Indietro</string>
-    <string name="sessions_intro">Una camminata con un obiettivo: avviala e tieni il telefono in tasca.</string>
+    <string name="sessions_intro">Una camminata con un obiettivo, o senza: avviala e tieni il telefono in tasca.</string>
     <string name="sessions_yours">Le tue uscite</string>
     <string name="sessions_start_named">Inizia %1$s</string>
     <string name="sessions_edit">Modifica</string>
@@ -141,4 +141,9 @@
     <string name="gps_intro_continue">Continua</string>
     <string name="gps_intro_not_now">Non ora</string>
     <string name="sessions_signals_intervals">Un segnale a ogni cambio</string>
+
+    <!-- L’uscita aperta (Fase 21): «Nessuno» nel Tipo dell’editor. -->
+    <string name="editor_kind_open">Nessuno</string>
+    <string name="editor_open_about">Nessun obiettivo: conta finché la fermi, e finisce da sola al tuo ultimo passo se te ne dimentichi.</string>
+    <string name="editor_open_signals_note">Nessun segnale lungo la strada: un’uscita senza obiettivo non ha una metà. Se si chiude da sola dopo una lunga sosta, o sta per farlo dopo dodici ore, te lo dice.</string>
 </resources>

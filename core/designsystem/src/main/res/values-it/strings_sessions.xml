@@ -178,4 +178,25 @@
         <item quantity="many">Stai ancora camminando? Questa uscita si chiude tra %1$d minuti.</item>
         <item quantity="other">Stai ancora camminando? Questa uscita si chiude tra %1$d minuti.</item>
     </plurals>
+
+    <!-- L’uscita aperta (Fase 21): un’uscita senza obiettivo. -->
+    <string name="session_amount_open">Nessun obiettivo</string>
+    <string name="session_open_free">Senza obiettivo, a ritmo libero</string>
+    <string name="session_open_brisk">Senza obiettivo, a passo svelto</string>
+    <string name="session_open_vigorous">Senza obiettivo, a passo sostenuto</string>
+    <string name="session_open_run">Senza obiettivo, di corsa</string>
+    <string name="session_open_progress">%1$s, %2$s</string>
+    <string name="session_open_summary">%1$s, circa %2$s</string>
+    <string name="session_open_summary_measured">%1$s misurati in %2$s</string>
+    <string name="session_headline_open_starting">Si parte: da qui conta tutto.</string>
+    <string name="session_headline_open_walking">%1$s in cammino.</string>
+    <string name="session_headline_open_running">%1$s di corsa.</string>
+    <string name="session_headline_open_measured">%1$s misurati in %2$s.</string>
+    <string name="session_headline_open_walk">Una camminata di %1$s.</string>
+    <string name="session_headline_open_run">Una corsa di %1$s.</string>
+    <string name="session_headline_open_idle">Chiusa da sola dopo una lunga sosta: %1$s.</string>
+    <string name="session_headline_open_closed">Chiusa: %1$s.</string>
+    <string name="session_outcome_open">%1$s in movimento</string>
+    <string name="session_open_row">Dalle %1$s · %2$s in movimento</string>
+    <string name="session_open_row_paused">Dalle %1$s · %2$s in movimento, %3$s in pausa</string>
 </resources>

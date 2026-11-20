@@ -359,6 +359,15 @@ to be proven on a device in Phase 15):
     alone»):* following a route is not built either, so the twelve hours start no outing:
     every outing has four, and «Keep going» moves them on as above. Should a long outing come
     back, designed anew, this is where its cap is decided.
+    *Amended 20 Nov 2026 (owner; PLANNING.md §11 Phase 21, «How it ends»):* the long outing came
+    back as the open outing, an outing with no goal: it **starts with twelve hours**, asked 15
+    minutes before them in the same way, «Keep going» moving them four hours on. An open outing
+    has no end of its own, so the cap is the one end left besides the reader and the stillness,
+    and a day's hike (six to ten hours with its stops) would otherwise lose the rest of its route
+    at four. The forgotten outing stays the stillness's to end, not the cap's. Twelve and not
+    none: the cap still bounds the processor kept awake on a phone with no wake-up counter, ten
+    minutes past it, and an outing kept open by a day of errands with the phone in a pocket.
+    Every other outing keeps four.
 
 15. **One APK.** A second build without the permission would keep "cannot" for the reader who
     wants it, at the price of two artifacts to test, sign and explain at every release, and of

@@ -3,7 +3,7 @@ package com.callbackdev.passo.core.model
 /**
  * What an outing is measured against (PLANNING.md §11 Phase 10). One quantity per outing, never
  * two: with steps and minutes both, "halfway" would have no single meaning, and neither would the
- * vibration that says it.
+ * vibration that says it. Or none: the open outing ([OPEN], Phase 21).
  */
 enum class SessionGoalKind {
     /** A number of steps. */
@@ -27,6 +27,23 @@ enum class SessionGoalKind {
      * value is the minutes of all the sets together, so it is measured as [TIME] is.
      */
     INTERVALS,
+
+    /**
+     * No goal (Phase 21, «None» in the editor; the open outing in the documents): it counts until
+     * the reader stops it, or ends by itself as every outing does, at its last step after a long
+     * stillness. Its value is 0 and never read; it has no share, no milestone and no end by goal.
+     */
+    OPEN,
+}
+
+/**
+ * A pause of an outing, from the reader's Pause to their Resume (Phase 21): what an outing's page
+ * says of the time paused, and where its minutes have a gap. Only a pause that ended inside the
+ * outing: the one under way is the outing's [Session.pausedAtMillis], and an outing stopped or
+ * ended while paused ends where it was paused, so that pause was never part of it.
+ */
+data class SessionPause(val fromMillis: Long, val toMillis: Long) {
+    val millis: Long get() = (toMillis - fromMillis).coerceAtLeast(0L)
 }
 
 /**
@@ -144,7 +161,10 @@ data class SessionPlan(
     val position: Int = 0,
     val lastUsedAtMillis: Long? = null,
     val gps: Boolean = false,
-)
+) {
+    /** It has no goal: the open outing (Phase 21). */
+    val open: Boolean get() = goalKind == SessionGoalKind.OPEN
+}
 
 /** Where an outing stands. */
 enum class SessionState {
@@ -233,6 +253,8 @@ data class SessionTotals(
  *   altitudes of its route (Phase 16), and [descentMeters] what it came down; null without GPS,
  *   and until an altitude is known.
  * @property legs an outing with GPS, a hundred metres at a time: what its splits are cut from.
+ * @property pauses its pauses that ended inside it, in order (Phase 21): none for an outing from
+ *   before they were kept, which no page can then tell from one never paused.
  */
 data class Session(
     val id: Long = 0,
@@ -268,7 +290,11 @@ data class Session(
     val ascentMeters: Double? = null,
     val descentMeters: Double? = null,
     val legs: List<OutingLeg> = emptyList(),
+    val pauses: List<SessionPause> = emptyList(),
 ) {
     val reached: Boolean get() = reachedAtMillis != null
     val live: Boolean get() = state != SessionState.FINISHED
+
+    /** It has no goal: the open outing (Phase 21). */
+    val open: Boolean get() = goalKind == SessionGoalKind.OPEN
 }

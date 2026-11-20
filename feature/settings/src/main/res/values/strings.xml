@@ -96,7 +96,7 @@
 
     <string name="settings_group_outings">Outings</string>
     <string name="settings_outings">Your outings</string>
-    <string name="settings_outings_note">Walks with a goal: keep them, change them, start one.</string>
+    <string name="settings_outings_note">Walks with a goal, or with none: keep them, change them, start one.</string>
     <string name="settings_start_outing_button">Button on Today</string>
     <string name="settings_start_outing_button_note">“Start an outing”, under the day. Off, your outings are still here.</string>
 

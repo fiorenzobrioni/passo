@@ -61,6 +61,7 @@ import com.callbackdev.passo.core.designsystem.format.capQuestion
 import com.callbackdev.passo.core.designsystem.format.clockTime
 import com.callbackdev.passo.core.designsystem.format.gpsLineAction
 import com.callbackdev.passo.core.designsystem.format.gpsLineText
+import com.callbackdev.passo.core.designsystem.format.movingMinutes
 import com.callbackdev.passo.core.designsystem.format.sessionAmount
 import com.callbackdev.passo.core.designsystem.format.sessionCadence
 import com.callbackdev.passo.core.designsystem.format.sessionDistanceLabel
@@ -75,6 +76,7 @@ import com.callbackdev.passo.core.designsystem.format.sessionProgress
 import com.callbackdev.passo.core.designsystem.format.sessionStanding
 import com.callbackdev.passo.core.designsystem.format.sessionSteps
 import com.callbackdev.passo.core.designsystem.format.sessionZone
+import com.callbackdev.passo.core.designsystem.format.text
 import com.callbackdev.passo.core.designsystem.format.unbrokenText
 import com.callbackdev.passo.core.designsystem.format.unitOf
 import com.callbackdev.passo.core.designsystem.format.walkNextIn
@@ -94,6 +96,7 @@ import com.callbackdev.passo.core.domain.sessions.cadenceFloor
 import com.callbackdev.passo.core.domain.sessions.fraction
 import com.callbackdev.passo.core.domain.sessions.goal
 import com.callbackdev.passo.core.domain.sessions.intervalAt
+import com.callbackdev.passo.core.domain.sessions.pausedMillis
 import com.callbackdev.passo.core.domain.sessions.progress
 import com.callbackdev.passo.core.domain.ways.WalkPlaces
 import com.callbackdev.passo.core.domain.ways.Ways
@@ -112,8 +115,9 @@ import java.time.ZoneId
  *
  * @property onGps the way out a line about the satellites offers (docs/adr/0016-location.md):
  *   «Resume GPS», the system's switch for location, the request for the permission.
- * @property onOpen «See the outing», on a finished one: its own page (Phase 16). Null where
- *   the card is already on a page of its own, or there is none to open.
+ * @property onOpen «See the outing»: its own page (Phase 16), on a finished card and, since
+ *   Phase 21, on one under way or paused, whose page follows it. Null where the card is already
+ *   on a page of its own, or there is none to open.
  */
 class SessionCardActions(
     val onPause: () -> Unit = {},
@@ -137,7 +141,11 @@ class SessionCardActions(
  *   going" for a while after a goal ([canKeepGoing]), "Resume" after an end by a long stillness.
  *
  * On a city walk (Phase 11) the bar is the walk's small map, the reader's point on it: drawn
- * only while the card is on screen, like every chart here.
+ * only while the card is on screen, like every chart here. An open outing (Phase 21) has no goal
+ * and no bar: under its sentence, since when it has been under way and its time in motion.
+ *
+ * While it counts the card is a door to the outing's own page («See the outing»), which follows it
+ * with its route growing, and carries its buttons too.
  *
  * An outing measured with GPS (Phase 15, docs/adr/0016-location.md) says which of its numbers is
  * a measure: «measured» under the distance where at least nine tenths of it came from fixes, the
@@ -257,50 +265,12 @@ fun SessionCard(
                     modifier = Modifier.testTag(SessionCardTags.SENTENCE),
                 )
             }
-            val progressText = res.sessionProgress(session, format)
-            val described = Modifier.clearAndSetSemantics {
-                contentDescription = res.getString(R.string.session_card_progress_description, progressText, sentence)
-                progressBarRangeInfo = ProgressBarRangeInfo(session.progress().toFloat().coerceIn(0f, 1f), 0f..1f)
-            }
-            val walk = session.walk?.let(Ways::of)
-            val along = WalkPlaces.along(session)
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                if (walk != null && along != null && showMap) {
-                    WayMapView(
-                        way = walk,
-                        walkedMeters = along,
-                        reached = walk.stops.count { it.distanceMeters <= along },
-                        contentDescription = "",
-                        detailed = false,
-                        // Wider than the walk's own frame: a card on Today, not a page.
-                        ratio = CARD_MAP_RATIO,
-                        modifier = Modifier.fillMaxWidth().testTag(SessionCardTags.MAP).then(described),
-                    )
-                } else if (session.intervals != null) {
-                    IntervalTrack(session = session, color = accent, nowMillis = now, modifier = described)
-                } else {
-                    SessionTrack(session = session, color = accent, modifier = described)
-                }
-                // Where it stands and where it ends, at the two ends of its bar: said by the bar
-                // itself to TalkBack, so here they are for the eye only.
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxWidth().clearAndSetSemantics { },
-                ) {
-                    val ends = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum")
-                    Text(
-                        text = res.sessionStanding(session, format),
-                        style = ends,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.weight(1f),
-                    )
-                    Text(
-                        text = res.sessionAmount(session.goal(), format),
-                        style = ends,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.End,
-                    )
-                }
+            if (session.open) {
+                // No goal, so no bar to fill: how long it has been walked, and since when. Over,
+                // the state's line above says when it was, and this would say it twice.
+                if (!finished) OpenRow(session, now, format)
+            } else {
+                GoalTrack(session, sentence, format, showMap, now, accent)
             }
             if (finished && session.intervals != null) IntervalBars(session, accent)
             SessionStats(session, cadence, pace, format, measure.openMeters)
@@ -325,17 +295,7 @@ fun SessionCard(
                     )
                 }
             }
-            measure.line?.let { line -> GpsNotice(line, onAction = actions.onGps) }
-            session.capQuestionMinutes(now)?.let { minutes ->
-                CardNotice(
-                    icon = PassoIcons.Clock,
-                    text = res.capQuestion(minutes),
-                    action = stringResource(R.string.session_card_keep_going),
-                    onAction = actions.onKeepGoing,
-                    modifier = Modifier.testTag(SessionCardTags.CAP_QUESTION),
-                    actionTag = SessionCardTags.CAP_KEEP_GOING,
-                )
-            }
+            SessionNotices(session, measure.line, now, actions)
             when {
                 // Three buttons at the most, which go on two lines where one is too short for
                 // them (a large text, a narrow phone).
@@ -370,40 +330,178 @@ fun SessionCard(
                     }
                 }
 
-                // Under way, the two buttons share the card's width and stand a little taller:
-                // they are touched while walking.
-                else -> Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                    val live = Modifier.weight(1f).heightIn(min = LIVE_BUTTON_HEIGHT)
-                    OutlinedButton(
-                        onClick = actions.onStop,
-                        contentPadding = LIVE_BUTTON_PADDING,
-                        modifier = live.testTag(SessionCardTags.STOP),
-                    ) {
-                        ButtonIcon(PassoIcons.Stop)
-                        SegmentLabel(stringResource(R.string.session_card_stop))
-                    }
-                    if (session.state == SessionState.PAUSED) {
-                        FilledTonalButton(
-                            onClick = actions.onResume,
-                            contentPadding = LIVE_BUTTON_PADDING,
-                            modifier = live.testTag(SessionCardTags.RESUME),
-                        ) {
-                            ButtonIcon(PassoIcons.Play)
-                            SegmentLabel(stringResource(R.string.session_card_resume))
-                        }
-                    } else {
-                        FilledTonalButton(
-                            onClick = actions.onPause,
-                            contentPadding = LIVE_BUTTON_PADDING,
-                            modifier = live.testTag(SessionCardTags.PAUSE),
-                        ) {
-                            ButtonIcon(PassoIcons.Pause)
-                            SegmentLabel(stringResource(R.string.session_card_pause))
-                        }
-                    }
+                // Under way: its own page, then the two buttons touched while walking.
+                else -> Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    actions.onOpen?.let { open -> SeeTheOuting(open, Modifier.align(Alignment.End)) }
+                    SessionLiveButtons(session, actions)
                 }
             }
         }
+    }
+}
+
+/**
+ * What an outing under way asks of the reader, one line each and only when there is one: what the
+ * receiver of an outing with GPS is doing, with its way out where it has one ([GpsLine]), and
+ * «Still walking?» before its cap, with «Keep going». On its card and on its own page alike
+ * (Phase 21): a reader who opened the page never has to go back to answer.
+ */
+@Composable
+fun SessionNotices(session: Session, line: GpsLine?, nowMillis: Long, actions: SessionCardActions) {
+    val res = LocalResources.current
+    line?.let { GpsNotice(it, onAction = actions.onGps) }
+    session.capQuestionMinutes(nowMillis)?.let { minutes ->
+        CardNotice(
+            icon = PassoIcons.Clock,
+            text = res.capQuestion(minutes),
+            action = stringResource(R.string.session_card_keep_going),
+            onAction = actions.onKeepGoing,
+            modifier = Modifier.testTag(SessionCardTags.CAP_QUESTION),
+            actionTag = SessionCardTags.CAP_KEEP_GOING,
+        )
+    }
+}
+
+/**
+ * Stop, and Pause or Resume, for an outing under way: the two buttons share the width and stand a
+ * little taller, since they are touched while walking. On its card and on its own page alike
+ * (Phase 21).
+ */
+@Composable
+fun SessionLiveButtons(session: Session, actions: SessionCardActions, modifier: Modifier = Modifier) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = modifier.fillMaxWidth()) {
+        val live = Modifier.weight(1f).heightIn(min = LIVE_BUTTON_HEIGHT)
+        OutlinedButton(
+            onClick = actions.onStop,
+            contentPadding = LIVE_BUTTON_PADDING,
+            modifier = live.testTag(SessionCardTags.STOP),
+        ) {
+            ButtonIcon(PassoIcons.Stop)
+            SegmentLabel(stringResource(R.string.session_card_stop))
+        }
+        if (session.state == SessionState.PAUSED) {
+            FilledTonalButton(
+                onClick = actions.onResume,
+                contentPadding = LIVE_BUTTON_PADDING,
+                modifier = live.testTag(SessionCardTags.RESUME),
+            ) {
+                ButtonIcon(PassoIcons.Play)
+                SegmentLabel(stringResource(R.string.session_card_resume))
+            }
+        } else {
+            FilledTonalButton(
+                onClick = actions.onPause,
+                contentPadding = LIVE_BUTTON_PADDING,
+                modifier = live.testTag(SessionCardTags.PAUSE),
+            ) {
+                ButtonIcon(PassoIcons.Pause)
+                SegmentLabel(stringResource(R.string.session_card_pause))
+            }
+        }
+    }
+}
+
+/**
+ * A goal outing's way to its goal: a city walk's small map, an interval outing's blocks, or the
+ * bar with the reader's milestones, with where it stands and where it ends at its two ends. One
+ * node for TalkBack, the progress and the sentence.
+ */
+@Composable
+private fun GoalTrack(
+    session: Session,
+    sentence: String,
+    format: MeasureFormatter,
+    showMap: Boolean,
+    now: Long,
+    accent: Color,
+) {
+    val res = LocalResources.current
+    val progressText = res.sessionProgress(session, format)
+    val described = Modifier.clearAndSetSemantics {
+        contentDescription = res.getString(R.string.session_card_progress_description, progressText, sentence)
+        progressBarRangeInfo = ProgressBarRangeInfo(session.progress().toFloat().coerceIn(0f, 1f), 0f..1f)
+    }
+    val walk = session.walk?.let(Ways::of)
+    val along = WalkPlaces.along(session)
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        if (walk != null && along != null && showMap) {
+            WayMapView(
+                way = walk,
+                walkedMeters = along,
+                reached = walk.stops.count { it.distanceMeters <= along },
+                contentDescription = "",
+                detailed = false,
+                // Wider than the walk's own frame: a card on Today, not a page.
+                ratio = CARD_MAP_RATIO,
+                modifier = Modifier.fillMaxWidth().testTag(SessionCardTags.MAP).then(described),
+            )
+        } else if (session.intervals != null) {
+            IntervalTrack(session = session, color = accent, nowMillis = now, modifier = described)
+        } else {
+            SessionTrack(session = session, color = accent, modifier = described)
+        }
+        // Where it stands and where it ends, at the two ends of its bar: said by the bar
+        // itself to TalkBack, so here they are for the eye only.
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.fillMaxWidth().clearAndSetSemantics { },
+        ) {
+            val ends = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum")
+            Text(
+                text = res.sessionStanding(session, format),
+                style = ends,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                text = res.sessionAmount(session.goal(), format),
+                style = ends,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.End,
+            )
+        }
+    }
+}
+
+/**
+ * An open outing's line under its sentence, in place of a goal's bar (Phase 21): since when it has
+ * been under way and its time in motion, «Since 10:12 · 41 min in motion», with the time paused
+ * when there was some. The sentence above says the time in words; this line, the clock's.
+ */
+@Composable
+private fun OpenRow(session: Session, nowMillis: Long, format: MeasureFormatter) {
+    val res = LocalResources.current
+    val since = clockTime(minuteOfDay(session.startedAtMillis))
+    val moving = format.minutes(session.movingMinutes()).text()
+    val paused = session.pausedMillis(nowMillis)
+    val text = if (paused >= MILLIS_PER_MINUTE) {
+        val pausedText = format.minutes((paused / MILLIS_PER_MINUTE).toInt()).text()
+        res.getString(R.string.session_open_row_paused, since, moving, pausedText)
+    } else {
+        res.getString(R.string.session_open_row, since, moving)
+    }
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelMedium.copy(fontFeatureSettings = "tnum"),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.testTag(SessionCardTags.OPEN_ROW),
+    )
+}
+
+/**
+ * «See the outing», on a card that counts (Phase 21): its own page, which follows it, with the
+ * route growing on a walk with GPS. Above the two buttons a reader touches while walking, at the
+ * card's end, as a way on: a door, with the chevron every door on these pages wears.
+ */
+@Composable
+private fun SeeTheOuting(onOpen: () -> Unit, modifier: Modifier = Modifier) {
+    TextButton(
+        onClick = onOpen,
+        modifier = modifier.heightIn(min = LIVE_BUTTON_HEIGHT).testTag(SessionCardTags.OPEN),
+    ) {
+        Text(stringResource(R.string.session_card_open))
+        androidx.compose.foundation.layout.Spacer(Modifier.size(ButtonDefaults.IconSpacing))
+        Icon(PassoIcons.ChevronRight, contentDescription = null, modifier = Modifier.size(ButtonDefaults.IconSize))
     }
 }
 
@@ -628,12 +726,14 @@ internal fun minuteOfDay(millis: Long): Int {
 
 /**
  * The mark of an outing: an interval walk is its slow and fast line, a run is a bolt, as in the
- * walk list; any other walk is the way to a flag. On the Outings page the interval walk no longer
- * wore the same mark as the brisk walk above it (owner's review, 2 Nov 2026).
+ * walk list; a walk with no goal (Phase 21) is the way that runs on with no flag; any other walk
+ * is the way to a flag. On the Outings page the interval walk no longer wore the same mark as the
+ * brisk walk above it (owner's review, 2 Nov 2026).
  */
 fun sessionIcon(intensity: SessionIntensity, goalKind: SessionGoalKind? = null): ImageVector = when {
     goalKind == SessionGoalKind.INTERVALS -> PassoIcons.Intervals
     intensity == SessionIntensity.RUN -> PassoIcons.Bolt
+    goalKind == SessionGoalKind.OPEN -> PassoIcons.OpenOuting
     else -> PassoIcons.Outing
 }
 
@@ -808,6 +908,7 @@ object SessionCardTags {
     const val KEEP_GOING = "session_card_keep_going"
     const val CLOSE = "session_card_close"
     const val OPEN = "session_card_open"
+    const val OPEN_ROW = "session_card_open_row"
     const val MAP = "session_card_map"
     const val INTERVALS = "session_card_intervals"
     const val INTERVAL_BARS = "session_card_interval_bars"

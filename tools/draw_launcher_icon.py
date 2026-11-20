@@ -216,8 +216,8 @@ def shortcut_ground():
     body = shaded("M 0,0 H 108 V 108 H 0 Z", (18, 18, 90, 90), GREEN[0], GREEN[2])
     what = (
         "The ground of the outings' shortcuts, adaptive icons (ic_shortcut_outing.xml,\n"
-        "     ic_shortcut_intervals.xml, ic_shortcut_run.xml): the launcher icon's ground, written\n"
-        "     here too because a library cannot name the app's drawables."
+        "     ic_shortcut_open.xml, ic_shortcut_intervals.xml, ic_shortcut_run.xml): the launcher\n"
+        "     icon's ground, written here too because a library cannot name the app's drawables."
     )
     return HEADER.format(what=what) + vector(body)
 

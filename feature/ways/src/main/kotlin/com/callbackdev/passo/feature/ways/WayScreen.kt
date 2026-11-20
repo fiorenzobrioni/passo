@@ -96,7 +96,13 @@ import java.time.LocalDate
 
 /** One way's page, or one city walk's, with its state from [WaysViewModel]. */
 @Composable
-fun WayRoute(way: WayId, journeyId: Long?, onBack: () -> Unit, viewModel: WaysViewModel = hiltViewModel()) {
+fun WayRoute(
+    way: WayId,
+    journeyId: Long?,
+    onBack: () -> Unit,
+    onOpenOuting: (Long) -> Unit = {},
+    viewModel: WaysViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     LifecycleResumeEffect(Unit) {
@@ -150,6 +156,8 @@ fun WayRoute(way: WayId, journeyId: Long?, onBack: () -> Unit, viewModel: WaysVi
                     onResume = viewModel::resumeWalk,
                     onStop = viewModel::stopWalk,
                     onKeepGoing = viewModel::keepGoing,
+                    // The walk's outing has a page of its own too, which follows it (Phase 21).
+                    onOpen = { state?.live?.session?.id?.let(onOpenOuting) },
                 ),
             ),
         ),

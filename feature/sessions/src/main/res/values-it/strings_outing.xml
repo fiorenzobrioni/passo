@@ -81,4 +81,6 @@
     <string name="outing_image_signature">Passo</string>
     <string name="outing_step_at_pace">Il tuo passo a questo ritmo: %1$s</string>
     <string name="outing_step_ready">Ora Passo può usare il passo misurato per ogni stima</string>
+
+    <string name="outing_when_paused">%1$s · %2$s · %3$s, %4$s in pausa</string>
 </resources>

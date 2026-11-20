@@ -96,6 +96,33 @@ class SessionAnnouncementTest {
     }
 
     @Test
+    fun `an open outing starts with no goal to say`() {
+        val open = session.copy(goalKind = SessionGoalKind.OPEN, goalValue = 0, intensity = SessionIntensity.FREE)
+        assertThat(SessionAnnouncement.started(open))
+            .isEqualTo(SessionAnnouncement.Started(null, SessionIntensity.FREE, false))
+    }
+
+    @Test
+    fun `an open outing stopped says what it came to, a goal outing stopped says nothing`() {
+        val open = session.copy(
+            goalKind = SessionGoalKind.OPEN,
+            goalValue = 0,
+            totals = SessionTotals(steps = 4_100, movingMillis = 41 * 60_000L + 20_000, distanceMeters = 3_210.0),
+        )
+        assertThat(SessionAnnouncement.openStopped(open))
+            .isEqualTo(SessionAnnouncement.OpenStopped(41, 3_210.0, measured = false, paceSecondsPerKm = null))
+        assertThat(SessionAnnouncement.openStopped(session)).isNull()
+
+        val measured = open.copy(gps = true, measuredShare = 0.97)
+        val said = checkNotNull(SessionAnnouncement.openStopped(measured))
+        assertThat(said.measured).isTrue()
+        assertThat(said.paceSecondsPerKm).isNotNull()
+        // A start pressed and stopped at once still says a minute, not none.
+        assertThat(SessionAnnouncement.openStopped(open.copy(totals = SessionTotals(steps = 40)))?.movingMinutes)
+            .isEqualTo(1)
+    }
+
+    @Test
     fun `it speaks through headphones, and out loud only when asked and not silenced`() {
         assertThat(SpeechRoute.speaks(SessionVoice.OFF, headphones = true, ringerNormal = true)).isFalse()
         assertThat(SpeechRoute.speaks(SessionVoice.HEADPHONES, headphones = true, ringerNormal = false)).isTrue()

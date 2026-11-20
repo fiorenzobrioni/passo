@@ -200,10 +200,64 @@ class PlanEditorScreenTest {
         assertThat(left).isTrue()
     }
 
+    // --- The open outing (Phase 21) ---------------------------------------------------------
+
+    @Test
+    fun `none says what an open outing is, and asks for no goal, estimate or share`() {
+        var editor by mutableStateOf(state())
+        val actions = PlanEditorActions(
+            kind = { kind ->
+                if (kind == EditorKind.OPEN) {
+                    editor = editor.copy(draft = editor.draft.copy(goalKind = SessionGoalKind.OPEN, goalValue = 0))
+                }
+            },
+        )
+        compose.setContent { PassoTheme { PlanEditorScreen(editor, onBack = {}, actions = actions) } }
+
+        compose.onNodeWithTag("${EditorTags.KIND}-OPEN").performClick()
+        compose.onNodeWithTag(EditorTags.OPEN_ABOUT).assertIsDisplayed()
+        compose.onNodeWithText("No goal: it counts until you stop it", substring = true).assertIsDisplayed()
+        compose.onNodeWithTag(EditorTags.GOAL_KIND).assertDoesNotExist()
+        compose.onNodeWithTag(EditorTags.VALUE).assertDoesNotExist()
+        compose.onNodeWithTag(EditorTags.ESTIMATE).assertDoesNotExist()
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.VIBRATE))
+        compose.onNodeWithText("No signal on the way", substring = true).assertIsDisplayed()
+        compose.onNodeWithTag("${EditorTags.MILESTONE}-50").assertDoesNotExist()
+        // Its legend keeps the two long pulses it does use: its end by itself, the cap's question.
+        compose.onNodeWithTag("${EditorTags.TRY}-50").assertDoesNotExist()
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.TRY_ENDED_STILL))
+        compose.onNodeWithTag(EditorTags.TRY_ENDED_STILL).assertIsDisplayed()
+        compose.assertAccessible()
+        snapshot("editor_open")
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT-w360dp-h640dp-xhdpi")
+    fun `in Italian on a small phone the three kinds fit their row`() {
+        compose.setContent {
+            PassoTheme { PlanEditorScreen(state(SessionPlans.OPEN_WALK), onBack = {}, actions = PlanEditorActions()) }
+        }
+        compose.onNodeWithText("Nessuno").assertIsDisplayed()
+        compose.onNodeWithText("Un obiettivo").assertIsDisplayed()
+        compose.onNodeWithText("Intervalli").assertIsDisplayed()
+        compose.onNodeWithText("Nessun obiettivo: conta finché la fermi", substring = true).assertIsDisplayed()
+        compose.assertAccessible()
+        snapshot("editor_open_it")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w411dp-h891dp-xxhdpi", fontScale = 2f)
+    fun `at twice the text size none still reads whole`() {
+        compose.setContent {
+            PassoTheme { PlanEditorScreen(state(SessionPlans.OPEN_WALK), onBack = {}, actions = PlanEditorActions()) }
+        }
+        compose.walkPage(hasTestTag(EditorTags.LIST), "editor_open_large")
+    }
+
     @Test
     fun `a kept outing can be deleted, after asking`() {
         var deleted = false
-        val kept = state(SessionPlans.PRESETS[2].copy(id = 3), isNew = false)
+        val kept = state(SessionPlans.REST_OF_DAY.copy(id = 3), isNew = false)
         compose.setContent {
             PassoTheme(darkTheme = true) {
                 PlanEditorScreen(kept, onBack = {}, actions = PlanEditorActions(delete = { deleted = true }))
@@ -265,8 +319,10 @@ class PlanEditorScreenTest {
     fun `intervals say what the Japanese walk is, and pick its sets`() {
         var editor by mutableStateOf(state())
         val actions = PlanEditorActions(
-            intervals = { on ->
-                if (on) editor = editor.copy(draft = SessionPlans.withIntervals(editor.draft, editor.draft.intervals))
+            kind = { kind ->
+                if (kind == EditorKind.INTERVALS) {
+                    editor = editor.copy(draft = SessionPlans.withIntervals(editor.draft, editor.draft.intervals))
+                }
             },
             sets = { change ->
                 editor = editor.copy(draft = SessionPlans.withIntervals(editor.draft, change(editor.draft.intervals)))
@@ -274,7 +330,7 @@ class PlanEditorScreenTest {
         )
         compose.setContent { PassoTheme { PlanEditorScreen(editor, onBack = {}, actions = actions) } }
 
-        compose.onNodeWithTag("${EditorTags.KIND}-true").performClick()
+        compose.onNodeWithTag("${EditorTags.KIND}-INTERVALS").performClick()
         compose.onNodeWithText("The Japanese interval walk").assertIsDisplayed()
         // In two lines where it is chosen, the sets on the same screen; the whole of it a touch away.
         compose.onNodeWithText("Three slow minutes and three brisk ones", substring = true).assertIsDisplayed()

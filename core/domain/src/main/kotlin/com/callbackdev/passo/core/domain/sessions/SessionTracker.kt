@@ -25,6 +25,7 @@ import com.callbackdev.passo.core.model.RoutePoint
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionMilestone
+import com.callbackdev.passo.core.model.SessionPause
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionTotals
 import com.callbackdev.passo.core.model.StepLengthSample
@@ -91,7 +92,9 @@ data class RouteHarvest(val points: List<RoutePoint>, val samples: List<StepLeng
  *   does for the day, and whether the time is at the outing's intensity.
  * - **Signals** come from the steps: the milestones the reader chose, then the goal, which ends
  *   the outing. For [KEEP_GOING_MILLIS] after it the steps are still counted aside, so "Keep
- *   going" reopens it with them.
+ *   going" reopens it with them. An open outing (Phase 21) has neither: its progress is always
+ *   0, so it crosses no share, and it ends only by the reader, the stillness, a long pause or its
+ *   cap, which is [SessionConstants.OPEN_MAX_SESSION_MILLIS] from its start.
  * - **It ends by itself** after [IDLE_END_MILLIS] without a step (at its last step), a pause of
  *   [PAUSE_END_MILLIS], or at its cap ([capMillis]); noticed at the next step or [check]. An end
  *   by stillness or by the cap can be taken back like the goal's, for [KEEP_GOING_MILLIS] from
@@ -353,15 +356,19 @@ class SessionTracker(
      * cap. The cap moves on by the pause, so a reader who paused across it is asked as any other
      * before it ends (no cap ends a walk unasked). A question already open stays open: the cap
      * is as far after the pause as it was before it, within the quarter of an hour it was asked in.
+     * The pause is kept with the outing (Phase 21): its page says the time paused, and its
+     * minutes have a gap there.
      */
     fun resume(nowMillis: Long): Boolean {
         val current = session
         if (current.state != SessionState.PAUSED) return false
-        val pausedFor = (nowMillis - (current.pausedAtMillis ?: nowMillis)).coerceAtLeast(0L)
+        val pausedAt = current.pausedAtMillis ?: nowMillis
+        val pausedFor = (nowMillis - pausedAt).coerceAtLeast(0L)
         val cap = current.capMillis + pausedFor
         session = current.copy(
             state = SessionState.ACTIVE,
             pausedAtMillis = null,
+            pauses = if (pausedFor > 0) current.pauses + SessionPause(pausedAt, nowMillis) else current.pauses,
             lastEventAtMillis = nowMillis,
             lastStepAtMillis = nowMillis,
             capAtMillis = cap,

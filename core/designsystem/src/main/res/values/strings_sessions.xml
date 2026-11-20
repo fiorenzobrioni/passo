@@ -202,4 +202,33 @@
         <item quantity="one">Still walking? This outing ends in %1$d minute.</item>
         <item quantity="other">Still walking? This outing ends in %1$d minutes.</item>
     </plurals>
+
+    <!-- The open outing (Phase 21): an outing with no goal. -->
+    <string name="session_amount_open">No goal</string>
+    <string name="session_open_free">No goal, at any pace</string>
+    <string name="session_open_brisk">No goal, at a brisk pace</string>
+    <string name="session_open_vigorous">No goal, at a vigorous pace</string>
+    <string name="session_open_run">No goal, running</string>
+    <!-- «2.30 km, 25 min»: what an open outing has come to, on a widget or a tile. -->
+    <string name="session_open_progress">%1$s, %2$s</string>
+    <!-- «41 minutes, about 3.20 km»: the distance an estimate, and said as one. -->
+    <string name="session_open_summary">%1$s, about %2$s</string>
+    <!-- «3.20 km measured in 41 minutes». -->
+    <string name="session_open_summary_measured">%1$s measured in %2$s</string>
+    <string name="session_headline_open_starting">Off you go: everything counts from here.</string>
+    <!-- «25 minutes on your feet.», «1 h 20 min on your feet.» -->
+    <string name="session_headline_open_walking">%1$s on your feet.</string>
+    <string name="session_headline_open_running">%1$s of running.</string>
+    <!-- «2.30 km measured in 25 minutes.» -->
+    <string name="session_headline_open_measured">%1$s measured in %2$s.</string>
+    <!-- «A walk of 41 minutes, about 3.20 km.» -->
+    <string name="session_headline_open_walk">A walk of %1$s.</string>
+    <string name="session_headline_open_run">A run of %1$s.</string>
+    <string name="session_headline_open_idle">Ended by itself after a long stop: %1$s.</string>
+    <string name="session_headline_open_closed">Closed: %1$s.</string>
+    <!-- «41 min in motion»: an open outing's row, where a goal outing says how far it went to its goal. -->
+    <string name="session_outcome_open">%1$s in motion</string>
+    <!-- Under an open outing's sentence, in place of a goal's bar: «Since 10:12 · 41 min in motion». -->
+    <string name="session_open_row">Since %1$s · %2$s in motion</string>
+    <string name="session_open_row_paused">Since %1$s · %2$s in motion, %3$s paused</string>
 </resources>

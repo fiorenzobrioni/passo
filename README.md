@@ -44,7 +44,7 @@ calories are estimates, and Passo says so.
     <td align="center"><img src="docs/screenshots/insights.png" width="250" alt="Insights: four days in a row at the goal, the last seven days, and the records"><br><sub><b>Insights</b>: streak, records, averages</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/outings.png" width="250" alt="Outings: a brisk walk of 20 minutes, a 30-minute run, the rest of the day and the Japanese interval walk, each with what it comes to, its signals and a button to start it"><br><sub><b>Outings</b>: a walk with a goal</sub></td>
+    <td align="center"><img src="docs/screenshots/outings.png" width="250" alt="Outings: a walk with no goal, a brisk walk of 20 minutes, a 30-minute run, the rest of the day and the Japanese interval walk, each with what it comes to, its signals and a button to start it"><br><sub><b>Outings</b>: with a goal, or none</sub></td>
     <td align="center"><img src="docs/screenshots/today-outing.png" width="250" alt="Today with a brisk walk under way: past halfway, 8 minutes to go, 12 of 20 minutes on its bar, 112 steps a minute on pace"><br><sub><b>Under way</b>: progress and pace</sub></td>
     <td align="center"><img src="docs/screenshots/outing-editor.png" width="250" alt="Editing an outing: the signals at 25, 50 and 75 percent, each vibration with its pattern drawn beside it and felt at a touch, and the voice through headphones"><br><sub><b>Signals</b> you can feel or hear</sub></td>
   </tr>
@@ -97,8 +97,8 @@ Italian). The phone's status bar is not in the pictures. The command that redraw
 - 📈 **Your day**: a chart you read with a finger, plus distance, calories, active and brisk minutes, cadence.
 - 📅 **History**: a day, week, month or year at a time, and a calendar of how close each day came.
 - 🚶 **Walks, found for you**: stretches of walking recognised in the steps already counted.
-- 🎯 **Outings**: a walk or run with a goal, with vibrations or a voice at the milestones you choose. Turn on «Measure with GPS» for one, and its distance is measured by satellite instead of estimated, with your pace by the kilometre or the mile.
-- 🧭 **An outing's page**: every outing has a page of its own, with one sentence and its numbers, each saying whether it is measured or estimated. With GPS: the route on a map you can zoom, drawn by Passo with no map service, each kilometre with its pace, and how much you climbed. Share the route as an image or a GPX file, save it, or delete it.
+- 🎯 **Outings**: a walk or run with a goal, with vibrations or a voice at the milestones you choose, or with no goal at all, counted until you stop it (and ended by itself at your last step if you forget). Turn on «Measure with GPS» for one, and its distance is measured by satellite instead of estimated, with your pace by the kilometre or the mile.
+- 🧭 **An outing's page**: every outing has a page of its own, with one sentence and its numbers, each saying whether it is measured or estimated. It follows the outing while it counts, with Stop and Pause at hand. With GPS: the route on a map you can zoom, drawn by Passo with no map service, each kilometre with its pace, and how much you climbed. Share the route as an image or a GPX file, save it, or delete it.
 - ⏱️ **Japanese interval walk**: 3 slow minutes and 3 fast ones, five sets or more, each change told with a vibration of its own so the phone stays in your pocket; at the end, how many fast intervals were at pace.
 - 🏆 **Insights**: your streak, your best day, week and month, and the averages.
 - 🗓️ **Your year on foot**: a year told in pages, from your own days: the steps and how far they went, the months, your best day, your day of the week and your hour, the goal, the outings and the ways, against the year before. Open it from Insights or History any time; in December it waits for you on Today. Share a page as an image, through an app you pick.

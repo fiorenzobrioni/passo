@@ -7,6 +7,7 @@ import com.callbackdev.passo.core.data.db.TrackerStateEntity
 import com.callbackdev.passo.core.data.db.TrackingDao
 import com.callbackdev.passo.core.data.db.intervalEntities
 import com.callbackdev.passo.core.data.db.legEntities
+import com.callbackdev.passo.core.data.db.pauseEntities
 import com.callbackdev.passo.core.data.db.toEntity
 import com.callbackdev.passo.core.data.db.toModel
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
@@ -134,6 +135,8 @@ constructor(
             session = session?.toEntity(),
             intervals = session?.intervalEntities().orEmpty(),
             legs = legs.filterIndexed { index, leg -> written.getOrNull(index) != leg },
+            // A handful at most, one a Pause the reader touched: written whole each time.
+            pauses = session?.pauseEntities().orEmpty(),
         )
         if (session != null && session.id != 0L) writtenLegs = session.id to legs
     }

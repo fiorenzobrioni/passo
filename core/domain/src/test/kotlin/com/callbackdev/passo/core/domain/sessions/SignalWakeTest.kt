@@ -89,6 +89,25 @@ class SignalWakeTest {
         assertThat(SignalWake.neededFor(silent.copy(gps = false), wakeUpCounter = false)).isFalse()
     }
 
+    @Test
+    fun `a phone with no wake-up counter, an open outing without GPS keeps no lock`() {
+        val open = checkNotNull(SessionPlans.start(SessionPlans.OPEN_WALK, 0, 0, 0, 8_000))
+        // It vibrates and speaks only for its end and its cap's question, which wait for the steps.
+        val speaking = open.copy(vibrate = true, voice = SessionVoice.HEADPHONES)
+        assertThat(SignalWake.needed(speaking, wakeUpCounter = false, signalsAllowed = true, nowMillis = 0)).isFalse()
+        assertThat(SignalWake.neededFor(SessionPlans.OPEN_WALK, wakeUpCounter = false)).isFalse()
+    }
+
+    @Test
+    fun `the same with GPS, the lock bounded ten minutes past its own twelve hours`() {
+        val open =
+            checkNotNull(SessionPlans.start(SessionPlans.OPEN_WALK.copy(gps = true), 0, 0, 0, 8_000, withGps = true))
+        assertThat(SignalWake.needed(open, wakeUpCounter = false, signalsAllowed = false, nowMillis = 0)).isTrue()
+        assertThat(SignalWake.neededFor(SessionPlans.OPEN_WALK.copy(gps = true), wakeUpCounter = false)).isTrue()
+        assertThat(SignalWake.timeoutMillis(open, nowMillis = 0))
+            .isEqualTo(SessionConstants.OPEN_MAX_SESSION_MILLIS + SignalWake.TIMEOUT_MARGIN_MILLIS)
+    }
+
     private companion object {
         const val MINUTE = 60_000L
     }

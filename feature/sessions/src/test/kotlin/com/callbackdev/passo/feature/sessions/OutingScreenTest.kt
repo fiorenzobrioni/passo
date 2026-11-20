@@ -23,12 +23,18 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.designsystem.components.OutingChartTags
 import com.callbackdev.passo.core.designsystem.components.RouteMapTags
+import com.callbackdev.passo.core.designsystem.components.SessionCardActions
 import com.callbackdev.passo.core.designsystem.components.SessionCardTags
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
+import com.callbackdev.passo.core.domain.routes.GpsLine
+import com.callbackdev.passo.core.domain.routes.LiveMeasure
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.model.AltitudeSource
 import com.callbackdev.passo.core.model.IntervalSplit
 import com.callbackdev.passo.core.model.SessionEnd
+import com.callbackdev.passo.core.model.SessionGoalKind
+import com.callbackdev.passo.core.model.SessionIntensity
+import com.callbackdev.passo.core.model.SessionPause
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionTotals
 import com.callbackdev.passo.core.model.UnitPreference
@@ -420,6 +426,118 @@ class OutingScreenTest {
         page().performScrollToNode(hasTestTag(SessionCardTags.INTERVAL_BARS))
         compose.onNodeWithTag(SessionCardTags.INTERVAL_BARS).assertIsDisplayed()
         snapshot("outing_intervals")
+    }
+
+    // --- The open outing, and the page of an outing that counts (Phase 21) ------------------
+
+    private val openLive = OutingSamples.measured.copy(
+        goalKind = SessionGoalKind.OPEN,
+        goalValue = 0,
+        intensity = SessionIntensity.FREE,
+        milestones = emptySet(),
+        state = SessionState.ACTIVE,
+        end = null,
+        endedAtMillis = null,
+        reachedAtMillis = null,
+    )
+
+    @Test
+    fun `an open outing under way - its sentence, no goal line, and Stop and Pause at its foot`() {
+        var stopped = false
+        var paused = false
+        show(
+            OutingSamples.state(session = openLive),
+            actions = OutingActions(
+                live = SessionCardActions(onStop = {
+                    stopped = true
+                }, onPause = { paused = true }),
+            ),
+        )
+
+        compose.onNodeWithText("4.26 km measured in", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("Its goal", substring = true).assertDoesNotExist()
+        compose.onNodeWithTag(OutingTags.LIVE_BUTTONS).assertIsDisplayed()
+        compose.onNodeWithTag(SessionCardTags.PAUSE).performClick()
+        compose.onNodeWithTag(SessionCardTags.STOP).performClick()
+        assertThat(paused).isTrue()
+        assertThat(stopped).isTrue()
+        snapshot("outing_open_live")
+    }
+
+    @Test
+    fun `while it counts, the page asks what its card asks - the receiver's line, the question before the cap`() {
+        val cap = System.currentTimeMillis() + 10 * 60_000
+        val asked = openLive.copy(capAtMillis = cap, capAskedForMillis = cap)
+        var keptGoing = false
+        show(
+            OutingSamples.state(session = asked).copy(measure = LiveMeasure(line = GpsLine.SIGNAL_LOST)),
+            actions = OutingActions(live = SessionCardActions(onKeepGoing = { keptGoing = true })),
+        )
+
+        compose.onNodeWithTag(SessionCardTags.GPS_LINE).assertIsDisplayed()
+        compose.onNodeWithTag(SessionCardTags.CAP_QUESTION).assertIsDisplayed()
+        compose.onNodeWithTag(SessionCardTags.CAP_KEEP_GOING).performClick()
+        assertThat(keptGoing).isTrue()
+    }
+
+    @Test
+    fun `paused, the page offers Resume at its foot`() {
+        show(
+            OutingSamples.state(
+                session = openLive.copy(state = SessionState.PAUSED, pausedAtMillis = OutingSamples.startedAt),
+            ),
+        )
+        compose.onNodeWithTag(SessionCardTags.RESUME).assertIsDisplayed()
+    }
+
+    @Test
+    fun `an outing over has no buttons at its foot`() {
+        show(OutingSamples.state())
+        compose.onNodeWithTag(OutingTags.LIVE_BUTTONS).assertDoesNotExist()
+    }
+
+    @Test
+    fun `an open outing over says its time paused, and at a brisk pace the pace it kept`() {
+        val start = OutingSamples.startedAt
+        val over = OutingSamples.onSteps.copy(
+            goalKind = SessionGoalKind.OPEN,
+            goalValue = 0,
+            milestones = emptySet(),
+            reachedAtMillis = null,
+            end = SessionEnd.STOPPED,
+            pauses = listOf(SessionPause(start + 10 * 60_000, start + 18 * 60_000)),
+        )
+        show(OutingSamples.state(session = over, route = null))
+
+        // The time paused kept whole, as the time it lasted is: «8 minutes» never breaks.
+        compose.onNodeWithText("8 minutes paused", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("No goal, at a brisk pace").assertIsDisplayed()
+        compose.onNodeWithText("A walk of 47 minutes, about 4.1", substring = true).assertIsDisplayed()
+        snapshot("outing_open_over")
+    }
+
+    @Test
+    fun `an open outing at any pace says nothing of a goal at all`() {
+        val over = OutingSamples.onSteps.copy(
+            goalKind = SessionGoalKind.OPEN,
+            goalValue = 0,
+            intensity = SessionIntensity.FREE,
+            milestones = emptySet(),
+            reachedAtMillis = null,
+            end = SessionEnd.STOPPED,
+        )
+        show(OutingSamples.state(session = over, route = null))
+        compose.onNodeWithText("No goal", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("paused", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT-w360dp-h740dp-xxhdpi")
+    fun `an open outing under way, in Italian on a small phone`() {
+        show(OutingSamples.state(session = openLive))
+        compose.onNodeWithText("misurati in", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("Termina").assertIsDisplayed()
+        snapshot("outing_open_live_it")
     }
 
     @Test

@@ -15,6 +15,7 @@ import com.callbackdev.passo.core.model.IntervalSplit
 import com.callbackdev.passo.core.model.LearnedStep
 import com.callbackdev.passo.core.model.OutingLeg
 import com.callbackdev.passo.core.model.SessionGoalKind
+import com.callbackdev.passo.core.model.SessionPause
 import com.callbackdev.passo.core.model.Sex
 import com.callbackdev.passo.core.model.StepLengthMode
 import com.callbackdev.passo.core.model.StepLengthSample
@@ -215,6 +216,43 @@ class BackupCodecTest {
         val withIntervals = full.copy(plans = full.plans + plan, sessions = full.sessions + outing)
 
         assertThat(BackupCodec.decode(BackupCodec.encode(withIntervals))).isEqualTo(BackupRead.Ok(withIntervals))
+    }
+
+    @Test
+    fun `a backup with open outings reads back whole, pauses included`() {
+        val start = 1_790_000_000_000
+        val plan = SessionPlans.OPEN_WALK.copy(id = 11)
+        val outing = session(start, planId = 11).copy(
+            goalKind = SessionGoalKind.OPEN,
+            goalValue = 0,
+            milestones = emptySet(),
+            reachedAtMillis = null,
+            endedAtMillis = start + 60 * 60_000,
+            pauses = listOf(
+                SessionPause(start + 10 * 60_000, start + 15 * 60_000),
+                SessionPause(start + 25 * 60_000, start + 28 * 60_000),
+            ),
+        )
+        val withOpen = full.copy(plans = full.plans + plan, sessions = full.sessions + outing)
+
+        assertThat(BackupCodec.decode(BackupCodec.encode(withOpen))).isEqualTo(BackupRead.Ok(withOpen))
+        assertThat(BackupCodec.encode(withOpen)).contains("\"goalKind\":\"OPEN\"")
+    }
+
+    @Test
+    fun `a pause no outing can have is dropped, and the outing kept`() {
+        val start = 1_790_000_000_000
+        val outing = session(start).copy(
+            pauses = listOf(
+                SessionPause(start + 5 * 60_000, start + 6 * 60_000),
+                // Ends before it begins, and before the outing began: not pauses.
+                SessionPause(start + 9 * 60_000, start + 8 * 60_000),
+                SessionPause(start - 60_000, start + 60_000),
+            ),
+        )
+        val read = BackupCodec.decode(BackupCodec.encode(full.copy(sessions = listOf(outing))))
+        val sessions = (read as BackupRead.Ok).backup.sessions
+        assertThat(sessions.single().pauses).containsExactly(SessionPause(start + 5 * 60_000, start + 6 * 60_000))
     }
 
     @Test

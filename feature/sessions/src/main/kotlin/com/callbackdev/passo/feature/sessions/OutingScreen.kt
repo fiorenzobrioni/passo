@@ -8,13 +8,16 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,6 +40,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -72,6 +76,9 @@ import com.callbackdev.passo.core.designsystem.components.IntervalBars
 import com.callbackdev.passo.core.designsystem.components.MetricTile
 import com.callbackdev.passo.core.designsystem.components.RouteBead
 import com.callbackdev.passo.core.designsystem.components.RouteMapView
+import com.callbackdev.passo.core.designsystem.components.SessionCardActions
+import com.callbackdev.passo.core.designsystem.components.SessionLiveButtons
+import com.callbackdev.passo.core.designsystem.components.SessionNotices
 import com.callbackdev.passo.core.designsystem.components.SplitList
 import com.callbackdev.passo.core.designsystem.components.SplitRow
 import com.callbackdev.passo.core.designsystem.components.StatStrip
@@ -108,6 +115,8 @@ import com.callbackdev.passo.core.domain.routes.Splits
 import com.callbackdev.passo.core.domain.routes.distanceKind
 import com.callbackdev.passo.core.domain.routes.pace
 import com.callbackdev.passo.core.domain.routes.stepsShare
+import com.callbackdev.passo.core.domain.sessions.cadenceFloor
+import com.callbackdev.passo.core.domain.sessions.pausedMillis
 import com.callbackdev.passo.core.model.AltitudeSource
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionState
@@ -118,13 +127,20 @@ import java.time.ZoneId
 import java.util.Locale
 import kotlin.math.roundToInt
 
-/** What an outing's page can ask for, as functions: the screen is a plain composable a test can draw. */
+/**
+ * What an outing's page can ask for, as functions: the screen is a plain composable a test can draw.
+ *
+ * @property live what the card of an outing under way can ask for, which its page asks too while
+ *   it counts (Phase 21): Stop, Pause, Resume, «Keep going» to the question before the cap, and
+ *   the line about the satellites' way out. No «See the outing»: this is the outing.
+ */
 class OutingActions(
     val shareImage: () -> Unit = {},
     val shareGpx: () -> Unit = {},
     val saveGpx: () -> Unit = {},
     val deleteRoute: () -> Unit = {},
     val openStepCard: () -> Unit = {},
+    val live: SessionCardActions = SessionCardActions(),
 )
 
 /** An outing's page with its state, and the sharing and saving of its route. */
@@ -185,6 +201,13 @@ fun OutingRoute(
             saveGpx = { runCatching { save.launch("$file.gpx") } },
             deleteRoute = viewModel::deleteRoute,
             openStepCard = onOpenStepCard,
+            live = SessionCardActions(
+                onPause = viewModel::pause,
+                onResume = viewModel::resume,
+                onStop = viewModel::stop,
+                onKeepGoing = viewModel::keepGoing,
+                onGps = viewModel::gps,
+            ),
         ),
     )
 }
@@ -239,6 +262,25 @@ fun OutingScreen(
                 scrollBehavior = scroll,
             )
         },
+        bottomBar = {
+            // While it counts the page is the outing's card made large (Phase 21): its two
+            // buttons stay at hand at the page's foot, however far down the reader has scrolled,
+            // so a reader who opened it at the park stops it at the car without going back.
+            val session = state?.session
+            if (session != null && session.live) {
+                Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
+                    SessionLiveButtons(
+                        session = session,
+                        actions = actions.live,
+                        modifier = Modifier
+                            .windowInsetsPadding(WindowInsets.navigationBars)
+                            .padding(pageGutter(sideInsets = false).contentPadding())
+                            .padding(horizontal = ScreenMargin, vertical = 12.dp)
+                            .testTag(OutingTags.LIVE_BUTTONS),
+                    )
+                }
+            }
+        },
     ) { padding ->
         // Until the outing is read, a bare page: nothing true can be drawn of it yet.
         if (state != null) {
@@ -267,6 +309,19 @@ private fun OutingPage(state: OutingUiState, format: MeasureFormatter, actions: 
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item(key = "sentence") { Sentence(session, format) }
+        // What the outing under way asks of the reader, as its card asks it: the receiver's line
+        // with its way out, «Still walking?» before its cap.
+        if (session.live) {
+            item(key = "notices") {
+                val now by produceState(System.currentTimeMillis(), session) { value = System.currentTimeMillis() }
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(horizontal = ScreenMargin),
+                ) {
+                    SessionNotices(session, state.measure?.line, now, actions.live)
+                }
+            }
+        }
         if (route != null) {
             item(key = "map") {
                 Column(
@@ -356,13 +411,34 @@ private fun Sentence(session: Session, format: MeasureFormatter) {
     val end = Instant.ofEpochMilli(session.endedAtMillis ?: session.lastStepAtMillis).atZone(zone)
     val lasted = end.toInstant().toEpochMilli() - session.startedAtMillis
     val minutes = (lasted / MILLIS_PER_MINUTE).toInt().coerceAtLeast(1)
-    val whenLine = stringResource(
-        R.string.outing_when,
-        longDate(start.toLocalDate()),
-        clockRange(start.hour * MINUTES_PER_HOUR + start.minute, end.hour * MINUTES_PER_HOUR + end.minute),
-        // How long it lasted is kept whole: «51 minutes», never «51» at a line's end.
-        duration(minutes).replace(' ', NO_BREAK),
-    )
+    val date = longDate(start.toLocalDate())
+    val range = clockRange(start.hour * MINUTES_PER_HOUR + start.minute, end.hour * MINUTES_PER_HOUR + end.minute)
+    // How long it lasted is kept whole: «51 minutes», never «51» at a line's end.
+    val lasting = duration(minutes).replace(' ', NO_BREAK)
+    // The time paused, where the pauses were kept (Phase 21): «53 minutes, 8 minutes paused».
+    val pausedMinutes = (
+        session.pausedMillis(
+            session.endedAtMillis ?: session.lastEventAtMillis,
+        ) / MILLIS_PER_MINUTE
+        ).toInt()
+    val whenLine = if (pausedMinutes > 0) {
+        stringResource(
+            R.string.outing_when_paused,
+            date,
+            range,
+            lasting,
+            duration(pausedMinutes).replace(' ', NO_BREAK),
+        )
+    } else {
+        stringResource(R.string.outing_when, date, range, lasting)
+    }
+    // What it set out to do. An open outing set out to do nothing in particular: said only where it
+    // had a pace to keep («No goal, at a brisk pace»), which its numbers are read against.
+    val aim = when {
+        !session.open -> stringResource(R.string.outing_goal, resources.sessionGoalDescription(session, format))
+        session.intensity.cadenceFloor != null -> resources.sessionGoalDescription(session, format)
+        else -> null
+    }
     Column(
         verticalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp),
@@ -373,11 +449,9 @@ private fun Sentence(session: Session, format: MeasureFormatter) {
             modifier = Modifier.testTag(OutingTags.SENTENCE).semantics { heading() },
         )
         Text(whenLine, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(
-            stringResource(R.string.outing_goal, resources.sessionGoalDescription(session, format)),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        aim?.let {
+            Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
     }
 }
 
@@ -767,6 +841,7 @@ private const val MIN_SPLIT_CLIMB = 1.0
 /** Hooks for the UI tests. */
 object OutingTags {
     const val PAGE = "outing_page"
+    const val LIVE_BUTTONS = "outing_live_buttons"
     const val SENTENCE = "outing_sentence"
     const val NUMBERS = "outing_numbers"
     const val SHARE_IMAGE = "outing_share_image"

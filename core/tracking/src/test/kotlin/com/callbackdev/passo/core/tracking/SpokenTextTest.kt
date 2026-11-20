@@ -305,6 +305,44 @@ class SpokenTextTest {
         )
     }
 
+    private val open = walk.copy(
+        goalKind = SessionGoalKind.OPEN,
+        goalValue = 0,
+        intensity = SessionIntensity.FREE,
+        milestones = emptySet(),
+        totals = SessionTotals(steps = 4_100, movingMillis = 41 * 60_000L, distanceMeters = 3_200.0),
+    )
+
+    @Test
+    @Config(qualifiers = "en-rUS")
+    fun `an open outing starts with no goal, and stopped says what it came to`() {
+        assertThat(say(SessionAnnouncement.started(open), open)).isEqualTo("Walk: off you go. No goal, at any pace.")
+        assertThat(say(checkNotNull(SessionAnnouncement.openStopped(open)), open))
+            .isEqualTo("Outing over: 41 minutes, about 3.20 kilometres. Well done.")
+        // A walk of hours is said in hours.
+        val long = open.copy(totals = open.totals.copy(movingMillis = 125 * 60_000L))
+        assertThat(say(checkNotNull(SessionAnnouncement.openStopped(long)), long))
+            .startsWith("Outing over: 2 hours 5 minutes, about")
+        // Measured, the distance is a measure and its pace is said.
+        val measured = open.copy(gps = true, measuredShare = 0.97)
+        assertThat(say(checkNotNull(SessionAnnouncement.openStopped(measured)), measured))
+            .startsWith("Outing over: 3.20 kilometres measured in 41 minutes. Pace: ")
+        assertThat(context.spokenOpenSample(UnitPreference.METRIC))
+            .isEqualTo("Outing over: 30 minutes, about 2.40 kilometres. Well done.")
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT")
+    fun `in Italian, an open outing`() {
+        assertThat(say(SessionAnnouncement.started(open), open))
+            .isEqualTo("Camminata: si parte. Senza obiettivo, a ritmo libero.")
+        assertThat(say(checkNotNull(SessionAnnouncement.openStopped(open)), open))
+            .isEqualTo("Uscita conclusa: 41 minuti, circa 3,20 chilometri. Ben fatto.")
+        val long = open.copy(totals = open.totals.copy(movingMillis = 125 * 60_000L))
+        assertThat(say(checkNotNull(SessionAnnouncement.openStopped(long)), long))
+            .startsWith("Uscita conclusa: 2 ore e 5 minuti, circa")
+    }
+
     @Test
     @Config(qualifiers = "it-rIT")
     fun `in Italian, an interval walk`() {

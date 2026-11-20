@@ -31,6 +31,9 @@ import androidx.room.RoomDatabase
  *   metres at a time (`session_leg`, a new table), from which its kilometres or its miles are
  *   cut. Numbers still. A version of its own although Phase 15's was not released: a debug
  *   build installed to try Phase 15 on a phone must not meet a second, different v7.
+ * - v9: the open outing (Phase 21): an outing's pauses, from Pause to Resume (`session_pause`, a
+ *   new table), for every outing; none before it. The open outing itself needs no column: a goal
+ *   kind is stored by its name, and `OPEN` is one more name.
  */
 @Database(
     entities = [
@@ -44,8 +47,9 @@ import androidx.room.RoomDatabase
         SessionIntervalEntity::class,
         StepLengthSampleEntity::class,
         SessionLegEntity::class,
+        SessionPauseEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -55,6 +59,7 @@ import androidx.room.RoomDatabase
         AutoMigration(from = 5, to = 6),
         AutoMigration(from = 6, to = 7),
         AutoMigration(from = 7, to = 8),
+        AutoMigration(from = 8, to = 9),
     ],
 )
 abstract class PassoDatabase : RoomDatabase() {

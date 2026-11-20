@@ -17,6 +17,7 @@ import android.speech.tts.Voice
 import android.util.Log
 import com.callbackdev.passo.core.designsystem.format.intensityPhrase
 import com.callbackdev.passo.core.designsystem.format.measureFormatter
+import com.callbackdev.passo.core.designsystem.format.openPhrase
 import com.callbackdev.passo.core.designsystem.format.paceSpoken
 import com.callbackdev.passo.core.designsystem.format.sessionName
 import com.callbackdev.passo.core.designsystem.ways.placeNameRes
@@ -385,12 +386,16 @@ internal fun Context.spoken(announcement: SessionAnnouncement, session: Session,
         } ?: res.getString(
             R.string.spoken_started,
             res.sessionName(session),
-            res.intensityPhrase(announcement.intensity, res.spokenAmount(announcement.goal, format)),
+            // An open outing (Phase 21) has no goal to say: what it is, «No goal, at any pace».
+            announcement.goal?.let { res.intensityPhrase(announcement.intensity, res.spokenAmount(it, format)) }
+                ?: res.openPhrase(announcement.intensity),
         )
 
         is SessionAnnouncement.IntervalChanged -> res.spokenInterval(announcement)
 
         is SessionAnnouncement.Milestone -> res.spokenMilestone(announcement, format)
+
+        is SessionAnnouncement.OpenStopped -> res.spokenOpenStopped(announcement, format)
 
         is SessionAnnouncement.EndedStill -> res.getString(
             R.string.spoken_ended_still,
@@ -476,6 +481,38 @@ private fun Resources.spokenInterval(announcement: SessionAnnouncement.IntervalC
 fun Context.spokenIntervalSample(fastMinutes: Int): String =
     resources.spokenInterval(SessionAnnouncement.IntervalChanged(fast = true, minutes = fastMinutes, lastSet = false))
 
+/**
+ * A sample of what an open outing says (Phase 21), for the editor's "Try it": it says nothing on
+ * the way, so its end, half an hour of walking.
+ */
+fun Context.spokenOpenSample(units: UnitPreference): String = resources.spokenOpenStopped(
+    SessionAnnouncement.OpenStopped(
+        movingMinutes = SAMPLE_OPEN_MINUTES,
+        distanceMeters = SAMPLE_OPEN_METERS,
+        measured = false,
+    ),
+    measureFormatter(units),
+)
+
+/** «Outing over: 41 minutes, about 3.20 kilometres. Well done.», with the pace where it was measured. */
+private fun Resources.spokenOpenStopped(
+    announcement: SessionAnnouncement.OpenStopped,
+    format: MeasureFormatter,
+): String {
+    val minutes = spokenDuration(announcement.movingMinutes)
+    val distance = spokenDistance(announcement.distanceMeters, format)
+    val summary = if (announcement.measured) {
+        getString(R.string.spoken_open_summary_measured, distance, minutes)
+    } else {
+        getString(R.string.spoken_open_summary, minutes, distance)
+    }
+    return listOfNotNull(
+        getString(R.string.spoken_open_stopped, summary),
+        spokenPace(announcement.paceSecondsPerKm, format),
+        getString(R.string.spoken_well_done),
+    ).joinToString(" ")
+}
+
 /** A sample of what an outing says on the way, for the editor's "Try it": its halfway. */
 fun Context.spokenSample(announcement: SessionAnnouncement.Milestone, units: UnitPreference): String =
     resources.spokenMilestone(announcement, measureFormatter(units))
@@ -544,6 +581,32 @@ private fun Resources.spokenNext(next: NextPlace, format: MeasureFormatter): Str
     return getString(R.string.spoken_walk_next, getString(placeNameRes(next.stop.key)), distance)
 }
 
+/** A time in words, for a voice: «41 minutes», «2 hours 5 minutes»; a walk of hours is not said in minutes. */
+private fun Resources.spokenDuration(minutes: Int): String {
+    val hours = minutes / MINUTES_PER_HOUR
+    val rest = minutes % MINUTES_PER_HOUR
+    val minutesText = getQuantityString(R.plurals.spoken_minutes, rest, rest)
+    return when {
+        hours == 0 -> getQuantityString(R.plurals.spoken_minutes, minutes, minutes)
+
+        rest == 0 -> getQuantityString(R.plurals.spoken_hours, hours, hours)
+
+        else -> getString(
+            R.string.spoken_hours_minutes,
+            getQuantityString(R.plurals.spoken_hours, hours, hours),
+            minutesText,
+        )
+    }
+}
+
+/** A distance in words, in the reader's units: «3.20 kilometres», «2.10 miles». */
+private fun Resources.spokenDistance(meters: Double, format: MeasureFormatter): String {
+    val measure = format.distance(meters)
+    val unit = if (measure.unit == MeasureUnit.MILE) R.plurals.spoken_miles else R.plurals.spoken_kilometres
+    // A distance with decimals is always many.
+    return getQuantityString(unit, MANY, measure.number)
+}
+
 /** An amount in words: «20 minutes», «2,400 steps», «1.50 kilometres». */
 private fun Resources.spokenAmount(amount: SessionAmount, format: MeasureFormatter): String = when (amount.kind) {
     SessionGoalKind.STEPS, SessionGoalKind.REST_OF_DAY -> {
@@ -565,9 +628,18 @@ private fun Resources.spokenAmount(amount: SessionAmount, format: MeasureFormatt
         }
         getQuantityString(unit, 2, measure.number)
     }
+
+    // Never asked of an open outing, which has no amount to say; the word if it ever were.
+    SessionGoalKind.OPEN -> getString(R.string.spoken_no_goal)
 }
 
 private val STEP_GOALS = setOf(SessionGoalKind.STEPS, SessionGoalKind.REST_OF_DAY)
 
 /** A plural's quantity that reads as many in English and Italian alike. */
 private const val MANY = 2
+
+private const val MINUTES_PER_HOUR = 60
+
+/** The editor's sample of an open outing: half an hour at an ordinary walk's pace and step. */
+private const val SAMPLE_OPEN_MINUTES = 30
+private const val SAMPLE_OPEN_METERS = 2_400.0

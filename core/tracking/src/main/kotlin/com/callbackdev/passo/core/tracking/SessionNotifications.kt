@@ -11,9 +11,11 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.callbackdev.passo.core.designsystem.format.countdown
+import com.callbackdev.passo.core.designsystem.format.format
 import com.callbackdev.passo.core.designsystem.format.gpsLineText
 import com.callbackdev.passo.core.designsystem.format.intervalWord
 import com.callbackdev.passo.core.designsystem.format.measureFormatter
+import com.callbackdev.passo.core.designsystem.format.movingMinutes
 import com.callbackdev.passo.core.designsystem.format.sessionCadence
 import com.callbackdev.passo.core.designsystem.format.sessionEstimates
 import com.callbackdev.passo.core.designsystem.format.sessionGoalDescription
@@ -91,7 +93,11 @@ internal class SessionNotifications(private val context: Context) {
         context.getSystemService(NotificationManager::class.java)?.createNotificationChannel(channel)
     }
 
-    /** The counting notification while [notice]'s outing is under way or paused. */
+    /**
+     * The counting notification while [notice]'s outing is under way or paused. A touch opens the
+     * outing's own page, which holds what this says and its buttons (Phase 21), not whatever page
+     * the app was last left on.
+     */
     fun ongoing(builder: NotificationCompat.Builder, notice: SessionNotice): NotificationCompat.Builder {
         val session = notice.session
         val format = context.measureFormatter(notice.units)
@@ -118,10 +124,16 @@ internal class SessionNotifications(private val context: Context) {
             .setSubText(where)
             .setCategory(NotificationCompat.CATEGORY_WORKOUT)
             .setRequestPromotedOngoing(true)
+            .setContentIntent(outingIntent(session))
             .setShortCriticalText(
                 when {
                     session.state == SessionState.PAUSED -> context.getString(R.string.session_chip_paused)
+
                     interval != null -> res.intervalWord(interval.fast)
+
+                    // An open outing has no share to show (Phase 21): how far it has come.
+                    session.open -> openChip(session, notice.measure.openMeters, format)
+
                     else -> format.percent(progress.coerceAtMost(1.0))
                 },
             )
@@ -159,7 +171,13 @@ internal class SessionNotifications(private val context: Context) {
         } else {
             listOf(sentence, detail).joinToString("\n")
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+        if (session.open) {
+            // No goal, nothing to fill (Phase 21): the sentence and the numbers, and on Android 16
+            // the chip's distance; a text notification is promoted to a Live Update as a bar is.
+            builder
+                .setContentText(text)
+                .setStyle(NotificationCompat.BigTextStyle().setBigContentTitle(title).bigText(text))
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
             // The system draws the milestones on the bar, and the walker riding it; an interval
             // outing's bar is its intervals, slow and fast in two colours, a point at each change.
             builder.setContentText(text)
@@ -192,6 +210,21 @@ internal class SessionNotifications(private val context: Context) {
                 .setProgress(PROGRESS_MAX, scaled, false)
         }
         return builder
+    }
+
+    /**
+     * An open outing's chip, a few characters wide: its distance with the stretch whose fixes are
+     * not in yet («2.30 km»), its time in motion before the first hundred metres, which as a
+     * distance would read as nothing.
+     */
+    private fun openChip(session: Session, openMeters: Double, format: MeasureFormatter): String {
+        val res = context.resources
+        val meters = session.totals.distanceMeters + openMeters
+        return if (meters < OPEN_CHIP_DISTANCE_FROM_METERS) {
+            res.format(format.minutes(session.movingMinutes()))
+        } else {
+            res.format(format.distance(meters))
+        }
     }
 
     /** Each interval a segment of its length, the slow ones grey, the fast ones the accent. */
@@ -298,7 +331,8 @@ internal class SessionNotifications(private val context: Context) {
             .setUsesChronometer(true)
             .setChronometerCountDown(true)
             .setTimeoutAfter((cap - nowMillis).coerceAtLeast(1L))
-            .setContentIntent(context.openAppIntent(REQUEST_GOAL))
+            // What it asks is on the outing's page too, with its answer (Phase 21).
+            .setContentIntent(outingIntent(session))
             .setAutoCancel(true)
             .setCategory(NotificationCompat.CATEGORY_WORKOUT)
             .addAction(
@@ -325,7 +359,8 @@ internal class SessionNotifications(private val context: Context) {
             )
             .setContentText(text)
             .setStyle(NotificationCompat.BigTextStyle().bigText(text))
-            .setContentIntent(context.openAppIntent(REQUEST_GOAL))
+            // What it asks is on the outing's page too, with its answer (Phase 21).
+            .setContentIntent(outingIntent(session))
             .setAutoCancel(true)
             .setCategory(NotificationCompat.CATEGORY_WORKOUT)
         if (canResume) {
@@ -483,8 +518,10 @@ internal class SessionNotifications(private val context: Context) {
         private const val REQUEST_RESUME = 11
         private const val REQUEST_STOP = 12
         private const val REQUEST_KEEP_GOING = 13
-        private const val REQUEST_GOAL = 14
         private const val REQUEST_RESUME_GPS = 15
         private const val REQUEST_OUTING = 16
+
+        /** Under this an open outing's chip says its time in motion, not a distance that reads as nothing. */
+        private const val OPEN_CHIP_DISTANCE_FROM_METERS = 100.0
     }
 }

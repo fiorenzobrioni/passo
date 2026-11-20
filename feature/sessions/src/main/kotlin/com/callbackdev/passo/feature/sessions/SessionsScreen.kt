@@ -424,7 +424,9 @@ private fun PlanCard(
 ) {
     val res = LocalResources.current
     val name = res.sessionName(plan)
-    val estimate = estimateLine(plan, state, format)
+    // An open plan (Phase 21) comes to what is walked, and tells nothing on the way: its line
+    // «No goal, at any pace» is the whole of it.
+    val estimate = if (plan.open) null else estimateLine(plan, state, format)
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         shape = GroupShape,
@@ -449,15 +451,17 @@ private fun PlanCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 // Shown short, with the sign of an estimate; read whole by TalkBack.
-                Text(
-                    text = estimate.shown,
-                    style = MaterialTheme.typography.bodySmall.copy(fontFeatureSettings = "tnum"),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .padding(top = 6.dp)
-                        .clearAndSetSemantics { text = AnnotatedString(estimate.spoken) },
-                )
-                SignalsLine(plan, format, modifier = Modifier.padding(top = 2.dp))
+                if (estimate != null) {
+                    Text(
+                        text = estimate.shown,
+                        style = MaterialTheme.typography.bodySmall.copy(fontFeatureSettings = "tnum"),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .padding(top = 6.dp)
+                            .clearAndSetSemantics { text = AnnotatedString(estimate.spoken) },
+                    )
+                    SignalsLine(plan, format, modifier = Modifier.padding(top = 2.dp))
+                }
                 // An interval plan shows its shape: slow and fast blocks, read before any number.
                 if (plan.goalKind == SessionGoalKind.INTERVALS) {
                     IntervalBlocks(
@@ -526,6 +530,9 @@ private fun estimateLine(plan: SessionPlan, state: SessionsUiState, format: Meas
         SessionGoalKind.STEPS -> minutes to distance
 
         SessionGoalKind.DISTANCE -> steps to minutes
+
+        // Never asked of an open plan, whose card has no estimate: the minutes' two others.
+        SessionGoalKind.OPEN -> steps to distance
 
         SessionGoalKind.REST_OF_DAY -> {
             if (state.restOfDaySteps < SessionConstants.MIN_REST_OF_DAY_STEPS) {

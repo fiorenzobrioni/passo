@@ -20,7 +20,12 @@ class SessionShortcutsTest {
             SessionGoalKind.entries.forEach { goal ->
                 val expected = when {
                     goal == SessionGoalKind.INTERVALS -> R.drawable.ic_shortcut_intervals
+
                     intensity == SessionIntensity.RUN -> R.drawable.ic_shortcut_run
+
+                    // A walk with no goal (Phase 21): the way that runs on, with no flag.
+                    goal == SessionGoalKind.OPEN -> R.drawable.ic_shortcut_open
+
                     else -> R.drawable.ic_shortcut_outing
                 }
                 assertEquals("$intensity, $goal", expected, SessionShortcuts.shortcutIcon(intensity, goal))

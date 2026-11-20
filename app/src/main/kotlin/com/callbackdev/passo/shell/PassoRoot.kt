@@ -297,7 +297,14 @@ private fun MainPages(
                 onOpenWay = { way, journey -> open(WayKey(way, journey)) },
             )
         }
-        entry<WayKey> { key -> WayRoute(way = key.way, journeyId = key.journeyId, onBack = nav::goBack) }
+        entry<WayKey> { key ->
+            WayRoute(
+                way = key.way,
+                journeyId = key.journeyId,
+                onBack = nav::goBack,
+                onOpenOuting = { id -> open(OutingKey(id)) },
+            )
+        }
         entry<YearKey> { key -> YearRoute(year = key.year, onBack = nav::goBack) }
     }
 

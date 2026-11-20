@@ -1416,6 +1416,12 @@ class StepTrackingService : Service() {
         sessionNotifications.cancelCapAhead()
         if (reopenable && session.end == SessionEnd.IDLE) tellEndedStill(session)
         if (reopenable && session.end == SessionEnd.CLOSED) tellEndedAtCap(session)
+        // An open outing has no goal to be told at (Phase 21): stopped by the reader, it says what
+        // it came to, as a goal outing's goal does.
+        val spoken = session.voice != SessionVoice.OFF && sessionNotifications.signalsAllowed()
+        if (finished.kept && session.end == SessionEnd.STOPPED && spoken) {
+            SessionAnnouncement.openStopped(session)?.let { speak(it, session) }
+        }
         speech.release()
         sessionDirty = false
         // The receiver goes with the end, just below; the pressure sensor a moment after it,

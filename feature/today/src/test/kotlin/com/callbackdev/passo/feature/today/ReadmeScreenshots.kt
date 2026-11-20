@@ -14,6 +14,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.data.sessions.LiveSessionState
+import com.callbackdev.passo.core.designsystem.components.SessionCardActions
 import com.callbackdev.passo.core.designsystem.components.SessionCardTags
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.insights.StreakSoFar
@@ -79,8 +80,16 @@ class ReadmeScreenshots {
     private fun show(state: TodayUiState, dark: Boolean = false) {
         compose.setContent {
             PassoTheme(darkTheme = dark) {
-                TodayScreen(state, askInSettings = false, onOpenSettings = {
-                }, onAllow = {}, onResume = {}, onCelebrated = {})
+                TodayScreen(
+                    state,
+                    askInSettings = false,
+                    onOpenSettings = {},
+                    onAllow = {},
+                    onResume = {},
+                    onCelebrated = {},
+                    // As the app gives it: a card under way is a door to its outing's page.
+                    sessionActions = { SessionCardActions(onOpen = {}) },
+                )
             }
         }
         compose.waitForIdle()

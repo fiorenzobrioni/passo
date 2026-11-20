@@ -45,6 +45,7 @@ import com.callbackdev.passo.core.designsystem.theme.widgetCardContainer
 import com.callbackdev.passo.core.designsystem.theme.widgetDress
 import com.callbackdev.passo.core.domain.widget.CountingState
 import com.callbackdev.passo.core.model.UserSettings
+import com.callbackdev.passo.core.tracking.SessionControl
 import com.callbackdev.passo.core.tracking.TrackingControl
 import java.util.Locale
 import kotlin.math.floor
@@ -158,12 +159,15 @@ fun wallpaperWantsDarkInk(context: Context): Boolean {
 
 /**
  * What a tap does: open the app, which lands on Today; on a paused card, open it asking to
- * resume, as the card says ([TrackingControl.EXTRA_RESUME]). The launcher's own intent, so the
- * tap brings back the app's task rather than starting a second one.
+ * resume, as the card says ([TrackingControl.EXTRA_RESUME]); on a card that shows an outing under
+ * way ([outingId]), that outing's own page, which holds what the card shows of it and its buttons
+ * (Phase 21). The launcher's own intent, so the tap brings back the app's task rather than
+ * starting a second one.
  */
-fun widgetTapIntent(context: Context, state: CountingState): Intent? =
+fun widgetTapIntent(context: Context, state: CountingState, outingId: Long? = null): Intent? =
     context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
         if (state == CountingState.PAUSED) putExtra(TrackingControl.EXTRA_RESUME, true)
+        if (outingId != null) putExtra(SessionControl.EXTRA_OPEN_OUTING, outingId)
     }
 
 /**
@@ -180,7 +184,7 @@ internal fun WidgetCard(
 ) {
     val context = LocalContext.current
     val palette = remember(model.look, dress) { widgetPalette(context, model.look, dress) }
-    val tap = widgetTapIntent(context, model.state)
+    val tap = widgetTapIntent(context, model.state, model.session?.id)
     Box(
         modifier = GlanceModifier
             .fillMaxSize()

@@ -49,6 +49,16 @@ object SessionConstants {
     const val MAX_SESSION_MILLIS: Long = 4 * 60 * 60_000L
 
     /**
+     * An open outing's cap (Phase 21; docs/adr/0016-location.md, decision 14, amended 20 Nov 2026).
+     * It has no end of its own, so the cap is the one end left besides the reader and the
+     * stillness; a day's hike is six to ten hours with its stops, and a cap inside it would end
+     * the walk and, with GPS, the rest of its route. Asked before it as every cap, and moved on by
+     * [CAP_EXTENSION_MILLIS] as every cap. Not none: it still bounds the processor kept awake on a
+     * phone with no wake-up counter, and an outing a day of errands keeps open.
+     */
+    const val OPEN_MAX_SESSION_MILLIS: Long = 12 * 60 * 60_000L
+
+    /**
      * This long before its cap an outing asks «Still walking?», once a cap: time enough to feel
      * the vibration, take the phone out and answer, and no cap ends a walk unasked.
      */

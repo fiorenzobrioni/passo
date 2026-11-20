@@ -139,6 +139,15 @@ constructor(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it[Keys.INTERVAL_PRESET_SEEDED] = true }
     }
 
+    /** Whether the open walk's preset (Phase 21) was offered, once, to plans seeded before it. */
+    suspend fun openPresetSeeded(): Boolean = dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .first()[Keys.OPEN_PRESET_SEEDED] ?: false
+
+    suspend fun markOpenPresetSeeded() {
+        dataStore.edit { it[Keys.OPEN_PRESET_SEEDED] = true }
+    }
+
     /**
      * What the reader last answered when Passo asked for the location permission
      * (docs/adr/0016-location.md, decision 2): a refusal is never asked again by itself, and a
@@ -362,6 +371,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
         val GOAL_NOTICE_DAY = longPreferencesKey("goal_notice_epoch_day")
         val SESSION_PLANS_SEEDED = booleanPreferencesKey("session_plans_seeded")
         val INTERVAL_PRESET_SEEDED = booleanPreferencesKey("interval_preset_seeded")
+        val OPEN_PRESET_SEEDED = booleanPreferencesKey("open_preset_seeded")
         val SESSION_SUMMARY_SEEN = longPreferencesKey("session_summary_seen")
         val YEAR_CARD_CLOSED = intPreferencesKey("year_card_closed")
         val GPS_ANSWER = stringPreferencesKey("gps_answer")

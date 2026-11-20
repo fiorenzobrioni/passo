@@ -45,10 +45,11 @@ and decided is in their boxes and in archive 04 (`docs/planning/README.md`, from
 an outing that asks for it» on); their proofs on a phone (the boxes in «Open») come before any
 release. **Phase 17 is built** (19 Nov 2026), on the branch of PR #74 at the owner's choice, and
 waits for a phone too (PLANNING.md §15, «Phase 17 built: the step that learns»). **Phase 21, the
-open outing, is next** (planned 20 Nov 2026: an outing with no goal, in three steps, a session
-each; PLANNING.md §11 Phase 21 and §15 «The open outing planned»), then 23, the doors (the ways
-in that were missing, and a list of the outings), then 18, then 20, which builds on 21; Phase
-22, the walk already begun, later. On 19 Nov 2026 the owner dropped Phases
+open outing** (planned 20 Nov 2026: an outing with no goal, in three steps, a session each;
+PLANNING.md §11 Phase 21 and §15 «The open outing planned»): **step 21.1 is built** (20 Nov 2026,
+waits for a phone; §15 «Phase 21.1 built: the open outing»), **21.2 is next**, then 21.3, then 23,
+the doors (the ways in that were missing, and a list of the outings), then 18, then 20, which
+builds on 21; Phase 22, the walk already begun, later. On 19 Nov 2026 the owner dropped Phases
 18 and 19 «On the spot»:
 Phase 18 is now a city walk measured with GPS (small), Phase 19 is dropped, and Phase 20 is the
 usual round alone: no route is followed, no GPX imported (PLANNING.md §15, «The places on the spot
@@ -90,7 +91,7 @@ that does not match it.
 
 | Module | Kind | Holds |
 |---|---|---|
-| `:core:model` | pure Kotlin/JVM | data classes shared by everything (a route's points, an outing's legs and a learnt step among them) |
+| `:core:model` | pure Kotlin/JVM | data classes shared by everything (a route's points, an outing's legs and its pauses, and a learnt step among them) |
 | `:core:domain` | pure Kotlin/JVM | `StepAccountant`, metric calculators, `WalkDetector`, `TypicalDayCalculator`, `PeriodOverview`, `Insights` (streaks, records, averages), `SessionTracker` and `SessionPlans` (outings), `IntervalSchedule` (the interval walk), `YearInReview` (Your year on foot), the backup file and its merge (`BackupCodec`, `BackupMerge`, `CsvExport`), `StepCalibration`, the step that learns (`StepLengthLearner`, `LearnedSteps`, `LearnedStepText`), the Ways and the city walks (`Ways`, `WayProgress`, `WalkDays`, `WalkPlaces`, `WayForecast`, `WayAnnouncement`, `WayProjection`, `Continents`, the generated `WayData` and `ContinentData`), the measured outing (`routes/`: `RouteMeter`, the fusion of steps and fixes, `RouteFilter`, `RouteCodec`, `GpsDuty`, `GpsStart`, `Pace`; `GpsLines`, the card's line for each state of the receiver; `Altitude`, `Climb` and `RouteHeights`, the climb; `Legs` and `Splits`, the kilometres; `GpxCodec`; `RouteShape` and `ScaleBar`, what a route's map draws, on plain ground) |
 | `:core:data` | Android library | Room (steps, tracker state, outings, ways), DataStore (settings, profile), repositories exposing `Flow`, `BackupRepository` (export, import), `WayRepository`, `StepLearningRepository` (what the outings with GPS taught of the step, and the reader's answers); a second Room database, `routes.db` (`RouteDatabase`, `RouteRepository`), where the outings measured with GPS went, and which no read ever makes (`RouteFile`) |
 | `:core:tracking` | Android library | `StepTrackingService` (FGS type `health`), sensor source, receivers, ongoing notification, `StepCounterProbe` (the calibration's direct read), `WayNotifier` (a stage reached), `LocationSource` (the satellite receiver, for an outing that asks for it), `PressureSource` (the barometer, on only with that receiver, for the climb), `OutingStarter` (the one door every start of a plan goes through) |

@@ -1,6 +1,9 @@
 package com.callbackdev.passo.core.domain.sessions
 
+import com.callbackdev.passo.core.domain.routes.DistanceKind
 import com.callbackdev.passo.core.domain.routes.capQuestionMinutes
+import com.callbackdev.passo.core.domain.routes.distanceKind
+import com.callbackdev.passo.core.domain.routes.pace
 import com.callbackdev.passo.core.domain.ways.NextPlace
 import com.callbackdev.passo.core.domain.ways.WalkPlaces
 import com.callbackdev.passo.core.domain.ways.WayStop
@@ -32,10 +35,11 @@ enum class PaceVerdict {
 sealed interface SessionAnnouncement {
     /**
      * It started: what it is. Heard first, it also says the voice works through these ears. An
-     * interval outing says its [intervals], and that it begins slow.
+     * interval outing says its [intervals], and that it begins slow; an open outing (Phase 21)
+     * that it has no goal ([goal] null).
      */
     data class Started(
-        val goal: SessionAmount,
+        val goal: SessionAmount?,
         val intensity: SessionIntensity,
         val restOfDay: Boolean,
         val intervals: IntervalSets? = null,
@@ -82,6 +86,19 @@ sealed interface SessionAnnouncement {
     data class EndedStill(val steps: Int) : SessionAnnouncement
 
     /**
+     * An open outing (Phase 21) the reader stopped: what it came to, as its goal's sentence says
+     * what a goal outing came to, since it has no goal to be told at. [movingMinutes] in motion
+     * and [distanceMeters], a measure where [measured] (with its pace, [paceSecondsPerKm]), an
+     * estimate otherwise, said as one.
+     */
+    data class OpenStopped(
+        val movingMinutes: Int,
+        val distanceMeters: Double,
+        val measured: Boolean,
+        val paceSecondsPerKm: Double? = null,
+    ) : SessionAnnouncement
+
+    /**
      * «Still walking?»: the outing ends by itself in [minutes], unless the reader says to go on
      * (docs/adr/0016-location.md, decision 14). No cap ends a walk unasked.
      */
@@ -114,7 +131,23 @@ sealed interface SessionAnnouncement {
 
     companion object {
         fun started(session: Session): Started =
-            Started(session.goal(), session.intensity, session.restOfDay, session.intervals)
+            Started(session.goal().takeUnless { session.open }, session.intensity, session.restOfDay, session.intervals)
+
+        /**
+         * What an open outing came to when the reader stopped it; null for any other outing, whose
+         * stop says nothing (the reader who touched Stop knows it stopped; its goal was its moment).
+         * At least a minute: «0 minutes» says nothing of a walk.
+         */
+        fun openStopped(session: Session): OpenStopped? {
+            if (!session.open) return null
+            val measured = session.distanceKind() == DistanceKind.MEASURED
+            return OpenStopped(
+                movingMinutes = (session.totals.movingMillis / MILLIS_PER_MINUTE).toInt().coerceAtLeast(1),
+                distanceMeters = session.totals.distanceMeters,
+                measured = measured,
+                paceSecondsPerKm = session.pace(),
+            )
+        }
 
         fun intervalChanged(position: IntervalPosition): IntervalChanged = IntervalChanged(
             fast = position.fast,

@@ -8,6 +8,7 @@ import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
+import com.callbackdev.passo.core.model.SessionPause
 import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionTotals
@@ -50,7 +51,7 @@ internal fun SessionPlan.toEntity() = SessionPlanEntity(
     gps = gps,
 )
 
-internal fun SessionRow.toModel(): Session? = session.toModel(intervals, legs)
+internal fun SessionRow.toModel(): Session? = session.toModel(intervals, legs, pauses)
 
 /**
  * Null for a row a newer build wrote with a kind this one does not know, or an interval outing
@@ -59,6 +60,7 @@ internal fun SessionRow.toModel(): Session? = session.toModel(intervals, legs)
 internal fun SessionEntity.toModel(
     intervals: List<SessionIntervalEntity> = emptyList(),
     legs: List<SessionLegEntity> = emptyList(),
+    pauses: List<SessionPauseEntity> = emptyList(),
 ): Session? {
     val kind = goalKind.toEnumOrNull<SessionGoalKind>() ?: return null
     val sets = IntervalSets(slowMinutes, fastMinutes, sets).takeIf { kind == SessionGoalKind.INTERVALS }
@@ -121,6 +123,7 @@ internal fun SessionEntity.toModel(
                 descentMeters = it.descentMeters,
             )
         },
+        pauses = pauses.sortedBy { it.pauseIndex }.map { SessionPause(it.fromMillis, it.toMillis) },
     )
 }
 
@@ -180,6 +183,13 @@ internal fun Session.legEntities(): List<SessionLegEntity> = if (id == 0L) {
             descentMeters = it.descentMeters,
         )
     }
+}
+
+/** An outing's pauses as rows, in order; none for one never paused, or one not yet written. */
+internal fun Session.pauseEntities(): List<SessionPauseEntity> = if (id == 0L) {
+    emptyList()
+} else {
+    pauses.mapIndexed { index, pause -> SessionPauseEntity(id, index, pause.fromMillis, pause.toMillis) }
 }
 
 /** An outing's intervals as rows; none for any other outing, or one not yet written. */

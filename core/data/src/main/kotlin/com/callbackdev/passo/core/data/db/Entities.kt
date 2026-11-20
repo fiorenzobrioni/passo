@@ -188,13 +188,25 @@ data class SessionLegEntity(
     val descentMeters: Double,
 )
 
-/** An outing with its intervals and its legs, read in one go. */
+/**
+ * A pause of an outing, from the reader's Pause to their Resume (PLANNING.md §11 Phase 21):
+ * `pauseIndex` from 0, in order. The pause under way is the outing's own `pausedAtMillis`, not a
+ * row: only a pause that ended inside its outing is kept. A row is a touch of the reader's, never
+ * one Passo makes by itself, so the table grows with the outings kept and far slower than
+ * `session_leg`; written with the outing, deleted with it.
+ */
+@Entity(tableName = "session_pause", primaryKeys = ["sessionId", "pauseIndex"])
+data class SessionPauseEntity(val sessionId: Long, val pauseIndex: Int, val fromMillis: Long, val toMillis: Long)
+
+/** An outing with its intervals, its legs and its pauses, read in one go. */
 data class SessionRow(
     @Embedded val session: SessionEntity,
     @Relation(parentColumn = "id", entityColumn = "sessionId")
     val intervals: List<SessionIntervalEntity>,
     @Relation(parentColumn = "id", entityColumn = "sessionId")
     val legs: List<SessionLegEntity>,
+    @Relation(parentColumn = "id", entityColumn = "sessionId")
+    val pauses: List<SessionPauseEntity> = emptyList(),
 )
 
 /**

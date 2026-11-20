@@ -1,5 +1,6 @@
 package com.callbackdev.passo.feature.sessions
 
+import android.content.Context
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -8,13 +9,18 @@ import com.callbackdev.passo.core.data.routes.RouteRepository
 import com.callbackdev.passo.core.data.sessions.LiveSession
 import com.callbackdev.passo.core.data.sessions.SessionRepository
 import com.callbackdev.passo.core.data.settings.SettingsRepository
+import com.callbackdev.passo.core.domain.routes.GpsLineAction
 import com.callbackdev.passo.core.domain.routes.GpxCodec
+import com.callbackdev.passo.core.domain.routes.LiveMeasure
 import com.callbackdev.passo.core.domain.routes.RouteShape
 import com.callbackdev.passo.core.model.AltitudeSource
 import com.callbackdev.passo.core.model.RoutePoint
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.UnitPreference
+import com.callbackdev.passo.core.tracking.OutingStarter
+import com.callbackdev.passo.core.tracking.SessionControl
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,6 +60,9 @@ class DrawnRoute(val shape: RouteShape, val altitudes: AltitudeSource?) {
  *   without a sample (PLANNING.md §11 Phase 17).
  * @property stepReady this is the outing whose samples made the learnt step's proposal ready, and
  *   the proposal still waits: its page offers it.
+ * @property measure what the service says of an outing under way beyond its stored numbers (the
+ *   line about the satellites, the pace now, the stretch whose fixes are not in yet); null for an
+ *   outing that is not the one under way (Phase 21: the page carries the card's lines).
  */
 @Immutable
 data class OutingUiState(
@@ -63,6 +72,7 @@ data class OutingUiState(
     val over: Boolean = !session.live,
     val stepAtPace: Double? = null,
     val stepReady: Boolean = false,
+    val measure: LiveMeasure? = null,
 )
 
 /**
@@ -70,12 +80,17 @@ data class OutingUiState(
  * the app does: it is told which outing is open ([open]), and its state runs only while a page
  * collects it. The route is read again only when it changes (a route still being written, one
  * the reader deletes), off the main thread.
+ *
+ * While the outing counts (Phase 21) the page follows the service's own state of it, as the card
+ * does, so the two never say different numbers, and sends the card's commands.
  */
 @HiltViewModel
 @OptIn(ExperimentalCoroutinesApi::class)
 class OutingViewModel
 @Inject
 constructor(
+    @ApplicationContext private val context: Context,
+    private val outings: OutingStarter,
     private val sessions: SessionRepository,
     private val routes: RouteRepository,
     settingsRepository: SettingsRepository,
@@ -91,27 +106,30 @@ constructor(
             } else {
                 val route = routes.observePointCount(id).distinctUntilChanged().mapLatest { read(id) }
                 val units = settingsRepository.settings.map { it.units }.distinctUntilChanged()
-                // Ended a moment ago, and the service can still take it back: not over yet.
-                val reopenable = live.current.map { it?.session?.id == id && it.canKeepGoing }.distinctUntilChanged()
+                // The service's own state of it while it counts, or while an end can be taken back:
+                // what the card shows, a step batch fresher than what is stored.
+                val running = live.current.map { it?.takeIf { state -> state.session.id == id } }
                 val step = combine(
                     learning.stepOf(id),
                     learning.learning.map { it.proposed && it.readyOutingId == id }.distinctUntilChanged(),
                 ) { atPace, ready -> atPace to ready }
-                combine(sessions.observeSession(id), route, units, reopenable, step) {
-                        session,
+                combine(sessions.observeSession(id), route, units, running, step) {
+                        stored,
                         drawn,
                         unit,
-                        canReopen,
+                        liveState,
                         (atPace, ready),
                     ->
-                    session?.let {
+                    (liveState?.session ?: stored)?.let {
                         OutingUiState(
                             it,
                             drawn,
                             unit,
-                            over = !it.live && !canReopen,
+                            // Ended a moment ago, and the service can still take it back: not over yet.
+                            over = !it.live && liveState?.canKeepGoing != true,
                             stepAtPace = atPace,
                             stepReady = ready,
+                            measure = liveState?.measure,
                         )
                     }
                 }
@@ -126,6 +144,17 @@ constructor(
     fun close() {
         opened.value = null
     }
+
+    fun pause() = SessionControl.pause(context)
+
+    fun resume() = SessionControl.resume(context)
+
+    fun stop() = SessionControl.stop(context)
+
+    fun keepGoing() = SessionControl.keepGoing(context)
+
+    /** What the line about the satellites asks for, through the outings' one door, as on the card. */
+    fun gps(action: GpsLineAction) = outings.onCardAction(action)
 
     /**
      * Forgets the open outing's route: the line and its places, never to be written again. The
