@@ -52,8 +52,10 @@ so they are uniform"):
 - **Built, on the branch of PR #74** (19 Nov 2026): Phase 17, the step that learns (§11; §15,
   «Phase 17 built: the step that learns»), committed on the review's branch at the owner's
   choice, merged into `main` once with the rest. Left: its check on a phone (the box in «Open»).
-  **Next: Phase 18**, a city walk measured with GPS (re-planned on 19 Nov 2026), then 20
-  (reviewed on 19 Nov 2026: the usual round alone): not started. Phase 19 dropped.
+  **Next: Phase 21**, the open outing (planned on 20 Nov 2026, in three steps; §11), then 23,
+  the doors (two steps), then 18, a city walk measured with GPS (re-planned on 19 Nov 2026), then
+  20 (reviewed on 19 Nov 2026: the usual round alone; it builds on 21): not started. Phase 19 dropped; Phase 22, the walk already
+  begun, later, when the owner asks.
 
 ## Open
 
@@ -711,7 +713,14 @@ cloud backup never carries; the day's distance stays the steps'.
 | 17 | The step that learns («Il passo che impara») | The step length by cadence, from the outings with GPS | 15 |
 | 18 | City walks measured with GPS («Passeggiate misurate») | A city walk's distance measured on the reader's own streets, and their real route kept; the walk stays imaginary | 15, 16 |
 | 19 | Dropped (owner, 19 Nov 2026) | Was «On the spot: the ways»; the first Phase 18, «On the spot: the cities», went with it | |
-| 20 | Your usual round («Il tuo giro solito») | A walk the reader repeats, known without being told and compared with their usual; Your rounds | 16 |
+| 20 | Your usual round («Il tuo giro solito») | A walk the reader repeats, known without being told and compared with their usual; Your rounds | 16, 21 |
+
+**Phase 21, the open outing, comes first** (owner, 20 Nov 2026; §15, «The open outing
+planned»). It is not a location phase: an outing with no goal, with GPS or without. It is planned
+beside these because the outings with GPS asked for it and Phase 20 builds on it (a usual round is
+walked as an open outing). Phase 23, the doors (the ways in that were missing, and a list of
+the outings), follows it. Order: 21, 23, then 18, then 20. Phase 22, the walk already begun, is
+later, when the owner asks. «The bar» below holds for 21, 22 and 23 as for these.
 
 **One phase, one session.** Each section is written to be enough for a session that has read
 CLAUDE.md, ADR 0016 and that section: it names the files to read first, the steps in order, the
@@ -723,7 +732,8 @@ there as an amendment, with its date and reason, before the code that needs it.
 
 **Releases.** Phases 15 and 16 are released together or not at all (ADR 0016, consequences);
 17 to 20 may each follow in a release of their own, in this order unless the owner changes it;
-18, being small, may go out with 17.
+18, being small, may go out with 17. 21 may go out with 15 to 17, or in a release of its own
+before 18.
 
 **The bar** (owner, 18 Nov 2026: "precise work, premium quality as this app is; no compromises,
 no shortcuts, complete and feasible features, premium in the code and in the design and
@@ -1342,6 +1352,12 @@ note, to reuse, not to copy), `SessionTracker.kt` (`placesPassed`), `WalkPlaces.
   starts on the steps and its card says so once. `SessionControl.startWalk`,
   `StepTrackingService.startWalk` and `SessionPlans.startWalk` gain `gps`; the service's
   `location` type and `GpsDuty` then do for a walk what they do for any outing.
+  - **The walk's page and its card.** On a walk's page, the card of the walk under way has no
+    `onGps` today (`WalkScreen` draws it, with the `SessionCardActions` that `WayScreen` builds).
+    That is harmless while a walk is never
+    measured. Once it is, the GPS line's way out («Resume GPS», the permission, location's
+    switch) must work there as it does on Today. `onOpen` comes with Phase 21.1 (the doors'
+    review, §15 «The open outing's plan reviewed»).
 - [ ] **The walk measured.** Nothing new to measure: in an outing with GPS the outing's
   distance is the fused one (ADR 0016 decision 5), and `placesPassed`, `WalkPlaces` and
   `WalkDays` read that distance, so the places are told by the measured kilometres and the walk
@@ -1402,8 +1418,14 @@ or behind it? Rounds are found among the reader's own outings with GPS; nothing 
 followed or guided (owner, 19 Nov 2026: following a route, a GPX or «Walk it again», is not
 built and not planned; §15, «Phase 20 reviewed: the usual round alone»).
 
+It comes after Phase 21 and builds on it (owner, 20 Nov 2026; §15, «The open outing planned»).
+A usual round is walked as an open outing with GPS. The round's line under way is that outing's
+sentence, told at 21.2's kilometre. A round's small map is 21.3's still route.
+
 **Read first:** ADR 0016 (decisions 6, 9, 11 and 16), Phase 16 here and its code (`RouteShape`,
-`RouteMapView`, `MapViewport`, `Legs`, `Splits`, `RouteRepository`, `RouteFile`);
+`RouteMapView`, `MapViewport`, `Legs`, `Splits`, `RouteRepository`, `RouteFile`); Phase 21 here
+(all three steps) and what it built: the open outing's sentences (`SessionHeadline`), the
+kilometre's mark (`SessionTracker`, `SessionAnnouncement`), the still route (21.3);
 `TypicalDayCalculator.kt` and `TodayOverview.kt` (how "ahead of your usual" is said for a day);
 `SessionsScreen.kt` (`CitiesDoor`, the door this phase's mirrors), `OutingScreen.kt`,
 `SessionCard.kt`; `BackupCodec.kt`, `DataSection` (Your data).
@@ -1436,20 +1458,41 @@ built and not planned; §15, «Phase 20 reviewed: the usual round alone»).
   («Your usual round, the sixth time: 2 minutes faster than usual»), against the usual above,
   with «Not the same round» (the pair is kept, the outing leaves the round) and the round's
   name, touched to open its page.
-- [ ] **The card, while it counts.** A free outing with GPS that began within 100 m of where a
-  round with two walks or more begins, and is still on it after 500 m (four fifths of its
-  points so far within 40 m of the round's line, in order), says at each kilometre how far
-  ahead or behind the usual it is, in the day's own words («30 seconds ahead of your usual»).
-  It rides on the step batches as every line of the card does: no wake of its own, no change to
-  §9 (review, 19 Nov 2026: a line at a kilometre is a signal of distance, told at the batch
-  like an outing's goal). Off the round for 200 m, the line says so once and stops; no
-  vibration, no voice: it is a line to read, not a signal. The service reads the rounds and
-  their members' routes once, at the outing's start, from `routes.db` (never making it:
-  `RouteFile`).
+- [ ] **The card, while it counts.** This is for an open outing with GPS (Phase 21). It must have
+  begun within 100 m of where a round with two walks or more begins, and still be on it after
+  500 m (four fifths of its points so far within 40 m of the round's line, in order). Then it
+  says how far ahead or behind the usual it is, in the day's own words («30 seconds ahead of
+  your usual»). That is its sentence, the one Phase 21 gives the open outing, from the first
+  kilometre and again at each.
+  - It rides on 21.2's kilometre: the batch that tells the kilometre's mark tells the round's
+    line.
+  - Where the outing speaks, the kilometre's words carry it too.
+    - On a round, the comparison takes the place of the kilometre's pace, so the words stay
+      short: «Two kilometres, 30 seconds ahead of your usual». The pace stays on the card and on
+      the page.
+    - Off the round, the next kilometre's words say so once, then go back to the pace.
+    - Being ahead or behind has no vibration of its own: the kilometre's one pulse is enough.
+  - There is no vibration and no signal of its own, and no wake: nothing is added to §9 (review,
+    19 Nov 2026: a line at a kilometre is told at the batch, like an outing's goal).
+  - An open outing whose marks are every ten minutes, or none, still shows the line at each
+    kilometre, silently.
+  - A goal outing keeps its own sentence: its round is told on its page afterwards.
+  - Off the round for 200 m, the line says so once and stops.
+
+  *Changed 20 Nov 2026* (§15, «The open outing planned» and «The open outing's plan reviewed»):
+  the line was «free» and silent. It is now the open outing's, and it is spoken where the
+  kilometre already is. The owner reopened 19 Nov's «no voice» and asked for what gives the most
+  value. A reader with the phone in a pocket hears the one thing a round adds, at the moment it
+  is true, with no new signal and no wake (as a target pace is told at each cue in the running
+  apps).
+
+  The service reads the rounds and their members' routes once, at the outing's start, from
+  `routes.db` (never making it: `RouteFile`).
 - [ ] **Your rounds** («I tuoi giri», `:feature:sessions`). A door on the Outings page, as the
   cities' is, shown once there is a round. Each round: its name (or «Your round of 3.2 km»
-  until it has one), its small map from its latest member's route (on its city's map where
-  Passo carries it, on plain ground elsewhere, still: no gestures in a list), its length, how
+  until it has one), its small map from its latest member's route (Phase 21.3's still route, on
+  plain ground as every route since §15 «Every route on plain ground»: no gestures in a list),
+  its length, how
   many times it was walked, its usual time. A round's page: the map with Phase 16's gestures,
   each walk with its day and its time brought to the usual length, a small Canvas chart of
   those times over the weeks with the usual as a line (one sentence for TalkBack: «Six walks
@@ -1460,14 +1503,17 @@ built and not planned; §15, «Phase 20 reviewed: the usual round alone»).
 - [ ] **Tests.** `RouteMatchTest` (the cases below, routes written by hand), the comparison's
   (lengths brought to the usual, the median, a member without route), the repository's (the
   migration, a member's outing deleted, «Delete all routes» leaving the rounds), the backup's
-  round trip, the card's line (on the round, left, a round of two walks), the outing page's and
+  round trip, the card's line (on the round, left, a round of two walks; said with the
+  kilometre's mark, with the voice on and off; an open outing with marks every ten minutes,
+  silent; a goal outing on a round, no line), the outing page's and
   Your rounds' UI tests, in Italian on a small phone and at twice the text size; the chart in
   both themes.
 - [ ] Strings in English and Italian, with plurals; CHANGELOG; the guide (a part in
   «Outings»); README: the feature line, and a screenshot of a round's page if it earns its
   place.
-- [ ] On a device (owner): a usual walk taken three times, then the fourth with the card's
-  line at each kilometre; the same walk the other way round, not called the same; a shortcut,
+- [ ] On a device (owner): a usual walk taken three times, then the fourth as an open outing
+  with GPS, with the card's line and its words at each kilometre; the same walk the other way
+  round, not called the same; a shortcut,
   compared honestly; Your rounds in both themes and at a large text size.
 
 **Acceptance:** the third time a round is walked Passo knows it without being told, and is right
@@ -1490,6 +1536,688 @@ pace, not of a shortcut; a reader who never walks with GPS sees nothing new.
 | A member's outing deleted | It leaves the round; under two members, the round is forgotten |
 | «Not the same round» | The pair is kept; the two are never matched again |
 | The reader leaves the round at the third kilometre | The card says so once and the line stops; the outing goes on as any |
+| A goal outing with GPS walked on a round | No line on its card (its sentence is its goal's); its page says the round afterwards |
+| An open outing on a round, marks every ten minutes | The line at each kilometre, silent; the ten minutes' words unchanged |
+
+### Phase 21 — The open outing («L'uscita aperta»)
+
+An open outing is an outing with no goal, with GPS or without. The reader arrives at the park,
+starts it, and walks as it comes. Halfway they look at the phone: the route so far and its
+numbers. Back at the car they stop it. Or they forget it, and it ends by itself at their last
+step.
+
+The owner asked for it on 20 Nov 2026, after the outings with GPS: "I miss an outing with no
+goal". It was reviewed against the code and against how the known apps do it (§15, «The open
+outing planned»). It comes before Phases 18 and 20, and Phase 20 builds on it.
+
+**Read first:**
+- ADR 0009, all of it: this phase amends decisions 1, 4, 6 and 8, and 3 with step 21.2.
+- ADR 0016, decisions 7 and 14.
+- ADR 0013 (the signals' wake).
+- «The bar» above, and §9, rules 7 and 9.
+- Every row of this phase's edge-case tables is a test that says so in its name.
+
+In the code:
+- `:core:model`: `Session.kt` (`SessionGoalKind`, `SessionPlan`, `Session`).
+- `:core:domain`: `SessionPlans.kt`, `SessionProgress.kt` (`progress`, `SessionHeadline`),
+  `SessionTracker.kt` (the signals, `finish`, the cap, the take-backs), `SessionConstants.kt`,
+  `SignalWake.kt`, `SessionAnnouncement.kt`, `BackupCodec.kt`, `BackupFile.kt`,
+  `BackupMerge.kt`, `CsvExport.kt`, `YearInReview.kt`.
+- `:core:data`: `Entities.kt`, `SessionMapping.kt`, `SessionRepository.kt` (the presets),
+  `PassoDatabase.kt`.
+- `:core:tracking`: `StepTrackingService.kt` (`publishSession`, `onSessionSignals`),
+  `SessionNotifications.kt`, `SessionShortcuts.kt`, `SignalWakeLock.kt`, `StepsTileService.kt`.
+- `:core:designsystem`: `SessionText.kt`, `SessionCard.kt`, `WalkList.kt` (`OutingList`),
+  `PassoIcons.kt` (`Outing`).
+- `:feature:sessions`: `PlanEditorScreen.kt`, `PlanEditorViewModel.kt`, `SessionsScreen.kt`,
+  `OutingScreen.kt`, `OutingViewModel.kt`.
+- `TodayScreen.kt` and `TodayViewModel.kt`; `WalkScreen.kt` (`:feature:ways`).
+- `:widget`: `WidgetText.kt`.
+
+**What the owner decided** (20 Nov 2026):
+- **The name.** The editor's «Kind» gains a third choice, «None» / «Nessuno»: «One goal | None |
+  Intervals». The documents call it the open outing, «uscita aperta». «Libero» / "Any pace" is
+  taken by the pace, and «Passeggiate» by the city walks: neither names it.
+- **The signals.** A signal at each kilometre (or mile) with GPS, and every ten minutes in
+  motion without. The reader may also choose none.
+- **The card under way.** In place of the bar: the route with GPS, the shape of the walk
+  minute by minute without, and the walk's share of the day's goal.
+- **«See the outing» while it counts**, on every outing's card, not only the open one.
+- **The forgotten start** (crediting the walking already done before the start) is Phase 22,
+  later. Phase 21 does not build it.
+- **Left out:**
+  - A turn-around signal: a time goal with its signal at half already gives one.
+  - Cropping a route afterwards: ADR 0016 decision 9 already leaves it out, and the end at the
+    last step makes it needless.
+  - Auto-pause: the time in motion, measured from the steps, already does that job.
+  - A goal added on the way: one quantity, frozen at the start, or none.
+  - A pace per kilometre without GPS: ADR 0009 decision 1.
+- **The number.** Phase 21 is a new number, so the numbers of the phases cited elsewhere stay.
+
+**How it ends.** Recommended when the owner asked "what do you really recommend, what is best for
+a premium app", and decided by the owner on 20 Nov 2026, the twelve hours and the short ride
+both (§15, «The open outing's plan reviewed»).
+- **No end by goal.** It ends in four ways, as every outing does:
+  - the reader stops it;
+  - after 15 minutes still, at its last step: told when noticed, with «Resume» for 15 minutes;
+  - after an hour paused, where it was paused;
+  - at its cap.
+- **The cap is twelve hours, not four** (ADR 0016 decision 14 says this is where a long
+  outing's cap is decided). The question still comes 15 minutes before, and «Keep going» still
+  moves the cap four hours on. Why twelve:
+  - An open outing has no end of its own. The cap is the only end left besides the reader and
+    the stillness.
+  - A day's hike is six to ten hours with its stops. A cap inside it would end the walk, and
+    with the walk the receiver: the rest of the route would be lost for good.
+  - The forgotten outing is the stillness's to end, not the cap's: a reader in a car or on a
+    sofa stops stepping.
+- **Why not no cap at all.** Twelve hours still bounds two things:
+  - the processor kept awake on a phone with no wake-up counter (`SignalWake`, ten minutes past
+    the cap);
+  - an outing kept open by a day of errands, with the phone forgotten in a pocket.
+- **A ride is not an end; the logic stays as it is.** The case is already handled:
+  - A ride adds no distance (`RouteMeter` sees it as carried) and almost no time in motion
+    (the time comes from the steps).
+  - The receiver sleeps two minutes after the last step.
+  - The outing ends at that last step, at the car, once the stillness has lasted 15 minutes.
+
+  It leaves one case: a ride shorter than 15 minutes, followed by steps (park, car, ten
+  minutes, the steps home). Then the outing goes on through it. The steps home are the
+  outing's until the stillness, and with GPS the route gains a stretch at the door. An
+  automatic end at the ride was weighed and left out, for three reasons:
+  - Only the first fix after the ride would see it. That fix comes after the steps that woke
+    the receiver, which are already counted.
+  - Indoors, that fix may never come.
+  - It would end the walk at every tram, which §11 Phase 15's table keeps inside the walk on
+    purpose («A tram between two walks»).
+
+  Step 21.1's device check walks exactly this case. If what the page shows matters, the end at
+  a ride is designed then, as a phase of its own.
+
+**Three steps, a session each, in this order.** Each ends green, with its boxes ticked, its
+entry at the end of §15's log, and its device box opened in «Open». A reader who never chooses
+«None» sees nothing new but three things: «See the outing» on a card under way, the outing's
+page opened by what shows the outing (its notification, the widgets, the tile), and the time
+paused on an outing's page.
+
+| Step | Brings | Needs |
+|---|---|---|
+| 21.1 | The open outing itself: the model, its ends, the start, the editor, every place an outing is shown; «See the outing» while it counts; the pauses kept | nothing before it |
+| 21.2 | The marks on the way: a kilometre, or ten minutes | 21.1 |
+| 21.3 | The shape on the card: the route, the minutes, the day's share; the still route that Phase 20 reuses | 21.1 |
+
+#### Step 21.1 — The open outing
+
+- [ ] **The documents first.** Write the amendments before the code, each with its date and
+  this phase's reason:
+  - ADR 0009, decision 1: one quantity, or none (the open outing).
+  - ADR 0009, decision 4: an open outing's notification has no bar.
+  - ADR 0009, decision 6: its ends, and its twelve hours.
+  - ADR 0009, decision 8: «See the outing» while it counts, and the open preset.
+  - ADR 0016, decision 14: an open outing starts with twelve hours.
+- [ ] **The model** (`:core:model`, `:core:domain`).
+  - `SessionGoalKind.OPEN`, with `goalValue` 0 and never read. It is stored by its name, as
+    every kind is (`session_plan.goalKind`, `session.goalKind`), so no column changes for it.
+  - `Session.open` and `SessionPlan.open`.
+  - The compiler lists every `when` on the kind. Each gets its own open branch, and none an
+    `else`.
+  - In `SessionPlans`:
+    - `range(OPEN)` is `0..0`.
+    - `convert` gives 0 into OPEN. Out of OPEN it gives the goal last kept for the new kind, or
+      `NEW`'s 30 minutes converted.
+    - `estimate`: none. The editor shows no estimate line for an open plan.
+    - `start` makes an open session with no milestones, and
+      `capAtMillis = now + OPEN_MAX_SESSION_MILLIS`.
+    - `REST_OF_DAY` is found by its kind, not by its place in `PRESETS`, which moves.
+  - `SessionConstants.OPEN_MAX_SESSION_MILLIS` (12 h), with its reason from «How it ends».
+  - `SessionProgress`:
+    - `progress()` is 0 for an open outing.
+    - `done`, `remaining` and `goal` are never asked of one: a test pins that no text is made
+      from an open amount.
+- [ ] **The tracker** (`SessionTracker`). An open outing has no milestone and no goal, so it
+  emits no `Milestone` and is never `Finished` by a goal. It ends by stop, by stillness
+  (`IDLE`), by a pause past an hour, or at its cap (`CLOSED`), with the same take-backs as every
+  outing. The cap's question comes at 11 h 45. It is kept as every outing is (30 steps or more).
+  The engine is otherwise untouched: §4.6's cases stand.
+- [ ] **The wake.** In this step an open outing tells nothing on the way, so it has no signal of
+  its own. It holds the lock only for GPS, on a phone with no wake-up counter (§9 rule 7,
+  amended). `SignalWake.needed` and `neededFor` learn this. The lock's bound follows the
+  outing's own cap (`timeoutMillis`). Check that nothing still bounds it by
+  `SignalWake.TIMEOUT_MILLIS`, the fixed four hours (`SignalWakeLock`'s first bound).
+- [ ] **The pauses kept** (`passo.db` v9, by auto-migration). This is for every outing, not
+  only the open one, so that 21.3's minutes are true from the first open outing walked.
+  - `session_pause` (`sessionId`, `fromMillis`, `toMillis`): written by the service in the same
+    transaction as the session, at each pause and each resume. `toMillis` is null while paused.
+    An end by a pause past an hour closes it at the end.
+  - Read by the outing's page: «when it was» says the time paused («10:12–11:05 · 53 minutes, 8
+    of them paused»). Also read by 21.3's minutes.
+  - In the JSON backup with its session: an added field, `pauses`, merged with the session
+    (`BackupMerge`). A file from before has none, and its outings have no pauses known.
+  - A route's segments at the pauses are untouched.
+  - **It does not grow on its own** (owner, 20 Nov 2026: "check it is not a table that grows
+    for ever").
+    - A row is a Pause the reader touched, and nothing else: no pause is ever made by itself,
+      and pausing the count ends the outing instead.
+    - It grows with the outings kept, as `session_interval` and `session_leg` do, and far
+      slower: a leg is a row every 100 m. Two pauses an outing, two outings a day, is about
+      1,500 rows a year, some tens of kilobytes. `minute_steps` alone writes hundreds a day.
+    - It is deleted with its outing, in the same transaction (`SessionDao.deleteSession`,
+      beside the intervals, the legs and the samples). That includes an outing too short to be
+      kept.
+    - A test proves it: an outing not kept leaves no pause behind, and an import that skips an
+      outing as a duplicate (`BackupMerge`) skips its pauses with it.
+- [ ] **The start.**
+  - **The open preset**, first in `PRESETS`: `SessionPlan(goalKind = OPEN, intensity = FREE,
+    position = 0)`. The others move down one.
+  - **A reader with plans already** finds it once, at the top of their list, after the update
+    (`SessionRepository`). A DataStore flag, `openPresetOffered`, keeps a deleted one from coming
+    back. It is not added to a reader who already keeps an open plan.
+  - **Every door that starts a plan starts an open one** as any other: the Outings page, the
+    launcher's shortcuts, and the one door for GPS (`OutingStarter`). "Walk now" and the city
+    walks are unchanged.
+- [ ] **The editor** (`PlanEditorScreen`, `PlanEditorViewModel`).
+  - «Kind» has three choices: «One goal | None | Intervals» («Un obiettivo | Nessuno |
+    Intervalli»). Check its width in Italian on a narrow phone and at twice the text size.
+  - With «None», there is no goal row, no value, no estimate line, and no milestones. Under
+    the row, one line says what it is: «No goal: it counts until you stop it, and ends by itself
+    at your last step if you forget it.» / «Nessun obiettivo: conta finché la fermi, e finisce
+    da sola al tuo ultimo passo se te ne dimentichi.»
+  - The pace, «Measure with GPS», the vibration and the voice stay. They still serve the
+    stillness, the cap's question and the GPS lines.
+  - Switching back to «One goal» finds the goal last set there, as «Intervals» keeps its sets.
+  - **The name** is derived from the pace, as now («Walk», «Brisk walk», «Run»). The plan's line
+    on the Outings page: «No goal, at any pace» / «Senza obiettivo, a ritmo libero».
+  - There is no signals line for an open plan until 21.2 builds the marks.
+- [ ] **The card** (`SessionCard`, `SessionText`). An open outing has its own sentences:
+
+  | State | English | Italian |
+  |---|---|---|
+  | Starting | «Off you go: everything counts from here» | «Si parte: da qui conta tutto» |
+  | Under way | «25 minutes on your feet» | «25 minuti in cammino» |
+  | Under way, a run | «25 minutes of running» | «25 minuti di corsa» |
+  | Under way, measured | «2.3 km measured in 25 minutes» | «2,3 km misurati in 25 minuti» |
+  | Paused | as any outing | as any outing |
+  | Over | «A walk of 3.2 km in 41 minutes» | «Una camminata di 3,2 km in 41 minuti» |
+
+  - Over by stillness or at the cap, it says that end, with its numbers, as any outing does.
+  - There is no bar, no milestone, and no goal at its end, and no `progressBarRangeInfo`.
+  - Under the sentence, one row: the time in motion and since when («41 min on your feet · since
+    10:12»). 21.3 puts the shape above it.
+  - The numbers, the pace line, the GPS line and the cap's question are as for any outing.
+- [ ] **Its mark.** A new `PassoIcons` mark: a way with no flag at its end, drawn in code, in
+  both dresses.
+  - Shown on the card, on the Outings page, and on its shortcut: `ic_shortcut_open.xml`, on the
+    shortcuts' ground from `tools/draw_launcher_icon.py`, mapped in
+    `SessionShortcuts.shortcutIcon` from `sessionIcon`.
+  - A run keeps its bolt.
+- [ ] **«See the outing» while it counts**, for every outing. One touch from the card, under
+  way or paused, opens the outing's page, which already follows the outing (archive 04, «An
+  outing's page follows the outing while it counts»).
+  - **Where:** on Today, on the Outings page, and on a city walk's page.
+  - **The card's controls:** Stop, Pause or Resume, and «See the outing», each at 48 dp. They go
+    on two lines where one is too narrow, as the finished card's do.
+  - **On the page, while it counts:** Stop and Pause or Resume at its foot, the GPS line with
+    its way out, and the cap's question, as on the card. A reader who opened it never has to
+    go back to stop.
+- [ ] **What shows the outing opens it**, for every outing (the doors' review, §15 «The open
+  outing's plan reviewed»). Today these land on whatever page the app was last left on: a
+  launch intent brings the task back as it was. While an outing counts, the following open the
+  outing's page (`SessionControl.EXTRA_OPEN_OUTING`, the door the end's notifications already
+  use):
+  - the body of the counting notification, which is then the outing's;
+  - «Still walking?» (`SessionNotifications.capAhead`);
+  - «GPS stopped» (`gpsStopped`);
+  - both widgets and the tile, while they show the outing's line.
+
+  The page holds what these speak of: the controls, the cap's question, the GPS line with
+  «Resume GPS». An outing already over when the touch comes opens on its finished page. With no
+  outing, these surfaces open Today (Phase 23.1).
+- [ ] **The notification, the widgets, the tile.**
+  - **The notification:** the name, the sentence, the numbers, Pause or Resume, and Stop, with
+    no bar. It uses `BigTextStyle` on every version and still asks to be promoted.
+  - **The chip on Android 16:** its short text is the distance («2.3 km»), or the time in
+    motion before 100 m. Use `setShortCriticalText` from the compat library if it has it,
+    otherwise the platform builder's.
+  - **When it updates:** when it updates now. No timer of Passo's; its chronometer is not the
+    time in motion, so it is not used.
+  - **Both widgets and the tile:** «Walk: 2.3 km, 25 min» / «Camminata: 2,3 km, 25 min», in the
+    place of «12 of 20 min». Count Glance's children.
+- [ ] **The voice** (`SessionAnnouncement`).
+  - The start: «Walk started, no goal» / «Camminata avviata, senza obiettivo».
+  - The end: what it came to («3.2 km in 41 minutes»).
+  - The stillness, the cap's question and GPS: as any outing.
+- [ ] **Where it is listed and kept.**
+  - **The lists of Today and History** (`OutingList`): «3.2 km · 41 min», with no share of a
+    goal.
+  - **The outing's page:** the sentence, «when it was» with the time paused, and no goal line.
+    The rest is as any outing's (map, numbers, kilometres, climb, the step learnt).
+  - **Your year on foot:** an open outing counts as an outing, and never as a goal missed.
+    Check `YearInReview` for anything said of goals.
+  - **The CSV:** `goal_kind` is «open», the goal's columns are empty, and the outcome is its
+    end.
+  - **The JSON backup:**
+    - The kind is stored by its name. The session reader refuses REST_OF_DAY alone, so it
+      accepts OPEN.
+    - An older Passo leaves the open outings and plans out (`toEnumOrNull`). Say so in the
+      CHANGELOG.
+  - **The step that learns:** an open outing with GPS teaches the step as any outing with GPS
+    (Phase 17).
+- [ ] **Tests.**
+  - `SessionPlansTest`: the preset, `start`, `convert`, the cap.
+  - `SessionTrackerTest`: the edge cases below; the engine's §4.6 cases unchanged.
+  - `SignalWakeTest`.
+  - The repository's tests: the pauses written with the session, the preset offered once,
+    the migration to v9 (CI's to prove on Windows).
+  - `BackupCodecTest` and the merge's tests: an open outing with its pauses, a file from
+    before.
+  - `CsvExportTest`.
+  - `SessionCard`'s UI tests: every state of an open outing, and «See the outing» under way
+    and paused on a goal outing too.
+  - `OutingScreenTest`: the controls while it counts, the time paused.
+  - The editor's tests: «None» in Italian on a small phone, at twice the text size, and on an
+    open foldable.
+  - The notification's builder.
+  - `WidgetGalleryTest`: the open line in each form.
+  - The screenshots looked at, in both themes and both dresses.
+- [ ] **The record.**
+  - Strings in English and Italian, with plurals.
+  - The CHANGELOG.
+  - The guide: «Outings» gains the open outing, its ends and its twelve hours; «With GPS»
+    gains the page while it counts.
+  - VISION: outings come with a goal or with none.
+  - The README: the outings' line. Its screenshot waits for 21.3's card.
+- [ ] **On a device (owner).**
+  - **An open outing with GPS at a park:**
+    - started from the Outings page and from the shortcut;
+    - the card under way (its sentence, its row, no bar);
+    - «See the outing» from the card, the route growing on the page, then Pause and Stop
+      from the page;
+    - the notification, and the chip with the distance on Android 16;
+    - both widgets and the tile;
+    - stopped at the car.
+  - **Then one forgotten:**
+    - with a ride of more than 15 minutes: ended at the car, told at the first steps home,
+      with «Resume»;
+    - with a ride of less than 15 minutes, then the steps home: what the page, the route and
+      the numbers show. This is the case that decides whether the end at a ride is designed
+      («How it ends»).
+  - **The doors to it:** the counting notification touched mid-walk, from the lock screen
+    too; «Still walking?» and «GPS stopped» touched; a widget and the tile touched while they
+    show the outing. Each opens the outing's page.
+  - **One without GPS**, with two pauses: the time paused on its page.
+  - **The editor's «None»** in Italian.
+  - **Everything** in both themes, at a large text size, and with TalkBack.
+
+**Acceptance (21.1):**
+- An open outing starts from «None» or from the preset, and counts with no goal.
+- It never ends at a goal, nor at four hours. It ends as every outing does otherwise.
+- It is shown everywhere an outing is, without a goal's word or bar.
+- Its page opens from the card while it counts, and can stop it.
+- An outing paused keeps its pauses.
+
+**Edge cases (21.1):**
+
+| Case | Expected behavior |
+|---|---|
+| An open outing walked for five hours | Not ended at four; asked at 11 h 45 if the reader is still walking |
+| The question at 11 h 45 unanswered | Ended at twelve hours and told; «Keep going» for 15 minutes takes it back with the steps since |
+| «Keep going» at 11 h 50 | The cap is four hours later; asked again 15 minutes before it |
+| Forgotten, then a ride of 20 minutes | Ended at its last step, at the car; told at the first step home; «Resume» for 15 minutes |
+| Forgotten, a ride of 10 minutes, then steps home | Goes on: the ride adds no distance and almost no time in motion; the steps home are its own until the stillness ends it (the device check's case) |
+| Paused for more than an hour | Ended where it was paused, its last pause closed there |
+| Fewer than 30 steps | Not kept |
+| A plan with GPS, the permission refused | Starts on the steps, as any plan with GPS; the card says so once |
+| Across midnight | Belongs to the day it started on |
+| Paused twice | Both pauses kept; the page says the time paused |
+| A plan switched to «None» and back | The goal last set is there again |
+| The open preset deleted | Never offered again |
+| A reader who already keeps an open plan | No preset added |
+| A phone with no wake-up counter, open, no GPS | No wake lock: it has no signal to keep on time |
+| The same, with GPS | The lock, bounded ten minutes past its own cap (twelve hours, or moved on) |
+| The process restarted during an open outing | Picked up as any; its cap and its open pause read from what was stored |
+| A run with no goal | Its bolt; «25 minutes of running» |
+| A backup with open outings | Read whole, pauses included; read by an older Passo, they are left out |
+| A goal outing under way | «See the outing» on its card; nothing else changes |
+| The counting notification touched during an outing | The outing's page, with its controls |
+| «Still walking?» or «GPS stopped» touched | The outing's page, with the cap's question or the GPS line on it |
+| A widget touched while it shows the outing | The outing's page |
+| A notification touched after the outing ended | The outing's page, finished (or reopenable, with its «Keep going») |
+
+#### Step 21.2 — The marks on the way
+
+A mark is the open outing's one signal on the way: a kilometre or a mile, or ten minutes in
+motion. It is told by a pulse, and by the voice where the outing speaks.
+
+- [ ] **The documents.** ADR 0009 decision 3 is amended: an open outing's signals are its marks.
+- [ ] **The model** (`passo.db` v10, by auto-migration).
+  - **What the reader chooses:** none, the distance, or the time.
+  - **The plan** (`session_plan`) keeps the choice, or nothing. Nothing means it follows the
+    plan's GPS switch: the distance with GPS on, the time with it off. The editor shows the one
+    in force as chosen. A choice made by the reader is kept whatever the switch.
+  - **The outing** (`session`) freezes, at its start, the mark in force and its unit (a
+    kilometre or a mile, from the reader's units then), as it freezes the goal. It also keeps
+    the count of marks told, so none is told twice.
+  - **The plan's switch decides, not the phone.** A plan with GPS that starts on the steps still
+    tells kilometres, estimated.
+  - The JSON backup carries both, as added fields.
+- [ ] **The tracker.**
+  - **Each mark crossed** is a signal (`SessionSignal`, a new case with its count). It is told
+    as a distance goal's milestones are: from the settled distance with GPS.
+  - **Several marks crossed in one batch** are told once, as the last.
+  - **None is told** after the end, or while the outing can be taken back. After «Resume» or
+    «Keep going», counting goes on from the next.
+  - **Ten minutes** means ten minutes in motion: a pause, or a traffic light, adds nothing.
+- [ ] **The pulse.** One short pulse, 180 ms: the pattern of a quarter in a goal outing. An
+  open outing has no quarters, so it cannot be mistaken for one. It is played as the milestones
+  are: as a notification's vibration, only while the outings' channel is on, and silent mode
+  applies.
+- [ ] **The words** (`SessionAnnouncement`).
+  - **The distance:** «One kilometre, in 11 minutes» / «Un chilometro, in 11 minuti», with the
+    plurals.
+  - **Where measured,** the pace of that kilometre is added, from its legs: «pace 11:20» /
+    «ritmo 11:20». This applies only where the outing's distance is measured, at nine tenths or
+    more (ADR 0016 decision 7).
+  - **Where not measured,** it says «about», and gives no pace.
+  - **The time:** «Ten minutes, 1,150 steps» / «Dieci minuti, 1.150 passi».
+- [ ] **The wake.** `SignalWake`: an open outing whose marks are none has no signal. One with
+  marks, and with the vibration or the voice on, has signals, as a goal outing has. The 30 s
+  latency is as every outing's. There is no 2 s window: that is the intervals'.
+- [ ] **The editor.**
+  - **A group «Signals» for an open plan:** «At each kilometre | Every 10 minutes | None» /
+    «A ogni km | Ogni 10 minuti | Nessuno», in miles where the reader walks in miles.
+  - **«Try it»** plays the pulse.
+  - **Its note** says that the kilometre is measured with GPS and estimated without.
+  - **The plan's line on the Outings page:** «A signal at each kilometre» / «Un segnale a ogni
+    km», and so on.
+- [ ] **The notification** is posted again at each mark, as at each milestone.
+- [ ] **Tests.**
+  - `SessionTrackerTest`: the edge cases below.
+  - `SignalWakeTest`.
+  - `SessionAnnouncementTest`: measured, estimated, the time, Italian plurals.
+  - The editor's tests: the group in each state, following the switch, a reader's choice kept.
+  - `BackupCodecTest`: the migration to v10, CI's to prove.
+- [ ] **The record.**
+  - Strings in English and Italian, with plurals.
+  - The CHANGELOG.
+  - The guide's «Outings»: the marks.
+- [ ] **On a device (owner).**
+  - An open outing with GPS: the pulse at each kilometre in a pocket, with the screen off, and
+    the voice in the headphones with the pace.
+  - One without GPS: the ten minutes.
+  - The editor's «Try it».
+  - The battery note of §9 unchanged: no new wake, beyond the signals' own.
+
+**Acceptance (21.2):**
+- An open outing tells each kilometre with GPS, and each ten minutes in motion without, unless
+  the reader chose otherwise.
+- Each mark is told once, on time with the screen off, and never after the end.
+- A pace is said only of a measured kilometre.
+
+**Edge cases (21.2):**
+
+| Case | Expected behavior |
+|---|---|
+| A batch crossing two kilometres | Told once, as the second |
+| A kilometre whose fixes are not in yet | Told when its metres are settled, as a distance goal's milestone |
+| A plan with GPS started on the steps | Kilometres told, estimated: «about», no pace |
+| The distance measured under nine tenths | No pace said |
+| Ten minutes with a pause in them | Minutes in motion: the pause adds nothing |
+| The units changed during the walk | The unit frozen at the start |
+| Marks set to none | No pulse, no words for them, no wake lock for them |
+| The outings' channel silenced | No pulse, as for the milestones; the voice as the reader set it |
+| Ended, while it can still be taken back | No mark |
+| Taken back with «Resume» | Marks go on from the next; none told twice |
+| The process restarted | The count of marks told read from what was stored |
+| The plan's GPS switch changed, no choice made | The mark follows the switch |
+| The plan's GPS switch changed after a choice | The reader's choice stays |
+
+#### Step 21.3 — The shape on the card
+
+- [ ] **The minutes** (`OutingMinutes`, `:core:domain`, pure). From `minute_steps`, over the
+  outing's span, less its pauses (`session_pause`, kept since 21.1).
+  - **One value a minute:** the steps in it.
+  - **Grouped** so that a bar stays at least 2 dp wide at the width given: 1, 2, 5, 10 or 15
+    minutes a bar.
+  - **A bar's height** is its mean steps a minute.
+  - **«At the pace»** when at least half its minutes are at or above the outing's cadence
+    floor. For an outing at any pace that floor is brisk, 100, the day's own brisk minute.
+  - **The pauses are gaps.**
+  - **One sentence for TalkBack:** «41 minutes on your feet, 30 of them brisk, one pause».
+- [ ] **The strip** (`MinuteStrip`, `:core:designsystem`, Canvas).
+  - **Its bars**, from the start to now: the accent for those at the pace, the muted ink for
+    the others.
+  - **It grows to the right.** Under reduced motion it jumps, with no growth.
+  - **Drawn only while on screen**, as every chart here.
+- [ ] **The still route** (`:core:designsystem`). A route drawn as `RouteMapView` draws it
+  (plain ground, its dashes), without gestures.
+  - On a card, a touch opens the outing's page.
+  - **One component**, which Phase 20's list of rounds reuses.
+  - **Thinned to the pixels it is drawn in.**
+  - **A twelve-hour route,** about 43,000 points at one fix a second, is read, shaped and
+    drawn without a dropped frame. Measure it in a test that logs the time, and on the phone.
+- [ ] **The card of an open outing**, in the bar's place:
+  - **With GPS:** the route so far, still. The strip shows until the route has a line (the
+    first fixes); then the route takes its place, with a fade.
+  - **Without GPS:** the strip.
+  - **Under it:** 21.1's row, then one line, the walk's share of its day's goal.
+    - «34% of today's goal» / «Il 34% del tuo obiettivo di oggi»: the outing's steps over the
+      goal stored for its day.
+    - «All of today's goal, by itself» / «Da sola, tutto l'obiettivo di oggi» at 100% or more.
+- [ ] **How the card reads them.** The card's ViewModels (Today, the Outings page, a city
+  walk's page) read only while the card is on screen (`WhileSubscribed`).
+  - **The route** is read again only when its point count changes, as `OutingViewModel` does,
+    off the main thread.
+  - **The minutes** come from the flow the day's chart already reads (Today), or from the
+    outing's span elsewhere.
+  - **Nothing runs with the screen off** (§9).
+- [ ] **Past its goal** (owner, 20 Nov 2026, explained in §15 «The open outing's plan
+  reviewed»). This is for a goal outing taken on with «Keep going» past its goal: for instance
+  30 minutes of brisk walking, and then 20 more.
+  - Today its card shows a bar full since the 30th minute, «50 min» at one end and «30 min» at
+    the other: nothing that moves as the reader walks on.
+  - From the goal on, the shape takes the bar's place: the route with GPS, the minutes without.
+    Past its goal an outing is open in all but its name.
+  - The sentence stays «Goal reached», with the time beyond it: «Goal reached, and 20 minutes
+    more» / «Obiettivo raggiunto, e 20 minuti in più».
+  - The goal's mark on the bar is not lost: the strip marks the minute the goal was reached,
+    with a thin line in the goal's colour.
+- [ ] **The outing's page.** A section, «The shape of the walk» / «La forma della camminata»,
+  holds the strip and the day's share, for every outing with its pauses kept, that is, every
+  outing walked since 21.1.
+  - With GPS, it comes after the map.
+  - On an outing from before, its pauses unknown, it is not shown.
+- [ ] **Tests.**
+  - `OutingMinutesTest`: the grouping, the pauses, across midnight, a twelve-hour walk.
+  - `MinuteStrip` and the still route in the galleries, in both themes.
+  - The card's UI tests: no fix yet, then the route; without GPS; past a goal.
+  - `OutingScreenTest`: the section shown, and not shown for an old outing.
+  - `assertAccessible()` and `walkPage()` on each.
+- [ ] **The record.**
+  - Strings in English and Italian.
+  - The CHANGELOG.
+  - The guide's «Outings»: the shape.
+  - The README: a screenshot of the open card with its route, from sample data
+    (`-PupdateScreenshots`), with its caption, if it earns its place among the few.
+- [ ] **On a device (owner).**
+  - The card at the park, halfway: the route growing; then a walk without GPS and its strip,
+    with a pause.
+  - The day's share against Today's ring.
+  - A long walk's card and page.
+  - In both themes, at a large text size, on the open foldable, and with TalkBack on the strip
+    and the route.
+
+**Acceptance (21.3):**
+- Halfway through an open outing, the card shows the walk's shape: the route with GPS, the
+  minutes without, and its share of the day.
+- It is drawn only while seen, and a twelve-hour walk draws as smoothly as a short one.
+
+**Edge cases (21.3):**
+
+| Case | Expected behavior |
+|---|---|
+| With GPS, no fix yet | The strip; the route in its place once it has a line |
+| GPS stopped during the walk | The route as it stands; the GPS line says why |
+| A pause | A gap in the strip |
+| A twelve-hour walk | Bars grouped; the route thinned; no dropped frame |
+| Across midnight | The minutes of both days; the share against the start day's goal |
+| The day's goal changed during the walk | The share against the day's goal as Today shows it |
+| The goal already met before the walk | The share as it is: «All of today's goal, by itself» only from the walk's own steps |
+| A goal outing past its goal | The shape in place of the bar; the sentence its goal's |
+| An outing walked before 21.1 | No shape section on its page |
+| Reduced motion | No growth; the route's arrival a fade |
+
+### Phase 22 — The walk already begun («La camminata già iniziata»), later
+
+Asked by the owner on 20 Nov 2026 as a phase of its own, not to be built with Phase 21: "later,
+in a phase apart". It is not planned in detail. The session that takes it up starts in plan mode
+on this sketch, with the owner.
+
+The known apps credit the walking done before the start (Apple's reminder, Samsung's walk
+recorded from the tenth minute). Passo would do it without detecting anything live:
+- **At a start**, the minutes just before are read. If they say the reader was already walking
+  (a walk as `WalkDetector` finds one, still under way), the start offers «Count from 10:04,
+  when you began» beside «From now».
+- **The minutes before** come from `minute_steps`. Their time in motion is the minutes', not
+  the steps' gaps. Their distance and energy are priced as the day prices them.
+- **With GPS,** the route begins at the start. The minutes before have no fixes, and the page
+  says so.
+- **Nothing runs to find it:** it is read at the start, from what is stored. §9 is untouched.
+
+To settle when it is taken up:
+- every outing, or the open one only;
+- with a goal, whether the minutes before count towards it;
+- how many minutes make a walk already begun;
+- the start's form: a second button, or a line on the card after the start («Walking since
+  10:04? Count those minutes»);
+- a walk with a pause in it.
+
+### Phase 23 — The doors («Le porte»)
+
+The owner asked on 20 Nov 2026, after «See the outing» was found missing on a card under way:
+"if you see other missing buttons or ways in, tell me and put them in the plan; value, not
+noise". The whole app was read for them: every page's touches, every notification, the widgets,
+the tile, the shortcuts. Each finding was checked in the code, then sorted. The ones that serve
+an outing went into Phase 21.1 (what shows the outing opens it), and the walk's card into Phase
+18. The rest are here, in two steps. The ones left out are listed with why (§15, «The open
+outing's plan reviewed»).
+
+**Order:** after Phase 21, before 18. 23.1 is small and needs only 21.1. 23.2 needs 21.3, for
+the still route.
+
+**Read first:**
+- `docs/adr/0008-goals-and-system-surfaces.md` (decision 8: «A tap opens Today»).
+- `docs/adr/0005-widgets.md`.
+- `docs/adr/0015-city-walks.md` (decision 12).
+- `app/.../shell/PassoRoot.kt` (the keys, `HistoryTarget`, `showToday`).
+- `MainActivity.kt` (`openToday`, `openOutingIfAsked`, `openWaysIfAsked`).
+- `NotificationText.kt` (`openAppIntent`), `TrackingNotifications.kt`, `GoalNotifications.kt`,
+  `WayNotifier.kt`, `StepsTileService.kt`.
+- `widget/.../WidgetCard.kt` (`widgetTapIntent`).
+- `SessionsScreen.kt` (`CitiesDoor`), `WaysScreen.kt`, `OutingScreen.kt`, `WalkList.kt`
+  (`OutingList`), `DataSection.kt`.
+
+#### Step 23.1 — The doors that lead where they say
+
+- [ ] **The tile, the widgets and the counting notification open Today.** ADR 0008 decision 8
+  says so, and `widgetTapIntent`'s comment says «lands on Today». They actually open the page
+  the app was last left on (a Way, Settings): the launcher's intent brings the `singleTask`
+  task back as it was, and only a shortcut's start brings Today forward (`openToday`).
+  - **The fix:** an extra that asks for Today, read in `onCreate` and `onNewIntent` as the
+    others are, and `nav.showToday()`.
+  - **Paused:** the resume extra keeps its meaning, and Today is where its button is.
+  - **During an outing:** Phase 21.1's rule applies instead (the outing's page).
+- [ ] **The goal's notifications open what they speak of** (`GoalNotifications`).
+  - The day's goal reached, and the evening reminder: Today.
+  - The weekly summary («Last week: 12% more…»): History on that week (`HistoryTarget`, the
+    week scale). Its rows say the same numbers.
+- [ ] **A stage reached opens its way** (`WayNotifier`): that way's page (`WayKey`), where the
+  new stamp is, instead of the Ways list. This revisits §8's «touching it opens the Ways page».
+  The notification names one way and one place, and the list made the reader look for it.
+- [ ] **An outing on a city walk leads to the walk.**
+  - Its page (`OutingScreen`) has one row naming the walk, which opens the walk's page: its
+    places, its stamps, «Continue from…». An example: «On the walk From the Duomo to the
+    Navigli».
+  - The card's small map of the walk opens the walk's page too.
+  - The card's «See the outing» (21.1) still opens the outing.
+
+  Today a half-walked city is four touches deep: Ways, Cities, a continent, the walk.
+- [ ] **The cities door lands on the cities.** The Outings page's «Walk through a city» opens
+  the Ways page at its «Cities» header, which today sits below five continents of ways. It
+  uses a target, as History's (`HistoryTarget`); the Ways page's own order is unchanged.
+- [ ] **An outing's row looks like a door.** In Today's and History's lists, an outing's row
+  opens its page but wears no chevron, while every other door on those pages wears one. It
+  gains the chevron. A walk found in the steps opens nothing (decided), so it wears none.
+- [ ] **Tests.**
+  - The intents each surface builds, with their extras.
+  - `MainActivity`'s doors: Today, a week, a way, the cities, each once per touch.
+  - The outing page's walk row.
+  - The lists' rows: `assertAccessible()` on each, with the role and the label.
+- [ ] **The record.** Strings in English and Italian, the CHANGELOG, and ADR 0008 decision 8
+  confirmed with what the fix found.
+- [ ] **On a device (owner).**
+  - **Today:** with the app left on Settings, the tile, each widget and the counting
+    notification each open Today.
+  - **The week:** the weekly summary opens its week.
+  - **A way:** a stage's notification opens its way.
+  - **A city walk:** from an outing on a city walk, to the walk.
+  - **The cities:** the cities door.
+
+**Acceptance (23.1):**
+- Every system surface opens the page that holds what it shows.
+- A city walk is one touch from its outing.
+- Every row that opens something looks like it does.
+
+#### Step 23.2 — Your outings («Le tue uscite»)
+
+Outings have their own pages, their routes and their GPX, but no list. Finding one from three
+weeks ago means paging History day by day, and with the outings measured with GPS that is the
+one list a walking app is expected to have. «Delete all routes» counts routes the reader cannot
+see one by one.
+
+- [ ] **The door** (`SessionsScreen`). On the Outings page, under the plans, beside the cities'
+  door (and Phase 20's rounds): «Your outings» / «Le tue uscite», with their count. It is shown
+  from the first outing kept, not before.
+- [ ] **The page** (`:feature:sessions`, `OutingsListScreen`, one key in `:app`).
+  - **One sentence first:** «48 outings since March; 21 with their route».
+  - **Then by month, newest first.** Each row is the one the day's lists draw (`OutingList`):
+    its mark, name, day and time, distance and time in motion, «measured» where it is.
+  - **One with a route** wears 21.3's still route, small, at its start. It is read only for
+    the rows on screen, from `routes.db`, never making it (`RouteFile`).
+  - **A row opens the outing's page.**
+  - **No paging library.** A few thousand outings are one query of numbers; only the routes are
+    read lazily.
+- [ ] **A filter:** «All | With their route» («Tutte | Con il percorso»). Your data's routes
+  row («21 routes, 3.4 MB», `DataSection`) opens this page with that filter. That is the way to
+  see which outings hold a route, and to delete one from its page, rather than all at once.
+- [ ] **Tests.**
+  - The list's grouping and its sentence (`:core:domain`, pure).
+  - The page's UI tests: empty, one month, many, the filter; Italian on a small phone, twice
+    the text size, an open foldable.
+  - The routes read only for the rows shown.
+  - Your data's row opening the filter.
+- [ ] **The record.**
+  - Strings in English and Italian, with plurals.
+  - The CHANGELOG.
+  - The guide's «Outings».
+  - The README: a screenshot of the list, if it earns its place.
+- [ ] **On a device (owner).** The list after a few weeks of outings, scrolled fast; the
+  filter; from Your data to the routes, one deleted from its page and the list after. In both
+  themes, at a large text size, with TalkBack.
+
+**Acceptance (23.2):**
+- Any outing is two touches from the Outings page.
+- Which outings hold a route can be seen, and each can be deleted on its own.
+
+**Left out of the doors' review**, each decided or noise:
+- Links to the guide's chapters from the pages they explain: the guide stays in Settings after
+  the first day (`TodayScreen`), and the map's note was moved to the guide on purpose on
+  20 Nov 2026.
+- The streak's day marks in Insights: the records already open History.
+- An end notification after Stop on the lock screen: the `sessions` channel carries only what
+  can still be taken back (§8).
+- A walk found in the steps opening a page: decided, it opens nothing.
+- Insights' way card opening the way instead of the Ways list: Today's card already does.
+- A touch on the continent's map naming more than the city: ADR 0015 decision 12.
 
 ---
 
@@ -1981,6 +2709,123 @@ This log starts with Phase 16 built (18 Nov 2026); its entries are written below
     changed). `RouteShapeTest` loses `RouteGround`'s three tests and gains `hasLaid`'s;
     `OutingScreenTest` checks the dashes' line under a route with a laid stretch and none under
     one without; `RouteMapGalleryTest` draws one gallery, plain; the screenshots looked at.
+
+- **20 Nov 2026.** **The open outing planned** (owner, after the outings with GPS: "I miss an
+  outing with no goal". At the park: walk, look at the route on the way, stop at the car, or
+  forget it. A brainstorm first, against the code and the known apps; then "prepare the plan in
+  PLANNING, a first small phase, the whole development in steps, detailed enough that a new
+  session starts from it"). §11 gains Phase 21 (three steps) and Phase 22 (later). Phase 20 is
+  updated to build on 21. «State» and CLAUDE.md say 21 comes next. Nothing is built yet, and no
+  ADR is amended yet: 21.1's first box does that.
+  - **What the known apps do** (their help pages, read on 20 Nov 2026: Apple Watch, Strava,
+    Garmin, Fitbit and Google, Samsung Health, Nike Run Club, Runkeeper, Komoot, Pacer, Huawei):
+    - No goal is the shortest way in, and a goal is an extra step: Apple's «Open goal», Nike's
+      «Basic», Samsung's «Basic workout», Huawei's «None».
+    - The live screen is numbers, with the route a swipe away.
+    - Auto-pause is advised against for walks (Strava) or left out for them (Apple).
+    - A forgotten stop gets a reminder that never ends anything (Apple), or a crop afterwards
+      (Strava, Komoot, Pacer).
+    - A forgotten start is credited (Apple, Samsung).
+    - A kilometre is told by a pulse or by the voice.
+
+    Passo's time in motion already does what auto-pause tries to do. Its end at the last step,
+    after 15 minutes still, handles a forgotten outing better than any of them.
+  - **What the code showed:**
+    - The goal is in every outing's shape: about 130 places in 23 files (the sentence, the bar,
+      the notification's `ProgressStyle`, the widgets' «12 of 20 min», the end at the goal).
+    - An outing's page already follows the outing while it counts, but nothing on the card
+      under way opens it: «See the outing» was on the finished card only.
+    - «Libero» is the pace («a ritmo libero»), and «Passeggiate» are the city walks, so neither
+      can name this.
+  - **Decided by the owner:**
+    - «Nessuno» / «None» in the editor; «uscita aperta» / "open outing" in the documents.
+    - A signal at each kilometre with GPS, every ten minutes without.
+    - The card's shape: the route with GPS, the minutes without, and the day's share.
+    - «See the outing» while it counts, for every outing.
+    - Phase 21 as a new number, before 18 and 20.
+    - The forgotten start as Phase 22, later.
+    - Left out: Garmin's turn-around (a time goal with its signal at half already gives it),
+      the crop, and auto-pause.
+  - **Proposed for the owner's review.** The owner asked: "what do you really recommend, what is
+    best for a premium app". Both proposals are in §11 Phase 21, «How it ends».
+    - *A short ride stays inside the walk, as the ends already are.* An automatic end at a ride
+      would see the ride only through the first fix after it, which comes after the steps that
+      woke the receiver, and indoors may not come at all. It would also end the walk at every
+      tram, which Phase 15 keeps inside the walk on purpose. 21.1's device check walks the one
+      case left (a ride under 15 minutes, then steps home) before anything is designed for it.
+    - *Twelve hours for an open outing, «Keep going» four more.* This is the place ADR 0016
+      decision 14 keeps for a long outing's cap. An open outing has no end of its own, a day's
+      hike would otherwise lose the rest of its route at four hours, and a forgotten outing is
+      the stillness's to end, not the cap's.
+  - **Also in the plan:**
+    - The pauses of every outing are kept from 21.1 (`session_pause`, `passo.db` v9), so that
+      21.3's minutes are true and an outing's page can say its time paused.
+    - The open preset is offered once to readers who have plans already.
+    - An open outing with no marks holds no wake lock for signals.
+  - **Phase 20 updated to inherit:**
+    - The card's line under way is for an open outing with GPS, and is its sentence.
+    - It rides on 21.2's kilometre. Where the outing speaks, the kilometre's words carry it.
+      This changes 19 Nov's «no voice», for the owner's review: no signal is added, the
+      kilometre's words say one thing more.
+    - A round's small map is 21.3's still route, on plain ground. This settles, for that one
+      line, the reading «Every route on plain ground» left to the phase.
+
+- **20 Nov 2026.** **The open outing's plan reviewed, and the doors** (owner, reading the plan
+  above: "I accept everything you told me and agree with everything proposed"; then "check that
+  the pauses are not a table that grows for ever"; then "if you see other missing buttons or
+  ways in, tell me and put them in the plan; value, not noise"). §11 Phases 18, 20 and 21 are
+  updated, and Phase 23 is added. «State» and CLAUDE.md give the order: 21, 23, 18, 20.
+  - **Confirmed by the owner:**
+    - The twelve hours of an open outing, with the question 15 minutes before and «Keep going»
+      four more.
+    - A short ride left inside the walk, as the ends already are: «How it ends» is no longer a
+      proposal.
+    - The open preset, offered once.
+    - Past its goal, an outing shows its shape (21.3; explained to the owner with the case of
+      30 minutes and 20 more, and accepted as explained).
+    - A round's small map on plain ground.
+  - **The round's voice** (owner: "we can revise the past decision; there was no idea of this
+    phase then; advise what is best and gives the app value"). The comparison is spoken in the
+    kilometre's words, where it takes the pace's place so they stay short. Leaving the round is
+    said once, at the next kilometre. Being ahead or behind has no pulse of its own. This
+    changes 19 Nov's «no voice» (§11 Phase 20, «The card, while it counts»).
+  - **The pauses' table, checked** (§11 21.1, «The pauses kept»):
+    - A row is a Pause the reader touched, and no pause is ever made by itself.
+    - It grows with the outings kept, far slower than `session_leg` (a row every 100 m) or
+      `minute_steps`: about 1,500 rows a year at two pauses an outing and two outings a day.
+    - It is deleted with its outing in `SessionDao.deleteSession`, an outing not kept
+      included.
+    - An import that skips an outing already here (`BackupMerge`, by its start) skips its
+      pauses with it.
+  - **The doors' review.** Every page's touches, every notification, the widgets, the tile and
+    the shortcuts were read, then each finding was checked in the code. What was found:
+    - **The tile, both widgets and the counting notification** open the page the app was last
+      left on, not Today as ADR 0008 decision 8 says. A launch intent brings the `singleTask`
+      task back as it was, and only a shortcut's start asks for Today.
+    - **«Still walking?» and «GPS stopped»** open that same last page, though what they ask for
+      is on the outing's card.
+    - **Outings have no list:** they are found day by day in History, and the routes' count in
+      Your data names routes no page lists.
+    - **An outing on a city walk** has no door to the walk.
+    - **The Outings page's cities door** lands above five continents of ways.
+    - **A stage's notification** opens the Ways list, not its way.
+    - **The goal's notifications** open the last page, and the weekly summary does not open its
+      week.
+    - **Outing rows** wear no chevron, though every other door on those pages does.
+    - **The card of a walk under way, on the walk's page,** has no `onGps`. That is harmless
+      until Phase 18 measures a walk.
+  - **Where each went:**
+    - What shows an outing opens the outing's page: Phase 21.1, beside «See the outing».
+    - The walk's card: Phase 18, «The start, through the one door».
+    - The rest: Phase 23. Step 23.1 holds the doors that lead where they say: Today, the week,
+      the way, the walk, the cities, the chevron. Step 23.2 holds «Your outings», the list,
+      with its filter for routes and the way in from Your data.
+    - Left out, each with its reason at the foot of Phase 23: links to the guide's chapters,
+      the streak's day marks, an end notification after Stop, a page for a walk found in the
+      steps, Insights' way card, the continent map's touch.
+  - **Order:** 23 after 21 and before 18. The doors are small and need 21.1. The list needs
+    21.3's still route, and makes the outings measured with GPS findable before Phase 20
+    groups them into rounds.
 
 ### Open
 

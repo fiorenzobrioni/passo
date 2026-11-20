@@ -44,8 +44,12 @@ and 16 are built** (18 Nov 2026), on branches in cascade, and wait for a phone: 
 and decided is in their boxes and in archive 04 (`docs/planning/README.md`, from «Location, for
 an outing that asks for it» on); their proofs on a phone (the boxes in «Open») come before any
 release. **Phase 17 is built** (19 Nov 2026), on the branch of PR #74 at the owner's choice, and
-waits for a phone too (PLANNING.md §15, «Phase 17 built: the step that learns»). **Phase 18 is
-next.** On 19 Nov 2026 the owner dropped Phases 18 and 19 «On the spot»:
+waits for a phone too (PLANNING.md §15, «Phase 17 built: the step that learns»). **Phase 21, the
+open outing, is next** (planned 20 Nov 2026: an outing with no goal, in three steps, a session
+each; PLANNING.md §11 Phase 21 and §15 «The open outing planned»), then 23, the doors (the ways
+in that were missing, and a list of the outings), then 18, then 20, which builds on 21; Phase
+22, the walk already begun, later. On 19 Nov 2026 the owner dropped Phases
+18 and 19 «On the spot»:
 Phase 18 is now a city walk measured with GPS (small), Phase 19 is dropped, and Phase 20 is the
 usual round alone: no route is followed, no GPX imported (PLANNING.md §15, «The places on the spot
 dropped, the city walk measured» and «Phase 20 reviewed: the usual round alone»).
