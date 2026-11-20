@@ -161,5 +161,21 @@
     <!-- The open outing (Phase 21): «None» in the editor's Kind. -->
     <string name="editor_kind_open">None</string>
     <string name="editor_open_about">No goal: it counts until you stop it, and ends by itself at your last step if you forget it.</string>
-    <string name="editor_open_signals_note">No signal on the way: an outing with no goal has no halfway. If it ends by itself after a long stop, or is about to after twelve hours, it tells you.</string>
+    <string name="editor_open_signals_note">One signal on the way, if you want it: an outing with no goal has no halfway. If it ends by itself after a long stop, or is about to after twelve hours, it tells you too.</string>
+    <!-- An open outing's marks on the way (Phase 21.2): a segmented row, so each label short. -->
+    <string name="editor_marks_km">Each km</string>
+    <string name="editor_marks_mile">Each mile</string>
+    <string name="editor_marks_time">Every 10 min</string>
+    <string name="editor_marks_none">None</string>
+    <string name="editor_marks_km_note">Each kilometre is measured with GPS, and estimated from your steps without it.</string>
+    <string name="editor_marks_mile_note">Each mile is measured with GPS, and estimated from your steps without it.</string>
+    <string name="editor_marks_time_note">Ten minutes on your feet: a pause, or a wait at a light, adds nothing to them.</string>
+    <!-- The legend's row for the mark, felt at a touch. -->
+    <string name="editor_try_mark_km">At each kilometre</string>
+    <string name="editor_try_mark_mile">At each mile</string>
+    <string name="editor_try_mark_time">Every 10 minutes</string>
+    <!-- An open plan's signals on the Outings page. -->
+    <string name="sessions_signals_marks_km">A signal at each kilometre</string>
+    <string name="sessions_signals_marks_mile">A signal at each mile</string>
+    <string name="sessions_signals_marks_time">A signal every 10 minutes</string>
 </resources>

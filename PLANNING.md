@@ -52,9 +52,10 @@ so they are uniform"):
 - **Built, on the branch of PR #74** (19 Nov 2026): Phase 17, the step that learns (§11; §15,
   «Phase 17 built: the step that learns»), committed on the review's branch at the owner's
   choice, merged into `main` once with the rest. Left: its check on a phone (the box in «Open»).
-  **Phase 21, the open outing** (planned on 20 Nov 2026, in three steps; §11): **step 21.1 is
-  built** (20 Nov 2026, on its own branch; §15, «Phase 21.1 built: the open outing»), and waits for
-  a phone (the box in «Open»). **Next: step 21.2**, the marks on the way, then 21.3, then 23, the
+  **Phase 21, the open outing** (planned on 20 Nov 2026, in three steps; §11): **steps 21.1 and
+  21.2 are built** (20 Nov 2026, on the branch of PR #76; §15, «Phase 21.1 built: the open outing»
+  and «Phase 21.2 built: the marks on the way»), and wait for a phone (the boxes in «Open»).
+  **Next: step 21.3**, the shape on the card, then 23, the
   doors (two steps), then 18, a city walk measured with GPS (re-planned on 19 Nov 2026), then 20
   (reviewed on 19 Nov 2026: the usual round alone; it builds on 21): not started. Phase 19 dropped; Phase 22, the walk already
   begun, later, when the owner asks.
@@ -154,6 +155,15 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
   - one without GPS with two pauses; the editor's «None» in Italian;
   - an update over the old build: «Walk» offered once at the top of the list;
   - in both themes, at a large text size, with TalkBack.
+
+- [ ] **On a device (owner): Phase 21.2's marks on the way** (§11 Phase 21, step 21.2; §15, «Phase
+  21.2 built: the marks on the way», 20 Nov 2026). Step 21.2's own box «On a device (owner)» says
+  it all; in short:
+  - an open outing with GPS: the pulse at each kilometre in a pocket with the screen off, and the
+    voice in the headphones with that kilometre's pace;
+  - one without GPS: the ten minutes, and a pause inside them;
+  - the editor's group «Signals» for «None» (in Italian too), its «Try it» felt and heard;
+  - the battery note of §9 unchanged: no wake beyond the signals' own.
 
 Read again on 2 Nov 2026, at archive 01 and 02: the boxes above are the ones the phases done had
 left open, and the review's device check. Read again at 1.1.0's tag: the owner's checks of the
@@ -1903,8 +1913,8 @@ paused on an outing's page.
 A mark is the open outing's one signal on the way: a kilometre or a mile, or ten minutes in
 motion. It is told by a pulse, and by the voice where the outing speaks.
 
-- [ ] **The documents.** ADR 0009 decision 3 is amended: an open outing's signals are its marks.
-- [ ] **The model** (`passo.db` v10, by auto-migration).
+- [x] **The documents.** ADR 0009 decision 3 is amended: an open outing's signals are its marks.
+- [x] **The model** (`passo.db` v10, by auto-migration).
   - **What the reader chooses:** none, the distance, or the time.
   - **The plan** (`session_plan`) keeps the choice, or nothing. Nothing means it follows the
     plan's GPS switch: the distance with GPS on, the time with it off. The editor shows the one
@@ -1915,18 +1925,18 @@ motion. It is told by a pulse, and by the voice where the outing speaks.
   - **The plan's switch decides, not the phone.** A plan with GPS that starts on the steps still
     tells kilometres, estimated.
   - The JSON backup carries both, as added fields.
-- [ ] **The tracker.**
+- [x] **The tracker.**
   - **Each mark crossed** is a signal (`SessionSignal`, a new case with its count). It is told
     as a distance goal's milestones are: from the settled distance with GPS.
   - **Several marks crossed in one batch** are told once, as the last.
   - **None is told** after the end, or while the outing can be taken back. After «Resume» or
     «Keep going», counting goes on from the next.
   - **Ten minutes** means ten minutes in motion: a pause, or a traffic light, adds nothing.
-- [ ] **The pulse.** One short pulse, 180 ms: the pattern of a quarter in a goal outing. An
+- [x] **The pulse.** One short pulse, 180 ms: the pattern of a quarter in a goal outing. An
   open outing has no quarters, so it cannot be mistaken for one. It is played as the milestones
   are: as a notification's vibration, only while the outings' channel is on, and silent mode
   applies.
-- [ ] **The words** (`SessionAnnouncement`).
+- [x] **The words** (`SessionAnnouncement`).
   - **The distance:** «One kilometre, in 11 minutes» / «Un chilometro, in 11 minuti», with the
     plurals.
   - **Where measured,** the pace of that kilometre is added, from its legs: «pace 11:20» /
@@ -1934,24 +1944,24 @@ motion. It is told by a pulse, and by the voice where the outing speaks.
     more (ADR 0016 decision 7).
   - **Where not measured,** it says «about», and gives no pace.
   - **The time:** «Ten minutes, 1,150 steps» / «Dieci minuti, 1.150 passi».
-- [ ] **The wake.** `SignalWake`: an open outing whose marks are none has no signal. One with
+- [x] **The wake.** `SignalWake`: an open outing whose marks are none has no signal. One with
   marks, and with the vibration or the voice on, has signals, as a goal outing has. The 30 s
   latency is as every outing's. There is no 2 s window: that is the intervals'.
-- [ ] **The editor.**
+- [x] **The editor.**
   - **A group «Signals» for an open plan:** «At each kilometre | Every 10 minutes | None» /
     «A ogni km | Ogni 10 minuti | Nessuno», in miles where the reader walks in miles.
   - **«Try it»** plays the pulse.
   - **Its note** says that the kilometre is measured with GPS and estimated without.
   - **The plan's line on the Outings page:** «A signal at each kilometre» / «Un segnale a ogni
     km», and so on.
-- [ ] **The notification** is posted again at each mark, as at each milestone.
-- [ ] **Tests.**
+- [x] **The notification** is posted again at each mark, as at each milestone.
+- [x] **Tests.**
   - `SessionTrackerTest`: the edge cases below.
   - `SignalWakeTest`.
   - `SessionAnnouncementTest`: measured, estimated, the time, Italian plurals.
   - The editor's tests: the group in each state, following the switch, a reader's choice kept.
   - `BackupCodecTest`: the migration to v10, CI's to prove.
-- [ ] **The record.**
+- [x] **The record.**
   - Strings in English and Italian, with plurals.
   - The CHANGELOG.
   - The guide's «Outings»: the marks.
@@ -2915,6 +2925,81 @@ This log starts with Phase 16 built (18 Nov 2026); its entries are written below
       doors), `SpokenTextTest`, `SessionShortcutsTest`, `WidgetGalleryTest` (the open line and
       the widget's door).
     - The screenshots looked at.
+
+- **20 Nov 2026.** **Phase 21.2 built: the marks on the way** (owner: "implement the next step,
+  21.2; carry on on PR 76, which is part of the same phase; premium work"). §11 Phase 21's step
+  21.2 boxes are ticked but the phone's, which opens in «Open». ADR 0009 decision 3 is amended
+  before the code, as the step's first box says (decision 1's pointer to it with it).
+  - **Built.**
+    - The model: `SessionMarks` (`DISTANCE`, `TIME`, `NONE`); a plan's choice, `SessionPlan.marks`,
+      null until the reader makes one, and `marksInForce`, which follows the plan's GPS switch
+      until then; an outing's `marks`, `markMiles` and `toldMarks`, frozen at the start of an open
+      outing by `SessionPlans.start` (with `miles`, the reader's units then), none for every
+      other outing.
+    - `OutingMarks` (`:core:domain`): how many marks an outing has crossed, the time in motion to
+      the last one and that stretch's pace, from its legs.
+    - The tracker: `SessionSignal.Mark(count)`, told in `advance` as a milestone is, so a kilometre
+      with GPS is told on settled metres; several in a batch told once, as the last; none after
+      the end, nor while the end can be taken back.
+    - `SignalWake`: an open outing with marks, and the vibration or the voice, has signals to keep
+      on time; one with none keeps the lock for GPS alone, as in 21.1.
+    - The words (`SessionAnnouncement.DistanceMark`, `TimeMark`; `SessionSpeech`): «2 kilometres,
+      in 23 minutes. Pace: 11 minutes 20 seconds a kilometre.», «About 1 kilometre, in 11
+      minutes.», «20 minutes, 2,300 steps.», in Italian with their plurals.
+    - The service: `tellMark`, one short pulse (`SessionHaptics.playMark`, 180 ms), the words, and
+      the notification posted again; the unit frozen at `startSession`.
+    - `passo.db` v10 by auto-migration (`marks` on `session_plan`; `marks`, `markMiles`,
+      `toldMarks` on `session`), and the JSON backup's `marks`, `markMiles`, `toldMarks`.
+    - The editor: under «None», the group «Signals» with «Each km | Every 10 min | None» («A ogni
+      km | Ogni 10 min | Nessuno»; «Each mile» in miles), the note of the one chosen, the legend's
+      row to feel the pulse, and the voice's «Try it» saying the first mark with the reader's own
+      step at the plan's pace. The Outings page: «A signal every 10 minutes», «A signal at each
+      kilometre» under an open plan.
+  - **Made exact on the way**, each in the code with its reason:
+    - **The numbers are said as numbers.** «One kilometre» and «Ten minutes» in the plan are what
+      the engine says of «1 kilometre» and «10 minutes»: every spoken amount is written so, with
+      its plural. A walk of hours is said in hours («1 hour 21 minutes»), as 21.1's end is.
+    - **The pace in Italian is «Andatura», not «ritmo».** «Ritmo» is the cadence in the app («a
+      ritmo libero»), and every measured pace already says «Andatura: 11 minuti e 20 secondi al
+      chilometro», as the milestones and the goal do.
+    - **The voice follows the outings' channel**, as the vibrations do. The edge-case table said
+      «the voice as the reader set it» for a silenced channel; ADR 0010 makes every spoken signal
+      follow the channel, and the milestones do. A mark is no different.
+    - **The segments' labels are short** («Each km», «Every 10 min»): a segment keeps its label on
+      one line (`SegmentLabel`), and a third of a narrow phone does not hold «At each kilometre».
+      The long words are the legend's row, the Outings page's line and the voice's.
+    - **A kilometre's time is its legs'** where it has them: with GPS it is told when its metres
+      are settled, by which time the reader may have walked on a little; without GPS it is the
+      outing's own time, which the batch that crossed it brought.
+    - **Taken back, the marks crossed aside are passed in silence**: `toldMarks` moves on with them
+      at «Resume» or «Keep going», and the next is told as it comes. A pulse under the reader's own
+      touch would tell them nothing.
+    - **A kilometre settled by a pause is told at the pause**, as a milestone settled there is (the
+      cut of the line); none is told at the end, whose last metres are absorbed in silence.
+    - **A goal outing never has marks**, whatever its plan keeps: the choice is read only for an
+      open plan, and a plan switched back to «One goal» keeps it for the next «None».
+    - **21.1's row «A phone with no wake-up counter, open, no GPS» now holds for an open outing
+      with no marks.** The open walk tells ten minutes unless the reader says otherwise, so it keeps
+      the lock as a goal outing with signals does, which is what step 21.2's «The wake» asks; 21.1's
+      test names an outing with none.
+    - **`UpgradeFromFirstReleaseTest` reaches schema 10.** It still checked schema 8, which 21.1
+      had not moved on.
+  - **The README.** `outings.png` and `intervals-done.png` regenerated (the open walk's card now
+    says «A signal every 10 minutes») and looked at; the outings' feature line names the pulse. CHANGELOG, VISION, the
+    guide's «With no goal» and the battery paragraph in both languages, CLAUDE.md.
+  - **Checked**: `spotlessCheck`, `:app:checkForbiddenPermissions`, `test` and `:app:lintDebug`,
+    as reported with the pull request. On this machine nine tests that walk a Room migration fail
+    by a Windows path comparison: the eight before, and the new «version 9 migrates to 10», CI's to
+    prove.
+    - New tests: `SessionTrackerMarksTest` (every row of the step's edge cases, and the marks'
+      own: in order, settled at a pause, none at the end, an outing from before), `SignalWakeTest`,
+      `SessionAnnouncementTest` (measured, estimated, the time), `BackupCodecTest` (the marks
+      carried, a file from before, an unknown value), `SessionRepositoryTest` (a plan's choice, an
+      outing's mark read back, the migration), `BackupRepositoryTest`, `SpokenTextTest` (English
+      and Italian, kilometres and miles, plurals), `SessionNotificationsTest` (the pulse),
+      `PlanEditorScreenTest` (the group following the switch, a choice kept, «Try it», none, miles,
+      the awake note, Italian on a small phone, twice the text size), `SessionsScreenTest`.
+    - The screenshots looked at, in both themes.
 
 ### Open
 

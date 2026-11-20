@@ -108,8 +108,10 @@ class SessionsScreenTest {
     fun `the presets say what they are, what they come to and their signals`() {
         show(state())
 
-        // The open walk first (Phase 21): what it is, and no estimate or signal for a walk with no goal.
+        // The open walk first (Phase 21): what it is, no estimate for a walk with no goal, and its
+        // mark on the way (21.2): ten minutes, its plan not measuring with GPS.
         compose.onNodeWithText("Walk").assertIsDisplayed()
+        compose.onNodeWithText("A signal every 10 minutes, with vibration").assertIsDisplayed()
         compose.onNodeWithText("No goal, at any pace").assertIsDisplayed()
         compose.onNodeWithText("Brisk walk").assertIsDisplayed()
         compose.onNodeWithText("20 min at a brisk\u00A0pace").assertIsDisplayed()

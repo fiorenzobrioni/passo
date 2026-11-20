@@ -15,6 +15,7 @@ import com.callbackdev.passo.core.model.IntervalSplit
 import com.callbackdev.passo.core.model.LearnedStep
 import com.callbackdev.passo.core.model.OutingLeg
 import com.callbackdev.passo.core.model.SessionGoalKind
+import com.callbackdev.passo.core.model.SessionMarks
 import com.callbackdev.passo.core.model.SessionPause
 import com.callbackdev.passo.core.model.Sex
 import com.callbackdev.passo.core.model.StepLengthMode
@@ -237,6 +238,56 @@ class BackupCodecTest {
 
         assertThat(BackupCodec.decode(BackupCodec.encode(withOpen))).isEqualTo(BackupRead.Ok(withOpen))
         assertThat(BackupCodec.encode(withOpen)).contains("\"goalKind\":\"OPEN\"")
+    }
+
+    @Test
+    fun `a backup carries the marks - a plan's choice, and an open outing's mark, unit and count told`() {
+        val start = 1_790_000_000_000
+        val chosen = SessionPlans.OPEN_WALK.copy(id = 12, gps = true, marks = SessionMarks.TIME)
+        val following = SessionPlans.OPEN_WALK.copy(id = 13, position = 1)
+        val outing = session(start, planId = 12).copy(
+            goalKind = SessionGoalKind.OPEN,
+            goalValue = 0,
+            milestones = emptySet(),
+            reachedAtMillis = null,
+            marks = SessionMarks.DISTANCE,
+            markMiles = true,
+            toldMarks = 3,
+        )
+        val withMarks = full.copy(plans = full.plans + chosen + following, sessions = full.sessions + outing)
+
+        val text = BackupCodec.encode(withMarks)
+        assertThat(BackupCodec.decode(text)).isEqualTo(BackupRead.Ok(withMarks))
+        assertThat(text).contains("\"marks\":\"TIME\"")
+        assertThat(text).contains("\"markMiles\":true")
+        assertThat(text).contains("\"toldMarks\":3")
+    }
+
+    @Test
+    fun `a file from before the marks reads a plan that follows its switch, and outings with none`() {
+        val start = 1_790_000_000_000
+        val text = BackupCodec.encode(
+            full.copy(
+                plans = listOf(SessionPlans.OPEN_WALK.copy(id = 14, gps = true)),
+                sessions = listOf(
+                    session(start).copy(goalKind = SessionGoalKind.OPEN, goalValue = 0, milestones = emptySet()),
+                ),
+            ),
+        )
+        assertThat(text).doesNotContain("\"marks\"")
+        val read = (BackupCodec.decode(text) as BackupRead.Ok).backup
+        assertThat(read.plans.single().marks).isNull()
+        assertThat(read.plans.single().marksInForce).isEqualTo(SessionMarks.DISTANCE)
+        assertThat(read.sessions.single().marks).isEqualTo(SessionMarks.NONE)
+        // A mark on a goal outing, or one this build does not know, is none.
+        val odd = text.replace(
+            "\"goalKind\":\"OPEN\",\"goalValue\":0,",
+            "\"goalKind\":\"OPEN\",\"goalValue\":0,\"marks\":\"LAPS\",",
+        )
+        assertThat(odd).contains("LAPS")
+        assertThat(
+            (BackupCodec.decode(odd) as BackupRead.Ok).backup.sessions.single().marks,
+        ).isEqualTo(SessionMarks.NONE)
     }
 
     @Test

@@ -46,6 +46,13 @@ sealed interface SessionSignal {
     data class Places(val places: List<WayStop>) : SessionSignal
 
     /**
+     * An open outing crossed a mark (Phase 21, step 21.2): its [count]th kilometre or mile, or its
+     * [count]th ten minutes in motion. When one batch crosses several, only the last is told: two
+     * pulses in a row would read as one mark, or as a quarter of a goal it does not have.
+     */
+    data class Mark(val count: Int) : SessionSignal
+
+    /**
      * An interval outing changed interval (Phase 13): [position] is the one that begins. When one
      * batch crosses several changes (a long stillness of the reports), only the latest is told;
      * the splits are right either way. Never the end of the last interval: that is the goal.
@@ -94,7 +101,10 @@ data class RouteHarvest(val points: List<RoutePoint>, val samples: List<StepLeng
  *   the outing. For [KEEP_GOING_MILLIS] after it the steps are still counted aside, so "Keep
  *   going" reopens it with them. An open outing (Phase 21) has neither: its progress is always
  *   0, so it crosses no share, and it ends only by the reader, the stillness, a long pause or its
- *   cap, which is [SessionConstants.OPEN_MAX_SESSION_MILLIS] from its start.
+ *   cap, which is [SessionConstants.OPEN_MAX_SESSION_MILLIS] from its start. Its signals are its
+ *   marks ([OutingMarks], step 21.2): a kilometre on settled metres, as a distance goal's
+ *   milestones are, or ten minutes in motion; counted in [Session.toldMarks], so none is told
+ *   twice, and none while it is over.
  * - **It ends by itself** after [IDLE_END_MILLIS] without a step (at its last step), a pause of
  *   [PAUSE_END_MILLIS], or at its cap ([capMillis]); noticed at the next step or [check]. An end
  *   by stillness or by the cap can be taken back like the goal's, for [KEEP_GOING_MILLIS] from
@@ -444,7 +454,10 @@ class SessionTracker(
         keptSamples += asideSamples
         clearOvertime()
         reopenableSince = null
-        val signals = advance(reopened, since, nowMillis)
+        // The marks the steps aside crossed are passed by in silence: they were walked while the
+        // outing was over, and a pulse under the reader's own touch of «Resume» would tell them
+        // nothing. The next is told as it comes.
+        val signals = advance(reopened, since, nowMillis).filterNot { it is SessionSignal.Mark }
         withMeasuredShare()
         return signals
     }
@@ -537,6 +550,11 @@ class SessionTracker(
         if (crossed.isNotEmpty()) {
             next = next.copy(toldMilestones = next.toldMilestones + crossed)
             signals += SessionSignal.Milestone(crossed.maxBy { it.percent })
+        }
+        val marks = OutingMarks.crossed(next)
+        if (marks > next.toldMarks) {
+            next = next.copy(toldMarks = marks)
+            signals += SessionSignal.Mark(marks)
         }
         if (schedule != null && SessionMilestone.GOAL !in crossed) {
             intervalChange(schedule, moved.totals.movingMillis, next, atMillis)?.let { signals += it }

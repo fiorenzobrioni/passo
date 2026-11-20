@@ -269,6 +269,9 @@ class SessionNotificationsTest {
         assertThat(SessionHaptics.endedStillPattern().toList()).containsExactly(0L, 500L, 300L, 500L).inOrder()
         // A walk's place: one short pulse (a walk has no quarters).
         assertThat(SessionHaptics.placePattern().toList()).containsExactly(0L, 180L).inOrder()
+        // An open outing's mark, a kilometre or ten minutes: one short pulse of 180 ms, a quarter's
+        // own, which an open outing cannot be taken for: it has no quarters.
+        assertThat(SessionHaptics.markPattern().toList()).containsExactly(0L, 180L).inOrder()
     }
 
     @Test

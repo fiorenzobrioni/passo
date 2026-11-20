@@ -1,8 +1,10 @@
 package com.callbackdev.passo.core.domain.sessions
 
+import com.callbackdev.passo.core.model.OutingLeg
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
+import com.callbackdev.passo.core.model.SessionMarks
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionTotals
 import com.callbackdev.passo.core.model.SessionVoice
@@ -120,6 +122,58 @@ class SessionAnnouncementTest {
         // A start pressed and stopped at once still says a minute, not none.
         assertThat(SessionAnnouncement.openStopped(open.copy(totals = SessionTotals(steps = 40)))?.movingMinutes)
             .isEqualTo(1)
+    }
+
+    @Test
+    fun `an estimated kilometre says about, its time in motion, and no pace`() {
+        val open = session.copy(
+            goalKind = SessionGoalKind.OPEN,
+            goalValue = 0,
+            marks = SessionMarks.DISTANCE,
+            totals = SessionTotals(steps = 2_900, movingMillis = 23 * 60_000L + 40_000, distanceMeters = 2_030.0),
+        )
+        assertThat(SessionAnnouncement.mark(open, 2)).isEqualTo(
+            SessionAnnouncement.DistanceMark(count = 2, miles = false, movingMinutes = 24, measured = false),
+        )
+    }
+
+    @Test
+    fun `a measured kilometre says the pace of that kilometre, not the walk's`() {
+        // Two kilometres from twenty legs: the first at 11 minutes, the second at 9.
+        val legs = (0 until 20).map { index ->
+            OutingLeg(
+                index = index,
+                meters = 100.0,
+                movingMillis = if (index < 10) 66_000L else 54_000L,
+                steps = 140.0,
+                endedAtMillis = (index + 1) * 60_000L,
+            )
+        }
+        val open = session.copy(
+            goalKind = SessionGoalKind.OPEN,
+            goalValue = 0,
+            marks = SessionMarks.DISTANCE,
+            gps = true,
+            measuredShare = 0.98,
+            legs = legs,
+            totals = SessionTotals(steps = 2_800, movingMillis = 20 * 60_000L + 30_000, distanceMeters = 2_000.0),
+        )
+        val said = SessionAnnouncement.mark(open, 2) as SessionAnnouncement.DistanceMark
+        assertThat(said.measured).isTrue()
+        assertThat(checkNotNull(said.paceSecondsPerKm)).isWithin(0.5).of(540.0)
+        // The time to the mark is its legs', not the walk's: twenty minutes, the half minute since not in it.
+        assertThat(said.movingMinutes).isEqualTo(20)
+        // Under nine tenths measured, an estimate: no pace.
+        val partly = SessionAnnouncement.mark(open.copy(measuredShare = 0.7), 2) as SessionAnnouncement.DistanceMark
+        assertThat(partly.measured).isFalse()
+        assertThat(partly.paceSecondsPerKm).isNull()
+    }
+
+    @Test
+    fun `a time mark says its ten minutes and the steps, and an outing with no marks says nothing`() {
+        val open = session.copy(goalKind = SessionGoalKind.OPEN, goalValue = 0, marks = SessionMarks.TIME)
+        assertThat(SessionAnnouncement.mark(open, 3)).isEqualTo(SessionAnnouncement.TimeMark(30, 1_050))
+        assertThat(SessionAnnouncement.mark(session, 1)).isNull()
     }
 
     @Test

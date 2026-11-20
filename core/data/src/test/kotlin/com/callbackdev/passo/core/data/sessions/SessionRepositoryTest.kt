@@ -21,6 +21,7 @@ import com.callbackdev.passo.core.model.OutingLeg
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
+import com.callbackdev.passo.core.model.SessionMarks
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionPause
 import com.callbackdev.passo.core.model.SessionPlan
@@ -190,6 +191,64 @@ class SessionRepositoryTest {
                 assertThat(cursor.getInt(0)).isEqualTo(0)
             }
         }
+    }
+
+    @Test
+    fun `version 9 migrates to 10 with every plan following its switch and every outing without marks`() {
+        migrations.createDatabase(MIGRATION_DB, 9).use { db ->
+            db.execSQL(
+                "INSERT INTO session_plan (name, goalKind, goalValue, intensity, milestones, vibrate, position, " +
+                    "lastUsedAtMillis, voice, gps) VALUES (NULL, 'OPEN', 0, 'FREE', 0, 1, 0, NULL, 'OFF', 1)",
+            )
+            db.execSQL(
+                "INSERT INTO session (planId, name, goalKind, goalValue, restOfDay, intensity, milestones, " +
+                    "vibrate, localEpochDay, startedAtMillis, state, endedAtMillis, endReason, steps, " +
+                    "movingMillis, zoneMillis, distanceMeters, activeKcal, lastStepAtMillis, lastEventAtMillis, " +
+                    "pausedAtMillis, reachedAtMillis, toldMilestones, voice, gps) " +
+                    "VALUES (NULL, NULL, 'OPEN', 0, 0, 'FREE', 0, 1, 20716, 1789990000000, 'FINISHED', " +
+                    "1789991200000, 'STOPPED', 2210, 1200000, 1200000, 1630.0, 61.0, 1789991200000, " +
+                    "1789991200000, NULL, NULL, 0, 'OFF', 0)",
+            )
+        }
+        migrations.runMigrationsAndValidate(MIGRATION_DB, 10, true).use { db ->
+            db.query("SELECT marks FROM session_plan").use { cursor ->
+                assertThat(cursor.moveToFirst()).isTrue()
+                assertThat(cursor.isNull(0)).isTrue()
+            }
+            db.query("SELECT marks, markMiles, toldMarks, steps FROM session").use { cursor ->
+                assertThat(cursor.moveToFirst()).isTrue()
+                assertThat(cursor.getString(0)).isEqualTo("NONE")
+                assertThat(cursor.getInt(1)).isEqualTo(0)
+                assertThat(cursor.getInt(2)).isEqualTo(0)
+                assertThat(cursor.getInt(3)).isEqualTo(2210)
+            }
+        }
+    }
+
+    @Test
+    fun `a plan keeps the reader's choice of marks, or none, and follows its switch until then`() = runTest {
+        val following = repository.savePlan(SessionPlans.OPEN_WALK.copy(name = "Park", gps = true))
+        val chosen = repository.savePlan(
+            SessionPlans.OPEN_WALK.copy(name = "Lake", gps = true, marks = SessionMarks.TIME),
+        )
+        val plans = repository.plans.first()
+        val park = plans.single { it.id == following }
+        val lake = plans.single { it.id == chosen }
+        assertThat(park.marks).isNull()
+        assertThat(park.marksInForce).isEqualTo(SessionMarks.DISTANCE)
+        assertThat(lake.marks).isEqualTo(SessionMarks.TIME)
+        assertThat(lake.copy(gps = false).marksInForce).isEqualTo(SessionMarks.TIME)
+    }
+
+    @Test
+    fun `an open outing keeps its mark, its unit and the count told, read back by a process restarted`() = runTest {
+        val plan = SessionPlans.OPEN_WALK.copy(marks = SessionMarks.DISTANCE)
+        val started = repository.insert(checkNotNull(SessionPlans.start(plan, 1_000, day, 0, 8_000, miles = true)))
+        repository.save(started.copy(toldMarks = 2))
+        val read = checkNotNull(repository.session(started.id))
+        assertThat(read.marks).isEqualTo(SessionMarks.DISTANCE)
+        assertThat(read.markMiles).isTrue()
+        assertThat(read.toldMarks).isEqualTo(2)
     }
 
     private fun count(table: String): Int =

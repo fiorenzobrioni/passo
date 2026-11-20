@@ -110,6 +110,7 @@ import com.callbackdev.passo.core.domain.sessions.typicalCadence
 import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
+import com.callbackdev.passo.core.model.SessionMarks
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.tracking.SessionSpeech
@@ -140,6 +141,8 @@ fun PlanEditorRoute(planId: Long?, onDone: () -> Unit, viewModel: PlanEditorView
             vibrate = viewModel::vibrate,
             tryVibration = viewModel::tryVibration,
             tryEndedStill = viewModel::tryEndedStill,
+            marks = viewModel::marks,
+            tryMark = viewModel::tryMark,
             voice = viewModel::voice,
             tryVoice = viewModel::tryVoice,
             openVoiceSettings = { runCatching { context.startActivity(SessionSpeech.settingsIntent()) } },
@@ -164,6 +167,8 @@ class PlanEditorActions(
     val vibrate: (Boolean) -> Unit = {},
     val tryVibration: (SessionMilestone) -> Unit = {},
     val tryEndedStill: () -> Unit = {},
+    val marks: (SessionMarks) -> Unit = {},
+    val tryMark: () -> Unit = {},
     val voice: (SessionVoice) -> Unit = {},
     val tryVoice: () -> Unit = {},
     val openVoiceSettings: () -> Unit = {},
@@ -309,7 +314,8 @@ private fun EditorList(state: PlanEditorState, actions: PlanEditorActions, modif
 
         val kind = plan.editorKind
         val intervals = kind == EditorKind.INTERVALS
-        // An open outing (Phase 21): no goal, so nothing to pick, estimate or signal on the way.
+        // An open outing (Phase 21): no goal, so nothing to pick or estimate; its signals on the way
+        // are its marks (21.2).
         val open = kind == EditorKind.OPEN
         item(key = "kind-header") { GroupHeader(stringResource(R.string.editor_kind)) }
         item(key = "kind") {
@@ -446,6 +452,7 @@ private fun EditorList(state: PlanEditorState, actions: PlanEditorActions, modif
                     modifier = Modifier.padding(horizontal = 4.dp),
                 )
                 if (kind == EditorKind.GOAL) MilestoneChips(plan.milestones, format, actions)
+                if (open) MarkChoice(plan.marksInForce, state.imperial, actions)
             }
         }
         if (state.canVibrate) {
@@ -465,6 +472,9 @@ private fun EditorList(state: PlanEditorState, actions: PlanEditorActions, modif
                             format = format,
                             intervals = intervals,
                             open = open,
+                            mark = plan.marksInForce.takeIf { open },
+                            imperial = state.imperial,
+                            onTryMark = actions.tryMark,
                             onTry = actions.tryVibration,
                             onTryInterval = actions.tryInterval,
                             onTryEndedStill = actions.tryEndedStill,
@@ -501,6 +511,52 @@ private fun gpsNote(note: GpsSwitchNote): String {
         GpsSwitchNote.PLAIN -> plain
         GpsSwitchNote.ASKS_AT_START -> plain + "\n" + stringResource(R.string.editor_gps_asks).unorphaned()
         GpsSwitchNote.NOT_ALLOWED -> stringResource(R.string.editor_gps_not_allowed).unorphaned()
+    }
+}
+
+/**
+ * An open outing's mark on the way (Phase 21.2): a kilometre (a mile for a reader who walks in
+ * miles), ten minutes, or none, with what the one chosen means under it. The one in force is shown
+ * as chosen: until the reader picks, it follows «Measure with GPS», the kilometre with it and ten
+ * minutes without, and the reader's own pick is kept whatever the switch does after it.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun MarkChoice(marks: SessionMarks, imperial: Boolean, actions: PlanEditorActions) {
+    val choices = listOf(
+        SessionMarks.DISTANCE to if (imperial) R.string.editor_marks_mile else R.string.editor_marks_km,
+        SessionMarks.TIME to R.string.editor_marks_time,
+        SessionMarks.NONE to R.string.editor_marks_none,
+    )
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().testTag(EditorTags.MARKS)) {
+            choices.forEachIndexed { index, (choice, label) ->
+                SegmentedButton(
+                    selected = marks == choice,
+                    onClick = { actions.marks(choice) },
+                    shape = SegmentedButtonDefaults.itemShape(index, choices.size),
+                    icon = {},
+                    label = { SegmentLabel(stringResource(label)) },
+                    modifier = Modifier.testTag("${EditorTags.MARKS}-${choice.name}"),
+                )
+            }
+        }
+        val note = when (marks) {
+            SessionMarks.DISTANCE -> if (imperial) R.string.editor_marks_mile_note else R.string.editor_marks_km_note
+
+            SessionMarks.TIME -> R.string.editor_marks_time_note
+
+            // None: the sentence above already says what is told, the end and the cap's question.
+            SessionMarks.NONE -> null
+        }
+        if (note != null) {
+            Text(
+                stringResource(note).unorphaned(),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 4.dp).testTag(EditorTags.MARKS_NOTE),
+            )
+        }
     }
 }
 
@@ -779,6 +835,9 @@ private fun SignalLegend(
     format: MeasureFormatter,
     intervals: Boolean,
     open: Boolean,
+    mark: SessionMarks?,
+    imperial: Boolean,
+    onTryMark: () -> Unit,
     onTry: (SessionMilestone) -> Unit,
     onTryInterval: (Boolean) -> Unit,
     onTryEndedStill: () -> Unit,
@@ -825,6 +884,22 @@ private fun SignalLegend(
                 },
                 onTry = { onTry(milestone) },
                 tag = "${EditorTags.TRY}-${milestone.percent}",
+            )
+        }
+        // An open outing's mark (Phase 21.2): one short pulse, the one it tells on the way.
+        if (mark != null && mark != SessionMarks.NONE) {
+            SignalRow(
+                label = stringResource(
+                    when {
+                        mark == SessionMarks.TIME -> R.string.editor_try_mark_time
+                        imperial -> R.string.editor_try_mark_mile
+                        else -> R.string.editor_try_mark_km
+                    },
+                ),
+                pattern = listOf(Pulse.SHORT),
+                spoken = pluralStringResource(R.plurals.editor_pulse_short, 1, 1),
+                onTry = onTryMark,
+                tag = EditorTags.TRY_MARK,
             )
         }
         SignalRow(
@@ -1150,5 +1225,8 @@ object EditorTags {
     const val BLOCKS = "editor_blocks"
     const val PROTOCOL = "editor_protocol"
     const val TRY_INTERVAL = "editor_try_interval"
+    const val MARKS = "editor_marks"
+    const val MARKS_NOTE = "editor_marks_note"
+    const val TRY_MARK = "editor_try_mark"
     const val AWAKE = "editor_awake"
 }

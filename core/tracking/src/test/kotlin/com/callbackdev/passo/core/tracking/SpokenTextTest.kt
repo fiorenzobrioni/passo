@@ -344,6 +344,62 @@ class SpokenTextTest {
     }
 
     @Test
+    @Config(qualifiers = "en-rUS")
+    fun `an open outing's marks - a kilometre measured with its pace, one estimated with about, ten minutes`() {
+        val measured = SessionAnnouncement.DistanceMark(
+            count = 2,
+            miles = false,
+            movingMinutes = 23,
+            measured = true,
+            paceSecondsPerKm = 680.0,
+        )
+        assertThat(say(measured, open))
+            .isEqualTo("2 kilometres, in 23 minutes. Pace: 11 minutes 20 seconds a kilometre.")
+        val first = measured.copy(count = 1, movingMinutes = 11, measured = false, paceSecondsPerKm = null)
+        assertThat(say(first, open)).isEqualTo("About 1 kilometre, in 11 minutes.")
+        // A walk of hours is said in hours.
+        assertThat(say(first.copy(count = 7, movingMinutes = 81), open))
+            .isEqualTo("About 7 kilometres, in 1 hour 21 minutes.")
+        assertThat(say(SessionAnnouncement.TimeMark(minutes = 20, steps = 2_300), open))
+            .isEqualTo("20 minutes, 2,300 steps.")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS")
+    fun `a mile mark says miles and its pace a mile, whatever the units are now`() {
+        val mile = SessionAnnouncement.DistanceMark(
+            count = 1,
+            miles = true,
+            movingMinutes = 18,
+            measured = true,
+            paceSecondsPerKm = 680.0,
+        )
+        // The unit frozen at the start, though the reader walks in kilometres today.
+        assertThat(context.spoken(mile, open, UnitPreference.METRIC))
+            .isEqualTo("1 mile, in 18 minutes. Pace: 18 minutes 14 seconds a mile.")
+        assertThat(context.spoken(mile.copy(count = 3), open, UnitPreference.METRIC))
+            .startsWith("3 miles, in 18 minutes.")
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT")
+    fun `in Italian, an open outing's marks, with their plurals`() {
+        val first = SessionAnnouncement.DistanceMark(count = 1, miles = false, movingMinutes = 1, measured = false)
+        assertThat(say(first, open)).isEqualTo("Circa 1 chilometro, in 1 minuto.")
+        val measured = first.copy(count = 2, movingMinutes = 23, measured = true, paceSecondsPerKm = 680.0)
+        assertThat(say(measured, open))
+            .isEqualTo("2 chilometri, in 23 minuti. Andatura: 11 minuti e 20 secondi al chilometro.")
+        assertThat(say(first.copy(count = 1, miles = true, movingMinutes = 18), open))
+            .isEqualTo("Circa 1 miglio, in 18 minuti.")
+        assertThat(say(first.copy(count = 2, miles = true, movingMinutes = 36), open))
+            .isEqualTo("Circa 2 miglia, in 36 minuti.")
+        assertThat(say(SessionAnnouncement.TimeMark(minutes = 10, steps = 1_150), open))
+            .isEqualTo("10 minuti, 1.150 passi.")
+        assertThat(say(SessionAnnouncement.TimeMark(minutes = 70, steps = 8_000), open))
+            .isEqualTo("1 ora e 10 minuti, 8.000 passi.")
+    }
+
+    @Test
     @Config(qualifiers = "it-rIT")
     fun `in Italian, an interval walk`() {
         assertThat(say(SessionAnnouncement.started(intervals), intervals)).isEqualTo(

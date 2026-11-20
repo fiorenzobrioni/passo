@@ -78,6 +78,7 @@ data class SessionPlanEntity(
     @ColumnInfo(defaultValue = "3") val fastMinutes: Int = 3,
     @ColumnInfo(defaultValue = "5") val sets: Int = 5,
     @ColumnInfo(defaultValue = "0") val gps: Boolean = false,
+    @ColumnInfo(defaultValue = "NULL") val marks: String? = null,
 )
 
 /**
@@ -124,6 +125,9 @@ data class SessionEntity(
     @ColumnInfo(defaultValue = "NULL") val capAskedForMillis: Long? = null,
     @ColumnInfo(defaultValue = "NULL") val ascentMeters: Double? = null,
     @ColumnInfo(defaultValue = "NULL") val descentMeters: Double? = null,
+    @ColumnInfo(defaultValue = "NONE") val marks: String = "NONE",
+    @ColumnInfo(defaultValue = "0") val markMiles: Boolean = false,
+    @ColumnInfo(defaultValue = "0") val toldMarks: Int = 0,
 )
 
 /**

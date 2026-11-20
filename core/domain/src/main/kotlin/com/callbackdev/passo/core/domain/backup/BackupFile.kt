@@ -104,6 +104,7 @@ internal data class PlanDto(
     val lastUsedAtMillis: Long? = null,
     val intervals: IntervalsDto? = null,
     val gps: Boolean = false,
+    val marks: String? = null,
 )
 
 @Serializable
@@ -145,6 +146,9 @@ internal data class OutingDto(
     val legs: List<LegDto> = emptyList(),
     val route: RouteDto? = null,
     val pauses: List<PauseDto> = emptyList(),
+    val marks: String? = null,
+    val markMiles: Boolean = false,
+    val toldMarks: Int = 0,
 )
 
 /**

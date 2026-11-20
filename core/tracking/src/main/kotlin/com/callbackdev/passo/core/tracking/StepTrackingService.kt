@@ -31,6 +31,7 @@ import com.callbackdev.passo.core.data.tracking.withPending
 import com.callbackdev.passo.core.data.ways.WayRepository
 import com.callbackdev.passo.core.data.widget.WidgetUpdates
 import com.callbackdev.passo.core.designsystem.format.intervalWord
+import com.callbackdev.passo.core.designsystem.format.measureFormatter
 import com.callbackdev.passo.core.domain.goals.GoalReached
 import com.callbackdev.passo.core.domain.metrics.MetricsCalculator
 import com.callbackdev.passo.core.domain.metrics.StepLengths
@@ -72,6 +73,7 @@ import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.UnitPreference
+import com.callbackdev.passo.core.model.UnitSystem
 import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.model.WayKind
 import dagger.hilt.android.AndroidEntryPoint
@@ -1386,6 +1388,10 @@ class StepTrackingService : Service() {
                     if (!atEnd) notifyNow()
                 }
 
+                // An open outing's mark (Phase 21.2): one short pulse, its words where the outing
+                // speaks, and the notification brought up to date, as at a milestone.
+                is SessionSignal.Mark -> tellMark(signal)
+
                 // Told once the batch is in: a later change in the same batch replaces it.
                 is SessionSignal.IntervalChange -> pendingChange = signal
 
@@ -1394,6 +1400,22 @@ class StepTrackingService : Service() {
                 is SessionSignal.Finished -> onSessionFinished(signal)
             }
         }
+    }
+
+    /**
+     * A kilometre, or ten minutes, of an open outing (PLANNING.md §11 Phase 21, step 21.2): felt
+     * and said as a milestone is, with the outings' channel (docs/adr/0010-voice.md: the voice
+     * follows the channel as the vibrations do), and the notification posted again, so whoever
+     * looks next sees what the walk has come to. It rides on the batch that crossed it: no timer.
+     */
+    private fun tellMark(mark: SessionSignal.Mark) {
+        val session = tracker?.session?.takeIf { it.live } ?: return
+        val allowed = sessionNotifications.signalsAllowed()
+        if (session.vibrate && allowed) SessionHaptics.playMark(this)
+        if (session.voice != SessionVoice.OFF && allowed) {
+            SessionAnnouncement.mark(session, mark.count)?.let { speak(it, session) }
+        }
+        notifyNow()
     }
 
     private fun onSessionFinished(finished: SessionSignal.Finished) {
@@ -1697,7 +1719,9 @@ class StepTrackingService : Service() {
         // app's to ask, before the command is sent.
         val readiness = if (plan.gps) Gps.readiness(this) else null
         val withGps = readiness == GpsReadiness.READY
-        val session = SessionPlans.start(plan, now, day, todaySteps, current.settings.dailyGoalSteps, withGps)
+        // An open outing's kilometres are miles for a reader who walks in miles now, to its end.
+        val miles = measureFormatter(current.settings.units).units == UnitSystem.IMPERIAL
+        val session = SessionPlans.start(plan, now, day, todaySteps, current.settings.dailyGoalSteps, withGps, miles)
             ?: return
         val saved = persistMutex.withLock { sessions.insert(session) }
         if (plan.id != 0L) sessions.markPlanUsed(plan.id, now)

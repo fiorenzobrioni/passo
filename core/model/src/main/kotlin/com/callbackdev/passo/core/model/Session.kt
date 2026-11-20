@@ -123,6 +123,22 @@ enum class SessionMilestone(val percent: Int) {
 }
 
 /**
+ * An open outing's signal on the way (Phase 21, step 21.2): a mark at each kilometre, or each mile
+ * for a reader who walks in miles, at each ten minutes in motion, or none. An open outing has no
+ * share of a goal to tell, so its marks are its signals (docs/adr/0009-sessions.md, decision 3).
+ */
+enum class SessionMarks {
+    /** A kilometre, or a mile: measured where the outing is measured with GPS, estimated otherwise. */
+    DISTANCE,
+
+    /** Ten minutes in motion: a pause, or a wait at a light, adds nothing to them. */
+    TIME,
+
+    /** No signal on the way. */
+    NONE,
+}
+
+/**
  * Whether an outing also speaks its signals (the second iteration of Phase 10): never, only
  * through headphones (or other private audio: earbuds, a hearing aid, a car's Bluetooth), or
  * also through the phone's speaker when the phone is not silenced.
@@ -147,6 +163,8 @@ enum class SessionVoice {
  *   reader who switches away and back finds their own.
  * @property gps «Measure with GPS» (docs/adr/0016-location.md): an outing started from it reads
  *   the satellites while it counts, if the reader lets it. Off unless the reader turns it on.
+ * @property marks the open outing's signal on the way, as the reader chose it (Phase 21.2); null
+ *   until they do, and then it follows [gps] ([marksInForce]). Read only for an open plan.
  */
 data class SessionPlan(
     val id: Long = 0,
@@ -161,9 +179,20 @@ data class SessionPlan(
     val position: Int = 0,
     val lastUsedAtMillis: Long? = null,
     val gps: Boolean = false,
+    val marks: SessionMarks? = null,
 ) {
     /** It has no goal: the open outing (Phase 21). */
     val open: Boolean get() = goalKind == SessionGoalKind.OPEN
+
+    /**
+     * The mark an open outing of this plan tells: the reader's choice, or, with none made, the
+     * kilometre where the plan measures with GPS and ten minutes where it does not. A kilometre
+     * told from the steps alone carries the step length's error; ten minutes are the steps' own.
+     * The plan's switch decides, not the phone: a plan with GPS that starts on the steps still
+     * tells its kilometres, estimated, as the reader expects from it.
+     */
+    val marksInForce: SessionMarks
+        get() = marks ?: if (gps) SessionMarks.DISTANCE else SessionMarks.TIME
 }
 
 /** Where an outing stands. */
@@ -255,6 +284,12 @@ data class SessionTotals(
  * @property legs an outing with GPS, a hundred metres at a time: what its splits are cut from.
  * @property pauses its pauses that ended inside it, in order (Phase 21): none for an outing from
  *   before they were kept, which no page can then tell from one never paused.
+ * @property marks an open outing's signal on the way (Phase 21.2), frozen at its start as the goal
+ *   is; [SessionMarks.NONE] for every other outing, which tells shares of its goal instead.
+ * @property markMiles its distance marks are miles, the reader walking in miles when it started:
+ *   frozen, so a change of units on the way does not change the mark under the reader's feet.
+ * @property toldMarks the marks already told, so none is told twice, not even by a process that
+ *   restarted.
  */
 data class Session(
     val id: Long = 0,
@@ -291,6 +326,9 @@ data class Session(
     val descentMeters: Double? = null,
     val legs: List<OutingLeg> = emptyList(),
     val pauses: List<SessionPause> = emptyList(),
+    val marks: SessionMarks = SessionMarks.NONE,
+    val markMiles: Boolean = false,
+    val toldMarks: Int = 0,
 ) {
     val reached: Boolean get() = reachedAtMillis != null
     val live: Boolean get() = state != SessionState.FINISHED

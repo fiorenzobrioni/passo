@@ -7,6 +7,7 @@ import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
+import com.callbackdev.passo.core.model.SessionMarks
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionPause
 import com.callbackdev.passo.core.model.SessionPlan
@@ -31,6 +32,8 @@ internal fun SessionPlanEntity.toModel(): SessionPlan? {
         lastUsedAtMillis = lastUsedAtMillis,
         intervals = IntervalSets(slowMinutes, fastMinutes, sets),
         gps = gps,
+        // A choice a newer build knows and this one does not: the plan follows its switch.
+        marks = marks.toEnumOrNull<SessionMarks>(),
     )
 }
 
@@ -49,6 +52,7 @@ internal fun SessionPlan.toEntity() = SessionPlanEntity(
     fastMinutes = intervals.fastMinutes,
     sets = intervals.sets,
     gps = gps,
+    marks = marks?.name,
 )
 
 internal fun SessionRow.toModel(): Session? = session.toModel(intervals, legs, pauses)
@@ -124,6 +128,10 @@ internal fun SessionEntity.toModel(
             )
         },
         pauses = pauses.sortedBy { it.pauseIndex }.map { SessionPause(it.fromMillis, it.toMillis) },
+        // A mark a newer build knows and this one does not tells nothing here.
+        marks = marks.toEnumOrNull<SessionMarks>() ?: SessionMarks.NONE,
+        markMiles = markMiles,
+        toldMarks = toldMarks,
     )
 }
 
@@ -165,6 +173,9 @@ internal fun Session.toEntity() = SessionEntity(
     capAskedForMillis = capAskedForMillis,
     ascentMeters = ascentMeters,
     descentMeters = descentMeters,
+    marks = marks.name,
+    markMiles = markMiles,
+    toldMarks = toldMarks,
 )
 
 /** An outing's legs as rows; none for an outing without GPS, or one not yet written. */

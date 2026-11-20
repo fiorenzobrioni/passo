@@ -92,8 +92,10 @@ import com.callbackdev.passo.core.domain.sessions.SessionConstants
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.SessionGoalKind
+import com.callbackdev.passo.core.model.SessionMarks
 import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.SessionVoice
+import com.callbackdev.passo.core.model.UnitSystem
 import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.tracking.GoalNotificationsBlock
 import com.callbackdev.passo.core.tracking.SessionSignalsAccess
@@ -424,8 +426,8 @@ private fun PlanCard(
 ) {
     val res = LocalResources.current
     val name = res.sessionName(plan)
-    // An open plan (Phase 21) comes to what is walked, and tells nothing on the way: its line
-    // «No goal, at any pace» is the whole of it.
+    // An open plan (Phase 21) comes to what is walked: no estimate, «No goal, at any pace», and
+    // under it its mark on the way, if it has one (21.2).
     val estimate = if (plan.open) null else estimateLine(plan, state, format)
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -461,6 +463,8 @@ private fun PlanCard(
                             .clearAndSetSemantics { text = AnnotatedString(estimate.spoken) },
                     )
                     SignalsLine(plan, format, modifier = Modifier.padding(top = 2.dp))
+                } else if (plan.open && plan.marksInForce != SessionMarks.NONE) {
+                    SignalsLine(plan, format, modifier = Modifier.padding(top = 6.dp))
                 }
                 // An interval plan shows its shape: slow and fast blocks, read before any number.
                 if (plan.goalKind == SessionGoalKind.INTERVALS) {
@@ -552,12 +556,21 @@ private fun estimateLine(plan: SessionPlan, state: SessionsUiState, format: Meas
 
 /**
  * «Signals at 25%, 50% and at the goal», with how they arrive as marks before it (a vibration,
- * a voice) and in words for TalkBack: «…, with vibration and voice».
+ * a voice) and in words for TalkBack: «…, with vibration and voice». An open plan's is its mark,
+ * «A signal at each kilometre» (Phase 21.2), in miles where the reader walks in miles.
  */
 @Composable
 private fun SignalsLine(plan: SessionPlan, format: MeasureFormatter, modifier: Modifier = Modifier) {
     val shares = plan.milestones.sortedBy { it.percent }.joinToString(", ") { format.percent(it.percent / 100.0) }
-    val signals = if (plan.goalKind == SessionGoalKind.INTERVALS) {
+    val signals = if (plan.open) {
+        stringResource(
+            when {
+                plan.marksInForce == SessionMarks.TIME -> R.string.sessions_signals_marks_time
+                format.units == UnitSystem.IMPERIAL -> R.string.sessions_signals_marks_mile
+                else -> R.string.sessions_signals_marks_km
+            },
+        )
+    } else if (plan.goalKind == SessionGoalKind.INTERVALS) {
         stringResource(R.string.sessions_signals_intervals)
     } else if (shares.isEmpty()) {
         stringResource(R.string.sessions_signals_goal_only)

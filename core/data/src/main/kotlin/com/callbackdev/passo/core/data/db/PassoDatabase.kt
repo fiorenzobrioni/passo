@@ -34,6 +34,10 @@ import androidx.room.RoomDatabase
  * - v9: the open outing (Phase 21): an outing's pauses, from Pause to Resume (`session_pause`, a
  *   new table), for every outing; none before it. The open outing itself needs no column: a goal
  *   kind is stored by its name, and `OPEN` is one more name.
+ * - v10: the open outing's marks on the way (Phase 21.2): a plan's choice (`marks` on
+ *   `session_plan`, none until the reader makes one, the plan then following its GPS switch), and
+ *   an outing's mark frozen at its start, its unit and how many were told (`marks`, `markMiles`,
+ *   `toldMarks` on `session`: none for every outing before it, as for every goal outing).
  */
 @Database(
     entities = [
@@ -49,7 +53,7 @@ import androidx.room.RoomDatabase
         SessionLegEntity::class,
         SessionPauseEntity::class,
     ],
-    version = 9,
+    version = 10,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -60,6 +64,7 @@ import androidx.room.RoomDatabase
         AutoMigration(from = 6, to = 7),
         AutoMigration(from = 7, to = 8),
         AutoMigration(from = 8, to = 9),
+        AutoMigration(from = 9, to = 10),
     ],
 )
 abstract class PassoDatabase : RoomDatabase() {

@@ -28,6 +28,7 @@ import com.callbackdev.passo.core.model.RoutePointKind
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
+import com.callbackdev.passo.core.model.SessionMarks
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionPause
 import com.callbackdev.passo.core.model.SessionPlan
@@ -394,7 +395,15 @@ class BackupRepositoryTest {
         val start = outing.startedAtMillis
         val pauses = listOf(SessionPause(start + 60_000, start + 120_000))
         old.database.sessionDao().upsertSession(
-            outing.copy(goalKind = SessionGoalKind.OPEN, goalValue = 0, reachedAtMillis = null, pauses = pauses),
+            outing.copy(
+                goalKind = SessionGoalKind.OPEN,
+                goalValue = 0,
+                reachedAtMillis = null,
+                pauses = pauses,
+                marks = SessionMarks.DISTANCE,
+                markMiles = true,
+                toldMarks = 2,
+            ),
         )
 
         val file = read(exported())
@@ -402,6 +411,10 @@ class BackupRepositoryTest {
         val came = checkNotNull(new.database.sessionDao().allSessions().single().toModel())
         assertThat(came.open).isTrue()
         assertThat(came.pauses).isEqualTo(pauses)
+        // Its marks as they were frozen (Phase 21.2): the mark, its unit, how many were told.
+        assertThat(came.marks).isEqualTo(SessionMarks.DISTANCE)
+        assertThat(came.markMiles).isTrue()
+        assertThat(came.toldMarks).isEqualTo(2)
 
         // The same file again: the outing is already here, and so are its pauses, once.
         new.backups.import(file, withPreferences = true)

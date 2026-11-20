@@ -15,8 +15,11 @@ All notable changes to Passo are documented here. The format follows
 - **An outing with no goal.** Choose «None» in an outing's kind, or start «Walk», now first on
   the Outings page: it counts until you stop it, at the park or wherever you go, and says what it
   has come to («25 minutes on your feet», «2.30 km measured in 25 minutes» with GPS) instead of
-  what is left. It tells nothing on the way, since it has no halfway; stopped, its voice says
-  what it came to. Forget it, and it ends by itself at your last step, a quarter of an hour after
+  what is left. It has no halfway, so on the way it tells a mark instead: each kilometre (or
+  mile) with GPS, every ten minutes on your feet without, or nothing, as you choose in its
+  signals. A mark is one short pulse, and where the outing speaks, what the walk has come to:
+  «2 kilometres, in 23 minutes», with that kilometre's pace when it was measured, «about» when
+  it was not. Stopped, its voice says what it came to. Forget it, and it ends by itself at your last step, a quarter of an hour after
   you stopped walking, so the drive home adds nothing. It stays open up to twelve hours, not
   four, so a day's hike is not cut in two, and asks «Still walking?» before then as every outing
   does. Your list of outings gets it once, at the top; delete it and it does not come back.

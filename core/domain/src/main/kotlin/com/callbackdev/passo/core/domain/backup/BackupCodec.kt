@@ -22,6 +22,7 @@ import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
+import com.callbackdev.passo.core.model.SessionMarks
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionPause
 import com.callbackdev.passo.core.model.SessionPlan
@@ -95,6 +96,11 @@ sealed interface BackupRead {
  *   goal; its `goalValue` is 0. A build without it leaves such a plan or outing out (its kind
  *   is unknown). `pauses` on an outing (Phase 21, every outing) are its pauses from Pause to
  *   Resume (`fromMillis`, `toMillis`); a file without them has none known.
+ * - `marks` (added with the open outing's marks, Phase 21.2) on a plan is the reader's choice of
+ *   its signal on the way, `DISTANCE`, `TIME` or `NONE`; absent, the plan has not chosen and
+ *   follows its `gps`. On an open outing it is the mark frozen at its start, with `markMiles`
+ *   (its distance marks were miles) and `toldMarks` (how many were told); absent, it has none,
+ *   as every outing from before. A build without them reads the plan and the outing without.
  * - `route` (Phase 16) on an outing with GPS, **only in a file exported «With the routes»**:
  *   where it went. `points` is Base64 of the app's own compact form, `altitudes` where their
  *   heights came from (`BAROMETER` or `SATELLITES`). The one field of this file that is a place.
@@ -211,6 +217,7 @@ private fun Backup.toFile() = BackupFile(
             lastUsedAtMillis = plan.lastUsedAtMillis,
             intervals = plan.intervals.takeIf { plan.goalKind == SessionGoalKind.INTERVALS }?.toDto(),
             gps = plan.gps,
+            marks = plan.marks?.name,
         )
     },
     outings = sessions.sortedBy { it.startedAtMillis }.map { session ->
@@ -260,6 +267,9 @@ private fun Backup.toFile() = BackupFile(
                 )
             },
             pauses = session.pauses.map { PauseDto(it.fromMillis, it.toMillis) },
+            marks = session.marks.takeIf { it != SessionMarks.NONE }?.name,
+            markMiles = session.markMiles,
+            toldMarks = session.toldMarks,
         )
     },
     diagnostics = diagnostics.map { DiagnosticDto(it.wallMillis, it.type.name, it.detail) },
@@ -419,6 +429,8 @@ private fun PlanDto.toPlan(): SessionPlan? {
         lastUsedAtMillis = lastUsedAtMillis,
         intervals = intervals?.toSets()?.let(SessionPlans::clampIntervals) ?: IntervalSets(),
         gps = gps,
+        // A choice this build does not know: the plan follows its switch, as one that never chose.
+        marks = marks.toEnumOrNull<SessionMarks>(),
     )
 }
 
@@ -492,6 +504,10 @@ private fun OutingDto.toSession(): Session? {
             .distinctBy { it.fromMillis }
             .sortedBy { it.fromMillis }
             .map { SessionPause(it.fromMillis, it.toMillis) },
+        // An open outing's mark as it was frozen; none for any other, which tells shares instead.
+        marks = marks.toEnumOrNull<SessionMarks>()?.takeIf { kind == SessionGoalKind.OPEN } ?: SessionMarks.NONE,
+        markMiles = markMiles,
+        toldMarks = toldMarks.coerceAtLeast(0),
         intervals = sets.takeIf { kind == SessionGoalKind.INTERVALS },
         splits = if (kind == SessionGoalKind.INTERVALS) {
             splits.filter { it.index in 0 until checkNotNull(sets).sets * 2 }

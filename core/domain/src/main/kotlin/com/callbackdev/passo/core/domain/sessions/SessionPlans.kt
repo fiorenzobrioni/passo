@@ -230,11 +230,14 @@ object SessionPlans {
      * The outing [plan] starts as, now: its goal copied (the rest of the day resolved to steps),
      * so changing the plan later does not change an outing under way or past. Null when there is
      * nothing to walk: the rest of a day whose goal is met, or all but met. An open outing starts
-     * with no goal and no milestone, and with the open outing's longer cap.
+     * with no goal and no milestone, and with the open outing's longer cap; its marks are frozen
+     * as the plan has them in force (step 21.2), with their unit.
      *
      * @param withGps it starts measured with GPS (docs/adr/0016-location.md): the plan asks for
      *   it, and the reader and the phone allow it right now. The caller knows the second half;
      *   it is frozen in the outing either way, like the goal.
+     * @param miles the reader walks in miles now: an open outing's distance marks are then miles,
+     *   to its end.
      */
     fun start(
         plan: SessionPlan,
@@ -243,6 +246,7 @@ object SessionPlans {
         todaySteps: Int,
         dailyGoalSteps: Int,
         withGps: Boolean = false,
+        miles: Boolean = false,
     ): Session? {
         val restOfDay = plan.goalKind == SessionGoalKind.REST_OF_DAY
         val kind = if (restOfDay) SessionGoalKind.STEPS else plan.goalKind
@@ -262,6 +266,10 @@ object SessionPlans {
                 startedAtMillis = nowMillis,
                 gps = withGps && plan.gps,
                 capAtMillis = nowMillis + SessionConstants.OPEN_MAX_SESSION_MILLIS,
+                // The plan's switch decides the mark, not what the phone allowed: a plan with GPS
+                // started on the steps still tells its kilometres, estimated.
+                marks = plan.marksInForce,
+                markMiles = miles,
             )
         }
         if (kind == SessionGoalKind.INTERVALS) {

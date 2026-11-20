@@ -1,5 +1,6 @@
 package com.callbackdev.passo.core.domain.sessions
 
+import com.callbackdev.passo.core.model.SessionMarks
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionVoice
 import com.google.common.truth.Truth.assertThat
@@ -90,12 +91,44 @@ class SignalWakeTest {
     }
 
     @Test
-    fun `a phone with no wake-up counter, an open outing without GPS keeps no lock`() {
-        val open = checkNotNull(SessionPlans.start(SessionPlans.OPEN_WALK, 0, 0, 0, 8_000))
+    fun `a phone with no wake-up counter, an open outing with no marks and no GPS keeps no lock`() {
+        val plan = SessionPlans.OPEN_WALK.copy(marks = SessionMarks.NONE)
+        val open = checkNotNull(SessionPlans.start(plan, 0, 0, 0, 8_000))
         // It vibrates and speaks only for its end and its cap's question, which wait for the steps.
         val speaking = open.copy(vibrate = true, voice = SessionVoice.HEADPHONES)
         assertThat(SignalWake.needed(speaking, wakeUpCounter = false, signalsAllowed = true, nowMillis = 0)).isFalse()
-        assertThat(SignalWake.neededFor(SessionPlans.OPEN_WALK, wakeUpCounter = false)).isFalse()
+        assertThat(SignalWake.neededFor(plan, wakeUpCounter = false)).isFalse()
+    }
+
+    @Test
+    fun `an open outing with marks keeps it awake as a goal outing with signals does`() {
+        // The open walk tells ten minutes without GPS, unless the reader chose otherwise.
+        val open = checkNotNull(SessionPlans.start(SessionPlans.OPEN_WALK, 0, 0, 0, 8_000))
+        assertThat(open.marks).isEqualTo(SessionMarks.TIME)
+        assertThat(SignalWake.needed(open, wakeUpCounter = false, signalsAllowed = true, nowMillis = 0)).isTrue()
+        assertThat(SignalWake.needed(open, wakeUpCounter = true, signalsAllowed = true, nowMillis = 0)).isFalse()
+        assertThat(SignalWake.neededFor(SessionPlans.OPEN_WALK, wakeUpCounter = false)).isTrue()
+        val kilometres = SessionPlans.OPEN_WALK.copy(marks = SessionMarks.DISTANCE)
+        assertThat(SignalWake.neededFor(kilometres, wakeUpCounter = false)).isTrue()
+        // Its bound is its own twelve hours, not a goal outing's four.
+        assertThat(SignalWake.timeoutMillis(open, nowMillis = 0))
+            .isEqualTo(SessionConstants.OPEN_MAX_SESSION_MILLIS + SignalWake.TIMEOUT_MARGIN_MILLIS)
+    }
+
+    @Test
+    fun `marks set to none, no wake lock for them`() {
+        val none =
+            checkNotNull(SessionPlans.start(SessionPlans.OPEN_WALK.copy(marks = SessionMarks.NONE), 0, 0, 0, 8_000))
+        assertThat(SignalWake.needed(none, wakeUpCounter = false, signalsAllowed = true, nowMillis = 0)).isFalse()
+    }
+
+    @Test
+    fun `marks with neither vibration nor voice, or the outings' channel silenced, keep nothing awake`() {
+        val open = checkNotNull(SessionPlans.start(SessionPlans.OPEN_WALK, 0, 0, 0, 8_000))
+        val mute = open.copy(vibrate = false, voice = SessionVoice.OFF)
+        assertThat(SignalWake.needed(mute, wakeUpCounter = false, signalsAllowed = true, nowMillis = 0)).isFalse()
+        assertThat(SignalWake.neededFor(SessionPlans.OPEN_WALK.copy(vibrate = false), wakeUpCounter = false)).isFalse()
+        assertThat(SignalWake.needed(open, wakeUpCounter = false, signalsAllowed = false, nowMillis = 0)).isFalse()
     }
 
     @Test

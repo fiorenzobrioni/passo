@@ -10,8 +10,9 @@ import com.callbackdev.passo.core.model.SessionMilestone
  * The outing's signals as vibrations (PLANNING.md §11 Phase 10), for a phone in a pocket or on
  * an arm: a count of short pulses for the quarters (one, two, three), one long one for the goal,
  * two long ones for an end brought by a long stillness; on a city walk, one short pulse a place;
- * on an interval walk (Phase 13), "faster" and "slower", unlike all of them. Read without
- * looking, and learned from the editor's "Try it".
+ * on an open outing (Phase 21.2), one short pulse a mark, a kilometre or ten minutes; on an
+ * interval walk (Phase 13), "faster" and "slower", unlike all of them. Read without looking, and
+ * learned from the editor's "Try it".
  *
  * "Faster" is a quick run of four taps, a drum roll that hurries; "slower" one long pulse and a
  * short one, a breath let out. Neither is a count (the quarters are slow, even pulses), nor a
@@ -29,6 +30,13 @@ object SessionHaptics {
 
     /** A city walk's place reached: one short pulse (a walk has no quarters to confuse it with). */
     fun playPlace(context: Context) = vibrate(context, placePattern())
+
+    /**
+     * An open outing's mark (Phase 21.2): one short pulse, the quarter's own. An open outing has no
+     * quarters, so it cannot be taken for one, and a single pulse is what a kilometre wants: felt,
+     * counted at a glance, over before the next step.
+     */
+    fun playMark(context: Context) = vibrate(context, markPattern())
 
     /** Plays the end by stillness: the outing is over, and can still be taken back. */
     fun playEndedStill(context: Context) = vibrate(context, endedStillPattern())
@@ -66,6 +74,9 @@ object SessionHaptics {
 
     /** A walk's place, off and on as [pattern]'s are. */
     fun placePattern(): LongArray = pulses(1)
+
+    /** An open outing's mark, off and on as [pattern]'s are. */
+    fun markPattern(): LongArray = pulses(1)
 
     /** The end by stillness, off and on as [pattern]'s are. */
     fun endedStillPattern(): LongArray = longArrayOf(0, STILL_MS, STILL_GAP_MS, STILL_MS)

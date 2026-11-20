@@ -7,7 +7,8 @@
   a pace per kilometre for an outing measured with GPS, shown and never a goal (decision 1,
   below); the longest outing asks before it ends and can be carried on (decision 6, below)
 - Amended: 20 Nov 2026 (owner; PLANNING.md §11 Phase 21, step 21.1): the open outing, an outing
-  with no goal (decisions 1, 4, 6 and 8, below)
+  with no goal (decisions 1, 4, 6 and 8, below); and with step 21.2, its marks on the way, a
+  kilometre or ten minutes (decision 3, below)
 
 ## Context
 
@@ -52,8 +53,7 @@ while one is under way.
    pace to keep, «Measure with GPS», the vibration and the voice for what is told on the way, its
    numbers). Its sentence is what it has come to («25 minutes on your feet», «2.3 km measured in 25
    minutes»), and «halfway» keeps its single meaning, since an open outing has no halfway. Its own
-   signal on the way (a kilometre, or ten minutes) is Phase 21's step 21.2, decision 3's to amend
-   then.
+   signal on the way (a kilometre, or ten minutes) is in decision 3, amended with step 21.2.
 2. **Measured from the steps, with no timer.** The tracking service feeds every accounted
    delta to a pure `SessionTracker`. Time in motion is the gaps between steps, each step
    credited with at most 1.5 s (a step at 40 spm, the active-minute threshold): standing at a
@@ -66,6 +66,21 @@ while one is under way.
    long one (900 ms) at the goal, played as notification vibrations (silent mode applies) and
    only while the outings' channel is on: a reader who silenced the channel is not buzzed
    either. The editor lets the reader feel each one before choosing.
+   *Amended 20 Nov 2026 (owner; PLANNING.md §11 Phase 21, step 21.2):* an open outing has no
+   share to tell, so **its signals are its marks**: a kilometre (or a mile, for a reader who
+   walks in miles), or ten minutes in motion, or none, as the reader chooses. A plan that has not
+   chosen follows its own «Measure with GPS»: the distance with it, the time without, for a
+   kilometre told from the steps alone carries the step length's error. The mark and its unit are
+   frozen at the start, as the goal is, with the count of marks told, so none is told twice, not
+   even by a process that restarted. Each mark is one short pulse (180 ms, the quarter's own: an
+   open outing has no quarters to be taken for), played as the milestones are, and the voice says
+   what it came to: «2 kilometres, in 23 minutes», with the pace of that kilometre where the
+   outing's distance is measured, «about» and no pace where it is not; «20 minutes, 2,300 steps».
+   Several marks crossed by one batch are told once, as the last. None is told after the end, nor
+   while the end can be taken back; taken back, the marks go on from the next. A distance mark is
+   told on settled metres, as a distance goal's milestones are: the fixes cannot take it back.
+   An open outing with marks, and with the vibration or the voice on, has signals to keep on
+   time, as a goal outing has (decision 5, `SignalWake`); one with none has not.
 4. **Notifications.** No new ongoing notification: the counting notification becomes the
    outing's while it lasts (the name, the sentence, «12 of 20 min», the pace against the
    outing's, the steps and the estimates, Pause/Resume and Stop). On Android 16 it is a

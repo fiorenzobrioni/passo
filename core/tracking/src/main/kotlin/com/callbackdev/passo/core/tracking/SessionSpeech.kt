@@ -37,6 +37,7 @@ import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.UnitPreference
+import com.callbackdev.passo.core.model.UnitSystem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -397,6 +398,10 @@ internal fun Context.spoken(announcement: SessionAnnouncement, session: Session,
 
         is SessionAnnouncement.OpenStopped -> res.spokenOpenStopped(announcement, format)
 
+        is SessionAnnouncement.DistanceMark -> res.spokenDistanceMark(announcement)
+
+        is SessionAnnouncement.TimeMark -> res.spokenTimeMark(announcement, format)
+
         is SessionAnnouncement.EndedStill -> res.getString(
             R.string.spoken_ended_still,
             res.spokenAmount(SessionAmount(SessionGoalKind.STEPS, announcement.steps.toDouble()), format),
@@ -512,6 +517,51 @@ private fun Resources.spokenOpenStopped(
         getString(R.string.spoken_well_done),
     ).joinToString(" ")
 }
+
+/**
+ * «2 kilometres, in 23 minutes. Pace: 11 minutes 20 seconds a kilometre.»: an open outing's
+ * distance mark (Phase 21.2), with the pace of that kilometre where it was measured; «About 2
+ * kilometres, in 23 minutes.» where it was not. In the unit frozen at the start, the pace with it,
+ * whatever the reader's units are now: the mark the reader felt is the one they hear.
+ */
+private fun Resources.spokenDistanceMark(announcement: SessionAnnouncement.DistanceMark): String {
+    val frozen = MeasureFormatter(
+        configuration.locales[0],
+        if (announcement.miles) UnitSystem.IMPERIAL else UnitSystem.METRIC,
+    )
+    val count = announcement.count
+    val distance = getQuantityString(
+        if (announcement.miles) R.plurals.spoken_miles else R.plurals.spoken_kilometres,
+        count,
+        frozen.integer(count.toLong()),
+    )
+    val time = spokenDuration(announcement.movingMinutes)
+    val sentence = if (announcement.measured) {
+        getString(R.string.spoken_mark_distance, distance, time)
+    } else {
+        getString(R.string.spoken_mark_distance_about, distance, time)
+    }
+    return listOfNotNull(sentence, spokenPace(announcement.paceSecondsPerKm, frozen)).joinToString(" ")
+}
+
+/** «20 minutes, 2,300 steps.»: an open outing's time mark (Phase 21.2). */
+private fun Resources.spokenTimeMark(announcement: SessionAnnouncement.TimeMark, format: MeasureFormatter): String =
+    getString(
+        R.string.spoken_mark_time,
+        spokenDuration(announcement.minutes),
+        getQuantityString(R.plurals.spoken_steps, announcement.steps, format.steps(announcement.steps)),
+    )
+
+/**
+ * A sample of an open outing's first kilometre (Phase 21.2), for the editor's "Try it": at the
+ * plan's pace with the reader's own step, said measured where the plan measures with GPS, about
+ * where it does not.
+ */
+fun Context.spokenMarkSample(sample: SessionAnnouncement.DistanceMark): String = resources.spokenDistanceMark(sample)
+
+/** The same for ten minutes, with the steps they come to at the plan's pace. */
+fun Context.spokenMarkSample(sample: SessionAnnouncement.TimeMark, units: UnitPreference): String =
+    resources.spokenTimeMark(sample, measureFormatter(units))
 
 /** A sample of what an outing says on the way, for the editor's "Try it": its halfway. */
 fun Context.spokenSample(announcement: SessionAnnouncement.Milestone, units: UnitPreference): String =
