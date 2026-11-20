@@ -86,6 +86,8 @@
     <string name="session_card_stop">Stop</string>
     <string name="session_card_keep_going">Keep going</string>
     <string name="session_card_close">Close</string>
+    <!-- On a finished outing, and what a touch on an outing's row does: its own page. -->
+    <string name="session_card_open">See the outing</string>
     <string name="session_card_under_way">Under way</string>
     <!-- What TalkBack says when an outing's card appears or changes: its name, then its state. -->
     <string name="session_card_pane">%1$s, %2$s</string>
@@ -140,4 +142,64 @@
     <string name="session_intervals_chart_description">Fast intervals, steps a minute: %1$s. Pace from %2$d.</string>
     <!-- Under the chart: the line is the pace. -->
     <string name="session_intervals_chart_legend">Each fast interval’s cadence; the line is the pace from\u00A0%1$d.</string>
+
+    <!-- An outing measured with GPS (Phase 15, docs/adr/0016-location.md). «Measured» is said
+         only of a distance at least nine tenths from fixes; under that, the share the steps gave. -->
+    <!-- Under the distance among the card's three numbers; the calories beside it stay an estimate (≈). -->
+    <string name="session_stat_measured">measured</string>
+    <string name="session_stat_measured_with">measured · ≈\u00A0%1$s</string>
+    <!-- «30% from steps»; before the first fix, when all of it is the steps', «from steps». -->
+    <string name="session_stat_from_steps">%1$s from steps</string>
+    <string name="session_stat_from_steps_with">%1$s from steps · ≈\u00A0%2$s</string>
+    <string name="session_stat_all_from_steps">from steps</string>
+    <string name="session_stat_all_from_steps_with">from steps · ≈\u00A0%1$s</string>
+    <!-- The same in a sentence: «Measured: 1.52 km · estimated: 91 kcal». -->
+    <string name="session_measured">Measured: %1$s · estimated: %2$s</string>
+    <!-- «1.52 km, 30% from your steps · estimated: 91 kcal». -->
+    <string name="session_partly_measured">%1$s, %2$s from your steps · estimated: %3$s</string>
+    <!-- Before the first fix: «0.05 km from your steps · estimated: 2 kcal». -->
+    <string name="session_from_steps">%1$s from your steps · estimated: %2$s</string>
+    <!-- An outing's row in Today and History: «1.52 km measured». -->
+    <string name="session_row_measured">%1$s measured</string>
+    <!-- The pace by the kilometre or the mile, and the pace now: «Pace 9:40 min/km · now 9:15 min/km». -->
+    <string name="session_pace">Pace %1$s</string>
+    <string name="session_pace_and_now">Pace %1$s · now %2$s</string>
+    <string name="session_pace_now">Pace now %1$s</string>
+    <!-- The same said aloud, by a screen reader and by the outing's voice: «9 minutes 40 seconds a kilometre». -->
+    <plurals name="pace_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
+    <plurals name="pace_seconds">
+        <item quantity="one">%1$d second</item>
+        <item quantity="other">%1$d seconds</item>
+    </plurals>
+    <string name="pace_minutes_seconds">%1$s %2$s</string>
+    <string name="pace_per_kilometer">%1$s a kilometre</string>
+    <string name="pace_per_mile">%1$s a mile</string>
+    <string name="session_pace_spoken">Pace: %1$s</string>
+    <string name="session_pace_and_now_spoken">Pace: %1$s. Now: %2$s</string>
+    <string name="session_pace_now_spoken">Pace now: %1$s</string>
+    <!-- What the card says of the satellites: one line for each state of the receiver, and its way out. -->
+    <string name="session_gps_finding">Finding the satellites. Your steps count meanwhile.</string>
+    <string name="session_gps_signal_lost">No GPS signal here. Your steps cover this stretch.</string>
+    <string name="session_gps_location_off">Location is off on this phone. Your steps count until it is back on.</string>
+    <string name="session_gps_stopped">GPS stopped. Your outing goes on from your steps.</string>
+    <string name="session_gps_permission_gone">Passo can no longer read your location. Your outing goes on from your steps.</string>
+    <!-- An outing whose plan asked for GPS and that started on the steps: said once, with the way to change it. -->
+    <string name="session_gps_on_steps_no_permission">This outing counts from your steps: Passo is not allowed to read your location. Allow it, and your next outing is measured.</string>
+    <string name="session_gps_on_steps_approximate">This outing counts from your steps: an approximate location cannot measure a walk. Allow the precise one, and your next outing is measured.</string>
+    <string name="session_gps_on_steps_location_off">This outing counts from your steps: location is off on this phone. Turn it on, and your next outing is measured.</string>
+    <string name="session_gps_resume">Resume GPS</string>
+    <string name="session_gps_turn_on_location">Turn on location</string>
+    <string name="session_gps_allow_location">Allow location</string>
+    <string name="session_gps_allow_precise">Allow precise location</string>
+    <!-- An outing's route on its map (Phase 16): north's letter, and the button back to the whole of it. -->
+    <string name="route_map_north">N</string>
+    <string name="route_map_whole">Whole route</string>
+    <!-- The question before the longest an outing stays open, on its card too (ADR 0016, decision 14). -->
+    <plurals name="session_card_cap_question">
+        <item quantity="one">Still walking? This outing ends in %1$d minute.</item>
+        <item quantity="other">Still walking? This outing ends in %1$d minutes.</item>
+    </plurals>
 </resources>

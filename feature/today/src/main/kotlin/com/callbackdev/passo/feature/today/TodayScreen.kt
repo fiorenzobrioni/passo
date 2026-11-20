@@ -126,6 +126,7 @@ fun TodayRoute(
     onOpenGuide: () -> Unit = {},
     onOpenWay: (WayId, Long) -> Unit = { _, _ -> },
     onOpenYear: (Int) -> Unit = {},
+    onOpenOuting: (Long) -> Unit = {},
     bottomPadding: Dp = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
     viewModel: TodayViewModel = hiltViewModel(),
 ) {
@@ -174,6 +175,7 @@ fun TodayRoute(
         onOpenWay = onOpenWay,
         onOpenYear = onOpenYear,
         onCloseYear = viewModel::closeYearCard,
+        onOpenOuting = onOpenOuting,
         sessionActions = { id ->
             SessionCardActions(
                 onPause = viewModel::pauseSession,
@@ -181,6 +183,8 @@ fun TodayRoute(
                 onStop = viewModel::stopSession,
                 onKeepGoing = viewModel::keepGoing,
                 onClose = { viewModel.closeSession(id) },
+                onGps = viewModel::gps,
+                onOpen = { onOpenOuting(id) },
             )
         },
     )
@@ -212,6 +216,7 @@ fun TodayScreen(
     onOpenYear: (Int) -> Unit = {},
     onCloseYear: (Int) -> Unit = {},
     sessionActions: (Long) -> SessionCardActions = { SessionCardActions() },
+    onOpenOuting: (Long) -> Unit = {},
 ) {
     val format = rememberMeasureFormatter(state.units)
     val bottom = bottomPadding
@@ -250,6 +255,7 @@ fun TodayScreen(
                         canKeepGoing = session.canKeepGoing,
                         format = format,
                         actions = sessionActions(session.session.id),
+                        measure = session.measure,
                         modifier = inColumn.padding(horizontal = ScreenMargin),
                     )
                 }
@@ -291,7 +297,9 @@ fun TodayScreen(
             if (session == null && state.status == TrackingStatus.COUNTING && state.startOutingButton) {
                 item(key = "start-outing") { StartOuting(onOpenSessions, inColumn) }
             }
-            if (state.outings.isNotEmpty()) item(key = "walks") { Box(inColumn) { WalksCard(state.outings, format) } }
+            if (state.outings.isNotEmpty()) {
+                item(key = "walks") { Box(inColumn) { WalksCard(state.outings, format, onOpenOuting) } }
+            }
             item(key = "metrics") { Box(inColumn) { Intensity(state, format) } }
             // Last: a way lasts weeks, and today's share of it is news only after the day's own.
             state.way?.let { way -> item(key = "way") { Box(inColumn) { WayCard(way, format, onOpenWay) } } }
@@ -839,7 +847,7 @@ private fun StartOuting(onOpenSessions: () -> Unit, modifier: Modifier) {
 
 /** Today's walks and finished outings, found in the minutes already counted (PLANNING.md §6.1). */
 @Composable
-private fun WalksCard(outings: List<Outing>, format: MeasureFormatter) {
+private fun WalksCard(outings: List<Outing>, format: MeasureFormatter, onOpenOuting: (Long) -> Unit) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         shape = GroupShape,
@@ -851,7 +859,7 @@ private fun WalksCard(outings: List<Outing>, format: MeasureFormatter) {
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp).semantics { heading() },
             )
-            OutingList(outings, format)
+            OutingList(outings, format, onOpen = onOpenOuting)
         }
     }
 }

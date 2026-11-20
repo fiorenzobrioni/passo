@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertLeftPositionInRootIsEqualTo
@@ -28,6 +29,9 @@ import com.callbackdev.passo.core.data.sessions.LiveSessionState
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
 import com.callbackdev.passo.core.designsystem.components.SessionCardTags
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
+import com.callbackdev.passo.core.domain.routes.GpsLine
+import com.callbackdev.passo.core.domain.routes.GpsLineAction
+import com.callbackdev.passo.core.domain.routes.LiveMeasure
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.today.DayMinute
 import com.callbackdev.passo.core.domain.today.TodayOverview
@@ -263,6 +267,35 @@ class TodayScreenTest {
     }
 
     @Test
+    fun `an outing measured with GPS says so on Today, with its pace and the receiver's line`() {
+        val asked = mutableListOf<GpsLineAction>()
+        val measured = outing.copy(
+            totals = outing.totals.copy(distanceMeters = 1_190.0, activeKcal = 44.0),
+            gps = true,
+            stepsMeters = 905.0,
+            measuredShare = 0.97,
+        )
+        val live = LiveSessionState(
+            measured,
+            cadence = 108,
+            canKeepGoing = false,
+            alertsWhileScreenOff = true,
+            measure = LiveMeasure(paceNow = 588.0, line = GpsLine.STOPPED),
+        )
+        show(state().copy(session = live), sessionActions = SessionCardActions(onGps = { asked += it }))
+
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(SessionCardTags.GPS_ACTION))
+        compose.onNodeWithTag(SessionCardTags.STATS)
+            .assertContentDescriptionContains("Measured: 1.19 km · estimated: 44 kcal", substring = true)
+        compose.onNodeWithTag(SessionCardTags.PACE)
+            .assertContentDescriptionContains("Pace: 10 minutes 5 seconds a kilometre", substring = true)
+        compose.onNodeWithText("GPS stopped. Your outing goes on from your steps.").assertIsDisplayed()
+        compose.onNodeWithTag(SessionCardTags.GPS_ACTION).performClick()
+        assertThat(asked).containsExactly(GpsLineAction.RESUME_GPS)
+        snapshot("today_outing_gps")
+    }
+
+    @Test
     fun `without the button, an outing under way still has its card`() {
         val live = LiveSessionState(outing, cadence = 108, canKeepGoing = false, alertsWhileScreenOff = true)
         show(state().copy(startOutingButton = false, session = live))
@@ -342,10 +375,15 @@ class TodayScreenTest {
             totals = outing.totals.copy(movingMillis = 20 * 60_000, zoneMillis = 17 * 60_000, steps = 2_140),
         )
         val live = LiveSessionState(done, cadence = null, canKeepGoing = true, alertsWhileScreenOff = true)
+        var opened = false
         show(
             state().copy(session = live),
             dark = true,
-            sessionActions = SessionCardActions(onKeepGoing = { kept = true }, onClose = { closed = true }),
+            sessionActions = SessionCardActions(
+                onKeepGoing = { kept = true },
+                onClose = { closed = true },
+                onOpen = { opened = true },
+            ),
         )
 
         compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(SessionCardTags.CARD))
@@ -354,8 +392,11 @@ class TodayScreenTest {
         snapshot("today_outing_done_dark")
         compose.onNodeWithTag(SessionCardTags.KEEP_GOING).performClick()
         compose.onNodeWithTag(SessionCardTags.CLOSE).performClick()
+        // «See the outing»: its own page.
+        compose.onNodeWithText("See the outing").performClick()
         assertThat(kept).isTrue()
         assertThat(closed).isTrue()
+        assertThat(opened).isTrue()
     }
 
     private fun us(value: Int) = String.format(Locale.US, "%,d", value)

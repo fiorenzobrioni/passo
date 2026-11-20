@@ -39,7 +39,16 @@ Source of truth:
 
 Work one phase at a time, starting from the phase's section in PLANNING.md §11. Phases 15 to 20
 (location, `docs/adr/0016-location.md`) each name what to read first and hold «The bar» their
-work is measured against: read the ADR and the phase's section before planning.
+work is measured against: read the ADR and the phase's section before planning. **Phases 15
+and 16 are built** (18 Nov 2026), on branches in cascade, and wait for a phone: what was built
+and decided is in their boxes and in archive 04 (`docs/planning/README.md`, from «Location, for
+an outing that asks for it» on); their proofs on a phone (the boxes in «Open») come before any
+release. **Phase 17 is built** (19 Nov 2026), on the branch of PR #74 at the owner's choice, and
+waits for a phone too (PLANNING.md §15, «Phase 17 built: the step that learns»). **Phase 18 is
+next.** On 19 Nov 2026 the owner dropped Phases 18 and 19 «On the spot»:
+Phase 18 is now a city walk measured with GPS (small), Phase 19 is dropped, and Phase 20 is the
+usual round alone: no route is followed, no GPX imported (PLANNING.md §15, «The places on the spot
+dropped, the city walk measured» and «Phase 20 reviewed: the usual round alone»).
 
 ## Build and commands
 
@@ -53,7 +62,7 @@ minSdk 34, compile/targetSdk 37. Java 21.
 - One module: `./gradlew :core:domain:test`; one class: `--tests "com.callbackdev.passo.core.domain.tracking.StepAccountantTest"`
 - Lint (every module, via `checkDependencies`): `./gradlew :app:lintDebug`
 - Format: `./gradlew spotlessApply` (CI runs `spotlessCheck`; rules in `.editorconfig`)
-- Forbidden-permission check on the merged manifests: `./gradlew :app:checkForbiddenPermissions`
+- Permission check on the merged manifests (an allowlist): `./gradlew :app:checkForbiddenPermissions`
 - Installable minified build: `./gradlew :app:assembleRelease -PsignReleaseWithDebugKey`
 - On a machine with no system JDK, prepend `JAVA_HOME="/c/Program Files/Android/Android Studio/jbr"`.
 - **Maven Central answers HTTP 429** (Too Many Requests; it happens in the Claude Code cloud
@@ -65,7 +74,9 @@ minSdk 34, compile/targetSdk 37. Java 21.
 `passo.android.library`, `passo.android.compose`, `passo.android.feature`, `passo.android.hilt`,
 `passo.android.room`, `passo.jvm.library`. SDK levels and the Java version live in
 `PassoSdk` / `Passo.kt`; a module's own build file only says what is specific to it. The
-forbidden-permission list is `ForbiddenPermissionPatterns` in `ForbiddenPermissions.kt`.
+permissions Passo may hold are `AllowedPermissions` in `ForbiddenPermissions.kt`, and the ones it
+never may `ForbiddenPermissionPatterns`, beside it; the gate's rules have their own tests there,
+which `./gradlew test` runs.
 
 **Version**: `passo.versionName` in `gradle.properties` is the only place it is written;
 `versionCode` is derived (major * 10000 + minor * 100 + patch). `release.yml` refuses a tag
@@ -75,13 +86,13 @@ that does not match it.
 
 | Module | Kind | Holds |
 |---|---|---|
-| `:core:model` | pure Kotlin/JVM | data classes shared by everything |
-| `:core:domain` | pure Kotlin/JVM | `StepAccountant`, metric calculators, `WalkDetector`, `TypicalDayCalculator`, `PeriodOverview`, `Insights` (streaks, records, averages), `SessionTracker` and `SessionPlans` (outings), `IntervalSchedule` (the interval walk), `YearInReview` (Your year on foot), the backup file and its merge (`BackupCodec`, `BackupMerge`, `CsvExport`), `StepCalibration`, the Ways and the city walks (`Ways`, `WayProgress`, `WalkDays`, `WalkPlaces`, `WayForecast`, `WayAnnouncement`, `WayProjection`, `Continents`, the generated `WayData` and `ContinentData`) |
-| `:core:data` | Android library | Room (steps, tracker state, outings, ways), DataStore (settings, profile), repositories exposing `Flow`, `BackupRepository` (export, import), `WayRepository` |
-| `:core:tracking` | Android library | `StepTrackingService` (FGS type `health`), sensor source, receivers, ongoing notification, `StepCounterProbe` (the calibration's direct read), `WayNotifier` (a stage reached) |
-| `:core:designsystem` | Android library | M3 theme, typography, shared components, the Canvas charts (`DayTrendChart`, `BarChart`), `CalendarHeatmap`, `WalkList` and `OutingList`, `SessionCard`, the ways' and the continents' maps and stamps (`WayMapView`, `ContinentMapView`, `WayStamp`) and place names, date formatting |
+| `:core:model` | pure Kotlin/JVM | data classes shared by everything (a route's points, an outing's legs and a learnt step among them) |
+| `:core:domain` | pure Kotlin/JVM | `StepAccountant`, metric calculators, `WalkDetector`, `TypicalDayCalculator`, `PeriodOverview`, `Insights` (streaks, records, averages), `SessionTracker` and `SessionPlans` (outings), `IntervalSchedule` (the interval walk), `YearInReview` (Your year on foot), the backup file and its merge (`BackupCodec`, `BackupMerge`, `CsvExport`), `StepCalibration`, the step that learns (`StepLengthLearner`, `LearnedSteps`, `LearnedStepText`), the Ways and the city walks (`Ways`, `WayProgress`, `WalkDays`, `WalkPlaces`, `WayForecast`, `WayAnnouncement`, `WayProjection`, `Continents`, the generated `WayData` and `ContinentData`), the measured outing (`routes/`: `RouteMeter`, the fusion of steps and fixes, `RouteFilter`, `RouteCodec`, `GpsDuty`, `GpsStart`, `Pace`; `GpsLines`, the card's line for each state of the receiver; `Altitude`, `Climb` and `RouteHeights`, the climb; `Legs` and `Splits`, the kilometres; `GpxCodec`; `RouteShape` and `ScaleBar`, what a route's map draws, on plain ground) |
+| `:core:data` | Android library | Room (steps, tracker state, outings, ways), DataStore (settings, profile), repositories exposing `Flow`, `BackupRepository` (export, import), `WayRepository`, `StepLearningRepository` (what the outings with GPS taught of the step, and the reader's answers); a second Room database, `routes.db` (`RouteDatabase`, `RouteRepository`), where the outings measured with GPS went, and which no read ever makes (`RouteFile`) |
+| `:core:tracking` | Android library | `StepTrackingService` (FGS type `health`), sensor source, receivers, ongoing notification, `StepCounterProbe` (the calibration's direct read), `WayNotifier` (a stage reached), `LocationSource` (the satellite receiver, for an outing that asks for it), `PressureSource` (the barometer, on only with that receiver, for the climb), `OutingStarter` (the one door every start of a plan goes through) |
+| `:core:designsystem` | Android library | M3 theme, typography, shared components, the Canvas charts (`DayTrendChart`, `BarChart`), `CalendarHeatmap`, `WalkList` and `OutingList`, `SessionCard`, the ways' and the continents' maps and stamps (`WayMapView`, `ContinentMapView`, `WayStamp`) and place names, a route's map, the one that moves (`RouteMapView`, `MapViewport`), `SplitList` and `ClimbProfile`, `StepCurveChart` (a learnt step against the step in use), the one file provider for what is shared (`SharedFiles`, `ShareImage`), date formatting |
 | `:core:testing` | Android library, test-only | `assertAccessible()` (labels, 48dp touch targets) and `walkPage()`, shared by the UI tests as `testImplementation` |
-| `:feature:*` | Android library | `today`, `history`, `insights`, `settings` (with your data and the step calibration), `onboarding`, `sessions` (the Outings page and editor), `ways` (the Ways, each continent's cities, each way's page and each city walk's), `guide` (the guide, in Chiaro's shape), `year` (Your year on foot: the year's pages, shared as an image) |
+| `:feature:*` | Android library | `today`, `history`, `insights`, `settings` (with your data and the step calibration), `onboarding`, `sessions` (the Outings page and editor, and an outing's own page, `OutingScreen`), `ways` (the Ways, each continent's cities, each way's page and each city walk's), `guide` (the guide, in Chiaro's shape), `year` (Your year on foot: the year's pages, shared as an image) |
 | `:widget` | Android library | the two Glance widgets («At a glance», «In words»), their settings screen, the update coordinator |
 | `:app` | application | `Application`, `MainActivity`, navigation (the bottom bar: Today, History, Insights), DI entry points; wires everything |
 
@@ -91,26 +102,44 @@ other. All business logic lives in `:core:domain`, with unit tests.
 
 ## Invariants (non-negotiable)
 
-- **Never add a forbidden permission** (PLANNING.md §10): `INTERNET`, any `ACCESS_*LOCATION`,
+- **The permissions are an allowlist** (PLANNING.md §10): the merged manifest must request
+  exactly the permissions written in `AllowedPermissions`; the build fails on one more, and on
+  one fewer. **Never, by name**: `INTERNET`, `ACCESS_BACKGROUND_LOCATION`,
   `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`,
-  `HIGH_SAMPLING_RATE_SENSORS`, `BODY_SENSORS*`. The build fails on the merged manifest; a
-  library that adds one is removed or patched with `tools:node="remove"`.
-  **Planned, not built** (owner, 18 Nov 2026; `docs/adr/0016-location.md`, PLANNING.md §11
-  Phases 15 to 20): location for an outing that asks for it. Until Phase 15 is built this
-  invariant stands exactly as written. Phase 15, and only it, changes the list (fine and
-  coarse location and the `location` service type come in, `ACCESS_BACKGROUND_LOCATION` and
-  `INTERNET` stay out, the gate becomes an allowlist) and rewrites this paragraph and the
-  battery one below in the same change. No other work adds a location permission.
+  `HIGH_SAMPLING_RATE_SENSORS`, `BODY_SENSORS*`. A library that adds a permission is removed or
+  patched with `tools:node="remove"`; a permission added to the list is the owner's decision,
+  written in §10 first.
+- **Location is a measuring tape, never a tracker** (`docs/adr/0016-location.md`; owner,
+  18 Nov 2026). `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION` and the service's `location`
+  type are held for one thing: an outing the reader started with «Measure with GPS» on, from
+  its start to its pause or end, and for at most 15 minutes after an end that can still be
+  taken back. Never for the day's count, never with no outing, never in the background, never
+  by a timer or a geofence. Satellites only, through the platform's `LocationManager`: no
+  Google Play services, no fused provider. Asked in context, the first time such an outing
+  starts; never in the first run. A way from home never reads them, nor does a city walk
+  unless its page's «Measure with GPS» is on (Phase 18, as re-planned on 19 Nov 2026): then it
+  is an outing with GPS, measured and its route kept, and the city's map shows the reader's
+  point on the walk by the distance walked, never their real position. Nothing in the app
+  depends on it: with the switch off, every screen, number and wake is as before.
+  Say "Passo sends nothing" and "cannot send"; never "Passo cannot know where the phone is".
+- **The day stays the steps'.** A day's distance, History, Insights, the ways from home and
+  Your year on foot are computed from the steps, with or without outings measured with GPS.
+  Only an outing shows a measure, and «measured» is a word for a distance at least nine
+  tenths from fixes.
 - **The hardware step counter is the only step source.** No Health Connect, Google Fit,
   Samsung Health or Play services for step data; no accelerometer.
 - **Battery first** (PLANNING.md §9): never poll or run timers while the screen is off; no
   wakelocks (except inside `goAsync()` for the shutdown flush), no exact alarms, no periodic
   workers for tracking; database writes are batched. Widget, notification and tile update
-  only when someone can see them. The one exception: an outing the reader started, while it
-  counts: the wake-up step counter at 30 s, and at 2 s in the 40 s before a change of an interval
-  walk; on a phone with no wake-up counter, a partial wake lock instead, for an outing with signals
-  only, let go after 15 minutes still by the one timer that runs while it is held (`SignalWake`;
-  `docs/adr/0009-sessions.md`, `docs/adr/0013-interval-walks.md`); never widen it.
+  only when someone can see them. Two exceptions, both for an outing the reader started, while
+  it counts. The first: the wake-up step counter at 30 s, and at 2 s in the 40 s before a change
+  of an interval walk; on a phone with no wake-up counter, a partial wake lock instead, for an
+  outing with signals or with GPS, bounded ten minutes past the outing's own cap and let go
+  after 15 minutes still by the one timer that runs while it is held (`SignalWake`;
+  `docs/adr/0009-sessions.md`, `docs/adr/0013-interval-walks.md`). The second: the satellite
+  receiver of an outing with GPS, on while the reader walks, asleep 2 minutes after they stop,
+  off at a pause and the end (`GpsDuty`; `docs/adr/0016-location.md`, decisions 5, 10 and 14).
+  Never widen either.
 - **No lost steps.** Don't change the tracking engine without updating the tests for every
   edge case in PLANNING.md §4.6.
 - **Honest estimates.** Distance, calories and active time are shown as estimates; formulas
@@ -118,7 +147,9 @@ other. All business logic lives in `:core:domain`, with unit tests.
 - **Past days are frozen.** A profile change never silently rewrites history. Every day is
   measured against its own stored goal (streaks, records, the goal line).
 - **Backup is an allowlist** (`app/src/main/res/xml/data_extraction_rules.xml`,
-  `docs/adr/0007-backup.md`): the database and the settings file, nothing else. Android sends
+  `docs/adr/0007-backup.md`): the database and the settings file, nothing else; `routes.db`,
+  where the outings measured with GPS went, only in the phone-to-phone transfer, never in the
+  cloud copy. A route is deleted before its outing; no place outlives its outing. Android sends
   the copy, so the no-`INTERNET` rule stands; say "Passo sends nothing", never "nothing leaves
   the phone". A tracker state from another installation is never trusted
   (`TrackingRepository.adoptTrackerState`).

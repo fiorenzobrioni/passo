@@ -5,6 +5,7 @@ import com.callbackdev.passo.core.domain.metrics.MinuteChange
 import com.callbackdev.passo.core.model.DailySummary
 import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.Profile
+import com.callbackdev.passo.core.model.Route
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
@@ -218,6 +219,24 @@ object BackupMerge {
     private fun WayJourney.activeSlot(): String = if (way.kind == WayKind.WAY) WAY_SLOT else way.name
 
     /**
+     * The file's routes to add (PLANNING.md §11 Phase 16, «Your data»), each with the id of the
+     * outing it belongs to on this phone: an outing is found by the instant it started, the one
+     * thing of it that is the same on every phone, and gets its route only where it has none.
+     * An import never takes a route away, and never puts one on an outing that has its own.
+     *
+     * @param outings this phone's outings after the file's were added: each one's start with
+     *   its id here.
+     * @param having the ids of the outings that already have a route.
+     */
+    fun routes(outings: Map<Long, Long>, having: Set<Long>, incoming: Map<Long, Route>): List<Pair<Long, Route>> =
+        incoming.entries
+            .sortedBy { it.key }
+            .mapNotNull { (startedAtMillis, route) ->
+                val id = outings[startedAtMillis] ?: return@mapNotNull null
+                if (id in having || route.points.isEmpty()) null else id to route
+            }
+
+    /**
      * The file's settings in place of this phone's, except what only this phone decides: whether
      * it is counting now, whether its first run is done, and whether its first-day note was read.
      */
@@ -234,6 +253,8 @@ object BackupMerge {
         milestones == other.milestones &&
         vibrate == other.vibrate &&
         voice == other.voice &&
+        // The same walk measured with GPS and without are two plans: the reader keeps both.
+        gps == other.gps &&
         (goalKind != SessionGoalKind.INTERVALS || intervals == other.intervals)
 }
 

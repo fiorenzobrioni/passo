@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertHasNoClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertLeftPositionInRootIsEqualTo
@@ -29,6 +31,7 @@ import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.history.PeriodScale
 import com.callbackdev.passo.core.testing.assertAccessible
 import com.callbackdev.passo.core.testing.walkPage
+import com.google.common.truth.Truth.assertThat
 import org.junit.Assert.assertFalse
 import org.junit.Rule
 import org.junit.Test
@@ -52,14 +55,17 @@ class HistoryScreenTest {
         target: HistoryTarget? = null,
         walkDetection: Boolean = true,
         outing: Boolean = false,
+        measured: Boolean = false,
+        onOpenOuting: (Long) -> Unit = {},
     ) {
         compose.setContent {
             PassoTheme(darkTheme = dark) {
                 HistoryScreen(
                     state = state,
-                    dayDetail = { HistorySamples.detail(it, walkDetection, outing) },
+                    dayDetail = { HistorySamples.detail(it, walkDetection, outing, measured) },
                     onOpenSettings = {},
                     target = target,
+                    onOpenOuting = onOpenOuting,
                 )
             }
         }
@@ -172,6 +178,45 @@ class HistoryScreenTest {
         compose.onNode(hasContentDescription("Brisk walk from", substring = true)).assertExists()
         compose.onNode(hasContentDescription("Goal reached: 20 min at a brisk pace", substring = true)).assertExists()
         snapshot("history_day_outing")
+    }
+
+    @Test
+    fun `an outing measured with GPS says so of its distance, and of nothing else`() {
+        show(target = HistoryTarget(PeriodScale.DAY, today.minusDays(1)), outing = true, measured = true)
+        page().performScrollToNode(hasTestTag(HistoryTags.WALKS))
+        // The row's one measure; its calories stay an estimate, and the day's own walks too.
+        compose.onNode(
+            hasContentDescription("Brisk walk from", substring = true) and
+                hasContentDescription("km measured", substring = true),
+        ).assertExists()
+        compose.onAllNodes(
+            hasContentDescription(
+                "Walk from",
+                substring = true,
+            ) and hasContentDescription("measured", substring = true),
+        ).assertCountEquals(0)
+        snapshot("history_day_outing_measured")
+    }
+
+    @Test
+    fun `an outing's row opens its own page, and a walk found in the steps opens nothing`() {
+        val opened = mutableListOf<Long>()
+        show(target = HistoryTarget(PeriodScale.DAY, today.minusDays(1)), outing = true, onOpenOuting = {
+            opened += it
+        })
+        page().performScrollToNode(hasTestTag(HistoryTags.WALKS))
+
+        compose.onAllNodes(hasContentDescription("Walk from", substring = true)).onFirst().assertHasNoClickAction()
+        compose.onNode(hasContentDescription("Brisk walk from", substring = true)).assertHasClickAction().performClick()
+
+        assertThat(opened).containsExactly(1L)
+    }
+
+    @Test
+    fun `an outing without GPS is an estimate, as ever`() {
+        show(target = HistoryTarget(PeriodScale.DAY, today.minusDays(1)), outing = true)
+        page().performScrollToNode(hasTestTag(HistoryTags.WALKS))
+        compose.onAllNodes(hasContentDescription("measured", substring = true)).assertCountEquals(0)
     }
 
     @Test

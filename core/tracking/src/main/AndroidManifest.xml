@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   The tracking engine's permissions and components (PLANNING.md §4.1, §10). This is the whole
-  list Passo holds: activity recognition to read the step counter, a foreground service of type
-  health to keep reading it, the boot broadcast to start again without being opened,
-  notifications (optional), and for the outings a vibration and a Live Update. `checkForbiddenPermissions` guards the rest: the goal alarms are
+  list Passo asks for itself, each for one thing:
+
+  - activity recognition, to read the step counter;
+  - a foreground service of type health, to keep reading it;
+  - the boot broadcast, to start again without being opened;
+  - notifications (optional);
+  - for the outings, a vibration, a Live Update, and the processor kept awake on a phone whose
+    step counter cannot wake it;
+  - for an outing the reader asked to be measured with GPS, and only while it counts, fine and
+    coarse location and the service's second type, location (docs/adr/0016-location.md).
+
+  Nothing else is held, and the build proves it: `checkForbiddenPermissions` fails unless the
+  merged manifest requests exactly the list written in build-logic (these, and the two the
+  libraries bring). INTERNET and ACCESS_BACKGROUND_LOCATION fail it by name: Passo cannot send
+  anything, and the receiver is held only for an outing that asked for it. The goal alarms are
   inexact and need no permission, and the Quick Settings tile needs none either.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -13,6 +25,13 @@
     <uses-feature
         android:name="android.hardware.sensor.stepcounter"
         android:required="true" />
+
+    <!-- The location permissions would otherwise imply that a satellite receiver is required,
+         and a future Play listing would hide Passo from a phone without one. Nothing in the app
+         depends on it: there the switch «Measure with GPS» is simply absent. -->
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
 
     <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -28,6 +47,14 @@
          (docs/adr/0013-interval-walks.md): the processor kept awake while the outing counts.
          A normal permission, granted at install; WorkManager declares it too. -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!-- An outing with «Measure with GPS» on (docs/adr/0016-location.md): the satellites are
+         read from its start to its pause or end, never for the day's count, never with no
+         outing. Asked together, in context, the first time such an outing starts; never in
+         the first run. Approximate alone is not enough to measure a walk: the outing then
+         counts from the steps. ACCESS_BACKGROUND_LOCATION is forbidden by the build. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 
     <!-- The outings' voice (docs/adr/0010-voice.md): since Android 11 an app sees a
          text-to-speech engine only if it says it looks for one. Not a permission. -->
@@ -38,10 +65,13 @@
     </queries>
 
     <application>
+        <!-- It starts and runs as `health`. `location` is declared so that it can be added
+             while an outing with GPS counts, by a second startForeground(), and dropped at its
+             pause or end (docs/adr/0016-location.md, decision 4). -->
         <service
             android:name=".StepTrackingService"
             android:exported="false"
-            android:foregroundServiceType="health" />
+            android:foregroundServiceType="health|location" />
 
         <!-- Not exported: the system delivers its own broadcasts to non-exported receivers,
              and nothing else has any business starting the tracker. -->

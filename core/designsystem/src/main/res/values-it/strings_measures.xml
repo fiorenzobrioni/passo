@@ -13,4 +13,6 @@
     <string name="measure_inches">%1$s in</string>
     <string name="measure_steps_per_minute">%1$s passi/min</string>
     <string name="measure_minutes">%1$s min</string>
+    <string name="measure_minutes_per_kilometer">%1$s min/km</string>
+    <string name="measure_minutes_per_mile">%1$s min/mi</string>
 </resources>

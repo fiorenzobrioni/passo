@@ -186,3 +186,36 @@ reference by name and read from the right place. The current log is not here: it
   - L60: Your year on foot
   - L73: The last seven days on At a glance
   - L75: 1.1.0, prepared
+
+## [04-decisions-2-to-18-nov-2026.md](04-decisions-2-to-18-nov-2026.md): PLANNING, archive 04: the decisions log, §15, 2 to 18 Nov 2026
+
+- L14: 15. Decisions log: 2 to 18 Nov 2026
+  - L16: No way on a widget
+  - L23: «At a glance» and Tempo's «In words»: one circle at one size
+  - L48: The family's circle at every size
+  - L81: The panel's ring grows without the sentence, as the tall card's
+  - L94: The new icon: two prints on the green
+  - L118: The new icon checked on the phone
+  - L121: The Outing shortcut, an adaptive icon
+  - L135: The adaptive shortcut checked on the phone, and Tetto in the family
+  - L142: Each outing's shortcut wears its own mark
+  - L153: The outings' own marks checked on the phone
+  - L157: Today reviewed for a premium first screen
+  - L191: Today's three amounts, centred
+  - L199: The outings, their editor and the city walks' maps, reviewed
+  - L266: An outing's numbers centred, as Today's three amounts are
+  - L278: History reviewed, after Today and the Outings
+  - L338: Insights and Your year on foot reviewed, after Today, the Outings and History
+  - L404: 12 Nov 2026. The first run's lines balanced, in the four apps
+  - L416: 14 Nov 2026. The widgets swap names
+  - L432: 15 Nov 2026. The widgets' names swap back, the cards wear green, a seventh colour
+  - L461: 15 Nov 2026. The shortcuts written again at every start of the service
+  - L482: 18 Nov 2026. Location, for an outing that asks for it
+  - L546: 18 Nov 2026. Phase 15 read against the code before it is built
+  - L586: 18 Nov 2026. The five answered, and the platform read again
+  - L631: 18 Nov 2026. Phase 15, the slice for the proof on the phone
+  - L684: 18 Nov 2026. Phase 15, the domain: the fusion, the route's bytes, the cap's question
+  - L777: 18 Nov 2026. The rules in force brought in line with what is built
+  - L794: 18 Nov 2026. Phase 15, what the reader sees, and the documents
+  - L867: 18 Nov 2026. Phase 16, the outing's page: the route, the splits, the climb
+  - L953: 18 Nov 2026. Phase 16 read again: the last points' pressure, and the shared image's test

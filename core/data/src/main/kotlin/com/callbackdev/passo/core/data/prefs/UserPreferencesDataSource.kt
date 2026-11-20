@@ -10,10 +10,13 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.callbackdev.passo.core.domain.calibration.LearnedStepText
 import com.callbackdev.passo.core.domain.goals.GoalReached
 import com.callbackdev.passo.core.domain.metrics.sanitized
+import com.callbackdev.passo.core.domain.routes.GpsAnswer
 import com.callbackdev.passo.core.model.AppFont
 import com.callbackdev.passo.core.model.AppPalette
+import com.callbackdev.passo.core.model.LearnedStep
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.Sex
@@ -136,6 +139,44 @@ constructor(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it[Keys.INTERVAL_PRESET_SEEDED] = true }
     }
 
+    /**
+     * What the reader last answered when Passo asked for the location permission
+     * (docs/adr/0016-location.md, decision 2): a refusal is never asked again by itself, and a
+     * grant the system took back («Only this time») is asked again without Passo's own screen,
+     * which is shown once. Not a setting: the reader changes it by answering, in the system's
+     * own page, or by turning «Measure with GPS» on again after a refusal, which forgets it
+     * (`GpsStart.asksAgain`); and it is not in the backup's file.
+     */
+    suspend fun gpsAnswer(): GpsAnswer {
+        val stored = dataStore.data
+            .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+            .first()[Keys.GPS_ANSWER]
+        return GpsAnswer.entries.firstOrNull { it.name == stored } ?: GpsAnswer.NEVER_ASKED
+    }
+
+    suspend fun setGpsAnswer(answer: GpsAnswer) {
+        dataStore.edit {
+            it[Keys.GPS_ANSWER] = answer.name
+            // A grant closes the refusal, and so does the reader asking to be asked again: one
+            // that comes after either is new, and told once again.
+            if (answer != GpsAnswer.REFUSED) it.remove(Keys.GPS_ON_STEPS_TOLD)
+        }
+    }
+
+    /**
+     * Whether an outing has already said that it started on the steps because the location
+     * permission was refused (PLANNING.md §11 Phase 15): a refusal is told once, on that
+     * outing's card, with the way back, and not at every outing after it. Not a setting, and
+     * not in the backup's file.
+     */
+    suspend fun gpsOnStepsTold(): Boolean = dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .first()[Keys.GPS_ON_STEPS_TOLD] ?: false
+
+    suspend fun markGpsOnStepsTold() {
+        dataStore.edit { it[Keys.GPS_ON_STEPS_TOLD] = true }
+    }
+
     /** The last outing whose summary Today has shown and the reader put away. */
     val sessionSummarySeen: Flow<Long?> = dataStore.data
         .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
@@ -158,6 +199,28 @@ constructor(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it[Keys.YEAR_CARD_CLOSED] = year }
     }
 
+    /**
+     * The learnt step last proposed and put away («Not now», «Go back», another length chosen):
+     * a new proposal waits until the outings move the step 2% from it (PLANNING.md §11 Phase 17).
+     * The phone's state, not the reader's choice: not in the backup's file, so on a new phone the
+     * proposal comes once more.
+     */
+    val stepPutAway: Flow<LearnedStep?> = dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .map { LearnedStepText.decode(it[Keys.STEP_PUT_AWAY]) }
+
+    suspend fun setStepPutAway(step: LearnedStep?) {
+        dataStore.edit {
+            if (step ==
+                null
+            ) {
+                it.remove(Keys.STEP_PUT_AWAY)
+            } else {
+                it[Keys.STEP_PUT_AWAY] = LearnedStepText.encode(step)
+            }
+        }
+    }
+
     private fun readProfile(prefs: Preferences) = Profile(
         heightMeters = prefs[Keys.HEIGHT_M],
         weightKg = prefs[Keys.WEIGHT_KG],
@@ -165,6 +228,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
         stepLengthMode = prefs[Keys.STEP_LENGTH_MODE].toEnumOrNull<StepLengthMode>() ?: StepLengthMode.AUTO,
         walkingStepLengthMeters = prefs[Keys.WALKING_STEP_LENGTH_M],
         runningStepLengthMeters = prefs[Keys.RUNNING_STEP_LENGTH_M],
+        learnedStep = LearnedStepText.decode(prefs[Keys.LEARNED_STEP]),
     ).sanitized()
 
     private fun writeProfile(prefs: MutablePreferences, old: Profile, new: Profile) {
@@ -174,6 +238,11 @@ constructor(private val dataStore: DataStore<Preferences>) {
         prefs.write(Keys.STEP_LENGTH_MODE, old.stepLengthMode.name, new.stepLengthMode.name, StepLengthMode.AUTO.name)
         prefs.write(Keys.WALKING_STEP_LENGTH_M, old.walkingStepLengthMeters, new.walkingStepLengthMeters)
         prefs.write(Keys.RUNNING_STEP_LENGTH_M, old.runningStepLengthMeters, new.runningStepLengthMeters)
+        prefs.write(
+            Keys.LEARNED_STEP,
+            old.learnedStep?.let(LearnedStepText::encode),
+            new.learnedStep?.let(LearnedStepText::encode),
+        )
     }
 
     private fun readSettings(prefs: Preferences): UserSettings {
@@ -266,6 +335,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
         val STEP_LENGTH_MODE = stringPreferencesKey("profile_step_length_mode")
         val WALKING_STEP_LENGTH_M = doublePreferencesKey("profile_walking_step_length_m")
         val RUNNING_STEP_LENGTH_M = doublePreferencesKey("profile_running_step_length_m")
+        val LEARNED_STEP = stringPreferencesKey("profile_learned_step")
 
         val DAILY_GOAL = intPreferencesKey("daily_goal_steps")
         val UNITS = stringPreferencesKey("units")
@@ -294,6 +364,9 @@ constructor(private val dataStore: DataStore<Preferences>) {
         val INTERVAL_PRESET_SEEDED = booleanPreferencesKey("interval_preset_seeded")
         val SESSION_SUMMARY_SEEN = longPreferencesKey("session_summary_seen")
         val YEAR_CARD_CLOSED = intPreferencesKey("year_card_closed")
+        val GPS_ANSWER = stringPreferencesKey("gps_answer")
+        val GPS_ON_STEPS_TOLD = booleanPreferencesKey("gps_on_steps_told")
+        val STEP_PUT_AWAY = stringPreferencesKey("step_curve_put_away")
     }
 
     companion object {

@@ -32,7 +32,27 @@ internal data class ProfileDto(
     val stepLengthMode: String? = null,
     val walkingStepLengthMeters: Double? = null,
     val runningStepLengthMeters: Double? = null,
+    val learnedStep: LearnedStepDto? = null,
 )
+
+/**
+ * The step learnt from the outings with GPS and accepted (Phase 17): an added field, no new
+ * version. 1.1.0 skips it and reads the mode `LEARNED`, which it does not know, as the height's
+ * estimate: a downgrade costs the curve, and nothing else. Numbers, never places.
+ */
+@Serializable
+internal data class LearnedStepDto(
+    val points: List<StepPointDto> = emptyList(),
+    val usualCadence: Int = 0,
+    val learntMeters: Double = 0.0,
+    val outings: Int = 0,
+    val throughMillis: Long = 0,
+    val replaced: String? = null,
+    val running: Boolean = true,
+)
+
+@Serializable
+internal data class StepPointDto(val cadence: Double = 0.0, val meters: Double = 0.0)
 
 /** The reader's choices; not whether this phone is counting, nor whether its first run is done. */
 @Serializable
@@ -83,6 +103,7 @@ internal data class PlanDto(
     val position: Int = 0,
     val lastUsedAtMillis: Long? = null,
     val intervals: IntervalsDto? = null,
+    val gps: Boolean = false,
 )
 
 @Serializable
@@ -115,7 +136,45 @@ internal data class OutingDto(
     val walkFromMeters: Int = 0,
     val intervals: IntervalsDto? = null,
     val splits: List<SplitDto> = emptyList(),
+    val gps: Boolean = false,
+    val stepsMeters: Double? = null,
+    val measuredShare: Double? = null,
+    val stepLengthSamples: List<StepLengthSampleDto> = emptyList(),
+    val ascentMeters: Double? = null,
+    val descentMeters: Double? = null,
+    val legs: List<LegDto> = emptyList(),
+    val route: RouteDto? = null,
 )
+
+/**
+ * A hundred metres of an outing with GPS as it was walked (Phase 16), in order: an added field
+ * of the outing, no new version. Numbers, never places.
+ */
+@Serializable
+internal data class LegDto(
+    val meters: Double = 0.0,
+    val movingMillis: Long = 0,
+    val steps: Double = 0.0,
+    val endedAtMillis: Long = 0,
+    val ascentMeters: Double = 0.0,
+    val descentMeters: Double = 0.0,
+)
+
+/**
+ * Where an outing with GPS went (Phase 16): only in a file the reader asked to hold the routes.
+ * The points as the app keeps them (`RouteCodec`: differences in variable-length integers), in
+ * Base64: a route is a few thousand points, and the GPX the outing's page saves is the form to
+ * read one in.
+ */
+@Serializable
+internal data class RouteDto(val altitudes: String? = null, val points: String = "")
+
+/**
+ * What a clean stretch of an outing with GPS said of the step (Phase 15): an added field of the
+ * outing, no new version. A number, never a place.
+ */
+@Serializable
+internal data class StepLengthSampleDto(val cadence: Int = 0, val steps: Int = 0, val meters: Double = 0.0)
 
 /** An interval outing's sets (Phase 13): an added field, no new version. */
 @Serializable

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- La pagina di un’uscita (PLANNING.md §11 Fase 16). -->
+<resources>
+    <string name="outing_back">Indietro</string>
+    <string name="outing_when">%1$s · %2$s · %3$s</string>
+    <string name="outing_goal">Il suo obiettivo: %1$s</string>
+    <plurals name="outing_route_spoken">
+        <item quantity="one">Il tuo percorso: %1$s, %2$s, %3$d sosta.</item>
+        <item quantity="many">Il tuo percorso: %1$s, %2$s, %3$d soste.</item>
+        <item quantity="other">Il tuo percorso: %1$s, %2$s, %3$d soste.</item>
+    </plurals>
+    <string name="outing_route_spoken_no_stops">Il tuo percorso: %1$s, %2$s, senza soste.</string>
+    <string name="outing_route_heading">da %1$s a %2$s</string>
+    <string name="outing_route_loop">di ritorno al punto di partenza</string>
+    <string name="compass_north">nord</string>
+    <string name="compass_north_east">nord-est</string>
+    <string name="compass_east">est</string>
+    <string name="compass_south_east">sud-est</string>
+    <string name="compass_south">sud</string>
+    <string name="compass_south_west">sud-ovest</string>
+    <string name="compass_west">ovest</string>
+    <string name="compass_north_west">nord-ovest</string>
+    <string name="outing_map_dashes">I tratteggi sono i tratti coperti dai tuoi passi, senza satelliti.</string>
+    <string name="outing_no_fix">I satelliti non hanno mai risposto durante questa uscita: è stata contata dai tuoi passi, e non ha un percorso.</string>
+    <string name="outing_no_fix_so_far">Finora nessun satellite ha risposto: questa uscita è contata dai tuoi passi.</string>
+    <string name="outing_no_fix_yet">Nessun satellite ha ancora risposto. I tuoi passi stanno contando l’uscita, e il percorso comparirà qui appena uno risponde.</string>
+    <string name="outing_bead">%1$s · %2$s</string>
+
+    <string name="outing_numbers">I numeri</string>
+    <string name="outing_steps">Passi</string>
+    <string name="outing_steps_meaning">Contati dal contapassi del telefono.</string>
+    <string name="outing_distance">Distanza</string>
+    <string name="outing_distance_measured">Misurata dai satelliti. I tuoi passi dicevano %1$s.</string>
+    <string name="outing_distance_partly">Il %1$s viene dai tuoi passi, dove i satelliti non arrivavano. I soli passi dicevano %2$s.</string>
+    <string name="outing_distance_estimated">Una stima, dai tuoi passi e dalla lunghezza del tuo passo.</string>
+    <string name="outing_moving">Tempo in movimento</string>
+    <string name="outing_moving_meaning">Il tempo in cui camminavi: le soste non ci sono.</string>
+    <string name="outing_pace">Andatura</string>
+    <string name="outing_pace_meaning">Il tuo tempo in movimento sulla distanza misurata.</string>
+    <string name="outing_cadence">Cadenza</string>
+    <string name="outing_cadence_meaning">La tua media mentre eri in movimento.</string>
+    <string name="outing_energy">Calorie attive</string>
+    <string name="outing_energy_meaning">Una stima, dalla distanza e dal tuo peso.</string>
+    <string name="outing_energy_meaning_climb">Una stima, dalla distanza, dalla salita e dal tuo peso.</string>
+    <string name="outing_climb">Salita</string>
+    <string name="outing_climb_value">≈\u00A0%1$s</string>
+    <string name="outing_climb_meaning">Circa %1$s in discesa. Una stima, dalla pressione dell’aria e dai satelliti.</string>
+    <string name="outing_climb_meaning_satellites">Circa %1$s in discesa. Una stima approssimativa, dai soli satelliti: questo telefono non ha un sensore di pressione.</string>
+    <string name="outing_tile_spoken">%1$s: %2$s. %3$s</string>
+    <string name="outing_at_pace">Al tuo ritmo</string>
+
+    <string name="outing_splits_km">Chilometro per chilometro</string>
+    <string name="outing_splits_mile">Miglio per miglio</string>
+    <string name="outing_splits_note">Più lunga è la barra, più veloce è stato.</string>
+    <string name="outing_split_fastest">il più veloce</string>
+    <string name="outing_split_up">≈\u00A0%1$s in salita</string>
+    <string name="outing_split_down">≈\u00A0%1$s in discesa</string>
+    <string name="outing_split_spoken_km">Chilometro %1$s: %2$s</string>
+    <string name="outing_split_spoken_mile">Miglio %1$s: %2$s</string>
+    <string name="outing_split_spoken_last">Gli ultimi %1$s: %2$s</string>
+    <string name="outing_split_spoken_fastest">Il più veloce.</string>
+    <string name="outing_split_no_pace">troppo corto per un’andatura</string>
+
+    <string name="outing_profile">Com’è salita</string>
+    <string name="outing_profile_spoken">La salita lungo la distanza: da %1$s a %2$s, il punto più basso a %3$s e il più alto a %4$s.</string>
+
+    <string name="outing_route">Il tuo percorso</string>
+    <string name="outing_share_image">Condividi come immagine</string>
+    <string name="outing_share_image_note">La linea, la frase e tre numeri. Dentro non c’è nessuna strada.</string>
+    <string name="outing_share_gpx">Condividi come file GPX</string>
+    <string name="outing_save_gpx">Salva come file GPX</string>
+    <string name="outing_gpx_note">Il file dice dove hai camminato, dal primo passo all’ultimo.</string>
+    <string name="outing_share_chooser">Condividi il tuo percorso</string>
+    <string name="outing_saved">Salvato.</string>
+    <string name="outing_save_failed">Non è stato possibile salvarlo lì.</string>
+    <string name="outing_delete_route">Elimina questo percorso</string>
+    <string name="outing_delete_route_title">Eliminare questo percorso?</string>
+    <string name="outing_delete_route_text">La linea e i suoi luoghi vengono eliminati da questo telefono. L’uscita e i suoi numeri restano.</string>
+    <string name="outing_delete_route_confirm">Elimina</string>
+    <string name="outing_delete_route_cancel">Annulla</string>
+    <string name="outing_image_signature">Passo</string>
+    <string name="outing_step_at_pace">Il tuo passo a questo ritmo: %1$s</string>
+    <string name="outing_step_ready">Ora Passo può usare il passo misurato per ogni stima</string>
+</resources>

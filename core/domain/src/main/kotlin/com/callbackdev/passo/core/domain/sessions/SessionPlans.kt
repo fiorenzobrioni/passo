@@ -209,6 +209,10 @@ object SessionPlans {
      * The outing [plan] starts as, now: its goal copied (the rest of the day resolved to steps),
      * so changing the plan later does not change an outing under way or past. Null when there is
      * nothing to walk: the rest of a day whose goal is met, or all but met.
+     *
+     * @param withGps it starts measured with GPS (docs/adr/0016-location.md): the plan asks for
+     *   it, and the reader and the phone allow it right now. The caller knows the second half;
+     *   it is frozen in the outing either way, like the goal.
      */
     fun start(
         plan: SessionPlan,
@@ -216,6 +220,7 @@ object SessionPlans {
         localEpochDay: Long,
         todaySteps: Int,
         dailyGoalSteps: Int,
+        withGps: Boolean = false,
     ): Session? {
         val restOfDay = plan.goalKind == SessionGoalKind.REST_OF_DAY
         val kind = if (restOfDay) SessionGoalKind.STEPS else plan.goalKind
@@ -235,6 +240,8 @@ object SessionPlans {
                 localEpochDay = localEpochDay,
                 startedAtMillis = nowMillis,
                 intervals = intervals.intervals,
+                gps = withGps && plan.gps,
+                capAtMillis = nowMillis + SessionConstants.MAX_SESSION_MILLIS,
             )
         }
         return Session(
@@ -249,13 +256,16 @@ object SessionPlans {
             voice = plan.voice,
             localEpochDay = localEpochDay,
             startedAtMillis = nowMillis,
+            gps = withGps && plan.gps,
+            capAtMillis = nowMillis + SessionConstants.MAX_SESSION_MILLIS,
         )
     }
 
     /**
      * An outing on a city walk (Phase 11), from [fromMeters] along it to its end: its goal the
      * distance left, its signals the walk's places rather than shares of the goal (the goal, at
-     * the walk's end, is still told). Null when nothing is left of the walk.
+     * the walk's end, is still told). Null when nothing is left of the walk. Never with GPS: a
+     * walk from home is walked on the steps (docs/adr/0016-location.md, decision 13).
      */
     fun startWalk(walk: Way, fromMeters: Int, voice: SessionVoice, nowMillis: Long, localEpochDay: Long): Session? {
         val left = walk.lengthMeters - fromMeters
@@ -273,6 +283,7 @@ object SessionPlans {
             startedAtMillis = nowMillis,
             walk = walk.id,
             walkFromMeters = fromMeters.coerceIn(0, walk.lengthMeters),
+            capAtMillis = nowMillis + SessionConstants.MAX_SESSION_MILLIS,
         )
     }
 

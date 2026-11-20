@@ -55,6 +55,28 @@ data class IntervalSplit(
 )
 
 /**
+ * A hundred metres of an outing measured with GPS, as walked (Phase 16): what its kilometres or
+ * its miles are cut from, whichever the reader walks in. Numbers, never places.
+ *
+ * @property index the [index]th from 0.
+ * @property meters of the outing's fused distance: a hundred, but for the last one, which is
+ *   under way or was left short.
+ * @property movingMillis the time in motion it took, from the steps' own timestamps.
+ * @property steps the steps it took; a part of a batch's, so not whole.
+ * @property endedAtMillis when its last metre was walked, on the steps' clock.
+ * @property ascentMeters what was climbed in it, and [descentMeters] what was come down.
+ */
+data class OutingLeg(
+    val index: Int,
+    val meters: Double,
+    val movingMillis: Long = 0,
+    val steps: Double = 0.0,
+    val endedAtMillis: Long,
+    val ascentMeters: Double = 0.0,
+    val descentMeters: Double = 0.0,
+)
+
+/**
  * How the outing is walked: none, or a cadence to stay at or above (the CADENCE-adults bands,
  * and Passo's own running threshold). The cadence is what the phone measures; a pace in minutes
  * per kilometre would be this cadence in disguise, with the step length's error in it.
@@ -106,6 +128,8 @@ enum class SessionVoice {
  * @property voice each signal is also spoken, and where.
  * @property intervals the sets, for [SessionGoalKind.INTERVALS]; kept with any other kind, so a
  *   reader who switches away and back finds their own.
+ * @property gps «Measure with GPS» (docs/adr/0016-location.md): an outing started from it reads
+ *   the satellites while it counts, if the reader lets it. Off unless the reader turns it on.
  */
 data class SessionPlan(
     val id: Long = 0,
@@ -119,6 +143,7 @@ data class SessionPlan(
     val intervals: IntervalSets = IntervalSets(),
     val position: Int = 0,
     val lastUsedAtMillis: Long? = null,
+    val gps: Boolean = false,
 )
 
 /** Where an outing stands. */
@@ -192,6 +217,22 @@ data class SessionTotals(
  * @property intervals the sets of an interval outing (Phase 13); null for any other.
  * @property splits an interval outing's intervals as walked so far, in order: the one under way
  *   last.
+ * @property gps it is measured with GPS (docs/adr/0016-location.md): decided at the start, from
+ *   the plan and from what the reader and the phone allowed then, and frozen like the goal. Its
+ *   [totals]' distance is then the one fused from the fixes and the steps.
+ * @property stepsMeters what the steps alone would have said of an outing with GPS, kept beside
+ *   the fused distance; null without GPS, where the distance already is the steps'.
+ * @property measuredShare the share of the distance that came from fixes, 0 to 1; null without
+ *   GPS. The app says «measured» only at nine tenths or more.
+ * @property capAtMillis when it ends by itself if nobody says to go on: asked 15 minutes before,
+ *   and moved on by «Keep going». Null for an outing from before it was kept: the longest outing
+ *   from its start.
+ * @property capAskedForMillis the cap the question was last asked for, so it is asked once a cap
+ *   and not again by a process that restarted.
+ * @property ascentMeters what an outing with GPS climbed, an estimate from the blended
+ *   altitudes of its route (Phase 16), and [descentMeters] what it came down; null without GPS,
+ *   and until an altitude is known.
+ * @property legs an outing with GPS, a hundred metres at a time: what its splits are cut from.
  */
 data class Session(
     val id: Long = 0,
@@ -219,6 +260,14 @@ data class Session(
     val walkFromMeters: Int = 0,
     val intervals: IntervalSets? = null,
     val splits: List<IntervalSplit> = emptyList(),
+    val gps: Boolean = false,
+    val stepsMeters: Double? = null,
+    val measuredShare: Double? = null,
+    val capAtMillis: Long? = null,
+    val capAskedForMillis: Long? = null,
+    val ascentMeters: Double? = null,
+    val descentMeters: Double? = null,
+    val legs: List<OutingLeg> = emptyList(),
 ) {
     val reached: Boolean get() = reachedAtMillis != null
     val live: Boolean get() = state != SessionState.FINISHED

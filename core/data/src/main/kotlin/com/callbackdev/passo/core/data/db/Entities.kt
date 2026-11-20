@@ -77,6 +77,7 @@ data class SessionPlanEntity(
     @ColumnInfo(defaultValue = "3") val slowMinutes: Int = 3,
     @ColumnInfo(defaultValue = "3") val fastMinutes: Int = 3,
     @ColumnInfo(defaultValue = "5") val sets: Int = 5,
+    @ColumnInfo(defaultValue = "0") val gps: Boolean = false,
 )
 
 /**
@@ -116,7 +117,45 @@ data class SessionEntity(
     @ColumnInfo(defaultValue = "0") val slowMinutes: Int = 0,
     @ColumnInfo(defaultValue = "0") val fastMinutes: Int = 0,
     @ColumnInfo(defaultValue = "0") val sets: Int = 0,
+    @ColumnInfo(defaultValue = "0") val gps: Boolean = false,
+    @ColumnInfo(defaultValue = "NULL") val stepsMeters: Double? = null,
+    @ColumnInfo(defaultValue = "NULL") val measuredShare: Double? = null,
+    @ColumnInfo(defaultValue = "NULL") val capAtMillis: Long? = null,
+    @ColumnInfo(defaultValue = "NULL") val capAskedForMillis: Long? = null,
+    @ColumnInfo(defaultValue = "NULL") val ascentMeters: Double? = null,
+    @ColumnInfo(defaultValue = "NULL") val descentMeters: Double? = null,
 )
+
+/**
+ * What a clean stretch of an outing with GPS said of the reader's step (Phase 15, for Phase 17 to
+ * learn from; docs/adr/0016-location.md decision 12): measured from end to end at a steady
+ * [cadence], so many [steps] over so many [meters]. Numbers, never places: this table is in
+ * `passo.db`, which Android's backup carries, and the route it came from is not. Deleted with
+ * its outing.
+ */
+@Entity(tableName = "step_length_sample", indices = [Index("sessionId")])
+data class StepLengthSampleEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val sessionId: Long,
+    val cadence: Int,
+    val steps: Int,
+    val meters: Double,
+)
+
+/** A sample with its outing's start, as the step that learns reads it. */
+data class OutingSampleRow(
+    val sessionId: Long,
+    val startedAtMillis: Long,
+    val cadence: Int,
+    val steps: Int,
+    val meters: Double,
+)
+
+/** How many minutes had [steps] steps. */
+data class StepCount(val steps: Int, val minutes: Int)
+
+/** An outing's id with its start, the pair a route is matched to its outing by. */
+data class SessionStart(val id: Long, val startedAtMillis: Long)
 
 /**
  * One interval of an interval outing as it was walked (Phase 13): `intervalIndex` from 0, slow
@@ -132,11 +171,30 @@ data class SessionIntervalEntity(
     val zoneMillis: Long,
 )
 
-/** An outing with its intervals, read in one go. */
+/**
+ * A hundred metres of an outing measured with GPS as it was walked (Phase 16): `legIndex` from
+ * 0, the last one under way or left short. What the outing's kilometres or miles are cut from.
+ * Numbers, never places: written with the outing, deleted with it, kept when its route goes.
+ */
+@Entity(tableName = "session_leg", primaryKeys = ["sessionId", "legIndex"])
+data class SessionLegEntity(
+    val sessionId: Long,
+    val legIndex: Int,
+    val meters: Double,
+    val movingMillis: Long,
+    val steps: Double,
+    val endedAtMillis: Long,
+    val ascentMeters: Double,
+    val descentMeters: Double,
+)
+
+/** An outing with its intervals and its legs, read in one go. */
 data class SessionRow(
     @Embedded val session: SessionEntity,
     @Relation(parentColumn = "id", entityColumn = "sessionId")
     val intervals: List<SessionIntervalEntity>,
+    @Relation(parentColumn = "id", entityColumn = "sessionId")
+    val legs: List<SessionLegEntity>,
 )
 
 /**

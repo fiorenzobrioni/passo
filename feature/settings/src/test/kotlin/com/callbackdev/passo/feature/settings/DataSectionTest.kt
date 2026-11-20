@@ -2,6 +2,7 @@ package com.callbackdev.passo.feature.settings
 
 import android.graphics.Bitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.captureToImage
@@ -75,6 +76,67 @@ class DataSectionTest {
         compose.onNodeWithText("From a file Passo wrote. Nothing on this phone is deleted.").assertIsDisplayed()
         compose.onNodeWithText("CSV: one row per day, per minute or per outing.").assertIsDisplayed()
         snapshot("settings_data")
+    }
+
+    @Test
+    fun `a phone with no routes has no row about them`() {
+        show(DataUiState(contents = contents))
+
+        compose.onNodeWithTag(DataTags.WITH_ROUTES).assertDoesNotExist()
+        compose.onNodeWithTag(DataTags.DELETE_ROUTES).assertDoesNotExist()
+    }
+
+    @Test
+    fun `with routes kept - the backup can hold them, off unless asked, and says what that means`() {
+        show(DataUiState(contents = contents.copy(routes = 3, deletableRoutes = 3, deletableBytes = 28_400)))
+
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(DataTags.WITH_ROUTES))
+        compose.onNodeWithText("With the routes").assertIsDisplayed()
+        compose.onNodeWithText("Off, it holds numbers only.", substring = true).assertIsDisplayed()
+        // Off as the page opens; a touch turns it on for the backup written next.
+        snapshot("data_routes")
+        compose.onNodeWithTag(DataTags.WITH_ROUTES).assertHasClickAction().performClick()
+        snapshot("data_routes_on")
+    }
+
+    @Test
+    fun `deleting all routes says how many and what they weigh, and asks first`() {
+        var deleted = 0
+        show(
+            DataUiState(contents = contents.copy(routes = 3, deletableRoutes = 3, deletableBytes = 28_400)),
+            DataActions(deleteRoutes = { deleted++ }),
+        )
+
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(DataTags.DELETE_ROUTES))
+        compose.onNodeWithText("3 routes, ", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("Never in Android’s cloud backup.", substring = true).assertIsDisplayed()
+        compose.onNodeWithTag(DataTags.DELETE_ROUTES).performClick()
+        // Nothing is deleted by the touch: the dialog says what goes and what stays.
+        assertThat(deleted).isEqualTo(0)
+        compose.onNodeWithText("Your outings and their numbers stay", substring = true).assertIsDisplayed()
+        snapshot("data_routes_delete")
+        compose.onNodeWithTag(DataTags.DELETE_ROUTES_CONFIRM).performClick()
+        assertThat(deleted).isEqualTo(1)
+    }
+
+    @Test
+    fun `the route still being written is not offered for deletion, and is not counted`() {
+        // Two routes kept, one of them the outing's under way.
+        show(DataUiState(contents = contents.copy(routes = 2, deletableRoutes = 1, deletableBytes = 9_100)))
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(DataTags.DELETE_ROUTES))
+        compose.onNodeWithText("1 route, ", substring = true).assertIsDisplayed()
+        // «Every line» is not said of the one it keeps.
+        compose.onNodeWithTag(DataTags.DELETE_ROUTES).performClick()
+        compose.onNodeWithText("The outing still under way keeps its route.", substring = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun `with only the route still being written, there is nothing to delete, and no row for it`() {
+        show(DataUiState(contents = contents.copy(routes = 1, deletableRoutes = 0)))
+
+        compose.onNodeWithTag(DataTags.DELETE_ROUTES).assertDoesNotExist()
+        // The backup can still carry it.
+        compose.onNodeWithTag(DataTags.WITH_ROUTES).assertExists()
     }
 
     @Test

@@ -1,13 +1,14 @@
 package com.callbackdev.passo.core.tracking
 
-import android.app.ForegroundServiceStartNotAllowedException
+import android.app.Notification
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.ServiceInfo
+import android.content.pm.ApplicationInfo
 import android.hardware.SensorManager
+import android.location.LocationManager
 import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
@@ -16,8 +17,10 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
+import com.callbackdev.passo.core.data.db.RouteDatabase
 import com.callbackdev.passo.core.data.prefs.UserPreferences
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
+import com.callbackdev.passo.core.data.routes.RouteRepository
 import com.callbackdev.passo.core.data.sessions.LiveSession
 import com.callbackdev.passo.core.data.sessions.LiveSessionState
 import com.callbackdev.passo.core.data.sessions.SessionRepository
@@ -31,13 +34,25 @@ import com.callbackdev.passo.core.designsystem.format.intervalWord
 import com.callbackdev.passo.core.domain.goals.GoalReached
 import com.callbackdev.passo.core.domain.metrics.MetricsCalculator
 import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.routes.GpsAnswer
+import com.callbackdev.passo.core.domain.routes.GpsDuty
+import com.callbackdev.passo.core.domain.routes.GpsLines
+import com.callbackdev.passo.core.domain.routes.GpsReadiness
+import com.callbackdev.passo.core.domain.routes.LiveMeasure
+import com.callbackdev.passo.core.domain.routes.PressureTrack
+import com.callbackdev.passo.core.domain.routes.ReceiverState
+import com.callbackdev.passo.core.domain.routes.RouteHeights
+import com.callbackdev.passo.core.domain.routes.RouteMeter
+import com.callbackdev.passo.core.domain.routes.pace
 import com.callbackdev.passo.core.domain.sessions.IntervalSchedule
+import com.callbackdev.passo.core.domain.sessions.RouteHarvest
 import com.callbackdev.passo.core.domain.sessions.SessionAnnouncement
 import com.callbackdev.passo.core.domain.sessions.SessionConstants
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.sessions.SessionSignal
 import com.callbackdev.passo.core.domain.sessions.SessionTracker
 import com.callbackdev.passo.core.domain.sessions.SignalWake
+import com.callbackdev.passo.core.domain.sessions.capMillis
 import com.callbackdev.passo.core.domain.sessions.intervalAt
 import com.callbackdev.passo.core.domain.today.DayMinute
 import com.callbackdev.passo.core.domain.today.TodayOverview
@@ -120,6 +135,20 @@ import javax.inject.Inject
  * processor awake while it counts ([SignalWakeLock], [SignalWake]): the steps then arrive as they
  * are taken, and every signal with them. The one wake lock of Passo's own besides the shutdown
  * flush's; let go at a pause, the end, or the service's.
+ *
+ * An outing the reader asked to be measured with GPS (Phase 15, docs/adr/0016-location.md) adds
+ * a second type to this service while it counts, `location`, by a second `startForeground()`, and
+ * reads the satellites through [LocationSource]: on while the reader walks, asleep two minutes
+ * after they stop, off at a pause and at the end ([GpsDuty]). Location is a while-in-use
+ * permission, so the type is asked for only where the reader is using the app (a page, a
+ * launcher's shortcut, a touch on a notification); a refusal, and a process the system restarted,
+ * leave the outing counting from the steps. Nothing of this runs for any other outing, nor with
+ * none: the service starts and stays `health`.
+ *
+ * While that receiver is on, and only then, the pressure sensor is read too ([PressureSource],
+ * Phase 16): each point the route keeps is given its height from the pressure and the
+ * satellites together (`RouteHeights`), and what the outing climbed is counted on them. It asks
+ * for no permission, never wakes the processor by itself, and is removed with the receiver.
  */
 @AndroidEntryPoint
 class StepTrackingService : Service() {
@@ -141,6 +170,8 @@ class StepTrackingService : Service() {
 
     @Inject lateinit var ways: WayRepository
 
+    @Inject lateinit var routes: RouteRepository
+
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val persistMutex = Mutex()
 
@@ -151,6 +182,45 @@ class StepTrackingService : Service() {
     private lateinit var sensorSource: StepSensorSource
     private lateinit var powerManager: PowerManager
     private lateinit var signalWake: SignalWakeLock
+    private lateinit var locationSource: LocationSource
+    private lateinit var pressureSource: PressureSource
+
+    // The pressure of the last while, on the steps' clock, and the heights of the route of the
+    // outing under way, counted as its points are written (null for any other outing).
+    private val pressure = PressureTrack()
+    private var heights: OutingHeights? = null
+    private var pendingPressureFlush: CompletableDeferred<Unit>? = null
+
+    // An outing with GPS has just ended, and its last points still wait for their pressure: the
+    // sensor is kept the moment it takes to hand over what it holds, then removed.
+    private var pressureHeldForEnd = false
+
+    // The types this service is in the foreground with: `health`, and `location` while an
+    // outing with GPS counts. A restarted process comes back without the second.
+    private lateinit var foreground: ForegroundTypes
+
+    // «Still walking?» was on show when a pause put it away: the resume brings it back, and
+    // only then (one the reader swiped away stays away).
+    private var capAheadPutAway = false
+
+    // When the receiver was last asked for fixes, having been off or asleep; null while it is
+    // not on. What «no fix for a while» is counted from after a stop, for the card's line.
+    private var receiverAwakeSinceMillis: Long? = null
+
+    // The outing that started on the steps although its plan asked for GPS, and what stood in
+    // the way then: its card says so, with the way to change it. In memory only: said once.
+    private var onSteps: OnSteps? = null
+
+    // What the receiver and the type did during the outing under way, for its one log row.
+    private val gpsLog = GpsLog()
+
+    // Each time the receiver was asked for its fixes, oldest first, while the answers are
+    // awaited: the receiver completes its flushes in the order asked, so each completion is the
+    // answer to the oldest, and the meter settles through that one's moment, never through a
+    // later request still on its way (or through all of them, once the wait gives up). A
+    // command waiting for the fixes before it acts (a pause, a stop) waits for its own.
+    private val settleRequests = ArrayDeque<FixRequest>()
+    private var settleJob: Job? = null
 
     private var ledger: StepLedger? = null
     private var started = false
@@ -225,6 +295,25 @@ class StepTrackingService : Service() {
         signalWake = SignalWakeLock(powerManager) { detail ->
             ledger?.note(DiagnosticsEvent(System.currentTimeMillis(), DiagnosticsType.SIGNAL_WAKE, detail))
         }
+        foreground = ForegroundTypes(
+            start = { notification, types ->
+                ServiceCompat.startForeground(this, TrackingNotifications.NOTIFICATION_ID, notification, types)
+            },
+            onLocationType = { added, refusal ->
+                gpsLog.onType(added, refusal)
+                // Without the type the receiver cannot stay on: the outing goes on from the steps.
+                if (!added) stopReceiver(asleep = false)
+            },
+        )
+        pressureSource = PressureSource(
+            sensorManager = requireNotNull(getSystemService(SensorManager::class.java)) { "No SensorManager" },
+            handler = Handler(Looper.getMainLooper()),
+        )
+        // The fixes arrive on the main thread, where everything here runs: no locking.
+        locationSource = LocationSource(
+            manager = requireNotNull(getSystemService(LocationManager::class.java)) { "No LocationManager" },
+            executor = ContextCompat.getMainExecutor(this),
+        )
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -237,34 +326,45 @@ class StepTrackingService : Service() {
         // Only today's: after midnight the last one would show yesterday's numbers.
         val content = displayedToday()?.let { steps -> shownContent ?: NotificationContent(steps) }
             ?: NotificationContent(null)
-        try {
-            ServiceCompat.startForeground(
-                this,
-                TrackingNotifications.NOTIFICATION_ID,
-                notifications.build(content),
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH,
-            )
-        } catch (e: SecurityException) {
-            Log.w(TAG, "The health service type was refused", e)
-            stopSelf()
-            return START_NOT_STICKY
-        } catch (e: ForegroundServiceStartNotAllowedException) {
-            Log.w(TAG, "Foreground start not allowed from here", e)
+        // With the types it already holds: the app starts this service again every time it is
+        // opened, and every button of the notification is a start too. With `health` alone here,
+        // each of them would take the `location` type away from an outing with GPS.
+        if (!enterForeground(notifications.build(content), withLocation = locationTypeHeld)) {
             stopSelf()
             return START_NOT_STICKY
         }
+        // The reader has the app in front of them: the one start, besides an outing's own
+        // commands, from which the `location` type may be asked for.
+        val fromApp = intent?.getBooleanExtra(StepTracking.EXTRA_FROM_APP, false) == true
         if (intent?.action in SESSION_ACTIONS) commands.trySend(requireNotNull(intent))
         if (!started) {
             started = true
-            startTracking()
-        } else if (interactive) {
-            // Opened from the app, so someone is looking: the numbers catch up at once, and a
-            // forgotten outing is closed where it ended.
-            checkSession()
-            notifyNow()
+            startTracking(fromApp)
+        } else {
+            // An outing with GPS that lost its receiver to a restarted process takes it back as
+            // soon as the app is brought forward, with no touch; and with the receiver back, the
+            // wake lock that lets its steps steer it, on a phone that needs one.
+            if (fromApp && tracker?.session?.gps == true && !locationTypeHeld) {
+                applyRegistration(mayEngageGps = true)
+            }
+            if (interactive) {
+                // Opened from the app, so someone is looking: the numbers catch up at once, and
+                // a forgotten outing is closed where it ended.
+                checkSession()
+                notifyNow()
+            }
         }
         return START_STICKY
     }
+
+    /**
+     * Puts the service in the foreground with its types ([ForegroundTypes]): `health`, and
+     * `location` too when [withLocation] asks. False only when `health` itself was refused.
+     */
+    private fun enterForeground(notification: Notification, withLocation: Boolean): Boolean =
+        foreground.enter(notification, withLocation)
+
+    private val locationTypeHeld: Boolean get() = foreground.locationHeld
 
     override fun onDestroy() {
         link.attach(null)
@@ -275,6 +375,8 @@ class StepTrackingService : Service() {
         signalWake.hold(false)
         unregisterReceivers()
         sensorSource.close()
+        locationSource.close()
+        pressureSource.close()
         // Whatever is still buffered is written on a scope that outlives this one. If the
         // process dies first, the stored state is older than the counter and the next sample
         // recomputes the delta: nothing is lost, only the minutes may shift.
@@ -282,12 +384,28 @@ class StepTrackingService : Service() {
         // after the last write, and show the count it stopped at.
         val batch = ledger?.drain()
         val outing = tracker?.takeIf { it.session.live }
+        // An outing with GPS: its line is cut here, every step up to it settled with the fixes
+        // in hand, as at a pause; its distance goes with the outing below, and its last points
+        // with its route. The next start draws a line of its own.
+        // What the cut crossed cannot be told by a service going; the outing keeps it all the
+        // same (a goal reached ends it there, and is written so).
+        outing?.cutRoute(System.currentTimeMillis())
+        outing?.takeHeldSignals()
+        val harvest = outing?.takeIf { it.measuring }?.takeRoute()
         FinalWrites.launch {
             persistMutex.withLock {
                 if (batch != null) {
                     repository.persist(batch, System.currentTimeMillis(), outing?.session)
                 } else if (outing != null) {
                     sessions.save(outing.session)
+                }
+                if (outing != null && harvest != null) {
+                    try {
+                        writeHarvest(outing, harvest, ending = true)
+                        sessions.save(outing.session)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Writing the route as the service went failed", e)
+                    }
                 }
                 // Counting paused by the reader: an outing cannot go on without its steps. A
                 // service the system stopped keeps it, and the next start picks it up.
@@ -303,7 +421,7 @@ class StepTrackingService : Service() {
         super.onDestroy()
     }
 
-    private fun startTracking() {
+    private fun startTracking(fromApp: Boolean) {
         scope.launch {
             // A paused count is never started by a side door (an old notification's button, a
             // shortcut): the steps of the pause would be added at the first sample.
@@ -329,17 +447,36 @@ class StepTrackingService : Service() {
             sessions.liveSession()?.let {
                 tracker = newTracker(it)
                 if (it.voice != SessionVoice.OFF) speech.prepare()
+                // An outing with GPS comes back without its receiver, which a process the system
+                // restarted cannot have. Opened by the reader, it takes it back below; started
+                // by the system alone, it goes on from the steps and says so, once.
+                if (it.gps && it.state == SessionState.ACTIVE && !fromApp) tellGpsStopped(it)
+            }
+            // Places with no outing are not kept. Only where the routes' file exists: a reader
+            // who never measured with GPS never has it, and this must not make it.
+            if (getDatabasePath(RouteDatabase.NAME).exists()) {
+                try {
+                    sessions.deleteOrphanRoutes()
+                } catch (e: Exception) {
+                    Log.w(TAG, "Clearing the routes with no outing failed", e)
+                }
             }
             registerReceivers()
             // A reminder about to read the count asks for the sensor's batch first.
             link.attach { withContext(Dispatchers.Main.immediate) { flushSensor() } }
             launch { sensorSource.readings.collect(::onReading) }
+            launch { locationSource.readings.collect(::onLocationReading) }
+            launch { pressureSource.readings.collect(::onPressureReading) }
             launch { preferencesSource.data.distinctUntilChanged().collect(::onPreferences) }
             launch { for (command in commands) onSessionCommand(command) }
             persist()
             liveSteps.setServiceRunning(true)
             widgets.notify(WidgetEvent.TRACKING_STATE)
             onScreenChanged(powerManager.isInteractive)
+            // A process restarted mid-outing and started again by the reader opening the app:
+            // the outing with GPS takes its receiver back here. Started by the system alone, it
+            // goes on from the steps until the app is brought forward.
+            if (fromApp) applyGps(mayEngage = true)
             // The launcher keeps the shortcuts as they were last written, icons included, until
             // a plan is started, saved or deleted: a list written by an older version outlived it
             // (owner, 15 Nov 2026: every shortcut still wore the same mark). Written again on each
@@ -380,7 +517,7 @@ class StepTrackingService : Service() {
     // --- Persistence (PLANNING.md §4.5) --------------------------------------------------------
 
     /** Writes the buffer in one transaction. Never cancelled halfway, so never half-counted. */
-    private suspend fun persist() = withContext(NonCancellable) {
+    private suspend fun persist(final: Boolean = false) = withContext(NonCancellable) {
         persistMutex.withLock {
             val ledger = ledger ?: return@withLock
             val batch = ledger.drain()
@@ -408,10 +545,98 @@ class StepTrackingService : Service() {
                     sessionDirty = true
                 }
             }
+            // After the step batch's transaction, never inside it: `passo.db` is the truth, and
+            // a route that loses a chunk is a shorter line, not a lost outing.
+            writeRoute(final)
+            // The phone going down: what the last points climbed is written now, not with a
+            // next batch that will not come.
+            if (final && sessionDirty) {
+                tracker?.session?.let { outing ->
+                    try {
+                        sessions.save(outing)
+                        sessionDirty = false
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Writing the outing's last climb failed", e)
+                    }
+                }
+            }
             refreshStoredTodayLocked()
             inFlightToday = 0
             publishLive()
         }
+    }
+
+    /**
+     * Writes what the outing with GPS has to keep since it was last asked: the route's points,
+     * their altitude turned to mean sea level, as a chunk of `routes.db`, and what its clean
+     * stretches said of the step, in `passo.db`. Under [persistMutex]. [final]: no pressure is
+     * waited for, every point is written now.
+     */
+    private suspend fun writeRoute(final: Boolean = false) {
+        val current = tracker ?: return
+        val harvest = current.takeRoute()
+        if (harvest.isEmpty &&
+            heights?.takeIf { it.sessionId == current.session.id }?.heights?.hasWaiting != true
+        ) {
+            return
+        }
+        try {
+            writeHarvest(current, harvest, ending = final)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.e(TAG, "Writing the route failed", e)
+        }
+    }
+
+    /**
+     * Writes [harvest], the points and the samples [outing] has to keep: the points' altitude
+     * turned to mean sea level, then blended with the pressure (`RouteHeights`); what they
+     * climbed told to the outing, which prices it and lays it on its legs; the points appended
+     * to the route. Points whose pressure is still on its way wait for the next call, unless
+     * the outing is [ending]. Under [persistMutex].
+     */
+    private suspend fun writeHarvest(outing: SessionTracker, harvest: RouteHarvest, ending: Boolean) {
+        val session = outing.session
+        val measured = heightsOf(session)
+        val leveled = RouteAltitudes.aboveMeanSeaLevel(this, harvest.points)
+        val taken = measured.take(leveled, pressure, System.currentTimeMillis(), all = ending)
+        if (taken.climbed.isNotEmpty()) {
+            taken.climbed.forEach { outing.addClimb(it.atMillis, it.upMeters, it.downMeters) }
+            sessionDirty = true
+        }
+        routes.append(session.id, session.startedAtMillis, taken.points, measured.source)
+        sessions.addStepLengthSamples(session.id, harvest.samples)
+    }
+
+    /** The heights of [session]'s route, begun with its first points and kept until it is over for good. */
+    private fun heightsOf(session: Session): RouteHeights {
+        heights?.takeIf { it.sessionId == session.id }?.let { return it.heights }
+        return RouteHeights(barometer = pressureSource.available).also { heights = OutingHeights(session.id, it) }
+    }
+
+    private fun onPressureReading(reading: PressureReading) {
+        when (reading) {
+            is PressureReading.Sample -> {
+                val snapshot = snapshots.current()
+                val atMillis = snapshot.wallClockMillis -
+                    (snapshot.elapsedRealtimeNanos - reading.elapsedNanos) / NANOS_PER_MILLI
+                pressure.add(atMillis, reading.hpa)
+            }
+
+            PressureReading.FlushCompleted -> {
+                pendingPressureFlush?.complete(Unit)
+                pendingPressureFlush = null
+            }
+        }
+    }
+
+    /** The pressure's readings up to now, before an outing's last points are given their height. */
+    private suspend fun flushPressure() {
+        if (!pressureSource.requestFlush()) return
+        val done = pendingPressureFlush ?: CompletableDeferred<Unit>().also { pendingPressureFlush = it }
+        withTimeoutOrNull(FLUSH_TIMEOUT_MS) { done.await() }
+        pendingPressureFlush = null
     }
 
     private suspend fun refreshStoredTodayLocked() {
@@ -445,6 +670,7 @@ class StepTrackingService : Service() {
             if (on) {
                 // What was batched while the screen was off, then live events.
                 flushSensor()
+                askForFixes(System.currentTimeMillis())
                 catchUpDay()
                 checkSession()
                 applyRegistration()
@@ -474,7 +700,18 @@ class StepTrackingService : Service() {
                         if (flushed) "flushed" else "flush timed out",
                     ),
                 )
-                persist()
+                // An outing with GPS: the receiver's fixes up to now, its line cut where it
+                // stands, what that crossed told, and its last points written with their
+                // heights, the phone going down before more pressure could come.
+                if (tracker?.session?.live == true) {
+                    flushRoute()
+                    tracker?.takeIf { it.measuring }?.let {
+                        it.cutRoute(System.currentTimeMillis())
+                        sessionDirty = true
+                        onSessionSignals(it.takeHeldSignals())
+                    }
+                }
+                persist(final = true)
             } finally {
                 pending.finish()
             }
@@ -629,7 +866,7 @@ class StepTrackingService : Service() {
         if (outing != null) {
             val units = preferences?.settings?.units ?: UnitPreference.SYSTEM
             val now = System.currentTimeMillis()
-            val notice = SessionNotice(outing.session, outing.cadenceAt(now), units, now)
+            val notice = SessionNotice(outing.session, outing.cadenceAt(now), units, now, liveMeasure(outing, now))
             return NotificationContent(steps, units = units, session = notice)
         }
         val preferences = preferences ?: return NotificationContent(steps)
@@ -703,18 +940,26 @@ class StepTrackingService : Service() {
      * with the screen off. Paused, over, or none: exactly the registration of every other
      * moment (docs/adr/0002-sensor-reporting.md).
      */
-    private fun applyRegistration(reconsiderWake: Boolean = true) {
+    private fun applyRegistration(reconsiderWake: Boolean = true, mayEngageGps: Boolean = false) {
+        // First, so that the wake lock below knows whether the receiver is there to steer.
+        applyGps(mayEngageGps)
         val measuring = tracker?.session?.state == SessionState.ACTIVE
         // A phone its counter cannot wake, an outing with signals: the processor is kept awake
         // while it counts, and the steps come as they are taken (docs/adr/0013-interval-walks.md).
         if (reconsiderWake) {
             signalWake.hold(
                 SignalWake.needed(
-                    session = tracker?.session,
+                    // An outing with GPS keeps the processor awake so that its steps steer the
+                    // receiver: without the receiver (refused, or lost to a restarted process)
+                    // it is an outing like any other, awake only for its signals.
+                    session = tracker?.session?.let { if (locationTypeHeld) it else it.copy(gps = false) },
                     wakeUpCounter = sensorSource.wakeUpSensor != null,
                     signalsAllowed = sessionNotifications.signalsAllowed(),
                     nowMillis = System.currentTimeMillis(),
                 ),
+                // Bounded ten minutes past the outing's own cap, which «Keep going» moves.
+                timeoutMillis = tracker?.session?.let { SignalWake.timeoutMillis(it, System.currentTimeMillis()) }
+                    ?: SignalWake.TIMEOUT_MILLIS,
             )
             armLetGo()
         }
@@ -729,6 +974,241 @@ class StepTrackingService : Service() {
         }
         sensorSource.register(latency, wakeUp = measuring)
         startCountdown()
+    }
+
+    /**
+     * The receiver and the service's `location` type, as the outing stands now ([GpsDuty]): on
+     * while an outing with GPS counts and the reader walks, asleep two minutes after they stop,
+     * off at a pause and at the end. Asked at whatever arrives (a step batch, a batch of fixes,
+     * a command, the screen), never by a timer.
+     *
+     * @param mayEngage the reader is using the app right now (a page, a launcher's shortcut, a
+     *   touch on a notification): only then is the `location` type asked for, location being a
+     *   while-in-use permission. Without it a service that does not hold the type leaves things
+     *   as they are, and the outing goes on from the steps.
+     */
+    private fun applyGps(mayEngage: Boolean = false) {
+        val current = tracker
+        val now = System.currentTimeMillis()
+        val duty = GpsDuty.state(
+            session = current?.session,
+            canKeepGoing = current?.canKeepGoing(now) == true,
+            lastMotionAtMillis = current?.lastMotionAtMillis ?: now,
+            nowMillis = now,
+        )
+        if (duty == GpsDuty.State.OFF) {
+            stopReceiver(asleep = false)
+            if (locationTypeHeld) enterForeground(currentNotification(), withLocation = false)
+            return
+        }
+        if (!locationTypeHeld) {
+            if (!mayEngage || Gps.readiness(this) != GpsReadiness.READY) return
+            enterForeground(currentNotification(), withLocation = true)
+            if (!locationTypeHeld) return
+            sessionNotifications.cancelGpsStopped()
+        }
+        if (duty == GpsDuty.State.ASLEEP) {
+            stopReceiver(asleep = true)
+            return
+        }
+        val wasActive = locationSource.active
+        val granted = locationSource.start(batched = !interactive)
+        // With the receiver, and only with it: the pressure the route's heights are read from.
+        if (granted) pressureSource.start(batched = !interactive) else pressureSource.stop()
+        if (!wasActive) {
+            gpsLog.onAsked(SystemClock.elapsedRealtime(), granted)
+            receiverAwakeSinceMillis = now.takeIf { granted }
+        }
+    }
+
+    private fun stopReceiver(asleep: Boolean) {
+        receiverAwakeSinceMillis = null
+        if (!pressureHeldForEnd) pressureSource.stop()
+        if (!locationSource.active) return
+        locationSource.stop()
+        gpsLog.onStopped(asleep)
+    }
+
+    /**
+     * What the outing's card and notification show beyond its stored numbers: for one measured
+     * with GPS, the stretch whose fixes are not in yet, the pace now, and the receiver's line;
+     * for one that started on the steps although its plan asked for GPS, that, until it is
+     * mended (the permission granted from the card, location turned on again).
+     */
+    private fun liveMeasure(current: SessionTracker, nowMillis: Long): LiveMeasure {
+        val session = current.session
+        if (!session.gps) {
+            val reason = onSteps?.takeIf { it.sessionId == session.id }?.reason ?: return LiveMeasure()
+            if (Gps.readiness(this) == GpsReadiness.READY) {
+                onSteps = null
+                return LiveMeasure()
+            }
+            return LiveMeasure(line = GpsLines.onSteps(session, reason))
+        }
+        if (session.state != SessionState.ACTIVE) return LiveMeasure()
+        val receiver = ReceiverState(
+            typeHeld = locationTypeHeld,
+            readiness = Gps.readiness(this),
+            duty = GpsDuty.state(session, canKeepGoing = false, current.lastMotionAtMillis, nowMillis),
+            awakeSinceMillis = receiverAwakeSinceMillis,
+            lastFixAtMillis = current.lastFixAtMillis,
+            settledThroughMillis = current.settledThroughMillis,
+        )
+        return LiveMeasure(
+            openMeters = current.openMeters,
+            paceNow = current.paceNowAt(nowMillis),
+            line = GpsLines.of(session, receiver),
+        )
+    }
+
+    /** The counting notification as it stands, for a `startForeground()` that only changes the types. */
+    private fun currentNotification(): Notification =
+        notifications.build(shownContent ?: NotificationContent(displayedToday()))
+
+    /**
+     * The fixes of an outing with GPS: handed to its tracker on the steps' own clock, counted
+     * for the log's row; and a batch is also a moment to ask whether the reader still walks,
+     * since with no step no step batch comes to ask it.
+     */
+    private fun onLocationReading(reading: LocationReading) {
+        when (reading) {
+            is LocationReading.Fixes -> {
+                gpsLog.onFixes(
+                    elapsedMillis = reading.fixes.map { it.elapsedRealtimeNanos / NANOS_PER_MILLI },
+                    accuracyMeters = reading.fixes.map { if (it.hasAccuracy()) it.accuracy else Float.MAX_VALUE },
+                    screenOn = interactive,
+                )
+                val snapshot = snapshots.current()
+                tracker?.let { current -> reading.fixes.forEach { current.onFix(it.toFix(snapshot)) } }
+                applyGps()
+                // The first fix ends «Finding the satellites» on the card, with no step needed.
+                publishSession()
+            }
+
+            // Location turned off on the phone, or on again: the card and the notification say
+            // it at once, to whoever is looking.
+            is LocationReading.Provider -> {
+                publishSession()
+                if (interactive) notifyNow()
+            }
+
+            // The receiver has handed over everything it held when it was asked.
+            LocationReading.FlushCompleted -> settleNow()
+        }
+    }
+
+    /**
+     * After a batch of steps of an outing with GPS: the steps lead. Their batch has already
+     * woken the processor, and the receiver is asked for its fixes in that same wake; the
+     * distance is settled when they are in, so nothing is told on metres the fixes could take
+     * back. Where the receiver holds nothing back (the screen on, or it is asleep or absent),
+     * at once. The wait for its answer gives up after [FLUSH_TIMEOUT_MS], as the sensor's does:
+     * not a timer that wakes anything, the processor being awake for the batch in hand.
+     */
+    private fun settleSoon() {
+        if (tracker?.measuring != true) return
+        val now = System.currentTimeMillis()
+        // In the wake the step batch made: the pressure's readings too, for the points' heights.
+        pressureSource.requestFlush()
+        if (!askForFixes(now)) {
+            settleRoute(now)
+            return
+        }
+        if (settleJob?.isActive == true) return
+        settleJob = scope.launch {
+            delay(FLUSH_TIMEOUT_MS)
+            settleAll()
+        }
+    }
+
+    /**
+     * Asks the receiver for the fixes it holds through [nowMillis], kept in line for the meter
+     * of an outing with GPS. False when no answer will come (nothing batched), and nothing waits.
+     */
+    private fun askForFixes(nowMillis: Long, done: CompletableDeferred<Unit>? = null): Boolean {
+        if (!locationSource.requestFlush()) return false
+        if (tracker?.measuring == true) settleRequests.addLast(FixRequest(nowMillis, done))
+        return true
+    }
+
+    /**
+     * Before a pause, a stop or a resume of an outing with GPS: the receiver's fixes up to the
+     * touch, as [flushSensor] brings the steps up to it, and the distance settled with them. The
+     * line is then cut on metres that were measured, not on the half minute the receiver held.
+     */
+    private suspend fun flushRoute() {
+        if (tracker?.measuring != true) return
+        // The pressure up to the touch too: the points about to be written take their height
+        // from it.
+        flushPressure()
+        val done = CompletableDeferred<Unit>()
+        if (askForFixes(System.currentTimeMillis(), done)) withTimeoutOrNull(FLUSH_TIMEOUT_MS) { done.await() }
+        dropRequests()
+        settleJob?.cancel()
+        settleRoute(System.currentTimeMillis())
+    }
+
+    /** A flush completed: the fixes are in through the oldest request still awaited. */
+    private fun settleNow() {
+        val answered = settleRequests.removeFirstOrNull() ?: return
+        if (settleRequests.isEmpty()) settleJob?.cancel()
+        settleRoute(answered.atMillis)
+        answered.done?.complete(Unit)
+    }
+
+    /** The wait gave up: through the latest request, the meter measuring a late fix as any other. */
+    private fun settleAll() {
+        val latest = settleRequests.lastOrNull() ?: return
+        val waiting = settleRequests.mapNotNull { it.done }
+        settleRequests.clear()
+        settleRoute(latest.atMillis)
+        waiting.forEach { it.complete(Unit) }
+    }
+
+    /** Forgets every request awaited, none left waiting: the meter is settled through now anyway. */
+    private fun dropRequests() {
+        settleRequests.forEach { it.done?.complete(Unit) }
+        settleRequests.clear()
+    }
+
+    /** Settles the outing's distance through [throughMillis], and tells what the settled metres crossed. */
+    private fun settleRoute(throughMillis: Long) {
+        val current = tracker?.takeIf { it.measuring } ?: run {
+            dropRequests()
+            return
+        }
+        val signals = current.settle(throughMillis, System.currentTimeMillis())
+        sessionDirty = true
+        onSessionSignals(signals)
+        dropExpiredKeepGoing()
+        publishSession()
+        if (signals.isNotEmpty() && interactive) notifyNow()
+    }
+
+    /** An outing with GPS, in one log row when it ends: what the receiver, the type and the meter did. */
+    private fun logGpsSummary(session: Session) {
+        if (!gpsLog.used) return
+        val detail = gpsLog.drain(
+            wakeUpCounter = sensorSource.wakeUpSensor != null,
+            taken = tracker?.fixesTaken ?: 0,
+            refused = tracker?.fixesRefused ?: 0,
+            measuredShare = session.measuredShare,
+        )
+        ledger?.note(DiagnosticsEvent(System.currentTimeMillis(), DiagnosticsType.GPS, detail))
+    }
+
+    /**
+     * The receiver of an outing with GPS stopped, told once: a notification with the way back
+     * (docs/adr/0016-location.md, decision 4), and the voice if the outing speaks. No vibration
+     * of its own: the patterns are few, and each has one meaning. Posted even where the outings'
+     * signals are silenced: it says that what the reader asked for is no longer happening.
+     */
+    private fun tellGpsStopped(session: Session) {
+        val canResume = Gps.readiness(this) == GpsReadiness.READY
+        sessionNotifications.postGpsStopped(sessionNotifications.gpsStopped(session, canResume))
+        if (session.voice != SessionVoice.OFF && sessionNotifications.signalsAllowed()) {
+            speak(SessionAnnouncement.GpsStopped, session)
+        }
     }
 
     /**
@@ -851,6 +1331,10 @@ class StepTrackingService : Service() {
         if (steps <= 0) return
         onSessionSignals(tracker.onSteps(atWallMillis, steps))
         sessionDirty = true
+        // A step is what wakes a receiver put to sleep at a stop; then the steps lead, and their
+        // batch asks for the fixes that measure it.
+        applyGps()
+        settleSoon()
         dropExpiredKeepGoing()
         publishSession()
         if (this.tracker?.untilIntervalSignal() != null || pendingChange != null) afterIntervalBatch()
@@ -874,6 +1358,8 @@ class StepTrackingService : Service() {
                     if (session.vibrate && allowed) SessionHaptics.play(this, signal.milestone)
                     if (session.voice != SessionVoice.OFF && allowed) {
                         val cadence = current.cadenceAt(System.currentTimeMillis())
+                        // An outing with GPS says its pace too, where its distance is a measure.
+                        val pace = session.pace()
                         // At the goal: whether this outing's steps also took the day across its own.
                         val dayGoal = signal.milestone == SessionMilestone.GOAL &&
                             SessionAnnouncement.broughtDayGoal(
@@ -881,7 +1367,7 @@ class StepTrackingService : Service() {
                                 sessionSteps = session.totals.steps,
                                 dailyGoalSteps = preferences?.settings?.dailyGoalSteps ?: Int.MAX_VALUE,
                             )
-                        speak(SessionAnnouncement.milestone(session, signal.milestone, cadence, dayGoal), session)
+                        speak(SessionAnnouncement.milestone(session, signal.milestone, cadence, dayGoal, pace), session)
                     }
                     // Once, even with the screen off: whoever looks next sees where it stands.
                     if (signal.milestone != SessionMilestone.GOAL) notifyNow()
@@ -903,6 +1389,8 @@ class StepTrackingService : Service() {
                 // Told once the batch is in: a later change in the same batch replaces it.
                 is SessionSignal.IntervalChange -> pendingChange = signal
 
+                is SessionSignal.CapAhead -> tellCapAhead()
+
                 is SessionSignal.Finished -> onSessionFinished(signal)
             }
         }
@@ -913,23 +1401,54 @@ class StepTrackingService : Service() {
         // The goal is the last interval's end: its long pulse, never a change on top of it.
         pendingChange = null
         logIntervalSummary(session)
+        if (session.gps) logGpsSummary(session)
+        // What the route has to keep up to its end, taken while the tracker is still in hand:
+        // the tracker itself too, which takes the climb of those last points after the service
+        // has let it go.
+        val ending = tracker
+        val harvest = ending?.takeRoute()
+        sessionNotifications.cancelGpsStopped()
         // Kept a while after its goal or a long stillness, for "Keep going" and "Resume";
         // otherwise it is over here. The voice is let go once its last sentence is said.
         val reopenable = finished.kept && tracker?.canKeepGoing(System.currentTimeMillis()) == true
         if (!reopenable) tracker = null
+        // The question before the cap is answered by the end, whatever ended it.
+        sessionNotifications.cancelCapAhead()
         if (reopenable && session.end == SessionEnd.IDLE) tellEndedStill(session)
+        if (reopenable && session.end == SessionEnd.CLOSED) tellEndedAtCap(session)
         speech.release()
         sessionDirty = false
+        // The receiver goes with the end, just below; the pressure sensor a moment after it,
+        // once it has handed over the readings of the outing's last points.
+        pressureHeldForEnd = session.gps && pressureSource.active
         scope.launch {
             persistMutex.withLock {
                 try {
-                    if (finished.kept) sessions.save(session) else sessions.delete(session.id)
+                    if (finished.kept) {
+                        sessions.save(session)
+                        if (ending != null && harvest != null && session.gps) {
+                            // The last points' heights, with the readings up to the end; what
+                            // they climbed is the outing's, written with it.
+                            flushPressure()
+                            writeHarvest(ending, harvest, ending = true)
+                            sessions.save(ending.session)
+                            sessionDirty = false
+                        }
+                    } else {
+                        // Too short to keep: its route goes first, then the outing.
+                        sessions.delete(session.id)
+                    }
                     // A city walk walked to its last place is done: the next outing on it
                     // begins it again.
                     val walk = session.walk
                     if (walk != null && session.end == SessionEnd.GOAL) ways.finishWalk(walk, today())
                 } catch (e: Exception) {
                     Log.e(TAG, "Writing the end of an outing failed", e)
+                }
+                if (pressureHeldForEnd) {
+                    pressureHeldForEnd = false
+                    // Unless the receiver is on again meanwhile (an end taken back at once).
+                    if (!locationSource.active) pressureSource.stop()
                 }
             }
         }
@@ -955,6 +1474,48 @@ class StepTrackingService : Service() {
     }
 
     /**
+     * «Still walking?», a quarter of an hour before the longest an outing stays open
+     * (docs/adr/0016-location.md, decision 14): the stillness's two long pulses, the voice if the
+     * outing speaks, and a notification with «Keep going». It rides on the step batch that came
+     * within that quarter of an hour, as every signal does: no timer, and a reader who is not
+     * walking is not asked. The notification is posted even where the signals are silenced: it
+     * is a question, and an outing that ends unasked is the fault this exists to mend.
+     */
+    private fun tellCapAhead() {
+        val session = tracker?.session?.takeIf { it.live } ?: return
+        val now = System.currentTimeMillis()
+        // Handed over after the cap (the counter's own delay): nothing can answer it any more,
+        // and the end that comes with the next steps says so, with «Keep going».
+        if (now >= session.capMillis) return
+        val asked = SessionAnnouncement.capAhead(session, now)
+        sessionNotifications.postCapAhead(sessionNotifications.capAhead(session, now))
+        if (sessionNotifications.signalsAllowed()) {
+            if (session.vibrate) SessionHaptics.playEndedStill(this)
+            if (session.voice != SessionVoice.OFF) speak(asked, session)
+        }
+        publishSession()
+    }
+
+    /** The question as it stands, posted again in silence, where it is open and its cap ahead. */
+    private fun repostCapAhead() {
+        val now = System.currentTimeMillis()
+        val session = tracker?.session?.takeIf {
+            it.state == SessionState.ACTIVE && it.capAskedForMillis == it.capMillis && now < it.capMillis
+        } ?: return
+        sessionNotifications.postCapAhead(sessionNotifications.capAhead(session, now))
+    }
+
+    /**
+     * The end at the cap, the question having gone unanswered, told as the reader walks on (or
+     * looks): it was silent, and for good. Once, as the end by stillness is.
+     */
+    private fun tellEndedAtCap(session: Session) {
+        if (!sessionNotifications.signalsAllowed()) return
+        if (session.vibrate) SessionHaptics.playEndedStill(this)
+        if (session.voice != SessionVoice.OFF) speak(SessionAnnouncement.endedAtCap(session), session)
+    }
+
+    /**
      * Past its "Keep going" window, or put away by the reader ([now]), an ended outing is over
      * for good: the button goes too.
      */
@@ -964,6 +1525,8 @@ class StepTrackingService : Service() {
         if (session.state != SessionState.FINISHED) return
         if (!now && current.canKeepGoing(System.currentTimeMillis())) return
         tracker = null
+        // The receiver stayed on while the end could be taken back: it cannot any more.
+        applyGps()
         publishSession()
         if (sessionNotifications.endShowing()) {
             val units = preferences?.settings?.units ?: UnitPreference.SYSTEM
@@ -981,6 +1544,7 @@ class StepTrackingService : Service() {
                     cadence = it.cadenceAt(now),
                     canKeepGoing = it.canKeepGoing(now),
                     alertsWhileScreenOff = sensorSource.wakeUpSensor != null,
+                    measure = liveMeasure(it, now),
                 )
             },
         )
@@ -1003,17 +1567,47 @@ class StepTrackingService : Service() {
                     if (walk != null) startWalk(walk, command.getBooleanExtra(SessionControl.EXTRA_AGAIN, false))
                 }
 
-                SessionControl.ACTION_PAUSE -> changeSession { tracker -> tracker.pause(System.currentTimeMillis()) }
+                // A paused outing's cap waits with it: the question's countdown would run on
+                // a time that is not passing, so it is put away and comes back at the resume.
+                SessionControl.ACTION_PAUSE -> {
+                    val showing = sessionNotifications.capAheadShowing()
+                    if (changeSession { tracker -> tracker.pause(System.currentTimeMillis()) }) {
+                        capAheadPutAway = showing
+                        sessionNotifications.cancelCapAhead()
+                    }
+                }
 
-                SessionControl.ACTION_RESUME -> changeSession { tracker -> tracker.resume(System.currentTimeMillis()) }
+                SessionControl.ACTION_RESUME -> {
+                    val resumed = changeSession(mayEngageGps = true) { tracker ->
+                        tracker.resume(System.currentTimeMillis())
+                    }
+                    // Asked already, not answered, and on show when the pause put it away: the same
+                    // question, with the cap the pause moved, and without the pulses a second time.
+                    if (resumed && capAheadPutAway) repostCapAhead()
+                    if (resumed) capAheadPutAway = false
+                }
+
+                // «Keep going» to the question before the cap: the cap moves on, nothing stops.
+                SessionControl.ACTION_KEEP_GOING if tracker?.session?.state == SessionState.ACTIVE -> {
+                    val moved = changeSession { tracker -> tracker.goOn(System.currentTimeMillis()) }
+                    if (moved) {
+                        sessionNotifications.cancelCapAhead()
+                        tracker?.session?.let {
+                            signalWake.renew(SignalWake.timeoutMillis(it, System.currentTimeMillis()))
+                        }
+                    }
+                }
 
                 SessionControl.ACTION_KEEP_GOING -> {
                     var crossed: List<SessionSignal> = emptyList()
-                    val reopened = changeSession { tracker ->
+                    val reopened = changeSession(mayEngageGps = true) { tracker ->
                         tracker.keepGoing(System.currentTimeMillis())?.also { crossed = it } != null
                     }
                     if (reopened) {
                         sessionNotifications.cancelEnd()
+                        // The end put the question away; taken back before its cap, it is open
+                        // again, and shown again.
+                        repostCapAhead()
                         if (tracker?.session?.voice?.let { it != SessionVoice.OFF } == true) speech.prepare()
                         // The steps since the end may have crossed a milestone, a change, or the goal.
                         onSessionSignals(crossed)
@@ -1023,9 +1617,18 @@ class StepTrackingService : Service() {
 
                 SessionControl.ACTION_DISMISS -> dropExpiredKeepGoing(now = true)
 
+                // «Resume GPS», from the card or the notification that told the stop: a touch,
+                // so the `location` type may be asked for again.
+                SessionControl.ACTION_RESUME_GPS -> {
+                    applyRegistration(mayEngageGps = true)
+                    notifyNow()
+                    publishSession()
+                }
+
                 SessionControl.ACTION_STOP -> {
-                    // The steps up to the touch belong to the outing.
+                    // The steps up to the touch belong to the outing, and their fixes with them.
                     flushSensor()
+                    flushRoute()
                     tracker?.stop(System.currentTimeMillis())?.let(::onSessionFinished)
                 }
             }
@@ -1040,13 +1643,16 @@ class StepTrackingService : Service() {
      * Pause, resume, keep going: after the sensor's batch, so the steps up to the touch land on
      * the right side of it. Returns whether it changed anything.
      */
-    private suspend fun changeSession(change: (SessionTracker) -> Boolean): Boolean {
+    private suspend fun changeSession(mayEngageGps: Boolean = false, change: (SessionTracker) -> Boolean): Boolean {
         flushSensor()
+        flushRoute()
         val tracker = tracker ?: return false
         if (!change(tracker)) return false
         sessionDirty = true
+        // A pause cuts the line of an outing with GPS: what its last metres crossed is told.
+        onSessionSignals(tracker.takeHeldSignals())
         persist()
-        applyRegistration()
+        applyRegistration(mayEngageGps = mayEngageGps)
         notifyNow()
         publishSession()
         widgets.notify(WidgetEvent.TRACKING_STATE)
@@ -1079,18 +1685,43 @@ class StepTrackingService : Service() {
         val now = System.currentTimeMillis()
         val day = today()
         val todaySteps = displayedToday() ?: repository.stepsOn(day)
-        val session = SessionPlans.start(plan, now, day, todaySteps, current.settings.dailyGoalSteps) ?: return
+        // Measured with GPS when the plan asks for it and the reader and the phone allow it right
+        // now: decided here, for every door alike (a page, a shortcut, the reminder's "Walk
+        // now"), and frozen in the outing. Nothing is asked from here: the permission is the
+        // app's to ask, before the command is sent.
+        val readiness = if (plan.gps) Gps.readiness(this) else null
+        val withGps = readiness == GpsReadiness.READY
+        val session = SessionPlans.start(plan, now, day, todaySteps, current.settings.dailyGoalSteps, withGps)
+            ?: return
         val saved = persistMutex.withLock { sessions.insert(session) }
         if (plan.id != 0L) sessions.markPlanUsed(plan.id, now)
         tracker = newTracker(saved, current.profile)
+        onSteps = readiness?.let { startedOnSteps(saved, it) }
         if (saved.voice != SessionVoice.OFF && sessionNotifications.signalsAllowed()) {
             speak(SessionAnnouncement.started(saved), saved)
         }
-        applyRegistration()
+        // A start is the reader using the app, from every door there is: the type may be asked.
+        applyRegistration(mayEngageGps = true)
         notifyNow()
         publishSession()
         widgets.notify(WidgetEvent.TRACKING_STATE)
         SessionShortcuts.update(this, sessions.plansByUse(), current.settings.units)
+    }
+
+    /**
+     * What the card of an outing says when its plan asked for GPS and it started on the steps
+     * (the permission refused or approximate, location off on the phone): null when nothing is
+     * to be said. A refusal is told once, on the first outing it costs, and not at every outing
+     * after it (PLANNING.md §11 «The bar», words); what is not a refusal (the reminder's "Walk
+     * now" before the permission was ever asked, location turned off) is said each time.
+     */
+    private suspend fun startedOnSteps(session: Session, readiness: GpsReadiness): OnSteps? {
+        if (GpsLines.onSteps(session, readiness) == null) return null
+        if (GpsLines.toldOnce(readiness) && preferencesSource.gpsAnswer() == GpsAnswer.REFUSED) {
+            if (preferencesSource.gpsOnStepsTold()) return null
+            preferencesSource.markGpsOnStepsTold()
+        }
+        return OnSteps(session.id, readiness)
     }
 
     /**
@@ -1140,12 +1771,28 @@ class StepTrackingService : Service() {
 
     private suspend fun newTracker(session: Session, profile: Profile? = null): SessionTracker {
         val measuredWith = profile ?: preferencesSource.current().profile
-        return SessionTracker(session, StepLengths.of(measuredWith), MetricsCalculator.weightKg(measuredWith))
+        // A meter for an outing with GPS (any other ignores it). A mock fix is taken only by a
+        // debuggable build, where a route can be replayed on a desk; never by a release, the one
+        // signed with the debug key for testing included: a walk is not to be faked there.
+        val debuggable = applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
+        return SessionTracker(
+            session,
+            StepLengths.of(measuredWith),
+            MetricsCalculator.weightKg(measuredWith),
+            RouteMeter(allowMock = debuggable),
+        )
     }
 
     private fun today(): Long = LocalDate.now(ZoneId.systemDefault()).toEpochDay()
 
     private data class StoredDay(val day: Long, val steps: Int)
+
+    private class OnSteps(val sessionId: Long, val reason: GpsReadiness)
+
+    private class OutingHeights(val sessionId: Long, val heights: RouteHeights)
+
+    /** The receiver asked for its fixes through [atMillis]; [done] for one a command waits on. */
+    private class FixRequest(val atMillis: Long, val done: CompletableDeferred<Unit>?)
 
     private class StoredMinutes(val day: Long, val version: Long, val minutes: List<MinuteSteps>)
 
@@ -1184,6 +1831,7 @@ class StepTrackingService : Service() {
             SessionControl.ACTION_STOP,
             SessionControl.ACTION_KEEP_GOING,
             SessionControl.ACTION_DISMISS,
+            SessionControl.ACTION_RESUME_GPS,
         )
 
         /** How long a flush may take before the shutdown gives up on it (PLANNING.md §4.2). */
@@ -1192,6 +1840,7 @@ class StepTrackingService : Service() {
         const val NOTIFY_INTERVAL_MS = 5_000L
         const val MILLIS_PER_MINUTE = 60_000L
         const val MINUTES_PER_HOUR = 60
+        const val NANOS_PER_MILLI = 1_000_000L
 
         /** HTC and a few other vendors' fast power-off, which skips ACTION_SHUTDOWN. */
         const val ACTION_QUICKBOOT_POWEROFF = "android.intent.action.QUICKBOOT_POWEROFF"

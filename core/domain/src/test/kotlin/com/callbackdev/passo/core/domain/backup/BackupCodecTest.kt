@@ -5,15 +5,20 @@ import com.callbackdev.passo.core.domain.backup.BackupFixtures.backup
 import com.callbackdev.passo.core.domain.backup.BackupFixtures.day
 import com.callbackdev.passo.core.domain.backup.BackupFixtures.minutes
 import com.callbackdev.passo.core.domain.backup.BackupFixtures.session
+import com.callbackdev.passo.core.domain.routes.Splits
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.model.AppPalette
 import com.callbackdev.passo.core.model.DiagnosticsEvent
 import com.callbackdev.passo.core.model.DiagnosticsType
 import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.IntervalSplit
+import com.callbackdev.passo.core.model.LearnedStep
+import com.callbackdev.passo.core.model.OutingLeg
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.Sex
 import com.callbackdev.passo.core.model.StepLengthMode
+import com.callbackdev.passo.core.model.StepLengthSample
+import com.callbackdev.passo.core.model.StepPoint
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.UserSettings
 import com.google.common.truth.Truth.assertThat
@@ -55,6 +60,143 @@ class BackupCodecTest {
         val read = BackupCodec.decode(BackupCodec.encode(full))
 
         assertThat(read).isEqualTo(BackupRead.Ok(full))
+    }
+
+    private val learned = BackupFixtures.profile.copy(
+        stepLengthMode = StepLengthMode.LEARNED,
+        walkingStepLengthMeters = 0.742,
+        learnedStep = LearnedStep(
+            points = listOf(StepPoint(94.5, 0.76), StepPoint(116.0, 0.81), StepPoint(161.0, 1.04)),
+            usualCadence = 104,
+            learntMeters = 14_230.0,
+            outings = 6,
+            throughMillis = 1_790_000_000_000,
+            replaced = StepLengthMode.CALIBRATED,
+            running = false,
+        ),
+    )
+
+    @Test
+    fun `a learnt step reads back with its curve and its way back`() {
+        val withCurve = full.copy(profile = learned)
+
+        assertThat(BackupCodec.decode(BackupCodec.encode(withCurve))).isEqualTo(BackupRead.Ok(withCurve))
+        assertThat(BackupCodec.encode(withCurve)).contains("\"stepLengthMode\":\"LEARNED\"")
+    }
+
+    @Test
+    fun `a file from before the step learnt reads without a curve`() {
+        val read = BackupCodec.decode(BackupCodec.encode(full)) as BackupRead.Ok
+
+        assertThat(read.backup.profile.learnedStep).isNull()
+        assertThat(read.backup.stepFallback).isFalse()
+    }
+
+    @Test
+    fun `a file of this version imported by 1_1_0 falls back to the height's estimate`() {
+        // What 1.1.0 does with this file: it skips the curve it does not know, and reads the mode
+        // `LEARNED`, unknown to it, as the height's estimate (tag v1.1.0, BackupCodec).
+        val text = BackupCodec.encode(full.copy(profile = learned))
+            .replace(Regex("\"learnedStep\":\\{.*?\\]\\s*,.*?\\}"), "\"skipped\":0")
+        val read = BackupCodec.decode(text) as BackupRead.Ok
+
+        assertThat(text).doesNotContain("learnedStep")
+        assertThat(read.backup.profile.stepLengthMode).isEqualTo(StepLengthMode.AUTO)
+        assertThat(read.backup.profile.learnedStep).isNull()
+    }
+
+    @Test
+    fun `a mode it does not know falls back to the height's estimate and says so`() {
+        val text = BackupCodec.encode(
+            full,
+        ).replace("\"stepLengthMode\":\"CALIBRATED\"", "\"stepLengthMode\":\"DREAMED\"")
+        val read = BackupCodec.decode(text) as BackupRead.Ok
+
+        assertThat(read.backup.profile.stepLengthMode).isEqualTo(StepLengthMode.AUTO)
+        assertThat(read.backup.stepFallback).isTrue()
+        assertThat((BackupCodec.decode(BackupCodec.encode(full)) as BackupRead.Ok).backup.stepFallback).isFalse()
+    }
+
+    @Test
+    fun `an outing measured with GPS reads back with its numbers and what it said of the step`() {
+        val plan = SessionPlans.NEW.copy(id = 11, gps = true, position = 1)
+        val outing = session(1_790_000_000_000, planId = 11).copy(
+            gps = true,
+            stepsMeters = 5_050.0,
+            measuredShare = 0.96,
+        )
+        val samples = listOf(StepLengthSample(110, 330, 252.0), StepLengthSample(128, 256, 216.5))
+        val measured = full.copy(
+            plans = full.plans + plan,
+            sessions = full.sessions + outing,
+            stepLengthSamples = mapOf(outing.startedAtMillis to samples),
+        )
+
+        assertThat(BackupCodec.decode(BackupCodec.encode(measured))).isEqualTo(BackupRead.Ok(measured))
+    }
+
+    @Test
+    fun `the file holds an outing's numbers, never where it went`() {
+        val outing = session(1_790_000_000_000).copy(gps = true, stepsMeters = 5_050.0, measuredShare = 0.96)
+        val measured = full.copy(
+            sessions = listOf(outing),
+            stepLengthSamples = mapOf(outing.startedAtMillis to listOf(StepLengthSample(110, 330, 252.0))),
+        )
+
+        val text = BackupCodec.encode(measured)
+
+        assertThat(text).contains("\"gps\"")
+        assertThat(text).contains("\"measuredShare\"")
+        assertThat(text).doesNotContainMatch("(?i)latitude|longitude|\"lat\"|\"lon\"|route|chunk")
+    }
+
+    @Test
+    fun `an outing without GPS writes none of it, and a file from before reads as it always did`() {
+        val text = BackupCodec.encode(full)
+        val read = (BackupCodec.decode(text) as BackupRead.Ok).backup
+
+        assertThat(read.sessions.none { it.gps }).isTrue()
+        assertThat(read.sessions.all { it.stepsMeters == null && it.measuredShare == null }).isTrue()
+        assertThat(read.stepLengthSamples).isEmpty()
+        assertThat(read.plans.none { it.gps }).isTrue()
+    }
+
+    @Test
+    fun `what cannot be a measure is dropped, and the outing kept`() {
+        val outing = session(1_790_000_000_000).copy(gps = true, stepsMeters = 5_050.0, measuredShare = 0.96)
+        val measured = full.copy(
+            sessions = listOf(outing),
+            stepLengthSamples = mapOf(outing.startedAtMillis to listOf(StepLengthSample(110, 330, 252.0))),
+        )
+        val broken = BackupCodec.encode(measured)
+            .replace(Regex("\"measuredShare\"\\s*:\\s*0\\.96"), "\"measuredShare\": 7.5")
+            .replace(Regex("\"steps\"\\s*:\\s*330"), "\"steps\": 0")
+        assertThat(broken).contains("7.5")
+
+        val read = (BackupCodec.decode(broken) as BackupRead.Ok).backup
+
+        // A share is between nothing and all; a sample with no steps says nothing of a step.
+        assertThat(read.sessions.single().measuredShare).isEqualTo(1.0)
+        assertThat(read.stepLengthSamples).isEmpty()
+    }
+
+    @Test
+    fun `a leg no outing can have is dropped, and its splits are cut from the rest`() {
+        val legs = listOf(
+            OutingLeg(0, 100.0, 70_000, 130.0, endedAtMillis = 1_790_000_070_000),
+            OutingLeg(1, 100.0, 70_000, 130.0, endedAtMillis = 1_790_000_140_000),
+        )
+        val outing = session(1_790_000_000_000).copy(gps = true, stepsMeters = 210.0, measuredShare = 0.96, legs = legs)
+        val text = BackupCodec.encode(full.copy(sessions = listOf(outing)))
+        // A damaged or hand-edited file: a leg of ten thousand billion metres.
+        val broken = text.replaceFirst(Regex("\"meters\"\\s*:\\s*100(\\.0)?"), "\"meters\": 1e13")
+        assertThat(broken).contains("1e13")
+
+        val read = (BackupCodec.decode(broken) as BackupRead.Ok).backup.sessions.single()
+
+        assertThat(read.legs.map { it.meters }).containsExactly(100.0)
+        assertThat(read.legs.single().index).isEqualTo(0)
+        assertThat(Splits.of(read.legs, 1_000.0).single().meters).isEqualTo(100.0)
     }
 
     @Test

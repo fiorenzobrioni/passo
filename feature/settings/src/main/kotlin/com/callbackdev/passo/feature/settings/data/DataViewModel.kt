@@ -112,12 +112,20 @@ constructor(
 
     fun tableFileName(table: CsvTable): String = CsvExport.fileName(table, LocalDate.now())
 
-    /** Writes the whole backup to [uri], a file the reader just created. */
-    fun writeBackup(uri: Uri) = run(DataTask.WRITING_BACKUP) {
+    /**
+     * Writes the whole backup to [uri], a file the reader just created; [withRoutes] when they
+     * ticked «With the routes»: the file then says where the outings with GPS went too.
+     */
+    fun writeBackup(uri: Uri, withRoutes: Boolean = false) = run(DataTask.WRITING_BACKUP) {
         // With the screen off the sensor hub holds up to ten minutes of steps: take them first,
         // so the file has the walk just finished.
         tracker.catchUp()
-        val backup = backups.backup(appVersion = appVersion(), nowMillis = System.currentTimeMillis(), zone = zone())
+        val backup = backups.backup(
+            appVersion = appVersion(),
+            nowMillis = System.currentTimeMillis(),
+            zone = zone(),
+            withRoutes = withRoutes,
+        )
         val written = write(uri, BackupCodec.encode(backup))
         if (written) {
             DataOutcome.BackupWritten(displayName(uri), backup.days.size, backup.sessions.size)
@@ -175,6 +183,11 @@ constructor(
 
     fun dismissOutcome() {
         outcome.value = null
+    }
+
+    /** Deletes every route kept on this phone: the lines and their places. The outings stay. */
+    fun deleteRoutes() {
+        viewModelScope.launch { backups.deleteRoutes() }
     }
 
     /** One task at a time; its outcome replaces the last one. */

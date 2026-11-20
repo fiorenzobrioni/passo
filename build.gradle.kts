@@ -12,6 +12,15 @@ plugins {
     alias(libs.plugins.spotless)
 }
 
+// `./gradlew test` also runs the convention plugins' own tests (the permission gate's rules,
+// PLANNING.md §10): build-logic is an included build, which a task name on the command line
+// does not reach by itself, and a gate nobody tests is a promise.
+tasks.register("test") {
+    group = "verification"
+    description = "Runs the convention plugins' tests with every module's."
+    dependsOn(gradle.includedBuild("build-logic").task(":convention:test"))
+}
+
 // Formatting (PLANNING.md §1): ktlint through Spotless, over every Kotlin source and build
 // script in the repo, build-logic included. `./gradlew spotlessApply` fixes, CI runs
 // `spotlessCheck`. The rules themselves live in .editorconfig, where the IDE reads them too.

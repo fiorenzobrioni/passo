@@ -64,6 +64,7 @@
         <item quantity="other">%1$s outings added</item>
     </plurals>
     <string name="data_imported_preferences">profile and settings taken from the file</string>
+    <string name="data_imported_step_fallback">Its step length was set in a way this version of Passo cannot read, so your step is estimated from your height. You can change it in Settings.</string>
     <string name="data_imported_nothing">Everything in it was already here.</string>
 
     <string name="data_failed_write_title">The file could not be written</string>
@@ -91,4 +92,20 @@
     <string name="data_preview_preferences">Also take its profile and settings</string>
     <string name="data_preview_preferences_note">Height, weight, step, goal, units, appearance and notifications. Days already over keep their estimates.</string>
     <string name="data_preview_import">Import</string>
+    <!-- The routes of the outings measured with GPS (Phase 16): only on a phone that keeps some. -->
+    <string name="data_with_routes">With the routes</string>
+    <string name="data_with_routes_note">The backup then also says where you walked, in the outings measured with GPS. Off, it holds numbers only.</string>
+    <plurals name="data_routes">
+        <item quantity="one">%1$s route</item>
+        <item quantity="other">%1$s routes</item>
+    </plurals>
+    <string name="data_delete_routes">Delete all routes</string>
+    <!-- «3 routes, 28 kB on this phone. …». -->
+    <string name="data_delete_routes_note">%1$s, %2$s on this phone. Never in Android’s cloud backup.</string>
+    <string name="data_delete_routes_title">Delete all routes?</string>
+    <string name="data_delete_routes_text">Every line, and the places it went through, is deleted from this phone. Your outings and their numbers stay: the distance, the pace, the kilometres, the climb.</string>
+    <!-- The same, while an outing with GPS is under way, or can still be taken back. -->
+    <string name="data_delete_routes_text_keeping">Every line of the outings that are over, and the places it went through, is deleted from this phone. The outing still under way keeps its route. Your outings and their numbers stay: the distance, the pace, the kilometres, the climb.</string>
+    <string name="data_delete_routes_confirm">Delete</string>
+    <string name="data_delete_routes_cancel">Cancel</string>
 </resources>

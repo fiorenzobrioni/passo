@@ -82,6 +82,9 @@ def render() -> str:
                 out.append(f"{'  ' * depth}- L{number}: {heading.group(2)}")
                 continue
             if ENTRY.match(line):
+                # A bold title left open at the line's end goes on in the next one.
+                if line.count("**") % 2 == 1 and number < len(lines):
+                    line = f"{line.rstrip()} {lines[number].strip()}"
                 out.append(f"{'  ' * (depth + 1)}- L{number}: {entry_title(line)}")
     return "\n".join(out) + "\n"
 

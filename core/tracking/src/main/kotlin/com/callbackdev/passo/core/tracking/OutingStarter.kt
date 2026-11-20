@@ -1,0 +1,145 @@
+package com.callbackdev.passo.core.tracking
+
+import android.content.ActivityNotFoundException
+import android.content.Context
+import android.content.Intent
+import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
+import com.callbackdev.passo.core.data.sessions.SessionRepository
+import com.callbackdev.passo.core.domain.routes.GpsAnswer
+import com.callbackdev.passo.core.domain.routes.GpsLineAction
+import com.callbackdev.passo.core.domain.routes.GpsStart
+import com.callbackdev.passo.core.domain.routes.GpsStartStep
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/**
+ * An outing that waits for the reader's word on the location permission before it starts.
+ *
+ * @property planId the plan to start once the reader has answered; null when no outing waits,
+ *   the reader having asked for the permission from the card of an outing already under way
+ *   (the way back after a refusal).
+ * @property step what is to be shown: Passo's own screen and then the system's request, or the
+ *   request alone.
+ * @property shown the app has put it in front of the reader: a screen drawn again (a rotation)
+ *   must not ask a second time.
+ */
+data class WaitingOuting(val planId: Long?, val step: GpsStartStep, val shown: Boolean = false)
+
+/**
+ * The one door every start of a plan's outing goes through (PLANNING.md §11 Phase 15, «One door
+ * for every start»; docs/adr/0016-location.md, decision 2). An outing starts from the Outings
+ * page and from a launcher's shortcut, modules that do not know each other: both ask here, so a
+ * plan with «Measure with GPS» on never skips Passo's own screen, and none asks twice.
+ *
+ * It holds no screen. When the reader's word is needed it says so in [waiting], and the app,
+ * which owns the activity the system's request needs, shows what is to be shown and reports the
+ * answer back. Either way the outing then starts: with GPS if the phone is ready for it, from
+ * the steps if not, which the tracking service decides at the start, for every door alike.
+ */
+@Singleton
+class OutingStarter
+@Inject
+constructor(
+    @ApplicationContext private val context: Context,
+    private val sessions: SessionRepository,
+    private val preferences: UserPreferencesDataSource,
+) {
+    private val state = MutableStateFlow<WaitingOuting?>(null)
+
+    /** The outing waiting for the reader's answer, if one is. */
+    val waiting: StateFlow<WaitingOuting?> = state.asStateFlow()
+
+    /**
+     * Starts the outing of plan [planId], or, when its permission must be asked first, leaves it
+     * in [waiting]. Returns false only when the start could not be sent at all.
+     */
+    suspend fun start(planId: Long): Boolean {
+        val plan = sessions.plan(planId)
+        val step = GpsStart.step(
+            planAsksGps = plan?.gps == true,
+            readiness = Gps.readiness(context),
+            answer = preferences.gpsAnswer(),
+        )
+        if (step == GpsStartStep.START) return SessionControl.start(context, planId)
+        state.value = WaitingOuting(planId, step)
+        return true
+    }
+
+    /**
+     * What a line about the satellites on an outing's card asks for (PLANNING.md §11 Phase 15,
+     * «What the reader sees while it counts»), from whichever page the card is on: the receiver
+     * back, the system's switch for location, or the permission, asked through this same door.
+     */
+    fun onCardAction(action: GpsLineAction) {
+        when (action) {
+            GpsLineAction.RESUME_GPS -> SessionControl.resumeGps(context)
+
+            GpsLineAction.LOCATION_SETTINGS -> try {
+                context.startActivity(Gps.locationSettingsIntent().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+            } catch (e: ActivityNotFoundException) {
+                // A phone with no such page: the line stays, and says what is off.
+            }
+
+            // The system's request alone: Passo's own screen is shown once, before the first.
+            GpsLineAction.ALLOW_LOCATION -> state.value = WaitingOuting(planId = null, step = GpsStartStep.ASK)
+        }
+    }
+
+    /** What the reader last answered when asked for the permission: the editor's note reads it. */
+    suspend fun gpsAnswer(): GpsAnswer = preferences.gpsAnswer()
+
+    /**
+     * A plan was saved with «Measure with GPS» [isOn], which [wasOn] before the reader last
+     * touched it in the editor. Turned on again
+     * after a refusal, it is the reader asking to be asked: the refusal is forgotten, and the
+     * next start through this door asks as the first did (docs/adr/0016-location.md, decision
+     * 2, amended). Nothing is asked here: the editor never asks.
+     */
+    suspend fun planSaved(wasOn: Boolean, isOn: Boolean) {
+        if (GpsStart.asksAgain(wasOn, isOn, Gps.readiness(context), preferences.gpsAnswer())) {
+            preferences.setGpsAnswer(GpsAnswer.NEVER_ASKED)
+        }
+    }
+
+    /** The app has put the question in front of the reader. */
+    fun shown() {
+        state.update { it?.copy(shown = true) }
+    }
+
+    /** The system's request was answered: remembered, and the outing starts. */
+    suspend fun answered(preciseGranted: Boolean) {
+        finish(GpsStart.answer(preciseGranted))
+    }
+
+    /**
+     * «Not now» on Passo's own screen: a refusal like the system's, remembered, so it is not
+     * asked again by itself. The outing starts, from the steps.
+     */
+    suspend fun declined() {
+        finish(GpsAnswer.REFUSED)
+    }
+
+    /** The reader went back without answering: nothing is remembered, and nothing starts. */
+    fun cancelled() {
+        state.value = null
+    }
+
+    private suspend fun finish(answer: GpsAnswer) {
+        val outing = state.value ?: return
+        state.value = null
+        preferences.setGpsAnswer(answer)
+        val planId = outing.planId
+        when {
+            planId != null -> SessionControl.start(context, planId)
+
+            // Asked from the card of an outing under way: one that lost its receiver takes it
+            // back at once, and one that started on the steps stops saying why.
+            answer == GpsAnswer.GRANTED -> SessionControl.resumeGps(context)
+        }
+    }
+}

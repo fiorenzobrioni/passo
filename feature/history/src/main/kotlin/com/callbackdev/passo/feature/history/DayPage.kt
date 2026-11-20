@@ -49,7 +49,13 @@ import com.callbackdev.passo.core.domain.today.HourlySteps
  * the chart, the sentence or the list: the switch means none of it.
  */
 @Composable
-internal fun DayPage(detail: DayDetail?, minWalkMinutes: Int, format: MeasureFormatter, bottomPadding: Dp) {
+internal fun DayPage(
+    detail: DayDetail?,
+    minWalkMinutes: Int,
+    format: MeasureFormatter,
+    bottomPadding: Dp,
+    onOpenOuting: (Long) -> Unit = {},
+) {
     // Until the day's minutes are read, a bare page: a chart of zeros would be a day nobody walked.
     if (detail == null) {
         Box(Modifier.fillMaxSize())
@@ -78,7 +84,7 @@ internal fun DayPage(detail: DayDetail?, minWalkMinutes: Int, format: MeasureFor
                                 heading()
                             },
                         )
-                        OutingList(detail.outings, format)
+                        OutingList(detail.outings, format, onOpen = onOpenOuting)
                         Text(
                             text = stringResource(R.string.history_walks_caption).unorphaned(),
                             style = MaterialTheme.typography.bodySmall,

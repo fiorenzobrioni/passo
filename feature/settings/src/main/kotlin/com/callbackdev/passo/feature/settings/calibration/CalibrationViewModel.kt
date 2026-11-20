@@ -6,12 +6,15 @@ import android.os.SystemClock
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.callbackdev.passo.core.data.learning.StepLearningRepository
 import com.callbackdev.passo.core.data.settings.SettingsRepository
 import com.callbackdev.passo.core.domain.calibration.CalibratedStep
 import com.callbackdev.passo.core.domain.calibration.CalibrationResult
 import com.callbackdev.passo.core.domain.calibration.StepCalibration
+import com.callbackdev.passo.core.domain.calibration.StepLearning
 import com.callbackdev.passo.core.domain.settings.ProfileInputs
 import com.callbackdev.passo.core.domain.settings.resolve
+import com.callbackdev.passo.core.model.LearnedStep
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.tracking.ProbeReading
@@ -54,6 +57,10 @@ enum class CalibrationPhase {
  *   value to count from.
  * @property steps the steps since Start, while walking.
  * @property profile the profile now, for what the result is compared with.
+ * @property learning what the outings with GPS have taught of the step (Phase 17).
+ * @property cardOpen the card was asked for: from the quiet row, or from the outing whose samples
+ *   made the proposal ready.
+ * @property stepUsed «Use it» was just touched: the card gives way to what it changed.
  */
 data class CalibrationUiState(
     val step: CalibratedStep,
@@ -66,6 +73,9 @@ data class CalibrationUiState(
     val elapsedMillis: Long,
     val result: CalibrationResult?,
     val profile: Profile,
+    val learning: StepLearning = StepLearning.NOTHING,
+    val cardOpen: Boolean = false,
+    val stepUsed: Boolean = false,
 )
 
 /**
@@ -83,8 +93,12 @@ constructor(
     @ApplicationContext private val context: Context,
     private val probe: StepCounterProbe,
     private val settings: SettingsRepository,
+    private val learning: StepLearningRepository,
     private val handle: SavedStateHandle,
 ) : ViewModel() {
+    private val cardOpen = MutableStateFlow(false)
+    private val stepUsed = MutableStateFlow(false)
+
     private val latest = MutableStateFlow<Long?>(null)
     private val now = MutableStateFlow(SystemClock.elapsedRealtime())
     private val permission = MutableStateFlow(StepTracking.hasActivityRecognition(context))
@@ -109,7 +123,9 @@ constructor(
         },
         settings.settings,
         settings.profile,
-    ) { live, userSettings, profile ->
+        learning.learning,
+        combine(cardOpen, stepUsed) { open, used -> open to used },
+    ) { live, userSettings, profile, learnt, (open, used) ->
         val draft = live.draft
         val step = draft.step ?: return@combine null
         val units = userSettings.units
@@ -135,12 +151,54 @@ constructor(
             elapsedMillis = draft.startedAt?.let { ((draft.stoppedAt ?: live.now) - it).coerceAtLeast(0) } ?: 0,
             result = if (phase == CalibrationPhase.RESULT) result(draft, step, distance) else null,
             profile = profile,
+            learning = learnt,
+            cardOpen = open,
+            stepUsed = used,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), null)
 
-    /** The page opened for [step]; a page restored after the process stopped keeps its own. */
-    fun open(step: CalibratedStep) {
+    /**
+     * The page opened for [step]; a page restored after the process stopped keeps its own. With
+     * [card], it opens on the learnt step's card (the line on the outing that made it ready).
+     */
+    fun open(step: CalibratedStep, card: Boolean = false) {
         if (draft.value.step == null) change { it.copy(step = step) }
+        cardOpen.value = card
+        stepUsed.value = false
+    }
+
+    /** The quiet row touched: the card, with the curve as it is today. */
+    fun openCard() {
+        cardOpen.value = true
+    }
+
+    /** «Use it»: today and the days after follow the learnt step; past days keep theirs. */
+    fun useStep(curve: LearnedStep) {
+        cardOpen.value = false
+        stepUsed.value = true
+        viewModelScope.launch { learning.use(curve) }
+    }
+
+    /** «Not now»: the card closes, and its quiet row stays. */
+    fun notNow(curve: LearnedStep) {
+        cardOpen.value = false
+        viewModelScope.launch { learning.notNow(curve) }
+    }
+
+    /** Back to the step in use before the learnt one. */
+    fun goBackStep() {
+        stepUsed.value = false
+        viewModelScope.launch { learning.goBack() }
+    }
+
+    /** «Apply to past days too», confirmed: every recorded day with the step now in use. */
+    fun applyProfileToPastDays() {
+        stepUsed.value = false
+        viewModelScope.launch { settings.applyProfileToPastDays() }
+    }
+
+    fun dismissStepUsed() {
+        stepUsed.value = false
     }
 
     /**
@@ -223,7 +281,12 @@ constructor(
     fun save(onSaved: () -> Unit) {
         val result = state.value?.result as? CalibrationResult.Measured ?: return
         viewModelScope.launch {
-            settings.updateProfile { StepCalibration.apply(it, result) }
+            // A walking step measured is another length chosen: a curve that counts is put away.
+            if (result.step == CalibratedStep.WALKING) {
+                learning.chooseLength { StepCalibration.apply(it, result) }
+            } else {
+                settings.updateProfile { StepCalibration.apply(it, result) }
+            }
             onSaved()
         }
     }

@@ -3,21 +3,31 @@ package com.callbackdev.passo.core.domain.sessions
 import com.callbackdev.passo.core.domain.metrics.MetricsCalculator
 import com.callbackdev.passo.core.domain.metrics.MetricsConstants
 import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.routes.Fix
+import com.callbackdev.passo.core.domain.routes.LegPiece
+import com.callbackdev.passo.core.domain.routes.Legs
+import com.callbackdev.passo.core.domain.routes.RouteConstants.PACE_NOW_MILLIS
+import com.callbackdev.passo.core.domain.routes.RouteFilter
+import com.callbackdev.passo.core.domain.routes.RouteMeter
+import com.callbackdev.passo.core.domain.routes.RouteSettlement
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.CADENCE_WINDOW_MILLIS
+import com.callbackdev.passo.core.domain.sessions.SessionConstants.CAP_EXTENSION_MILLIS
+import com.callbackdev.passo.core.domain.sessions.SessionConstants.CAP_WARNING_MILLIS
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.IDLE_END_MILLIS
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.KEEP_GOING_MILLIS
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.MAX_MILLIS_PER_STEP
-import com.callbackdev.passo.core.domain.sessions.SessionConstants.MAX_SESSION_MILLIS
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.MIN_CADENCE_SPAN_MILLIS
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.MIN_KEPT_STEPS
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.PAUSE_END_MILLIS
 import com.callbackdev.passo.core.domain.ways.WayStop
 import com.callbackdev.passo.core.domain.ways.Ways
+import com.callbackdev.passo.core.model.RoutePoint
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionTotals
+import com.callbackdev.passo.core.model.StepLengthSample
 import kotlin.math.roundToInt
 
 /** What the tracker has to tell after a step or a check. */
@@ -48,10 +58,26 @@ sealed interface SessionSignal {
         SessionSignal
 
     /**
+     * The outing is within [SessionConstants.CAP_WARNING_MILLIS] of its cap, and the reader is
+     * walking: «Still walking?», asked once a cap (docs/adr/0016-location.md, decision 14). No
+     * cap ends a walk unasked; unanswered, it ends at [capAtMillis] and can still be taken back.
+     */
+    data class CapAhead(val capAtMillis: Long) : SessionSignal
+
+    /**
      * The outing is over. [kept] is false for one too short to be worth keeping
      * ([SessionConstants.MIN_KEPT_STEPS]), which the caller deletes rather than records.
      */
     data class Finished(val session: Session, val kept: Boolean) : SessionSignal
+}
+
+/**
+ * What an outing with GPS has to keep since it was last asked: the route's points and what its
+ * clean stretches said of the step. Only what belongs to the outing for good: what was walked
+ * after an end that can still be taken back waits aside, and comes here if it is.
+ */
+data class RouteHarvest(val points: List<RoutePoint>, val samples: List<StepLengthSample>) {
+    val isEmpty: Boolean get() = points.isEmpty() && samples.isEmpty()
 }
 
 /**
@@ -67,22 +93,43 @@ sealed interface SessionSignal {
  *   the outing. For [KEEP_GOING_MILLIS] after it the steps are still counted aside, so "Keep
  *   going" reopens it with them.
  * - **It ends by itself** after [IDLE_END_MILLIS] without a step (at its last step), a pause of
- *   [PAUSE_END_MILLIS], or [MAX_SESSION_MILLIS] open; noticed at the next step or [check]. An
- *   end by stillness can be taken back like the goal's, for [KEEP_GOING_MILLIS] from the moment
- *   it was noticed: a chat with a friend is a stop, not the end of the walk.
+ *   [PAUSE_END_MILLIS], or at its cap ([capMillis]); noticed at the next step or [check]. An end
+ *   by stillness or by the cap can be taken back like the goal's, for [KEEP_GOING_MILLIS] from
+ *   the moment it was noticed: a chat with a friend is a stop, not the end of the walk.
+ * - **Before its cap it asks** ([SessionSignal.CapAhead]), at the first steps within
+ *   [CAP_WARNING_MILLIS] of it, and [goOn] moves the cap [CAP_EXTENSION_MILLIS] on: no cap ends
+ *   a walk unasked (docs/adr/0016-location.md, decision 14). A reader who is sitting is not
+ *   asked: no step brings the question, and the stillness ends the outing as always.
  * - **An interval outing** (Phase 13) cuts the same time in motion into its intervals
  *   ([IntervalSchedule]): each batch is laid on the splits, cut where it crosses a change, and
  *   the latest change it crossed is told; one due before the next report, while walking, is told
  *   at this one ([SessionConstants.EARLY_CHANGE_MILLIS]).
+ * - **An outing measured with GPS** (Phase 15, docs/adr/0016-location.md) has its distance, and
+ *   the energy with it, from a [RouteMeter]: the steps are handed to it with the fixes ([onFix]),
+ *   and the distance is added when it is settled ([settle]), so its goal, its milestones and a
+ *   walk's places are told on metres the fixes cannot take back. Steps, time in motion and the
+ *   intervals are the steps' as ever, and told with them.
  *
  * Not thread-safe: the service drives it from one thread.
+ *
+ * @param meter the meter of an outing with GPS; ignored for any other outing.
  */
-class SessionTracker(initial: Session, private val lengths: StepLengths, private val weightKg: Double) {
+class SessionTracker(
+    initial: Session,
+    private val lengths: StepLengths,
+    private val weightKg: Double,
+    meter: RouteMeter? = null,
+) {
     var session: Session = initial
         private set
 
+    private val route: RouteMeter? = meter.takeIf { initial.gps }
+
     private val window = ArrayDeque<Mark>()
     private var windowFrom: Long = initial.lastEventAtMillis
+
+    // The cadence the last measured batch was walked at: the meter's batches carry it.
+    private var measuredCadence: Int? = null
 
     // After the goal or a long stillness: from when "Keep going" can reopen it (null when it
     // cannot), the steps since, and the time they reach.
@@ -90,9 +137,26 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
     private var overtime = SessionTotals()
     private var overtimeLastEvent: Long? = null
 
+    // An outing with GPS: the metres of its distance that came from fixes; what is to be kept
+    // of its route; and what was walked after an end that can be taken back, kept aside.
+    private var measuredMeters: Double = (initial.measuredShare ?: 0.0) * initial.totals.distanceMeters
+    private val keptPoints = ArrayList<RoutePoint>()
+    private val keptSamples = ArrayList<StepLengthSample>()
+    private var overtimeMeasuredMeters = 0.0
+    private var overtimeStepsMeters = 0.0
+    private val asidePoints = ArrayList<RoutePoint>()
+    private val asideSamples = ArrayList<StepLengthSample>()
+    private val asidePieces = ArrayList<LegPiece>()
+
+    // What a cut of the line crossed (a pause, the service going), for the service to tell.
+    private val held = ArrayList<SessionSignal>()
+
     // The last interval whose start was told: the one under way when the tracker was made (its
     // start was told then, or by the process before this one), then each change as it is told.
     private var toldInterval: Int = IntervalSchedule.of(initial)?.indexAt(initial.totals.movingMillis) ?: 0
+
+    /** Whether this outing is measured with GPS, by a meter. */
+    val measuring: Boolean get() = route != null
 
     /**
      * The time in motion to the next moment of an interval outing worth telling on time (a change
@@ -104,6 +168,38 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
         if (current.state != SessionState.ACTIVE) return null
         return IntervalSchedule.of(current)?.untilSignal(current.totals.movingMillis)
     }
+
+    /**
+     * The last step seen, the ones kept aside after an end that can be taken back included: what
+     * says whether the reader is walking now, whichever side of the end they are on.
+     */
+    val lastMotionAtMillis: Long get() = overtimeLastEvent ?: session.lastStepAtMillis
+
+    /**
+     * The pace of the last stretch of an outing with GPS, in seconds in motion a kilometre; null
+     * for any other outing, before enough has been measured, while it does not count, and once
+     * the reader has stopped for [RouteConstants.PACE_NOW_MILLIS]: the pace of a stretch walked
+     * a while ago is not the pace now.
+     */
+    fun paceNowAt(nowMillis: Long): Double? {
+        if (session.state != SessionState.ACTIVE || nowMillis - session.lastStepAtMillis > PACE_NOW_MILLIS) return null
+        return route?.paceNow()
+    }
+
+    /** What the steps estimate for the stretch whose fixes are not in yet: shown, never told on. */
+    val openMeters: Double get() = route?.openMeters ?: 0.0
+
+    /** The last fix the meter accepted since its line began; null before the first. */
+    val lastFixAtMillis: Long? get() = route?.lastFixAtMillis
+
+    /** The end of the last batch of steps the meter settled, its fixes known to be in. */
+    val settledThroughMillis: Long? get() = route?.settledThrough
+
+    /** How many fixes the meter took, for the outing's log row. */
+    val fixesTaken: Int get() = route?.taken ?: 0
+
+    /** How many it refused. */
+    val fixesRefused: Int get() = route?.refused ?: 0
 
     /** Accounts [steps] taken at [atMillis]; returns what to tell, in order. */
     fun onSteps(atMillis: Long, steps: Int): List<SessionSignal> {
@@ -118,6 +214,60 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
 
             SessionState.ACTIVE -> countActive(atMillis, steps)
         }
+    }
+
+    /**
+     * A fix of an outing with GPS, while it counts or can still be taken back; null where there
+     * is nothing to give it to (another outing, a paused one, one over for good).
+     */
+    fun onFix(fix: Fix): RouteFilter.Verdict? {
+        val meter = route ?: return null
+        val listening = session.state == SessionState.ACTIVE ||
+            (session.state == SessionState.FINISHED && reopenableSince != null)
+        return if (listening) meter.onFix(fix, cadenceAt(fix.atMillis)) else null
+    }
+
+    /**
+     * Settles the distance of an outing with GPS through [fixesThroughMillis], the moment through
+     * which the receiver's fixes are known to be in, and says what the settled metres crossed: a
+     * milestone, a walk's places, the goal, which ends it at [atMillis].
+     */
+    fun settle(fixesThroughMillis: Long, atMillis: Long): List<SessionSignal> {
+        val meter = route ?: return emptyList()
+        return take(meter.settle(fixesThroughMillis), atMillis)
+    }
+
+    /**
+     * What an outing with GPS climbed and came down since it was last told, counted on the
+     * altitudes of the points it keeps ([upMeters], [downMeters]; both zero says only that its
+     * height is now known). The climb goes to the leg that was being walked at [atMillis], and
+     * what it cost to the outing's energy: the slope's term, over and above the flat's
+     * (PLANNING.md §11 Phase 16, «Energy on a slope»), at the cadence that leg was walked at, the
+     * climb being told up to a minute and a half after it (its points wait for their pressure)
+     * and the reader may have gone from a run to a walk meanwhile. Nothing for an outing without
+     * GPS: its energy, like the day's, is the steps' alone.
+     */
+    fun addClimb(atMillis: Long, upMeters: Double, downMeters: Double) {
+        if (route == null) return
+        val up = upMeters.coerceAtLeast(0.0)
+        val down = downMeters.coerceAtLeast(0.0)
+        val current = session
+        val cadence = Legs.cadenceAt(current.legs, atMillis) ?: measuredCadence
+        val cost = up * weightKg * MetricsCalculator.kcalPerKgPerMeterClimbed(cadence ?: 0)
+        session = current.copy(
+            ascentMeters = (current.ascentMeters ?: 0.0) + up,
+            descentMeters = (current.descentMeters ?: 0.0) + down,
+            legs = Legs.climb(current.legs, atMillis, up, down),
+            totals = current.totals.copy(activeKcal = current.totals.activeKcal + cost),
+        )
+    }
+
+    /** What is to be kept of the route since the last call: for the service to write. */
+    fun takeRoute(): RouteHarvest {
+        val harvest = RouteHarvest(keptPoints.toList(), keptSamples.toList())
+        keptPoints.clear()
+        keptSamples.clear()
+        return harvest
     }
 
     /**
@@ -148,8 +298,8 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
                 nowMillis - current.lastStepAtMillis > IDLE_END_MILLIS ->
                     listOf(finish(current.lastStepAtMillis, SessionEnd.IDLE, reopenableFrom = nowMillis))
 
-                nowMillis - current.startedAtMillis > MAX_SESSION_MILLIS ->
-                    listOf(finish(current.lastStepAtMillis, SessionEnd.CLOSED))
+                nowMillis > current.capMillis ->
+                    listOf(finish(current.lastStepAtMillis, SessionEnd.CLOSED, reopenableFrom = nowMillis))
 
                 else -> emptyList()
             }
@@ -165,18 +315,57 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
 
     fun pause(nowMillis: Long): Boolean {
         if (session.state != SessionState.ACTIVE) return false
+        // The line is cut at a pause: what was walked up to it is settled with the fixes in hand.
+        // Its last metres may reach the goal: the outing then ended there, and is not paused.
+        cutLine(nowMillis)
+        if (session.state != SessionState.ACTIVE) return true
         session = session.copy(state = SessionState.PAUSED, pausedAtMillis = nowMillis)
         return true
     }
 
-    /** Counting again from now: the pause is neither motion nor stillness. */
+    /**
+     * The service is going (stopped by the system, or the phone shutting down): the line of an
+     * outing with GPS is cut where it stands, every step up to it settled with the fixes in hand,
+     * as at a pause, so no metre the meter held in memory goes with it. The outing counts on, and
+     * the next start draws a line of its own.
+     */
+    fun cutRoute(atMillis: Long) = cutLine(atMillis)
+
+    /**
+     * What the last cut of the line crossed, as the metres it settled are told: a milestone, a
+     * walk's place, the goal, which ends the outing there. Taken once.
+     */
+    fun takeHeldSignals(): List<SessionSignal> = held.toList().also { held.clear() }
+
+    /**
+     * Cuts the line of an outing with GPS that counts: every step up to [atMillis] settled with
+     * the fixes in hand, and taken as any settled metres are, so what they cross is told (held
+     * for the service, [takeHeldSignals]) and a goal they reach ends the outing at it.
+     */
+    private fun cutLine(atMillis: Long) {
+        val meter = route ?: return
+        if (session.state != SessionState.ACTIVE) return
+        held += take(meter.close(), atMillis)
+    }
+
+    /**
+     * Counting again from now: the pause is neither motion nor stillness, nor time towards the
+     * cap. The cap moves on by the pause, so a reader who paused across it is asked as any other
+     * before it ends (no cap ends a walk unasked). A question already open stays open: the cap
+     * is as far after the pause as it was before it, within the quarter of an hour it was asked in.
+     */
     fun resume(nowMillis: Long): Boolean {
-        if (session.state != SessionState.PAUSED) return false
-        session = session.copy(
+        val current = session
+        if (current.state != SessionState.PAUSED) return false
+        val pausedFor = (nowMillis - (current.pausedAtMillis ?: nowMillis)).coerceAtLeast(0L)
+        val cap = current.capMillis + pausedFor
+        session = current.copy(
             state = SessionState.ACTIVE,
             pausedAtMillis = null,
             lastEventAtMillis = nowMillis,
             lastStepAtMillis = nowMillis,
+            capAtMillis = cap,
+            capAskedForMillis = if (current.capAskedForMillis == current.capMillis) cap else current.capAskedForMillis,
         )
         window.clear()
         windowFrom = nowMillis
@@ -192,8 +381,8 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
     }
 
     /**
-     * Whether "Keep going" can still reopen it: after its goal or a long stillness (not a pause
-     * left too long, nor the longest outing, nor the reader's own stop), and not too long after.
+     * Whether "Keep going" can still reopen it: after its goal, a long stillness or its cap (not
+     * a pause left too long, nor the reader's own stop), and not too long after.
      */
     fun canKeepGoing(nowMillis: Long): Boolean {
         val since = reopenableSince ?: return false
@@ -201,26 +390,56 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
     }
 
     /**
-     * Reopens an outing ended by its goal or by a long stillness, with the steps taken since; the
-     * stillness itself adds nothing. Returns what those steps crossed on the way (a milestone, or
-     * the goal, which ends it again), or null when it cannot be reopened.
+     * «Keep going», said to the question before the cap: the cap moves [CAP_EXTENSION_MILLIS]
+     * on, and nothing stops. False when there is no question to answer (not counting, or not
+     * asked yet for this cap): the cap is the reader's to move, not anyone's by accident.
+     */
+    fun goOn(nowMillis: Long): Boolean {
+        val current = session
+        val cap = current.capMillis
+        if (current.state != SessionState.ACTIVE || current.capAskedForMillis != cap || nowMillis > cap) return false
+        session = current.copy(capAtMillis = cap + CAP_EXTENSION_MILLIS)
+        return true
+    }
+
+    /**
+     * Reopens an outing ended by its goal, by a long stillness or by its cap, with the steps
+     * taken since; the stillness itself adds nothing. One ended by its cap gets its cap moved
+     * [CAP_EXTENSION_MILLIS] on, as if the question had been answered in time. Returns what
+     * those steps crossed on the way (a milestone, or the goal, which ends it again), or null
+     * when it cannot be reopened.
      */
     fun keepGoing(nowMillis: Long): List<SessionSignal>? {
         if (!canKeepGoing(nowMillis)) return null
         val current = session
         val lastEvent = overtimeLastEvent ?: current.endedAtMillis ?: nowMillis
+        val cap = if (current.end ==
+            SessionEnd.CLOSED
+        ) {
+            current.capMillis + CAP_EXTENSION_MILLIS
+        } else {
+            current.capAtMillis
+        }
         val reopened = current.copy(
             state = SessionState.ACTIVE,
             end = null,
             endedAtMillis = null,
             lastEventAtMillis = lastEvent,
             lastStepAtMillis = maxOf(lastEvent, nowMillis),
+            capAtMillis = cap,
+            stepsMeters = current.stepsMeters?.let { it + overtimeStepsMeters },
+            legs = asidePieces.fold(current.legs, Legs::lay),
         )
         val since = overtime
-        overtime = SessionTotals()
-        overtimeLastEvent = null
+        // What was kept aside is the outing's again: the route taken back has no hole.
+        measuredMeters += overtimeMeasuredMeters
+        keptPoints += asidePoints
+        keptSamples += asideSamples
+        clearOvertime()
         reopenableSince = null
-        return advance(reopened, since, nowMillis)
+        val signals = advance(reopened, since, nowMillis)
+        withMeasuredShare()
+        return signals
     }
 
     private fun countActive(atMillis: Long, steps: Int): List<SessionSignal> {
@@ -232,25 +451,67 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
             countOvertime(atMillis, steps)
             return listOf(finished)
         }
-        if (atMillis - current.startedAtMillis > MAX_SESSION_MILLIS) {
-            return listOf(finish(current.lastStepAtMillis, SessionEnd.CLOSED))
+        // Past its cap, unanswered: over, and told. The reader who walks on can take it back.
+        if (atMillis > current.capMillis) {
+            val finished = finish(current.lastStepAtMillis, SessionEnd.CLOSED, reopenableFrom = atMillis)
+            countOvertime(atMillis, steps)
+            return listOf(finished)
         }
-        val added = measure(atMillis, steps, current.lastEventAtMillis)
-        val moved = current.copy(
+        var added = measure(atMillis, steps, current.lastEventAtMillis)
+        var moved = current.copy(
             lastEventAtMillis = maxOf(atMillis, current.lastEventAtMillis),
             lastStepAtMillis = maxOf(atMillis, current.lastStepAtMillis),
         )
-        return advance(moved, added, atMillis)
+        val meter = route
+        if (meter != null) {
+            // The distance, and the energy with it, come when the meter settles these steps
+            // with their fixes; what the steps alone say is kept beside it.
+            meter.onSteps(
+                fromMillis = current.lastEventAtMillis,
+                toMillis = atMillis,
+                steps = steps,
+                movingMillis = added.movingMillis,
+                stepsMeters = added.distanceMeters,
+                cadence = measuredCadence,
+            )
+            moved = moved.copy(stepsMeters = (moved.stepsMeters ?: 0.0) + added.distanceMeters)
+            added = added.copy(distanceMeters = 0.0, activeKcal = 0.0)
+        }
+        val signals = advance(moved, added, atMillis)
+        return signals + listOfNotNull(capAhead(atMillis))
+    }
+
+    /**
+     * «Still walking?», once a cap: at the first steps within [CAP_WARNING_MILLIS] of it. It
+     * rides on a step batch, as every signal does: no timer, and a reader who is not walking is
+     * not asked.
+     */
+    private fun capAhead(atMillis: Long): SessionSignal.CapAhead? {
+        val current = session
+        if (current.state != SessionState.ACTIVE) return null
+        val cap = current.capMillis
+        if (atMillis < cap - CAP_WARNING_MILLIS || current.capAskedForMillis == cap) return null
+        session = current.copy(capAskedForMillis = cap)
+        return SessionSignal.CapAhead(cap)
     }
 
     /**
      * Adds [added] to [moved] (the outing with its times already brought forward) and says what
      * it crossed: the highest milestone, and the goal, which ends it at [atMillis].
+     *
+     * @param steps [added] is a batch of steps; false for metres settled by the meter, which
+     *   move no interval: an interval outing's changes ride on the steps alone, and the fixes
+     *   change nothing of their timing.
      */
-    private fun advance(moved: Session, added: SessionTotals, atMillis: Long): List<SessionSignal> {
+    private fun advance(
+        moved: Session,
+        added: SessionTotals,
+        atMillis: Long,
+        steps: Boolean = true,
+    ): List<SessionSignal> {
         val before = moved.progress()
         var next = moved.copy(totals = moved.totals + added)
-        val schedule = IntervalSchedule.of(moved)
+        val schedule = if (steps) IntervalSchedule.of(moved) else null
         if (schedule != null) {
             val splits = schedule.lay(moved.splits, moved.totals.movingMillis, added)
             // The time at pace of an interval outing is the fast minutes' only: the slow ones
@@ -330,7 +591,14 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
         if (atMillis - since > KEEP_GOING_MILLIS) return
         // After a stillness the first gap is the stillness: [measure] credits it a step's worth.
         val last = overtimeLastEvent ?: ended
-        overtime += measure(atMillis, steps, last)
+        var added = measure(atMillis, steps, last)
+        val meter = route
+        if (meter != null) {
+            meter.onSteps(last, atMillis, steps, added.movingMillis, added.distanceMeters, measuredCadence)
+            overtimeStepsMeters += added.distanceMeters
+            added = added.copy(distanceMeters = 0.0, activeKcal = 0.0)
+        }
+        overtime += added
         overtimeLastEvent = maxOf(atMillis, last)
     }
 
@@ -341,6 +609,7 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
         window.addLast(Mark(atMillis, steps, moving))
         while (window.isNotEmpty() && window.first().atMillis <= atMillis - CADENCE_WINDOW_MILLIS) window.removeFirst()
         val cadence = cadenceAt(atMillis)
+        measuredCadence = cadence
         val floor = session.intensity.cadenceFloor
         val inZone = floor == null || (cadence != null && cadence >= floor)
         val distance = steps * lengths.forCadence(cadence ?: 0)
@@ -349,16 +618,90 @@ class SessionTracker(initial: Session, private val lengths: StepLengths, private
             movingMillis = moving,
             zoneMillis = if (inZone) moving else 0,
             distanceMeters = distance,
-            activeKcal = distance / METERS_PER_KM * weightKg * MetricsCalculator.kcalPerKgPerKm(cadence ?: 0),
+            activeKcal = energy(distance, cadence),
         )
+    }
+
+    /** What walking [meters] at [cadence] cost, as the day's own estimate prices it. */
+    private fun energy(meters: Double, cadence: Int?): Double =
+        meters / METERS_PER_KM * weightKg * MetricsCalculator.kcalPerKgPerKm(cadence ?: 0)
+
+    /** What the meter settled, as totals: the distance, and the energy each stretch cost. */
+    private fun totals(settled: RouteSettlement) = SessionTotals(
+        distanceMeters = settled.meters,
+        activeKcal = settled.stretches.sumOf { energy(it.meters, it.cadence) },
+    )
+
+    /**
+     * Takes what the meter settled: into the outing while it counts, telling what it crossed;
+     * aside while an ended outing can still be taken back; nowhere once it cannot.
+     */
+    private fun take(settled: RouteSettlement, atMillis: Long): List<SessionSignal> {
+        if (settled.isEmpty) return emptyList()
+        return when {
+            session.state == SessionState.ACTIVE -> {
+                measuredMeters += settled.measuredMeters
+                keptPoints += settled.points
+                keptSamples += settled.samples
+                val laid = session.copy(legs = settled.pieces.fold(session.legs, Legs::lay))
+                val signals = advance(laid, totals(settled), atMillis, steps = false)
+                withMeasuredShare()
+                signals
+            }
+
+            session.state == SessionState.FINISHED && reopenableSince != null -> {
+                overtime += totals(settled)
+                overtimeMeasuredMeters += settled.measuredMeters
+                asidePoints += settled.points
+                asideSamples += settled.samples
+                asidePieces += settled.pieces
+                emptyList()
+            }
+
+            else -> emptyList()
+        }
+    }
+
+    /** What the meter gave as its line was cut: added with no signal, the outing pausing or ending. */
+    private fun absorb(settled: RouteSettlement) {
+        if (settled.isEmpty) return
+        measuredMeters += settled.measuredMeters
+        keptPoints += settled.points
+        keptSamples += settled.samples
+        session = session.copy(
+            totals = session.totals + totals(settled),
+            legs = settled.pieces.fold(session.legs, Legs::lay),
+        )
+        withMeasuredShare()
+    }
+
+    /** The share of the distance that came from fixes, as the outing stands. */
+    private fun withMeasuredShare() {
+        if (route == null) return
+        val distance = session.totals.distanceMeters
+        val share = if (distance > 0) (measuredMeters / distance).coerceIn(0.0, 1.0) else 0.0
+        session = session.copy(measuredShare = share)
+    }
+
+    private fun clearOvertime() {
+        overtime = SessionTotals()
+        overtimeLastEvent = null
+        overtimeMeasuredMeters = 0.0
+        overtimeStepsMeters = 0.0
+        asidePoints.clear()
+        asideSamples.clear()
+        asidePieces.clear()
     }
 
     /** Ends it at [atMillis]; [reopenableFrom] is when "Keep going" starts to count, if it may. */
     private fun finish(atMillis: Long, end: SessionEnd, reopenableFrom: Long? = null): SessionSignal.Finished {
+        // The line is cut at the end: every step up to it settled with the fixes in hand, none
+        // lost. What is walked after it, while it can be taken back, starts a line of its own.
+        val meter = route
+        if (meter != null && session.state == SessionState.ACTIVE) absorb(meter.close())
         val current = session
         reopenableSince = reopenableFrom
-        overtime = SessionTotals()
-        overtimeLastEvent = null
+        clearOvertime()
         val finished = current.copy(
             state = SessionState.FINISHED,
             end = end,

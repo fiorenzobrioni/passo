@@ -95,6 +95,17 @@ object MetricsCalculator {
         else -> WALK_KCAL_PER_KG_KM
     }
 
+    /**
+     * Net energy per kilogram for each metre climbed at [stepsPerMinute], over and above the
+     * flat's ([kcalPerKgPerKm]): the slope's term, for an outing whose climb is known. The
+     * day's own energy never has it: a day is computed from the steps alone.
+     */
+    fun kcalPerKgPerMeterClimbed(stepsPerMinute: Int): Double = if (stepsPerMinute >= RUNNING_CADENCE) {
+        MetricsConstants.RUN_KCAL_PER_KG_METER_CLIMBED
+    } else {
+        MetricsConstants.WALK_KCAL_PER_KG_METER_CLIMBED
+    }
+
     /** The reader's weight, or [DEFAULT_WEIGHT_KG] when not given (or not plausible). */
     fun weightKg(profile: Profile): Double = profile.sanitized().weightKg ?: DEFAULT_WEIGHT_KG
 

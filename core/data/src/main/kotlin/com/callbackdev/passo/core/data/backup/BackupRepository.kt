@@ -1,11 +1,14 @@
 package com.callbackdev.passo.core.data.backup
 
 import com.callbackdev.passo.core.data.db.SessionDao
+import com.callbackdev.passo.core.data.db.StepLengthSampleEntity
 import com.callbackdev.passo.core.data.db.TrackingDao
 import com.callbackdev.passo.core.data.db.WayDao
 import com.callbackdev.passo.core.data.db.toEntity
 import com.callbackdev.passo.core.data.db.toModel
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
+import com.callbackdev.passo.core.data.routes.RouteRepository
+import com.callbackdev.passo.core.data.sessions.LiveSession
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.domain.backup.Backup
 import com.callbackdev.passo.core.domain.backup.BackupDay
@@ -14,17 +17,35 @@ import com.callbackdev.passo.core.domain.backup.CsvExport
 import com.callbackdev.passo.core.domain.backup.CsvTable
 import com.callbackdev.passo.core.domain.metrics.DaySummaries
 import com.callbackdev.passo.core.model.MinuteSteps
+import com.callbackdev.passo.core.model.StepLengthSample
 import com.callbackdev.passo.core.model.UnitSystem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** What this phone holds, as the data rows of Settings say it before an export. */
-data class DataContents(val days: Int, val outings: Int)
+/**
+ * What this phone holds, as the data rows of Settings say it before an export.
+ *
+ * @property routes the routes kept, the one of an outing under way included: what «With the
+ *   routes» would put in a backup.
+ * @property deletableRoutes of them, those «Delete all routes» deletes: every one but the route
+ *   still being written, of an outing under way or one that can still be taken back;
+ *   [deletableBytes] what they weigh.
+ */
+data class DataContents(
+    val days: Int,
+    val outings: Int,
+    val routes: Int = 0,
+    val deletableRoutes: Int = 0,
+    val deletableBytes: Long = 0,
+)
 
 /**
  * What an import did (ADR 0011).
@@ -33,6 +54,8 @@ data class DataContents(val days: Int, val outings: Int)
  * @property mergedDays days both had, where the file added steps.
  * @property unchangedDays days the phone already had whole.
  * @property preferences the file's profile and settings were taken.
+ * @property stepFallback the profile taken had a step length this version cannot read (a newer
+ *   Passo's): the height's estimate is in use instead, and the summary says so.
  */
 data class ImportReport(
     val addedDays: Int,
@@ -42,6 +65,8 @@ data class ImportReport(
     val addedPlans: Int,
     val preferences: Boolean,
     val addedWays: Int = 0,
+    val addedRoutes: Int = 0,
+    val stepFallback: Boolean = false,
 )
 
 /**
@@ -59,14 +84,49 @@ constructor(
     private val wayDao: WayDao,
     private val preferences: UserPreferencesDataSource,
     private val tracking: TrackingRepository,
+    private val routes: RouteRepository,
+    private val live: LiveSession,
 ) {
-    val contents: Flow<DataContents> =
-        combine(tracking.observeDayCount(), sessionDao.observeSessionCount()) { days, outings ->
-            DataContents(days, outings)
-        }
+    // The outing with GPS whose route may still grow: under way (as written), or ended a moment
+    // ago and still to be taken back (as the service holds it). Its route is not the reader's
+    // to delete yet.
+    private val growing: Flow<Long?> = combine(
+        sessionDao.observeLiveSession().map { row -> row?.session?.takeIf { it.gps }?.id },
+        live.current.map { state -> state?.session?.takeIf { it.gps }?.id },
+    ) { written, held -> written ?: held }.distinctUntilChanged()
 
-    /** Everything a new phone could not rebuild, read as it stands now. */
-    suspend fun backup(appVersion: String, nowMillis: Long, zone: ZoneId): Backup {
+    val contents: Flow<DataContents> = combine(
+        tracking.observeDayCount(),
+        sessionDao.observeSessionCount(),
+        routes.routeIds,
+        growing,
+    ) { days, outings, kept, underWay ->
+        // The route still being written is not the reader's to delete yet: «Delete all routes»
+        // counts and weighs the others, and is not offered for that one alone.
+        val deletable = kept.count { it != underWay }
+        DataContents(
+            days = days,
+            outings = outings,
+            routes = kept.size,
+            deletableRoutes = deletable,
+            deletableBytes = if (deletable > 0) routes.bytes(except = underWay) else 0,
+        )
+    }
+
+    /**
+     * Forgets every route kept on this phone but the one that may still grow (an outing with GPS
+     * under way, or one that can still be taken back); the outings and their numbers stay.
+     */
+    suspend fun deleteRoutes() = routes.deleteAll(keep = growing.first())
+
+    /**
+     * Everything a new phone could not rebuild, read as it stands now.
+     *
+     * @param withRoutes the reader ticked «With the routes»: where the outings measured with
+     *   GPS went is in the file too. Off unless they say so (docs/adr/0016-location.md,
+     *   decision 9): a backup is numbers, and a route is a place.
+     */
+    suspend fun backup(appVersion: String, nowMillis: Long, zone: ZoneId, withRoutes: Boolean = false): Backup {
         val current = preferences.current()
         val history = trackingDao.history()
         val minutesByDay = history.minutes
@@ -86,6 +146,18 @@ constructor(
             )
             BackupDay(summary, minutes)
         }
+        // What the outings with GPS said of the step, by the outing's start: its id is this
+        // phone's alone.
+        val starts = sessionDao.sessionStarts().associate { it.id to it.startedAtMillis }
+        val samples = sessionDao.allStepLengthSamples()
+            .groupBy({ starts[it.sessionId] }) { StepLengthSample(it.cadence, it.steps, it.meters) }
+            .mapNotNull { (start, said) -> start?.let { it to said } }
+            .toMap()
+        val kept = if (withRoutes) {
+            starts.mapNotNull { (id, start) -> routes.route(id, start)?.let { start to it } }.toMap()
+        } else {
+            emptyMap()
+        }
         return Backup(
             exportedAtMillis = nowMillis,
             zone = zone.id,
@@ -97,6 +169,8 @@ constructor(
             sessions = sessionDao.allSessions().mapNotNull { it.toModel() },
             diagnostics = tracking.diagnostics(),
             journeys = wayDao.journeys().mapNotNull { it.toModel() },
+            stepLengthSamples = samples,
+            routes = kept,
         )
     }
 
@@ -119,6 +193,38 @@ constructor(
             plans = plans.toAdd.map { it.id to it.copy(id = 0).toEntity() },
             planIds = plans.matched,
         ) { ids -> BackupMerge.sessions(localSessions, backup.sessions, ids) }
+        // What the outings that came said of the step comes with them; an outing this phone
+        // already had keeps its own, and one the import left out leaves its samples out.
+        if (newIds.isNotEmpty() && backup.stepLengthSamples.isNotEmpty()) {
+            val came = sessionDao.sessionStarts().filter { it.id in newIds }
+            sessionDao.insertStepLengthSamples(
+                came.flatMap { outing ->
+                    backup.stepLengthSamples[outing.startedAtMillis].orEmpty().map {
+                        StepLengthSampleEntity(
+                            sessionId = outing.id,
+                            cadence = it.cadence,
+                            steps = it.steps,
+                            meters = it.meters,
+                        )
+                    }
+                },
+            )
+        }
+        // The file's routes, each on the outing that started at its instant, where that outing
+        // has none: the ones that came with their outings, and the ones of outings this phone
+        // had without their route (a restore from the cloud copy). Never one taken away.
+        val added = if (backup.routes.isEmpty()) {
+            emptyList()
+        } else {
+            BackupMerge.routes(
+                outings = sessionDao.sessionStarts().associate { it.startedAtMillis to it.id },
+                having = routes.routeIds.first(),
+                incoming = backup.routes,
+            )
+        }
+        for ((sessionId, route) in added) {
+            routes.restore(sessionId, route.sessionStartedAtMillis, route.points, route.altitudes)
+        }
         // An outing walked on the other phone today is history here, not one just over: Today's
         // card for the last outing stays put away.
         if (newIds.isNotEmpty()) {
@@ -141,6 +247,8 @@ constructor(
             addedPlans = plans.toAdd.size,
             preferences = withPreferences,
             addedWays = ways.size,
+            addedRoutes = added.size,
+            stepFallback = withPreferences && backup.stepFallback,
         )
     }
 

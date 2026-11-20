@@ -72,6 +72,7 @@
         <item quantity="other">%1$s uscite aggiunte</item>
     </plurals>
     <string name="data_imported_preferences">profilo e impostazioni presi dal file</string>
+    <string name="data_imported_step_fallback">La lunghezza del passo era impostata in un modo che questa versione di Passo non sa leggere, quindi il tuo passo è stimato dall’altezza. Puoi cambiarlo nelle Impostazioni.</string>
     <string name="data_imported_nothing">Tutto quello che conteneva era già qui.</string>
 
     <string name="data_failed_write_title">Non è stato possibile scrivere il file</string>
@@ -100,4 +101,18 @@
     <string name="data_preview_preferences">Prendi anche profilo e impostazioni</string>
     <string name="data_preview_preferences_note">Altezza, peso, passo, obiettivo, unità, aspetto e notifiche. I giorni già conclusi tengono le loro stime.</string>
     <string name="data_preview_import">Importa</string>
+    <string name="data_with_routes">Con i percorsi</string>
+    <string name="data_with_routes_note">La copia allora dice anche dove hai camminato, nelle uscite misurate con il GPS. Spento, contiene solo numeri.</string>
+    <plurals name="data_routes">
+        <item quantity="one">%1$s percorso</item>
+        <item quantity="many">%1$s percorsi</item>
+        <item quantity="other">%1$s percorsi</item>
+    </plurals>
+    <string name="data_delete_routes">Elimina tutti i percorsi</string>
+    <string name="data_delete_routes_note">%1$s, %2$s su questo telefono. Mai nel backup di Android nel cloud.</string>
+    <string name="data_delete_routes_title">Eliminare tutti i percorsi?</string>
+    <string name="data_delete_routes_text">Ogni linea, con i luoghi che attraversa, viene eliminata da questo telefono. Le uscite e i loro numeri restano: la distanza, l’andatura, i chilometri, la salita.</string>
+    <string name="data_delete_routes_text_keeping">Ogni linea delle uscite finite, con i luoghi che attraversa, viene eliminata da questo telefono. L’uscita ancora in corso tiene il suo percorso. Le uscite e i loro numeri restano: la distanza, l’andatura, i chilometri, la salita.</string>
+    <string name="data_delete_routes_confirm">Elimina</string>
+    <string name="data_delete_routes_cancel">Annulla</string>
 </resources>

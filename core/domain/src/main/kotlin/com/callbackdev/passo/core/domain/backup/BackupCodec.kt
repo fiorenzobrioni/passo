@@ -1,6 +1,10 @@
 package com.callbackdev.passo.core.domain.backup
 
+import com.callbackdev.passo.core.domain.metrics.sanitized
+import com.callbackdev.passo.core.domain.routes.Legs
+import com.callbackdev.passo.core.domain.routes.RouteCodec
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
+import com.callbackdev.passo.core.model.AltitudeSource
 import com.callbackdev.passo.core.model.AppFont
 import com.callbackdev.passo.core.model.AppPalette
 import com.callbackdev.passo.core.model.DailySummary
@@ -8,8 +12,12 @@ import com.callbackdev.passo.core.model.DiagnosticsEvent
 import com.callbackdev.passo.core.model.DiagnosticsType
 import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.IntervalSplit
+import com.callbackdev.passo.core.model.LearnedStep
 import com.callbackdev.passo.core.model.MinuteSteps
+import com.callbackdev.passo.core.model.OutingLeg
 import com.callbackdev.passo.core.model.Profile
+import com.callbackdev.passo.core.model.Route
+import com.callbackdev.passo.core.model.RoutePoint
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
@@ -21,6 +29,8 @@ import com.callbackdev.passo.core.model.SessionTotals
 import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.Sex
 import com.callbackdev.passo.core.model.StepLengthMode
+import com.callbackdev.passo.core.model.StepLengthSample
+import com.callbackdev.passo.core.model.StepPoint
 import com.callbackdev.passo.core.model.ThemeMode
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.UserSettings
@@ -36,6 +46,7 @@ import java.time.DateTimeException
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
+import java.util.Base64
 
 /** What reading a file came to. */
 sealed interface BackupRead {
@@ -68,6 +79,20 @@ sealed interface BackupRead {
  * - `intervals` (added with the interval walk, Phase 13) on a plan or an outing gives its sets
  *   (`slowMinutes`, `fastMinutes`, `sets`); an outing's `splits` give each interval as walked.
  *   An interval plan or outing read by a build without them is left out (its kind is unknown).
+ * - `gps` (added with the measured outing, Phase 15) on a plan says it asks to be measured with
+ *   GPS, and on an outing that it was: its `distanceMeters` is then the distance fused from the
+ *   fixes and the steps, `stepsMeters` what the steps alone said, `measuredShare` the share
+ *   that came from fixes (0 to 1), and `stepLengthSamples` what its clean stretches said of the
+ *   step (`cadence`, `steps`, `meters`). Numbers only: where the outing went is not in this
+ *   file unless the reader asks for the routes. A build without them reads the outing as it
+ *   reads any other, with its distance.
+ * - `ascentMeters`, `descentMeters` and `legs` (added with the outing's page, Phase 16) on an
+ *   outing with GPS: what it climbed and came down, an estimate, and the outing a hundred
+ *   metres at a time (`meters`, `movingMillis`, `steps`, `endedAtMillis`, and each leg's own
+ *   climb), from which its kilometres or miles are cut. Numbers still.
+ * - `route` (Phase 16) on an outing with GPS, **only in a file exported «With the routes»**:
+ *   where it went. `points` is Base64 of the app's own compact form, `altitudes` where their
+ *   heights came from (`BAROMETER` or `SATELLITES`). The one field of this file that is a place.
  *
  * Reading is lenient where a value can be dropped without lying (an unknown setting, a minute
  * with a negative count) and strict where it cannot (the format, the version, broken JSON).
@@ -122,6 +147,17 @@ private fun Backup.toFile() = BackupFile(
         stepLengthMode = profile.stepLengthMode.name,
         walkingStepLengthMeters = profile.walkingStepLengthMeters,
         runningStepLengthMeters = profile.runningStepLengthMeters,
+        learnedStep = profile.learnedStep?.let { step ->
+            LearnedStepDto(
+                points = step.points.map { StepPointDto(it.cadence, it.meters) },
+                usualCadence = step.usualCadence,
+                learntMeters = step.learntMeters,
+                outings = step.outings,
+                throughMillis = step.throughMillis,
+                replaced = step.replaced.name,
+                running = step.running,
+            )
+        },
     ),
     settings = SettingsDto(
         dailyGoalSteps = settings.dailyGoalSteps,
@@ -169,6 +205,7 @@ private fun Backup.toFile() = BackupFile(
             position = plan.position,
             lastUsedAtMillis = plan.lastUsedAtMillis,
             intervals = plan.intervals.takeIf { plan.goalKind == SessionGoalKind.INTERVALS }?.toDto(),
+            gps = plan.gps,
         )
     },
     outings = sessions.sortedBy { it.startedAtMillis }.map { session ->
@@ -201,6 +238,22 @@ private fun Backup.toFile() = BackupFile(
             walkFromMeters = session.walkFromMeters,
             intervals = session.intervals?.toDto(),
             splits = session.splits.map { SplitDto(it.index, it.fast, it.steps, it.movingMillis, it.zoneMillis) },
+            gps = session.gps,
+            stepsMeters = session.stepsMeters.takeIf { session.gps },
+            measuredShare = session.measuredShare.takeIf { session.gps },
+            stepLengthSamples = stepLengthSamples[session.startedAtMillis].orEmpty()
+                .map { StepLengthSampleDto(it.cadence, it.steps, it.meters) },
+            ascentMeters = session.ascentMeters.takeIf { session.gps },
+            descentMeters = session.descentMeters.takeIf { session.gps },
+            legs = session.legs.takeIf { session.gps }.orEmpty().sortedBy { it.index }.map {
+                LegDto(it.meters, it.movingMillis, it.steps, it.endedAtMillis, it.ascentMeters, it.descentMeters)
+            },
+            route = routes[session.startedAtMillis]?.takeIf { session.gps && it.points.isNotEmpty() }?.let {
+                RouteDto(
+                    altitudes = it.altitudes?.name,
+                    points = Base64.getEncoder().encodeToString(RouteCodec.encode(it.points)),
+                )
+            },
         )
     },
     diagnostics = diagnostics.map { DiagnosticDto(it.wallMillis, it.type.name, it.detail) },
@@ -218,18 +271,33 @@ private fun Backup.toFile() = BackupFile(
 
 private fun BackupFile.toBackup(): Backup {
     val defaults = UserSettings()
+    // A mode this build does not know (from a newer Passo), or a learnt step that cannot be read,
+    // is the height's estimate: said in the import's summary, never a failure.
+    val stepProfile = Profile(
+        heightMeters = profile.heightMeters,
+        weightKg = profile.weightKg,
+        sex = profile.sex.toEnumOrNull<Sex>(),
+        stepLengthMode = profile.stepLengthMode.toEnumOrNull<StepLengthMode>() ?: StepLengthMode.AUTO,
+        walkingStepLengthMeters = profile.walkingStepLengthMeters,
+        runningStepLengthMeters = profile.runningStepLengthMeters,
+        learnedStep = profile.learnedStep?.let { step ->
+            LearnedStep(
+                points = step.points.map { StepPoint(it.cadence, it.meters) },
+                usualCadence = step.usualCadence,
+                learntMeters = step.learntMeters,
+                outings = step.outings,
+                throughMillis = step.throughMillis,
+                replaced = step.replaced.toEnumOrNull<StepLengthMode>() ?: StepLengthMode.AUTO,
+                running = step.running,
+            )
+        },
+    ).sanitized()
     return Backup(
         exportedAtMillis = exportedAtMillis ?: 0L,
         zone = zone.orEmpty(),
         appVersion = app.orEmpty(),
-        profile = Profile(
-            heightMeters = profile.heightMeters,
-            weightKg = profile.weightKg,
-            sex = profile.sex.toEnumOrNull<Sex>(),
-            stepLengthMode = profile.stepLengthMode.toEnumOrNull<StepLengthMode>() ?: StepLengthMode.AUTO,
-            walkingStepLengthMeters = profile.walkingStepLengthMeters,
-            runningStepLengthMeters = profile.runningStepLengthMeters,
-        ),
+        profile = stepProfile,
+        stepFallback = profile.stepLengthMode != null && stepProfile.stepLengthMode.name != profile.stepLengthMode,
         settings = UserSettings(
             dailyGoalSteps = settings.dailyGoalSteps ?: defaults.dailyGoalSteps,
             units = settings.units.toEnumOrNull<UnitPreference>() ?: defaults.units,
@@ -257,6 +325,29 @@ private fun BackupFile.toBackup(): Backup {
             .sortedBy { it.summary.localEpochDay },
         plans = plans.mapNotNull { it.toPlan() },
         sessions = outings.mapNotNull { it.toSession() },
+        // Of the outings that came, with GPS: a sample with no steps or no metres says nothing.
+        stepLengthSamples = outings.filter { it.gps && it.toSession() != null }
+            .associate { outing ->
+                outing.startedAtMillis to outing.stepLengthSamples
+                    .filter { it.cadence > 0 && it.steps > 0 && it.meters > 0 && !it.meters.isNaN() }
+                    .map { StepLengthSample(it.cadence, it.steps, it.meters) }
+            }
+            .filterValues { it.isNotEmpty() },
+        // Of the outings that came, with GPS: a route whose points cannot be read is left out.
+        routes = outings.filter { it.gps && it.route != null && it.toSession() != null }
+            .mapNotNull { outing ->
+                val points = outing.route?.points.orEmpty().toRoutePoints()
+                if (points.isEmpty()) {
+                    null
+                } else {
+                    outing.startedAtMillis to Route(
+                        sessionStartedAtMillis = outing.startedAtMillis,
+                        points = points,
+                        altitudes = outing.route?.altitudes.toEnumOrNull<AltitudeSource>(),
+                    )
+                }
+            }
+            .toMap(),
         diagnostics = diagnostics.mapNotNull { row ->
             row.type.toEnumOrNull<DiagnosticsType>()?.let { DiagnosticsEvent(row.atMillis, it, row.detail) }
         },
@@ -321,6 +412,7 @@ private fun PlanDto.toPlan(): SessionPlan? {
         position = position,
         lastUsedAtMillis = lastUsedAtMillis,
         intervals = intervals?.toSets()?.let(SessionPlans::clampIntervals) ?: IntervalSets(),
+        gps = gps,
     )
 }
 
@@ -364,6 +456,28 @@ private fun OutingDto.toSession(): Session? {
         toldMilestones = toldMilestones.toMilestones(),
         walk = walk.toEnumOrNull<WayId>(),
         walkFromMeters = walkFromMeters.coerceAtLeast(0),
+        // What an outing measured with GPS says beside its distance; nothing for any other.
+        gps = gps,
+        stepsMeters = stepsMeters?.nonNegative().takeIf { gps },
+        measuredShare = measuredShare?.takeIf { gps && !it.isNaN() }?.coerceIn(0.0, 1.0),
+        ascentMeters = ascentMeters?.nonNegative().takeIf { gps },
+        descentMeters = descentMeters?.nonNegative().takeIf { gps },
+        // A leg with no length says nothing, and one longer than a leg is not one (a damaged
+        // file, or a hand-edited one): the splits are cut from them, on the page as it opens.
+        // The rest in the file's order, numbered anew.
+        legs = legs.takeIf { gps }.orEmpty()
+            .filter { it.meters > 0 && it.meters <= Legs.MAX_METERS }
+            .mapIndexed { index, leg ->
+                OutingLeg(
+                    index = index,
+                    meters = leg.meters,
+                    movingMillis = leg.movingMillis.coerceAtLeast(0),
+                    steps = leg.steps.nonNegative(),
+                    endedAtMillis = leg.endedAtMillis,
+                    ascentMeters = leg.ascentMeters.nonNegative(),
+                    descentMeters = leg.descentMeters.nonNegative(),
+                )
+            },
         intervals = sets.takeIf { kind == SessionGoalKind.INTERVALS },
         splits = if (kind == SessionGoalKind.INTERVALS) {
             splits.filter { it.index in 0 until checkNotNull(sets).sets * 2 }
@@ -389,7 +503,14 @@ private fun Set<SessionMilestone>.percents(): List<Int> = map { it.percent }.sor
 private fun List<Int>.toMilestones(): Set<SessionMilestone> =
     mapNotNull { percent -> SessionMilestone.entries.firstOrNull { it.percent == percent } }.toSet()
 
-private fun Double.nonNegative(): Double = if (isNaN() || this < 0) 0.0 else this
+private fun Double.nonNegative(): Double = if (!isFinite() || this < 0) 0.0 else this
+
+/** A route's points from the file's Base64; none where it is not Base64, or not a route. */
+private fun String.toRoutePoints(): List<RoutePoint> = try {
+    RouteCodec.decode(Base64.getDecoder().decode(this))
+} catch (_: IllegalArgumentException) {
+    emptyList()
+}
 
 private fun String.toEpochDayOrNull(): Long? = try {
     LocalDate.parse(this).toEpochDay()

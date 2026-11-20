@@ -325,22 +325,15 @@ class SessionTrackerTest {
     }
 
     @Test
-    fun `a pause left too long and the longest outing are not taken back`() {
+    fun `a pause left too long is not taken back`() {
+        // The longest outing is: it is asked before it ends, and can be taken back after
+        // (SessionTrackerCapTest; docs/adr/0016-location.md, decision 14).
         val paused = tracker()
         paused.walk(start, 60_000)
         paused.pause(start + 70_000)
         val at = start + 70_000 + SessionConstants.PAUSE_END_MILLIS + 1
         assertThat(paused.check(at)).hasSize(1)
         assertThat(paused.canKeepGoing(at)).isFalse()
-
-        val long = tracker(session(kind = SessionGoalKind.STEPS, value = 30_000))
-        var t = start
-        while (t < start + SessionConstants.MAX_SESSION_MILLIS - 60_000) {
-            long.onSteps(t + 60_000, 100)
-            t += 60_000
-        }
-        long.onSteps(start + SessionConstants.MAX_SESSION_MILLIS + 1_000, 100)
-        assertThat(long.canKeepGoing(start + SessionConstants.MAX_SESSION_MILLIS + 2_000)).isFalse()
     }
 
     @Test

@@ -9,6 +9,10 @@ import com.callbackdev.passo.core.data.settings.SettingsRepository
 import com.callbackdev.passo.core.data.tracking.LiveSteps
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.routes.GpsAnswer
+import com.callbackdev.passo.core.domain.routes.GpsReadiness
+import com.callbackdev.passo.core.domain.routes.GpsStart
+import com.callbackdev.passo.core.domain.routes.GpsSwitchNote
 import com.callbackdev.passo.core.domain.sessions.SessionAmount
 import com.callbackdev.passo.core.domain.sessions.SessionAnnouncement
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
@@ -22,6 +26,8 @@ import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.UnitSystem
+import com.callbackdev.passo.core.tracking.Gps
+import com.callbackdev.passo.core.tracking.OutingStarter
 import com.callbackdev.passo.core.tracking.SessionHaptics
 import com.callbackdev.passo.core.tracking.SessionShortcuts
 import com.callbackdev.passo.core.tracking.SessionSpeech
@@ -56,6 +62,14 @@ import kotlin.math.ceil
  * @property wakeUpCounter the phone has a wake-up step counter: an outing's signals reach it on
  *   time with the screen off by themselves; without it, Passo keeps the phone awake for them
  *   while the outing counts (docs/adr/0013-interval-walks.md), and the editor says so.
+ * @property canMeasureWithGps the phone has a satellite receiver: without one «Measure with GPS»
+ *   is not offered (docs/adr/0016-location.md).
+ * @property gpsReadiness whether the phone could measure an outing now, read when the editor
+ *   opens, and [gpsAnswer] what the reader last answered when asked for the permission: what
+ *   the switch says under it comes from the two.
+ * @property gpsTurnedOn the reader turned «Measure with GPS» on in this editor, with their own
+ *   hand: after a refusal, that is them asking to be asked again. A plan opened with the switch
+ *   already on is not.
  */
 @Immutable
 data class PlanEditorState(
@@ -69,8 +83,27 @@ data class PlanEditorState(
     val canVibrate: Boolean,
     val voiceAvailability: VoiceAvailability = VoiceAvailability.UNKNOWN,
     val wakeUpCounter: Boolean = true,
+    val canMeasureWithGps: Boolean = false,
+    val gpsReadiness: GpsReadiness = GpsReadiness.READY,
+    val gpsAnswer: GpsAnswer = GpsAnswer.NEVER_ASKED,
+    val gpsTurnedOn: Boolean = false,
 ) {
     val changed: Boolean get() = draft != original
+
+    /** What the switch says under it: never on, without a word, over an outing left to the steps. */
+    val gpsNote: GpsSwitchNote
+        get() = GpsStart.switchNote(wasOn = !gpsTurnedOn, isOn = draft.gps, gpsReadiness, gpsAnswer)
+
+    /**
+     * Whether an outing of this draft would be measured, as far as the editor can tell: the
+     * switch on, a receiver to measure with, and no refusal standing. The notes on what the
+     * estimate is and on what keeps the phone awake read this, not the switch alone.
+     */
+    val measuresWithGps: Boolean
+        get() = draft.gps && canMeasureWithGps && gpsNote != GpsSwitchNote.NOT_ALLOWED
+
+    /** «Measure with GPS» touched: the plan's wish, and whose hand turned it on. */
+    fun withGps(on: Boolean): PlanEditorState = copy(draft = draft.copy(gps = on), gpsTurnedOn = on)
 }
 
 /**
@@ -86,6 +119,7 @@ constructor(
     private val settingsRepository: SettingsRepository,
     private val tracking: TrackingRepository,
     private val liveSteps: LiveSteps,
+    private val outings: OutingStarter,
 ) : ViewModel() {
     private val editor = MutableStateFlow<PlanEditorState?>(null)
 
@@ -117,6 +151,9 @@ constructor(
                 restOfDaySteps = SessionPlans.restOfDay(steps, settings.dailyGoalSteps),
                 canVibrate = SessionHaptics.available(context),
                 wakeUpCounter = StepTracking.hasWakeUpStepCounter(context),
+                canMeasureWithGps = Gps.hasReceiver(context),
+                gpsReadiness = Gps.readiness(context),
+                gpsAnswer = outings.gpsAnswer(),
             )
         }
     }
@@ -183,6 +220,13 @@ constructor(
         it.draft.copy(milestones = if (on) it.draft.milestones + milestone else it.draft.milestones - milestone)
     }
 
+    /**
+     * «Measure with GPS». Only the plan's wish is kept here: the permission is asked when an
+     * outing with it first starts, in context, never from the editor. Turned on again after a
+     * refusal and saved, it is the reader asking to be asked again ([save]).
+     */
+    fun gps(on: Boolean) = editor.update { it?.withGps(on) }
+
     fun vibrate(on: Boolean) = edit { it.draft.copy(vibrate = on) }
 
     fun tryVibration(milestone: SessionMilestone) = SessionHaptics.play(context, milestone)
@@ -235,6 +279,7 @@ constructor(
         val state = editor.value ?: return
         viewModelScope.launch {
             sessions.savePlan(state.draft)
+            outings.planSaved(wasOn = !state.gpsTurnedOn, isOn = state.draft.gps)
             refreshShortcuts(state.units)
             done()
         }

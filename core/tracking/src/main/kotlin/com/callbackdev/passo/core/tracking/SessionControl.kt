@@ -37,6 +37,13 @@ object SessionControl {
     /** Reopens an outing just ended by its goal ("Keep going") or by a long stillness ("Resume"). */
     fun keepGoing(context: Context): Boolean = send(context, command(context, ACTION_KEEP_GOING))
 
+    /**
+     * Gives an outing with GPS its receiver back, after a process the system restarted lost it
+     * (docs/adr/0016-location.md, decision 4): from the card, or from the notification that
+     * told the stop. A touch is the reader using the app, which is when location may be read.
+     */
+    fun resumeGps(context: Context): Boolean = send(context, command(context, ACTION_RESUME_GPS))
+
     /** The reader put the ended outing away: it can no longer be reopened. */
     fun dismiss(context: Context): Boolean = send(context, command(context, ACTION_DISMISS))
 
@@ -76,6 +83,7 @@ object SessionControl {
     internal const val ACTION_STOP = "com.callbackdev.passo.action.SESSION_STOP"
     internal const val ACTION_KEEP_GOING = "com.callbackdev.passo.action.SESSION_KEEP_GOING"
     internal const val ACTION_DISMISS = "com.callbackdev.passo.action.SESSION_DISMISS"
+    internal const val ACTION_RESUME_GPS = "com.callbackdev.passo.action.SESSION_RESUME_GPS"
     internal const val EXTRA_PLAN_ID = "com.callbackdev.passo.extra.PLAN_ID"
     internal const val EXTRA_WALK = "com.callbackdev.passo.extra.WALK"
     internal const val EXTRA_AGAIN = "com.callbackdev.passo.extra.AGAIN"
@@ -85,4 +93,10 @@ object SessionControl {
      * from the activity, and the reader sees it begin on Today.
      */
     const val EXTRA_START_PLAN: String = "com.callbackdev.passo.extra.START_PLAN"
+
+    /**
+     * On the app's launch intent, from the notification of an outing's end: the outing whose
+     * page to open (Phase 16).
+     */
+    const val EXTRA_OPEN_OUTING: String = "com.callbackdev.passo.extra.OPEN_OUTING"
 }

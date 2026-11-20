@@ -17,6 +17,7 @@ import android.speech.tts.Voice
 import android.util.Log
 import com.callbackdev.passo.core.designsystem.format.intensityPhrase
 import com.callbackdev.passo.core.designsystem.format.measureFormatter
+import com.callbackdev.passo.core.designsystem.format.paceSpoken
 import com.callbackdev.passo.core.designsystem.format.sessionName
 import com.callbackdev.passo.core.designsystem.ways.placeNameRes
 import com.callbackdev.passo.core.designsystem.ways.placeNoteRes
@@ -396,6 +397,18 @@ internal fun Context.spoken(announcement: SessionAnnouncement, session: Session,
             res.spokenAmount(SessionAmount(SessionGoalKind.STEPS, announcement.steps.toDouble()), format),
         )
 
+        SessionAnnouncement.GpsStopped -> res.getString(R.string.spoken_gps_stopped)
+
+        is SessionAnnouncement.CapAhead -> res.getString(
+            R.string.spoken_cap_ahead,
+            res.getQuantityString(R.plurals.spoken_minutes, announcement.minutes, announcement.minutes),
+        )
+
+        is SessionAnnouncement.EndedAtCap -> res.getString(
+            R.string.spoken_ended_cap,
+            res.spokenAmount(SessionAmount(SessionGoalKind.STEPS, announcement.steps.toDouble()), format),
+        )
+
         is SessionAnnouncement.WalkStarted -> {
             val here = res.getString(placeNameRes(announcement.here.key))
             if (announcement.continued) {
@@ -443,7 +456,8 @@ internal fun Context.spoken(announcement: SessionAnnouncement, session: Session,
                 )
             }
             val day = res.getString(R.string.spoken_day_goal).takeIf { announcement.dayGoalReached }
-            listOfNotNull(goal, pace, day, res.getString(R.string.spoken_well_done)).joinToString(" ")
+            val measuredPace = res.spokenPace(announcement.paceSecondsPerKm, format)
+            listOfNotNull(goal, measuredPace, pace, day, res.getString(R.string.spoken_well_done)).joinToString(" ")
         }
     }
 }
@@ -485,8 +499,12 @@ private fun Resources.spokenMilestone(announcement: SessionAnnouncement.Mileston
         announcement.pace == PaceVerdict.BELOW -> getQuantityString(R.plurals.spoken_pace_below, cadence, cadence)
         else -> null
     }
-    return listOfNotNull(share, pace).joinToString(" ")
+    return listOfNotNull(share, pace, spokenPace(announcement.paceSecondsPerKm, format)).joinToString(" ")
 }
+
+/** «Pace: 9 minutes 40 seconds a kilometre.»: an outing measured with GPS says it at each signal. */
+private fun Resources.spokenPace(secondsPerKm: Double?, format: MeasureFormatter): String? =
+    secondsPerKm?.let { getString(R.string.spoken_pace, paceSpoken(it, format)) }
 
 /**
  * A sample of what a city walk says on the way, for its page's "Hear it": the first place

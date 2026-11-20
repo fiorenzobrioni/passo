@@ -22,4 +22,8 @@ enum class MeasureUnit {
     INCH,
     STEPS_PER_MINUTE,
     MINUTE,
+
+    /** A pace: minutes and seconds in motion a kilometre or a mile, «9:40» (Phase 15). */
+    MINUTES_PER_KILOMETER,
+    MINUTES_PER_MILE,
 }

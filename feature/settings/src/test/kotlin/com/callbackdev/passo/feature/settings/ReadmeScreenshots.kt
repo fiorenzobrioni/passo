@@ -18,7 +18,6 @@ import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.backup.Backup
 import com.callbackdev.passo.core.domain.backup.BackupDay
 import com.callbackdev.passo.core.domain.calibration.CalibratedStep
-import com.callbackdev.passo.core.domain.calibration.StepCalibration
 import com.callbackdev.passo.core.model.DailySummary
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.Session
@@ -105,18 +104,21 @@ class ReadmeScreenshots {
 
     @Test
     fun calibration() {
-        // 100 metres walked in 131 steps at an everyday pace, by a reader 1.78 m tall.
+        // A reader 1.78 m tall whose six outings with GPS measured their step (PLANNING.md §11
+        // Phase 17): the page where they measure it by walking opens on what the outings learnt.
+        val profile = Profile(heightMeters = 1.78, weightKg = 74.0)
         val state = CalibrationUiState(
             step = CalibratedStep.WALKING,
             distanceMeters = 100.0,
             units = UnitPreference.METRIC,
-            phase = CalibrationPhase.RESULT,
+            phase = CalibrationPhase.SETUP,
             permission = true,
             counterReady = true,
-            steps = 131,
-            elapsedMillis = 76_000,
-            result = StepCalibration.measure(CalibratedStep.WALKING, 100.0, 48_210, 48_341, 76_000),
-            profile = Profile(heightMeters = 1.78, weightKg = 74.0),
+            steps = 0,
+            elapsedMillis = 0,
+            result = null,
+            profile = profile,
+            learning = LearningFixtures.proposed(profile),
         )
         compose.setContent { PassoTheme { CalibrationScreen(state, onBack = {}, actions = CalibrationActions()) } }
         compose.waitForIdle()

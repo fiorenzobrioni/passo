@@ -97,9 +97,14 @@ internal object HistorySamples {
 
     /**
      * One day in detail; with [outing], its last walk was walked as an outing: a brisk 20
-     * minutes reached (the list shows the outing in its place).
+     * minutes reached (the list shows the outing in its place); [measured], with GPS.
      */
-    fun detail(date: LocalDate, walkDetection: Boolean = true, outing: Boolean = false): DayDetail {
+    fun detail(
+        date: LocalDate,
+        walkDetection: Boolean = true,
+        outing: Boolean = false,
+        measured: Boolean = false,
+    ): DayDetail {
         val isToday = date == today
         val minutes = minutes(date, if (isToday) NOW_MINUTE else 24 * 60)
         val metrics = MetricsCalculator.day(minutes.map { it.steps }, profile)
@@ -118,12 +123,12 @@ internal object HistorySamples {
             isToday = isToday,
             currentHour = if (isToday) NOW_MINUTE / 60 else null,
             outings = walks.orEmpty().map { walk ->
-                if (outing && walk == walks?.last()) plannedFrom(walk, date) else Outing.Detected(walk)
+                if (outing && walk == walks?.last()) plannedFrom(walk, date, measured) else Outing.Detected(walk)
             },
         )
     }
 
-    private fun plannedFrom(walk: Walk, date: LocalDate): Outing.Planned {
+    private fun plannedFrom(walk: Walk, date: LocalDate, measured: Boolean): Outing.Planned {
         val session = Session(
             id = 1,
             planId = 1,
@@ -145,6 +150,9 @@ internal object HistorySamples {
                 distanceMeters = walk.distanceMeters,
                 activeKcal = walk.activeKcal,
             ),
+            gps = measured,
+            stepsMeters = walk.distanceMeters.takeIf { measured },
+            measuredShare = 0.96.takeIf { measured },
         )
         return Outing.Planned(session, walk.startMinute, walk.endMinute)
     }

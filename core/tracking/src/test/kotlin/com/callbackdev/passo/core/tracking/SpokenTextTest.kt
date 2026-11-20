@@ -73,6 +73,51 @@ class SpokenTextTest {
 
     @Test
     @Config(qualifiers = "en-rUS")
+    fun `an outing measured with GPS says its pace a kilometre at each signal, and at the goal`() {
+        val half = SessionAnnouncement.Milestone(
+            SessionMilestone.HALF,
+            SessionAmount(SessionGoalKind.TIME, 10.0),
+            108,
+            PaceVerdict.ON_PACE,
+            paceSecondsPerKm = 580.0,
+        )
+        assertThat(say(half)).isEqualTo(
+            "Halfway. 10 minutes to go. 108 steps a minute: on pace. Pace: 9 minutes 40 seconds a kilometre.",
+        )
+        // A round pace says its minutes alone.
+        assertThat(say(half.copy(paceSecondsPerKm = 600.0))).endsWith("Pace: 10 minutes a kilometre.")
+        assertThat(context.spoken(half, walk, UnitPreference.IMPERIAL))
+            .endsWith("Pace: 15 minutes 33 seconds a mile.")
+        assertThat(say(SessionAnnouncement.goal(walk, paceSecondsPerKm = 580.0))).isEqualTo(
+            "Goal reached: 20 minutes, 2,140 steps. Pace: 9 minutes 40 seconds a kilometre. " +
+                "17 of 20 minutes at your pace. Well done.",
+        )
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT")
+    fun `in Italian, the pace is the andatura`() {
+        val half = SessionAnnouncement.Milestone(
+            SessionMilestone.HALF,
+            SessionAmount(SessionGoalKind.TIME, 10.0),
+            null,
+            PaceVerdict.NONE,
+            paceSecondsPerKm = 541.0,
+        )
+
+        assertThat(say(half)).endsWith("Andatura: 9 minuti e 1 secondo al chilometro.")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS")
+    fun `an outing without GPS says no pace a kilometre`() {
+        val half = SessionAnnouncement.milestone(walk, SessionMilestone.HALF, cadence = 108)
+
+        assertThat(say(half)).doesNotContain("kilometre")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS")
     fun `the goal says what happened, and a steps goal its steps once`() {
         val kept = walk.copy(totals = walk.totals.copy(zoneMillis = 19 * 60_000L + 30_000))
         assertThat(say(SessionAnnouncement.goal(kept, dayGoalReached = true))).isEqualTo(
@@ -138,6 +183,40 @@ class SpokenTextTest {
         val still = walk.copy(totals = walk.totals.copy(steps = 764))
         assertThat(say(SessionAnnouncement.endedStill(still), still))
             .isEqualTo("Uscita chiusa dopo una lunga sosta, a 764 passi. Puoi riprenderla dalla notifica.")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS")
+    fun `before the longest an outing stays open, it asks aloud`() {
+        assertThat(say(SessionAnnouncement.CapAhead(minutes = 15), walk)).isEqualTo(
+            "Still walking? This outing ends in 15 minutes. Touch Keep going on the notification to carry on.",
+        )
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT")
+    fun `in Italian, the question before the longest outing`() {
+        assertThat(say(SessionAnnouncement.CapAhead(minutes = 15), walk)).isEqualTo(
+            "Stai ancora camminando? Questa uscita si chiude tra 15 minuti. " +
+                "Tocca Continua sulla notifica per andare avanti.",
+        )
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS")
+    fun `the question unanswered, the end says what was walked and that it can be kept going`() {
+        val closed = walk.copy(totals = walk.totals.copy(steps = 21_400))
+        assertThat(say(SessionAnnouncement.endedAtCap(closed), closed)).isEqualTo(
+            "Outing ended at its time limit, at 21,400 steps. You can keep going from the notification.",
+        )
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT")
+    fun `in Italian, the end at the longest outing`() {
+        val closed = walk.copy(totals = walk.totals.copy(steps = 764))
+        assertThat(say(SessionAnnouncement.endedAtCap(closed), closed))
+            .isEqualTo("Uscita chiusa per limite di tempo, a 764 passi. Puoi continuarla dalla notifica.")
     }
 
     private val milan = Ways.of(WayId.MILAN_DUOMO_NAVIGLI)

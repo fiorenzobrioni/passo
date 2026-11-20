@@ -49,6 +49,9 @@ calories are estimates, and Passo says so.
     <td align="center"><img src="docs/screenshots/outing-editor.png" width="250" alt="Editing an outing: the signals at 25, 50 and 75 percent, each vibration with its pattern drawn beside it and felt at a touch, and the voice through headphones"><br><sub><b>Signals</b> you can feel or hear</sub></td>
   </tr>
   <tr>
+    <td align="center"><img src="docs/screenshots/outing-route.png" width="250" alt="The page of a brisk walk measured with GPS: goal reached, 45 minutes; its route drawn as a line on plain ground, with a dashed stretch covered by the steps and a bead at each kilometre; 4.26 km measured by satellite, 47 minutes in motion, a pace of 11:14 a kilometre"><br><sub><b>An outing's page</b>: where it went, measured</sub></td>
+  </tr>
+  <tr>
     <td align="center"><img src="docs/screenshots/way.png" width="250" alt="The Via Francigena under way: the map from the Great St Bernard Pass to Rome with the part walked, past Monteriggioni, 280 km to Rome"><br><sub><b>Ways</b>: a long way, walked from home</sub></td>
     <td align="center"><img src="docs/screenshots/way-stamps.png" width="250" alt="The stamps: one for each stage reached, from the Great St Bernard Pass to Cassio, each with its day"><br><sub><b>The stamps</b>, one a stage</sub></td>
     <td align="center"><img src="docs/screenshots/way-start.png" width="250" alt="Starting a way: from today, from 1 January (you would already be past Vetralla), or from your first day with Passo"><br><sub><b>A start in the past</b> places you at once</sub></td>
@@ -71,7 +74,7 @@ calories are estimates, and Passo says so.
   <tr>
     <td align="center"><img src="docs/screenshots/onboarding-goal.png" width="250" alt="The first run: the daily goal, with what it means in distance and time"><br><sub><b>A goal</b> in kilometres and minutes</sub></td>
     <td align="center"><img src="docs/screenshots/settings-appearance.png" width="250" alt="Settings: appearance, with a live preview"><br><sub><b>Appearance</b>: palettes and typefaces</sub></td>
-    <td align="center"><img src="docs/screenshots/calibration.png" width="250" alt="Measure your step: 131 steps over 100 m make a walking step of 76 cm, against 74 cm estimated from the height, so distances read 3% longer"><br><sub><b>Measure your step</b>, no GPS</sub></td>
+    <td align="center"><img src="docs/screenshots/calibration.png" width="250" alt="Your step, measured on your outings: six outings with GPS put it at 78 cm at the usual pace, not the 74 cm estimated from the height, drawn by cadence against the step in use, with Use it and Not now"><br><sub><b>Your step</b>, learnt from your outings with GPS</sub></td>
   </tr>
   <tr>
     <td align="center"><img src="docs/screenshots/settings-data.png" width="250" alt="Settings, your data: a backup saved with 412 days and 38 outings, and the rows to back up, import and export for a spreadsheet"><br><sub><b>Your data</b>, in a file you keep</sub></td>
@@ -94,13 +97,14 @@ Italian). The phone's status bar is not in the pictures. The command that redraw
 - 📈 **Your day**: a chart you read with a finger, plus distance, calories, active and brisk minutes, cadence.
 - 📅 **History**: a day, week, month or year at a time, and a calendar of how close each day came.
 - 🚶 **Walks, found for you**: stretches of walking recognised in the steps already counted.
-- 🎯 **Outings**: a walk or run with a goal, with vibrations or a voice at the milestones you choose.
+- 🎯 **Outings**: a walk or run with a goal, with vibrations or a voice at the milestones you choose. Turn on «Measure with GPS» for one, and its distance is measured by satellite instead of estimated, with your pace by the kilometre or the mile.
+- 🧭 **An outing's page**: every outing has a page of its own, with one sentence and its numbers, each saying whether it is measured or estimated. With GPS: the route on a map you can zoom, drawn by Passo with no map service, each kilometre with its pace, and how much you climbed. Share the route as an image or a GPX file, save it, or delete it.
 - ⏱️ **Japanese interval walk**: 3 slow minutes and 3 fast ones, five sets or more, each change told with a vibration of its own so the phone stays in your pocket; at the end, how many fast intervals were at pace.
 - 🏆 **Insights**: your streak, your best day, week and month, and the averages.
 - 🗓️ **Your year on foot**: a year told in pages, from your own days: the steps and how far they went, the months, your best day, your day of the week and your hour, the goal, the outings and the ways, against the year before. Open it from Insights or History any time; in December it waits for you on Today. Share a page as an image, through an app you pick.
 - 🗺️ **Ways**: long ways (Via degli Dei, Camino Portugués, Via di Francesco, Camino Francés, Via Francigena, Kumano Kodō, Great Ocean Walk, Inca Trail, John Muir Trail, Kilimanjaro), listed by continent and walked from home, stage by stage, with a stamp for each. No location: only your distance.
 - 🏛️ **City walks**: Milan, Rome, Paris, London, Madrid, Berlin, Vienna, Porto, Amsterdam and Prague in Europe, Lima, Cusco, New York, Rio de Janeiro, Mexico City, Buenos Aires, San Francisco, Québec, Havana and Cartagena in the Americas, Tokyo, Sydney, Seoul, Beijing, Hong Kong, Singapore, Bangkok, Kyoto, Hanoi and Melbourne in Asia and Oceania, Cairo, Cape Town, Marrakech, Tunis, Alexandria, Dakar, Addis Ababa, Fez, Zanzibar and Luxor in Africa, walked where you are in one outing or a few, about 5 km or about 10. Each continent has its page, with a map of where its cities are and which you have walked. Each place is told as your steps reach it, with a short vibration and, if you like, a line about it in your headphones.
-- 📏 **Measure your step**: walk a distance you know and Passo works out your step length. No GPS.
+- 📏 **Measure your step**: walk a distance you know and Passo works out your step length, with no GPS. Or let your outings with GPS measure it: once they have enough, Passo shows your step pace by pace and offers it for every estimate, yours to accept or not. Past days keep theirs unless you ask.
 - 🏠 **Two widgets**: At a glance and In words, resizable, in seven colours (green by default) and any opacity.
 - 🔔 **Notifications**: goal reached, an evening reminder, a weekly summary. Each one optional.
 - ⚡ **Quick Settings tile**: today's steps and the share of the goal.
@@ -114,12 +118,13 @@ Italian). The phone's status bar is not in the pictures. The command that redraw
 
 | | |
 |---|---|
-| 🔒 **Private by design** | no `INTERNET` permission: Passo cannot send anything. The build fails if a network, location, exact-alarm or body-sensor permission appears |
+| 🔒 **Private by design** | no `INTERNET` permission: Passo sends nothing, and cannot. The permissions it may hold are a fixed list, and the build fails on any other: network, background location, exact alarms and body sensors by name |
+| 📍 **Location, only if you ask** | read by satellite only during an outing you start with «Measure with GPS» on, from its start to its pause or end. Never for the day's count, never in the background, never without an outing. Leave the switch off and Passo never asks for it |
 | 👟 **One source of steps** | the phone's hardware step counter. No Health Connect, no Google Fit, no Play services |
 | 🔋 **Battery is a feature** | the step counter runs on a low-power chip; no timers with the screen off, widgets updated only when visible. Target: about 1% of a day's battery |
 | 📏 **Honest estimates** | distance and calories say they are estimates; every formula is documented in the code with its source |
 | 🗓️ **Past days are frozen** | a new goal or profile changes today, never your history (unless you ask) |
-| 📁 **Your files are yours** | export and import go through Android's file picker, so no storage permission. Android's own backup carries only your steps, profile and settings |
+| 📁 **Your files are yours** | export and import go through Android's file picker, so no storage permission. Android's own backup carries only your steps, profile and settings; the routes of outings measured with GPS never go to the cloud copy |
 
 ## Install
 

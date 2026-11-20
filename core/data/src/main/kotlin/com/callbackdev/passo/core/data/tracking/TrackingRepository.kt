@@ -2,9 +2,11 @@ package com.callbackdev.passo.core.data.tracking
 
 import com.callbackdev.passo.core.data.db.DiagnosticsEventEntity
 import com.callbackdev.passo.core.data.db.MinuteStepsEntity
+import com.callbackdev.passo.core.data.db.SessionLegEntity
 import com.callbackdev.passo.core.data.db.TrackerStateEntity
 import com.callbackdev.passo.core.data.db.TrackingDao
 import com.callbackdev.passo.core.data.db.intervalEntities
+import com.callbackdev.passo.core.data.db.legEntities
 import com.callbackdev.passo.core.data.db.toEntity
 import com.callbackdev.passo.core.data.db.toModel
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
@@ -60,6 +62,13 @@ constructor(
 ) {
     private val summaryLock = Mutex()
 
+    // The legs of the outing under way as last written with a batch: the next writes those that
+    // changed since, however many and however far back («Keep going» lays a quarter of an
+    // hour's at once, a climb lands on a leg a minute and a half behind), never a fixed few, or a
+    // process that died would come back with holes in its splits. Lost with the process, so the
+    // first batch after it writes them all.
+    private var writtenLegs: Pair<Long, List<SessionLegEntity>>? = null
+
     suspend fun trackerState(): TrackerState? = dao.trackerState()?.let {
         TrackerState(
             bootCount = it.bootCount,
@@ -102,6 +111,8 @@ constructor(
      */
     suspend fun persist(batch: LedgerBatch, nowWallMillis: Long, session: Session? = null) = summaryLock.withLock {
         val current = preferences.current()
+        val legs = session?.legEntities().orEmpty()
+        val written = writtenLegs?.takeIf { it.first == session?.id }?.second.orEmpty()
         dao.writeBatch(
             increments = batch.increments.map { MinuteStepsEntity(it.epochMinute, it.localEpochDay, it.steps) },
             state = batch.state?.let {
@@ -122,7 +133,9 @@ constructor(
             diagnosticsKept = TrackingConstants.DIAGNOSTICS_LOG_SIZE,
             session = session?.toEntity(),
             intervals = session?.intervalEntities().orEmpty(),
+            legs = legs.filterIndexed { index, leg -> written.getOrNull(index) != leg },
         )
+        if (session != null && session.id != 0L) writtenLegs = session.id to legs
     }
 
     /**

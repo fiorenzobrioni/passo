@@ -8,6 +8,9 @@
 - Built: 3 Oct 2026 (Phase 13), as option A
 - Amended: 4 Oct 2026 (owner, after the first field test): on a phone with no wake-up step
   counter, every outing with signals keeps the processor awake while it counts (below)
+- Amended: 18 Nov 2026 (`docs/adr/0016-location.md`, decisions 5 and 14; built with Phase 15):
+  that wake lock is also an outing with GPS's, and its bound follows the outing's own cap (at
+  the end of the amendment below)
 
 ## Context
 
@@ -184,6 +187,22 @@ Without it a forgotten outing kept the processor awake until the screen came on,
 min bound. The moment is kept by a timer in the service, which exists only while the lock is held:
 the processor is awake anyway, so it shortens a wake and never makes one. It is the one timer of
 Passo's that runs with the screen off, and only under this lock.
+
+**Amended 18 Nov 2026** (owner; Phase 15, `docs/adr/0016-location.md` decisions 5 and 14). Two
+things, both on a phone with no wake-up step counter only:
+
+- **An outing measured with GPS holds the lock too, with signals or without.** There the steps
+  steer the satellite receiver (asleep two minutes after the reader stops, awake at the next
+  step, and no distance without a step), and with the processor asleep no step would arrive
+  to wake it: the receiver, once asleep, stayed asleep until the screen came on. A receiver
+  slowed to a fix every half minute during a stop was weighed and left out: it costs more
+  than a processor awake with the receiver off, and finds the first step up to half a minute
+  late. Held only while the service holds its `location` type: an outing with GPS whose
+  receiver was refused or lost is an outing like any other. Let go as always: a pause, the
+  end, 15 minutes still.
+- **The bound is ten minutes past the outing's own cap**, no longer 4 h 10 min from when the
+  lock is taken: the longest outing now asks before it ends, and «Keep going» moves its cap
+  four hours on, so the lock is taken again then, bounded ten minutes past the new cap.
 
 The cost, an estimate until measured: a processor kept awake with little to do draws in the order
 of 0.1 to 0.5 W above sleep, so about 0.5 to 1.5% of a 17 Wh battery for half an hour, 1 to 3%

@@ -85,14 +85,18 @@ object StepCalibration {
     /**
      * [profile] with the measured length in place: the walking one is marked as measured, so
      * Settings can say where it came from; the running one is the reader's own, like one typed.
+     * The last length chosen is the one in use: a walking step measured replaces a learnt one,
+     * and a running step measured wins over a learnt step's running part, whose walking part
+     * stays (PLANNING.md §11 Phase 17).
      */
     fun apply(profile: Profile, result: CalibrationResult.Measured): Profile = when (result.step) {
         CalibratedStep.WALKING -> profile.copy(
             stepLengthMode = StepLengthMode.CALIBRATED,
             walkingStepLengthMeters = result.stepLengthMeters,
+            learnedStep = null,
         )
 
-        CalibratedStep.RUNNING -> profile.copy(runningStepLengthMeters = result.stepLengthMeters)
+        CalibratedStep.RUNNING -> LearnedSteps.chooseRunning(profile, result.stepLengthMeters)
     }
 
     /** What the app accepts for each step (`ProfileLimits`): a result outside would not be kept. */

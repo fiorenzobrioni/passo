@@ -25,6 +25,9 @@ dependencies {
     compileOnly(libs.compose.gradlePlugin)
     compileOnly(libs.ksp.gradlePlugin)
     compileOnly(libs.room.gradlePlugin)
+
+    // The permission gate's rules are a pure function, tested here (PermissionVerdictTest).
+    testImplementation(libs.junit)
 }
 
 gradlePlugin {

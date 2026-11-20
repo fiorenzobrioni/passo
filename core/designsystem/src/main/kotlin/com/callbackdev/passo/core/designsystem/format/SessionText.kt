@@ -6,6 +6,11 @@ import com.callbackdev.passo.core.designsystem.ways.placeNameRes
 import com.callbackdev.passo.core.designsystem.ways.walkOutingRes
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.metrics.MetricsConstants
+import com.callbackdev.passo.core.domain.routes.DistanceKind
+import com.callbackdev.passo.core.domain.routes.GpsLine
+import com.callbackdev.passo.core.domain.routes.distanceKind
+import com.callbackdev.passo.core.domain.routes.pace
+import com.callbackdev.passo.core.domain.routes.stepsShare
 import com.callbackdev.passo.core.domain.sessions.SessionAmount
 import com.callbackdev.passo.core.domain.sessions.SessionHeadline
 import com.callbackdev.passo.core.domain.sessions.cadenceFloor
@@ -24,6 +29,7 @@ import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.SessionState
+import com.callbackdev.passo.core.model.UnitSystem
 import kotlin.math.roundToInt
 
 /*
@@ -320,12 +326,143 @@ fun Resources.sessionOutcome(session: Session, format: MeasureFormatter): String
     getString(R.string.session_outcome_share, format.percent(session.progress().coerceAtMost(1.0)))
 }
 
-/** «Estimated: 1.52 km · 91 kcal». */
-fun Resources.sessionEstimates(session: Session, format: MeasureFormatter): String = getString(
-    R.string.session_estimated,
-    format(format.distance(session.totals.distanceMeters)),
-    format(format.energy(session.totals.activeKcal)),
+/**
+ * «Estimated: 1.52 km · 91 kcal». For an outing with GPS the distance says what it is
+ * (docs/adr/0016-location.md, decision 6): «Measured: 1.52 km · estimated: 91 kcal» where at
+ * least nine tenths of it came from fixes, «1.52 km, 30% from your steps · estimated: 91 kcal»
+ * under that. The calories are an estimate either way.
+ *
+ * @param openMeters the stretch whose fixes are not in yet, shown with the distance while it
+ *   is under way.
+ */
+fun Resources.sessionEstimates(session: Session, format: MeasureFormatter, openMeters: Double = 0.0): String {
+    val distance = format(format.distance(session.totals.distanceMeters + openMeters))
+    val energy = format(format.energy(session.totals.activeKcal))
+    return when (session.distanceKind()) {
+        DistanceKind.ESTIMATED -> getString(R.string.session_estimated, distance, energy)
+
+        DistanceKind.MEASURED -> getString(R.string.session_measured, distance, energy)
+
+        DistanceKind.PARTLY_MEASURED -> {
+            val share = session.stepsShare() ?: 1.0
+            if (share >= 1.0) {
+                getString(R.string.session_from_steps, distance, energy)
+            } else {
+                getString(R.string.session_partly_measured, distance, format.percent(share), energy)
+            }
+        }
+    }
+}
+
+/**
+ * The word under an outing's distance among its card's numbers: «estimate», «measured», or the
+ * share its steps gave («30% from steps»); with [energy], the calories beside it, which stay an
+ * estimate under any of the three.
+ */
+fun Resources.sessionDistanceLabel(session: Session, format: MeasureFormatter, energy: String? = null): String =
+    when (session.distanceKind()) {
+        DistanceKind.ESTIMATED -> if (energy == null) {
+            getString(R.string.session_stat_estimate)
+        } else {
+            getString(R.string.session_stat_estimate_with, energy)
+        }
+
+        DistanceKind.MEASURED -> if (energy == null) {
+            getString(R.string.session_stat_measured)
+        } else {
+            getString(R.string.session_stat_measured_with, energy)
+        }
+
+        DistanceKind.PARTLY_MEASURED -> {
+            val share = session.stepsShare() ?: 1.0
+            when {
+                // Before the first fix all of it is the steps': said without a figure.
+                share >= 1.0 && energy == null -> getString(R.string.session_stat_all_from_steps)
+
+                share >= 1.0 -> getString(R.string.session_stat_all_from_steps_with, energy)
+
+                energy == null -> getString(R.string.session_stat_from_steps, format.percent(share))
+
+                else -> getString(R.string.session_stat_from_steps_with, format.percent(share), energy)
+            }
+        }
+    }
+
+/**
+ * An outing's pace by the kilometre or the mile, and the pace now (docs/adr/0016-location.md,
+ * decision 7): «Pace 9:40 min/km · now 9:15 min/km». Null when there is neither: an outing
+ * without GPS, one not measured enough, the first two hundred metres.
+ *
+ * @param paceNow the pace of the last stretch, in seconds a kilometre, while it is walked.
+ */
+fun Resources.sessionPace(session: Session, paceNow: Double?, format: MeasureFormatter): String? {
+    val whole = session.pace()?.let { format(format.pace(it)).replace(' ', NO_BREAK) }
+    val now = paceNow?.let { format(format.pace(it)).replace(' ', NO_BREAK) }
+    return when {
+        whole != null && now != null -> getString(R.string.session_pace_and_now, whole, now)
+        whole != null -> getString(R.string.session_pace, whole)
+        now != null -> getString(R.string.session_pace_now, now)
+        else -> null
+    }
+}
+
+/** [sessionPace] as a screen reader says it: «Pace: 9 minutes 40 seconds a kilometre. Now: …». */
+fun Resources.sessionPaceSpoken(session: Session, paceNow: Double?, format: MeasureFormatter): String? {
+    val whole = session.pace()?.let { paceSpoken(it, format) }
+    val now = paceNow?.let { paceSpoken(it, format) }
+    return when {
+        whole != null && now != null -> getString(R.string.session_pace_and_now_spoken, whole, now)
+        whole != null -> getString(R.string.session_pace_spoken, whole)
+        now != null -> getString(R.string.session_pace_now_spoken, now)
+        else -> null
+    }
+}
+
+/** A pace in words, for a voice: «9 minutes 40 seconds a kilometre», «10 minutes a mile». */
+fun Resources.paceSpoken(secondsPerKm: Double, format: MeasureFormatter): String {
+    val (minutes, seconds) = format.paceParts(secondsPerKm)
+    val minutesText = getQuantityString(R.plurals.pace_minutes, minutes, minutes)
+    val time = if (seconds == 0) {
+        minutesText
+    } else {
+        getString(
+            R.string.pace_minutes_seconds,
+            minutesText,
+            getQuantityString(R.plurals.pace_seconds, seconds, seconds),
+        )
+    }
+    return getString(
+        if (format.units == UnitSystem.METRIC) R.string.pace_per_kilometer else R.string.pace_per_mile,
+        time,
+    )
+}
+
+/** What the card says of the satellites, one sentence a state (PLANNING.md §11 Phase 15). */
+fun Resources.gpsLineText(line: GpsLine): String = getString(
+    when (line) {
+        GpsLine.FINDING -> R.string.session_gps_finding
+        GpsLine.SIGNAL_LOST -> R.string.session_gps_signal_lost
+        GpsLine.LOCATION_OFF -> R.string.session_gps_location_off
+        GpsLine.STOPPED -> R.string.session_gps_stopped
+        GpsLine.PERMISSION_GONE -> R.string.session_gps_permission_gone
+        GpsLine.ON_STEPS_NO_PERMISSION -> R.string.session_gps_on_steps_no_permission
+        GpsLine.ON_STEPS_APPROXIMATE -> R.string.session_gps_on_steps_approximate
+        GpsLine.ON_STEPS_LOCATION_OFF -> R.string.session_gps_on_steps_location_off
+    },
 )
+
+/** The button a line offers, in words; null for a line with no way out of its own. */
+fun Resources.gpsLineAction(line: GpsLine): String? = when (line) {
+    GpsLine.FINDING, GpsLine.SIGNAL_LOST -> null
+    GpsLine.LOCATION_OFF, GpsLine.ON_STEPS_LOCATION_OFF -> getString(R.string.session_gps_turn_on_location)
+    GpsLine.STOPPED -> getString(R.string.session_gps_resume)
+    GpsLine.PERMISSION_GONE, GpsLine.ON_STEPS_NO_PERMISSION -> getString(R.string.session_gps_allow_location)
+    GpsLine.ON_STEPS_APPROXIMATE -> getString(R.string.session_gps_allow_precise)
+}
+
+/** «Still walking? This outing ends in 15 minutes.» */
+fun Resources.capQuestion(minutes: Int): String =
+    getQuantityString(R.plurals.session_card_cap_question, minutes, minutes)
 
 /**
  * An outing in one line, for a widget or a tile: «Brisk walk: 12 of 20 min», «Run: paused». Where

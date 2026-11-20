@@ -87,6 +87,7 @@ fun HistoryRoute(
     onTargetShown: () -> Unit,
     bottomPadding: Dp,
     onOpenYear: (Int) -> Unit = {},
+    onOpenOuting: (Long) -> Unit = {},
     viewModel: HistoryViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -101,6 +102,7 @@ fun HistoryRoute(
         onTargetShown = onTargetShown,
         bottomPadding = bottomPadding,
         onOpenYear = onOpenYear,
+        onOpenOuting = onOpenOuting,
     )
 }
 
@@ -123,6 +125,7 @@ fun HistoryScreen(
     onTargetShown: () -> Unit = {},
     bottomPadding: Dp = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
     onOpenYear: (Int) -> Unit = {},
+    onOpenOuting: (Long) -> Unit = {},
 ) {
     var scale by rememberSaveable { mutableStateOf(PeriodScale.WEEK) }
     // The day the reader is looking at: it survives a change of scale, so a week opens on
@@ -201,6 +204,7 @@ fun HistoryScreen(
                                 scale = newScale
                             },
                             onOpenYear = onOpenYear,
+                            onOpenOuting = onOpenOuting,
                         )
                     }
                 }
@@ -338,6 +342,7 @@ private fun Pages(
     bottomPadding: Dp,
     onOpen: (PeriodScale, LocalDate) -> Unit,
     onOpenYear: (Int) -> Unit,
+    onOpenOuting: (Long) -> Unit,
 ) {
     val format = rememberMeasureFormatter(state.units)
     HorizontalPager(
@@ -348,7 +353,7 @@ private fun Pages(
         val period = pages.periodAt(page)
         Box(Modifier.fillMaxSize()) {
             if (period.scale == PeriodScale.DAY) {
-                DayPage(dayDetail(period.start), state.minWalkMinutes, format, bottomPadding)
+                DayPage(dayDetail(period.start), state.minWalkMinutes, format, bottomPadding, onOpenOuting)
             } else {
                 val overview = remember(period, state.days, state.today, state.firstDay, state.goalSteps) {
                     PeriodOverview.of(period, state.days, state.today, state.firstDay, state.goalSteps)

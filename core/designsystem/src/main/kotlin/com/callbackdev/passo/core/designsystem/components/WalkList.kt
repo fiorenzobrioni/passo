@@ -1,5 +1,6 @@
 package com.callbackdev.passo.core.designsystem.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,8 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.callbackdev.passo.core.designsystem.R
@@ -33,6 +37,8 @@ import com.callbackdev.passo.core.designsystem.format.text
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
+import com.callbackdev.passo.core.domain.routes.DistanceKind
+import com.callbackdev.passo.core.domain.routes.distanceKind
 import com.callbackdev.passo.core.domain.sessions.Outing
 import com.callbackdev.passo.core.domain.today.MINUTES_PER_DAY
 import com.callbackdev.passo.core.domain.walks.Walk
@@ -58,22 +64,30 @@ fun WalkList(walks: List<Walk>, format: MeasureFormatter, modifier: Modifier = M
 /**
  * A day's walks and outings in one list, by start (PLANNING.md §11 Phase 10): an outing stands in
  * for the walk found in its minutes, with its goal and what came of it.
+ *
+ * @param onOpen an outing's row opens its own page (Phase 16), by its id; null where there is
+ *   no page to open it on. A walk found in the steps has none: its row says all there is.
  */
 @Composable
-fun OutingList(outings: List<Outing>, format: MeasureFormatter, modifier: Modifier = Modifier) {
+fun OutingList(
+    outings: List<Outing>,
+    format: MeasureFormatter,
+    modifier: Modifier = Modifier,
+    onOpen: ((Long) -> Unit)? = null,
+) {
     Column(modifier) {
         outings.forEachIndexed { index, outing ->
             if (index > 0) GroupDivider()
             when (outing) {
                 is Outing.Detected -> WalkRow(outing.walk, format)
-                is Outing.Planned -> SessionRow(outing, format)
+                is Outing.Planned -> SessionRow(outing, format, onOpen)
             }
         }
     }
 }
 
 @Composable
-private fun SessionRow(outing: Outing.Planned, format: MeasureFormatter) {
+private fun SessionRow(outing: Outing.Planned, format: MeasureFormatter, onOpen: ((Long) -> Unit)?) {
     val session = outing.session
     val res = LocalResources.current
     val name = res.sessionName(session)
@@ -97,17 +111,36 @@ private fun SessionRow(outing: Outing.Planned, format: MeasureFormatter) {
         null
     }
     val energy = format.energy(session.totals.activeKcal).text()
-    val figures = listOfNotNull(steps, distance, cadence, energy).joinToString("  ·  ")
+    // An outing measured with GPS says so of its distance (docs/adr/0016-location.md, decision
+    // 6): the one figure of the row that is not an estimate, with the satellites' mark before it.
+    val measured = session.distanceKind() == DistanceKind.MEASURED
+    val distanceSaid = if (measured) stringResource(R.string.session_row_measured, distance) else distance
+    val figures = listOfNotNull(steps, distanceSaid, cadence, energy).joinToString("  ·  ")
     val spoken = stringResource(R.string.session_spoken, name, from, to, outcome, goal, figures)
     val counted = figureLine(steps, cadence)
-    val estimated = stringResource(R.string.walk_estimates, figureLine(distance, energy))
+    val estimated = if (measured) {
+        figureLine(distanceSaid, stringResource(R.string.walk_estimates, energy))
+    } else {
+        stringResource(R.string.walk_estimates, figureLine(distance, energy))
+    }
     val reached = session.reached
+    val open = stringResource(R.string.session_card_open)
     Row(
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.spacedBy(14.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .clearAndSetSemantics { contentDescription = spoken }
+            .then(if (onOpen != null) Modifier.clickable { onOpen(session.id) } else Modifier)
+            .clearAndSetSemantics {
+                contentDescription = spoken
+                if (onOpen != null) {
+                    role = Role.Button
+                    onClick(label = open) {
+                        onOpen(session.id)
+                        true
+                    }
+                }
+            }
             .padding(horizontal = 16.dp, vertical = 14.dp),
     ) {
         Surface(
@@ -170,7 +203,7 @@ private fun SessionRow(outing: Outing.Planned, format: MeasureFormatter) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Figures(counted, estimated)
+            Figures(counted, estimated, measured)
         }
     }
 }
@@ -244,12 +277,28 @@ private fun WalkRow(walk: Walk, format: MeasureFormatter) {
  * cadence), then what is estimated from it (the distance, the calories), with the sign Today
  * sets before its estimates. Four on one line broke wherever the width ran out, «108 steps/»
  * from its «min».
+ *
+ * @param measured the second line opens with a distance measured with GPS: the satellites' mark
+ *   stands before it, quiet, in the line's own ink.
  */
 @Composable
-private fun Figures(counted: String, estimated: String) {
+private fun Figures(counted: String, estimated: String, measured: Boolean = false) {
     val style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum")
     Text(counted, style = style, color = MaterialTheme.colorScheme.onSurfaceVariant)
-    Text(estimated, style = style, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    if (measured) {
+        Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Icon(
+                PassoIcons.Gps,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                // On the first line's height: where the figures wrap, the mark stays with the distance.
+                modifier = Modifier.padding(top = 3.dp).size(14.dp),
+            )
+            Text(estimated, style = style, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    } else {
+        Text(estimated, style = style, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
 }
 
 /** Figures on a line, each one held together: a line too long breaks between two, never inside one. */

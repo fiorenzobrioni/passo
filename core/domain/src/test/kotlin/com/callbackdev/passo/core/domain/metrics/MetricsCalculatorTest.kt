@@ -94,6 +94,27 @@ class MetricsCalculatorTest {
     }
 
     @Test
+    fun `a kilometre walked on the flat, at 5 percent and at 10 percent - the slope's term`() {
+        // The flat's 0.5 kcal/kg/km, plus 0.009 for each metre climbed (the ACSM walking equation).
+        fun perKm(grade: Double) = MetricsCalculator.kcalPerKgPerKm(90) +
+            MetricsCalculator.kcalPerKgPerMeterClimbed(90) * 1_000 * grade
+
+        assertThat(perKm(0.0)).isWithin(1e-9).of(0.5)
+        assertThat(perKm(0.05)).isWithin(1e-9).of(0.95)
+        assertThat(perKm(0.10)).isWithin(1e-9).of(1.4)
+    }
+
+    @Test
+    fun `running uphill costs half the walker's slope, on top of its own flat`() {
+        fun perKm(grade: Double) = MetricsCalculator.kcalPerKgPerKm(160) +
+            MetricsCalculator.kcalPerKgPerMeterClimbed(160) * 1_000 * grade
+
+        assertThat(perKm(0.0)).isWithin(1e-9).of(1.0)
+        assertThat(perKm(0.05)).isWithin(1e-9).of(1.225)
+        assertThat(perKm(0.10)).isWithin(1e-9).of(1.45)
+    }
+
+    @Test
     fun `active and brisk minutes start exactly at their thresholds`() {
         val metrics = MetricsCalculator.day(listOf(39, 40, 99, 100), noProfile)
 

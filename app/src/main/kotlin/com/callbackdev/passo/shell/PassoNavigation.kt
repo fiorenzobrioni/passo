@@ -56,13 +56,31 @@ data object SessionsKey : NavKey
 @Serializable
 data object GuideKey : NavKey
 
-/** Measuring the walking or the running step, from Settings (PLANNING.md §11 Phase 7). */
+/**
+ * Measuring the walking or the running step, from Settings (PLANNING.md §11 Phase 7); with
+ * [card], open on the step learnt from the outings with GPS (Phase 17), from the outing whose
+ * samples made it ready.
+ */
 @Serializable
-data class CalibrationKey(val step: CalibratedStep) : NavKey
+data class CalibrationKey(val step: CalibratedStep, val card: Boolean = false) : NavKey
 
 /** The editor of one outing; a new one when [planId] is null. */
 @Serializable
 data class PlanEditorKey(val planId: Long?) : NavKey
+
+/**
+ * Passo's own words before Android asks for the location (PLANNING.md §11 Phase 15): opened by the
+ * start of an outing measured with GPS, the first time, over whichever page it started from.
+ */
+@Serializable
+data object GpsIntroKey : NavKey
+
+/**
+ * One outing's own page (PLANNING.md §11 Phase 16): from its finished card, from its row in
+ * Today and in History, and from the notification of its end.
+ */
+@Serializable
+data class OutingKey(val sessionId: Long) : NavKey
 
 /** The Ways, from Insights and from a stage's notification (PLANNING.md §11 Phase 11). */
 @Serializable
@@ -171,6 +189,11 @@ class PassoNavigationState(
         } else if (selected != ShellTab.TODAY) {
             selected = ShellTab.TODAY
         }
+    }
+
+    /** Takes [key] off the top of what is on screen, if it is there: a page that has done its job. */
+    fun close(key: NavKey) {
+        if (currentKey == key) goBack()
     }
 
     /** The stacks on screen right now: Today's, then the selected tab's. */

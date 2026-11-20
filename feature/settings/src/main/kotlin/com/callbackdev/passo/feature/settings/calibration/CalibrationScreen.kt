@@ -82,17 +82,29 @@ import com.callbackdev.passo.core.domain.calibration.CalibrationResult
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.metrics.MetricsConstants
 import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.metrics.runningPoints
 import com.callbackdev.passo.core.domain.settings.ProfileInputs
+import com.callbackdev.passo.core.model.LearnedStep
 import com.callbackdev.passo.core.model.Profile
 import com.callbackdev.passo.core.model.StepLengthMode
 import com.callbackdev.passo.feature.settings.R
+import com.callbackdev.passo.feature.settings.learning.StepLearningTags
+import com.callbackdev.passo.feature.settings.learning.StepLearntRow
+import com.callbackdev.passo.feature.settings.learning.StepProposalCard
+import com.callbackdev.passo.feature.settings.learning.StepUsedNote
+import com.callbackdev.passo.feature.settings.learning.wayBackLabel
 import java.util.Locale
 import kotlin.math.abs
 
 /** The calibration page for [step], as the navigation opens it. */
 @Composable
-fun CalibrationRoute(step: CalibratedStep, onDone: () -> Unit, viewModel: CalibrationViewModel = hiltViewModel()) {
-    LaunchedEffect(step) { viewModel.open(step) }
+fun CalibrationRoute(
+    step: CalibratedStep,
+    onDone: () -> Unit,
+    card: Boolean = false,
+    viewModel: CalibrationViewModel = hiltViewModel(),
+) {
+    LaunchedEffect(step, card) { viewModel.open(step, card) }
     // The counter is read only while the page is on screen (PLANNING.md §9).
     LifecycleStartEffect(Unit) {
         viewModel.onVisible()
@@ -110,6 +122,12 @@ fun CalibrationRoute(step: CalibratedStep, onDone: () -> Unit, viewModel: Calibr
             again = viewModel::again,
             save = { viewModel.save(onDone) },
             permissionResult = viewModel::onPermissionResult,
+            openCard = viewModel::openCard,
+            useStep = viewModel::useStep,
+            notNow = viewModel::notNow,
+            goBackStep = viewModel::goBackStep,
+            applyPast = viewModel::applyProfileToPastDays,
+            dismissStepUsed = viewModel::dismissStepUsed,
         ),
     )
 }
@@ -123,6 +141,12 @@ class CalibrationActions(
     val again: () -> Unit = {},
     val save: () -> Unit = {},
     val permissionResult: () -> Unit = {},
+    val openCard: () -> Unit = {},
+    val useStep: (LearnedStep) -> Unit = {},
+    val notNow: (LearnedStep) -> Unit = {},
+    val goBackStep: () -> Unit = {},
+    val applyPast: () -> Unit = {},
+    val dismissStepUsed: () -> Unit = {},
 )
 
 /**
@@ -229,6 +253,8 @@ private fun Setup(state: CalibrationUiState, actions: CalibrationActions) {
         )
     }
 
+    LearntStep(state, actions, format)
+
     if (!state.permission) PermissionCard(actions.permissionResult)
 
     GroupHeader(stringResource(R.string.calibration_what))
@@ -253,6 +279,15 @@ private fun Setup(state: CalibrationUiState, actions: CalibrationActions) {
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.padding(start = ScreenMargin + 4.dp, end = ScreenMargin, top = 10.dp),
     )
+    // The way back from a learnt step, named as what was in use before it.
+    if (state.step == CalibratedStep.WALKING) {
+        wayBackLabel(state.profile, format)?.let { back ->
+            TextButton(
+                onClick = actions.goBackStep,
+                modifier = Modifier.padding(start = ScreenMargin - 8.dp).testTag(StepLearningTags.WAY_BACK),
+            ) { Text(back) }
+        }
+    }
 
     GroupHeader(stringResource(R.string.calibration_distance))
     val scale = ProfileInputs.calibrationDistance(format.units)
@@ -310,6 +345,56 @@ private fun Setup(state: CalibrationUiState, actions: CalibrationActions) {
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(start = ScreenMargin + 4.dp, end = ScreenMargin, top = 12.dp),
+        )
+    }
+}
+
+/**
+ * The step learnt from the outings with GPS, where the reader comes to look at their step: the
+ * card when it is proposed or asked for, what «Use it» changed once touched, and otherwise a quiet
+ * row whenever a curve counts and is not in use, which opens the card: a reader who said «Not now»
+ * and changed their mind does not wait for new outings.
+ */
+@Composable
+private fun LearntStep(state: CalibrationUiState, actions: CalibrationActions, format: MeasureFormatter) {
+    var confirmPast by rememberSaveable { mutableStateOf(false) }
+    val offer = state.learning.offer
+    val inUse = state.profile.stepLengthMode == StepLengthMode.LEARNED
+    val spacing = Modifier.padding(top = 12.dp)
+    when {
+        state.stepUsed -> StepUsedNote(onApplyPast = {
+            confirmPast = true
+        }, onDone = actions.dismissStepUsed, modifier = spacing)
+
+        offer != null && (state.learning.proposed || (state.cardOpen && !inUse)) -> StepProposalCard(
+            offer = offer,
+            profile = state.profile,
+            format = format,
+            onUse = { actions.useStep(offer.curve) },
+            onNotNow = { actions.notNow(offer.curve) },
+            modifier = spacing,
+        )
+
+        offer != null && !inUse -> StepLearntRow(offer, format, onOpen = actions.openCard, modifier = spacing)
+
+        else -> Unit
+    }
+    if (confirmPast) {
+        AlertDialog(
+            onDismissRequest = { confirmPast = false },
+            title = { Text(stringResource(R.string.settings_apply_past_title)) },
+            text = { Text(stringResource(R.string.settings_apply_past_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmPast = false
+                    actions.applyPast()
+                }) {
+                    Text(stringResource(R.string.settings_apply_past_confirm), color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmPast = false }) { Text(stringResource(R.string.settings_cancel)) }
+            },
         )
     }
 }
@@ -636,7 +721,15 @@ private fun currentStep(step: CalibratedStep, profile: Profile, format: MeasureF
     return when (step) {
         CalibratedStep.WALKING -> {
             val shown = format.stepLength(lengths.walkingMeters).text()
+            val learned = lengths.learned
             when {
+                learned != null ->
+                    stringResource(
+                        R.string.calibration_now_learned,
+                        shown,
+                        format.distance(learned.learntMeters).text(),
+                    )
+
                 profile.walkingStepLengthMeters != null && profile.stepLengthMode == StepLengthMode.CALIBRATED ->
                     stringResource(R.string.calibration_now_measured, shown)
 
@@ -651,7 +744,10 @@ private fun currentStep(step: CalibratedStep, profile: Profile, format: MeasureF
 
         CalibratedStep.RUNNING -> {
             val shown = format.stepLength(lengths.runningMeters).text()
-            if (profile.runningStepLengthMeters != null) {
+            val learned = lengths.learned?.takeIf { it.running && it.runningPoints.isNotEmpty() }
+            if (learned != null) {
+                stringResource(R.string.calibration_now_learned, shown, format.distance(learned.learntMeters).text())
+            } else if (profile.runningStepLengthMeters != null) {
                 stringResource(R.string.calibration_now_manual, shown)
             } else {
                 stringResource(R.string.calibration_now_running_auto, shown)

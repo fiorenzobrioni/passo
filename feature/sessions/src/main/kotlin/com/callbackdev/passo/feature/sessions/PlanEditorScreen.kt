@@ -101,6 +101,7 @@ import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
 import com.callbackdev.passo.core.designsystem.theme.padding
 import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
+import com.callbackdev.passo.core.domain.routes.GpsSwitchNote
 import com.callbackdev.passo.core.domain.sessions.SessionAmount
 import com.callbackdev.passo.core.domain.sessions.SessionConstants
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
@@ -135,6 +136,7 @@ fun PlanEditorRoute(planId: Long?, onDone: () -> Unit, viewModel: PlanEditorView
             nudge = viewModel::nudge,
             intensity = viewModel::intensity,
             milestone = viewModel::milestone,
+            gps = viewModel::gps,
             vibrate = viewModel::vibrate,
             tryVibration = viewModel::tryVibration,
             tryEndedStill = viewModel::tryEndedStill,
@@ -158,6 +160,7 @@ class PlanEditorActions(
     val nudge: (Boolean) -> Unit = {},
     val intensity: (SessionIntensity) -> Unit = {},
     val milestone: (SessionMilestone, Boolean) -> Unit = { _, _ -> },
+    val gps: (Boolean) -> Unit = {},
     val vibrate: (Boolean) -> Unit = {},
     val tryVibration: (SessionMilestone) -> Unit = {},
     val tryEndedStill: () -> Unit = {},
@@ -394,6 +397,24 @@ private fun EditorList(state: PlanEditorState, actions: PlanEditorActions, modif
         item(key = "estimate-header") { GroupHeader(stringResource(R.string.editor_estimate_title)) }
         item(key = "estimate") { Estimate(state, format) }
 
+        // After what the outing comes to, how that is known: estimated from the steps, or
+        // measured. Absent on a phone with no satellite receiver: nothing to offer there.
+        if (state.canMeasureWithGps) {
+            item(key = "measure-header") { GroupHeader(stringResource(R.string.editor_measure)) }
+            item(key = "gps") {
+                SettingsGroup {
+                    SwitchRow(
+                        label = stringResource(R.string.editor_gps),
+                        note = gpsNote(state.gpsNote),
+                        checked = plan.gps,
+                        onChange = actions.gps,
+                        icon = PassoIcons.Gps,
+                        modifier = Modifier.testTag(EditorTags.GPS),
+                    )
+                }
+            }
+        }
+
         item(key = "signals-header") { GroupHeader(stringResource(R.string.editor_signals)) }
         item(key = "signals") {
             Column(
@@ -436,9 +457,33 @@ private fun EditorList(state: PlanEditorState, actions: PlanEditorActions, modif
             }
         }
         item(key = "voice") { VoiceChoice(state, actions) }
-        if (SignalWake.neededFor(plan, wakeUpCounter = state.wakeUpCounter)) {
-            item(key = "awake") { AwakeNote() }
+        // A plan with GPS on a phone that has no receiver (one brought by an import), or whose
+        // permission the reader refused, measures nothing there, and keeps nothing awake for it.
+        val measured = plan.copy(gps = state.measuresWithGps)
+        if (SignalWake.neededFor(measured, wakeUpCounter = state.wakeUpCounter)) {
+            // With signals the reason is the reader's to feel; with none, it is the receiver's.
+            val forSignals = SignalWake.neededFor(measured.copy(gps = false), wakeUpCounter = state.wakeUpCounter)
+            item(key = "awake") {
+                AwakeNote(if (forSignals) R.string.editor_awake_note else R.string.editor_awake_note_gps)
+            }
         }
+    }
+}
+
+/**
+ * What «Measure with GPS» says under it. What it gives, then what it costs, each on its own
+ * line; where Passo will ask for the permission, that it does so when the outing starts; and
+ * after a refusal, with the switch still on, that the outing counts from the steps and how to
+ * be asked again. The switch is never on, without a word, over an outing left to the steps.
+ */
+@Composable
+private fun gpsNote(note: GpsSwitchNote): String {
+    val plain = stringResource(R.string.editor_gps_gives).unorphaned() + "\n" +
+        stringResource(R.string.editor_gps_costs).unorphaned()
+    return when (note) {
+        GpsSwitchNote.PLAIN -> plain
+        GpsSwitchNote.ASKS_AT_START -> plain + "\n" + stringResource(R.string.editor_gps_asks).unorphaned()
+        GpsSwitchNote.NOT_ALLOWED -> stringResource(R.string.editor_gps_not_allowed).unorphaned()
     }
 }
 
@@ -562,7 +607,14 @@ private fun Estimate(state: PlanEditorState, format: MeasureFormatter) {
                 style = MaterialTheme.typography.bodyLarge,
             )
             Text(
-                text = stringResource(R.string.editor_estimate_note),
+                // What measures the outing itself: the note must stay true with GPS on.
+                text = stringResource(
+                    if (state.measuresWithGps) {
+                        R.string.editor_estimate_note_gps
+                    } else {
+                        R.string.editor_estimate_note
+                    },
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -992,7 +1044,7 @@ private fun CountRow(
  * it is how the signals arrive on time, and turning them off turns it off.
  */
 @Composable
-private fun AwakeNote() {
+private fun AwakeNote(note: Int) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.Top,
@@ -1008,7 +1060,7 @@ private fun AwakeNote() {
             modifier = Modifier.size(18.dp),
         )
         Text(
-            stringResource(R.string.editor_awake_note),
+            stringResource(note),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -1025,6 +1077,7 @@ object EditorTags {
     const val ESTIMATE = "editor_estimate"
     const val MILESTONE = "editor_milestone"
     const val VIBRATE = "editor_vibrate"
+    const val GPS = "editor_gps"
     const val TRY = "editor_try"
     const val TRY_ENDED_STILL = "editor_try_ended_still"
     const val VOICE = "editor_voice"

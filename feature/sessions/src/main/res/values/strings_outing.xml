@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- An outing's own page (PLANNING.md §11 Phase 16): the sentence, its numbers each with its
+     line, and for one measured with GPS its route, its kilometres and its climb. -->
+<resources>
+    <string name="outing_back">Back</string>
+    <!-- Under the sentence: «Wednesday, November 18 · 6:02 PM–6:24 PM · 22 minutes». -->
+    <string name="outing_when">%1$s · %2$s · %3$s</string>
+    <!-- What it set out to do: «20 min at a brisk pace». -->
+    <string name="outing_goal">Its goal: %1$s</string>
+    <!-- The route, in one sentence for a screen reader: «Your route: 5.20 km, from north to south, 3 stops». -->
+    <plurals name="outing_route_spoken">
+        <item quantity="one">Your route: %1$s, %2$s, %3$d stop.</item>
+        <item quantity="other">Your route: %1$s, %2$s, %3$d stops.</item>
+    </plurals>
+    <string name="outing_route_spoken_no_stops">Your route: %1$s, %2$s, with no stop.</string>
+    <string name="outing_route_heading">from %1$s to %2$s</string>
+    <string name="outing_route_loop">back to where it began</string>
+    <string name="compass_north">north</string>
+    <string name="compass_north_east">north-east</string>
+    <string name="compass_east">east</string>
+    <string name="compass_south_east">south-east</string>
+    <string name="compass_south">south</string>
+    <string name="compass_south_west">south-west</string>
+    <string name="compass_west">west</string>
+    <string name="compass_north_west">north-west</string>
+    <!-- Under the map, only when some stretch of the route is drawn dashed. -->
+    <string name="outing_map_dashes">Dashes are stretches your steps covered, with no satellite.</string>
+    <!-- An outing with GPS that never got a fix. -->
+    <string name="outing_no_fix">The satellites never answered during this outing: it was counted from your steps, and has no route.</string>
+    <!-- The same place while the outing still counts: the satellites may yet answer. -->
+    <!-- The same place while the outing is paused: the receiver is off until it resumes. -->
+    <string name="outing_no_fix_so_far">No satellite has answered so far: this outing is counted from your steps.</string>
+    <string name="outing_no_fix_yet">No satellite has answered yet. Your steps are counting this outing, and the route will appear here as soon as one does.</string>
+    <!-- A bead on the map, touched: «3 km · 9:40 min/km». -->
+    <string name="outing_bead">%1$s · %2$s</string>
+
+    <!-- The numbers, each with the line that says what it means. -->
+    <string name="outing_numbers">The numbers</string>
+    <string name="outing_steps">Steps</string>
+    <string name="outing_steps_meaning">Counted by the phone’s step counter.</string>
+    <string name="outing_distance">Distance</string>
+    <!-- «5.20 km measured; your steps said 5.05». -->
+    <string name="outing_distance_measured">Measured by satellite. Your steps said %1$s.</string>
+    <string name="outing_distance_partly">%1$s of it from your steps, where the satellites did not reach. Your steps alone said %2$s.</string>
+    <string name="outing_distance_estimated">An estimate, from your steps and your step length.</string>
+    <string name="outing_moving">Time in motion</string>
+    <string name="outing_moving_meaning">The time you were walking: a stop is not in it.</string>
+    <string name="outing_pace">Pace</string>
+    <string name="outing_pace_meaning">Your time in motion over the measured distance.</string>
+    <string name="outing_cadence">Cadence</string>
+    <string name="outing_cadence_meaning">Your average while in motion.</string>
+    <string name="outing_energy">Active calories</string>
+    <string name="outing_energy_meaning">An estimate, from the distance and your weight.</string>
+    <string name="outing_energy_meaning_climb">An estimate, from the distance, the climb and your weight.</string>
+    <string name="outing_climb">Climb</string>
+    <!-- «≈ 240 m». -->
+    <string name="outing_climb_value">≈\u00A0%1$s</string>
+    <string name="outing_climb_meaning">About %1$s down. An estimate, from the air pressure and the satellites.</string>
+    <string name="outing_climb_meaning_satellites">About %1$s down. A rough estimate, from the satellites alone: this phone has no pressure sensor.</string>
+    <!-- A tile as TalkBack says it: «Distance: 5.20 km. Measured by satellite…». -->
+    <string name="outing_tile_spoken">%1$s: %2$s. %3$s</string>
+    <!-- At the pace it was to keep: «17 of 20 min at the pace you set». -->
+    <string name="outing_at_pace">At your pace</string>
+
+    <!-- The splits. -->
+    <string name="outing_splits_km">Kilometre by kilometre</string>
+    <string name="outing_splits_mile">Mile by mile</string>
+    <string name="outing_splits_note">The longer the bar, the faster it was walked.</string>
+    <string name="outing_split_fastest">fastest</string>
+    <!-- «112 steps/min · ≈ 12 m up». -->
+    <string name="outing_split_up">≈\u00A0%1$s up</string>
+    <string name="outing_split_down">≈\u00A0%1$s down</string>
+    <!-- A split as TalkBack says it: «Kilometre 3: 9 minutes 40 seconds a kilometre. 112 steps/min, ≈ 12 m up». -->
+    <string name="outing_split_spoken_km">Kilometre %1$s: %2$s</string>
+    <string name="outing_split_spoken_mile">Mile %1$s: %2$s</string>
+    <string name="outing_split_spoken_last">The last %1$s: %2$s</string>
+    <string name="outing_split_spoken_fastest">The fastest.</string>
+    <string name="outing_split_no_pace">too short for a pace</string>
+
+    <!-- The climb's profile. -->
+    <string name="outing_profile">How it climbed</string>
+    <string name="outing_profile_spoken">The climb over the distance: from %1$s to %2$s, the lowest %3$s and the highest %4$s.</string>
+
+    <!-- What the route can do: share, save, delete. -->
+    <string name="outing_route">Your route</string>
+    <string name="outing_share_image">Share as an image</string>
+    <string name="outing_share_image_note">The line, the sentence and three numbers. No street is in it.</string>
+    <string name="outing_share_gpx">Share as a GPX file</string>
+    <string name="outing_save_gpx">Save as a GPX file</string>
+    <string name="outing_gpx_note">The file says where you walked, from the first step to the last.</string>
+    <string name="outing_share_chooser">Share your route</string>
+    <string name="outing_saved">Saved.</string>
+    <string name="outing_save_failed">It could not be saved there.</string>
+    <string name="outing_delete_route">Delete this route</string>
+    <string name="outing_delete_route_title">Delete this route?</string>
+    <string name="outing_delete_route_text">The line and its places are deleted from this phone. The outing and its numbers stay.</string>
+    <string name="outing_delete_route_confirm">Delete</string>
+    <string name="outing_delete_route_cancel">Cancel</string>
+    <!-- The image shared: Passo's name at its foot. -->
+    <string name="outing_image_signature">Passo</string>
+    <string name="outing_step_at_pace">Your step at this pace: %1$s</string>
+    <string name="outing_step_ready">Passo can now use your measured step for every estimate</string>
+</resources>

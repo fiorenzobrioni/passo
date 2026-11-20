@@ -11,6 +11,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.IconCompat
 import com.callbackdev.passo.core.designsystem.format.countdown
+import com.callbackdev.passo.core.designsystem.format.gpsLineText
 import com.callbackdev.passo.core.designsystem.format.intervalWord
 import com.callbackdev.passo.core.designsystem.format.measureFormatter
 import com.callbackdev.passo.core.designsystem.format.sessionCadence
@@ -18,11 +19,15 @@ import com.callbackdev.passo.core.designsystem.format.sessionEstimates
 import com.callbackdev.passo.core.designsystem.format.sessionGoalDescription
 import com.callbackdev.passo.core.designsystem.format.sessionHeadline
 import com.callbackdev.passo.core.designsystem.format.sessionName
+import com.callbackdev.passo.core.designsystem.format.sessionPace
 import com.callbackdev.passo.core.designsystem.format.sessionProgress
 import com.callbackdev.passo.core.designsystem.format.sessionSteps
 import com.callbackdev.passo.core.designsystem.format.sessionZone
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
+import com.callbackdev.passo.core.domain.routes.GpsLine
+import com.callbackdev.passo.core.domain.routes.LiveMeasure
 import com.callbackdev.passo.core.domain.sessions.IntervalSchedule
+import com.callbackdev.passo.core.domain.sessions.capMillis
 import com.callbackdev.passo.core.domain.sessions.fraction
 import com.callbackdev.passo.core.domain.sessions.intervalAt
 import com.callbackdev.passo.core.domain.sessions.progress
@@ -31,6 +36,8 @@ import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.UnitPreference
+import java.time.Instant
+import java.time.ZoneId
 import kotlin.math.roundToInt
 
 /**
@@ -38,12 +45,15 @@ import kotlin.math.roundToInt
  *
  * @property cadence the last half minute's pace; null before there is one, or paused.
  * @property nowMillis when it is drawn: an interval outing's countdown is counted to it.
+ * @property measure what an outing measured with GPS shows beyond its stored numbers, and the
+ *   line about the satellites: the same in words as on its card.
  */
 internal data class SessionNotice(
     val session: Session,
     val cadence: Int?,
     val units: UnitPreference,
     val nowMillis: Long = session.lastStepAtMillis,
+    val measure: LiveMeasure = LiveMeasure(),
 )
 
 /**
@@ -54,6 +64,9 @@ internal data class SessionNotice(
  *   expanded, the pace against the outing's own, the steps and the estimates, over a bar with
  *   the milestones marked on it. From Android 16 it asks to be a Live Update (a chip in the
  *   status bar and on the lock screen), which the reader can turn off in the system's settings.
+ *   An outing measured with GPS says what its card says, in the same words: the distance as a
+ *   measure, the pace by the kilometre and the pace now, and the one line about the satellites;
+ *   with «Resume GPS» as a third button when the receiver was lost.
  * - **The goal** is its own notification, on the `sessions` channel, which stays as a record:
  *   what was walked, and "Keep going" for a while after. So is **an end by stillness**, with
  *   "Resume" for as long, found by the reader who walks on. The milestones on the way are not
@@ -130,6 +143,15 @@ internal class SessionNotifications(private val context: Context) {
             context.getString(R.string.session_action_stop),
             SessionControl.pendingIntent(context, SessionControl.ACTION_STOP, REQUEST_STOP),
         )
+        // The receiver lost to a restarted process: one touch gives it back, a touch on a
+        // notification being a moment location may be read from (ADR 0016, decision 4).
+        if (notice.measure.line == GpsLine.STOPPED) {
+            builder.addAction(
+                0,
+                context.getString(R.string.session_action_resume_gps),
+                SessionControl.pendingIntent(context, SessionControl.ACTION_RESUME_GPS, REQUEST_RESUME_GPS),
+            )
+        }
         val scaled = (progress.coerceIn(0.0, 1.0) * PROGRESS_MAX).roundToInt()
         val schedule = IntervalSchedule.of(session)
         val text = if (interval != null) {
@@ -189,7 +211,10 @@ internal class SessionNotifications(private val context: Context) {
     private fun scaledAt(movingMillis: Long, schedule: IntervalSchedule): Int =
         (movingMillis.coerceIn(0, schedule.totalMillis).toDouble() / schedule.totalMillis * PROGRESS_MAX).roundToInt()
 
-    /** «108 steps/min: on pace · 1,240 steps», then the estimates. */
+    /**
+     * «108 steps/min: on pace · 1,240 steps», then the estimates; for an outing with GPS the
+     * distance as what it is, its pace, and the line about the satellites if there is one.
+     */
     private fun detailLines(notice: SessionNotice, format: MeasureFormatter): String {
         val res = context.resources
         val session = notice.session
@@ -201,7 +226,12 @@ internal class SessionNotifications(private val context: Context) {
             else -> res.sessionCadence(notice.cadence, session.intensity, format)
         }
         val first = listOfNotNull(pace, res.sessionSteps(session, format)).joinToString(" · ")
-        return listOf(first, res.sessionEstimates(session, format)).joinToString("\n")
+        return listOfNotNull(
+            first,
+            res.sessionEstimates(session, format, notice.measure.openMeters),
+            res.sessionPace(session, notice.measure.paceNow, format),
+            notice.measure.line?.let(res::gpsLineText),
+        ).joinToString("\n")
     }
 
     /**
@@ -221,11 +251,15 @@ internal class SessionNotifications(private val context: Context) {
             .setContentText(res.sessionGoalDescription(session, format))
             .setStyle(
                 NotificationCompat.BigTextStyle().bigText(
-                    listOf(res.sessionGoalDescription(session, format), summary, res.sessionEstimates(session, format))
-                        .joinToString("\n"),
+                    listOfNotNull(
+                        res.sessionGoalDescription(session, format),
+                        summary,
+                        res.sessionEstimates(session, format),
+                        res.sessionPace(session, paceNow = null, format),
+                    ).joinToString("\n"),
                 ),
             )
-            .setContentIntent(context.openAppIntent(REQUEST_GOAL))
+            .setContentIntent(outingIntent(session))
             .setAutoCancel(true)
             .setOnlyAlertOnce(true)
             .setCategory(NotificationCompat.CATEGORY_WORKOUT)
@@ -240,10 +274,106 @@ internal class SessionNotifications(private val context: Context) {
     }
 
     /**
-     * An end by a long stillness, noticed as the reader walks on (or looks): what the outing came
-     * to, and "Resume" while it can still be taken back ([withResume]).
+     * «Still walking?»: the outing is within a quarter of an hour of the longest it stays open,
+     * and the reader is walking (docs/adr/0016-location.md, decision 14). «Keep going» moves that
+     * on; unanswered, the outing ends there, says so, and can still be taken back.
+     *
+     * Its time is the cap's own, never minutes counted when it was posted: the clock time in its
+     * words, and the system's countdown in its header, both true however late it is read, and no
+     * timer of Passo's to keep them so. It goes by itself at the cap, where it has nothing left
+     * to ask ([nowMillis] measures the wait).
+     */
+    fun capAhead(session: Session, nowMillis: Long): android.app.Notification {
+        val res = context.resources
+        val cap = session.capMillis
+        val at = Instant.ofEpochMilli(cap).atZone(ZoneId.systemDefault()).toLocalTime()
+        val text = context.getString(R.string.session_cap_ahead_text, context.clockTime(at))
+        return NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_stat_steps)
+            .setContentTitle(context.getString(R.string.session_cap_ahead_title, res.sessionName(session)))
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setWhen(cap)
+            .setShowWhen(true)
+            .setUsesChronometer(true)
+            .setChronometerCountDown(true)
+            .setTimeoutAfter((cap - nowMillis).coerceAtLeast(1L))
+            .setContentIntent(context.openAppIntent(REQUEST_GOAL))
+            .setAutoCancel(true)
+            .setCategory(NotificationCompat.CATEGORY_WORKOUT)
+            .addAction(
+                0,
+                context.getString(R.string.session_action_keep_going),
+                SessionControl.pendingIntent(context, SessionControl.ACTION_KEEP_GOING, REQUEST_KEEP_GOING),
+            )
+            .build()
+    }
+
+    /**
+     * The receiver of an outing with GPS stopped: told once, with the way back. «Resume GPS»
+     * where the permission is there ([canResume]), since a touch on a notification is a moment
+     * location may be read from; where it is gone, the app, the one place it can be asked.
+     */
+    fun gpsStopped(session: Session, canResume: Boolean): android.app.Notification {
+        val text = context.getString(
+            if (canResume) R.string.session_gps_stopped_text else R.string.session_gps_stopped_text_open,
+        )
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_stat_steps)
+            .setContentTitle(
+                context.getString(R.string.session_gps_stopped_title, context.resources.sessionName(session)),
+            )
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setContentIntent(context.openAppIntent(REQUEST_GOAL))
+            .setAutoCancel(true)
+            .setCategory(NotificationCompat.CATEGORY_WORKOUT)
+        if (canResume) {
+            builder.addAction(
+                0,
+                context.getString(R.string.session_action_resume_gps),
+                SessionControl.pendingIntent(context, SessionControl.ACTION_RESUME_GPS, REQUEST_RESUME_GPS),
+            )
+        }
+        return builder.build()
+    }
+
+    fun postGpsStopped(notification: android.app.Notification) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        NotificationManagerCompat.from(context).notify(ID_GPS_STOPPED, notification)
+    }
+
+    /** The receiver is back, or the outing is over. */
+    fun cancelGpsStopped() {
+        NotificationManagerCompat.from(context).cancel(ID_GPS_STOPPED)
+    }
+
+    /** The question, in the shade: under its own id, so the end's notification never hides it. */
+    fun postCapAhead(notification: android.app.Notification) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        NotificationManagerCompat.from(context).notify(ID_CAP_AHEAD, notification)
+    }
+
+    /** Answered, or overtaken by the outing's end. */
+    fun cancelCapAhead() {
+        NotificationManagerCompat.from(context).cancel(ID_CAP_AHEAD)
+    }
+
+    /**
+     * An end the outing came to by itself, noticed as the reader walks on (or looks): after a
+     * long stillness, or at the longest it stays open. What it came to, and "Resume" or "Keep
+     * going" while it can still be taken back ([withResume]).
      */
     fun endedStill(session: Session, units: UnitPreference, withResume: Boolean): android.app.Notification {
+        val atCap = session.end == SessionEnd.CLOSED
         val format = context.measureFormatter(units)
         val res = context.resources
         val summary = listOfNotNull(
@@ -253,28 +383,46 @@ internal class SessionNotifications(private val context: Context) {
         val sentence = res.sessionHeadline(session, format)
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_steps)
-            .setContentTitle(context.getString(R.string.session_ended_still_title, res.sessionName(session)))
+            .setContentTitle(
+                context.getString(
+                    if (atCap) R.string.session_ended_cap_title else R.string.session_ended_still_title,
+                    res.sessionName(session),
+                ),
+            )
             .setContentText(sentence)
             .setStyle(
                 NotificationCompat.BigTextStyle().bigText(
-                    listOf(sentence, summary, res.sessionEstimates(session, format)).joinToString("\n"),
+                    listOfNotNull(
+                        sentence,
+                        summary,
+                        res.sessionEstimates(session, format),
+                        res.sessionPace(session, paceNow = null, format),
+                    ).joinToString("\n"),
                 ),
             )
-            .setContentIntent(context.openAppIntent(REQUEST_GOAL))
+            .setContentIntent(outingIntent(session))
             .setAutoCancel(true)
             .setOnlyAlertOnce(true)
             .setCategory(NotificationCompat.CATEGORY_WORKOUT)
         if (withResume) {
             builder.addAction(
                 0,
-                context.getString(R.string.session_action_resume),
+                // The reader who stopped resumes; the one the clock stopped keeps going.
+                context.getString(if (atCap) R.string.session_action_keep_going else R.string.session_action_resume),
                 SessionControl.pendingIntent(context, SessionControl.ACTION_KEEP_GOING, REQUEST_KEEP_GOING),
             )
         }
         return builder.build()
     }
 
-    /** The notification of an outing's end that can be taken back: its goal, or a long stillness. */
+    /**
+     * A touch on the notification of an outing's end opens that outing's own page (Phase 16):
+     * what it came to, in full. Its own request code, so its extra is never another intent's.
+     */
+    private fun outingIntent(session: Session) =
+        context.openAppIntent(REQUEST_OUTING) { putExtra(SessionControl.EXTRA_OPEN_OUTING, session.id) }
+
+    /** The notification of an outing's end that can be taken back: its goal, a long stillness, or its cap. */
     fun ended(session: Session, units: UnitPreference, canReopen: Boolean): android.app.Notification =
         if (session.end == SessionEnd.GOAL) {
             goalReached(session, units, withKeepGoing = canReopen)
@@ -294,6 +442,10 @@ internal class SessionNotifications(private val context: Context) {
     /** Whether the end's notification is still in the shade: one put away is not brought back. */
     fun endShowing(): Boolean = context.getSystemService(NotificationManager::class.java)
         ?.activeNotifications?.any { it.id == ID_END } == true
+
+    /** Whether «Still walking?» is on show: a question the reader swiped away is not brought back. */
+    fun capAheadShowing(): Boolean = context.getSystemService(NotificationManager::class.java)
+        ?.activeNotifications?.any { it.id == ID_CAP_AHEAD } == true
 
     fun cancelEnd() {
         NotificationManagerCompat.from(context).cancel(ID_END)
@@ -320,11 +472,19 @@ internal class SessionNotifications(private val context: Context) {
         /** The goal's notification, or the end by stillness's: one outing's end at a time. */
         const val ID_END = 5
 
+        /** «Still walking?», before the longest an outing stays open. */
+        const val ID_CAP_AHEAD = 7
+
+        /** «GPS stopped», for an outing with GPS whose receiver a restarted process lost. */
+        const val ID_GPS_STOPPED = 8
+
         private const val PROGRESS_MAX = 1_000
         private const val REQUEST_PAUSE = 10
         private const val REQUEST_RESUME = 11
         private const val REQUEST_STOP = 12
         private const val REQUEST_KEEP_GOING = 13
         private const val REQUEST_GOAL = 14
+        private const val REQUEST_RESUME_GPS = 15
+        private const val REQUEST_OUTING = 16
     }
 }

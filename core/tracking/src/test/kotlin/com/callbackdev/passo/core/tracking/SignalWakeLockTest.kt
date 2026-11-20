@@ -50,6 +50,31 @@ class SignalWakeLockTest {
     }
 
     @Test
+    fun `keep going renews its bound while it is held, and takes nothing that was not`() {
+        // Not held: a new bound is no reason to take it.
+        lock.renew(8 * 60 * 60_000L)
+        assertThat(lock.held).isFalse()
+
+        lock.hold(true)
+        lock.renew(8 * 60 * 60_000L)
+        assertThat(lock.held).isTrue()
+        // Let go by the new bound, it says the bound it had.
+        ShadowPowerManager.getLatestWakeLock()?.release()
+        lock.hold(false)
+        assertThat(log).containsExactly("timed out after ${8 * 60 * 60}s")
+    }
+
+    @Test
+    fun `taken with the outing's own bound, it says that bound when it times out`() {
+        lock.hold(true, timeoutMillis = 30 * 60_000L)
+        ShadowPowerManager.getLatestWakeLock()?.release()
+
+        lock.hold(false)
+
+        assertThat(log).containsExactly("timed out after ${30 * 60}s")
+    }
+
+    @Test
     fun `never asked, nothing is held and nothing is logged`() {
         lock.hold(false)
         assertThat(lock.held).isFalse()

@@ -6,6 +6,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,10 +38,12 @@ import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.progressBarRangeInfo
 import androidx.compose.ui.semantics.semantics
@@ -54,12 +57,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.callbackdev.passo.core.designsystem.R
 import com.callbackdev.passo.core.designsystem.format.annotated
+import com.callbackdev.passo.core.designsystem.format.capQuestion
 import com.callbackdev.passo.core.designsystem.format.clockTime
+import com.callbackdev.passo.core.designsystem.format.gpsLineAction
+import com.callbackdev.passo.core.designsystem.format.gpsLineText
 import com.callbackdev.passo.core.designsystem.format.sessionAmount
 import com.callbackdev.passo.core.designsystem.format.sessionCadence
+import com.callbackdev.passo.core.designsystem.format.sessionDistanceLabel
 import com.callbackdev.passo.core.designsystem.format.sessionEstimates
 import com.callbackdev.passo.core.designsystem.format.sessionHeadline
 import com.callbackdev.passo.core.designsystem.format.sessionName
+import com.callbackdev.passo.core.designsystem.format.sessionPace
+import com.callbackdev.passo.core.designsystem.format.sessionPaceSpoken
 import com.callbackdev.passo.core.designsystem.format.sessionPaceWord
 import com.callbackdev.passo.core.designsystem.format.sessionPlaceAhead
 import com.callbackdev.passo.core.designsystem.format.sessionProgress
@@ -75,6 +84,10 @@ import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.designsystem.theme.reducedMotion
 import com.callbackdev.passo.core.designsystem.ways.placeNameRes
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
+import com.callbackdev.passo.core.domain.routes.GpsLine
+import com.callbackdev.passo.core.domain.routes.GpsLineAction
+import com.callbackdev.passo.core.domain.routes.LiveMeasure
+import com.callbackdev.passo.core.domain.routes.capQuestionMinutes
 import com.callbackdev.passo.core.domain.sessions.IntervalSchedule
 import com.callbackdev.passo.core.domain.sessions.cadence
 import com.callbackdev.passo.core.domain.sessions.cadenceFloor
@@ -94,13 +107,22 @@ import kotlinx.coroutines.delay
 import java.time.Instant
 import java.time.ZoneId
 
-/** What an outing's card can ask for. */
+/**
+ * What an outing's card can ask for.
+ *
+ * @property onGps the way out a line about the satellites offers (docs/adr/0016-location.md):
+ *   «Resume GPS», the system's switch for location, the request for the permission.
+ * @property onOpen «See the outing», on a finished one: its own page (Phase 16). Null where
+ *   the card is already on a page of its own, or there is none to open.
+ */
 class SessionCardActions(
     val onPause: () -> Unit = {},
     val onResume: () -> Unit = {},
     val onStop: () -> Unit = {},
     val onKeepGoing: () -> Unit = {},
     val onClose: () -> Unit = {},
+    val onGps: (GpsLineAction) -> Unit = {},
+    val onOpen: (() -> Unit)? = null,
 )
 
 /**
@@ -117,8 +139,17 @@ class SessionCardActions(
  * On a city walk (Phase 11) the bar is the walk's small map, the reader's point on it: drawn
  * only while the card is on screen, like every chart here.
  *
+ * An outing measured with GPS (Phase 15, docs/adr/0016-location.md) says which of its numbers is
+ * a measure: «measured» under the distance where at least nine tenths of it came from fixes, the
+ * share its steps gave under that; its pace by the kilometre or the mile, and the pace now, in a
+ * line under the numbers. What the receiver is doing has one line, and one only ([GpsLine]),
+ * with its way out where it has one. Before the longest an outing stays open the card asks what
+ * the notification asks, «Still walking?», with «Keep going».
+ *
  * @param cadence the last half minute's pace, for an outing under way.
  * @param showMap false where the walk's own map is already on the page.
+ * @param measure what an outing with GPS shows beyond its stored numbers, and the line about
+ *   the satellites; empty for any other outing.
  */
 @Composable
 fun SessionCard(
@@ -129,6 +160,7 @@ fun SessionCard(
     actions: SessionCardActions,
     modifier: Modifier = Modifier,
     showMap: Boolean = true,
+    measure: LiveMeasure = LiveMeasure(),
 ) {
     val res = LocalResources.current
     val reached = session.reached
@@ -271,7 +303,19 @@ fun SessionCard(
                 }
             }
             if (finished && session.intervals != null) IntervalBars(session, accent)
-            SessionStats(session, cadence, pace, format)
+            SessionStats(session, cadence, pace, format, measure.openMeters)
+            // The pace by the kilometre, where the distance is a measure, and the pace now.
+            res.sessionPace(session, measure.paceNow, format)?.let { paceLine ->
+                val spoken = res.sessionPaceSpoken(session, measure.paceNow, format) ?: paceLine
+                Text(
+                    text = paceLine,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontFeatureSettings = "tnum"),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .testTag(SessionCardTags.PACE)
+                        .clearAndSetSemantics { contentDescription = spoken },
+                )
+            }
             if (session.state != SessionState.ACTIVE) {
                 res.sessionZone(session, format)?.let {
                     Text(
@@ -281,13 +325,31 @@ fun SessionCard(
                     )
                 }
             }
+            measure.line?.let { line -> GpsNotice(line, onAction = actions.onGps) }
+            session.capQuestionMinutes(now)?.let { minutes ->
+                CardNotice(
+                    icon = PassoIcons.Clock,
+                    text = res.capQuestion(minutes),
+                    action = stringResource(R.string.session_card_keep_going),
+                    onAction = actions.onKeepGoing,
+                    modifier = Modifier.testTag(SessionCardTags.CAP_QUESTION),
+                    actionTag = SessionCardTags.CAP_KEEP_GOING,
+                )
+            }
             when {
-                finished -> Row(
+                // Three buttons at the most, which go on two lines where one is too short for
+                // them (a large text, a narrow phone).
+                finished -> FlowRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     TextButton(onClick = actions.onClose, modifier = Modifier.testTag(SessionCardTags.CLOSE)) {
                         Text(stringResource(R.string.session_card_close))
+                    }
+                    actions.onOpen?.let { open ->
+                        TextButton(onClick = open, modifier = Modifier.testTag(SessionCardTags.OPEN)) {
+                            Text(stringResource(R.string.session_card_open))
+                        }
                     }
                     if (canKeepGoing) {
                         FilledTonalButton(
@@ -366,7 +428,13 @@ private val STAT_MIN_WIDTH = 80.dp
  * card is too narrow for a number at the reader's text size, those sentences are what is shown.
  */
 @Composable
-private fun SessionStats(session: Session, cadence: Int?, pace: SessionIntensity, format: MeasureFormatter) {
+private fun SessionStats(
+    session: Session,
+    cadence: Int?,
+    pace: SessionIntensity,
+    format: MeasureFormatter,
+    openMeters: Double,
+) {
     val res = LocalResources.current
     val active = session.state == SessionState.ACTIVE
     val lines = listOf(
@@ -375,7 +443,7 @@ private fun SessionStats(session: Session, cadence: Int?, pace: SessionIntensity
         } else {
             res.sessionSteps(session, format)
         },
-        res.sessionEstimates(session, format),
+        res.sessionEstimates(session, format, openMeters),
     )
     val spoken = lines.joinToString(". ")
     val unit = SpanStyle(fontSize = MaterialTheme.typography.bodyMedium.fontSize)
@@ -383,9 +451,11 @@ private fun SessionStats(session: Session, cadence: Int?, pace: SessionIntensity
         AnnotatedString(format.steps(session.totals.steps)),
         pluralStringResource(R.plurals.session_stat_steps, session.totals.steps),
     )
-    val distance = format.distance(session.totals.distanceMeters).annotated(unit)
+    // With the stretch whose fixes are not in yet: shown, as the steps estimate it.
+    val distance = format.distance(session.totals.distanceMeters + openMeters).annotated(unit)
     val energy = format.energy(session.totals.activeKcal)
     val estimate = stringResource(R.string.session_stat_estimate)
+    // What the distance is, under it: an estimate, measured, or how much of it the steps gave.
     val stats = if (active) {
         val now = format.cadence(cadence ?: 0)
         listOf(
@@ -394,12 +464,16 @@ private fun SessionStats(session: Session, cadence: Int?, pace: SessionIntensity
             // A little wider than the other two: its label carries the calories as well.
             StripStat(
                 distance,
-                stringResource(R.string.session_stat_estimate_with, energy.unbrokenText()),
+                res.sessionDistanceLabel(session, format, energy.unbrokenText()),
                 weight = WIDE_STAT,
             ),
         )
     } else {
-        listOf(steps, StripStat(distance, estimate), StripStat(energy.annotated(unit), estimate))
+        listOf(
+            steps,
+            StripStat(distance, res.sessionDistanceLabel(session, format)),
+            StripStat(energy.annotated(unit), estimate),
+        )
     }
     StatStrip(
         stats = stats,
@@ -430,6 +504,102 @@ private const val WIDE_STAT = 1.3f
 
 /** A pace not measured yet: the first seconds of an outing. */
 private const val NO_VALUE = "–"
+
+/**
+ * What the card says of the satellites: a quiet line while there is nothing to do about it
+ * (finding them, a tunnel), and the same sentence with its button where there is. Said by
+ * TalkBack when it comes: the reader who cannot see the card learns that GPS stopped as the one
+ * who can.
+ */
+@Composable
+private fun GpsNotice(line: GpsLine, onAction: (GpsLineAction) -> Unit) {
+    val res = LocalResources.current
+    val text = res.gpsLineText(line)
+    val action = line.action
+    if (action == null) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(SessionCardTags.GPS_LINE)
+                .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
+        ) {
+            Icon(
+                PassoIcons.Gps,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                // On the first line's own height, so it sits beside the words, not above them.
+                modifier = Modifier.padding(top = 1.dp).size(18.dp),
+            )
+            Text(
+                text = text,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    } else {
+        CardNotice(
+            icon = PassoIcons.Gps,
+            text = text,
+            action = res.gpsLineAction(line).orEmpty(),
+            onAction = { onAction(action) },
+            modifier = Modifier.testTag(SessionCardTags.GPS_LINE),
+            actionTag = SessionCardTags.GPS_ACTION,
+        )
+    }
+}
+
+/**
+ * Something the card has to say that has a way out: a sentence on a ground of its own, a step
+ * above the card's, and the button that answers it under the words, at the end, where the
+ * card's own buttons are.
+ */
+@Composable
+private fun CardNotice(
+    icon: ImageVector,
+    text: String,
+    action: String,
+    onAction: () -> Unit,
+    modifier: Modifier = Modifier,
+    actionTag: String? = null,
+) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        shape = MaterialTheme.shapes.large,
+        modifier = modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(start = 12.dp, end = 8.dp, top = 12.dp, bottom = 4.dp)) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .padding(end = 4.dp)
+                    .semantics(mergeDescendants = true) { liveRegion = LiveRegionMode.Polite },
+            ) {
+                Icon(
+                    icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 1.dp).size(18.dp),
+                )
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                TextButton(
+                    onClick = onAction,
+                    modifier = if (actionTag != null) Modifier.testTag(actionTag) else Modifier,
+                ) {
+                    Text(action)
+                }
+            }
+        }
+    }
+}
 
 @Composable
 private fun ButtonIcon(icon: ImageVector) {
@@ -637,8 +807,14 @@ object SessionCardTags {
     const val STOP = "session_card_stop"
     const val KEEP_GOING = "session_card_keep_going"
     const val CLOSE = "session_card_close"
+    const val OPEN = "session_card_open"
     const val MAP = "session_card_map"
     const val INTERVALS = "session_card_intervals"
     const val INTERVAL_BARS = "session_card_interval_bars"
     const val STATS = "session_card_stats"
+    const val PACE = "session_card_pace"
+    const val GPS_LINE = "session_card_gps_line"
+    const val GPS_ACTION = "session_card_gps_action"
+    const val CAP_QUESTION = "session_card_cap_question"
+    const val CAP_KEEP_GOING = "session_card_cap_keep_going"
 }

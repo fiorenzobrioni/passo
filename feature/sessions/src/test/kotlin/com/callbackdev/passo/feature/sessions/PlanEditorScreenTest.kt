@@ -25,6 +25,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.routes.GpsAnswer
+import com.callbackdev.passo.core.domain.routes.GpsReadiness
+import com.callbackdev.passo.core.domain.routes.GpsSwitchNote
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.SessionGoalKind
@@ -357,6 +360,153 @@ class PlanEditorScreenTest {
         compose.setContent { PassoTheme { PlanEditorScreen(japanese, onBack = {}, actions = PlanEditorActions()) } }
         compose.onNodeWithText("La camminata giapponese a intervalli").assertIsDisplayed()
         compose.walkPage(hasTestTag(EditorTags.LIST), "editor_intervals_it", maxScreens = 12)
+    }
+
+    // --- Measure with GPS (Phase 15) ---------------------------------------------------------
+
+    @Test
+    fun `on a phone with no satellite receiver, measuring with GPS is not offered`() {
+        compose.setContent { PassoTheme { PlanEditorScreen(state(), onBack = {}, actions = PlanEditorActions()) } }
+
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.VIBRATE))
+        compose.onNodeWithTag(EditorTags.GPS).assertDoesNotExist()
+        compose.onNodeWithText("Measure with GPS").assertDoesNotExist()
+    }
+
+    @Test
+    fun `with a receiver, the switch says what it gives and what it costs, and is off until asked`() {
+        var editor by mutableStateOf(state().copy(canMeasureWithGps = true))
+        val actions = PlanEditorActions(gps = { on -> editor = editor.copy(draft = editor.draft.copy(gps = on)) })
+        compose.setContent { PassoTheme { PlanEditorScreen(editor, onBack = {}, actions = actions) } }
+
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.GPS))
+        compose.onNodeWithText("Measure with GPS").assertIsDisplayed()
+        compose.onNodeWithText("A measured distance, your pace", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("More battery, only while", substring = true).assertIsDisplayed()
+        assertThat(editor.draft.gps).isFalse()
+
+        compose.onNodeWithTag(EditorTags.GPS).performClick()
+
+        assertThat(editor.draft.gps).isTrue()
+        assertThat(editor.changed).isTrue()
+        snapshot("editor_gps")
+    }
+
+    @Test
+    fun `where Passo will ask for the permission, the switch says it asks when the outing starts`() {
+        val editor = state(SessionPlans.NEW.copy(gps = true))
+            .copy(canMeasureWithGps = true, gpsReadiness = GpsReadiness.PERMISSION_NEEDED)
+        compose.setContent { PassoTheme { PlanEditorScreen(editor, onBack = {}, actions = PlanEditorActions()) } }
+
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.GPS))
+        compose.onNodeWithText("A measured distance, your pace", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("Passo asks for your location", substring = true).assertIsDisplayed()
+        snapshot("editor_gps_asks")
+    }
+
+    @Test
+    fun `on since a refusal, the switch says the steps count, and asks again once off and on`() {
+        var editor by mutableStateOf(
+            state(SessionPlans.NEW.copy(gps = true), isNew = false).copy(
+                canMeasureWithGps = true,
+                gpsReadiness = GpsReadiness.PERMISSION_NEEDED,
+                gpsAnswer = GpsAnswer.REFUSED,
+            ),
+        )
+        val actions = PlanEditorActions(gps = { on -> editor = editor.withGps(on) })
+        compose.setContent { PassoTheme { PlanEditorScreen(editor, onBack = {}, actions = actions) } }
+
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.GPS))
+        // Not what it gives: it gives nothing as things stand, and the note does not pretend.
+        compose.onNodeWithText("Passo is not allowed to read", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("A measured distance, your pace", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("Passo asks for your location", substring = true).assertDoesNotExist()
+        // Nor does the estimate's own note say the outing is measured with GPS.
+        compose.onNodeWithText("measured with GPS", substring = true).assertDoesNotExist()
+        assertThat(editor.measuresWithGps).isFalse()
+        snapshot("editor_gps_not_allowed")
+
+        // Off: the switch as anyone finds it.
+        compose.onNodeWithTag(EditorTags.GPS).performClick()
+        compose.onNodeWithText("Passo is not allowed to read", substring = true).assertDoesNotExist()
+        compose.onNodeWithText("A measured distance, your pace", substring = true).assertIsDisplayed()
+
+        // And on again: the reader's own asking, so Passo will ask at the start.
+        compose.onNodeWithTag(EditorTags.GPS).performClick()
+        assertThat(editor.gpsTurnedOn).isTrue()
+        assertThat(editor.gpsNote).isEqualTo(GpsSwitchNote.ASKS_AT_START)
+        compose.onNodeWithText("Passo asks for your location", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("Passo is not allowed to read", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT-w360dp-h740dp-xxhdpi")
+    fun `in Italian, the refusal's note fits a small phone`() {
+        val editor = state(SessionPlans.NEW.copy(gps = true), isNew = false).copy(
+            canMeasureWithGps = true,
+            gpsReadiness = GpsReadiness.APPROXIMATE_ONLY,
+            gpsAnswer = GpsAnswer.REFUSED,
+        )
+        compose.setContent { PassoTheme { PlanEditorScreen(editor, onBack = {}, actions = PlanEditorActions()) } }
+
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.GPS))
+        compose.onNodeWithText("Passo non ha il permesso", substring = true).assertIsDisplayed()
+        compose.walkPage(hasTestTag(EditorTags.LIST), "editor_gps_not_allowed_it", maxScreens = 12)
+    }
+
+    @Test
+    fun `none of the outings a first visit finds measures with GPS`() {
+        assertThat(SessionPlans.PRESETS.none { it.gps }).isTrue()
+        assertThat(SessionPlans.NEW.gps).isFalse()
+    }
+
+    @Test
+    fun `on a phone its counter cannot wake, a silent outing with GPS says why it is kept awake`() {
+        val silent = SessionPlans.NEW.copy(gps = true, vibrate = false, voice = SessionVoice.OFF)
+        val editor = state(silent).copy(canMeasureWithGps = true, wakeUpCounter = false)
+        compose.setContent { PassoTheme { PlanEditorScreen(editor, onBack = {}, actions = PlanEditorActions()) } }
+
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.AWAKE))
+        compose.onNodeWithText("so the GPS rests when you stop", substring = true).assertIsDisplayed()
+        compose.onNodeWithText("so the signals arrive on time", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun `with signals too, the note stays the signals' own`() {
+        val editor = state(SessionPlans.NEW.copy(gps = true)).copy(canMeasureWithGps = true, wakeUpCounter = false)
+        compose.setContent { PassoTheme { PlanEditorScreen(editor, onBack = {}, actions = PlanEditorActions()) } }
+
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.AWAKE))
+        compose.onNodeWithText("so the signals arrive on time", substring = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun `a phone with a wake-up counter keeps nothing awake for GPS, and says nothing`() {
+        val silent = SessionPlans.NEW.copy(gps = true, vibrate = false, voice = SessionVoice.OFF)
+        val editor = state(silent).copy(canMeasureWithGps = true, wakeUpCounter = true)
+        compose.setContent { PassoTheme { PlanEditorScreen(editor, onBack = {}, actions = PlanEditorActions()) } }
+
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.VOICE))
+        compose.onNodeWithTag(EditorTags.AWAKE).assertDoesNotExist()
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
+    fun `at twice the text size, the editor with the GPS switch still reads`() {
+        val editor = state(SessionPlans.NEW.copy(gps = true)).copy(canMeasureWithGps = true, wakeUpCounter = false)
+        compose.setContent { PassoTheme { PlanEditorScreen(editor, onBack = {}, actions = PlanEditorActions()) } }
+        compose.walkPage(hasTestTag(EditorTags.LIST), "editor_gps_large_text", maxScreens = 20)
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT-w360dp-h740dp-xxhdpi")
+    fun `in Italian, the GPS switch fits a small phone`() {
+        val editor = state(SessionPlans.NEW.copy(gps = true)).copy(canMeasureWithGps = true)
+        compose.setContent { PassoTheme { PlanEditorScreen(editor, onBack = {}, actions = PlanEditorActions()) } }
+
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.GPS))
+        compose.onNodeWithText("Misura con il GPS").assertIsDisplayed()
+        compose.walkPage(hasTestTag(EditorTags.LIST), "editor_gps_it", maxScreens = 12)
     }
 
     private fun snapshot(name: String) {

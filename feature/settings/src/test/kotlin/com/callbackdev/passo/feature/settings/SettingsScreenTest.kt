@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -24,11 +25,15 @@ import androidx.compose.ui.test.performScrollToNode
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
+import com.callbackdev.passo.core.domain.calibration.LearnedSteps
+import com.callbackdev.passo.core.model.LearnedStep
 import com.callbackdev.passo.core.model.Profile
+import com.callbackdev.passo.core.model.StepLengthMode
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.model.UserSettings
 import com.callbackdev.passo.core.testing.assertAccessible
 import com.callbackdev.passo.core.testing.walkPage
+import com.callbackdev.passo.feature.settings.learning.StepLearningTags
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -59,6 +64,113 @@ class SettingsScreenTest {
         compose.onNodeWithText("Not set: average values are used").assertIsDisplayed()
         compose.onNodeWithText("Estimated from your height: 73 cm").assertIsDisplayed()
         snapshot("settings_top")
+    }
+
+    private fun show(state: SettingsUiState, actions: SettingsActions = SettingsActions(), dark: Boolean = false) {
+        compose.setContent { PassoTheme(darkTheme = dark) { SettingsScreen(state, onBack = {}, actions = actions) } }
+    }
+
+    private val proposed = state.copy(learning = LearningFixtures.proposed(state.profile))
+
+    @Test
+    fun `a learnt step proposed is a card under the step's rows, never a notification`() {
+        var used: LearnedStep? = null
+        var putAway: LearnedStep? = null
+        show(proposed, SettingsActions(useStep = { used = it }, notNow = { putAway = it }))
+
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(StepLearningTags.USE))
+        compose.onNodeWithTag(StepLearningTags.SENTENCE).assertTextEquals(
+            "Passo has measured your step on 14.2\u00A0km of your outings: " +
+                "at your usual pace it is 78\u00A0cm, not 73\u00A0cm, " +
+                "so distances and calories read 6% higher.",
+        )
+        snapshot("settings_learning_card")
+        compose.onNodeWithTag(StepLearningTags.USE).performClick()
+        assertThat(used).isEqualTo(LearningFixtures.curve)
+        compose.onNodeWithTag(StepLearningTags.NOT_NOW).performClick()
+        assertThat(putAway).isEqualTo(LearningFixtures.curve)
+    }
+
+    @Test
+    fun `not now puts the card away from Settings`() {
+        show(proposed.copy(learning = proposed.learning.copy(proposed = false)))
+
+        compose.onNodeWithTag(StepLearningTags.CARD).assertDoesNotExist()
+        compose.onNodeWithTag(StepLearningTags.ROW).assertDoesNotExist()
+    }
+
+    @Test
+    fun `use it says what changed, with the past days offered and asked first`() {
+        var applied = false
+        var done = false
+        show(
+            proposed.copy(stepUsed = true),
+            SettingsActions(applyProfileToPastDays = { applied = true }, dismissStepUsed = { done = true }),
+        )
+
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(StepLearningTags.USED))
+        compose.onNodeWithText(
+            "From today, distances use your measured step. Past days keep theirs.",
+        ).assertIsDisplayed()
+        compose.onNodeWithTag(StepLearningTags.CARD).assertDoesNotExist()
+        snapshot("settings_learning_used")
+        compose.onNodeWithTag(StepLearningTags.APPLY_PAST).performClick()
+        compose.onNodeWithText("Recompute every past day?").assertIsDisplayed()
+        assertThat(applied).isFalse()
+        compose.onNodeWithText("Recompute").performClick()
+        assertThat(applied).isTrue()
+        compose.onNodeWithTag(StepLearningTags.DONE).performClick()
+        assertThat(done).isTrue()
+    }
+
+    @Test
+    fun `the learnt step's row says where it comes from, with the way back to the step typed`() {
+        var back = false
+        val typed = Profile(heightMeters = 1.76, stepLengthMode = StepLengthMode.MANUAL, walkingStepLengthMeters = 0.76)
+        val learned = LearnedSteps.accept(typed, LearningFixtures.curve)
+        show(state.copy(profile = learned), SettingsActions(goBackStep = { back = true }))
+
+        compose.onNodeWithText("Learnt from 14.2 km of your outings: 78 cm").assertIsDisplayed()
+        snapshot("settings_learning_in_use")
+        compose.onNodeWithText("Go back to the step you typed (76 cm)").performClick()
+        assertThat(back).isTrue()
+    }
+
+    @Test
+    fun `the way back to the estimate from the height is named so`() {
+        show(state.copy(profile = LearnedSteps.accept(state.profile, LearningFixtures.curve)))
+
+        compose.onNodeWithText("Go back to the estimate from your height").assertIsDisplayed()
+    }
+
+    @Test
+    fun `the step's dialog offers the learnt step first, and another length chosen is said as one`() {
+        var chosen: Pair<Double?, Boolean>? = null
+        show(
+            state.copy(profile = LearnedSteps.accept(state.profile, LearningFixtures.curve)),
+            SettingsActions(chooseWalking = { own, keep -> chosen = own to keep }),
+        )
+
+        compose.onNodeWithText("Learnt from 14.2 km of your outings: 78 cm").performClick()
+        compose.onNodeWithText("Learnt from your outings · 78 cm").assertIsDisplayed()
+        compose.onNodeWithText("Estimate it · 73 cm").performClick()
+        compose.onNodeWithText("Save").performClick()
+        assertThat(chosen).isEqualTo(null to false)
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
+    fun `at twice the text size the learnt step's card still reads`() {
+        show(proposed)
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(StepLearningTags.USE))
+        snapshot("settings_learning_large_text")
+    }
+
+    @Test
+    fun `the learnt step's card in the dark`() {
+        show(proposed, dark = true)
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(StepLearningTags.CARD))
+        snapshot("settings_learning_card_dark")
     }
 
     @Test

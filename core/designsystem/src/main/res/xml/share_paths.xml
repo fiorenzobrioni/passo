@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only the cache's "share" folder, where the one file being shared is written. -->
+<paths>
+    <cache-path
+        name="share"
+        path="share/" />
+</paths>

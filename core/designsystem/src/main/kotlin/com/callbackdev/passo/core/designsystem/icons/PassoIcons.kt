@@ -659,6 +659,25 @@ object PassoIcons {
         lineTo(20f, 14f)
     }
 
+    /**
+     * A point, the ring that found it and the four marks of a sight: a place fixed by the
+     * satellites («Measure with GPS», docs/adr/0016-location.md).
+     */
+    val Gps: ImageVector by lazy {
+        icon("gps") {
+            circle(12f, 12f, 2.6f)
+            circle(12f, 12f, 6.8f)
+            moveTo(12f, 2.5f)
+            lineTo(12f, 5.2f)
+            moveTo(12f, 18.8f)
+            lineTo(12f, 21.5f)
+            moveTo(2.5f, 12f)
+            lineTo(5.2f, 12f)
+            moveTo(18.8f, 12f)
+            lineTo(21.5f, 12f)
+        }
+    }
+
     private fun icon(name: String, autoMirror: Boolean = false, draw: PathBuilder.() -> Unit): ImageVector =
         ImageVector.Builder(
             name = "passo_$name",

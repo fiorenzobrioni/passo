@@ -7,7 +7,7 @@ android {
 }
 
 dependencies {
-    // FileProvider, for a page shared as an image: androidx.core, already in the app.
+    // A page shared as an image goes through the shared provider (`:core:designsystem`).
     implementation(libs.androidx.core.ktx)
     // Saving a page where the reader chooses: the Storage Access Framework's launcher.
     implementation(libs.androidx.activity.compose)

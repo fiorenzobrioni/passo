@@ -104,6 +104,7 @@ fun SessionsRoute(
     onBack: () -> Unit,
     onEdit: (Long?) -> Unit,
     onOpenWays: () -> Unit = {},
+    onOpenOuting: (Long) -> Unit = {},
     viewModel: SessionsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -143,6 +144,8 @@ fun SessionsRoute(
                 onResume = viewModel::resume,
                 onStop = viewModel::stop,
                 onKeepGoing = viewModel::keepGoing,
+                onGps = viewModel::gps,
+                onOpen = { state?.live?.session?.id?.let(onOpenOuting) },
             ),
             resumeTracking = viewModel::resumeTracking,
             openSignalSettings = {
@@ -303,6 +306,7 @@ private fun SessionsList(
                     canKeepGoing = live.canKeepGoing,
                     format = format,
                     actions = actions.card,
+                    measure = live.measure,
                     modifier = Modifier
                         .animateItem(
                             fadeInSpec = PassoMotion.effects(reduced),

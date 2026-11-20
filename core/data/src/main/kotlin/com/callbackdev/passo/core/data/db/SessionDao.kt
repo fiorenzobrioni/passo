@@ -56,6 +56,11 @@ abstract class SessionDao {
     @Query("SELECT * FROM session WHERE id = :id")
     abstract suspend fun session(id: Long): SessionRow?
 
+    /** One outing as it changes: its own page, while it is open. */
+    @Transaction
+    @Query("SELECT * FROM session WHERE id = :id")
+    abstract fun observeSession(id: Long): Flow<SessionRow?>
+
     @Transaction
     @Query("SELECT * FROM session WHERE localEpochDay = :localEpochDay ORDER BY startedAtMillis")
     abstract fun observeSessionsOn(localEpochDay: Long): Flow<List<SessionRow>>
@@ -109,6 +114,7 @@ abstract class SessionDao {
         return sessions(ids).map { session ->
             val id = insertSession(session.toEntity())
             upsertIntervals(session.copy(id = id).intervalEntities())
+            upsertLegs(session.copy(id = id).legEntities())
             id
         }
     }
@@ -119,11 +125,15 @@ abstract class SessionDao {
     @Upsert
     protected abstract suspend fun upsertIntervals(intervals: List<SessionIntervalEntity>)
 
-    /** An outing and its intervals, in one transaction. */
+    @Upsert
+    protected abstract suspend fun upsertLegs(legs: List<SessionLegEntity>)
+
+    /** An outing with its intervals and its legs, in one transaction. */
     @Transaction
     open suspend fun upsertSession(session: Session) {
         upsertSessionRow(session.toEntity())
         upsertIntervals(session.intervalEntities())
+        upsertLegs(session.legEntities())
     }
 
     @Query("DELETE FROM session WHERE id = :id")
@@ -132,9 +142,43 @@ abstract class SessionDao {
     @Query("DELETE FROM session_interval WHERE sessionId = :id")
     protected abstract suspend fun deleteIntervals(id: Long)
 
+    @Query("DELETE FROM session_leg WHERE sessionId = :id")
+    protected abstract suspend fun deleteLegs(id: Long)
+
+    @Query("DELETE FROM step_length_sample WHERE sessionId = :id")
+    protected abstract suspend fun deleteStepLengthSamples(id: Long)
+
+    /** What an outing's clean stretches said of the step: added as it goes (Phase 15, for 17). */
+    @Insert
+    abstract suspend fun insertStepLengthSamples(samples: List<StepLengthSampleEntity>)
+
+    @Query("SELECT * FROM step_length_sample WHERE sessionId = :sessionId ORDER BY id")
+    abstract suspend fun stepLengthSamples(sessionId: Long): List<StepLengthSampleEntity>
+
+    /** Every sample, oldest first: for the learner, and for the reader's own export. */
+    @Query("SELECT * FROM step_length_sample ORDER BY id")
+    abstract suspend fun allStepLengthSamples(): List<StepLengthSampleEntity>
+
+    /**
+     * Every sample with its outing's start, as they change: what the step that learns reads
+     * (PLANNING.md §11 Phase 17). A sample goes with its outing.
+     */
+    @Query(
+        "SELECT s.sessionId, se.startedAtMillis, s.cadence, s.steps, s.meters FROM step_length_sample s " +
+            "JOIN session se ON se.id = s.sessionId ORDER BY se.startedAtMillis, s.id",
+    )
+    abstract fun observeStepLengthSamples(): Flow<List<OutingSampleRow>>
+
+    /** Each outing's id with its start: what the routes' database is checked against. */
+    @Query("SELECT id, startedAtMillis FROM session")
+    abstract suspend fun sessionStarts(): List<SessionStart>
+
+    /** An outing with what belongs to it alone: its intervals, its legs, and what it said of the step. */
     @Transaction
     open suspend fun deleteSession(id: Long) {
         deleteIntervals(id)
+        deleteLegs(id)
+        deleteStepLengthSamples(id)
         deleteSessionRow(id)
     }
 }

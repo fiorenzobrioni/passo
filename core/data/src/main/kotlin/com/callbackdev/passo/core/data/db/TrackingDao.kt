@@ -45,6 +45,17 @@ abstract class TrackingDao {
     @Query("SELECT * FROM minute_steps WHERE localEpochDay BETWEEN :fromDay AND :toDay")
     abstract suspend fun minutesBetween(fromDay: Long, toDay: Long): List<MinuteStepsEntity>
 
+    /**
+     * How many minutes had each step count, from [fromDay] to [toDay] included: four weeks of
+     * paces in a few hundred rows, what the step that learns names a usual pace from and weighs a
+     * curve on (PLANNING.md §11 Phase 17).
+     */
+    @Query(
+        "SELECT steps, COUNT(*) AS minutes FROM minute_steps " +
+            "WHERE localEpochDay BETWEEN :fromDay AND :toDay AND steps > 0 GROUP BY steps",
+    )
+    abstract suspend fun stepCounts(fromDay: Long, toDay: Long): List<StepCount>
+
     /** The first day with steps recorded; null before the first. */
     @Query("SELECT MIN(localEpochDay) FROM daily_summary")
     abstract fun observeFirstRecordedDay(): Flow<Long?>
@@ -111,6 +122,7 @@ abstract class TrackingDao {
         diagnosticsKept: Int,
         session: SessionEntity? = null,
         intervals: List<SessionIntervalEntity> = emptyList(),
+        legs: List<SessionLegEntity> = emptyList(),
     ) {
         val changes = linkedMapOf<Long, MutableList<MinuteChange>>()
         for (increment in increments) {
@@ -139,6 +151,7 @@ abstract class TrackingDao {
         }
         if (session != null) upsertSession(session)
         if (intervals.isNotEmpty()) upsertIntervals(intervals)
+        if (legs.isNotEmpty()) upsertLegs(legs)
     }
 
     /**
@@ -236,6 +249,9 @@ abstract class TrackingDao {
 
     @Upsert
     protected abstract suspend fun upsertIntervals(intervals: List<SessionIntervalEntity>)
+
+    @Upsert
+    protected abstract suspend fun upsertLegs(legs: List<SessionLegEntity>)
 
     @Upsert
     protected abstract suspend fun upsertTrackerState(state: TrackerStateEntity)

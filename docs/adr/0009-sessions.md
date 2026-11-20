@@ -3,6 +3,9 @@
 - Status: accepted
 - Date: 2026-09-25
 - Amends: `docs/adr/0002-sensor-reporting.md`, for the length of an outing only
+- Amended: 18 Nov 2026 (`docs/adr/0016-location.md`, decisions 7 and 14; built with Phase 15):
+  a pace per kilometre for an outing measured with GPS, shown and never a goal (decision 1,
+  below); the longest outing asks before it ends and can be carried on (decision 6, below)
 
 ## Context
 
@@ -31,6 +34,12 @@ while one is under way.
    the step length's error in it. No calorie goal: the weakest estimate should not be a target.
    No outing "type": the step length already follows the cadence minute by minute, so a
    run needs no switch; the name is the reader's, or the pace's.
+   *Amended 18 Nov 2026 (Phase 15, `docs/adr/0016-location.md` decision 7):* an outing whose
+   plan has «Measure with GPS» on has a measured distance, and over a measure a pace is a
+   measure too: it shows its pace by the kilometre or the mile (time in motion over the
+   distance) and the pace now. Shown only, and only where at least nine tenths of the distance
+   came from fixes: the goal is still one quantity, the pace to keep is still a cadence, and
+   an outing without GPS still has no pace per kilometre, for the reason above.
 2. **Measured from the steps, with no timer.** The tracking service feeds every accounted
    delta to a pure `SessionTracker`. Time in motion is the gaps between steps, each step
    credited with at most 1.5 s (a step at 40 spm, the active-minute threshold): standing at a
@@ -69,6 +78,15 @@ while one is under way.
    speaks), and can be taken back with "Resume" for 15 minutes from then, like the goal's
    "Keep going", with the steps since and without the stillness. Closing the finished card
    withdraws both. Nothing new runs for it: it rides on the step batch that noticed the end.
+   *Amended 18 Nov 2026 (Phase 15, `docs/adr/0016-location.md` decision 14):* "at four hours"
+   ended a walk the reader was still on without a word, and for good. Now every outing, with
+   GPS or not, keeps its own cap (four hours from its start) and asks fifteen minutes before
+   it, at the first steps within that quarter of an hour: the stillness's two long pulses, a
+   notification and its card, «Still walking?», with «Keep going», which moves the cap four
+   hours on and can be said again before the next. Unanswered, the outing ends at its cap,
+   says so, and can be taken back for 15 minutes with the steps since, as the other two ends
+   can. No timer: a reader who is sitting is not asked, and the stillness ends the outing as
+   always.
 7. **Stored as it goes, with the steps.** Two new tables (`session_plan`, `session`), schema v2
    by an auto-migration. The outing under way is written in the same transaction as the step
    batch that moved it, so the counter state and the outing never disagree after a crash; a

@@ -2,6 +2,8 @@
 
 - Status: accepted
 - Date: 2026-09-25
+- Amended: 18 Nov 2026 (`docs/adr/0016-location.md`, decision 9; built with Phase 15): a second
+  database, `routes.db`, left out of the cloud copy (decision 1, below)
 
 ## Context
 
@@ -23,6 +25,12 @@ had since that phone started: steps from before Passo was there.
    transfer. The step history is the one thing a new phone cannot rebuild, so it is the thing
    worth carrying. The widgets' looks are left out: they are keyed by widget ids, which a
    restore renews.
+   *Amended 18 Nov 2026 (Phase 15, `docs/adr/0016-location.md` decision 9):* the routes of the
+   outings measured with GPS live in a second database, `routes.db`, which is named only under
+   `<device-transfer>` (the direct move to a new phone) and never under `<cloud-backup>`: where
+   a reader walked does not go to a copy kept on someone else's servers. A phone restored from
+   the cloud has those outings with their numbers and no route. The allowlist stays an
+   allowlist: nothing is carried that is not named, and a test reads the rules' file to say so.
 2. **Not `allowBackup="false"`**: on Android 12 and later some makers still run the device
    transfer. An instruction whose effect depends on the maker is not a decision (Chiaro's
    reasoning, 21 Sep 2026).

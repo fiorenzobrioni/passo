@@ -8,13 +8,16 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.callbackdev.passo.core.data.TestDataStore
 import com.callbackdev.passo.core.data.db.PassoDatabase
+import com.callbackdev.passo.core.data.db.RouteDatabase
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
+import com.callbackdev.passo.core.data.routes.RouteRepository
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.tracking.LedgerBatch
 import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.IntervalSplit
 import com.callbackdev.passo.core.model.MinuteSteps
+import com.callbackdev.passo.core.model.OutingLeg
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
@@ -52,6 +55,8 @@ class SessionRepositoryTest {
     private lateinit var store: TestDataStore
     private lateinit var preferences: UserPreferencesDataSource
     private lateinit var repository: SessionRepository
+    private lateinit var routeDatabase: RouteDatabase
+    private lateinit var routes: RouteRepository
 
     private val day = 20_720L
 
@@ -62,12 +67,18 @@ class SessionRepositoryTest {
             .build()
         store = TestDataStore(folder.root)
         preferences = UserPreferencesDataSource(store.dataStore)
-        repository = SessionRepository(database.sessionDao(), preferences)
+        routeDatabase = Room.inMemoryDatabaseBuilder(
+            ApplicationProvider.getApplicationContext(),
+            RouteDatabase::class.java,
+        ).allowMainThreadQueries().build()
+        routes = RouteRepository(routeDatabase.routeDao())
+        repository = SessionRepository(database.sessionDao(), preferences, routes)
     }
 
     @After
     fun tearDown() {
         database.close()
+        routeDatabase.close()
         store.scope.cancel()
     }
 
@@ -141,6 +152,75 @@ class SessionRepositoryTest {
     }
 
     @Test
+    fun `version 7 migrates to 8 with every outing's climb unknown, and no legs`() {
+        migrations.createDatabase(MIGRATION_DB, 7).use { db ->
+            db.execSQL(
+                "INSERT INTO session (planId, name, goalKind, goalValue, restOfDay, intensity, milestones, " +
+                    "vibrate, localEpochDay, startedAtMillis, state, endedAtMillis, endReason, steps, " +
+                    "movingMillis, zoneMillis, distanceMeters, activeKcal, lastStepAtMillis, lastEventAtMillis, " +
+                    "pausedAtMillis, reachedAtMillis, toldMilestones, voice, gps, stepsMeters, measuredShare) " +
+                    "VALUES (NULL, NULL, 'TIME', 20, 0, 'BRISK', 2, 1, 20716, 1789990000000, 'FINISHED', " +
+                    "1789991200000, 'GOAL', 2210, 1200000, 1100000, 1630.0, 61.0, 1789991200000, " +
+                    "1789991200000, NULL, 1789991200000, 6, 'OFF', 1, 1590.0, 0.96)",
+            )
+        }
+        migrations.runMigrationsAndValidate(MIGRATION_DB, 8, true).use { db ->
+            db.query("SELECT gps, measuredShare, ascentMeters, descentMeters FROM session").use { cursor ->
+                assertThat(cursor.moveToFirst()).isTrue()
+                assertThat(cursor.getInt(0)).isEqualTo(1)
+                assertThat(cursor.getDouble(1)).isEqualTo(0.96)
+                assertThat(cursor.isNull(2)).isTrue()
+                assertThat(cursor.isNull(3)).isTrue()
+            }
+            db.query("SELECT COUNT(*) FROM session_leg").use { cursor ->
+                assertThat(cursor.moveToFirst()).isTrue()
+                assertThat(cursor.getInt(0)).isEqualTo(0)
+            }
+        }
+    }
+
+    @Test
+    fun `an outing with GPS keeps its climb and its legs, and loses them with itself`() = runTest {
+        val plan = SessionPlans.NEW.copy(gps = true)
+        val started = repository.insert(checkNotNull(SessionPlans.start(plan, 1_000, 20_720, 0, 8_000, withGps = true)))
+        val legs = listOf(
+            OutingLeg(0, 100.0, 71_000, 130.5, endedAtMillis = 72_000, ascentMeters = 4.0),
+            OutingLeg(1, 100.0, 70_000, 128.0, endedAtMillis = 143_000, descentMeters = 3.5),
+            OutingLeg(2, 40.0, 29_000, 52.25, endedAtMillis = 172_000),
+        )
+        repository.save(started.copy(ascentMeters = 4.0, descentMeters = 3.5, legs = legs))
+
+        val read = checkNotNull(repository.session(started.id))
+        assertThat(read.ascentMeters).isEqualTo(4.0)
+        assertThat(read.descentMeters).isEqualTo(3.5)
+        assertThat(read.legs).isEqualTo(legs)
+
+        // The leg under way grows, and a new one opens: written over, never twice.
+        val grown = legs.dropLast(1) + legs.last().copy(meters = 100.0, endedAtMillis = 215_000) +
+            OutingLeg(3, 12.0, 9_000, 16.0, endedAtMillis = 224_000)
+        repository.save(read.copy(legs = grown))
+        assertThat(checkNotNull(repository.session(started.id)).legs).isEqualTo(grown)
+
+        repository.delete(started.id)
+        assertThat(
+            database.openHelper.readableDatabase.query("SELECT COUNT(*) FROM session_leg").use {
+                it.moveToFirst()
+                it.getInt(0)
+            },
+        ).isEqualTo(0)
+    }
+
+    @Test
+    fun `an outing without GPS has no climb and no legs`() = runTest {
+        val started = repository.insert(checkNotNull(SessionPlans.start(SessionPlans.NEW, 1_000, 20_720, 0, 8_000)))
+
+        val read = checkNotNull(repository.session(started.id))
+        assertThat(read.ascentMeters).isNull()
+        assertThat(read.descentMeters).isNull()
+        assertThat(read.legs).isEmpty()
+    }
+
+    @Test
     fun `a new plan goes last, and an edit stays in place`() = runTest {
         val presets = repository.plans.first()
         val id = repository.savePlan(
@@ -197,6 +277,23 @@ class SessionRepositoryTest {
 
         repository.delete(finished.id)
         assertThat(repository.observeSessionsOn(day).first()).isEmpty()
+    }
+
+    @Test
+    fun `a batch writes every leg changed since the last, however many and however far back`() = runTest {
+        val tracking = TrackingRepository(database.trackingDao(), preferences) { day }
+        val plan = SessionPlans.NEW.copy(gps = true)
+        val started = repository.insert(checkNotNull(SessionPlans.start(plan, 1_000, day, 0, 8_000, withGps = true)))
+        fun leg(index: Int, ascent: Double = 0.0) =
+            OutingLeg(index, 100.0, 70_000, 130.0, endedAtMillis = 70_000L * (index + 1), ascentMeters = ascent)
+        val batch = LedgerBatch(listOf(MinuteSteps(100, day, 120)), TrackerState(1, 500, 2L, 3L), emptyList())
+
+        tracking.persist(batch, nowWallMillis = 70_000L, session = started.copy(legs = (0..2).map { leg(it) }))
+        // «Keep going» lays a quarter of an hour's legs at once, and a climb lands on the first.
+        val grown = listOf(leg(0, ascent = 6.0)) + (1..14).map { leg(it) }
+        tracking.persist(batch, nowWallMillis = 140_000L, session = started.copy(legs = grown))
+
+        assertThat(checkNotNull(repository.session(started.id)).legs).isEqualTo(grown)
     }
 
     @Test

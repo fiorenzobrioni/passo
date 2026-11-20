@@ -23,10 +23,12 @@ Passo does one thing and does it well. It counts steps with the phone's own hard
 ## Product principles
 
 1. **Steps are the core.** Every feature must come from step data plus the user's profile (height, weight, step length). If a feature needs another data source, it's out of scope.
+   - *Amended 18 Nov 2026 (`docs/adr/0016-location.md`):* location, when the reader asks for it, measures what the steps estimate, in an outing that asked for it. It never replaces the steps (the day's count, History, Insights and the ways from home are computed from them as before), and nothing in the app depends on it.
 2. **Autonomous.** No dependency on other health apps, Health Connect, Google Fit or Google Play services for step data. The hardware step counter sensor is the only source.
 3. **Private by design.**
-   - No `INTERNET` permission, no location, no account, no analytics, no ads SDKs.
-   - Data never leaves the device, except through a user-initiated export or Android's own system backup.
+   - No `INTERNET` permission, no account, no analytics, no ads SDKs: Passo sends nothing, and cannot.
+   - Location is a measuring tape, never a tracker (amended 18 Nov 2026, `docs/adr/0016-location.md`): read only inside an outing the reader started with «Measure with GPS» on, from its start to its pause or end. Never for the day's count, never with no outing, never in the background; satellites only, with no Google Play services. Asked in context, the first time such an outing starts; a reader who never turns it on is asked for nothing. The permissions the app may hold are an allowlist, and the build fails on any other.
+   - Data never leaves the device, except through a user-initiated export or Android's own system backup. The routes of the outings measured with GPS are never in Android's cloud copy: only in a phone-to-phone transfer.
 4. **Battery first.**
    - Use the low-power hardware step counter with sensor batching.
    - Wake the CPU only when there is a reason to.
@@ -65,7 +67,8 @@ Passo does one thing and does it well. It counts steps with the phone's own hard
 ### Derived metrics (estimates)
 
 - **Distance:** steps × step length.
-  - The step length is either derived from height, set manually, or calibrated.
+  - The step length is either derived from height, set manually, calibrated, or learnt pace by
+    pace from the outings with GPS and accepted by the reader (Phase 17).
   - A separate running step length is used for high-cadence minutes.
 - **Active calories:** net energy from walking and running, based on distance, body weight and cadence.
 - **Active minutes:** minutes with sustained stepping.
@@ -101,12 +104,14 @@ Passo does one thing and does it well. It counts steps with the phone's own hard
 
 Added to v1.0 at the owner's request (Phase 10, `docs/adr/0009-sessions.md`). An outing is a walk (or a run) started on purpose, with a goal, that tells the reader on the way; it is measured from the steps like everything else.
 
-- **One goal, one pace.** The goal is one quantity: steps, a distance (estimated), minutes in motion, or "the rest of the day" (today's goal less today's count). The pace is optional: free, brisk (100 spm), vigorous (130 spm) or running (140 spm). Never two quantities at once, never a pace in minutes per kilometre (without GPS it would be the cadence in disguise), never a calorie target.
+- **One goal, one pace.** The goal is one quantity: steps, a distance (estimated), minutes in motion, or "the rest of the day" (today's goal less today's count). The pace is optional: free, brisk (100 spm), vigorous (130 spm) or running (140 spm). Never two quantities at once, never a calorie target, and never a pace in minutes per kilometre as a goal: without GPS it would be the cadence in disguise, and with it (below) it is a measure the outing shows, not one it is walked against.
 - **Signals the reader chooses:** at 25, 50 and 75% (50% by default), and always at the goal, which ends the outing. Each vibrates in its own count (one, two, three short pulses, one long one at the goal), so a phone in a pocket is read without looking; the editor lets you feel them first. They follow the phone's silent mode and the outings' notification channel.
 - **The counting notification becomes the outing's** while it lasts, collapsed and expanded, with Pause and Stop; on Android 16 it is a Live Update with the milestones on its bar. The goal reached is a notification of its own, with "Keep going".
 - **Time in motion, from the steps:** a stop at a traffic light does not count. The cadence now is said against the outing's own ("on pace", "below your pace").
 - **Where it shows:** Today (a button to start one, which the reader can take away in Settings, then its card), the Outings page (from Today or from Settings) with the reader's outings (three to start with: a brisk 20 minutes, a 30-minute run, the rest of the day), the launcher's long press, the evening reminder's "Walk now", both widgets and the Quick Settings tile while one is under way, and History and Today's list of the day's walks, in the place of the walk it was, with its goal and how much of it was done.
 - **Battery:** only while an outing is counting, the phone's wake-up step counter reports within 30 seconds, about two brief wakes a minute while walking and none while still, and within 2 seconds in the 40 seconds before each change of an interval walk (`docs/adr/0013-interval-walks.md`). On a phone whose step counter cannot wake it, an outing with signals keeps the processor awake while it counts instead, said in the editor (about 1 to 3% of a battery an hour). Everything else is as before. It ends by itself at its goal, after 15 minutes without a step, or after an hour paused.
+- **No outing ends a walk unasked** (Phase 15, `docs/adr/0016-location.md` decision 14): four hours is the longest an outing stays open (the time paused not counted), so that one forgotten by a reader who keeps walking does not run all day. Fifteen minutes before, it asks, «Still walking?», by a vibration, a notification counting down to the end, and its card; «Keep going» moves the end four hours on. Unanswered, it ends there, says so, and can be taken back for fifteen minutes.
+- **Measured with GPS, if you ask** (Phase 15, `docs/adr/0016-location.md`; built on 18 Nov 2026, released with Phase 16): a switch in an outing's editor, off unless the reader turns it on. The outing then reads the satellites while it counts, and its distance is measured rather than estimated; it shows its pace by the kilometre or the mile, and keeps its route. The steps and the fixes are fused: the steps say when the reader walks, the fixes how far, so a stop, a bus or a tunnel does not fool it, and the receiver rests two minutes after the reader stops. «Measured» is said only of a distance at least nine tenths from fixes; under that the outing says how much of it the steps gave. The day's distance, History, Insights and the ways from home stay the steps'. Without the permission, or with location off, the outing counts from the steps and its card says so once.
 - **A voice, if you want it** (off by default, per outing; `docs/adr/0010-voice.md`): the start, each signal with what is left and your pace, and the goal, spoken through headphones, or out loud too when the phone is not silenced. The system's engine with a voice installed on the phone, never one from the network; the music dims for a moment.
 
 ### Widgets (Jetpack Glance)
@@ -150,8 +155,8 @@ Added to v1.0 at the owner's request (Phase 10, `docs/adr/0009-sessions.md`). An
 ## Out of scope (non-goals)
 
 - Sleep, food, water, heart rate, weight tracking over time.
-- A workout suite: a catalogue of sports, training plans, calorie or pace-per-kilometre targets, several goals at once, GPS routes. Outings (one goal of steps, distance or time, with an optional cadence, measured from the steps alone) are in scope since Phase 10; the rest of workout tracking is not.
-- GPS, routes, maps, or anything that needs location permissions.
+- A workout suite: a catalogue of sports, cycling, training plans, calorie or pace-per-kilometre targets, several goals at once, segments, rankings, anyone else's routes. Outings (one goal of steps, distance or time, with an optional cadence, measured from the steps and, when the reader asks, with GPS) are in scope since Phase 10; the rest of workout tracking is not.
+- Location for anything but an outing that asks for it (amended 18 Nov 2026, `docs/adr/0016-location.md`, decisions 1 and 16): no tracking of the day, no location in the background, no geofence or reminder tied to a place, no outing that starts by itself, no live sharing, no map tiles, no navigation to a start or turn by turn.
 - Reading from or writing to Health Connect, Samsung Health, Google Fit, or any other health app in v1.
 - Accounts, cloud sync, social features, leaderboards.
 - Floors climbed, which would need a barometer and isn't derived from steps.
@@ -168,16 +173,18 @@ Asked for by the owner after the v1.0.0 release (1 Oct 2026); the phases are in 
 - **The interval walk** («Camminata a intervalli», Phase 13): the Japanese Interval Walking Training as an outing, in minutes, with each change of interval felt in the pocket (`docs/adr/0013-interval-walks.md`).
 - **More ways, beyond Europe** («Altri cammini», Phase 14, planned): the Kumano Kodō, the Inca Trail, the Great Ocean Walk, the John Muir Trail and Kilimanjaro, so that the ways reach every continent the cities do; the words that describe the feature as a whole name no faith, and the ways' stamps are grouped as «Timbri» / "Stamps", on a page that lists the ways by continent.
 
-### Planned after 1.1: location, for an outing that asks for it
+### After 1.1: location, for an outing that asks for it
 
 Asked for and approved by the owner on 18 Nov 2026, after weighing it a second time
-(`docs/adr/0016-location.md`; the phases are in PLANNING §11, 15 to 20). **Not built yet:** until
-Phase 15 is, the principles, the non-goals and the success criteria above stand as written, and
-no location permission is in the app. Phase 15 amends them in the change that builds it.
+(`docs/adr/0016-location.md`; the phases are in PLANNING §11, 15 to 20). **Phase 15 is built**
+(18 Nov 2026; not released: it goes out with Phase 16 or not at all, and its proof on a phone
+comes first), and with it the principles, the non-goals and the success criteria above were
+amended, each where it changed. Phase 16 is built too, waiting for the same proof; Phases 17,
+18 and 20 are planned, and Phase 19 was dropped with the first Phase 18 (owner, 19 Nov 2026).
 
 Location enters as a measuring tape, never as a tracker: it is read only inside an outing the
 reader started with «Measure with GPS» on. A reader who never turns it on is asked for nothing,
-and the app is exactly as it is today. Passo still holds no `INTERNET` permission, so it cannot
+and the app is exactly as it was. Passo still holds no `INTERNET` permission, so it cannot
 send a route anywhere; it never reads location in the background, and routes are left out of
 Android's cloud backup.
 
@@ -187,16 +194,23 @@ Android's cloud backup.
   the reader moves, the fixes how far, so a stop, a bus or a tunnel does not fool it.
 - **The step that learns** («Il passo che impara», Phase 17): each outing with GPS says how
   long the reader's step is at each pace; Passo proposes the result, and every day without GPS
-  reads truer for it.
-- **On the spot** («Sul posto», Phases 18 and 19): a city walk or a way walked where it is, for
-  a reader who goes there: a place told on arrival, a vibration when the route is left, a stamp
-  in a second ink, the stretches of a way walked in person kept over the years. From home,
-  both stay as they are, with no location.
-- **Your routes** («I tuoi percorsi», Phase 20): the same guidance along a GPX or a past
-  outing, and a round the reader repeats compared with their usual.
+  reads truer for it. Built (19 Nov 2026): the reader accepts it or not, past days keep theirs
+  unless asked, and the way back to the step used before is one touch.
+- **City walks measured** («Passeggiate misurate», Phase 18): a city walk stays imaginary, but
+  with «Measure with GPS» on its page its distance is measured on the reader's own streets and
+  their real route is kept, so one walk gives the story and the measure. The city's map shows
+  the reader's point on the walk by the distance walked, never their real position. A way from home stays as it is, with no location; Phase 17 makes
+  its kilometres truer. «On the spot», a city walk or a way walked where it is, was weighed and
+  dropped (owner, 19 Nov 2026): real value for few readers, a high cost for all
+  (`docs/adr/0016-location.md`, decision 13, amended).
+- **Your usual round** («Il tuo giro solito», Phase 20): a walk the reader repeats, known
+  without being told among their own outings with GPS, and compared with their usual, honestly
+  (the same direction, the time brought to the usual length): a sentence on the outing's page,
+  a line at each kilometre while it counts, and the rounds listed with their walks.
 
 Still out: a catalogue of sports, cycling, training plans, segments, rankings, friends, live
-sharing, an outing that starts by itself, and location in the background for any reason.
+sharing, an outing that starts by itself, following a route or a GPX from elsewhere (weighed
+and left out on 19 Nov 2026), and location in the background for any reason.
 
 ### Possible post-1.0 ideas (not committed)
 
@@ -225,9 +239,9 @@ sharing, an outing that starts by itself, and location in the background for any
 
 - **No lost steps on graceful shutdown.** After a full power-off and power-on cycle, the recorded daily total matches the raw sensor deltas, including the steps taken just before shutdown.
 - **Hands-off.** After a reboot or an app update, tracking resumes without the user opening the app.
-- **Battery.** The app's share of daily battery use is at most about 1% on reference devices with normal use. This is a target, checked with `batterystats` and Battery Historian. There are no app wakelocks or alarms while the screen is off; the one exception is an outing the reader started, while it counts: the wake-up step counter's reports, every 30 s, and every 2 s in the 40 s before a change of an interval walk, or, on a phone without a wake-up counter and for an outing with signals, the processor kept awake (`docs/adr/0009-sessions.md`, `docs/adr/0013-interval-walks.md`).
+- **Battery.** The app's share of daily battery use is at most about 1% on reference devices with normal use. This is a target, checked with `batterystats` and Battery Historian. There are no app wakelocks or alarms while the screen is off; the one exception is an outing the reader started, while it counts: the wake-up step counter's reports, every 30 s, and every 2 s in the 40 s before a change of an interval walk, or, on a phone without a wake-up counter and for an outing with signals or with GPS, the processor kept awake (`docs/adr/0009-sessions.md`, `docs/adr/0013-interval-walks.md`); and, for an outing with GPS, the satellite receiver, on while the reader walks, asleep two minutes after they stop, off at a pause and at the end (`docs/adr/0016-location.md`). An outing with GPS is outside the 1% target: its cost an hour is measured on a phone and said beside its switch.
 - **Widget freshness.** The widget shows the current count within about 5 seconds of the screen turning on, and is never more than about 60 seconds stale while the screen is on.
-- **Privacy is enforced.** The merged release manifest contains no `INTERNET` and no location permissions, and CI fails if one appears.
+- **Privacy is enforced.** The merged manifest requests exactly the permissions on the build's allowlist (PLANNING §10): no `INTERNET`, no `ACCESS_BACKGROUND_LOCATION`, and CI fails on any permission that is not on the list, and on one that is and is no longer requested. *Amended 18 Nov 2026 (`docs/adr/0016-location.md`, decision 2):* the two location permissions and the service's `location` type are on the list, for an outing that asks for it; letting them in made the gate an allowlist, stricter than the list of forbidden names it was.
 
 ## Glossary
 
@@ -242,4 +256,7 @@ sharing, an outing that starts by itself, and location in the background for any
 - **Walk:** a stretch of consecutive minutes with sustained stepping, detected automatically from step data. Called a "run" when the average cadence is at or above the running threshold.
 - **Outing:** a walk or run started on purpose, with one goal (steps, distance, minutes in motion or the rest of the day) and an optional cadence, measured from the steps, with signals on the way. Italian «uscita».
 - **Time in motion:** an outing's time, made of the gaps between its steps: a stop is not in it.
+- **Measured:** said of an outing's distance when at least nine tenths of it came from satellite fixes (an outing with «Measure with GPS» on). Every other distance in the app is an estimate, and says so. Italian «misurati».
+- **Pace:** an outing's time in motion over its measured distance, by the kilometre or the mile («9:40 min/km»): shown, never a goal. Italian «andatura». Not the cadence, which the outings' words call "your pace" («ritmo») when they compare it with the outing's own.
+- **Fix:** one position from the satellite receiver. A fix is used when it is accurate enough and the steps agree that the reader could have walked there.
 - **Typical day:** the average cumulative step curve for the same weekday over the last 4 weeks, used as a reference on the Today sparkline.

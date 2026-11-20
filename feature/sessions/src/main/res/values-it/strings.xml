@@ -54,6 +54,7 @@
     <string name="editor_estimate">Circa %1$s e %2$s, con il tuo passo di %3$s.</string>
     <string name="editor_estimate_run">Circa %1$s e %2$s, con il tuo passo di corsa di %3$s.</string>
     <string name="editor_estimate_note">Una stima: l’uscita vera si misura dai tuoi passi.</string>
+    <string name="editor_estimate_note_gps">Una stima: l’uscita vera si misura con il GPS, e dai tuoi passi dove i satelliti non arrivano.</string>
     <string name="editor_signals">Segnali</string>
     <string name="editor_signals_note">Lungo la strada alle quote che scegli, e sempre all’obiettivo, che conclude l’uscita.</string>
     <string name="editor_vibrate">Vibrazione</string>
@@ -121,5 +122,23 @@
     <string name="editor_intervals_voice_note">Solo nelle cuffie: la partenza, ogni cambio (“Veloce, 3 minuti”, “Lento”) e all’obiettivo quanti intervalli veloci erano al ritmo.</string>
     <!-- On a phone whose counter cannot wake it: how the signals stay on time, and its cost (ADR 0013). -->
     <string name="editor_awake_note" formatted="false">Su questo telefono Passo lo tiene sveglio durante l’uscita, così i segnali arrivano puntuali. Un po’ più di batteria: circa l’1–3% all’ora.</string>
+    <string name="editor_measure">Misura</string>
+    <string name="editor_gps">Misura con il GPS</string>
+    <string name="editor_gps_gives">La distanza misurata, la tua andatura e il percorso che hai fatto.</string>
+    <string name="editor_gps_costs">Più batteria, solo mentre cammini.</string>
+    <string name="editor_gps_asks">Passo chiede la posizione quando l’uscita parte.</string>
+    <string name="editor_gps_not_allowed">Passo non ha il permesso di leggere la posizione precisa, quindi questa uscita conta dai tuoi passi. Spegni e riaccendi, e Passo lo chiede quando l’uscita parte.</string>
+    <string name="editor_awake_note_gps" formatted="false">Su questo telefono Passo lo tiene sveglio durante l’uscita, così il GPS riposa quando ti fermi e riparte al tuo prossimo passo. Un po’ più di batteria: circa l’1–3% all’ora.</string>
+    <string name="gps_intro_title">Misura questa uscita con il GPS</string>
+    <string name="gps_intro_lead">Passo può leggere i satelliti per misurare la distanza che percorri, invece di stimarla dai tuoi passi.</string>
+    <string name="gps_intro_when_title">Solo durante un’uscita che lo chiede</string>
+    <string name="gps_intro_when_body">Dall’avvio alla pausa o alla fine. Mai per il conteggio della giornata, e mai senza un’uscita in corso.</string>
+    <string name="gps_intro_sent_title">Mai inviata</string>
+    <string name="gps_intro_sent_body">Passo non può usare internet: non invia nulla, a nessuno.</string>
+    <string name="gps_intro_cost_title">Più batteria, solo mentre cammini</string>
+    <string name="gps_intro_cost_body">Il ricevitore riposa quando ti fermi e riparte al tuo prossimo passo.</string>
+    <string name="gps_intro_next">Ora Android ti chiederà la posizione. Scegli «Precisa»: una posizione approssimativa non può misurare una camminata. Qualunque cosa tu risponda, l’uscita parte: senza GPS conta dai tuoi passi, come sempre.</string>
+    <string name="gps_intro_continue">Continua</string>
+    <string name="gps_intro_not_now">Non ora</string>
     <string name="sessions_signals_intervals">Un segnale a ogni cambio</string>
 </resources>
