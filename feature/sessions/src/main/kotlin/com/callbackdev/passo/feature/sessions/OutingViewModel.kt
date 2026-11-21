@@ -5,11 +5,16 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.callbackdev.passo.core.data.learning.StepLearningRepository
+import com.callbackdev.passo.core.data.rounds.RoundRepository
 import com.callbackdev.passo.core.data.routes.RouteRepository
 import com.callbackdev.passo.core.data.sessions.LiveSession
 import com.callbackdev.passo.core.data.sessions.OutingShapes
 import com.callbackdev.passo.core.data.sessions.SessionRepository
 import com.callbackdev.passo.core.data.settings.SettingsRepository
+import com.callbackdev.passo.core.domain.rounds.KeptRound
+import com.callbackdev.passo.core.domain.rounds.RoundComparison
+import com.callbackdev.passo.core.domain.rounds.RoundTimes
+import com.callbackdev.passo.core.domain.rounds.YourRounds
 import com.callbackdev.passo.core.domain.routes.GpsLineAction
 import com.callbackdev.passo.core.domain.routes.GpxCodec
 import com.callbackdev.passo.core.domain.routes.LiveMeasure
@@ -52,6 +57,13 @@ class DrawnRoute(val shape: RouteShape, val altitudes: AltitudeSource?) {
 }
 
 /**
+ * The usual round an outing over is a walk of (PLANNING.md §11 Phase 20), once the round is known
+ * (its third walk), and how this walk compares with the walks of it before.
+ */
+@Immutable
+data class OutingRound(val round: KeptRound, val comparison: RoundComparison)
+
+/**
  * An outing's own page.
  *
  * @property route its route, for an outing measured with GPS that still has one; null for any
@@ -68,6 +80,7 @@ class DrawnRoute(val shape: RouteShape, val altitudes: AltitudeSource?) {
  *   outing that is not the one under way (Phase 21: the page carries the card's lines).
  * @property shape its minutes and its day's goal, for «The shape of the walk» (Phase 21.3); its
  *   minutes are null for an outing from before its pauses were kept, and the section is not shown.
+ * @property round the usual round it is a walk of (Phase 20); null for every other outing.
  */
 @Immutable
 data class OutingUiState(
@@ -79,6 +92,7 @@ data class OutingUiState(
     val stepReady: Boolean = false,
     val measure: LiveMeasure? = null,
     val shape: OutingShape? = null,
+    val round: OutingRound? = null,
 )
 
 /**
@@ -103,6 +117,7 @@ constructor(
     live: LiveSession,
     learning: StepLearningRepository,
     shapes: OutingShapes,
+    private val rounds: RoundRepository,
 ) : ViewModel() {
     private val opened = MutableStateFlow<Long?>(null)
 
@@ -125,10 +140,18 @@ constructor(
                     learning.stepOf(id),
                     learning.learning.map { it.proposed && it.readyOutingId == id }.distinctUntilChanged(),
                 ) { atPace, ready -> atPace to ready }
-                combine(stored, route, combine(units, shape, ::Pair), running, step) {
+                // Its usual round (Phase 20), once known: read only while the page is seen.
+                val round = rounds.kept.map { kept ->
+                    YourRounds.of(id, kept)?.let { found ->
+                        found.walks.firstOrNull {
+                            it.id == id
+                        }?.let { OutingRound(found, RoundTimes.comparison(it, found.walks)) }
+                    }
+                }.distinctUntilChanged()
+                combine(stored, route, combine(units, shape, round, ::Triple), running, step) {
                         saved,
                         drawn,
-                        (unit, outingShape),
+                        (unit, outingShape, outingRound),
                         liveState,
                         (atPace, ready),
                     ->
@@ -143,6 +166,7 @@ constructor(
                             stepReady = ready,
                             measure = liveState?.measure,
                             shape = outingShape?.takeIf { shape -> shape.sessionId == it.id },
+                            round = outingRound,
                         )
                     }
                 }
@@ -176,6 +200,15 @@ constructor(
     fun deleteRoute() {
         val session = state.value?.takeIf { it.over }?.session ?: return
         viewModelScope.launch { routes.forget(session.id, session.startedAtMillis) }
+    }
+
+    /**
+     * «Not the same round»: the open outing leaves its round, never to be matched with its walks
+     * again (PLANNING.md §11 Phase 20). Only once it is over for good, as its page offers it.
+     */
+    fun notTheSameRound() {
+        val session = state.value?.takeIf { it.over && it.round != null }?.session ?: return
+        viewModelScope.launch { rounds.notTheSame(session.id) }
     }
 
     /** The open outing's route as a GPX document named [name]; null when it has none. */

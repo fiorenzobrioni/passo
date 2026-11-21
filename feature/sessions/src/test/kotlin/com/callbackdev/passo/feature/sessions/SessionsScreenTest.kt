@@ -81,6 +81,7 @@ class SessionsScreenTest {
         restOfDay: Int = 2_400,
         list: List<SessionPlan> = plans,
         kept: KeptOutingsDoor? = null,
+        rounds: RoundsDoor? = null,
     ) = SessionsUiState(
         plans = list,
         live = live,
@@ -90,6 +91,7 @@ class SessionsScreenTest {
         status = status,
         alertsWhileScreenOff = true,
         kept = kept,
+        rounds = rounds,
     )
 
     private fun show(
@@ -308,6 +310,33 @@ class SessionsScreenTest {
         compose.onNodeWithTag(SessionsTags.KEPT).performClick()
         assertThat(opened).isEqualTo(1)
         snapshot("sessions_kept")
+    }
+
+    @Test
+    fun `the usual rounds are a door beside the outings', from the first one known`() {
+        var opened = 0
+        val today = java.time.LocalDate.of(2026, 11, 21)
+        val latest = walking.copy(localEpochDay = today.toEpochDay(), state = SessionState.FINISHED)
+        show(
+            state(
+                kept = KeptOutingsDoor(count = 48, latest = latest, route = null, today = today),
+                rounds = RoundsDoor(rounds = 2, walks = 14, route = null),
+            ),
+            actions = SessionsActions(openRounds = { opened++ }),
+        )
+        compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag(SessionsTags.ROUNDS))
+        compose.onNodeWithText("Your rounds").assertIsDisplayed()
+        compose.onNodeWithText("2 rounds · 14 walks").assertIsDisplayed()
+        compose.onNodeWithTag(SessionsTags.ROUNDS).performClick()
+        assertThat(opened).isEqualTo(1)
+        snapshot("sessions_rounds")
+    }
+
+    @Test
+    fun `no round known, no door to them`() {
+        show(state())
+        compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag(SessionsTags.CITIES))
+        compose.onNodeWithTag(SessionsTags.ROUNDS).assertDoesNotExist()
     }
 
     @Test

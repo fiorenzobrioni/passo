@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.domain.sessions.PaceVerdict
+import com.callbackdev.passo.core.domain.sessions.RoundSaid
 import com.callbackdev.passo.core.domain.sessions.SessionAmount
 import com.callbackdev.passo.core.domain.sessions.SessionAnnouncement
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
@@ -397,6 +398,44 @@ class SpokenTextTest {
             .isEqualTo("10 minuti, 1.150 passi.")
         assertThat(say(SessionAnnouncement.TimeMark(minutes = 70, steps = 8_000), open))
             .isEqualTo("1 ora e 10 minuti, 8.000 passi.")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS")
+    fun `on a usual round the comparison takes the time's and the pace's place, and leaving it is said once`() {
+        val mark = SessionAnnouncement.DistanceMark(
+            count = 2,
+            miles = false,
+            movingMinutes = 23,
+            measured = true,
+            paceSecondsPerKm = 680.0,
+            round = RoundSaid.Gap(-31_000),
+        )
+        assertThat(say(mark, open)).isEqualTo("2 kilometres, 30 seconds ahead of your usual.")
+        assertThat(say(mark.copy(round = RoundSaid.Gap(95_000)), open))
+            .isEqualTo("2 kilometres, 2 minutes behind your usual.")
+        assertThat(say(mark.copy(round = RoundSaid.Gap(0)), open)).isEqualTo("2 kilometres, right on your usual.")
+        // Left since the last kilometre: said in the pace's place, once.
+        assertThat(say(mark.copy(count = 3, movingMinutes = 33, round = RoundSaid.Left), open))
+            .isEqualTo("3 kilometres, in 33 minutes. You left your usual round.")
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT")
+    fun `in Italian, a usual round's kilometre`() {
+        val mark = SessionAnnouncement.DistanceMark(
+            count = 2,
+            miles = false,
+            movingMinutes = 23,
+            measured = true,
+            round = RoundSaid.Gap(-60_000),
+        )
+        assertThat(say(mark, open)).isEqualTo("2 chilometri, 1 minuto avanti rispetto al solito.")
+        assertThat(
+            say(mark.copy(round = RoundSaid.Gap(0)), open),
+        ).isEqualTo("2 chilometri, in linea con il tuo solito.")
+        assertThat(say(mark.copy(round = RoundSaid.Left), open))
+            .isEqualTo("2 chilometri, in 23 minuti. Hai lasciato il tuo giro solito.")
     }
 
     @Test

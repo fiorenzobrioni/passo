@@ -19,12 +19,14 @@ import com.callbackdev.passo.core.designsystem.format.intensityPhrase
 import com.callbackdev.passo.core.designsystem.format.measureFormatter
 import com.callbackdev.passo.core.designsystem.format.openPhrase
 import com.callbackdev.passo.core.designsystem.format.paceSpoken
+import com.callbackdev.passo.core.designsystem.format.roundGapWords
 import com.callbackdev.passo.core.designsystem.format.sessionName
 import com.callbackdev.passo.core.designsystem.ways.placeNameRes
 import com.callbackdev.passo.core.designsystem.ways.placeNoteRes
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.sessions.PaceSummary
 import com.callbackdev.passo.core.domain.sessions.PaceVerdict
+import com.callbackdev.passo.core.domain.sessions.RoundSaid
 import com.callbackdev.passo.core.domain.sessions.SessionAmount
 import com.callbackdev.passo.core.domain.sessions.SessionAnnouncement
 import com.callbackdev.passo.core.domain.sessions.SpeechRoute
@@ -536,12 +538,33 @@ private fun Resources.spokenDistanceMark(announcement: SessionAnnouncement.Dista
         frozen.integer(count.toLong()),
     )
     val time = spokenDuration(announcement.movingMinutes)
+    // On a usual round (Phase 20), the comparison in place of the time and the pace.
+    val round = announcement.round
+    if (round is RoundSaid.Gap) {
+        return when {
+            round.millis < 0 -> getString(R.string.spoken_mark_round_ahead, distance, spokenRoundGap(-round.millis))
+            round.millis > 0 -> getString(R.string.spoken_mark_round_behind, distance, spokenRoundGap(round.millis))
+            else -> getString(R.string.spoken_mark_round_even, distance)
+        }
+    }
     val sentence = if (announcement.measured) {
         getString(R.string.spoken_mark_distance, distance, time)
     } else {
         getString(R.string.spoken_mark_distance_about, distance, time)
     }
-    return listOfNotNull(sentence, spokenPace(announcement.paceSecondsPerKm, frozen)).joinToString(" ")
+    // The round left since the last kilometre: said once, in the pace's place; the next one has its pace.
+    val after = if (round == RoundSaid.Left) {
+        getString(R.string.spoken_round_left)
+    } else {
+        spokenPace(announcement.paceSecondsPerKm, frozen)
+    }
+    return listOfNotNull(sentence, after).joinToString(" ")
+}
+
+/** A difference against a usual round, said: «30 seconds», «2 minutes», an hour and more in hours. */
+private fun Resources.spokenRoundGap(millis: Long): String {
+    val minutes = ((millis + MILLIS_PER_MINUTE / 2) / MILLIS_PER_MINUTE).toInt()
+    return if (minutes >= MINUTES_PER_HOUR) spokenDuration(minutes) else roundGapWords(millis)
 }
 
 /** «20 minutes, 2,300 steps.»: an open outing's time mark (Phase 21.2). */
@@ -689,6 +712,7 @@ private val STEP_GOALS = setOf(SessionGoalKind.STEPS, SessionGoalKind.REST_OF_DA
 private const val MANY = 2
 
 private const val MINUTES_PER_HOUR = 60
+private const val MILLIS_PER_MINUTE = 60_000L
 
 /** The editor's sample of an open outing: half an hour at an ordinary walk's pace and step. */
 private const val SAMPLE_OPEN_MINUTES = 30

@@ -108,6 +108,8 @@
     <string name="data_delete_routes_text">Every line, and the places it went through, is deleted from this phone. Your outings and their numbers stay: the distance, the pace, the kilometres, the climb.</string>
     <!-- The same, while an outing with GPS is under way, or can still be taken back. -->
     <string name="data_delete_routes_text_keeping">Every line of the outings that are over, and the places it went through, is deleted from this phone. The outing still under way keeps its route. Your outings and their numbers stay: the distance, the pace, the kilometres, the climb.</string>
+    <!-- Where the reader has usual rounds (Phase 20): they stay, with their history; a new walk with GPS draws their map again. -->
+    <string name="data_delete_routes_rounds">Your usual rounds stay too, with their walks and their times.</string>
     <string name="data_delete_routes_confirm">Delete</string>
     <string name="data_delete_routes_cancel">Cancel</string>
 </resources>

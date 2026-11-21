@@ -1,5 +1,6 @@
 package com.callbackdev.passo.core.data.backup
 
+import com.callbackdev.passo.core.data.db.RoundDao
 import com.callbackdev.passo.core.data.db.SessionDao
 import com.callbackdev.passo.core.data.db.StepLengthSampleEntity
 import com.callbackdev.passo.core.data.db.TrackingDao
@@ -7,15 +8,18 @@ import com.callbackdev.passo.core.data.db.WayDao
 import com.callbackdev.passo.core.data.db.toEntity
 import com.callbackdev.passo.core.data.db.toModel
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
+import com.callbackdev.passo.core.data.rounds.RoundRepository
 import com.callbackdev.passo.core.data.routes.RouteRepository
 import com.callbackdev.passo.core.data.sessions.LiveSession
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.domain.backup.Backup
 import com.callbackdev.passo.core.domain.backup.BackupDay
 import com.callbackdev.passo.core.domain.backup.BackupMerge
+import com.callbackdev.passo.core.domain.backup.BackupRound
 import com.callbackdev.passo.core.domain.backup.CsvExport
 import com.callbackdev.passo.core.domain.backup.CsvTable
 import com.callbackdev.passo.core.domain.metrics.DaySummaries
+import com.callbackdev.passo.core.domain.rounds.RoundConstants
 import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.StepLengthSample
 import com.callbackdev.passo.core.model.UnitSystem
@@ -38,6 +42,8 @@ import javax.inject.Singleton
  * @property deletableRoutes of them, those «Delete all routes» deletes: every one but the route
  *   still being written, of an outing under way or one that can still be taken back;
  *   [deletableBytes] what they weigh.
+ * @property rounds the usual rounds kept (Phase 20): «Delete all routes» leaves them, their walks
+ *   and their times, and its dialog says so where there are some.
  */
 data class DataContents(
     val days: Int,
@@ -45,6 +51,7 @@ data class DataContents(
     val routes: Int = 0,
     val deletableRoutes: Int = 0,
     val deletableBytes: Long = 0,
+    val rounds: Int = 0,
 )
 
 /**
@@ -86,6 +93,8 @@ constructor(
     private val tracking: TrackingRepository,
     private val routes: RouteRepository,
     private val live: LiveSession,
+    private val roundDao: RoundDao,
+    private val rounds: RoundRepository,
 ) {
     // The outing with GPS whose route may still grow: under way (as written), or ended a moment
     // ago and still to be taken back (as the service holds it). Its route is not the reader's
@@ -100,7 +109,11 @@ constructor(
         sessionDao.observeSessionCount(),
         routes.routeIds,
         growing,
-    ) { days, outings, kept, underWay ->
+        // The rounds the reader can see, from their third walk: a pair kept unseen is not «your round».
+        rounds.rounds.map { found ->
+            found.count { it.walks.size >= RoundConstants.KNOWN_WALKS }
+        }.distinctUntilChanged(),
+    ) { days, outings, kept, underWay, roundCount ->
         // The route still being written is not the reader's to delete yet: «Delete all routes»
         // counts and weighs the others, and is not offered for that one alone.
         val deletable = kept.count { it != underWay }
@@ -110,6 +123,7 @@ constructor(
             routes = kept.size,
             deletableRoutes = deletable,
             deletableBytes = if (deletable > 0) routes.bytes(except = underWay) else 0,
+            rounds = roundCount,
         )
     }
 
@@ -158,6 +172,16 @@ constructor(
         } else {
             emptyMap()
         }
+        // The usual rounds, by their walks' starts: names and numbers, so in every backup.
+        val members = roundDao.members().groupBy({ it.roundId }) { it.sessionId }
+        val keptRounds = roundDao.rounds().mapNotNull { round ->
+            members[round.id]?.mapNotNull { starts[it] }?.takeIf { it.size >= 2 }?.let { BackupRound(round.name, it) }
+        }
+        val apart = roundDao.apart().mapNotNull { pair ->
+            val first = starts[pair.firstId] ?: return@mapNotNull null
+            val second = starts[pair.secondId] ?: return@mapNotNull null
+            first to second
+        }
         return Backup(
             exportedAtMillis = nowMillis,
             zone = zone.id,
@@ -171,6 +195,8 @@ constructor(
             journeys = wayDao.journeys().mapNotNull { it.toModel() },
             stepLengthSamples = samples,
             routes = kept,
+            rounds = keptRounds,
+            roundsApart = apart,
         )
     }
 
@@ -224,6 +250,20 @@ constructor(
         }
         for ((sessionId, route) in added) {
             routes.restore(sessionId, route.sessionStartedAtMillis, route.points, route.altitudes)
+        }
+        // The file's usual rounds, on this phone's outings; then the outings that came with their
+        // route and no round are searched for theirs, as each would have been as it ended here.
+        if (backup.rounds.isNotEmpty() || backup.roundsApart.isNotEmpty()) {
+            val (fileRounds, pairs) = BackupMerge.rounds(
+                outings = sessionDao.sessionStarts().associate { it.startedAtMillis to it.id },
+                incoming = backup.rounds,
+                apart = backup.roundsApart,
+            )
+            roundDao.importRounds(fileRounds, pairs)
+        }
+        if (added.isNotEmpty()) {
+            val inRounds = roundDao.members().mapTo(HashSet()) { it.sessionId }
+            rounds.searchAmong(added.map { it.first }.filter { it !in inRounds })
         }
         // An outing walked on the other phone today is history here, not one just over: Today's
         // card for the last outing stays put away.

@@ -18,6 +18,8 @@ import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.IntervalSplit
 import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.OutingLeg
+import com.callbackdev.passo.core.model.RoundLine
+import com.callbackdev.passo.core.model.RoundStanding
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
@@ -266,6 +268,44 @@ class SessionRepositoryTest {
                 assertThat(kept).containsExactly(0, 1, 1).inOrder()
             }
         }
+    }
+
+    @Test
+    fun `version 11 migrates to 12 with no round, and every outing off any round's line`() {
+        migrations.createDatabase(MIGRATION_DB, 11).use { db ->
+            db.execSQL(
+                "INSERT INTO session (planId, name, goalKind, goalValue, restOfDay, intensity, milestones, " +
+                    "vibrate, localEpochDay, startedAtMillis, state, endedAtMillis, endReason, steps, " +
+                    "movingMillis, zoneMillis, distanceMeters, activeKcal, lastStepAtMillis, lastEventAtMillis, " +
+                    "pausedAtMillis, reachedAtMillis, toldMilestones, voice, gps, measuredShare, pausesKept) VALUES " +
+                    "(NULL, NULL, 'OPEN', 0, 0, 'FREE', 0, 1, 20716, 1789995000000, 'FINISHED', " +
+                    "1789996200000, 'STOPPED', 4210, 2400000, 2400000, 3200.0, 121.0, 1789996200000, " +
+                    "1789996200000, NULL, NULL, 0, 'OFF', 1, 1.0, 1)",
+            )
+        }
+        migrations.runMigrationsAndValidate(MIGRATION_DB, 12, true).use { db ->
+            db.query("SELECT roundLineId, roundLineStanding, roundLineMarks, roundLineGapMillis FROM session").use {
+                assertThat(it.moveToFirst()).isTrue()
+                assertThat(it.isNull(0)).isTrue()
+                assertThat(it.isNull(1)).isTrue()
+                assertThat(it.getInt(2)).isEqualTo(0)
+                assertThat(it.isNull(3)).isTrue()
+            }
+            db.query("SELECT COUNT(*) FROM round").use {
+                it.moveToFirst()
+                assertThat(it.getInt(0)).isEqualTo(0)
+            }
+        }
+    }
+
+    @Test
+    fun `an open outing's line on a round is written with it, and read back by a process restarted`() = runTest {
+        val started = repository.insert(checkNotNull(SessionPlans.start(SessionPlans.OPEN_WALK, 1_000, day, 0, 8_000)))
+        val line = RoundLine(roundId = 4, standing = RoundStanding.ON, marks = 2, gapMillis = -30_000)
+        repository.save(started.copy(roundLine = line))
+        assertThat(repository.liveSession()?.roundLine).isEqualTo(line)
+        repository.save(started.copy(roundLine = line.copy(standing = RoundStanding.GONE)))
+        assertThat(repository.liveSession()?.roundLine?.standing).isEqualTo(RoundStanding.GONE)
     }
 
     @Test

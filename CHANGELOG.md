@@ -12,6 +12,23 @@ All notable changes to Passo are documented here. The format follows
 
 ### New
 
+- **Your usual rounds.** Walk the same streets three times with «Measure with GPS» on, from
+  your door and the same way round, and Passo knows it is your round, without being told: the
+  same streets the other way round are another round, and so is a loop begun from another point
+  of it. A walk with no goal on your round says on its card, from the first kilometre and again at
+  each, how far ahead of your usual or behind it you are («35 seconds ahead of your usual»), and
+  where it speaks, the kilometre's words say it in place of the pace; leave the round and it says
+  so once, then goes on as any walk. No new vibration and nothing more awake: it rides on the
+  kilometre. Afterwards the outing's page says which time it was and how it went against the walks
+  before («Your usual round, the 8th time: 6 minutes faster than usual»), each time in motion
+  brought to the round's usual length, so a shortcut is not a faster walk and a detour not a
+  slower one; «Not the same round» takes an outing out where Passo was wrong, for good. «Your
+  rounds», a new door on the Outings page, keeps each round with its map, its times over the weeks
+  against your usual, and every walk of it; rename it, or forget it, and its outings stay as they
+  are. Your outings with GPS from before are searched once for their rounds. A round is numbers
+  and a name, in every backup with the outings; its line is its walks' routes, and «Delete all
+  routes» keeps the rounds and their times. Never a record, a ranking or anyone else's walk.
+
 - **An outing with no goal.** Choose «None» in an outing's kind, or start «Walk», now first on
   the Outings page: it counts until you stop it, at the park or wherever you go, and says what it
   has come to («25 minutes on your feet», «2.30 km measured in 25 minutes» with GPS) instead of

@@ -203,11 +203,16 @@ Android's cloud backup.
   its kilometres truer. «On the spot», a city walk or a way walked where it is, was weighed and
   dropped (owner, 19 Nov 2026): real value for few readers, a high cost for all
   (`docs/adr/0016-location.md`, decision 13, amended).
-- **The open outing** («L'uscita aperta», Phase 21, planned on 20 Nov 2026 and to be built before 18 and 20): an outing with no goal, with GPS or without, whose page follows it while it counts, its route growing, and can stop it. Not a location phase, but the outings with GPS asked for it, and the usual round is walked as one.
+- **The open outing** («L'uscita aperta», Phase 21, built on 20 Nov 2026 before 18 and 20): an outing with no goal, with GPS or without, whose page follows it while it counts, its route growing, and can stop it. Not a location phase, but the outings with GPS asked for it, and the usual round is walked as one.
 - **Your usual round** («Il tuo giro solito», Phase 20): a walk the reader repeats, known
   without being told among their own outings with GPS, and compared with their usual, honestly
   (the same direction, the time brought to the usual length): a sentence on the outing's page,
-  a line at each kilometre while it counts, and the rounds listed with their walks.
+  a line at each kilometre while it counts, and the rounds listed with their walks. Built (21 Nov
+  2026): found from the third walk, the same way round from the same door; the line on the card
+  of an open outing with GPS, in the kilometre's words where it speaks; «Not the same round»
+  where Passo was wrong; «Your rounds», each with its map and its times over the weeks. Numbers
+  and names only: a round's line is its walks' routes, so no place outlives its outing. Never a
+  record, a ranking or anyone else's walk.
 
 Still out: a catalogue of sports, cycling, training plans, segments, rankings, friends, live
 sharing, an outing that starts by itself, following a route or a GPX from elsewhere (weighed

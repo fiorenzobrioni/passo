@@ -178,6 +178,34 @@ abstract class SessionDao {
     @Query("DELETE FROM session_pause WHERE sessionId = :id")
     protected abstract suspend fun deletePauses(id: Long)
 
+    @Query("DELETE FROM round_member WHERE sessionId = :id")
+    protected abstract suspend fun deleteRoundMember(id: Long)
+
+    @Query("DELETE FROM round_apart WHERE firstId = :id OR secondId = :id")
+    protected abstract suspend fun deleteRoundApart(id: Long)
+
+    /** The walks of a round left with fewer than two: a round is a pair at least. */
+    @Query(
+        "DELETE FROM round_member WHERE roundId IN " +
+            "(SELECT roundId FROM round_member GROUP BY roundId HAVING COUNT(*) < 2)",
+    )
+    protected abstract suspend fun deleteLoneRoundMembers()
+
+    @Query("DELETE FROM round WHERE id NOT IN (SELECT DISTINCT roundId FROM round_member)")
+    protected abstract suspend fun deleteEmptyRounds()
+
+    /**
+     * The outings over that were measured with GPS, oldest first, their own rows alone: what a new
+     * one is searched among for its round (PLANNING.md §11 Phase 20). Numbers, a few hundred at most.
+     */
+    @Query("SELECT * FROM session WHERE state = 'FINISHED' AND gps = 1 ORDER BY startedAtMillis, id")
+    abstract suspend fun finishedWithGps(): List<SessionEntity>
+
+    /** These outings whole, with their legs: what a round's usual at each kilometre is read from. */
+    @Transaction
+    @Query("SELECT * FROM session WHERE id IN (:ids) ORDER BY startedAtMillis")
+    abstract suspend fun sessions(ids: List<Long>): List<SessionRow>
+
     /** What an outing's clean stretches said of the step: added as it goes (Phase 15, for 17). */
     @Insert
     abstract suspend fun insertStepLengthSamples(samples: List<StepLengthSampleEntity>)
@@ -204,8 +232,9 @@ abstract class SessionDao {
     abstract suspend fun sessionStarts(): List<SessionStart>
 
     /**
-     * An outing with what belongs to it alone: its intervals, its legs, its pauses, and what it
-     * said of the step.
+     * An outing with what belongs to it alone: its intervals, its legs, its pauses, what it said of
+     * the step, and its place in a round (Phase 20): it leaves its round, which is forgotten once
+     * fewer than two walks are left, and any pair said not the same with it goes.
      */
     @Transaction
     open suspend fun deleteSession(id: Long) {
@@ -213,6 +242,10 @@ abstract class SessionDao {
         deleteLegs(id)
         deletePauses(id)
         deleteStepLengthSamples(id)
+        deleteRoundMember(id)
+        deleteRoundApart(id)
+        deleteLoneRoundMembers()
+        deleteEmptyRounds()
         deleteSessionRow(id)
     }
 }

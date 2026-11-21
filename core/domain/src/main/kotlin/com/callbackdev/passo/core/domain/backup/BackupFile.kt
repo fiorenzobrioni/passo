@@ -22,7 +22,20 @@ internal data class BackupFile(
     val outings: List<OutingDto> = emptyList(),
     val diagnostics: List<DiagnosticDto> = emptyList(),
     val ways: List<WayDto> = emptyList(),
+    val rounds: List<RoundDto> = emptyList(),
+    val roundsApart: List<RoundApartDto> = emptyList(),
 )
+
+/**
+ * A usual round (Phase 20): the reader's name for it, if any, and its walks by their outings'
+ * `startedAtMillis`. An added field, no new version; a name and numbers, never a place.
+ */
+@Serializable
+internal data class RoundDto(val name: String? = null, val walks: List<Long> = emptyList())
+
+/** Two outings, by their starts, the reader said are not the same round (Phase 20). */
+@Serializable
+internal data class RoundApartDto(val first: Long = 0, val second: Long = 0)
 
 @Serializable
 internal data class ProfileDto(

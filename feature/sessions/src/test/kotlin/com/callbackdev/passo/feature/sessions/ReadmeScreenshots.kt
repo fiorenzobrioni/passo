@@ -272,6 +272,35 @@ class ReadmeScreenshots {
         save("outings-list")
     }
 
+    /**
+     * The brisk hour through Milan, the eighth time it was walked (PLANNING.md §11 Phase 20): its
+     * page says it, sentence first, against the usual of the walks before.
+     */
+    @Test
+    fun outingRound() {
+        compose.setContent {
+            PassoTheme { OutingScreen(state = RoundSamples.outingState(), onBack = {}, actions = OutingActions()) }
+        }
+        save("outing-round")
+    }
+
+    /** That round's own page: eight walks since September, the last four faster than usual. */
+    @Test
+    fun round() {
+        compose.setContent {
+            PassoTheme {
+                RoundScreen(
+                    state = RoundSamples.page(name = "Along the canals"),
+                    onBack = {},
+                    onOpenOuting = {},
+                    onRename = {},
+                    onForget = {},
+                )
+            }
+        }
+        save("round")
+    }
+
     /** A point every ten metres along [way]'s line for [meters], from its start, at a walking pace. */
     private fun walkPoints(way: WayId, meters: Double, startMillis: Long): List<RoutePoint> {
         val line = Ways.of(way).map.line

@@ -117,6 +117,7 @@ fun SessionsRoute(
     onOpenOuting: (Long) -> Unit = {},
     onOpenWalk: (WayId) -> Unit = {},
     onOpenOutings: () -> Unit = {},
+    onOpenRounds: () -> Unit = {},
     viewModel: SessionsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -167,6 +168,7 @@ fun SessionsRoute(
             },
             openCities = onOpenCities,
             openOutings = onOpenOutings,
+            openRounds = onOpenRounds,
         ),
     )
 }
@@ -179,6 +181,7 @@ class SessionsActions(
     val openSignalSettings: () -> Unit = {},
     val openCities: () -> Unit = {},
     val openOutings: () -> Unit = {},
+    val openRounds: () -> Unit = {},
 )
 
 /**
@@ -403,7 +406,7 @@ private fun SessionsList(
             )
         }
         item(key = "doors") {
-            Doors(state.kept, format, actions, Modifier.animateItem(placementSpec = placement))
+            Doors(state.kept, state.rounds, format, actions, Modifier.animateItem(placementSpec = placement))
         }
         item(key = "footer") {
             Column(
@@ -642,15 +645,17 @@ object SessionsTags {
     const val BLOCKED = "sessions_blocked"
     const val CITIES = "sessions_cities"
     const val KEPT = "sessions_kept"
+    const val ROUNDS = "sessions_rounds"
 }
 
 /**
  * The page's doors, under the plans, on one ground: the outings walked (Phase 23.2), from the first
- * one over, and the city walks.
+ * one over; the usual rounds (Phase 20), from the first one known; and the city walks.
  */
 @Composable
 private fun Doors(
     kept: KeptOutingsDoor?,
+    rounds: RoundsDoor?,
     format: MeasureFormatter,
     actions: SessionsActions,
     modifier: Modifier = Modifier,
@@ -660,7 +665,51 @@ private fun Doors(
             KeptDoor(kept, format, actions.openOutings)
             GroupDivider()
         }
+        if (rounds != null) {
+            RoundsDoorRow(rounds, format, actions.openRounds)
+            GroupDivider()
+        }
         CitiesDoor(actions.openCities)
+    }
+}
+
+/**
+ * The door to «Your rounds» (PLANNING.md §11 Phase 20): «2 rounds · 14 walks», with the latest walked
+ * round's small map as its picture, the round's mark where none keeps a route.
+ */
+@Composable
+private fun RoundsDoorRow(door: RoundsDoor, format: MeasureFormatter, onOpen: () -> Unit) {
+    val res = LocalResources.current
+    DoorRow(
+        title = stringResource(R.string.sessions_rounds_title),
+        body = stringResource(
+            R.string.sessions_rounds_body,
+            res.roundsCount(door.rounds, format),
+            res.roundWalks(door.walks, format),
+        ),
+        onOpen = onOpen,
+        modifier = Modifier.testTag(SessionsTags.ROUNDS),
+    ) {
+        val route = door.route
+        if (route != null) {
+            StillRouteView(
+                shape = route,
+                contentDescription = "",
+                ratio = 1f,
+                clip = MaterialTheme.shapes.large,
+                modifier = Modifier.size(DOOR_MAP_SIZE),
+            )
+        } else {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(DOOR_MAP_SIZE)
+                    .clip(MaterialTheme.shapes.large)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            ) {
+                Icon(PassoIcons.Round, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+            }
+        }
     }
 }
 

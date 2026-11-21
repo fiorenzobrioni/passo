@@ -228,4 +228,9 @@
     <string name="spoken_mark_distance_about">Circa %1$s, in %2$s.</string>
     <!-- «20 minuti, 2.300 passi.» -->
     <string name="spoken_mark_time">%1$s, %2$s.</string>
+    <!-- Su un giro solito (Fase 20) il confronto prende il posto del tempo e dell’andatura: «2 chilometri, 30 secondi avanti rispetto al solito.» -->
+    <string name="spoken_mark_round_ahead">%1$s, %2$s avanti rispetto al solito.</string>
+    <string name="spoken_mark_round_behind">%1$s, %2$s indietro rispetto al solito.</string>
+    <string name="spoken_mark_round_even">%1$s, in linea con il tuo solito.</string>
+    <string name="spoken_round_left">Hai lasciato il tuo giro solito.</string>
 </resources>

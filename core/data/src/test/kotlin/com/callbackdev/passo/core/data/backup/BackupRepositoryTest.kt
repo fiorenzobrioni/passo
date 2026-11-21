@@ -11,6 +11,7 @@ import com.callbackdev.passo.core.data.db.WayJourneyEntity
 import com.callbackdev.passo.core.data.db.toEntity
 import com.callbackdev.passo.core.data.db.toModel
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
+import com.callbackdev.passo.core.data.rounds.RoundRepository
 import com.callbackdev.passo.core.data.routes.RouteRepository
 import com.callbackdev.passo.core.data.sessions.LiveSession
 import com.callbackdev.passo.core.data.sessions.LiveSessionState
@@ -79,6 +80,7 @@ class BackupRepositoryTest {
                 .build()
         val routes = RouteRepository(routeDatabase.routeDao())
         val live = LiveSession()
+        val rounds = RoundRepository(database.roundDao(), database.sessionDao(), routes, preferences)
         val backups = BackupRepository(
             database.trackingDao(),
             database.sessionDao(),
@@ -87,6 +89,8 @@ class BackupRepositoryTest {
             tracking,
             routes,
             live,
+            database.roundDao(),
+            rounds,
         )
 
         suspend fun walk(vararg minutes: MinuteSteps) {
@@ -293,6 +297,63 @@ class BackupRepositoryTest {
         // Not ticked, the routes stay where they are: the file holds no place.
         assertThat(file).doesNotContain("\"route\"")
         assertThat(new.routes.count.first()).isEqualTo(0)
+    }
+
+    /** Four walks round the old phone's park, the first three its round «Park»; the fourth said not the same. */
+    private suspend fun roundHistory(): List<Long> {
+        val ids = (0 until 4).map { walk ->
+            val started = (day + walk) * 86_400_000L + 7 * 3_600_000L
+            old.database.sessionDao().insertSession(
+                com.callbackdev.passo.core.model.Session(
+                    planId = null,
+                    name = null,
+                    goalKind = SessionGoalKind.OPEN,
+                    goalValue = 0,
+                    intensity = SessionIntensity.FREE,
+                    milestones = emptySet(),
+                    vibrate = true,
+                    localEpochDay = day + walk,
+                    startedAtMillis = started,
+                    state = SessionState.FINISHED,
+                    endedAtMillis = started + 2_400_000,
+                    end = SessionEnd.STOPPED,
+                    totals = SessionTotals(steps = 4_000, movingMillis = 2_400_000, distanceMeters = 3_200.0),
+                    gps = true,
+                    measuredShare = 1.0,
+                ).toEntity(),
+            )
+        }
+        val rounds = old.database.roundDao()
+        val round = rounds.pair(ids[0], ids[1])
+        rounds.join(round, ids[2])
+        rounds.rename(round, "Park")
+        rounds.insertApart(listOf(com.callbackdev.passo.core.data.db.RoundApartEntity(ids[2], ids[3])))
+        return ids
+    }
+
+    @Test
+    fun `a round travels with its outings, its name and the pairs said not the same, numbers and no place`() = runTest {
+        roundHistory()
+        val file = exported()
+        assertThat(file).contains("\"rounds\"")
+        new.backups.import(read(file), withPreferences = false)
+
+        val came = new.database.sessionDao().allSessions().map { it.session }.sortedBy { it.startedAtMillis }
+        val round = new.rounds.rounds.first().single()
+        assertThat(round.name).isEqualTo("Park")
+        assertThat(round.walks).containsExactly(came[0].id, came[1].id, came[2].id)
+        assertThat(new.database.roundDao().apart().map { it.firstId to it.secondId })
+            .containsExactly(came[2].id to came[3].id)
+    }
+
+    @Test
+    fun `the same file again adds no round twice`() = runTest {
+        roundHistory()
+        val file = exported()
+        new.backups.import(read(file), withPreferences = false)
+        new.backups.import(read(file), withPreferences = false)
+        assertThat(new.rounds.rounds.first()).hasSize(1)
+        assertThat(new.database.roundDao().apart()).hasSize(1)
     }
 
     @Test

@@ -26,6 +26,8 @@ import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.today.TypicalDayCalculator
 import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.Profile
+import com.callbackdev.passo.core.model.RoundLine
+import com.callbackdev.passo.core.model.RoundStanding
 import com.callbackdev.passo.core.model.RoutePoint
 import com.callbackdev.passo.core.model.RoutePointKind
 import com.callbackdev.passo.core.model.Session
@@ -200,6 +202,58 @@ class ReadmeScreenshots {
         compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(SessionCardTags.CARD))
         compose.waitForIdle()
         save("outing-open")
+    }
+
+    /**
+     * The same walk round the park, the reader's usual round (PLANNING.md §11 Phase 20): past its
+     * second kilometre, the card says how far ahead of the usual it is, in the day's own words.
+     */
+    @Test
+    fun todayRoundOuting() {
+        val zone = ZoneId.systemDefault()
+        val start = LocalDateTime.of(2026, 9, 24, 10, 12).atZone(zone).toInstant().toEpochMilli()
+        val seconds = 27 * 60
+        val points = parkWalk(start / 1_000, seconds)
+        val walk = Session(
+            id = 1,
+            planId = 1,
+            name = null,
+            goalKind = SessionGoalKind.OPEN,
+            goalValue = 0,
+            intensity = SessionIntensity.FREE,
+            milestones = emptySet(),
+            vibrate = true,
+            localEpochDay = LocalDate.of(2026, 9, 24).toEpochDay(),
+            startedAtMillis = start,
+            totals = SessionTotals(
+                steps = 3_040,
+                movingMillis = seconds * 1_000L,
+                zoneMillis = seconds * 1_000L,
+                distanceMeters = 2_270.0,
+                activeKcal = 118.0,
+            ),
+            lastStepAtMillis = start + seconds * 1_000L,
+            lastEventAtMillis = start + seconds * 1_000L,
+            gps = true,
+            stepsMeters = 2_190.0,
+            measuredShare = 0.97,
+            pausesKept = true,
+            roundLine = RoundLine(roundId = 3, standing = RoundStanding.ON, marks = 2, gapMillis = -36_000),
+        )
+        val minutes = (0 until 28).map { MinuteSteps(start / 60_000 + it, walk.localEpochDay, 104 + (it * 7) % 15) }
+        val state = state(nowMinute = 10 * 60 + 40).copy(
+            session = LiveSessionState(walk, cadence = 114, canKeepGoing = false, alertsWhileScreenOff = true),
+            sessionShape = OutingShape(
+                sessionId = walk.id,
+                minutes = OutingMinutes.of(walk, minutes, nowMillis = walk.lastEventAtMillis),
+                route = RouteShape.of(points),
+                dayGoalSteps = 10_000,
+            ),
+        )
+        show(state)
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(SessionCardTags.CARD))
+        compose.waitForIdle()
+        save("today-round")
     }
 
     /**

@@ -12,6 +12,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
@@ -735,6 +736,69 @@ class OutingScreenTest {
     fun `the walk's row at twice the text size`() {
         show(OutingSamples.state(session = onWalk(), route = null))
         compose.walkPage(hasTestTag(OutingTags.PAGE), "outing_walk_large_text")
+    }
+
+    @Test
+    fun `from the third walk of a round, the page says it, sentence first, against the usual`() {
+        var opened: Long? = null
+        show(RoundSamples.outingState(), actions = OutingActions(openRound = { opened = it }))
+        page().performScrollToNode(hasTestTag(OutingTags.ROUND))
+        compose.onNodeWithTag(OutingTags.ROUND_SENTENCE)
+            .assertTextEquals("Your usual round, the 8th time: 6 minutes faster than usual.")
+        compose.onNode(hasContentDescription("This time: 48 minutes. In motion, brought to 4.26 km.")).assertExists()
+        compose.onNode(hasContentDescription("Usual: 54 minutes. The middle of the 7 walks before.")).assertExists()
+        compose.onNodeWithText("a shortcut is not a faster walk", substring = true).assertExists()
+        compose.onNodeWithTag(OutingTags.ROUND_OPEN)
+            .assertContentDescriptionContains("Your round of 4.26 km. 8 walks")
+            .performClick()
+        assertThat(opened).isEqualTo(3L)
+        snapshot("outing_round")
+    }
+
+    @Test
+    fun `the first two walks of a round say which time they were, and no usual`() {
+        // The second walk of a round known since its third: its page says which time it was.
+        val second = RoundSamples.outingState(count = 2)
+        val known = second.round?.copy(round = RoundSamples.round(RoundSamples.walks(3)))
+        show(second.copy(round = known))
+        page().performScrollToNode(hasTestTag(OutingTags.ROUND))
+        compose.onNodeWithTag(OutingTags.ROUND_SENTENCE).assertTextEquals("Your usual round, the 2nd time.")
+        compose.onNodeWithText("This time").assertDoesNotExist()
+    }
+
+    @Test
+    fun `not the same round is asked first, then the outing leaves the round`() {
+        var left = false
+        show(RoundSamples.outingState(), actions = OutingActions(notTheSameRound = { left = true }))
+        page().performScrollToNode(hasTestTag(OutingTags.NOT_SAME))
+        compose.onNodeWithTag(OutingTags.NOT_SAME).performClick()
+        assertThat(left).isFalse()
+        compose.onNodeWithText("This outing leaves Your round of 4.26 km", substring = true).assertIsDisplayed()
+        compose.onNodeWithTag(OutingTags.NOT_SAME_CONFIRM).performClick()
+        assertThat(left).isTrue()
+    }
+
+    @Test
+    fun `an outing that can still be taken back says no round yet`() {
+        show(RoundSamples.outingState(over = false))
+        compose.onNodeWithTag(OutingTags.ROUND).assertDoesNotExist()
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT-w360dp-h640dp-xhdpi")
+    fun `a round's walk in Italian on a small phone, the ordinal elided where Italian elides it`() {
+        show(RoundSamples.outingState())
+        page().performScrollToNode(hasTestTag(OutingTags.ROUND))
+        compose.onNodeWithTag(OutingTags.ROUND_SENTENCE)
+            .assertTextEquals("Il tuo giro solito, l’8ª volta: 6 minuti in meno del solito.")
+        snapshot("outing_round_it")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h640dp-xhdpi", fontScale = 2f)
+    fun `a round's walk at twice the text size`() {
+        show(RoundSamples.outingState())
+        compose.walkPage(hasTestTag(OutingTags.PAGE), "outing_round_large_text")
     }
 
     private fun snapshot(name: String) {

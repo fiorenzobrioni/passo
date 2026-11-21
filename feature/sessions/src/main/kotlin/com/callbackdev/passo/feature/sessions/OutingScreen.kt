@@ -164,6 +164,8 @@ class OutingActions(
     val openStepCard: () -> Unit = {},
     val live: SessionCardActions = SessionCardActions(),
     val openWalk: () -> Unit = {},
+    val openRound: (Long) -> Unit = {},
+    val notTheSameRound: () -> Unit = {},
 )
 
 /** An outing's page with its state, and the sharing and saving of its route. */
@@ -173,6 +175,7 @@ fun OutingRoute(
     onBack: () -> Unit,
     onOpenStepCard: () -> Unit = {},
     onOpenWalk: (WayId) -> Unit = {},
+    onOpenRound: (Long) -> Unit = {},
     viewModel: OutingViewModel = hiltViewModel(),
 ) {
     LaunchedEffect(sessionId) { viewModel.open(sessionId) }
@@ -233,6 +236,8 @@ fun OutingRoute(
                 onGps = viewModel::gps,
             ),
             openWalk = { current?.session?.walk?.let(onOpenWalk) },
+            openRound = onOpenRound,
+            notTheSameRound = viewModel::notTheSameRound,
         ),
     )
 }
@@ -330,6 +335,7 @@ private fun OutingPage(state: OutingUiState, format: MeasureFormatter, actions: 
     val resources = LocalResources.current
     val splits = remember(session.legs, format.units) { Splits.of(session.legs, Splits.unitMeters(format.units)) }
     var deleting by rememberSaveable { mutableStateOf(false) }
+    var notSame by rememberSaveable { mutableStateOf(false) }
     LazyColumn(
         modifier = Modifier.fillMaxSize().testTag(OutingTags.PAGE),
         contentPadding = pageGutter(sideInsets = false).contentPadding(bottom = 32.dp),
@@ -353,6 +359,12 @@ private fun OutingPage(state: OutingUiState, format: MeasureFormatter, actions: 
         // After what the outing under way asks of the reader, which cannot wait.
         session.walk?.let { walk ->
             item(key = "walk") { WalkRow(session, Ways.of(walk), format, actions.openWalk) }
+        }
+        // Its usual round (Phase 20), once it is over for good: what it was against the walks of it
+        // before, sentence first, high on the page where it is read with the outing's own.
+        val round = state.round
+        if (round != null && state.over) {
+            item(key = "round") { RoundSection(round, format, actions, onNotTheSame = { notSame = true }) }
         }
         if (route != null) {
             item(key = "map") {
@@ -418,6 +430,28 @@ private fun OutingPage(state: OutingUiState, format: MeasureFormatter, actions: 
         if (route != null && state.over) {
             item(key = "route") { RouteActions(actions, onDelete = { deleting = true }) }
         }
+    }
+    val round = state.round
+    if (notSame && round != null) {
+        AlertDialog(
+            onDismissRequest = { notSame = false },
+            title = { Text(stringResource(R.string.outing_round_not_same_title)) },
+            text = {
+                Text(stringResource(R.string.outing_round_not_same_text, resources.roundName(round.round, format)))
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        notSame = false
+                        actions.notTheSameRound()
+                    },
+                    modifier = Modifier.testTag(OutingTags.NOT_SAME_CONFIRM),
+                ) { Text(stringResource(R.string.outing_round_not_same_confirm)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { notSame = false }) { Text(stringResource(R.string.round_cancel)) }
+            },
+        )
     }
     if (deleting) {
         AlertDialog(
@@ -789,6 +823,138 @@ private fun ShareCard(state: OutingUiState, route: DrawnRoute, format: MeasureFo
 }
 
 /**
+ * The usual round an outing over is a walk of (PLANNING.md §11 Phase 20): sentence first («Your usual
+ * round, the 6th time: 2 minutes faster than usual»), then this time and the usual side by side,
+ * each brought to the round's usual length, with the line that says why; then the round itself, a
+ * door to its page; and «Not the same round», where Passo was wrong. The first two walks of a round
+ * have no usual before them: their sentence says which time they were, and no more.
+ */
+@Composable
+private fun RoundSection(
+    round: OutingRound,
+    format: MeasureFormatter,
+    actions: OutingActions,
+    onNotTheSame: () -> Unit,
+) {
+    val resources = LocalResources.current
+    val comparison = round.comparison
+    val usual = comparison.usual
+    val time = resources.roundTime(comparison.nth)
+    val gap = comparison.gapMillis
+    val sentence = if (usual != null && gap != null) {
+        stringResource(R.string.outing_round_sentence, time, resources.roundGapPhrase(gap))
+    } else {
+        stringResource(R.string.outing_round_sentence_alone, time)
+    }
+    val name = resources.roundName(round.round, format)
+    val length = resources.format(format.distance(round.round.usual.meters))
+    Group {
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.testTag(OutingTags.ROUND)) {
+            Text(
+                sentence,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() }.testTag(OutingTags.ROUND_SENTENCE),
+            )
+            val mine = comparison.thisMillis
+            if (usual != null && mine != null) {
+                val usualLength = resources.format(format.distance(usual.meters))
+                val thisLabel = stringResource(R.string.outing_round_this)
+                val thisValue = duration(minutesOf(mine))
+                val thisMeaning = stringResource(R.string.outing_round_this_meaning, usualLength)
+                val usualLabel = stringResource(R.string.outing_round_usual)
+                val usualValue = duration(minutesOf(usual.movingMillis))
+                val usualMeaning = resources.getQuantityString(
+                    R.plurals.outing_round_usual_meaning,
+                    usual.walks,
+                    usual.walks,
+                )
+                TilePair {
+                    MetricTile(
+                        icon = PassoIcons.Clock,
+                        label = thisLabel,
+                        value = AnnotatedString(thisValue),
+                        meaning = thisMeaning,
+                        spoken = stringResource(R.string.outing_round_tile_spoken, thisLabel, thisValue, thisMeaning),
+                        fitLabel = true,
+                    )
+                    MetricTile(
+                        icon = PassoIcons.Round,
+                        label = usualLabel,
+                        value = AnnotatedString(usualValue),
+                        meaning = usualMeaning,
+                        spoken = stringResource(
+                            R.string.outing_round_tile_spoken,
+                            usualLabel,
+                            usualValue,
+                            usualMeaning,
+                        ),
+                        fitLabel = true,
+                    )
+                }
+                Note(stringResource(R.string.outing_round_note, usualLength))
+            }
+            val walks = resources.roundWalks(round.round.walks.size, format)
+            // A round named by its length does not say its length twice.
+            val detail = if (round.round.round.name ==
+                null
+            ) {
+                walks
+            } else {
+                stringResource(R.string.outing_round_walks, length, walks)
+            }
+            val open = stringResource(R.string.rounds_open)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(MaterialTheme.shapes.large)
+                    .testTag(OutingTags.ROUND_OPEN)
+                    .clickable { actions.openRound(round.round.id) }
+                    // One node: the round and the door it is.
+                    .clearAndSetSemantics {
+                        contentDescription = "$name. $detail"
+                        role = Role.Button
+                        onClick(label = open) {
+                            actions.openRound(round.round.id)
+                            true
+                        }
+                    }
+                    .heightIn(min = 48.dp)
+                    .padding(vertical = 6.dp),
+            ) {
+                Icon(PassoIcons.Round, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        stringResource(R.string.outing_round_title),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    Text(name, style = MaterialTheme.typography.bodyLarge)
+                    Text(
+                        detail,
+                        style = MaterialTheme.typography.bodySmall.copy(fontFeatureSettings = "tnum"),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Icon(
+                    PassoIcons.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            TextButton(
+                onClick = onNotTheSame,
+                modifier = Modifier.heightIn(min = 48.dp).testTag(OutingTags.NOT_SAME),
+            ) { Text(stringResource(R.string.outing_round_not_same)) }
+        }
+    }
+}
+
+private fun minutesOf(millis: Long): Int =
+    ((millis + MILLIS_PER_MINUTE / 2) / MILLIS_PER_MINUTE).toInt().coerceAtLeast(1)
+
+/**
  * The city walk an outing moved on (PLANNING.md §11 Phase 23): its small map with where the outing
  * left it, its route, and how far along it the outing came, as the walk's row on the Ways page
  * says it. A door to the walk's own page, where its places, its stamps and «Continue from…» are:
@@ -961,7 +1127,7 @@ private fun routeSpoken(shape: RouteShape, session: Session, format: MeasureForm
     }
 }
 
-private val Compass.word: Int
+internal val Compass.word: Int
     get() = when (this) {
         Compass.NORTH -> R.string.compass_north
         Compass.NORTH_EAST -> R.string.compass_north_east
@@ -1003,4 +1169,9 @@ object OutingTags {
     const val STEP = "outing_step"
     const val STEP_READY = "outing_step_ready"
     const val WALK = "outing_walk"
+    const val ROUND = "outing_round"
+    const val ROUND_SENTENCE = "outing_round_sentence"
+    const val ROUND_OPEN = "outing_round_open"
+    const val NOT_SAME = "outing_round_not_same"
+    const val NOT_SAME_CONFIRM = "outing_round_not_same_confirm"
 }

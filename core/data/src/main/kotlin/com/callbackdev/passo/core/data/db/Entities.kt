@@ -129,6 +129,10 @@ data class SessionEntity(
     @ColumnInfo(defaultValue = "0") val markMiles: Boolean = false,
     @ColumnInfo(defaultValue = "0") val toldMarks: Int = 0,
     @ColumnInfo(defaultValue = "0") val pausesKept: Boolean = false,
+    @ColumnInfo(defaultValue = "NULL") val roundLineId: Long? = null,
+    @ColumnInfo(defaultValue = "NULL") val roundLineStanding: String? = null,
+    @ColumnInfo(defaultValue = "0") val roundLineMarks: Int = 0,
+    @ColumnInfo(defaultValue = "NULL") val roundLineGapMillis: Long? = null,
 )
 
 /**
@@ -202,6 +206,29 @@ data class SessionLegEntity(
  */
 @Entity(tableName = "session_pause", primaryKeys = ["sessionId", "pauseIndex"])
 data class SessionPauseEntity(val sessionId: Long, val pauseIndex: Int, val fromMillis: Long, val toMillis: Long)
+
+/**
+ * A usual round (PLANNING.md §11 Phase 20): its id, and the name the reader gave it, if any. A
+ * number and a name, never a place: its line and its start are its walks' routes, in `routes.db`,
+ * so it is in `passo.db` and in Android's backup like the outings, and no place outlives its outing.
+ */
+@Entity(tableName = "round")
+data class RoundEntity(@PrimaryKey(autoGenerate = true) val id: Long = 0, val name: String? = null)
+
+/**
+ * An outing that is a walk of a round: one round at most, so the outing is the key. Deleted with
+ * its outing, and the round with it once fewer than two walks are left.
+ */
+@Entity(tableName = "round_member", indices = [Index("roundId")])
+data class RoundMemberEntity(@PrimaryKey val sessionId: Long, val roundId: Long)
+
+/**
+ * Two outings the reader said are not the same round («Not the same round»): never matched again.
+ * [firstId] is the smaller id, so a pair is one row whichever way it was said. Deleted with either
+ * outing.
+ */
+@Entity(tableName = "round_apart", primaryKeys = ["firstId", "secondId"])
+data class RoundApartEntity(val firstId: Long, val secondId: Long)
 
 /** An outing with its intervals, its legs and its pauses, read in one go. */
 data class SessionRow(

@@ -90,6 +90,6 @@ class UpgradeFromFirstReleaseTest {
         const val FIRST_RELEASE_SCHEMA = 3
 
         /** [PassoDatabase]'s version now. */
-        const val CURRENT_SCHEMA = 11
+        const val CURRENT_SCHEMA = 12
     }
 }
