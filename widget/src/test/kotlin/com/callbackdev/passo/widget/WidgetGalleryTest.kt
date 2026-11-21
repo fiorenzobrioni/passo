@@ -1,6 +1,9 @@
 package com.callbackdev.passo.widget
 
 import android.content.Context
+import android.content.Intent
+import android.content.pm.ActivityInfo
+import android.content.pm.ResolveInfo
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.designsystem.theme.WidgetCardColor
@@ -15,10 +18,13 @@ import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionTotals
+import com.callbackdev.passo.core.tracking.SessionControl
 import com.callbackdev.passo.widget.glance.GlanceWidgetContent
 import com.callbackdev.passo.widget.words.WordsWidgetContent
+import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.io.File
@@ -209,5 +215,61 @@ class WidgetGalleryTest {
         )
         board.row(Grants.FourByTwo to renderCard(context, Grants.FourByTwo) { GlanceWidgetContent(walking) })
         board.draw().saveTo(out, "widget-outing")
+    }
+
+    @Test
+    fun `an open outing under way says how far it has come, with no goal`() {
+        val open = Session(
+            planId = 1,
+            name = null,
+            goalKind = SessionGoalKind.OPEN,
+            goalValue = 0,
+            intensity = SessionIntensity.FREE,
+            milestones = emptySet(),
+            vibrate = true,
+            localEpochDay = 0,
+            startedAtMillis = 0,
+            totals = SessionTotals(steps = 2_820, movingMillis = 25 * 60_000L, distanceMeters = 2_100.0),
+        )
+        val walking = WidgetSamples.model().copy(session = open)
+        val board = HomeBoard(context, widthDp = 380)
+        board.row(Grants.FourByOne to renderCard(context, Grants.FourByOne) { GlanceWidgetContent(walking) })
+        board.row(Grants.FourByOne to renderCard(context, Grants.FourByOne) { WordsWidgetContent(walking) })
+        board.row(
+            Grants.TwoByTwo to renderCard(context, Grants.TwoByTwo) { GlanceWidgetContent(walking) },
+            Grants.TwoByTwo to renderCard(context, Grants.TwoByTwo) { WordsWidgetContent(walking) },
+        )
+        board.draw().saveTo(out, "widget-open-outing")
+    }
+
+    @Test
+    fun `a card that shows an outing opens that outing, any other Today`() {
+        // The app's launcher activity, which this module does not have.
+        val launcher = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setPackage(context.packageName)
+        val info = ResolveInfo().apply {
+            activityInfo = ActivityInfo().apply {
+                packageName = context.packageName
+                name = "com.callbackdev.passo.MainActivity"
+            }
+        }
+        shadowOf(context.packageManager).addResolveInfoForIntent(launcher, info)
+        val outing = WidgetSamples.model().copy(
+            session = Session(
+                id = 31,
+                planId = 1,
+                name = null,
+                goalKind = SessionGoalKind.OPEN,
+                goalValue = 0,
+                intensity = SessionIntensity.FREE,
+                milestones = emptySet(),
+                vibrate = true,
+                localEpochDay = 0,
+                startedAtMillis = 0,
+            ),
+        )
+        val tap = checkNotNull(widgetTapIntent(context, outing.state, outing.session?.id))
+        assertThat(tap.getLongExtra(SessionControl.EXTRA_OPEN_OUTING, 0L)).isEqualTo(31L)
+        val day = checkNotNull(widgetTapIntent(context, WidgetSamples.model().state))
+        assertThat(day.hasExtra(SessionControl.EXTRA_OPEN_OUTING)).isFalse()
     }
 }

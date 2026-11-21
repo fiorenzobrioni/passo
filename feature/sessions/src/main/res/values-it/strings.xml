@@ -3,7 +3,7 @@
 <resources>
     <string name="sessions_title">Uscite</string>
     <string name="sessions_back">Indietro</string>
-    <string name="sessions_intro">Una camminata con un obiettivo: avviala e tieni il telefono in tasca.</string>
+    <string name="sessions_intro">Una camminata con un obiettivo, o senza: avviala e tieni il telefono in tasca.</string>
     <string name="sessions_yours">Le tue uscite</string>
     <string name="sessions_start_named">Inizia %1$s</string>
     <string name="sessions_edit">Modifica</string>
@@ -141,4 +141,23 @@
     <string name="gps_intro_continue">Continua</string>
     <string name="gps_intro_not_now">Non ora</string>
     <string name="sessions_signals_intervals">Un segnale a ogni cambio</string>
+
+    <!-- L’uscita aperta (Fase 21): «Nessuno» nel Tipo dell’editor. -->
+    <string name="editor_kind_open">Nessuno</string>
+    <string name="editor_open_about">Nessun obiettivo: conta finché la fermi, e finisce da sola al tuo ultimo passo se te ne dimentichi.</string>
+    <string name="editor_open_signals_note">Un segnale lungo la strada, se lo vuoi: un’uscita senza obiettivo non ha una metà. Se si chiude da sola dopo una lunga sosta, o sta per farlo dopo dodici ore, te lo dice.</string>
+    <!-- I segni dell’uscita aperta (Fase 21.2): una riga segmentata, quindi etichette brevi. -->
+    <string name="editor_marks_km">A ogni km</string>
+    <string name="editor_marks_mile">A ogni miglio</string>
+    <string name="editor_marks_time">Ogni 10 min</string>
+    <string name="editor_marks_none">Nessuno</string>
+    <string name="editor_marks_km_note">Ogni chilometro è misurato con il GPS, e stimato dai tuoi passi senza.</string>
+    <string name="editor_marks_mile_note">Ogni miglio è misurato con il GPS, e stimato dai tuoi passi senza.</string>
+    <string name="editor_marks_time_note">Dieci minuti in cammino: una pausa, o un’attesa al semaforo, non li allunga.</string>
+    <string name="editor_try_mark_km">A ogni chilometro</string>
+    <string name="editor_try_mark_mile">A ogni miglio</string>
+    <string name="editor_try_mark_time">Ogni 10 minuti</string>
+    <string name="sessions_signals_marks_km">Un segnale a ogni chilometro</string>
+    <string name="sessions_signals_marks_mile">Un segnale a ogni miglio</string>
+    <string name="sessions_signals_marks_time">Un segnale ogni 10 minuti</string>
 </resources>

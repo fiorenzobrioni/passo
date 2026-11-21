@@ -59,8 +59,8 @@ class SessionsScreenTest {
         id = 9,
         planId = 1,
         name = null,
-        goalKind = plans[0].goalKind,
-        goalValue = plans[0].goalValue,
+        goalKind = plans[1].goalKind,
+        goalValue = plans[1].goalValue,
         intensity = SessionIntensity.BRISK,
         milestones = setOf(SessionMilestone.HALF),
         vibrate = true,
@@ -108,15 +108,20 @@ class SessionsScreenTest {
     fun `the presets say what they are, what they come to and their signals`() {
         show(state())
 
+        // The open walk first (Phase 21): what it is, no estimate for a walk with no goal, and its
+        // mark on the way (21.2): ten minutes, its plan not measuring with GPS.
+        compose.onNodeWithText("Walk").assertIsDisplayed()
+        compose.onNodeWithText("A signal every 10 minutes, with vibration").assertIsDisplayed()
+        compose.onNodeWithText("No goal, at any pace").assertIsDisplayed()
         compose.onNodeWithText("Brisk walk").assertIsDisplayed()
         compose.onNodeWithText("20 min at a brisk\u00A0pace").assertIsDisplayed()
         compose.onNodeWithText("About 2,000 steps · 1.46 km, estimated").assertIsDisplayed()
         compose.onAllNodesWithText("Signals at 50% and at the goal, with vibration").assertCountEquals(3)
-        compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag("${SessionsTags.PLAN}-4"))
+        compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag("${SessionsTags.PLAN}-5"))
         compose.onNodeWithText("Japanese walking").assertIsDisplayed()
         compose.onNodeWithText("5 sets: 3 min slow, 3\u00A0min\u00A0brisk").assertIsDisplayed()
         compose.onNodeWithText("A signal at each change, with vibration").assertIsDisplayed()
-        compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag("${SessionsTags.PLAN}-3"))
+        compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag("${SessionsTags.PLAN}-4"))
         compose.onNodeWithText("Finish the day").assertIsDisplayed()
         compose.onNodeWithText("2,400 steps left today · 1.75 km, estimated").assertIsDisplayed()
         snapshot("sessions")
@@ -135,7 +140,7 @@ class SessionsScreenTest {
     @Config(qualifiers = "it-rIT-w384dp-h832dp-xxhdpi")
     fun `an outing started far down the list brings its card into view`() {
         var current by mutableStateOf(state())
-        val japanese = walking.copy(planId = 4, goalKind = plans[3].goalKind, goalValue = plans[3].goalValue)
+        val japanese = walking.copy(planId = 5, goalKind = plans[4].goalKind, goalValue = plans[4].goalValue)
         compose.setContent {
             PassoTheme {
                 SessionsScreen(
@@ -157,8 +162,8 @@ class SessionsScreenTest {
                 )
             }
         }
-        compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag("${SessionsTags.START}-4"))
-        compose.onNodeWithTag("${SessionsTags.START}-4").performClick()
+        compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag("${SessionsTags.START}-5"))
+        compose.onNodeWithTag("${SessionsTags.START}-5").performClick()
 
         compose.onNodeWithTag(SessionCardTags.CARD).assertIsDisplayed()
         compose.onNodeWithTag(SessionCardTags.STOP).assertIsDisplayed()
@@ -174,7 +179,7 @@ class SessionsScreenTest {
         // In the bar, so in reach wherever the list stands: nothing to scroll to.
         compose.onNodeWithContentDescription("New outing").assertIsDisplayed()
         compose.onNodeWithTag(SessionsTags.NEW).performClick()
-        assertThat(opened).containsExactly(1L, null).inOrder()
+        assertThat(opened).containsExactly(2L, null).inOrder()
     }
 
     @Test
@@ -215,7 +220,7 @@ class SessionsScreenTest {
         snapshot("sessions_live_dark")
     }
 
-    private val japanese = checkNotNull(SessionPlans.start(plans[3], 0, 0, 0, 8_000)).copy(id = 10, planId = 4)
+    private val japanese = checkNotNull(SessionPlans.start(plans[4], 0, 0, 0, 8_000)).copy(id = 10, planId = 5)
 
     @Test
     fun `an interval walk under way says its interval, its set and its countdown`() {
@@ -283,9 +288,9 @@ class SessionsScreenTest {
     fun `a met day has no rest to walk`() {
         show(state(restOfDay = 0))
 
-        compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag("${SessionsTags.START}-3"))
+        compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag("${SessionsTags.START}-4"))
         compose.onNodeWithText("Today’s goal is met: nothing left to walk").assertIsDisplayed()
-        compose.onNodeWithTag("${SessionsTags.START}-3").assertIsNotEnabled()
+        compose.onNodeWithTag("${SessionsTags.START}-4").assertIsNotEnabled()
     }
 
     @Test

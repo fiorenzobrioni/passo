@@ -526,6 +526,25 @@ object PassoIcons {
     }
 
     /**
+     * The open outing (Phase 21): the same winding way from a dot as [Outing], with no flag at its
+     * end: it runs on past where the flag would stand, in two dots, as far as the reader goes.
+     */
+    val OpenOuting: ImageVector by lazy {
+        icon("open-outing") {
+            circle(5f, 19f, 1.8f)
+            moveTo(6.8f, 19f)
+            lineTo(12f, 19f)
+            curveTo(15f, 19f, 15f, 13f, 12f, 13f)
+            curveTo(9f, 13f, 9f, 9.5f, 12f, 9.5f)
+            lineTo(14.5f, 9.5f)
+            moveTo(17.5f, 9.5f)
+            lineTo(17.6f, 9.5f)
+            moveTo(20.5f, 9.5f)
+            lineTo(20.6f, 9.5f)
+        }
+    }
+
+    /**
      * The interval walk (Phase 13): from a dot, slow and fast in turns, the line low and high, as
      * the editor draws its blocks. Set apart from [Outing], which every other walk wears.
      */

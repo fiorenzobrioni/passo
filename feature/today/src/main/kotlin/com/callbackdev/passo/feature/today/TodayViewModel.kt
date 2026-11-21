@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
 import com.callbackdev.passo.core.data.sessions.LiveSession
 import com.callbackdev.passo.core.data.sessions.LiveSessionState
+import com.callbackdev.passo.core.data.sessions.OutingShapes
 import com.callbackdev.passo.core.data.sessions.SessionRepository
 import com.callbackdev.passo.core.data.settings.SettingsRepository
 import com.callbackdev.passo.core.data.tracking.LiveSteps
@@ -18,6 +19,8 @@ import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.routes.GpsLineAction
 import com.callbackdev.passo.core.domain.sessions.DayOutings
 import com.callbackdev.passo.core.domain.sessions.Outing
+import com.callbackdev.passo.core.domain.sessions.OutingShape
+import com.callbackdev.passo.core.domain.sessions.pastGoal
 import com.callbackdev.passo.core.domain.today.DayMinute
 import com.callbackdev.passo.core.domain.today.TodayOverview
 import com.callbackdev.passo.core.domain.today.TypicalDay
@@ -75,6 +78,7 @@ constructor(
     private val sessions: SessionRepository,
     private val userPreferences: UserPreferencesDataSource,
     private val outingStarter: OutingStarter,
+    shapes: OutingShapes,
     ways: WayRepository,
     liveSteps: LiveSteps,
     liveSession: LiveSession,
@@ -91,7 +95,9 @@ constructor(
 
     private val day: Flow<LocalDate> = clock.map { it.date }.distinctUntilChanged()
 
+    // Shared: the day's chart reads it, and so does the outing's strip (Phase 21.3), from one query.
     private val minutes: Flow<List<MinuteSteps>> = day.flatMapLatest { tracking.observeMinutesOn(it.toEpochDay()) }
+        .shareIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), replay = 1)
 
     private val typical: Flow<TypicalDay?> = combine(
         day,
@@ -144,7 +150,25 @@ constructor(
                 ?: latest?.takeIf { it.id != seen && today.any { same -> same.id == it.id } }
                     ?.let { LiveSessionState(it, cadence = null, canKeepGoing = false, alertsWhileScreenOff = true) }
         Outings(today, card)
-    }
+    }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), replay = 1)
+
+    /**
+     * The shape of the card's outing (Phase 21.3), read only for a card that draws one: an open
+     * outing's, or a goal outing's taken on past its goal. Today's minutes come from the day's own
+     * query; another day's (an outing across midnight) from the repository.
+     */
+    private val shape: Flow<OutingShape?> = shapes.of(
+        outing = outings.map { it.card?.session?.takeIf { session -> session.open || session.pastGoal } },
+        minutesOn = { epochDay ->
+            if (epochDay ==
+                LocalDate.now(ZoneId.systemDefault()).toEpochDay()
+            ) {
+                minutes
+            } else {
+                tracking.observeMinutesOn(epochDay)
+            }
+        },
+    )
 
     /**
      * The way under way (or arrived today) and its days since it began; today's distance is
@@ -177,8 +201,14 @@ constructor(
         YearInReview.inSeason(first?.let(LocalDate::ofEpochDay), date)?.takeIf { it != closed }
     }.distinctUntilChanged()
 
-    val state: StateFlow<TodayUiState?> = combine(inputs, preferences, outings, way, yearCard) { i, p, o, w, y ->
-        build(i, p, o, w).copy(yearCard = y)
+    val state: StateFlow<TodayUiState?> = combine(
+        inputs,
+        preferences,
+        combine(outings, shape, ::Pair),
+        way,
+        yearCard,
+    ) { i, p, (o, s), w, y ->
+        build(i, p, o, w).copy(yearCard = y, sessionShape = s)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), null)
 
     /** The year's card closed: not shown again for that year. */

@@ -31,22 +31,35 @@ object SessionPlans {
         intensity = SessionIntensity.BRISK,
         milestones = emptySet(),
         intervals = IntervalSets(),
-        position = 3,
+        position = 4,
     )
 
     /**
-     * The four outings a first visit finds, ready to start and to change: a brisk walk of twenty
-     * minutes (the WHO's weekly 150 is about 20 a day), a half-hour run, the rest of the day, and
-     * the Japanese interval walk (Phase 13). Unnamed, so they are called in the reader's language.
+     * A walk with no goal, at any pace (Phase 21): the open outing, the shortest way in. First of
+     * the presets, as the known apps put it first: started, walked as it comes, stopped at the end.
+     */
+    val OPEN_WALK: SessionPlan = SessionPlan(
+        goalKind = SessionGoalKind.OPEN,
+        goalValue = 0,
+        intensity = SessionIntensity.FREE,
+        position = 0,
+    )
+
+    /**
+     * The five outings a first visit finds, ready to start and to change: a walk with no goal
+     * (Phase 21), a brisk walk of twenty minutes (the WHO's weekly 150 is about 20 a day), a
+     * half-hour run, the rest of the day, and the Japanese interval walk (Phase 13). Unnamed, so
+     * they are called in the reader's language.
      */
     val PRESETS: List<SessionPlan> = listOf(
-        SessionPlan(goalKind = SessionGoalKind.TIME, goalValue = 20, intensity = SessionIntensity.BRISK, position = 0),
-        SessionPlan(goalKind = SessionGoalKind.TIME, goalValue = 30, intensity = SessionIntensity.RUN, position = 1),
+        OPEN_WALK,
+        SessionPlan(goalKind = SessionGoalKind.TIME, goalValue = 20, intensity = SessionIntensity.BRISK, position = 1),
+        SessionPlan(goalKind = SessionGoalKind.TIME, goalValue = 30, intensity = SessionIntensity.RUN, position = 2),
         SessionPlan(
             goalKind = SessionGoalKind.REST_OF_DAY,
             goalValue = 0,
             intensity = SessionIntensity.BRISK,
-            position = 2,
+            position = 3,
         ),
         JAPANESE_WALKING,
     )
@@ -59,14 +72,14 @@ object SessionPlans {
      * The outing the evening reminder's "Walk now" starts when the reader keeps none for the rest
      * of the day: the steps left, at a brisk pace, with the default signals.
      */
-    val REST_OF_DAY: SessionPlan = PRESETS[2]
+    val REST_OF_DAY: SessionPlan = PRESETS.first { it.goalKind == SessionGoalKind.REST_OF_DAY }
 
     /** A value the editor accepts for [kind], on its steps and inside its range. */
     fun clampValue(kind: SessionGoalKind, value: Int): Int = when (kind) {
         SessionGoalKind.STEPS -> snap(value, SessionConstants.STEPS_RANGE, SessionConstants.STEPS_STEP)
         SessionGoalKind.DISTANCE -> snap(value, SessionConstants.DISTANCE_RANGE, SessionConstants.DISTANCE_STEP)
         SessionGoalKind.TIME -> snap(value, SessionConstants.TIME_RANGE, SessionConstants.TIME_STEP)
-        SessionGoalKind.REST_OF_DAY -> 0
+        SessionGoalKind.REST_OF_DAY, SessionGoalKind.OPEN -> 0
         SessionGoalKind.INTERVALS -> value.coerceIn(INTERVALS_RANGE)
     }
 
@@ -79,12 +92,12 @@ object SessionPlans {
 
         SessionGoalKind.TIME -> SessionConstants.TIME_STEP.toDouble()
 
-        SessionGoalKind.REST_OF_DAY, SessionGoalKind.INTERVALS -> 1.0
+        SessionGoalKind.REST_OF_DAY, SessionGoalKind.INTERVALS, SessionGoalKind.OPEN -> 1.0
     }
 
     /** [value] on the editor's steps for [kind] (quarter miles for [imperial] distances), in range. */
     fun snapForEditor(kind: SessionGoalKind, value: Double, imperial: Boolean): Int {
-        if (kind == SessionGoalKind.REST_OF_DAY) return 0
+        if (kind == SessionGoalKind.REST_OF_DAY || kind == SessionGoalKind.OPEN) return 0
         val step = editorStep(kind, imperial)
         val snapped = ((value / step).roundToInt() * step).roundToInt()
         val range = range(kind)
@@ -103,7 +116,7 @@ object SessionPlans {
         SessionGoalKind.STEPS -> SessionConstants.STEPS_RANGE
         SessionGoalKind.DISTANCE -> SessionConstants.DISTANCE_RANGE
         SessionGoalKind.TIME -> SessionConstants.TIME_RANGE
-        SessionGoalKind.REST_OF_DAY -> 0..0
+        SessionGoalKind.REST_OF_DAY, SessionGoalKind.OPEN -> 0..0
         SessionGoalKind.INTERVALS -> INTERVALS_RANGE
     }
 
@@ -149,11 +162,15 @@ object SessionPlans {
 
     /**
      * The value to show when the reader switches the goal to [kind]: the same outing, roughly,
-     * in the new quantity, so switching from 20 minutes to steps offers about 2,000 steps.
+     * in the new quantity, so switching from 20 minutes to steps offers about 2,000 steps. An
+     * open outing has no quantity to carry over: from one, the new plan's half hour at its pace,
+     * in the new quantity.
      */
     fun convert(from: SessionPlan, kind: SessionGoalKind, lengths: StepLengths, restOfDaySteps: Int): Int {
         if (kind == from.goalKind) return from.goalValue
         if (kind == SessionGoalKind.INTERVALS) return from.intervals.totalMinutes
+        if (kind == SessionGoalKind.OPEN) return 0
+        if (from.open) return convert(NEW.copy(intensity = from.intensity), kind, lengths, restOfDaySteps)
         val estimate = estimate(from, lengths, restOfDaySteps)
         return clampValue(
             kind,
@@ -161,14 +178,18 @@ object SessionPlans {
                 SessionGoalKind.STEPS -> estimate.steps
                 SessionGoalKind.DISTANCE -> estimate.distanceMeters.roundToInt()
                 SessionGoalKind.TIME -> estimate.minutes
-                SessionGoalKind.REST_OF_DAY, SessionGoalKind.INTERVALS -> 0
+                SessionGoalKind.REST_OF_DAY, SessionGoalKind.INTERVALS, SessionGoalKind.OPEN -> 0
             },
         )
     }
 
-    /** What [plan] adds up to, walked at its intensity's cadence with [lengths]. */
+    /**
+     * What [plan] adds up to, walked at its intensity's cadence with [lengths]. Nothing for an
+     * open outing: it adds up to what is walked, and the editor says no estimate for it.
+     */
     fun estimate(plan: SessionPlan, lengths: StepLengths, restOfDaySteps: Int): SessionEstimate {
         if (plan.goalKind == SessionGoalKind.INTERVALS) return estimateIntervals(plan, lengths)
+        if (plan.open) return SessionEstimate(steps = 0, distanceMeters = 0.0, minutes = 0)
         val cadence = plan.intensity.typicalCadence
         val stepLength = lengths.forCadence(cadence)
         val steps = when (plan.goalKind) {
@@ -176,7 +197,7 @@ object SessionPlans {
             SessionGoalKind.DISTANCE -> ceil(plan.goalValue / stepLength).toInt()
             SessionGoalKind.TIME -> plan.goalValue * cadence
             SessionGoalKind.REST_OF_DAY -> restOfDaySteps.coerceAtLeast(0)
-            SessionGoalKind.INTERVALS -> 0
+            SessionGoalKind.INTERVALS, SessionGoalKind.OPEN -> 0
         }
         val minutes = when (plan.goalKind) {
             SessionGoalKind.TIME -> plan.goalValue
@@ -208,11 +229,15 @@ object SessionPlans {
     /**
      * The outing [plan] starts as, now: its goal copied (the rest of the day resolved to steps),
      * so changing the plan later does not change an outing under way or past. Null when there is
-     * nothing to walk: the rest of a day whose goal is met, or all but met.
+     * nothing to walk: the rest of a day whose goal is met, or all but met. An open outing starts
+     * with no goal and no milestone, and with the open outing's longer cap; its marks are frozen
+     * as the plan has them in force (step 21.2), with their unit.
      *
      * @param withGps it starts measured with GPS (docs/adr/0016-location.md): the plan asks for
      *   it, and the reader and the phone allow it right now. The caller knows the second half;
      *   it is frozen in the outing either way, like the goal.
+     * @param miles the reader walks in miles now: an open outing's distance marks are then miles,
+     *   to its end.
      */
     fun start(
         plan: SessionPlan,
@@ -221,11 +246,33 @@ object SessionPlans {
         todaySteps: Int,
         dailyGoalSteps: Int,
         withGps: Boolean = false,
+        miles: Boolean = false,
     ): Session? {
         val restOfDay = plan.goalKind == SessionGoalKind.REST_OF_DAY
         val kind = if (restOfDay) SessionGoalKind.STEPS else plan.goalKind
         val value = if (restOfDay) restOfDay(todaySteps, dailyGoalSteps) else inRange(kind, plan.goalValue)
         if (restOfDay && value < MIN_REST_OF_DAY_STEPS) return null
+        if (kind == SessionGoalKind.OPEN) {
+            return Session(
+                planId = plan.id.takeIf { it != 0L },
+                name = plan.name?.takeIf { it.isNotBlank() },
+                goalKind = SessionGoalKind.OPEN,
+                goalValue = 0,
+                intensity = plan.intensity,
+                milestones = emptySet(),
+                vibrate = plan.vibrate,
+                voice = plan.voice,
+                localEpochDay = localEpochDay,
+                startedAtMillis = nowMillis,
+                gps = withGps && plan.gps,
+                capAtMillis = nowMillis + SessionConstants.OPEN_MAX_SESSION_MILLIS,
+                pausesKept = true,
+                // The plan's switch decides the mark, not what the phone allowed: a plan with GPS
+                // started on the steps still tells its kilometres, estimated.
+                marks = plan.marksInForce,
+                markMiles = miles,
+            )
+        }
         if (kind == SessionGoalKind.INTERVALS) {
             val intervals = withIntervals(plan, plan.intervals)
             return Session(
@@ -242,6 +289,7 @@ object SessionPlans {
                 intervals = intervals.intervals,
                 gps = withGps && plan.gps,
                 capAtMillis = nowMillis + SessionConstants.MAX_SESSION_MILLIS,
+                pausesKept = true,
             )
         }
         return Session(
@@ -258,6 +306,7 @@ object SessionPlans {
             startedAtMillis = nowMillis,
             gps = withGps && plan.gps,
             capAtMillis = nowMillis + SessionConstants.MAX_SESSION_MILLIS,
+            pausesKept = true,
         )
     }
 
@@ -284,6 +333,7 @@ object SessionPlans {
             walk = walk.id,
             walkFromMeters = fromMeters.coerceIn(0, walk.lengthMeters),
             capAtMillis = nowMillis + SessionConstants.MAX_SESSION_MILLIS,
+            pausesKept = true,
         )
     }
 

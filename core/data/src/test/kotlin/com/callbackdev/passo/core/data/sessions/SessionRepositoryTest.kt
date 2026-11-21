@@ -21,7 +21,9 @@ import com.callbackdev.passo.core.model.OutingLeg
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
+import com.callbackdev.passo.core.model.SessionMarks
 import com.callbackdev.passo.core.model.SessionMilestone
+import com.callbackdev.passo.core.model.SessionPause
 import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionTotals
@@ -87,6 +89,7 @@ class SessionRepositoryTest {
         val first = repository.plans.first()
         assertThat(first.map { it.goalKind })
             .containsExactly(
+                SessionGoalKind.OPEN,
                 SessionGoalKind.TIME,
                 SessionGoalKind.TIME,
                 SessionGoalKind.REST_OF_DAY,
@@ -95,6 +98,207 @@ class SessionRepositoryTest {
         first.forEach { repository.deletePlan(it.id) }
         assertThat(repository.plans.first()).isEmpty()
     }
+
+    @Test
+    fun `plans seeded before the open outing get its walk once, at the top of their list`() = runTest {
+        // Seeded by a build without it: every preset but the open walk, and a plan of the reader's.
+        preferences.markSessionPlansSeeded()
+        preferences.markIntervalPresetSeeded()
+        SessionPlans.PRESETS.drop(1).forEach { repository.savePlan(it) }
+        repository.savePlan(SessionPlans.NEW.copy(name = "Park"))
+        val plans = repository.plans.first()
+        assertThat(plans.first().open).isTrue()
+        assertThat(plans.map { it.position }).containsExactly(0, 1, 2, 3, 4, 5).inOrder()
+        assertThat(plans.last().name).isEqualTo("Park")
+
+        // Deleted, the open preset is never offered again.
+        repository.deletePlan(plans.first().id)
+        assertThat(repository.plans.first().none { it.open }).isTrue()
+        assertThat(repository.plansByUse().none { it.open }).isTrue()
+    }
+
+    @Test
+    fun `a reader who already keeps an open plan is not given the preset`() = runTest {
+        preferences.markSessionPlansSeeded()
+        preferences.markIntervalPresetSeeded()
+        repository.savePlan(SessionPlans.NEW)
+        repository.savePlan(SessionPlans.OPEN_WALK.copy(name = "Round the park"))
+        val plans = repository.plans.first()
+        assertThat(plans.count { it.open }).isEqualTo(1)
+        assertThat(plans.single { it.open }.name).isEqualTo("Round the park")
+    }
+
+    @Test
+    fun `an outing's pauses are written with it, in order, and deleted with it`() = runTest {
+        val started = repository.insert(checkNotNull(SessionPlans.start(SessionPlans.OPEN_WALK, 1_000, day, 0, 8_000)))
+        val pauses = listOf(SessionPause(600_000, 900_000), SessionPause(1_500_000, 1_680_000))
+        repository.save(started.copy(pauses = pauses))
+        assertThat(checkNotNull(repository.session(started.id)).pauses).isEqualTo(pauses)
+
+        // A third, at the next resume: the two before written over, never twice.
+        val three = pauses + SessionPause(2_000_000, 2_060_000)
+        repository.save(started.copy(pauses = three))
+        assertThat(checkNotNull(repository.session(started.id)).pauses).isEqualTo(three)
+
+        repository.delete(started.id)
+        assertThat(count("session_pause")).isEqualTo(0)
+    }
+
+    @Test
+    fun `an outing started now is read back with its pauses known, one from before without`() = runTest {
+        val started = repository.insert(checkNotNull(SessionPlans.start(SessionPlans.PRESETS[1], 1_000, day, 0, 8_000)))
+        assertThat(checkNotNull(repository.session(started.id)).pausesKept).isTrue()
+        val before = repository.insert(started.copy(id = 0, startedAtMillis = 5_000, pausesKept = false))
+        assertThat(checkNotNull(repository.session(before.id)).pausesKept).isFalse()
+    }
+
+    @Test
+    fun `an outing not kept leaves no pause behind`() = runTest {
+        val started = repository.insert(checkNotNull(SessionPlans.start(SessionPlans.OPEN_WALK, 1_000, day, 0, 8_000)))
+        repository.save(started.copy(pauses = listOf(SessionPause(5_000, 9_000))))
+        // Too short to keep: the service deletes it, its pauses with it.
+        repository.delete(started.id)
+        assertThat(count("session_pause")).isEqualTo(0)
+        assertThat(count("session")).isEqualTo(0)
+    }
+
+    @Test
+    fun `a batch writes the outing's pauses with its steps`() = runTest {
+        val tracking = TrackingRepository(database.trackingDao(), preferences) { day }
+        val started = repository.insert(checkNotNull(SessionPlans.start(SessionPlans.OPEN_WALK, 1_000, day, 0, 8_000)))
+        val paused = started.copy(pauses = listOf(SessionPause(60_000, 120_000)))
+        tracking.persist(
+            LedgerBatch(listOf(MinuteSteps(100, day, 120)), TrackerState(1, 500, 2L, 3L), emptyList()),
+            nowWallMillis = 130_000L,
+            session = paused,
+        )
+        assertThat(checkNotNull(repository.session(started.id)).pauses).isEqualTo(paused.pauses)
+    }
+
+    @Test
+    fun `version 8 migrates to 9 with every outing's pauses unknown`() {
+        migrations.createDatabase(MIGRATION_DB, 8).use { db ->
+            db.execSQL(
+                "INSERT INTO session (planId, name, goalKind, goalValue, restOfDay, intensity, milestones, " +
+                    "vibrate, localEpochDay, startedAtMillis, state, endedAtMillis, endReason, steps, " +
+                    "movingMillis, zoneMillis, distanceMeters, activeKcal, lastStepAtMillis, lastEventAtMillis, " +
+                    "pausedAtMillis, reachedAtMillis, toldMilestones, voice, gps) " +
+                    "VALUES (NULL, NULL, 'TIME', 20, 0, 'BRISK', 2, 1, 20716, 1789990000000, 'FINISHED', " +
+                    "1789991200000, 'GOAL', 2210, 1200000, 1100000, 1630.0, 61.0, 1789991200000, " +
+                    "1789991200000, NULL, 1789991200000, 6, 'OFF', 0)",
+            )
+        }
+        migrations.runMigrationsAndValidate(MIGRATION_DB, 9, true).use { db ->
+            db.query("SELECT goalKind, steps FROM session").use { cursor ->
+                assertThat(cursor.moveToFirst()).isTrue()
+                assertThat(cursor.getString(0)).isEqualTo("TIME")
+                assertThat(cursor.getInt(1)).isEqualTo(2210)
+            }
+            db.query("SELECT COUNT(*) FROM session_pause").use { cursor ->
+                assertThat(cursor.moveToFirst()).isTrue()
+                assertThat(cursor.getInt(0)).isEqualTo(0)
+            }
+        }
+    }
+
+    @Test
+    fun `version 9 migrates to 10 with every plan following its switch and every outing without marks`() {
+        migrations.createDatabase(MIGRATION_DB, 9).use { db ->
+            db.execSQL(
+                "INSERT INTO session_plan (name, goalKind, goalValue, intensity, milestones, vibrate, position, " +
+                    "lastUsedAtMillis, voice, gps) VALUES (NULL, 'OPEN', 0, 'FREE', 0, 1, 0, NULL, 'OFF', 1)",
+            )
+            db.execSQL(
+                "INSERT INTO session (planId, name, goalKind, goalValue, restOfDay, intensity, milestones, " +
+                    "vibrate, localEpochDay, startedAtMillis, state, endedAtMillis, endReason, steps, " +
+                    "movingMillis, zoneMillis, distanceMeters, activeKcal, lastStepAtMillis, lastEventAtMillis, " +
+                    "pausedAtMillis, reachedAtMillis, toldMilestones, voice, gps) " +
+                    "VALUES (NULL, NULL, 'OPEN', 0, 0, 'FREE', 0, 1, 20716, 1789990000000, 'FINISHED', " +
+                    "1789991200000, 'STOPPED', 2210, 1200000, 1200000, 1630.0, 61.0, 1789991200000, " +
+                    "1789991200000, NULL, NULL, 0, 'OFF', 0)",
+            )
+        }
+        migrations.runMigrationsAndValidate(MIGRATION_DB, 10, true).use { db ->
+            db.query("SELECT marks FROM session_plan").use { cursor ->
+                assertThat(cursor.moveToFirst()).isTrue()
+                assertThat(cursor.isNull(0)).isTrue()
+            }
+            db.query("SELECT marks, markMiles, toldMarks, steps FROM session").use { cursor ->
+                assertThat(cursor.moveToFirst()).isTrue()
+                assertThat(cursor.getString(0)).isEqualTo("NONE")
+                assertThat(cursor.getInt(1)).isEqualTo(0)
+                assertThat(cursor.getInt(2)).isEqualTo(0)
+                assertThat(cursor.getInt(3)).isEqualTo(2210)
+            }
+        }
+    }
+
+    @Test
+    fun `version 10 migrates to 11 with the pauses known only where nothing else could have walked it`() {
+        migrations.createDatabase(MIGRATION_DB, 10).use { db ->
+            val columns = "INSERT INTO session (planId, name, goalKind, goalValue, restOfDay, intensity, milestones, " +
+                "vibrate, localEpochDay, startedAtMillis, state, endedAtMillis, endReason, steps, " +
+                "movingMillis, zoneMillis, distanceMeters, activeKcal, lastStepAtMillis, lastEventAtMillis, " +
+                "pausedAtMillis, reachedAtMillis, toldMilestones, voice, gps) VALUES "
+            // A goal outing never paused, an open outing, and a goal outing with a pause written.
+            db.execSQL(
+                columns + "(NULL, NULL, 'TIME', 20, 0, 'BRISK', 0, 1, 20716, 1789990000000, 'FINISHED', " +
+                    "1789991200000, 'GOAL', 2210, 1200000, 1200000, 1630.0, 61.0, 1789991200000, " +
+                    "1789991200000, NULL, 1789991200000, 0, 'OFF', 0)",
+            )
+            db.execSQL(
+                columns + "(NULL, NULL, 'OPEN', 0, 0, 'FREE', 0, 1, 20716, 1789995000000, 'FINISHED', " +
+                    "1789996200000, 'STOPPED', 2210, 1200000, 1200000, 1630.0, 61.0, 1789996200000, " +
+                    "1789996200000, NULL, NULL, 0, 'OFF', 0)",
+            )
+            db.execSQL(
+                columns + "(NULL, NULL, 'TIME', 20, 0, 'BRISK', 0, 1, 20717, 1790080000000, 'FINISHED', " +
+                    "1790081500000, 'GOAL', 2210, 1200000, 1200000, 1630.0, 61.0, 1790081500000, " +
+                    "1790081500000, NULL, 1790081500000, 0, 'OFF', 0)",
+            )
+            db.execSQL(
+                "INSERT INTO session_pause (sessionId, pauseIndex, fromMillis, toMillis) VALUES (3, 0, 1790080600000, 1790080900000)",
+            )
+        }
+        migrations.runMigrationsAndValidate(MIGRATION_DB, 11, true).use { db ->
+            db.query("SELECT pausesKept FROM session ORDER BY id").use { cursor ->
+                val kept = buildList { while (cursor.moveToNext()) add(cursor.getInt(0)) }
+                assertThat(kept).containsExactly(0, 1, 1).inOrder()
+            }
+        }
+    }
+
+    @Test
+    fun `a plan keeps the reader's choice of marks, or none, and follows its switch until then`() = runTest {
+        val following = repository.savePlan(SessionPlans.OPEN_WALK.copy(name = "Park", gps = true))
+        val chosen = repository.savePlan(
+            SessionPlans.OPEN_WALK.copy(name = "Lake", gps = true, marks = SessionMarks.TIME),
+        )
+        val plans = repository.plans.first()
+        val park = plans.single { it.id == following }
+        val lake = plans.single { it.id == chosen }
+        assertThat(park.marks).isNull()
+        assertThat(park.marksInForce).isEqualTo(SessionMarks.DISTANCE)
+        assertThat(lake.marks).isEqualTo(SessionMarks.TIME)
+        assertThat(lake.copy(gps = false).marksInForce).isEqualTo(SessionMarks.TIME)
+    }
+
+    @Test
+    fun `an open outing keeps its mark, its unit and the count told, read back by a process restarted`() = runTest {
+        val plan = SessionPlans.OPEN_WALK.copy(marks = SessionMarks.DISTANCE)
+        val started = repository.insert(checkNotNull(SessionPlans.start(plan, 1_000, day, 0, 8_000, miles = true)))
+        repository.save(started.copy(toldMarks = 2))
+        val read = checkNotNull(repository.session(started.id))
+        assertThat(read.marks).isEqualTo(SessionMarks.DISTANCE)
+        assertThat(read.markMiles).isTrue()
+        assertThat(read.toldMarks).isEqualTo(2)
+    }
+
+    private fun count(table: String): Int =
+        database.openHelper.readableDatabase.query("SELECT COUNT(*) FROM $table").use {
+            it.moveToFirst()
+            it.getInt(0)
+        }
 
     @Test
     fun `plans seeded before the interval walk get its preset once, after theirs`() = runTest {
@@ -251,7 +455,7 @@ class SessionRepositoryTest {
         repository.markPlanUsed(plans[2].id, 5_000L)
         repository.markPlanUsed(plans[1].id, 1_000L)
         assertThat(repository.plansByUse().map { it.id })
-            .containsExactly(plans[2].id, plans[1].id, plans[0].id, plans[3].id).inOrder()
+            .containsExactly(plans[2].id, plans[1].id, plans[0].id, plans[3].id, plans[4].id).inOrder()
     }
 
     @Test

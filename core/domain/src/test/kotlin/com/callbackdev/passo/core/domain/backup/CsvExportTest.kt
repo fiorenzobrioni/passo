@@ -4,6 +4,8 @@ import com.callbackdev.passo.core.domain.backup.BackupFixtures.DAY
 import com.callbackdev.passo.core.domain.backup.BackupFixtures.session
 import com.callbackdev.passo.core.model.DailySummary
 import com.callbackdev.passo.core.model.MinuteSteps
+import com.callbackdev.passo.core.model.SessionEnd
+import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.UnitSystem
 import com.google.common.truth.Truth.assertThat
@@ -64,6 +66,27 @@ class CsvExportTest {
         // Its distance is the measured one; the steps' own and the share stand beside it.
         assertThat(rows[1]).contains(",5.200,")
         assertThat(rows[1]).endsWith(",yes,5.050,96")
+    }
+
+    @Test
+    fun `an open outing says its kind, with no goal value or unit`() {
+        val open = session(DAY * 86_400_000L + 9 * 3_600_000L).copy(
+            goalKind = SessionGoalKind.OPEN,
+            goalValue = 0,
+            state = SessionState.FINISHED,
+            end = SessionEnd.STOPPED,
+            endedAtMillis = DAY * 86_400_000L + 10 * 3_600_000L,
+            // An open outing is never reached: it has no goal.
+            reachedAtMillis = null,
+        )
+
+        val rows = lines(CsvExport.outings(listOf(open), UnitSystem.METRIC, ZoneOffset.UTC))
+        val header = rows[0].split(",")
+        val row = rows[1].split(",")
+        assertThat(row[header.indexOf("goal")]).isEqualTo("open")
+        assertThat(row[header.indexOf("goal_value")]).isEmpty()
+        assertThat(row[header.indexOf("goal_unit")]).isEmpty()
+        assertThat(row[header.indexOf("outcome")]).isEqualTo("stopped")
     }
 
     @Test

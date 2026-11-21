@@ -154,8 +154,13 @@ object CsvExport {
 
     private fun goal(session: Session, units: UnitSystem): Pair<String, String> = when (session.goalKind) {
         SessionGoalKind.DISTANCE -> distance(session.goalValue.toDouble(), units) to distanceUnit(units)
+
         SessionGoalKind.TIME, SessionGoalKind.INTERVALS -> session.goalValue.toString() to "min"
+
         SessionGoalKind.STEPS, SessionGoalKind.REST_OF_DAY -> session.goalValue.toString() to "steps"
+
+        // An open outing (Phase 21) has no goal: its kind says «open», its value and unit nothing.
+        SessionGoalKind.OPEN -> "" to ""
     }
 
     private fun outcome(session: Session): String = when {

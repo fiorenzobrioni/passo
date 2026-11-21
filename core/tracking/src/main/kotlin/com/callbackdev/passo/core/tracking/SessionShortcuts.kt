@@ -45,13 +45,15 @@ object SessionShortcuts {
 
     /**
      * The shortcut wears the plan's own mark, the one the Outings page draws beside it
-     * ([sessionIcon]): an interval walk its slow and fast line, a run its bolt, any other walk
-     * the way to a flag. Read from the same rule, so the two cannot drift apart.
+     * ([sessionIcon]): an interval walk its slow and fast line, a run its bolt, a walk with no
+     * goal the way that runs on, any other walk the way to a flag. Read from the same rule, so the
+     * two cannot drift apart.
      */
     internal fun shortcutIcon(intensity: SessionIntensity, goalKind: SessionGoalKind): Int =
         when (sessionIcon(intensity, goalKind)) {
             PassoIcons.Intervals -> R.drawable.ic_shortcut_intervals
             PassoIcons.Bolt -> R.drawable.ic_shortcut_run
+            PassoIcons.OpenOuting -> R.drawable.ic_shortcut_open
             else -> R.drawable.ic_shortcut_outing
         }
 

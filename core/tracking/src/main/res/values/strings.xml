@@ -213,4 +213,23 @@
     </plurals>
     <!-- The notification's title while an interval outing goes: «Fast · 1:40». -->
     <string name="session_interval_title">%1$s · %2$s</string>
+
+    <!-- The open outing (Phase 21), spoken. -->
+    <plurals name="spoken_hours">
+        <item quantity="one">%1$d hour</item>
+        <item quantity="other">%1$d hours</item>
+    </plurals>
+    <!-- «2 hours 5 minutes». -->
+    <string name="spoken_hours_minutes">%1$s %2$s</string>
+    <string name="spoken_no_goal">no goal</string>
+    <!-- «Outing over: 41 minutes, about 3.20 kilometres.» -->
+    <string name="spoken_open_stopped">Outing over: %1$s.</string>
+    <string name="spoken_open_summary">%1$s, about %2$s</string>
+    <string name="spoken_open_summary_measured">%1$s measured in %2$s</string>
+    <!-- An open outing's marks on the way (Phase 21.2). A measured kilometre: «2 kilometres, in 23 minutes.», then its pace. -->
+    <string name="spoken_mark_distance">%1$s, in %2$s.</string>
+    <!-- An estimated one, said as the estimate it is, with no pace: «About 2 kilometres, in 23 minutes.» -->
+    <string name="spoken_mark_distance_about">About %1$s, in %2$s.</string>
+    <!-- Ten minutes in motion: «20 minutes, 2,300 steps.» -->
+    <string name="spoken_mark_time">%1$s, %2$s.</string>
 </resources>

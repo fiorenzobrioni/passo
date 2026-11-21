@@ -1,6 +1,7 @@
 package com.callbackdev.passo.core.domain.sessions
 
 import com.callbackdev.passo.core.model.Session
+import com.callbackdev.passo.core.model.SessionMarks
 import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionVoice
@@ -20,6 +21,13 @@ import com.callbackdev.passo.core.model.SessionVoice
  *
  * Awake, the processor receives the counter's steps as they are taken, and the signals ride on
  * them as they always do: no alarm. Paused, over or with no outing, it sleeps.
+ *
+ * An open outing (Phase 21) has no share and no goal to tell: its signals on the way are its
+ * marks (step 21.2), a kilometre or ten minutes. With marks, and the vibration or the voice to
+ * tell them, it holds the lock as a goal outing with signals does, so a kilometre is felt at the
+ * kilometre; with none, its vibration and its voice say only its end by stillness and the question
+ * before its cap, which ride on the steps that come whenever they come, and it holds the lock for
+ * GPS alone. Its bound is ten minutes past its own cap, twelve hours or as moved on.
  *
  * Still for [SessionConstants.IDLE_END_MILLIS], an outing is over (it ends at its last step), even
  * though it is closed only at the next step or when the reader looks, as on every phone: from
@@ -41,8 +49,15 @@ object SignalWake {
         session != null &&
             session.state == SessionState.ACTIVE &&
             !wakeUpCounter &&
-            (session.gps || (signalsAllowed && (session.vibrate || session.voice != SessionVoice.OFF))) &&
+            (session.gps || (signalsAllowed && session.tellsOnTheWay)) &&
             nowMillis < letGoAt(session)
+
+    /**
+     * It has signals to tell on the way, on time: a goal outing that vibrates or speaks, or an
+     * open one (Phase 21) that does and has marks to tell (step 21.2).
+     */
+    private val Session.tellsOnTheWay: Boolean
+        get() = tells(vibrate, voice) && (!open || marks != SessionMarks.NONE)
 
     /**
      * When a counting [session] stops keeping the processor awake: [SessionConstants.IDLE_END_MILLIS]
@@ -64,8 +79,11 @@ object SignalWake {
         (session.capMillis + TIMEOUT_MARGIN_MILLIS - nowMillis).coerceAtLeast(TIMEOUT_MARGIN_MILLIS)
 
     /** Whether an outing started from [plan] would, on this phone: what the editor says. */
-    fun neededFor(plan: SessionPlan, wakeUpCounter: Boolean): Boolean =
-        !wakeUpCounter && (plan.gps || plan.vibrate || plan.voice != SessionVoice.OFF)
+    fun neededFor(plan: SessionPlan, wakeUpCounter: Boolean): Boolean = !wakeUpCounter &&
+        (plan.gps || (tells(plan.vibrate, plan.voice) && (!plan.open || plan.marksInForce != SessionMarks.NONE)))
+
+    /** A signal reaches the reader some way: felt, or heard. */
+    private fun tells(vibrate: Boolean, voice: SessionVoice): Boolean = vibrate || voice != SessionVoice.OFF
 
     /**
      * The longest it is held at once, whatever happens: the longest outing Passo keeps open, and

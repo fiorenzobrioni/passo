@@ -3,6 +3,9 @@ package com.callbackdev.passo.core.tracking
 import android.app.Notification
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
+import android.content.pm.ActivityInfo
+import android.content.pm.ResolveInfo
 import androidx.core.app.NotificationCompat
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -24,6 +27,7 @@ import com.callbackdev.passo.core.model.WayId
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import java.time.Instant
 import java.time.ZoneId
@@ -84,6 +88,61 @@ class SessionNotificationsTest {
         assertThat(NotificationCompat.getContentTitle(notification).toString()).isEqualTo("A walk in London")
         assertThat(NotificationCompat.getContentText(notification).toString())
             .startsWith("Next: Trafalgar Square, 540 m")
+    }
+
+    private val open = session.copy(
+        id = 7,
+        goalKind = SessionGoalKind.OPEN,
+        goalValue = 0,
+        intensity = SessionIntensity.FREE,
+        milestones = emptySet(),
+        totals = session.totals.copy(movingMillis = 25 * 60_000, distanceMeters = 2_100.0),
+    )
+
+    @Test
+    fun `an open outing's notification has no bar - its sentence, and how far it has come`() {
+        val notification = ongoing(open)
+
+        assertThat(NotificationCompat.getContentTitle(notification).toString()).isEqualTo("Walk")
+        assertThat(NotificationCompat.getContentText(notification).toString()).startsWith("25 minutes on your feet.")
+        assertThat(NotificationCompat.getSubText(notification).toString()).isEqualTo("2.10 km, 25 min")
+        assertThat(notification.extras.getInt(Notification.EXTRA_PROGRESS_MAX)).isEqualTo(0)
+        assertThat(notification.actions.map { it.title.toString() }).containsExactly("Pause", "Stop").inOrder()
+        assertThat(NotificationCompat.getOngoing(notification)).isTrue()
+    }
+
+    /** The app's launcher activity, which this module does not have: what the notifications' touches open. */
+    private fun withLauncher() {
+        val launcher = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setPackage(context.packageName)
+        val info = ResolveInfo().apply {
+            activityInfo = ActivityInfo().apply {
+                packageName = context.packageName
+                name = "com.callbackdev.passo.MainActivity"
+            }
+        }
+        shadowOf(context.packageManager).addResolveInfoForIntent(launcher, info)
+    }
+
+    @Test
+    fun `touched while an outing counts, the notification opens the outing's own page`() {
+        withLauncher()
+        val intent = shadowOf(ongoing(open).contentIntent).savedIntent
+        assertThat(intent.getLongExtra(SessionControl.EXTRA_OPEN_OUTING, 0L)).isEqualTo(7L)
+        // A goal outing's too.
+        val goal = shadowOf(ongoing(session).contentIntent).savedIntent
+        assertThat(goal.getLongExtra(SessionControl.EXTRA_OPEN_OUTING, 0L)).isEqualTo(3L)
+    }
+
+    @Test
+    fun `the question before the cap and GPS stopped open the outing's page, where they are answered`() {
+        withLauncher()
+        val sessions = SessionNotifications(context)
+        val asked = sessions.capAhead(open, nowMillis = open.capMillis - 10 * 60_000L)
+        assertThat(shadowOf(asked.contentIntent).savedIntent.getLongExtra(SessionControl.EXTRA_OPEN_OUTING, 0L))
+            .isEqualTo(7L)
+        val stopped = sessions.gpsStopped(open.copy(gps = true), canResume = true)
+        assertThat(shadowOf(stopped.contentIntent).savedIntent.getLongExtra(SessionControl.EXTRA_OPEN_OUTING, 0L))
+            .isEqualTo(7L)
     }
 
     @Test
@@ -210,6 +269,9 @@ class SessionNotificationsTest {
         assertThat(SessionHaptics.endedStillPattern().toList()).containsExactly(0L, 500L, 300L, 500L).inOrder()
         // A walk's place: one short pulse (a walk has no quarters).
         assertThat(SessionHaptics.placePattern().toList()).containsExactly(0L, 180L).inOrder()
+        // An open outing's mark, a kilometre or ten minutes: one short pulse of 180 ms, a quarter's
+        // own, which an open outing cannot be taken for: it has no quarters.
+        assertThat(SessionHaptics.markPattern().toList()).containsExactly(0L, 180L).inOrder()
     }
 
     @Test

@@ -71,7 +71,7 @@ class ReadmeScreenshots {
 
     @Test
     fun outingEditor() {
-        val plan = plans[0].copy(
+        val plan = plans[1].copy(
             milestones = setOf(SessionMilestone.QUARTER, SessionMilestone.HALF, SessionMilestone.THREE_QUARTERS),
             voice = SessionVoice.HEADPHONES,
         )
@@ -93,7 +93,7 @@ class ReadmeScreenshots {
 
     @Test
     fun intervals() {
-        val plan = plans[3]
+        val plan = plans[4]
         val state = PlanEditorState(
             original = plan,
             draft = plan,
@@ -117,7 +117,7 @@ class ReadmeScreenshots {
             IntervalSplit(index, fast, steps = cadence * 3, movingMillis = 180_000, zoneMillis = zone)
         }
         val start = 18 * 3_600_000L - java.util.TimeZone.getDefault().getOffset(0L)
-        val done = checkNotNull(SessionPlans.start(plans[3], start, 0, 0, 8_000)).copy(
+        val done = checkNotNull(SessionPlans.start(plans[4], start, 0, 0, 8_000)).copy(
             id = 12,
             state = SessionState.FINISHED,
             end = SessionEnd.GOAL,

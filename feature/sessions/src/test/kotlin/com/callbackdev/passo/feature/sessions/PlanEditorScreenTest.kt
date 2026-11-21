@@ -8,6 +8,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.hasTestTag
@@ -32,6 +34,7 @@ import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
+import com.callbackdev.passo.core.model.SessionMarks
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.SessionVoice
@@ -200,10 +203,196 @@ class PlanEditorScreenTest {
         assertThat(left).isTrue()
     }
 
+    // --- The open outing (Phase 21) ---------------------------------------------------------
+
+    @Test
+    fun `none says what an open outing is, and asks for no goal, estimate or share`() {
+        var editor by mutableStateOf(state())
+        val actions = PlanEditorActions(
+            kind = { kind ->
+                if (kind == EditorKind.OPEN) {
+                    editor = editor.copy(draft = editor.draft.copy(goalKind = SessionGoalKind.OPEN, goalValue = 0))
+                }
+            },
+        )
+        compose.setContent { PassoTheme { PlanEditorScreen(editor, onBack = {}, actions = actions) } }
+
+        compose.onNodeWithTag("${EditorTags.KIND}-OPEN").performClick()
+        compose.onNodeWithTag(EditorTags.OPEN_ABOUT).assertIsDisplayed()
+        compose.onNodeWithText("No goal: it counts until you stop it", substring = true).assertIsDisplayed()
+        compose.onNodeWithTag(EditorTags.GOAL_KIND).assertDoesNotExist()
+        compose.onNodeWithTag(EditorTags.VALUE).assertDoesNotExist()
+        compose.onNodeWithTag(EditorTags.ESTIMATE).assertDoesNotExist()
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.VIBRATE))
+        compose.onNodeWithText("One signal on the way, if you want it", substring = true).assertIsDisplayed()
+        compose.onNodeWithTag("${EditorTags.MILESTONE}-50").assertDoesNotExist()
+        // Its signal on the way is its mark (21.2): ten minutes, the plan not measuring with GPS.
+        compose.onNodeWithTag("${EditorTags.MARKS}-TIME").assertIsSelected()
+        // Its legend keeps the two long pulses it does use: its end by itself, the cap's question.
+        compose.onNodeWithTag("${EditorTags.TRY}-50").assertDoesNotExist()
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.TRY_ENDED_STILL))
+        compose.onNodeWithTag(EditorTags.TRY_ENDED_STILL).assertIsDisplayed()
+        compose.assertAccessible()
+        snapshot("editor_open")
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT-w360dp-h640dp-xhdpi")
+    fun `in Italian on a small phone the three kinds fit their row`() {
+        compose.setContent {
+            PassoTheme { PlanEditorScreen(state(SessionPlans.OPEN_WALK), onBack = {}, actions = PlanEditorActions()) }
+        }
+        compose.onNodeWithText("Nessuno").assertIsDisplayed()
+        compose.onNodeWithText("Un obiettivo").assertIsDisplayed()
+        compose.onNodeWithText("Intervalli").assertIsDisplayed()
+        compose.onNodeWithText("Nessun obiettivo: conta finché la fermi", substring = true).assertIsDisplayed()
+        compose.assertAccessible()
+        snapshot("editor_open_it")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w411dp-h891dp-xxhdpi", fontScale = 2f)
+    fun `at twice the text size none still reads whole`() {
+        compose.setContent {
+            PassoTheme { PlanEditorScreen(state(SessionPlans.OPEN_WALK), onBack = {}, actions = PlanEditorActions()) }
+        }
+        compose.walkPage(hasTestTag(EditorTags.LIST), "editor_open_large")
+    }
+
+    // --- The open outing's marks (Phase 21.2) -----------------------------------------------
+
+    /** An editor of an open plan whose actions change its draft as the view model does. */
+    private fun openEditor(plan: SessionPlan = SessionPlans.OPEN_WALK, imperial: Boolean = false): PlanEditorState =
+        state(plan).copy(canMeasureWithGps = true, imperial = imperial)
+
+    @Test
+    fun `an open plan's marks follow the GPS switch until the reader picks one, then stay`() {
+        var editor by mutableStateOf(openEditor())
+        val actions = PlanEditorActions(
+            gps = { editor = editor.withGps(it) },
+            marks = { editor = editor.copy(draft = editor.draft.copy(marks = it)) },
+        )
+        compose.setContent { PassoTheme { PlanEditorScreen(editor, onBack = {}, actions = actions) } }
+
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.MARKS))
+        // No GPS, no choice made: ten minutes, which are the steps' own.
+        compose.onNodeWithTag("${EditorTags.MARKS}-TIME").assertIsSelected()
+        compose.onNodeWithText("Ten minutes on your feet", substring = true).assertIsDisplayed()
+
+        // «Measure with GPS» on: the kilometre, measured.
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.GPS))
+        compose.onNodeWithTag(EditorTags.GPS).performClick()
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.MARKS))
+        compose.onNodeWithTag("${EditorTags.MARKS}-DISTANCE").assertIsSelected()
+        compose.onNodeWithText("Each kilometre is measured with GPS", substring = true).assertIsDisplayed()
+        snapshot("editor_open_marks_km")
+
+        // The reader picks ten minutes: kept, whatever the switch does after it.
+        compose.onNodeWithTag("${EditorTags.MARKS}-TIME").performClick()
+        assertThat(editor.draft.marks).isEqualTo(SessionMarks.TIME)
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.GPS))
+        compose.onNodeWithTag(EditorTags.GPS).performClick()
+        compose.onNodeWithTag(EditorTags.GPS).performClick()
+        assertThat(editor.draft.gps).isTrue()
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.MARKS))
+        compose.onNodeWithTag("${EditorTags.MARKS}-TIME").assertIsSelected()
+        compose.onNodeWithTag("${EditorTags.MARKS}-DISTANCE").assertIsNotSelected()
+    }
+
+    @Test
+    fun `the mark can be felt first, and none has no pulse, no note and no row to feel`() {
+        var editor by mutableStateOf(openEditor())
+        var felt = 0
+        val actions = PlanEditorActions(
+            marks = { editor = editor.copy(draft = editor.draft.copy(marks = it)) },
+            tryMark = { felt++ },
+        )
+        compose.setContent { PassoTheme { PlanEditorScreen(editor, onBack = {}, actions = actions) } }
+
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.TRY_MARK))
+        compose.onNodeWithText("Every 10 minutes").assertIsDisplayed()
+        compose.onNodeWithTag(EditorTags.TRY_MARK).performClick()
+        assertThat(felt).isEqualTo(1)
+        compose.assertAccessible()
+
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.MARKS))
+        compose.onNodeWithTag("${EditorTags.MARKS}-NONE").performClick()
+        compose.onNodeWithTag("${EditorTags.MARKS}-NONE").assertIsSelected()
+        compose.onNodeWithTag(EditorTags.MARKS_NOTE).assertDoesNotExist()
+        compose.onNodeWithTag(EditorTags.TRY_MARK).assertDoesNotExist()
+        // The end by itself and the cap's question are still felt: they are not marks.
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.TRY_ENDED_STILL))
+        compose.onNodeWithTag(EditorTags.TRY_ENDED_STILL).assertIsDisplayed()
+    }
+
+    @Test
+    fun `for a reader who walks in miles, the mark is a mile`() {
+        compose.setContent {
+            PassoTheme(darkTheme = true) {
+                PlanEditorScreen(
+                    openEditor(SessionPlans.OPEN_WALK.copy(gps = true), imperial = true),
+                    onBack = {},
+                    actions = PlanEditorActions(),
+                )
+            }
+        }
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.MARKS))
+        compose.onNodeWithText("Each mile").assertIsDisplayed()
+        compose.onNodeWithTag("${EditorTags.MARKS}-DISTANCE").assertIsSelected()
+        compose.onNodeWithText("Each mile is measured with GPS", substring = true).assertIsDisplayed()
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.TRY_MARK))
+        compose.onNodeWithText("At each mile").assertIsDisplayed()
+        snapshot("editor_open_marks_miles_dark")
+    }
+
+    @Test
+    fun `on a phone its counter cannot wake, an open plan with marks says it keeps it awake, with none it does not`() {
+        var editor by mutableStateOf(openEditor().copy(wakeUpCounter = false))
+        val actions = PlanEditorActions(marks = { editor = editor.copy(draft = editor.draft.copy(marks = it)) })
+        compose.setContent { PassoTheme { PlanEditorScreen(editor, onBack = {}, actions = actions) } }
+
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.AWAKE))
+        compose.onNodeWithText("so the signals arrive on time", substring = true).assertIsDisplayed()
+
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.MARKS))
+        compose.onNodeWithTag("${EditorTags.MARKS}-NONE").performClick()
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.VOICE))
+        compose.onNodeWithTag(EditorTags.AWAKE).assertDoesNotExist()
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT-w360dp-h640dp-xhdpi")
+    fun `in Italian on a small phone the three marks fit their row`() {
+        compose.setContent {
+            PassoTheme {
+                PlanEditorScreen(openEditor(SessionPlans.OPEN_WALK.copy(gps = true)), onBack = {
+                }, actions = PlanEditorActions())
+            }
+        }
+        compose.onNodeWithTag(EditorTags.LIST).performScrollToNode(hasTestTag(EditorTags.MARKS_NOTE))
+        compose.onNodeWithText("A ogni km").assertIsDisplayed()
+        compose.onNodeWithText("Ogni 10 min").assertIsDisplayed()
+        compose.onNodeWithTag("${EditorTags.MARKS}-NONE").assertIsDisplayed()
+        compose.onNodeWithText("Ogni chilometro è misurato con il GPS", substring = true).assertIsDisplayed()
+        snapshot("editor_open_marks_it")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
+    fun `at twice the text size on a small phone, the marks still read`() {
+        compose.setContent {
+            PassoTheme {
+                PlanEditorScreen(openEditor(SessionPlans.OPEN_WALK.copy(gps = true)), onBack = {
+                }, actions = PlanEditorActions())
+            }
+        }
+        compose.walkPage(hasTestTag(EditorTags.LIST), "editor_open_marks_large", maxScreens = 20)
+    }
+
     @Test
     fun `a kept outing can be deleted, after asking`() {
         var deleted = false
-        val kept = state(SessionPlans.PRESETS[2].copy(id = 3), isNew = false)
+        val kept = state(SessionPlans.REST_OF_DAY.copy(id = 3), isNew = false)
         compose.setContent {
             PassoTheme(darkTheme = true) {
                 PlanEditorScreen(kept, onBack = {}, actions = PlanEditorActions(delete = { deleted = true }))
@@ -265,8 +454,10 @@ class PlanEditorScreenTest {
     fun `intervals say what the Japanese walk is, and pick its sets`() {
         var editor by mutableStateOf(state())
         val actions = PlanEditorActions(
-            intervals = { on ->
-                if (on) editor = editor.copy(draft = SessionPlans.withIntervals(editor.draft, editor.draft.intervals))
+            kind = { kind ->
+                if (kind == EditorKind.INTERVALS) {
+                    editor = editor.copy(draft = SessionPlans.withIntervals(editor.draft, editor.draft.intervals))
+                }
             },
             sets = { change ->
                 editor = editor.copy(draft = SessionPlans.withIntervals(editor.draft, change(editor.draft.intervals)))
@@ -274,7 +465,7 @@ class PlanEditorScreenTest {
         )
         compose.setContent { PassoTheme { PlanEditorScreen(editor, onBack = {}, actions = actions) } }
 
-        compose.onNodeWithTag("${EditorTags.KIND}-true").performClick()
+        compose.onNodeWithTag("${EditorTags.KIND}-INTERVALS").performClick()
         compose.onNodeWithText("The Japanese interval walk").assertIsDisplayed()
         // In two lines where it is chosen, the sets on the same screen; the whole of it a touch away.
         compose.onNodeWithText("Three slow minutes and three brisk ones", substring = true).assertIsDisplayed()

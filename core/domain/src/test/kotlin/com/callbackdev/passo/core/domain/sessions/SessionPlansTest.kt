@@ -130,10 +130,70 @@ class SessionPlansTest {
     }
 
     @Test
+    fun `the open walk is the first preset, with no goal, at any pace`() {
+        val first = SessionPlans.PRESETS.first()
+        assertThat(first).isEqualTo(SessionPlans.OPEN_WALK)
+        assertThat(first.open).isTrue()
+        assertThat(first.intensity).isEqualTo(SessionIntensity.FREE)
+        assertThat(first.gps).isFalse()
+        assertThat(SessionPlans.PRESETS.map { it.position }).containsExactly(0, 1, 2, 3, 4).inOrder()
+    }
+
+    @Test
+    fun `the rest of the day is found by its kind, wherever the presets put it`() {
+        assertThat(SessionPlans.REST_OF_DAY.goalKind).isEqualTo(SessionGoalKind.REST_OF_DAY)
+    }
+
+    @Test
+    fun `an open plan adds up to nothing before it is walked`() {
+        val estimate = SessionPlans.estimate(SessionPlans.OPEN_WALK, lengths, 4_000)
+        assertThat(estimate).isEqualTo(SessionEstimate(steps = 0, distanceMeters = 0.0, minutes = 0))
+    }
+
+    @Test
+    fun `a plan switched to none and back offers a half hour at its pace in the new quantity`() {
+        val brisk = plan(SessionGoalKind.TIME, 20)
+        assertThat(SessionPlans.convert(brisk, SessionGoalKind.OPEN, lengths, 0)).isEqualTo(0)
+        val open = brisk.copy(goalKind = SessionGoalKind.OPEN, goalValue = 0)
+        assertThat(SessionPlans.convert(open, SessionGoalKind.TIME, lengths, 0)).isEqualTo(30)
+        assertThat(SessionPlans.convert(open, SessionGoalKind.STEPS, lengths, 0)).isEqualTo(3_000)
+        assertThat(SessionPlans.range(SessionGoalKind.OPEN)).isEqualTo(0..0)
+        assertThat(SessionPlans.clampValue(SessionGoalKind.OPEN, 40)).isEqualTo(0)
+        assertThat(SessionPlans.snapForEditor(SessionGoalKind.OPEN, 40.0, imperial = false)).isEqualTo(0)
+    }
+
+    @Test
+    fun `an open plan starts with no goal and no milestone, and twelve hours to its cap`() {
+        val plan = SessionPlans.OPEN_WALK.copy(id = 9, milestones = setOf(SessionMilestone.HALF), gps = true)
+        val session = checkNotNull(SessionPlans.start(plan, 5_000, 20_000, 0, 8_000, withGps = true))
+        assertThat(session.goalKind).isEqualTo(SessionGoalKind.OPEN)
+        assertThat(session.goalValue).isEqualTo(0)
+        assertThat(session.milestones).isEmpty()
+        assertThat(session.planId).isEqualTo(9)
+        assertThat(session.gps).isTrue()
+        assertThat(session.capAtMillis).isEqualTo(5_000 + SessionConstants.OPEN_MAX_SESSION_MILLIS)
+        // Every other outing keeps four hours.
+        val timed = checkNotNull(SessionPlans.start(plan(SessionGoalKind.TIME, 20), 5_000, 20_000, 0, 8_000))
+        assertThat(timed.capAtMillis).isEqualTo(5_000 + SessionConstants.MAX_SESSION_MILLIS)
+    }
+
+    @Test
     fun `the zone share is of the moving time`() {
         val base = SessionPlans.start(plan(SessionGoalKind.TIME, 20), 0, 0, 0, 8_000)!!
         assertThat(base.zoneShare()).isNull()
         val walked = base.copy(totals = SessionTotals(movingMillis = 20 * 60_000, zoneMillis = 17 * 60_000))
         assertThat(walked.zoneShare()).isWithin(1e-9).of(0.85)
+    }
+
+    @Test
+    fun `every outing started now keeps its pauses, so its minutes can be drawn with their gaps`() {
+        val started = SessionPlans.PRESETS.mapNotNull { plan ->
+            SessionPlans.start(plan, nowMillis = 0, localEpochDay = 0, todaySteps = 0, dailyGoalSteps = 8_000)
+        }
+        assertThat(started).hasSize(SessionPlans.PRESETS.size)
+        assertThat(started.all { it.pausesKept }).isTrue()
+        val walk = com.callbackdev.passo.core.domain.ways.Ways.walks.first()
+        assertThat(SessionPlans.startWalk(walk, 0, com.callbackdev.passo.core.model.SessionVoice.OFF, 0, 0)?.pausesKept)
+            .isTrue()
     }
 }

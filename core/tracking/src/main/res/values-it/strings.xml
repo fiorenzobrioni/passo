@@ -210,4 +210,22 @@
         <item quantity="other">%1$d intervalli veloci su %2$d al ritmo.</item>
     </plurals>
     <string name="session_interval_title">%1$s · %2$s</string>
+
+    <!-- L’uscita aperta (Fase 21), detta a voce. -->
+    <plurals name="spoken_hours">
+        <item quantity="one">%1$d ora</item>
+        <item quantity="many">%1$d ore</item>
+        <item quantity="other">%1$d ore</item>
+    </plurals>
+    <!-- «2 ore e 5 minuti». -->
+    <string name="spoken_hours_minutes">%1$s e %2$s</string>
+    <string name="spoken_no_goal">nessun obiettivo</string>
+    <string name="spoken_open_stopped">Uscita conclusa: %1$s.</string>
+    <string name="spoken_open_summary">%1$s, circa %2$s</string>
+    <string name="spoken_open_summary_measured">%1$s misurati in %2$s</string>
+    <!-- I segni dell’uscita aperta (Fase 21.2). «2 chilometri, in 23 minuti.», poi l’andatura. -->
+    <string name="spoken_mark_distance">%1$s, in %2$s.</string>
+    <string name="spoken_mark_distance_about">Circa %1$s, in %2$s.</string>
+    <!-- «20 minuti, 2.300 passi.» -->
+    <string name="spoken_mark_time">%1$s, %2$s.</string>
 </resources>

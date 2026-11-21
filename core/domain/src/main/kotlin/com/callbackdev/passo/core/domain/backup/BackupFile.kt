@@ -104,6 +104,7 @@ internal data class PlanDto(
     val lastUsedAtMillis: Long? = null,
     val intervals: IntervalsDto? = null,
     val gps: Boolean = false,
+    val marks: String? = null,
 )
 
 @Serializable
@@ -144,7 +145,19 @@ internal data class OutingDto(
     val descentMeters: Double? = null,
     val legs: List<LegDto> = emptyList(),
     val route: RouteDto? = null,
+    val pauses: List<PauseDto> = emptyList(),
+    val marks: String? = null,
+    val markMiles: Boolean = false,
+    val toldMarks: Int = 0,
+    val pausesKept: Boolean = false,
 )
+
+/**
+ * A pause of an outing, from its Pause to its Resume (Phase 21), in order: an added field of the
+ * outing, no new version. Instants, never places.
+ */
+@Serializable
+internal data class PauseDto(val fromMillis: Long = 0, val toMillis: Long = 0)
 
 /**
  * A hundred metres of an outing with GPS as it was walked (Phase 16), in order: an added field

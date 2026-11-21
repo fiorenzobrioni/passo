@@ -15,6 +15,8 @@ import com.callbackdev.passo.core.model.IntervalSplit
 import com.callbackdev.passo.core.model.LearnedStep
 import com.callbackdev.passo.core.model.OutingLeg
 import com.callbackdev.passo.core.model.SessionGoalKind
+import com.callbackdev.passo.core.model.SessionMarks
+import com.callbackdev.passo.core.model.SessionPause
 import com.callbackdev.passo.core.model.Sex
 import com.callbackdev.passo.core.model.StepLengthMode
 import com.callbackdev.passo.core.model.StepLengthSample
@@ -215,6 +217,123 @@ class BackupCodecTest {
         val withIntervals = full.copy(plans = full.plans + plan, sessions = full.sessions + outing)
 
         assertThat(BackupCodec.decode(BackupCodec.encode(withIntervals))).isEqualTo(BackupRead.Ok(withIntervals))
+    }
+
+    @Test
+    fun `a backup with open outings reads back whole, pauses included`() {
+        val start = 1_790_000_000_000
+        val plan = SessionPlans.OPEN_WALK.copy(id = 11)
+        val outing = session(start, planId = 11).copy(
+            goalKind = SessionGoalKind.OPEN,
+            goalValue = 0,
+            milestones = emptySet(),
+            reachedAtMillis = null,
+            endedAtMillis = start + 60 * 60_000,
+            pauses = listOf(
+                SessionPause(start + 10 * 60_000, start + 15 * 60_000),
+                SessionPause(start + 25 * 60_000, start + 28 * 60_000),
+            ),
+            // An open outing is walked by a Passo that keeps the pauses, always.
+            pausesKept = true,
+        )
+        val withOpen = full.copy(plans = full.plans + plan, sessions = full.sessions + outing)
+
+        assertThat(BackupCodec.decode(BackupCodec.encode(withOpen))).isEqualTo(BackupRead.Ok(withOpen))
+        assertThat(BackupCodec.encode(withOpen)).contains("\"goalKind\":\"OPEN\"")
+    }
+
+    @Test
+    fun `a backup carries the marks - a plan's choice, and an open outing's mark, unit and count told`() {
+        val start = 1_790_000_000_000
+        val chosen = SessionPlans.OPEN_WALK.copy(id = 12, gps = true, marks = SessionMarks.TIME)
+        val following = SessionPlans.OPEN_WALK.copy(id = 13, position = 1)
+        val outing = session(start, planId = 12).copy(
+            goalKind = SessionGoalKind.OPEN,
+            goalValue = 0,
+            milestones = emptySet(),
+            reachedAtMillis = null,
+            marks = SessionMarks.DISTANCE,
+            markMiles = true,
+            toldMarks = 3,
+            pausesKept = true,
+        )
+        val withMarks = full.copy(plans = full.plans + chosen + following, sessions = full.sessions + outing)
+
+        val text = BackupCodec.encode(withMarks)
+        assertThat(BackupCodec.decode(text)).isEqualTo(BackupRead.Ok(withMarks))
+        assertThat(text).contains("\"marks\":\"TIME\"")
+        assertThat(text).contains("\"markMiles\":true")
+        assertThat(text).contains("\"toldMarks\":3")
+    }
+
+    @Test
+    fun `a file from before the marks reads a plan that follows its switch, and outings with none`() {
+        val start = 1_790_000_000_000
+        val text = BackupCodec.encode(
+            full.copy(
+                plans = listOf(SessionPlans.OPEN_WALK.copy(id = 14, gps = true)),
+                sessions = listOf(
+                    session(start).copy(goalKind = SessionGoalKind.OPEN, goalValue = 0, milestones = emptySet()),
+                ),
+            ),
+        )
+        assertThat(text).doesNotContain("\"marks\"")
+        val read = (BackupCodec.decode(text) as BackupRead.Ok).backup
+        assertThat(read.plans.single().marks).isNull()
+        assertThat(read.plans.single().marksInForce).isEqualTo(SessionMarks.DISTANCE)
+        assertThat(read.sessions.single().marks).isEqualTo(SessionMarks.NONE)
+        // A mark on a goal outing, or one this build does not know, is none.
+        val odd = text.replace(
+            "\"goalKind\":\"OPEN\",\"goalValue\":0,",
+            "\"goalKind\":\"OPEN\",\"goalValue\":0,\"marks\":\"LAPS\",",
+        )
+        assertThat(odd).contains("LAPS")
+        assertThat(
+            (BackupCodec.decode(odd) as BackupRead.Ok).backup.sessions.single().marks,
+        ).isEqualTo(SessionMarks.NONE)
+    }
+
+    @Test
+    fun `an outing's pauses known are carried, and a file from before proves them where it can`() {
+        val start = 1_790_000_000_000
+        val kept = session(start).copy(pausesKept = true)
+        val text = BackupCodec.encode(full.copy(sessions = listOf(kept)))
+        assertThat(text).contains("\"pausesKept\":true")
+        assertThat((BackupCodec.decode(text) as BackupRead.Ok).backup.sessions.single().pausesKept).isTrue()
+
+        val day = 86_400_000L
+        // A file from before the field: a goal outing with no pause cannot tell, an open one or one
+        // with a pause can only come from a Passo that kept them, as the database's migration says.
+        val before = BackupCodec.encode(
+            full.copy(
+                sessions = listOf(
+                    session(start),
+                    session(start + day).copy(goalKind = SessionGoalKind.OPEN, goalValue = 0, milestones = emptySet()),
+                    session(start + 2 * day).copy(
+                        pauses = listOf(SessionPause(start + 2 * day + 60_000, start + 2 * day + 120_000)),
+                    ),
+                ),
+            ),
+        ).replace("\"pausesKept\":false,", "").replace(",\"pausesKept\":false", "")
+        assertThat(before).doesNotContain("pausesKept")
+        val read = (BackupCodec.decode(before) as BackupRead.Ok).backup.sessions.sortedBy { it.startedAtMillis }
+        assertThat(read.map { it.pausesKept }).containsExactly(false, true, true).inOrder()
+    }
+
+    @Test
+    fun `a pause no outing can have is dropped, and the outing kept`() {
+        val start = 1_790_000_000_000
+        val outing = session(start).copy(
+            pauses = listOf(
+                SessionPause(start + 5 * 60_000, start + 6 * 60_000),
+                // Ends before it begins, and before the outing began: not pauses.
+                SessionPause(start + 9 * 60_000, start + 8 * 60_000),
+                SessionPause(start - 60_000, start + 60_000),
+            ),
+        )
+        val read = BackupCodec.decode(BackupCodec.encode(full.copy(sessions = listOf(outing))))
+        val sessions = (read as BackupRead.Ok).backup.sessions
+        assertThat(sessions.single().pauses).containsExactly(SessionPause(start + 5 * 60_000, start + 6 * 60_000))
     }
 
     @Test

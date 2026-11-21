@@ -43,6 +43,16 @@ abstract class SessionDao {
     @Transaction
     open suspend fun appendPlan(plan: SessionPlanEntity): Long = insertPlan(plan.copy(position = nextPlanPosition()))
 
+    @Query("UPDATE session_plan SET position = position + 1")
+    protected abstract suspend fun movePlansDown()
+
+    /** [plan] first of the list, every other one a place further down, in one transaction. */
+    @Transaction
+    open suspend fun prependPlan(plan: SessionPlanEntity): Long {
+        movePlansDown()
+        return insertPlan(plan.copy(position = 0))
+    }
+
     /** The outing under way (or paused), if there is one; there is never more than one. */
     @Transaction
     @Query("SELECT * FROM session WHERE state != 'FINISHED' ORDER BY startedAtMillis DESC LIMIT 1")
@@ -115,6 +125,7 @@ abstract class SessionDao {
             val id = insertSession(session.toEntity())
             upsertIntervals(session.copy(id = id).intervalEntities())
             upsertLegs(session.copy(id = id).legEntities())
+            upsertPauses(session.copy(id = id).pauseEntities())
             id
         }
     }
@@ -128,12 +139,16 @@ abstract class SessionDao {
     @Upsert
     protected abstract suspend fun upsertLegs(legs: List<SessionLegEntity>)
 
-    /** An outing with its intervals and its legs, in one transaction. */
+    @Upsert
+    protected abstract suspend fun upsertPauses(pauses: List<SessionPauseEntity>)
+
+    /** An outing with its intervals, its legs and its pauses, in one transaction. */
     @Transaction
     open suspend fun upsertSession(session: Session) {
         upsertSessionRow(session.toEntity())
         upsertIntervals(session.intervalEntities())
         upsertLegs(session.legEntities())
+        upsertPauses(session.pauseEntities())
     }
 
     @Query("DELETE FROM session WHERE id = :id")
@@ -147,6 +162,9 @@ abstract class SessionDao {
 
     @Query("DELETE FROM step_length_sample WHERE sessionId = :id")
     protected abstract suspend fun deleteStepLengthSamples(id: Long)
+
+    @Query("DELETE FROM session_pause WHERE sessionId = :id")
+    protected abstract suspend fun deletePauses(id: Long)
 
     /** What an outing's clean stretches said of the step: added as it goes (Phase 15, for 17). */
     @Insert
@@ -173,11 +191,15 @@ abstract class SessionDao {
     @Query("SELECT id, startedAtMillis FROM session")
     abstract suspend fun sessionStarts(): List<SessionStart>
 
-    /** An outing with what belongs to it alone: its intervals, its legs, and what it said of the step. */
+    /**
+     * An outing with what belongs to it alone: its intervals, its legs, its pauses, and what it
+     * said of the step.
+     */
     @Transaction
     open suspend fun deleteSession(id: Long) {
         deleteIntervals(id)
         deleteLegs(id)
+        deletePauses(id)
         deleteStepLengthSamples(id)
         deleteSessionRow(id)
     }

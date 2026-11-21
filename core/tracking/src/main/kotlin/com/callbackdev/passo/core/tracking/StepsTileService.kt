@@ -46,6 +46,7 @@ class StepsTileService : TileService() {
 
     private var listening: CoroutineScope? = null
     private var shown: CountingState? = null
+    private var shownOuting: Long? = null
 
     override fun onStartListening() {
         super.onStartListening()
@@ -94,9 +95,18 @@ class StepsTileService : TileService() {
     override fun onClick() {
         super.onClick()
         val resume = shown == CountingState.PAUSED
+        // While it shows an outing under way, its own page: what the tile says of it, and its
+        // buttons (Phase 21).
+        val outing = shownOuting.takeIf { !resume }
         val open = {
-            openAppIntent(if (resume) REQUEST_RESUME else REQUEST_OPEN) {
+            val request = when {
+                resume -> REQUEST_RESUME
+                outing != null -> REQUEST_OUTING
+                else -> REQUEST_OPEN
+            }
+            openAppIntent(request) {
                 if (resume) putExtra(TrackingControl.EXTRA_RESUME, true)
+                if (outing != null) putExtra(SessionControl.EXTRA_OPEN_OUTING, outing)
             }?.let { startActivityAndCollapse(it) }
         }
         if (isLocked) unlockAndRun { open() } else open()
@@ -105,6 +115,7 @@ class StepsTileService : TileService() {
     private fun show(face: TileFace) {
         val tile = qsTile ?: return
         shown = face.counting
+        shownOuting = face.outingId
         tile.state = face.state
         tile.label = face.label
         tile.subtitle = face.subtitle
@@ -115,11 +126,19 @@ class StepsTileService : TileService() {
     private companion object {
         const val REQUEST_OPEN = 10
         const val REQUEST_RESUME = 11
+        const val REQUEST_OUTING = 12
     }
 }
 
 /** What the tile shows: the count with the goal while counting, or why it is not counting. */
-internal data class TileFace(val counting: CountingState, val state: Int, val label: String, val subtitle: String) {
+internal data class TileFace(
+    val counting: CountingState,
+    val state: Int,
+    val label: String,
+    val subtitle: String,
+    /** The outing the line under the count is about, while one is under way: a touch opens it (Phase 21). */
+    val outingId: Long? = null,
+) {
     companion object {
         /** With [session] under way, the line under the count is the outing's (PLANNING.md §11 Phase 10). */
         fun of(
@@ -146,6 +165,7 @@ internal data class TileFace(val counting: CountingState, val state: Int, val la
                     } else {
                         res.getString(R.string.tile_progress, format.percent(steps.toDouble() / goalSteps))
                     },
+                    outingId = session?.id,
                 )
 
                 // The count so far still holds; the line says it is not moving.

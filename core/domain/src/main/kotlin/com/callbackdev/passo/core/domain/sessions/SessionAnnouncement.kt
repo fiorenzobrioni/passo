@@ -1,6 +1,9 @@
 package com.callbackdev.passo.core.domain.sessions
 
+import com.callbackdev.passo.core.domain.routes.DistanceKind
 import com.callbackdev.passo.core.domain.routes.capQuestionMinutes
+import com.callbackdev.passo.core.domain.routes.distanceKind
+import com.callbackdev.passo.core.domain.routes.pace
 import com.callbackdev.passo.core.domain.ways.NextPlace
 import com.callbackdev.passo.core.domain.ways.WalkPlaces
 import com.callbackdev.passo.core.domain.ways.WayStop
@@ -8,8 +11,10 @@ import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionIntensity
+import com.callbackdev.passo.core.model.SessionMarks
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionVoice
+import kotlin.math.roundToInt
 
 /** The pace now against the outing's own, as a spoken signal says it. */
 enum class PaceVerdict {
@@ -26,16 +31,17 @@ enum class PaceVerdict {
 /**
  * What an outing says aloud (Phase 10, second iteration: the voice), one sentence each, in the
  * order the reader lives it: the start, each signal they chose with what is left and how the
- * pace is going, the goal with what it came to, or the end a long stillness brought. The words are the app's (resources); this is
- * what they say.
+ * pace is going (an open outing's marks with what it has come to), the goal with what it came to,
+ * or the end a long stillness brought. The words are the app's (resources); this is what they say.
  */
 sealed interface SessionAnnouncement {
     /**
      * It started: what it is. Heard first, it also says the voice works through these ears. An
-     * interval outing says its [intervals], and that it begins slow.
+     * interval outing says its [intervals], and that it begins slow; an open outing (Phase 21)
+     * that it has no goal ([goal] null).
      */
     data class Started(
-        val goal: SessionAmount,
+        val goal: SessionAmount?,
         val intensity: SessionIntensity,
         val restOfDay: Boolean,
         val intervals: IntervalSets? = null,
@@ -82,6 +88,40 @@ sealed interface SessionAnnouncement {
     data class EndedStill(val steps: Int) : SessionAnnouncement
 
     /**
+     * An open outing (Phase 21) the reader stopped: what it came to, as its goal's sentence says
+     * what a goal outing came to, since it has no goal to be told at. [movingMinutes] in motion
+     * and [distanceMeters], a measure where [measured] (with its pace, [paceSecondsPerKm]), an
+     * estimate otherwise, said as one.
+     */
+    data class OpenStopped(
+        val movingMinutes: Int,
+        val distanceMeters: Double,
+        val measured: Boolean,
+        val paceSecondsPerKm: Double? = null,
+    ) : SessionAnnouncement
+
+    /**
+     * An open outing's distance mark (Phase 21, step 21.2): its [count]th kilometre, or mile where
+     * [miles], reached in [movingMinutes] in motion. Where the outing's distance is [measured]
+     * (nine tenths or more from fixes), with the pace of that kilometre ([paceSecondsPerKm], from
+     * its legs); where it is not, said as the estimate it is, «about», and with no pace, which over
+     * an estimate would be the cadence in disguise (docs/adr/0009-sessions.md, decision 1).
+     */
+    data class DistanceMark(
+        val count: Int,
+        val miles: Boolean,
+        val movingMinutes: Int,
+        val measured: Boolean,
+        val paceSecondsPerKm: Double? = null,
+    ) : SessionAnnouncement
+
+    /**
+     * An open outing's time mark (step 21.2): [minutes] in motion, and the [steps] they came to.
+     * The steps are what changes from one walk to the next; the minutes are the mark's own.
+     */
+    data class TimeMark(val minutes: Int, val steps: Int) : SessionAnnouncement
+
+    /**
      * «Still walking?»: the outing ends by itself in [minutes], unless the reader says to go on
      * (docs/adr/0016-location.md, decision 14). No cap ends a walk unasked.
      */
@@ -114,7 +154,49 @@ sealed interface SessionAnnouncement {
 
     companion object {
         fun started(session: Session): Started =
-            Started(session.goal(), session.intensity, session.restOfDay, session.intervals)
+            Started(session.goal().takeUnless { session.open }, session.intensity, session.restOfDay, session.intervals)
+
+        /**
+         * What an open outing came to when the reader stopped it; null for any other outing, whose
+         * stop says nothing (the reader who touched Stop knows it stopped; its goal was its moment).
+         * At least a minute: «0 minutes» says nothing of a walk.
+         */
+        fun openStopped(session: Session): OpenStopped? {
+            if (!session.open) return null
+            val measured = session.distanceKind() == DistanceKind.MEASURED
+            return OpenStopped(
+                movingMinutes = (session.totals.movingMillis / MILLIS_PER_MINUTE).toInt().coerceAtLeast(1),
+                distanceMeters = session.totals.distanceMeters,
+                measured = measured,
+                paceSecondsPerKm = session.pace(),
+            )
+        }
+
+        /**
+         * What [session]'s [count]th mark says, as the outing stands when it is told; null for an
+         * outing with no marks. At least a minute: «in 0 minutes» says nothing of a kilometre.
+         */
+        fun mark(session: Session, count: Int): SessionAnnouncement? = when (session.marks) {
+            SessionMarks.DISTANCE -> {
+                val pace = OutingMarks.paceOf(session, count)
+                DistanceMark(
+                    count = count,
+                    miles = session.markMiles,
+                    movingMinutes = (OutingMarks.movingMillisTo(session, count).toDouble() / MILLIS_PER_MINUTE)
+                        .roundToInt()
+                        .coerceAtLeast(1),
+                    measured = session.distanceKind() == DistanceKind.MEASURED,
+                    paceSecondsPerKm = pace,
+                )
+            }
+
+            SessionMarks.TIME -> TimeMark(
+                minutes = (count * OutingMarks.TIME_MARK_MILLIS / MILLIS_PER_MINUTE).toInt(),
+                steps = session.totals.steps,
+            )
+
+            SessionMarks.NONE -> null
+        }
 
         fun intervalChanged(position: IntervalPosition): IntervalChanged = IntervalChanged(
             fast = position.fast,

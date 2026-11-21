@@ -100,4 +100,17 @@
     <string name="outing_image_signature">Passo</string>
     <string name="outing_step_at_pace">Your step at this pace: %1$s</string>
     <string name="outing_step_ready">Passo can now use your measured step for every estimate</string>
+
+    <!-- «Thursday 20 November · 10:12–11:05 · 53 minutes, 8 minutes paused»: the pauses kept (Phase 21). -->
+    <string name="outing_when_paused">%1$s · %2$s · %3$s, %4$s paused</string>
+
+    <!-- The shape of the walk (Phase 21.3): its minutes as a strip, what a bar is, its share of the day. -->
+    <string name="outing_shape">The shape of the walk</string>
+    <string name="outing_shape_run">The shape of the run</string>
+    <plurals name="outing_shape_legend">
+        <item quantity="one">A bar for each minute, in colour at %2$d steps a minute or more.</item>
+        <item quantity="other">A bar for every %1$d minutes, in colour at %2$d steps a minute or more.</item>
+    </plurals>
+    <string name="outing_shape_gaps">The gaps are your pauses.</string>
+    <string name="outing_shape_goal_line">The line marks your goal.</string>
 </resources>

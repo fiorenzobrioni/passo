@@ -146,6 +146,7 @@ private fun GuideContent(state: GuideUiState, modifier: Modifier) {
 
         Chapter(PassoIcons.Outing, stringResource(R.string.guide_outings_title))
         Paragraph(stringResource(R.string.guide_outings_p1))
+        Feature(R.string.guide_outings_open_title, R.string.guide_outings_open_body)
         Feature(R.string.guide_outings_signals_title, R.string.guide_outings_signals_body)
         Feature(R.string.guide_outings_motion_title, R.string.guide_outings_motion_body)
         Feature(R.string.guide_outings_end_title, R.string.guide_outings_end_body)

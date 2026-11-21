@@ -3,7 +3,6 @@ package com.callbackdev.passo.feature.sessions
 import com.callbackdev.passo.core.domain.routes.LegPiece
 import com.callbackdev.passo.core.domain.routes.Legs
 import com.callbackdev.passo.core.domain.routes.RouteShape
-import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.AltitudeSource
 import com.callbackdev.passo.core.model.OutingLeg
@@ -11,6 +10,7 @@ import com.callbackdev.passo.core.model.RoutePoint
 import com.callbackdev.passo.core.model.RoutePointKind
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
+import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionState
@@ -110,7 +110,7 @@ internal object OutingSamples {
         id = 12,
         planId = 1,
         name = null,
-        goalKind = SessionPlans.PRESETS[0].goalKind,
+        goalKind = SessionGoalKind.TIME,
         goalValue = 45,
         intensity = SessionIntensity.BRISK,
         milestones = setOf(SessionMilestone.HALF),

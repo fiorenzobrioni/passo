@@ -12,6 +12,34 @@ All notable changes to Passo are documented here. The format follows
 
 ### New
 
+- **An outing with no goal.** Choose «None» in an outing's kind, or start «Walk», now first on
+  the Outings page: it counts until you stop it, at the park or wherever you go, and says what it
+  has come to («25 minutes on your feet», «2.30 km measured in 25 minutes» with GPS) instead of
+  what is left. It has no halfway, so on the way it tells a mark instead: each kilometre (or
+  mile) with GPS, every ten minutes on your feet without, or nothing, as you choose in its
+  signals. A mark is one short pulse, and where the outing speaks, what the walk has come to:
+  «2 kilometres, in 23 minutes», with that kilometre's pace when it was measured, «about» when
+  it was not. Stopped, its voice says what it came to. Forget it, and it ends by itself at your last step, a quarter of an hour after
+  you stopped walking, so the drive home adds nothing. It stays open up to twelve hours, not
+  four, so a day's hike is not cut in two, and asks «Still walking?» before then as every outing
+  does. Your list of outings gets it once, at the top; delete it and it does not come back.
+
+- **The shape of the walk.** Look at an outing with no goal halfway, and its card shows how it
+  has gone: the route so far with GPS (touch it to open the outing's page), or without it your
+  minutes one by one, in colour where they were brisk, your pauses as gaps; under it, how much of
+  today's goal the walk has made by itself. A goal outing taken on past its goal shows its shape
+  too, where the full bar stood, and says how far beyond it you went: «Goal reached, and 20
+  minutes more». Every outing walked from this version on has the shape of the walk on its page.
+  A twelve-hour walk draws as smoothly as a short one, and nothing of it is read while the screen
+  is off.
+
+- **An outing's page while it counts.** «See the outing» is now on the card of an outing under
+  way, not only a finished one: its page follows it, with the route growing on a walk with GPS,
+  and keeps Stop and Pause at its foot, with the satellites' line and «Still walking?» when there
+  is one. Touching the outing's notification, a widget or the tile while they show it opens that
+  page too, and so does «Still walking?» and «GPS stopped». An outing's page also says how long
+  it was paused.
+
 - **An outing measured with GPS, if you ask.** Turn on «Measure with GPS» for an outing and
   Passo reads the satellites while it counts: its distance is measured instead of estimated,
   and it shows your pace by the kilometre or the mile, and the pace now. Your steps and the

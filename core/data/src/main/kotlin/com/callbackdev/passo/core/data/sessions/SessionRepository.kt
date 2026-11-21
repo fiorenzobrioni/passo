@@ -145,6 +145,7 @@ constructor(
             if (dao.plans().isEmpty()) dao.insertPlans(SessionPlans.PRESETS.map { it.toEntity() })
             preferences.markSessionPlansSeeded()
             preferences.markIntervalPresetSeeded()
+            preferences.markOpenPresetSeeded()
         }
         // Plans seeded before the interval walk (Phase 13) get it once, after theirs; a reader
         // who already made an interval plan, or deleted this one, is not given it again.
@@ -154,6 +155,14 @@ constructor(
                 dao.appendPlan(SessionPlans.JAPANESE_WALKING.toEntity())
             }
             preferences.markIntervalPresetSeeded()
+        }
+        // Plans seeded before the open outing (Phase 21) get its walk once, at the top of their
+        // list, where a first visit finds it; a reader who already keeps an open plan, or deleted
+        // this one, is not given it again.
+        if (!preferences.openPresetSeeded()) {
+            val plans = dao.plans().mapNotNull { it.toModel() }
+            if (plans.none { it.open }) dao.prependPlan(SessionPlans.OPEN_WALK.toEntity())
+            preferences.markOpenPresetSeeded()
         }
     }
 }

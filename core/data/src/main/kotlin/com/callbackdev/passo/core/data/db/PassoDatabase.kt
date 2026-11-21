@@ -3,6 +3,8 @@ package com.callbackdev.passo.core.data.db
 import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import androidx.room.migration.AutoMigrationSpec
+import androidx.sqlite.db.SupportSQLiteDatabase
 
 /**
  * Passo's database (PLANNING.md §5). The schema is exported to `core/data/schemas` and
@@ -31,6 +33,17 @@ import androidx.room.RoomDatabase
  *   metres at a time (`session_leg`, a new table), from which its kilometres or its miles are
  *   cut. Numbers still. A version of its own although Phase 15's was not released: a debug
  *   build installed to try Phase 15 on a phone must not meet a second, different v7.
+ * - v9: the open outing (Phase 21): an outing's pauses, from Pause to Resume (`session_pause`, a
+ *   new table), for every outing; none before it. The open outing itself needs no column: a goal
+ *   kind is stored by its name, and `OPEN` is one more name.
+ * - v10: the open outing's marks on the way (Phase 21.2): a plan's choice (`marks` on
+ *   `session_plan`, none until the reader makes one, the plan then following its GPS switch), and
+ *   an outing's mark frozen at its start, its unit and how many were told (`marks`, `markMiles`,
+ *   `toldMarks` on `session`: none for every outing before it, as for every goal outing).
+ * - v11: the shape of an outing (Phase 21.3): whether its pauses are known (`pausesKept` on
+ *   `session`), so its minutes are drawn with their gaps; false for every outing before it, whose
+ *   minutes in a pause would be drawn as walked, but for those that could only come from a Passo
+ *   that kept them: an open outing, and one with a pause written ([KeptPauses]).
  */
 @Database(
     entities = [
@@ -44,8 +57,9 @@ import androidx.room.RoomDatabase
         SessionIntervalEntity::class,
         StepLengthSampleEntity::class,
         SessionLegEntity::class,
+        SessionPauseEntity::class,
     ],
-    version = 8,
+    version = 11,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -55,6 +69,9 @@ import androidx.room.RoomDatabase
         AutoMigration(from = 5, to = 6),
         AutoMigration(from = 6, to = 7),
         AutoMigration(from = 7, to = 8),
+        AutoMigration(from = 8, to = 9),
+        AutoMigration(from = 9, to = 10),
+        AutoMigration(from = 10, to = 11, spec = PassoDatabase.KeptPauses::class),
     ],
 )
 abstract class PassoDatabase : RoomDatabase() {
@@ -63,6 +80,21 @@ abstract class PassoDatabase : RoomDatabase() {
     abstract fun sessionDao(): SessionDao
 
     abstract fun wayDao(): WayDao
+
+    /**
+     * An outing from before v11 has its pauses known only where nothing else could have walked
+     * it: an open outing came with the pauses (v9), and a pause written proves the Passo that
+     * wrote it kept them. Any other outing from before is left unknown, its page with no shape
+     * rather than a shape with a pause drawn as walking.
+     */
+    class KeptPauses : AutoMigrationSpec {
+        override fun onPostMigrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "UPDATE session SET pausesKept = 1 " +
+                    "WHERE goalKind = 'OPEN' OR id IN (SELECT DISTINCT sessionId FROM session_pause)",
+            )
+        }
+    }
 
     companion object {
         const val NAME = "passo.db"
