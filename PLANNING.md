@@ -227,6 +227,9 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
     «Is this …?»; «Another round» keeps two and is not asked again; «The same» makes one, with the
     old name, every walk, the map and the card's line at the next walk (§15 «Phase 20: two rounds
     made one»);
+  - a round walked once with a detour and once with a shortcut, then as usual: known at the third
+    walk; and a file «With the routes» from a phone that walked the round before, imported: one round,
+    with this phone's name (§15 «Phase 20: the last open choices»);
   - in both themes, at a large text size, on the open foldable, with TalkBack on the chart.
 
 - [x] **Decision (owner): a round whose walks all lost their routes** (§15 «Phase 20 reviewed: the
@@ -1421,6 +1424,42 @@ entries are written below.
     `:feature:guide` (1,365 tests, none failed), green on this machine; the question's pictures
     looked at, in both themes, in Italian on a small phone and at twice the text size. No picture of
     the README shows it.
+
+- **21 Nov 2026.** **Phase 20: the last open choices** (owner, agreeing with the three proposals of
+  the review: "son d'accordo"). The three left open by «Phase 20 reviewed», each now decided and
+  built:
+  - **A new round takes every walk in no round the outing is the same as** (`RoundFinder.choose`,
+    `RoundChoice.New`, `RoundDao.start`). Before, it paired with the closest only. A walk with a
+    detour of 300 m and one with a shortcut can lie more than a tenth apart, never matched with each
+    other, and each be the same as the walk round the park: the third walk made a round of two, not
+    shown, and Passo knew the round only at the fourth, against the phase's acceptance («the third
+    time a round is walked Passo knows it»). Each walk taken is the same as the outing by the whole
+    rule, so the round drifts no further than a round already does, its walks joined through its
+    latest three; no two walks the reader said are not the same are put in one round. A round
+    forgotten is found again by a walk of it with all its walks in no round, as any round is
+    (`RoundRepositoryTest`, «forgetting a round…», changed so). Tests: `RoundFinderTest` and
+    `RoundRepositoryTest`, «the third walk makes the round known though the first two were too far
+    apart to match».
+  - **An import with the routes joins its rounds to the phone's by their lines**
+    (`RoundRepository.joinAlike`, `RoundMerge.mayBeOne`, `RoundMerge.sameByLine`). A file of older
+    walks of a round the phone has made a round of its own: each walk is searched among the ones
+    before it, and the phone's are after. Now, after the import, two rounds with a line, one holding
+    an outing the import brought, of the same kind and usual length within a tenth, with a walk of
+    one the same as a walk of the other among their latest three with a route, are made one, with
+    the phone's round and name (the older round; the import's are made after it). No question: both
+    have a line, and the rule is the one every walk is matched by. Rounds the reader said are not one
+    are left. A file without the routes (the default) brings rounds with no line: «Phase 20: two
+    rounds made one» asks about them. Tests: `RoundMergeTest`, `RoundRepositoryTest` («after an
+    import…», «rounds the import did not touch…»), `BackupRepositoryTest` («a file with older walks
+    of the phone's round, with their routes, joins that round, its name the phone's»).
+  - **The two usuals stay, said.** A walk's page measures it against the walks before it (so its
+    verdict never changes as walks come, as a past day's does not), a round's page against all its
+    walks (how the reader stands now). The chart's note says so: «The dashed line is your usual now,
+    52 minutes: the middle of all its walks». `round.png` drawn again, the one README picture that
+    shows it.
+  - Checked: `spotlessCheck`, `:app:checkForbiddenPermissions`, `:app:lintDebug`, and the tests of
+    `:core:domain`, `:core:data`, `:core:tracking`, `:feature:sessions`, `:feature:settings` and
+    `:feature:guide` (1,372 tests, none failed), green on this machine; `round.png` looked at.
 
 ### Open
 

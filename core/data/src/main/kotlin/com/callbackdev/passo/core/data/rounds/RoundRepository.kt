@@ -134,16 +134,59 @@ constructor(
                 .filter { it.state == SessionState.FINISHED }
                 .sortedBy { it.startedAtMillis }
             if (walks.size < RoundConstants.MIN_WALKS || walks.all { it.running } != running) return@mapNotNull null
-            val lines = ArrayList<List<RoutePoint>>(RoundConstants.WALKS_ASKED)
-            for (walk in walks.asReversed()) {
-                if (lines.size == RoundConstants.WALKS_ASKED) break
-                routes.route(walk.id, walk.startedAtMillis)?.points?.takeIf { it.size >= 2 }?.let { lines += it }
-            }
+            val lines = latestLines(walks).map { it.points }
             if (lines.isEmpty()) return@mapNotNull null
             val usual = RoundTimes.usual(walks) ?: return@mapNotNull null
             // A kilometre past the usual length, for a walk a little longer than the round.
             val count = ceil(usual.meters / unitMeters).toInt() + 1
             RoundGuide(roundId, lines, RoundTimes.usualAtMarks(walks, unitMeters, count), walks.size)
+        }
+    }
+
+    /**
+     * After an import (PLANNING.md §15, «Phase 20: the last open choices»): two rounds with a line, one
+     * of them holding an outing the import brought ([brought]), that are one by the rule every walk is
+     * matched by ([RoundMerge.sameByLine]), are made one, with the phone's name. A file of older walks
+     * of a round the phone has makes a round of its own: its walks are searched among the ones before
+     * them, and the phone's are after. No question: both have a line, and Passo can tell. Rounds the
+     * reader said are not one are left as they are.
+     */
+    suspend fun joinAlike(brought: Collection<Long>) = lock.withLock {
+        if (brought.isEmpty()) return@withLock
+        val wanted = brought.toHashSet()
+        val outings = sessions.finishedWithGps().mapNotNull { it.toModel() }.associateBy { it.id }
+        val apart = dao.apart().mapTo(HashSet()) { it.firstId to it.secondId }
+        val lines = HashMap<Long, List<WalkedRoute>>()
+        while (true) {
+            val rounds = dao.members()
+                .groupBy({ it.roundId }) { it.sessionId }
+                .mapValues { (_, ids) -> ids.mapNotNull { outings[it] }.sortedBy { it.startedAtMillis } }
+                .filterValues { it.size >= RoundConstants.MIN_WALKS }
+            val ids = rounds.keys.sorted()
+            var joined: Pair<Long, Long>? = null
+            search@ for (a in ids) {
+                for (b in ids) {
+                    if (b <= a) continue
+                    val first = rounds.getValue(a)
+                    val second = rounds.getValue(b)
+                    if (first.none { it.id in wanted } && second.none { it.id in wanted }) continue
+                    if (!RoundMerge.mayBeOne(first, second)) continue
+                    if (RoundMerge.saidApart(first.map { it.id }, second.map { it.id }, apart)) continue
+                    val linesA = lines.getOrPut(a) { latestLines(first).map { it.walked } }
+                    val linesB = lines.getOrPut(b) { latestLines(second).map { it.walked } }
+                    val same = withContext(Dispatchers.Default) { RoundMerge.sameByLine(linesA, linesB) }
+                    if (same) {
+                        joined = a to b
+                        break@search
+                    }
+                }
+            }
+            val (into, from) = joined ?: break
+            // The older round is the phone's: the import's are made after it. It keeps its name.
+            val names = dao.rounds().associate { it.id to it.name }
+            dao.merge(into, from, names[into] ?: names[from])
+            lines.remove(into)
+            lines.remove(from)
         }
     }
 
@@ -188,7 +231,8 @@ constructor(
         val boxes = routes.boxes()
         val box = boxes[sessionId]?.takeIf { it.sessionStartedAtMillis == outing.startedAtMillis } ?: return
         val route = routes.route(sessionId, outing.startedAtMillis) ?: return
-        val apart = dao.apart().mapNotNull {
+        val pairs = dao.apart()
+        val apart = pairs.mapNotNull {
             when (sessionId) {
                 it.firstId -> it.secondId
                 it.secondId -> it.firstId
@@ -221,16 +265,39 @@ constructor(
             routes.route(other.id, other.startedAtMillis)?.let { RoundCandidate(other, roundOf[other.id], it.points) }
         }
         val choice = withContext(Dispatchers.Default) {
-            RoundFinder.choose(WalkedRoute(route.points, outing.totals.distanceMeters), candidates)
+            RoundFinder.choose(
+                WalkedRoute(route.points, outing.totals.distanceMeters),
+                candidates,
+                apart = pairs.mapTo(HashSet()) { it.firstId to it.secondId },
+            )
         }
         when (choice) {
             is RoundChoice.Join -> dao.join(choice.roundId, sessionId)
-            is RoundChoice.Pair -> dao.pair(choice.sessionId, sessionId)
+            is RoundChoice.New -> dao.start(choice.sessionIds + sessionId)
             RoundChoice.None -> Unit
         }
     }
 
     private val Session.running: Boolean get() = intensity == SessionIntensity.RUN
+
+    /** One of a round's latest walks with its route: as the card follows it, as two rounds are compared. */
+    private class Line(val walk: Session, val points: List<RoutePoint>) {
+        val walked: WalkedRoute get() = WalkedRoute(points, walk.totals.distanceMeters)
+    }
+
+    /**
+     * The routes of the latest of [walks] (oldest first) that keep one, newest first, up to
+     * [RoundConstants.WALKS_ASKED].
+     */
+    private suspend fun latestLines(walks: List<Session>): List<Line> {
+        val lines = ArrayList<Line>(RoundConstants.WALKS_ASKED)
+        for (walk in walks.asReversed()) {
+            if (lines.size == RoundConstants.WALKS_ASKED) break
+            val points = routes.route(walk.id, walk.startedAtMillis)?.points ?: continue
+            if (points.size >= 2) lines += Line(walk, points)
+        }
+        return lines
+    }
 
     private companion object {
         /**

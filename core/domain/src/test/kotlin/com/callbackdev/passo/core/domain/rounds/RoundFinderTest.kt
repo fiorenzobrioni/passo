@@ -1,5 +1,6 @@
 package com.callbackdev.passo.core.domain.rounds
 
+import com.callbackdev.passo.core.domain.routes.RouteMatch
 import com.callbackdev.passo.core.domain.routes.WalkedRoute
 import com.callbackdev.passo.core.model.RouteBox
 import com.callbackdev.passo.core.model.SessionIntensity
@@ -68,7 +69,23 @@ class RoundFinderTest {
             walked(Ground.LOOP),
             listOf(candidate(1, Ground.OTHER_LOOP, roundId = 5), candidate(2, Ground.LOOP, roundId = null)),
         )
-        assertThat(choice).isEqualTo(RoundChoice.Pair(2))
+        assertThat(choice).isEqualTo(RoundChoice.New(listOf(2)))
+    }
+
+    @Test
+    fun `a third walk the same as two walks too far apart to match each other makes one round of the three`() {
+        // The first with a detour of 300 m, the second with a shortcut: 3.5 km and 3.1 km, more than a
+        // tenth apart, and so never matched with each other; each the same as the walk round the park.
+        val detour = Ground.LOOP_WITH_DETOUR
+        val shortcut = listOf(0.0 to 0.0, 640.0 to 0.0, 800.0 to 160.0, 800.0 to 800.0, 0.0 to 800.0, 0.0 to 0.0)
+        assertThat(RouteMatch.compare(walked(detour), walked(shortcut)).same).isFalse()
+        val candidates = listOf(candidate(1, detour, roundId = null), candidate(2, shortcut, roundId = null))
+        val choice = RoundFinder.choose(walked(Ground.LOOP), candidates)
+        assertThat(choice).isInstanceOf(RoundChoice.New::class.java)
+        assertThat((choice as RoundChoice.New).sessionIds).containsExactly(1L, 2L)
+        // Two the reader said are not the same are never put in one round: the closer is.
+        val apart = RoundFinder.choose(walked(Ground.LOOP), candidates, apart = setOf(1L to 2L))
+        assertThat((apart as RoundChoice.New).sessionIds).hasSize(1)
     }
 
     @Test

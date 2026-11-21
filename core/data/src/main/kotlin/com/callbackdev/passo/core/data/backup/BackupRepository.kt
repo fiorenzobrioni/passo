@@ -264,6 +264,9 @@ constructor(
         if (added.isNotEmpty()) {
             val inRounds = roundDao.members().mapTo(HashSet()) { it.sessionId }
             rounds.searchAmong(added.map { it.first }.filter { it !in inRounds })
+            // Older walks of a round the phone has, come with their routes, make a round of their own
+            // (each is searched among the ones before it): joined to the phone's, by their lines.
+            rounds.joinAlike(newIds + added.map { it.first })
         }
         // An outing walked on the other phone today is history here, not one just over: Today's
         // card for the last outing stays put away.

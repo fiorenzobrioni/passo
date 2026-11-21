@@ -1,6 +1,9 @@
 package com.callbackdev.passo.core.domain.rounds
 
 import com.callbackdev.passo.core.domain.routes.RouteMatch
+import com.callbackdev.passo.core.domain.routes.WalkedRoute
+import com.callbackdev.passo.core.model.Session
+import com.callbackdev.passo.core.model.SessionIntensity
 import kotlin.math.abs
 
 /**
@@ -13,6 +16,10 @@ import kotlin.math.abs
  * length from the same door are two rounds), so it asks, on either round's page, once the new one is
  * known: a round with no line and a round with one, of the same kind (walks or runs), their usual
  * lengths within a tenth, and no answer «Another round» between them.
+ *
+ * Two rounds that both have a line are another matter: Passo can tell whether they are one, by the
+ * rule every walk is matched by ([sameByLine]), and an import that brought older walks of a round the
+ * phone has, with their routes, is joined to it without a question.
  *
  * Pure: the repository reads the rounds and the pairs said not the same, and writes the answer.
  */
@@ -46,10 +53,34 @@ object RoundMerge {
     }
 
     /** Any pair of their walks said not the same: the reader answered «Another round». */
-    fun saidApart(a: KeptRound, b: KeptRound, apart: Set<Pair<Long, Long>>): Boolean {
+    fun saidApart(a: KeptRound, b: KeptRound, apart: Set<Pair<Long, Long>>): Boolean =
+        saidApart(a.walks.map { it.id }, b.walks.map { it.id }, apart)
+
+    /** Any pair of the outings [a] and [b] said not the same round. */
+    fun saidApart(a: Collection<Long>, b: Collection<Long>, apart: Set<Pair<Long, Long>>): Boolean {
         if (apart.isEmpty()) return false
-        val first = a.walks.mapTo(HashSet()) { it.id }
-        val second = b.walks.mapTo(HashSet()) { it.id }
+        val first = a.toHashSet()
+        val second = b.toHashSet()
         return apart.any { (x, y) -> (x in first && y in second) || (x in second && y in first) }
     }
+
+    /**
+     * Whether two rounds may be one by their numbers alone, before a point is read: walks or runs
+     * both, and their usual lengths, the middle of their walks', within a tenth.
+     */
+    fun mayBeOne(a: List<Session>, b: List<Session>): Boolean {
+        val first = RoundTimes.usual(a) ?: return false
+        val second = RoundTimes.usual(b) ?: return false
+        return a.all { it.intensity == SessionIntensity.RUN } == b.all { it.intensity == SessionIntensity.RUN } &&
+            RouteMatch.lengthsAlike(first.meters, second.meters)
+    }
+
+    /**
+     * Whether two rounds with a line are one by the rule every walk is matched by ([RouteMatch]): a
+     * walk of one, among its latest with a route ([a]), the same as a walk of the other ([b]). Not a
+     * guess, so not asked: what an import that brought a round with its routes is joined by to the
+     * phone's own (§15, «Phase 20: the last open choices»).
+     */
+    fun sameByLine(a: List<WalkedRoute>, b: List<WalkedRoute>): Boolean =
+        a.any { first -> b.any { second -> RouteMatch.compare(first, second).same } }
 }

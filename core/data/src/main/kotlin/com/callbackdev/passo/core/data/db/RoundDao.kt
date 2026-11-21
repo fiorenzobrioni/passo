@@ -77,11 +77,15 @@ abstract class RoundDao {
     protected abstract suspend fun deleteEmptyRounds()
 
     /** A new round of the outings [first] and [second], unnamed; its id. */
+    open suspend fun pair(first: Long, second: Long): Long = start(listOf(first, second))
+
+    /** A new round of the outings [walks], two or more, unnamed; its id. */
     @Transaction
-    open suspend fun pair(first: Long, second: Long): Long {
+    open suspend fun start(walks: List<Long>): Long {
         val id = insertRound(RoundEntity())
-        upsertMembers(listOf(RoundMemberEntity(first, id), RoundMemberEntity(second, id)))
-        // Should either have been another round's walk, that round may be one walk now.
+        upsertMembers(walks.distinct().map { RoundMemberEntity(it, id) })
+        // Should one have been another round's walk, that round may be one walk now; and a round of
+        // fewer than two is none.
         prune()
         return id
     }

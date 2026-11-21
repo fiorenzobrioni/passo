@@ -182,6 +182,23 @@ class RoundRepositoryTest {
         }
 
     @Test
+    fun `the third walk makes the round known though the first two were too far apart to match`() = runTest {
+        // A detour of 300 m one day, a shortcut the next: more than a tenth apart, no round yet.
+        val detour = listOf(0.0 to 0.0, 300.0 to 0.0, 300.0 to -150.0, 300.0 to 0.0, 800.0 to 0.0) +
+            listOf(800.0 to 800.0, 0.0 to 800.0, 0.0 to 0.0)
+        val shortcut = listOf(0.0 to 0.0, 640.0 to 0.0, 800.0 to 160.0, 800.0 to 800.0, 0.0 to 800.0, 0.0 to 0.0)
+        val first = walked(detour, day = 0)
+        val second = walked(shortcut, day = 1)
+        rounds.find(second)
+        assertThat(kept()).isEmpty()
+        // The round as a rule: the same as each, and the three are one round, known.
+        val third = walked(LOOP, day = 2)
+        rounds.find(third)
+        assertThat(kept().single().walks).containsExactly(first, second, third)
+        assertThat(rounds.kept.first().single().walks).hasSize(3)
+    }
+
+    @Test
     fun `a round with no line and the round its next walks made, made one as the reader said`() = runTest {
         // «Along the canals»: three walks, named, then every route deleted.
         walked(LOOP, day = 0)
@@ -213,6 +230,41 @@ class RoundRepositoryTest {
         assertThat(kept.walks).hasSize(6)
         assertThat(kept.route).isNotNull()
         assertThat(rounds.guides(running = false, unitMeters = 1_000.0).single().walks).isEqualTo(6)
+    }
+
+    @Test
+    fun `after an import, a round of older walks with their routes is joined to the phone's by its line`() = runTest {
+        val dao = database.roundDao()
+        // The phone's round, named: three walks round the park.
+        val phone = dao.start((10L..12L).map { walked(LOOP, day = it) })
+        dao.rename(phone, "The park")
+        // Another round of the phone's, as long, from the same door: not this one.
+        val other = dao.start((13L..15L).map { walked(OTHER_LOOP, day = it) })
+        // The file's: three older walks round the park, a round of their own.
+        val brought = (0L..2L).map { walked(LOOP, day = it) }
+        val file = dao.start(brought)
+        rounds.joinAlike(brought)
+        val after = kept()
+        assertThat(after.map { it.id }).containsExactly(phone, other)
+        val park = after.single { it.id == phone }
+        assertThat(park.name).isEqualTo("The park")
+        assertThat(park.walks).hasSize(6)
+        assertThat(after.single { it.id == other }.walks).hasSize(3)
+        assertThat(dao.rounds().map { it.id }).doesNotContain(file)
+    }
+
+    @Test
+    fun `rounds the import did not touch, or the reader said are not one, are left as they are`() = runTest {
+        val dao = database.roundDao()
+        val first = dao.start((0L..2L).map { walked(LOOP, day = it) })
+        val second = dao.start((3L..5L).map { walked(LOOP, day = it) })
+        // Nothing of either came with the file.
+        rounds.joinAlike(listOf(walked(OTHER_LOOP, day = 9)))
+        assertThat(kept().map { it.id }).containsExactly(first, second)
+        // «Another round», said before: kept two.
+        rounds.notOneRound(first, second)
+        rounds.joinAlike(dao.walksOf(second))
+        assertThat(kept().map { it.id }).containsExactly(first, second)
     }
 
     @Test
@@ -281,7 +333,8 @@ class RoundRepositoryTest {
         assertThat(sessions.session(first)).isNotNull()
         val third = walked(LOOP, day = 2)
         rounds.find(third)
-        assertThat(kept().single().walks).containsExactly(second, third)
+        // Found again as any round is: with every walk in no round it is the same as, its name gone.
+        assertThat(kept().single().walks).containsExactly(first, second, third)
         assertThat(kept().single().name).isNull()
     }
 

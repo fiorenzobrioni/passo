@@ -71,8 +71,8 @@
     <string name="round_same_yes">The same</string>
     <string name="round_same_no">Another round</string>
     <string name="round_times">Its times</string>
-    <!-- Under the chart: what a dot is and what the line is. -->
-    <string name="round_times_note">A dot for each walk, its time in motion brought to %1$s; lower is faster. The dashed line is your usual, %2$s.</string>
+    <!-- Under the chart: what a dot is and what the line is. The line is the usual now, of all the walks: each walk's own page compares it with the walks before it, and says so. -->
+    <string name="round_times_note">A dot for each walk, its time in motion brought to %1$s; lower is faster. The dashed line is your usual now, %2$s: the middle of all its walks.</string>
     <string name="round_walks">Its walks</string>
     <!-- A walk's row: its day, its time brought to the usual length, then «3.25 km walked». -->
     <string name="round_walk_meters">%1$s walked</string>

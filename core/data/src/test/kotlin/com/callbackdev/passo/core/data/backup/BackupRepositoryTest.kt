@@ -53,6 +53,8 @@ import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import java.io.File
 import java.time.ZoneOffset
+import kotlin.math.cos
+import kotlin.math.hypot
 
 /**
  * The export and the import (PLANNING.md §11 Phase 7) between two phones, each a real Room
@@ -345,6 +347,79 @@ class BackupRepositoryTest {
         assertThat(new.database.roundDao().apart().map { it.firstId to it.secondId })
             .containsExactly(came[2].id to came[3].id)
     }
+
+    /**
+     * A walk round the park on [phone], 3.2 km from the door [days] after the first day, measured, with
+     * its route: a point every five metres, a few metres off the line as a receiver draws it. Its id.
+     */
+    private suspend fun loop(phone: Phone, days: Long, seed: Int): Long {
+        val started = (day + days) * 86_400_000L + 7 * 3_600_000L
+        val id = phone.database.sessionDao().insertSession(
+            com.callbackdev.passo.core.model.Session(
+                planId = null,
+                name = null,
+                goalKind = SessionGoalKind.OPEN,
+                goalValue = 0,
+                intensity = SessionIntensity.FREE,
+                milestones = emptySet(),
+                vibrate = true,
+                localEpochDay = day + days,
+                startedAtMillis = started,
+                state = SessionState.FINISHED,
+                endedAtMillis = started + 2_400_000,
+                end = SessionEnd.STOPPED,
+                totals = SessionTotals(steps = 4_000, movingMillis = 2_400_000, distanceMeters = 3_200.0),
+                gps = true,
+                measuredShare = 1.0,
+            ).toEntity(),
+        )
+        val corners = listOf(0.0 to 0.0, 800.0 to 0.0, 800.0 to 800.0, 0.0 to 800.0, 0.0 to 0.0)
+        val points = ArrayList<RoutePoint>()
+        for (index in 1 until corners.size) {
+            val (x0, y0) = corners[index - 1]
+            val (x1, y1) = corners[index]
+            val steps = (hypot(x1 - x0, y1 - y0) / 5).toInt()
+            for (step in (if (index == 1) 0 else 1)..steps) {
+                val t = step.toDouble() / steps
+                val wander = ((step * 7 + seed * 3) % 9 - 4).toDouble()
+                val east = x0 + (x1 - x0) * t + wander
+                val north = y0 + (y1 - y0) * t - wander
+                points += RoutePoint(
+                    epochSecond = started / 1_000 + points.size * 4L,
+                    latitudeE6 = ((45.4642 + north / 111_320.0) * 1e6).toInt(),
+                    longitudeE6 = ((9.19 + east / (111_320.0 * cos(Math.toRadians(45.4642)))) * 1e6).toInt(),
+                    altitudeDm = null,
+                    accuracyMeters = 5,
+                    kind = if (points.isEmpty()) RoutePointKind.START else RoutePointKind.MEASURED,
+                )
+            }
+        }
+        phone.routes.append(id, started, points)
+        return id
+    }
+
+    @Test
+    fun `a file with older walks of the phone's round, with their routes, joins that round, its name the phone's`() =
+        runTest {
+            // The old phone: three walks round the park in October, a round it named «Park».
+            val old1 = loop(old, 0, seed = 1)
+            old.rounds.find(loop(old, 1, seed = 2))
+            old.rounds.find(loop(old, 2, seed = 3))
+            old.database.roundDao().rename(checkNotNull(old.database.roundDao().roundOf(old1)), "Park")
+            // The new phone, walked before the file came: the same park, three times, «Around the park».
+            new.rounds.find(loop(new, 30, seed = 4))
+            new.rounds.find(loop(new, 31, seed = 5))
+            new.rounds.find(loop(new, 32, seed = 6))
+            val phoneRound = new.rounds.rounds.first().single()
+            new.database.roundDao().rename(phoneRound.id, "Around the park")
+
+            new.backups.import(read(exported(withRoutes = true)), withPreferences = false)
+
+            val round = new.rounds.rounds.first().single()
+            assertThat(round.id).isEqualTo(phoneRound.id)
+            assertThat(round.name).isEqualTo("Around the park")
+            assertThat(round.walks).hasSize(6)
+        }
 
     @Test
     fun `the same file again adds no round twice`() = runTest {

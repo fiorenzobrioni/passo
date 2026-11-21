@@ -131,6 +131,11 @@ class RoundsScreenTest {
         compose.onNodeWithTag(RoundChartTags.TIMES)
             .assertContentDescriptionContains("8 walks since September; the last 4 faster than usual.")
         compose.onNodeWithText("lower is faster", substring = true).assertExists()
+        // The line is the usual now, of every walk: each walk's page has the usual before it.
+        compose.onNodeWithText(
+            "your usual now, 52 minutes: the middle of all its walks",
+            substring = true,
+        ).assertExists()
         snapshot("round_times")
     }
 

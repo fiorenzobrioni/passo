@@ -1,5 +1,6 @@
 package com.callbackdev.passo.core.domain.rounds
 
+import com.callbackdev.passo.core.domain.routes.WalkedRoute
 import com.callbackdev.passo.core.model.Round
 import com.callbackdev.passo.core.model.RouteKey
 import com.callbackdev.passo.core.model.SessionIntensity
@@ -79,6 +80,33 @@ class RoundMergeTest {
         assertThat(RoundMerge.proposal(since, listOf(since, far, near), emptySet())?.id).isEqualTo(3L)
         val same = round(5, firstId = 80, count = 12, meters = 4_250.0, lined = false)
         assertThat(RoundMerge.proposal(since, listOf(since, near, same), emptySet())?.id).isEqualTo(5L)
+    }
+
+    @Test
+    fun `two rounds with a line are one by the rule every walk is matched by, not by their lengths`() {
+        val loop = listOf(WalkedRoute(Ground.walk(Ground.LOOP, seed = 1), Ground.length(Ground.LOOP)))
+        val again = listOf(
+            WalkedRoute(Ground.walk(Ground.LOOP_OTHER_WAY, seed = 2), Ground.length(Ground.LOOP)),
+            WalkedRoute(Ground.walk(Ground.LOOP, seed = 3), Ground.length(Ground.LOOP)),
+        )
+        assertThat(RoundMerge.sameByLine(loop, again)).isTrue()
+        // As long, from the same door, and another round: the other loop, and the same one the other way.
+        val other = listOf(
+            WalkedRoute(Ground.walk(Ground.OTHER_LOOP, seed = 4), Ground.length(Ground.OTHER_LOOP)),
+            WalkedRoute(Ground.walk(Ground.LOOP_OTHER_WAY, seed = 5), Ground.length(Ground.LOOP)),
+        )
+        assertThat(RoundMerge.sameByLine(loop, other)).isFalse()
+        assertThat(RoundMerge.sameByLine(loop, emptyList())).isFalse()
+    }
+
+    @Test
+    fun `two rounds may be one by their numbers when both are walks or runs, their lengths within a tenth`() {
+        assertThat(RoundMerge.mayBeOne(canals.walks, since.walks)).isTrue()
+        val longer = round(3, firstId = 40, count = 3, meters = 4_800.0, lined = true)
+        assertThat(RoundMerge.mayBeOne(canals.walks, longer.walks)).isFalse()
+        val run = round(3, firstId = 40, count = 3, lined = true, intensity = SessionIntensity.RUN)
+        assertThat(RoundMerge.mayBeOne(canals.walks, run.walks)).isFalse()
+        assertThat(RoundMerge.mayBeOne(canals.walks, emptyList())).isFalse()
     }
 
     @Test
