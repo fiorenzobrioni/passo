@@ -9,28 +9,37 @@ import com.callbackdev.passo.core.model.RoutePoint
 
 /**
  * A round an open outing with GPS may be walking, as the tracking service reads it once, at the
- * outing's start (PLANNING.md §11 Phase 20, «The card, while it counts»): its line, from its latest
- * walk's route, and its usual time at each kilometre, from its walks' legs.
+ * outing's start (PLANNING.md §11 Phase 20, «The card, while it counts»): its lines, from its latest
+ * walks' routes, and its usual time at each kilometre, from its walks' legs.
  *
+ * @property lines the routes of its latest walks that keep one, newest first, up to
+ *   [RoundConstants.WALKS_ASKED]: one walk's alone would carry its own shortcut or detour, and a
+ *   walk of the round as usual would leave it there (§15, «Phase 20 reviewed»).
  * @property usualAtMarks the usual time in motion at the 1st, 2nd… kilometre (or mile, the
  *   outing's frozen unit), from index 0; null where too few walks reached it.
  * @property walks how many times it was walked: of two rounds the walk is on alike, the usual one.
  */
-class RoundGuide(val roundId: Long, val line: List<RoutePoint>, val usualAtMarks: List<Long?>, val walks: Int)
+class RoundGuide(val roundId: Long, val lines: List<List<RoutePoint>>, val usualAtMarks: List<Long?>, val walks: Int)
 
 /**
  * Which of the reader's rounds an open outing with GPS is walking, as its route comes (Phase 20). Fed
  * the route's points as the meter settles them, it says whether the walk is on a round: begun within
- * [RoundConstants.START_METERS] of where the round begins, and, from [RoundConstants.FOUND_METERS]
- * on, four fifths of it near the round's line in order; and whether it has left it: off that line
- * for [RoundConstants.LEFT_METERS] in a row.
+ * [RoundConstants.START_METERS] of where one of its lines begins, and, from
+ * [RoundConstants.FOUND_METERS] on, four fifths of it near that line in order; and whether it has
+ * left it: off every one of its lines for [RoundConstants.LEFT_METERS] in a row.
+ *
+ * Each of a round's lines is followed on its own, the walk laid along each in order: the round is
+ * as near as the nearest of them. A walk of it that cut a corner last time does not have the round,
+ * walked whole the next time, told as left at that corner.
  *
  * Pure, and fed by the tracker alone: no timer, no read, nothing but the points the outing keeps
  * anyway. Two rounds from the same door are told apart as the walk goes: on the first of them while
  * they share their streets, on the other once it leaves the first for the other's.
  */
 class RoundWatch(guides: List<RoundGuide>) {
-    private val follows = guides.filter { it.line.size >= 2 }.map(::Follow)
+    private val follows = guides.flatMap { guide ->
+        guide.lines.filter { it.size >= 2 }.map { line -> Follow(guide, line) }
+    }
     private var first: RoutePoint? = null
 
     /** Takes the points the outing has kept since the last call, in order. */
@@ -64,12 +73,12 @@ class RoundWatch(guides: List<RoundGuide>) {
     fun usualAt(roundId: Long, mark: Int): Long? =
         follows.firstOrNull { it.guide.roundId == roundId }?.guide?.usualAtMarks?.getOrNull(mark - 1)
 
-    /** One round followed: the outing's walk laid along its line, in the line's own plane. */
-    private class Follow(val guide: RoundGuide) {
-        private val start = guide.line.first()
+    /** One of a round's lines followed: the outing's walk laid along it, in the line's own plane. */
+    private class Follow(val guide: RoundGuide, points: List<RoutePoint>) {
+        private val start = points.first()
         private val plane = Plane(start.latitude, start.longitude)
         private val line = LineIndex(
-            EvenSamples.of(guide.line, plane, RoundConstants.SAMPLE_METERS, RoundConstants.MAX_SAMPLES),
+            EvenSamples.of(points, plane, RoundConstants.SAMPLE_METERS, RoundConstants.MAX_SAMPLES),
             RoundConstants.NEAR_METERS,
         )
         private val order = InOrder(line, RoundConstants.ORDER_SLACK_METERS)

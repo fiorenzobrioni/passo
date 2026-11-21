@@ -216,11 +216,25 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
   - leaving the round on purpose for a few hundred metres: «You left your usual round» once, then
     the walk's own sentence, and the next kilometre's words saying it;
   - the same walk the other way round, not called the same; a shortcut, compared honestly;
+  - a walk of the round that cuts a corner, then the round walked whole: on the card at every
+    kilometre, never «You left your usual round» at that corner (§15 «Phase 20 reviewed», 21 Nov);
   - the outing's page: the sentence, this time and the usual, the round's door, «Not the same
     round» and its question;
   - a round's page: the map pinched and dragged, the chart, rename (the dialog, its keyboard),
-    «Forget this round»; «Delete all routes» saying the rounds stay;
+    «Forget this round»; «Delete all routes» saying the rounds stay, and that with no route left
+    Passo cannot know them again;
   - in both themes, at a large text size, on the open foldable, with TalkBack on the chart.
+
+- [ ] **Decision (owner): a round whose walks all lost their routes** (§15 «Phase 20 reviewed: the
+  line held by the round's latest walks», 21 Nov 2026). As built it stays as history, with its
+  walks, times and name, and with no line it is never found again: its next walks with GPS make a
+  new round beside it, and «Your rounds» can show two rows for one round. Its page and «Delete all
+  routes» now say so. Proposed: the two made one when the reader says so, never by a guess. Once
+  the new round is known (its third walk) and a round with no line of the same kind, walks or runs,
+  has a usual length within a tenth of its own, the new round's page asks once whether it is that
+  one. «The same» moves the new walks into the old round, which keeps its name and its whole
+  history; «Not this one» keeps a pair of their walks in `round_apart`, and is not asked again.
+  Not built until the owner says.
 
 - [ ] **The figures of the two measures, written** (archive 05, «The phone checks up to Phase 23
   done», 21 Nov 2026). The owner made both measures, Phase 15's and Phase 13's 30-minute interval outing;
@@ -1327,6 +1341,49 @@ entries are written below.
       `RoundsScreenTest`, `SessionsScreenTest`, `DataSectionTest`, each at twice the text size, in
       Italian on a small phone and on the foldable where it draws a page.
     - The screenshots looked at, in both themes.
+
+- **21 Nov 2026.** **Phase 20 reviewed: the line held by the round's latest walks, a round with no
+  route said as it is** (owner, after a review of the branch: "fix points 1 and 2 and the simplest
+  minor ones; for 2, fix the text, then tell me which is better and more correct, merging or
+  forgetting").
+  - **The card's line follows the round's latest three walks with a route**, not the latest one
+    alone (`RoundGuide.lines`, `RoundWatch`; `RoundConstants.WALKS_ASKED`, now the end's search and
+    the card's alike). Found in the review: a latest walk that cut a corner, 117 m shorter and still
+    the round, made the round walked whole the next time leave it at that corner, some 290 m off
+    that one walk's line, and its line stopped for the rest of the walk. Each line is followed on
+    its own and the round is as near as the nearest of them, so the shortcut or the detour of one
+    walk is forgiven as the search forgives it. This makes exact §11 Phase 20's «within 40 m of the
+    round's line»: the line of any of its three latest walks that keep a route. Tests: «the round
+    walked whole after its latest walk cut a corner» in `RoundWatchTest` and
+    `SessionTrackerRoundTest`; the three lines in `RoundRepositoryTest`.
+  - **A round whose walks all lost their routes is said as it is.** It keeps its walks, times and
+    name, but it has no line to be known by, and no place outlives its outing: its next walks with
+    GPS make a new round, from the third time (as built, `RoundRepositoryTest`, «every member's
+    route deleted»). Its page said «a walk of it with GPS draws its map again», which was not true:
+    it says now that Passo cannot know it again and finds it as a new round, with its own times;
+    «Delete all routes» says the same where there are rounds, and the guide and the CHANGELOG too.
+    Whether the two should become one is the owner's (Open, «Decision (owner): a round whose walks
+    all lost their routes»).
+  - **The simplest of the review's minor findings, fixed:**
+    - The guides read only walks over. An outing taken back with «Keep going» is still its round's
+      walk until it ends again; read at a restart of the process, its own route so far was the
+      round's line and its own legs in the usual (`RoundRepositoryTest`).
+    - The rounds are read before the outing begins, before the sensor's flush. They were read
+      between the outing's row and its tracker, a moment in which its steps were the day's alone.
+    - The points the meter settles at a pause are laid on the rounds too, as a restart lays them.
+    - «Your rounds» and each round's page read the rounds' own walks (`SessionDao.observeRoundWalks`),
+      not every outing over at each write of an outing under way.
+    - Three conditions the formatter had wrapped mid-expression are written plainly, and the comment
+      on the rounds' small maps says when they are read.
+  - **Left**, each a decision rather than a fix: an import of older outings never joins its rounds to
+    the phone's own when they share no walk (two rounds of one, as above); a third walk that matches
+    two lone walks that did not match each other makes a pair with one of them only; a round's page
+    measures each walk against the usual of all its walks, its outing's page against the walks before
+    it.
+  - Checked: `spotlessCheck`, `:app:checkForbiddenPermissions`, `:app:lintDebug`, and the tests of
+    the modules touched (`:core:domain`, `:core:data`, `:core:tracking`, `:core:designsystem`,
+    `:feature:sessions`, `:feature:settings`, `:feature:guide`: 1,377 tests, none failed), green on
+    this machine. No picture of the README shows what changed.
 
 ### Open
 

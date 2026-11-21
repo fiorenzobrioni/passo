@@ -27,7 +27,9 @@ All notable changes to Passo are documented here. The format follows
   against your usual, and every walk of it; rename it, or forget it, and its outings stay as they
   are. Your outings with GPS from before are searched once for their rounds. A round is numbers
   and a name, in every backup with the outings; its line is its walks' routes, and «Delete all
-  routes» keeps the rounds and their times. Never a record, a ranking or anyone else's walk.
+  routes» keeps the rounds and their times, though a round left with no route has no line to be known
+  by: walked again with GPS, it is found as a new round. Never a record, a ranking or anyone else's
+  walk.
 
 - **An outing with no goal.** Choose «None» in an outing's kind, or start «Walk», now first on
   the Outings page: it counts until you stop it, at the park or wherever you go, and says what it

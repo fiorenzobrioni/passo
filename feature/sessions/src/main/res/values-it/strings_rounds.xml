@@ -58,7 +58,7 @@
     <string name="round_usual">Di solito %1$s in movimento, per %2$s.</string>
     <string name="round_map_spoken">Il tuo giro: %1$s, dalla tua porta e ritorno.</string>
     <string name="round_map_spoken_line">Il tuo giro: %1$s, da %2$s a %3$s.</string>
-    <string name="round_no_map">I percorsi delle uscite di questo giro sono stati eliminati: le uscite e i loro tempi restano, e un’uscita del giro con il GPS ne ridisegna la mappa.</string>
+    <string name="round_no_map">I percorsi delle uscite di questo giro sono stati eliminati: le uscite e i loro tempi restano, ma senza più una linea Passo non può riconoscerlo. Se lo percorri con il GPS, dalla terza volta Passo lo trova come un giro nuovo, con i suoi tempi.</string>
     <string name="round_times">I suoi tempi</string>
     <string name="round_times_note">Un punto per ogni uscita, il suo tempo in movimento riportato a %1$s; più in basso è più veloce. La linea tratteggiata è il tuo solito, %2$s.</string>
     <string name="round_walks">Le sue uscite</string>

@@ -10,7 +10,8 @@ import org.junit.Test
  * after 200 m away from its line.
  */
 class RoundWatchTest {
-    private val park = RoundGuide(1, Ground.walk(Ground.LOOP, seed = 1), listOf(600_000L, 1_200_000L), walks = 4)
+    private val park =
+        RoundGuide(1, listOf(Ground.walk(Ground.LOOP, seed = 1)), listOf(600_000L, 1_200_000L), walks = 4)
 
     /** [points], a walk's, fed to the watch as far as [meters] along it; how far that is. */
     private fun RoundWatch.walkTo(points: List<RoutePoint>, meters: Double): Double {
@@ -61,14 +62,14 @@ class RoundWatchTest {
 
     @Test
     fun `a round no walk of the reader's has a line for is never followed`() {
-        val bare = RoundGuide(2, emptyList(), emptyList(), walks = 3)
+        val bare = RoundGuide(2, listOf(emptyList()), emptyList(), walks = 3)
         val watch = RoundWatch(listOf(bare))
         assertThat(watch.on(null, watch.walkTo(Ground.walk(Ground.LOOP, seed = 2), 900.0))).isNull()
     }
 
     @Test
     fun `two rounds from the same door are told apart as the walk goes`() {
-        val north = RoundGuide(2, Ground.walk(Ground.PARK_THEN_NORTH, seed = 3), emptyList(), walks = 2)
+        val north = RoundGuide(2, listOf(Ground.walk(Ground.PARK_THEN_NORTH, seed = 3)), emptyList(), walks = 2)
         val walk = Ground.walk(Ground.PARK_THEN_NORTH, seed = 4)
         val watch = RoundWatch(listOf(park, north))
         // Their first 600 m are one street: on the one walked more.
@@ -77,6 +78,27 @@ class RoundWatchTest {
         val later = RoundWatch(listOf(park, north))
         val walked = later.walkTo(walk, 1_100.0)
         assertThat(later.on(1L, walked)).isEqualTo(2L)
+    }
+
+    @Test
+    fun `the round walked whole after its latest walk cut a corner is still the round`() {
+        // The latest walk cut the corner at the park's south-east across a diagonal: 117 m shorter,
+        // still the round. The reader walks it whole again: off that walk's line for some 290 m.
+        val cut = listOf(0.0 to 0.0, 600.0 to 0.0, 800.0 to 200.0, 800.0 to 800.0, 0.0 to 800.0, 0.0 to 0.0)
+        val cutLine = Ground.walk(cut, seed = 3)
+        val whole = Ground.walk(Ground.LOOP, seed = 2)
+        // That walk's line alone would have the round left by the corner.
+        val alone = RoundWatch(listOf(RoundGuide(1, listOf(cutLine), emptyList(), walks = 4)))
+        assertThat(alone.on(1L, alone.walkTo(whole, 900.0))).isNull()
+        // With the walks before it, the round as it is walked as a rule holds it.
+        val round = RoundGuide(1, listOf(cutLine, Ground.walk(Ground.LOOP, seed = 1)), emptyList(), walks = 4)
+        for (meters in listOf(600.0, 800.0, 900.0, 1_000.0, 1_500.0, 3_000.0)) {
+            val watch = RoundWatch(listOf(round))
+            assertThat(watch.on(1L, watch.walkTo(whole, meters))).isEqualTo(1L)
+        }
+        // And the walk that cuts the corner again is on it too, by that walk's own line.
+        val again = RoundWatch(listOf(round))
+        assertThat(again.on(1L, again.walkTo(Ground.walk(cut, seed = 4), 900.0))).isEqualTo(1L)
     }
 
     @Test

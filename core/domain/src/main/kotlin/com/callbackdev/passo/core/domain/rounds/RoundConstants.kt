@@ -71,6 +71,14 @@ object RoundConstants {
     const val KNOWN_WALKS: Int = 3
 
     /**
+     * A round is asked through its latest walks that keep a route, this many: when an outing ends,
+     * whether it is one of them, and while an open one counts, whether it walks one of their lines.
+     * One would do; three forgive the shortcut or the detour of one, and the newest say what the
+     * round is now, however many years of walks it has.
+     */
+    const val WALKS_ASKED: Int = 3
+
+    /**
      * The card says the round once the outing has walked this far on it (four fifths of it near the
      * round's line, in order): too soon, and every walk out of the door is on every round from it.
      */

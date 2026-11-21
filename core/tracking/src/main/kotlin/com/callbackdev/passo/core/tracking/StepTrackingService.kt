@@ -1745,18 +1745,12 @@ class StepTrackingService : Service() {
         // A new outing ends the last one's "Keep going".
         tracker = null
         sessionNotifications.cancelEnd()
-        // Everything walked until now is the day's, not the outing's.
-        flushSensor()
-        persist()
         val plan = if (planId == null) {
             sessions.plans.first().firstOrNull { it.goalKind == SessionGoalKind.REST_OF_DAY }
                 ?: SessionPlans.REST_OF_DAY
         } else {
             sessions.plan(planId) ?: return
         }
-        val now = System.currentTimeMillis()
-        val day = today()
-        val todaySteps = displayedToday() ?: repository.stepsOn(day)
         // Measured with GPS when the plan asks for it and the reader and the phone allow it right
         // now: decided here, for every door alike (a page, a shortcut, the reminder's "Walk
         // now"), and frozen in the outing. Nothing is asked from here: the permission is the
@@ -1765,11 +1759,24 @@ class StepTrackingService : Service() {
         val withGps = readiness == GpsReadiness.READY
         // An open outing's kilometres are miles for a reader who walks in miles now, to its end.
         val miles = measureFormatter(current.settings.units).units == UnitSystem.IMPERIAL
+        // The reader's usual rounds, for an open outing with GPS (Phase 20): read before the outing
+        // begins, so that no step of it is the day's alone while they are read.
+        val guides = if (plan.open && withGps) {
+            roundGuides(running = plan.intensity == SessionIntensity.RUN, miles = miles)
+        } else {
+            emptyList()
+        }
+        // Everything walked until now is the day's, not the outing's.
+        flushSensor()
+        persist()
+        val now = System.currentTimeMillis()
+        val day = today()
+        val todaySteps = displayedToday() ?: repository.stepsOn(day)
         val session = SessionPlans.start(plan, now, day, todaySteps, current.settings.dailyGoalSteps, withGps, miles)
             ?: return
         val saved = persistMutex.withLock { sessions.insert(session) }
         if (plan.id != 0L) sessions.markPlanUsed(plan.id, now)
-        tracker = newTracker(saved, current.profile, roundGuides(saved))
+        tracker = newTracker(saved, current.profile, guides)
         onSteps = readiness?.let { startedOnSteps(saved, it) }
         if (saved.voice != SessionVoice.OFF && sessionNotifications.signalsAllowed()) {
             speak(SessionAnnouncement.started(saved), saved)
@@ -1881,23 +1888,27 @@ class StepTrackingService : Service() {
     }
 
     /**
-     * The rounds [session] may walk, read once at its start, or at a restart of the process: runs
-     * for a run, walks for a walk, by the kilometre or the mile its marks were frozen in. None for any
-     * other outing, and none should the read fail: the outing counts as any.
+     * The rounds [session] may walk, read again at a restart of the process: none for any outing
+     * but an open one with GPS.
      */
-    private suspend fun roundGuides(session: Session): List<RoundGuide> {
-        if (!followsRounds(session)) return emptyList()
-        return try {
-            rounds.guides(
-                running = session.intensity == SessionIntensity.RUN,
-                unitMeters = OutingMarks.meters(session.markMiles),
-            )
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            Log.w(TAG, "Reading the usual rounds failed", e)
-            emptyList()
-        }
+    private suspend fun roundGuides(session: Session): List<RoundGuide> = if (followsRounds(session)) {
+        roundGuides(running = session.intensity == SessionIntensity.RUN, miles = session.markMiles)
+    } else {
+        emptyList()
+    }
+
+    /**
+     * The rounds an open outing with GPS may walk, read once, before it starts or at a restart of
+     * the process: runs for a run ([running]), walks for a walk, by the kilometre or the mile its
+     * marks are frozen in ([miles]). None should the read fail: the outing counts as any.
+     */
+    private suspend fun roundGuides(running: Boolean, miles: Boolean): List<RoundGuide> = try {
+        rounds.guides(running = running, unitMeters = OutingMarks.meters(miles))
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Log.w(TAG, "Reading the usual rounds failed", e)
+        emptyList()
     }
 
     private fun today(): Long = LocalDate.now(ZoneId.systemDefault()).toEpochDay()

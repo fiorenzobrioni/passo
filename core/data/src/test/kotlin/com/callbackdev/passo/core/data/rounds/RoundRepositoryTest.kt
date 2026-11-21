@@ -281,10 +281,49 @@ class RoundRepositoryTest {
         rounds.find(second)
         val guide = rounds.guides(running = false, unitMeters = 1_000.0).single()
         assertThat(guide.walks).isEqualTo(2)
-        assertThat(guide.line).isNotEmpty()
+        assertThat(guide.lines).hasSize(2)
         // Ten and fifteen minutes a kilometre: the middle is twelve and a half.
         assertThat(guide.usualAtMarks.first()).isEqualTo(750_000L)
         assertThat(rounds.guides(running = true, unitMeters = 1_000.0)).isEmpty()
+    }
+
+    @Test
+    fun `an open outing's start follows the lines of the round's latest three walks with a route`() = runTest {
+        walked(LOOP, day = 0)
+        val second = walked(LOOP, day = 1)
+        rounds.find(second)
+        val third = walked(LOOP, day = 2)
+        rounds.find(third)
+        rounds.find(walked(LOOP, day = 3))
+        val newest = walked(LOOP, day = 4)
+        rounds.find(newest)
+        assertThat(kept().single().walks).hasSize(5)
+        // Three lines at most, the newest walks' first.
+        assertThat(rounds.guides(running = false, unitMeters = 1_000.0).single().lines).hasSize(3)
+        // A walk without its route gives none: the three newest that keep one.
+        routes.forget(newest, START + 4 * DAY)
+        routes.forget(third, START + 2 * DAY)
+        val guide = rounds.guides(running = false, unitMeters = 1_000.0).single()
+        assertThat(guide.walks).isEqualTo(5)
+        assertThat(guide.lines).hasSize(3)
+        routes.forget(second, START + DAY)
+        assertThat(rounds.guides(running = false, unitMeters = 1_000.0).single().lines).hasSize(2)
+    }
+
+    @Test
+    fun `an outing taken back with Keep going is not its own round's walk at a restart`() = runTest {
+        walked(LOOP, day = 0)
+        val second = walked(LOOP, day = 1)
+        rounds.find(second)
+        val third = walked(LOOP, day = 2)
+        rounds.find(third)
+        // Ended, found, then taken back: under way again, still its round's walk until it ends.
+        val going = checkNotNull(sessions.session(third))
+        sessions.save(going.copy(state = SessionState.ACTIVE, endedAtMillis = null))
+        assertThat(kept().single().walks).contains(third)
+        val guide = rounds.guides(running = false, unitMeters = 1_000.0).single()
+        assertThat(guide.walks).isEqualTo(2)
+        assertThat(guide.lines).hasSize(2)
     }
 
     private companion object {

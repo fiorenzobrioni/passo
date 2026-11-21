@@ -201,6 +201,16 @@ abstract class SessionDao {
     @Query("SELECT * FROM session WHERE state = 'FINISHED' AND gps = 1 ORDER BY startedAtMillis, id")
     abstract suspend fun finishedWithGps(): List<SessionEntity>
 
+    /**
+     * The outings over that are walks of a usual round (Phase 20), their own rows alone: what Your
+     * rounds and each round's page group, without reading every outing the reader ever walked.
+     */
+    @Query(
+        "SELECT * FROM session WHERE state = 'FINISHED' AND id IN (SELECT sessionId FROM round_member) " +
+            "ORDER BY startedAtMillis, id",
+    )
+    abstract fun observeRoundWalks(): Flow<List<SessionEntity>>
+
     /** These outings whole, with their legs: what a round's usual at each kilometre is read from. */
     @Transaction
     @Query("SELECT * FROM session WHERE id IN (:ids) ORDER BY startedAtMillis")

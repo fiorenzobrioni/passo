@@ -895,13 +895,8 @@ private fun RoundSection(
             }
             val walks = resources.roundWalks(round.round.walks.size, format)
             // A round named by its length does not say its length twice.
-            val detail = if (round.round.round.name ==
-                null
-            ) {
-                walks
-            } else {
-                stringResource(R.string.outing_round_walks, length, walks)
-            }
+            val named = round.round.round.name != null
+            val detail = if (named) stringResource(R.string.outing_round_walks, length, walks) else walks
             val open = stringResource(R.string.rounds_open)
             Row(
                 verticalAlignment = Alignment.CenterVertically,

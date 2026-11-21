@@ -138,14 +138,16 @@ class DataSectionTest {
     }
 
     @Test
-    fun `deleting all routes says the usual rounds stay, with their history, where there are some`() {
+    fun `deleting all routes says the usual rounds stay, with their history, and that none is known again`() {
         show(
             DataUiState(contents = contents.copy(routes = 3, deletableRoutes = 3, deletableBytes = 28_400, rounds = 2)),
         )
         compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(DataTags.DELETE_ROUTES))
         compose.onNodeWithTag(DataTags.DELETE_ROUTES).performClick()
         compose.onNodeWithTag(DataTags.DELETE_ROUTES_TEXT)
-            .assertTextContains("Your usual rounds stay too, with their walks and their times.", substring = true)
+            .assertTextContains("Your usual rounds stay too, with their walks and their times", substring = true)
+        compose.onNodeWithTag(DataTags.DELETE_ROUTES_TEXT)
+            .assertTextContains("each is found as a new round", substring = true)
     }
 
     @Test

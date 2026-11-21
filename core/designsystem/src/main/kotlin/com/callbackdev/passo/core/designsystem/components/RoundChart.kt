@@ -69,14 +69,11 @@ fun RoundTimesChart(
             val first = points.first().epochDay
             val days = (points.last().epochDay - first).toFloat()
             fun x(index: Int, day: Long): Float {
-                val share = if (days >
-                    0f
-                ) {
-                    (day - first) / days
-                } else if (points.size > 1) {
-                    index / (points.size - 1f)
-                } else {
-                    0.5f
+                // By the day where the walks span days; evenly where they were all on one.
+                val share = when {
+                    days > 0f -> (day - first) / days
+                    points.size > 1 -> index / (points.size - 1f)
+                    else -> 0.5f
                 }
                 return inset + share * (size.width - 2 * inset)
             }

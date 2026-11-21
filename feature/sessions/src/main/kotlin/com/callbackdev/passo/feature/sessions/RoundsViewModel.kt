@@ -36,8 +36,9 @@ data class RoundsUiState(val rounds: List<KeptRound>, val units: UnitPreference,
 
 /**
  * «Your rounds» (PLANNING.md §11 Phase 20): the rounds as numbers, grouped off the main thread and
- * only while the page is collected; their small maps read by the rows on screen ([pictures]), as
- * «Your outings» reads its routes.
+ * only while the page is collected; their small maps read by the rows as the page draws them
+ * ([pictures]), kept thinned as «Your outings» keeps its routes. The rounds are one group on the page,
+ * a few rows: drawn together, not as they scroll on screen.
  */
 @HiltViewModel
 class RoundsViewModel

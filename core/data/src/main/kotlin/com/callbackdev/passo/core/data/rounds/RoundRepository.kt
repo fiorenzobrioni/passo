@@ -15,8 +15,10 @@ import com.callbackdev.passo.core.domain.rounds.RoundTimes
 import com.callbackdev.passo.core.domain.rounds.YourRounds
 import com.callbackdev.passo.core.domain.routes.WalkedRoute
 import com.callbackdev.passo.core.model.Round
+import com.callbackdev.passo.core.model.RoutePoint
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionIntensity
+import com.callbackdev.passo.core.model.SessionState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -63,13 +65,13 @@ constructor(
     /**
      * The rounds as the reader sees them, from their third walk (PLANNING.md §11 Phase 20, «Your
      * rounds»): each with its walks over, its usual and its picture's key, the latest walked first.
-     * Numbers alone, grouped off the main thread; read only while a page collects it. An outing under
-     * way writes its row at each batch: the rounds, whose walks are over, are grouped again only when
-     * what they hold changed.
+     * Numbers alone, the rounds' own walks and no other outing, grouped off the main thread; read
+     * only while a page collects it. An outing under way writes its row at each batch: the rounds,
+     * whose walks are over, are grouped again only when what they hold changed.
      */
     val kept: Flow<List<KeptRound>> = combine(
         rounds,
-        sessions.observeFinished().map { rows -> rows.mapNotNull { it.toModel() } }.distinctUntilChanged(),
+        sessions.observeRoundWalks().map { rows -> rows.mapNotNull { it.toModel() } }.distinctUntilChanged(),
         routes.keys,
     ) { found, outings, keys -> YourRounds.of(found, outings, keys) }
         .flowOn(Dispatchers.Default)
@@ -105,8 +107,13 @@ constructor(
 
     /**
      * The rounds an open outing with GPS may walk, read once at its start: each round of two walks
-     * or more that still has a route, its line the latest walk's, and its usual time at each
-     * kilometre in [unitMeters] (or mile), from its walks' legs. Runs only for a run, walks for a walk.
+     * over or more that still has a route, its lines its latest walks' (up to
+     * [RoundConstants.WALKS_ASKED]), and its usual time at each kilometre in [unitMeters] (or mile),
+     * from its walks' legs. Runs only for a run, walks for a walk.
+     *
+     * Only walks over: an outing taken back with «Keep going» is still its round's walk until it
+     * ends again, and read after a restart of the process it would be compared with itself, its own
+     * route so far the round's line.
      */
     suspend fun guides(running: Boolean, unitMeters: Double): List<RoundGuide> = withContext(Dispatchers.Default) {
         val members = dao.members().groupBy({ it.roundId }) { it.sessionId }
@@ -115,14 +122,19 @@ constructor(
             // A round walked daily for years is read a slice at a time: a query's parameters are bounded.
             val walks = ids.chunked(IDS_A_READ).flatMap { sessions.sessions(it) }
                 .mapNotNull { it.toModel() }
+                .filter { it.state == SessionState.FINISHED }
                 .sortedBy { it.startedAtMillis }
-            if (walks.isEmpty() || walks.all { it.running } != running) return@mapNotNull null
-            val line = walks.asReversed().firstNotNullOfOrNull { routes.route(it.id, it.startedAtMillis) }
-                ?: return@mapNotNull null
+            if (walks.size < RoundConstants.MIN_WALKS || walks.all { it.running } != running) return@mapNotNull null
+            val lines = ArrayList<List<RoutePoint>>(RoundConstants.WALKS_ASKED)
+            for (walk in walks.asReversed()) {
+                if (lines.size == RoundConstants.WALKS_ASKED) break
+                routes.route(walk.id, walk.startedAtMillis)?.points?.takeIf { it.size >= 2 }?.let { lines += it }
+            }
+            if (lines.isEmpty()) return@mapNotNull null
             val usual = RoundTimes.usual(walks) ?: return@mapNotNull null
             // A kilometre past the usual length, for a walk a little longer than the round.
             val count = ceil(usual.meters / unitMeters).toInt() + 1
-            RoundGuide(roundId, line.points, RoundTimes.usualAtMarks(walks, unitMeters, count), walks.size)
+            RoundGuide(roundId, lines, RoundTimes.usualAtMarks(walks, unitMeters, count), walks.size)
         }
     }
 
@@ -182,7 +194,9 @@ constructor(
         // of walks of it, and the newest say what it is now. An outing in no round, alone.
         val asked = near
             .groupBy { roundOf[it.id] }
-            .flatMap { (round, walks) -> if (round == null) walks.take(MAX_ALONE) else walks.take(WALKS_ASKED) }
+            .flatMap { (round, walks) ->
+                if (round == null) walks.take(MAX_ALONE) else walks.take(RoundConstants.WALKS_ASKED)
+            }
         val candidates = asked.mapNotNull { other ->
             routes.route(other.id, other.startedAtMillis)?.let { RoundCandidate(other, roundOf[other.id], it.points) }
         }
@@ -199,9 +213,6 @@ constructor(
     private val Session.running: Boolean get() = intensity == SessionIntensity.RUN
 
     private companion object {
-        /** The latest walks of a round a new one is compared with: one would do, three forgive a detour. */
-        const val WALKS_ASKED = 3
-
         /**
          * The outings in no round a new one is compared with, newest first: a bound on the reads of a
          * reader who walks a new way each day near the same door, far past what a usual round needs.

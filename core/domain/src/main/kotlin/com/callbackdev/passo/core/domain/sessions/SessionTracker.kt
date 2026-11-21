@@ -770,6 +770,8 @@ class SessionTracker(
     private fun absorb(settled: RouteSettlement) {
         if (settled.isEmpty) return
         measuredMeters += settled.measuredMeters
+        // Laid on the rounds as every point the route keeps: a restart reads them from the route.
+        watch?.add(settled.points)
         keptPoints += settled.points
         keptSamples += settled.samples
         session = session.copy(

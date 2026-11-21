@@ -60,7 +60,8 @@
     <string name="round_usual">Usually %1$s in motion, for %2$s.</string>
     <string name="round_map_spoken">Your round: %1$s, from your door and back.</string>
     <string name="round_map_spoken_line">Your round: %1$s, from %2$s to %3$s.</string>
-    <string name="round_no_map">The routes of this round\'s walks were deleted: its walks and their times stay, and a walk of it with GPS draws its map again.</string>
+    <!-- Every walk's route deleted: no line is left to know the round by, and no place outlives its outing, so its next walks make a new round. -->
+    <string name="round_no_map">The routes of this round\'s walks were deleted: its walks and their times stay, but with no line left Passo cannot know it again. Walk it with GPS, and from the third time Passo finds it as a new round, with its own times.</string>
     <string name="round_times">Its times</string>
     <!-- Under the chart: what a dot is and what the line is. -->
     <string name="round_times_note">A dot for each walk, its time in motion brought to %1$s; lower is faster. The dashed line is your usual, %2$s.</string>

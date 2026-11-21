@@ -30,7 +30,7 @@ class SessionTrackerRoundTest {
     /** The park's round: walked four times, thirteen minutes a kilometre as a rule. */
     private val park = RoundGuide(
         roundId = 7,
-        line = Ground.walk(Ground.LOOP, seed = 1),
+        lines = listOf(Ground.walk(Ground.LOOP, seed = 1)),
         usualAtMarks = listOf(13 * MINUTE, 26 * MINUTE, 39 * MINUTE),
         walks = 4,
     )
@@ -170,6 +170,22 @@ class SessionTrackerRoundTest {
     }
 
     @Test
+    fun `the round walked whole after its latest walk cut a corner keeps its line at each kilometre`() {
+        // The latest walk cut the park's south-east corner across a diagonal: still the round.
+        val cut = listOf(0.0 to 0.0, 600.0 to 0.0, 800.0 to 200.0, 800.0 to 800.0, 0.0 to 800.0, 0.0 to 0.0)
+        val alone = Walker(open(), listOf(RoundGuide(7, listOf(Ground.walk(cut, seed = 3)), park.usualAtMarks, 4)))
+        alone.walk(Ground.LOOP, 2_050.0)
+        // Its line alone: the round walked whole as a rule would be told left at the corner.
+        assertThat(alone.line?.standing).isNotEqualTo(RoundStanding.ON)
+        val round = RoundGuide(7, listOf(Ground.walk(cut, seed = 3)) + park.lines, park.usualAtMarks, walks = 4)
+        val walker = Walker(open(), listOf(round))
+        walker.walk(Ground.LOOP, 2_050.0)
+        assertThat(walker.line?.standing).isEqualTo(RoundStanding.ON)
+        assertThat(walker.line?.marks).isEqualTo(2)
+        assertThat(walker.signals.lines().map { it.standing }).doesNotContain(RoundStanding.LEFT)
+    }
+
+    @Test
     fun `an open outing with marks every ten minutes still shows the line at each kilometre, silently`() {
         val walker = Walker(open(marks = SessionMarks.TIME))
         walker.walk(Ground.LOOP, 1_100.0)
@@ -213,7 +229,7 @@ class SessionTrackerRoundTest {
 
     @Test
     fun `a kilometre the round's walks did not reach whole keeps the last comparison`() {
-        val short = RoundGuide(7, park.line, listOf(13 * MINUTE), walks = 3)
+        val short = RoundGuide(7, park.lines, listOf(13 * MINUTE), walks = 3)
         val walker = Walker(open(), listOf(short))
         walker.walk(Ground.LOOP, 2_100.0)
         assertThat(walker.line?.marks).isEqualTo(1)
