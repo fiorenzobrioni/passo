@@ -108,8 +108,8 @@
     <string name="data_delete_routes_text">Every line, and the places it went through, is deleted from this phone. Your outings and their numbers stay: the distance, the pace, the kilometres, the climb.</string>
     <!-- The same, while an outing with GPS is under way, or can still be taken back. -->
     <string name="data_delete_routes_text_keeping">Every line of the outings that are over, and the places it went through, is deleted from this phone. The outing still under way keeps its route. Your outings and their numbers stay: the distance, the pace, the kilometres, the climb.</string>
-    <!-- Where the reader has usual rounds (Phase 20): they stay, with their history, but a round with no route left has no line to be known by, and its next walks make a new round. -->
-    <string name="data_delete_routes_rounds">Your usual rounds stay too, with their walks and their times, but with no route left Passo cannot know them again: walked with GPS, each is found as a new round.</string>
+    <!-- Where the reader has usual rounds (Phase 20): they stay, with their history, but a round with no route left has no line to be known by: its next walks make a new round, and the two pages ask whether they are one. -->
+    <string name="data_delete_routes_rounds">Your usual rounds stay too, with their walks and their times, but with no route left Passo cannot know them again: walked with GPS, each is found as a new round, and Passo asks whether it is the one you had.</string>
     <string name="data_delete_routes_confirm">Delete</string>
     <string name="data_delete_routes_cancel">Cancel</string>
 </resources>

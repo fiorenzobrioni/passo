@@ -10,6 +10,7 @@ import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
 import com.callbackdev.passo.core.data.routes.RouteFile
 import com.callbackdev.passo.core.data.routes.RouteRepository
 import com.callbackdev.passo.core.data.sessions.SessionRepository
+import com.callbackdev.passo.core.domain.rounds.RoundMerge
 import com.callbackdev.passo.core.model.OutingLeg
 import com.callbackdev.passo.core.model.Round
 import com.callbackdev.passo.core.model.RoutePoint
@@ -179,6 +180,63 @@ class RoundRepositoryTest {
             rounds.find(fourth)
             assertThat(kept().map { it.walks }).containsExactly(setOf(first, second), setOf(third, fourth))
         }
+
+    @Test
+    fun `a round with no line and the round its next walks made, made one as the reader said`() = runTest {
+        // «Along the canals»: three walks, named, then every route deleted.
+        walked(LOOP, day = 0)
+        rounds.find(walked(LOOP, day = 1))
+        rounds.find(walked(LOOP, day = 2))
+        val canals = kept().single().id
+        rounds.rename(canals, "Along the canals")
+        routes.deleteAll()
+        // Three walks of it with GPS: a round of their own, beside it.
+        val fourth = walked(LOOP, day = 3)
+        rounds.find(fourth)
+        rounds.find(walked(LOOP, day = 4))
+        rounds.find(walked(LOOP, day = 5))
+        val since = kept().single { it.id != canals }
+        assertThat(since.walks).hasSize(3)
+        val shown = rounds.kept.first()
+        val lost = shown.single { it.id == canals }
+        val lined = shown.single { it.id == since.id }
+        assertThat(RoundMerge.proposal(lined, shown, rounds.apart.first())?.id).isEqualTo(canals)
+        // «The same»: from the new round's page, into it, with the old round's name.
+        rounds.merge(into = since.id, from = canals, name = RoundMerge.name(lined, lost))
+        val one = kept().single()
+        assertThat(one.id).isEqualTo(since.id)
+        assertThat(one.name).isEqualTo("Along the canals")
+        assertThat(one.walks).hasSize(6)
+        assertThat(database.roundDao().rounds().map { it.id }).containsExactly(since.id)
+        // Its map and the card's line are the walks with GPS since; its usual is all six.
+        val kept = rounds.kept.first().single()
+        assertThat(kept.walks).hasSize(6)
+        assertThat(kept.route).isNotNull()
+        assertThat(rounds.guides(running = false, unitMeters = 1_000.0).single().walks).isEqualTo(6)
+    }
+
+    @Test
+    fun `another round, and the two are never asked about again, whatever walk is deleted`() = runTest {
+        walked(LOOP, day = 0)
+        (1L..3L).forEach { rounds.find(walked(LOOP, day = it)) }
+        val canals = kept().single().id
+        routes.deleteAll()
+        val fourth = walked(LOOP, day = 4)
+        rounds.find(fourth)
+        (5L..7L).forEach { rounds.find(walked(LOOP, day = it)) }
+        val since = kept().single { it.id != canals }.id
+        val before = rounds.kept.first()
+        assertThat(RoundMerge.proposal(before.single { it.id == since }, before, rounds.apart.first())).isNotNull()
+        rounds.notOneRound(since, canals)
+        val shown = rounds.kept.first()
+        assertThat(shown).hasSize(2)
+        shown.forEach { assertThat(RoundMerge.proposal(it, shown, rounds.apart.first())).isNull() }
+        // One of the walks deleted: the answer stands through the others.
+        sessions.delete(fourth)
+        val left = rounds.kept.first()
+        assertThat(left).hasSize(2)
+        left.forEach { assertThat(RoundMerge.proposal(it, left, rounds.apart.first())).isNull() }
+    }
 
     @Test
     fun `a member's outing deleted leaves the round, and under two members the round is forgotten`() = runTest {

@@ -9,6 +9,7 @@ import com.callbackdev.passo.core.data.routes.RouteThumbnails
 import com.callbackdev.passo.core.data.settings.SettingsRepository
 import com.callbackdev.passo.core.data.time.TodaySource
 import com.callbackdev.passo.core.domain.rounds.KeptRound
+import com.callbackdev.passo.core.domain.rounds.RoundMerge
 import com.callbackdev.passo.core.domain.routes.RouteShape
 import com.callbackdev.passo.core.model.RouteKey
 import com.callbackdev.passo.core.model.UnitPreference
@@ -72,9 +73,18 @@ constructor(
  * @property round null once it is no longer one of the reader's usual rounds (forgotten, or left with
  *   fewer than three walks): the page has nothing true to show, and goes back.
  * @property map its latest walk's whole route, for the map with its gestures; null with no route left.
+ * @property same the round it may be (PLANNING.md §15, «Phase 20: two rounds made one»): for a round
+ *   with a line, one whose walks all lost their routes; for one of those, the round its walks since
+ *   made. Asked once, on either page; null when there is none, or the reader answered.
  */
 @Immutable
-data class RoundUiState(val round: KeptRound?, val map: RouteShape?, val units: UnitPreference, val today: LocalDate)
+data class RoundUiState(
+    val round: KeptRound?,
+    val map: RouteShape?,
+    val units: UnitPreference,
+    val today: LocalDate,
+    val same: KeptRound? = null,
+)
 
 /**
  * A round's page (PLANNING.md §11 Phase 20): told which round is open ([open]), as the outing's page
@@ -97,10 +107,20 @@ constructor(
             if (id == null) {
                 flowOf(null)
             } else {
-                val round = rounds.kept.map { kept -> kept.firstOrNull { it.id == id } }.distinctUntilChanged()
-                val map = round.map { it?.route }.distinctUntilChanged().mapLatest { key -> key?.let { read(it) } }
-                combine(round, map, settings.settings.map { it.units }.distinctUntilChanged()) { kept, drawn, units ->
-                    RoundUiState(kept, drawn, units, LocalDate.ofEpochDay(todaySource.epochDay()))
+                // The round, and the one it may be: the reader's answer between them is in the pairs.
+                val pair = combine(rounds.kept, rounds.apart) { kept, apart ->
+                    val round = kept.firstOrNull { it.id == id }
+                    round to round?.let { RoundMerge.proposal(it, kept, apart) }
+                }.distinctUntilChanged()
+                val map = pair.map { it.first?.route }.distinctUntilChanged().mapLatest { key -> key?.let { read(it) } }
+                combine(
+                    pair,
+                    map,
+                    settings.settings.map {
+                        it.units
+                    }.distinctUntilChanged(),
+                ) { (kept, same), drawn, units ->
+                    RoundUiState(kept, drawn, units, LocalDate.ofEpochDay(todaySource.epochDay()), same)
                 }
             }
         }
@@ -118,6 +138,21 @@ constructor(
     fun rename(name: String) {
         val id = opened.value ?: return
         viewModelScope.launch { rounds.rename(id, name) }
+    }
+
+    /**
+     * «The same round»: the open round and [other] are one. Its page stays open on them made one: the
+     * other's walks come into it, with the name of the round that kept its walks the longest.
+     */
+    fun same(other: KeptRound) {
+        val round = state.value?.round ?: return
+        viewModelScope.launch { rounds.merge(into = round.id, from = other.id, name = RoundMerge.name(round, other)) }
+    }
+
+    /** «Another round»: the open round and [other] are not one, never asked about again. */
+    fun another(other: KeptRound) {
+        val id = opened.value ?: return
+        viewModelScope.launch { rounds.notOneRound(id, other.id) }
     }
 
     /** «Forget this round»: the round and its pairs go; its outings stay, as they are. */

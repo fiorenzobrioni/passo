@@ -11,6 +11,7 @@ import com.callbackdev.passo.core.domain.rounds.RoundChoice
 import com.callbackdev.passo.core.domain.rounds.RoundConstants
 import com.callbackdev.passo.core.domain.rounds.RoundFinder
 import com.callbackdev.passo.core.domain.rounds.RoundGuide
+import com.callbackdev.passo.core.domain.rounds.RoundMerge
 import com.callbackdev.passo.core.domain.rounds.RoundTimes
 import com.callbackdev.passo.core.domain.rounds.YourRounds
 import com.callbackdev.passo.core.domain.routes.WalkedRoute
@@ -75,6 +76,14 @@ constructor(
         routes.keys,
     ) { found, outings, keys -> YourRounds.of(found, outings, keys) }
         .flowOn(Dispatchers.Default)
+        .distinctUntilChanged()
+
+    /**
+     * The pairs of outings the reader said are not the same round, each the smaller id first: what
+     * keeps two rounds they said are not one from being asked about again ([RoundMerge]).
+     */
+    val apart: Flow<Set<Pair<Long, Long>>> = dao.observeApart()
+        .map { rows -> rows.mapTo(HashSet()) { it.firstId to it.secondId } }
         .distinctUntilChanged()
 
     /**
@@ -143,6 +152,17 @@ constructor(
 
     /** «Forget this round»: the round and its pairs go; the outings stay, as they are. */
     suspend fun forget(roundId: Long) = lock.withLock { dao.forget(roundId) }
+
+    /**
+     * «The same round»: the two rounds the reader said are one (PLANNING.md §15, «Phase 20: two rounds
+     * made one»), [from]'s walks into [into], which is named [name] ([RoundMerge.name]).
+     */
+    suspend fun merge(into: Long, from: Long, name: String?) = lock.withLock {
+        dao.merge(into, from, name?.trim()?.takeIf { it.isNotEmpty() })
+    }
+
+    /** «Another round»: the two rounds are not one, and are never asked about again. */
+    suspend fun notOneRound(first: Long, second: Long) = lock.withLock { dao.apartRounds(first, second) }
 
     /** The reader's own name for the round [roundId]; none, or a blank one, names it from its length. */
     suspend fun rename(roundId: Long, name: String?) = dao.rename(roundId, name?.trim()?.takeIf { it.isNotEmpty() })

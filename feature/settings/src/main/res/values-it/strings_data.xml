@@ -115,7 +115,7 @@
     <string name="data_delete_routes_title">Eliminare tutti i percorsi?</string>
     <string name="data_delete_routes_text">Ogni linea, con i luoghi che attraversa, viene eliminata da questo telefono. Le uscite e i loro numeri restano: la distanza, l’andatura, i chilometri, la salita.</string>
     <string name="data_delete_routes_text_keeping">Ogni linea delle uscite finite, con i luoghi che attraversa, viene eliminata da questo telefono. L’uscita ancora in corso tiene il suo percorso. Le uscite e i loro numeri restano: la distanza, l’andatura, i chilometri, la salita.</string>
-    <string name="data_delete_routes_rounds">Restano anche i tuoi giri soliti, con le loro uscite e i loro tempi, ma senza più un percorso Passo non può riconoscerli: ripercorrendoli con il GPS, li trova come giri nuovi.</string>
+    <string name="data_delete_routes_rounds">Restano anche i tuoi giri soliti, con le loro uscite e i loro tempi, ma senza più un percorso Passo non può riconoscerli: ripercorrendoli con il GPS, li trova come giri nuovi, e ti chiede se sono quelli che avevi.</string>
     <string name="data_delete_routes_confirm">Elimina</string>
     <string name="data_delete_routes_cancel">Annulla</string>
 </resources>

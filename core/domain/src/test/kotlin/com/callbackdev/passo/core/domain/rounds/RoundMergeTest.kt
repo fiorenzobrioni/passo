@@ -1,0 +1,93 @@
+package com.callbackdev.passo.core.domain.rounds
+
+import com.callbackdev.passo.core.model.Round
+import com.callbackdev.passo.core.model.RouteKey
+import com.callbackdev.passo.core.model.SessionIntensity
+import com.google.common.truth.Truth.assertThat
+import org.junit.Test
+
+/**
+ * Two rounds that may be one, asked of the reader (PLANNING.md §15, «Phase 20: two rounds made
+ * one»): a round whose walks all lost their routes, and the round its next walks made.
+ */
+class RoundMergeTest {
+    /** [count] walks of [meters], a week apart from [firstDay], ids from [firstId]. */
+    private fun round(
+        id: Long,
+        firstId: Long,
+        count: Int,
+        meters: Double = 4_260.0,
+        lined: Boolean,
+        name: String? = null,
+        firstDay: Long = 0,
+        intensity: SessionIntensity = SessionIntensity.FREE,
+    ): KeptRound {
+        val walks = (0 until count).map {
+            Ground.outing(firstId + it, meters, 52.0 - it, day = firstDay + it * 7L, intensity = intensity)
+        }
+        val latest = walks.last()
+        return KeptRound(
+            round = Round(id, name, walks.map { it.id }.toSet()),
+            walks = walks,
+            usual = checkNotNull(RoundTimes.usual(walks)),
+            route = if (lined) RouteKey(latest.id, latest.startedAtMillis, 1_400) else null,
+            running = intensity == SessionIntensity.RUN,
+        )
+    }
+
+    // «Along the canals»: ten walks, every route deleted; then three walks of it with GPS.
+    private val canals = round(1, firstId = 1, count = 10, lined = false, name = "Along the canals")
+    private val since = round(2, firstId = 20, count = 3, lined = true, firstDay = 100)
+
+    @Test
+    fun `the round its next walks made asks whether it is the one with no line, and that one asks back`() {
+        val rounds = listOf(since, canals)
+        assertThat(RoundMerge.proposal(since, rounds, emptySet())?.id).isEqualTo(1L)
+        assertThat(RoundMerge.proposal(canals, rounds, emptySet())?.id).isEqualTo(2L)
+    }
+
+    @Test
+    fun `two rounds with a line, or two with none, are never asked about`() {
+        val other = round(3, firstId = 40, count = 3, lined = true, firstDay = 200)
+        assertThat(RoundMerge.proposal(since, listOf(since, other), emptySet())).isNull()
+        val lost = round(4, firstId = 60, count = 4, lined = false)
+        assertThat(RoundMerge.proposal(canals, listOf(canals, lost), emptySet())).isNull()
+    }
+
+    @Test
+    fun `lengths more than a tenth apart, or a run and a walk, are not asked about`() {
+        val longer = round(3, firstId = 40, count = 3, meters = 4_800.0, lined = true, firstDay = 200)
+        assertThat(RoundMerge.proposal(canals, listOf(canals, longer), emptySet())).isNull()
+        val run = round(3, firstId = 40, count = 3, lined = true, firstDay = 200, intensity = SessionIntensity.RUN)
+        assertThat(RoundMerge.proposal(canals, listOf(canals, run), emptySet())).isNull()
+    }
+
+    @Test
+    fun `once the reader answered another round, any pair of their walks keeps it unasked`() {
+        val rounds = listOf(since, canals)
+        val answered = setOf(5L to 21L)
+        assertThat(RoundMerge.proposal(since, rounds, answered)).isNull()
+        assertThat(RoundMerge.proposal(canals, rounds, answered)).isNull()
+        // A pair of other outings says nothing of these two.
+        assertThat(RoundMerge.proposal(since, rounds, setOf(5L to 99L))?.id).isEqualTo(1L)
+    }
+
+    @Test
+    fun `of two that may be it, the closest in length is asked first, then the one walked more`() {
+        val near = round(3, firstId = 40, count = 3, meters = 4_250.0, lined = false)
+        val far = round(4, firstId = 60, count = 6, meters = 4_000.0, lined = false)
+        assertThat(RoundMerge.proposal(since, listOf(since, far, near), emptySet())?.id).isEqualTo(3L)
+        val same = round(5, firstId = 80, count = 12, meters = 4_250.0, lined = false)
+        assertThat(RoundMerge.proposal(since, listOf(since, near, same), emptySet())?.id).isEqualTo(5L)
+    }
+
+    @Test
+    fun `made one, they keep the name of the round with no line, else the other's`() {
+        assertThat(RoundMerge.name(since, canals)).isEqualTo("Along the canals")
+        assertThat(RoundMerge.name(canals, since)).isEqualTo("Along the canals")
+        val unnamed = round(1, firstId = 1, count = 10, lined = false)
+        val named = round(2, firstId = 20, count = 3, lined = true, firstDay = 100, name = "Canals again")
+        assertThat(RoundMerge.name(named, unnamed)).isEqualTo("Canals again")
+        assertThat(RoundMerge.name(since, unnamed)).isNull()
+    }
+}

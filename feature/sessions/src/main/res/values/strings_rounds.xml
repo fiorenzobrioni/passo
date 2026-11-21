@@ -61,7 +61,15 @@
     <string name="round_map_spoken">Your round: %1$s, from your door and back.</string>
     <string name="round_map_spoken_line">Your round: %1$s, from %2$s to %3$s.</string>
     <!-- Every walk's route deleted: no line is left to know the round by, and no place outlives its outing, so its next walks make a new round. -->
-    <string name="round_no_map">The routes of this round\'s walks were deleted: its walks and their times stay, but with no line left Passo cannot know it again. Walk it with GPS, and from the third time Passo finds it as a new round, with its own times.</string>
+    <string name="round_no_map">The routes of this round\'s walks were deleted: its walks and their times stay, but with no line left Passo cannot know it again. Walk it with GPS, and from the third time Passo finds it as a new round, and asks whether it is this one.</string>
+    <!-- Two rounds that may be one (PLANNING.md §15, «Phase 20: two rounds made one»): one lost every walk's route, the other was made by the walks since. Asked on either's page, once; «The same» makes them one, «Another round» keeps them two. -->
+    <string name="round_same_title">Is this “%1$s”?</string>
+    <!-- On the page of the round the new walks made: the other is the one with no line. -->
+    <string name="round_same_text_lost">“%1$s” lost the routes of its walks, so Passo could not tell whether this round is it. If it is, the two become one, with all their walks and their times.</string>
+    <!-- On the page of the round with no line: the other is the one its walks since made. -->
+    <string name="round_same_text_since">Your walks of it since its routes were deleted may have made “%1$s”. If they did, the two become one, with all their walks and their times.</string>
+    <string name="round_same_yes">The same</string>
+    <string name="round_same_no">Another round</string>
     <string name="round_times">Its times</string>
     <!-- Under the chart: what a dot is and what the line is. -->
     <string name="round_times_note">A dot for each walk, its time in motion brought to %1$s; lower is faster. The dashed line is your usual, %2$s.</string>

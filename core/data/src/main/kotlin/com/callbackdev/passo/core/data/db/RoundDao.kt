@@ -31,6 +31,9 @@ abstract class RoundDao {
     @Query("SELECT * FROM round_apart")
     abstract suspend fun apart(): List<RoundApartEntity>
 
+    @Query("SELECT * FROM round_apart")
+    abstract fun observeApart(): Flow<List<RoundApartEntity>>
+
     @Query("SELECT roundId FROM round_member WHERE sessionId = :sessionId")
     abstract suspend fun roundOf(sessionId: Long): Long?
 
@@ -120,6 +123,32 @@ abstract class RoundDao {
         if (walks.isNotEmpty()) deleteApartOf(walks)
         deleteMembers(roundId)
         deleteRound(roundId)
+    }
+
+    /**
+     * Two rounds made one, as the reader said (PLANNING.md §15, «Phase 20: two rounds made one»):
+     * the walks of [from] become [into]'s, which takes [name]; [from], left with none, is forgotten.
+     * Two rounds with a pair of walks said not the same are never asked about, so none is undone.
+     */
+    @Transaction
+    open suspend fun merge(into: Long, from: Long, name: String?) {
+        if (into == from) return
+        val walks = walksOf(from)
+        if (walks.isEmpty() || walksOf(into).isEmpty()) return
+        upsertMembers(walks.map { RoundMemberEntity(it, into) })
+        rename(into, name)
+        prune()
+    }
+
+    /**
+     * «Another round»: the two rounds the reader said are not one. Each walk of one is kept not the
+     * same as each walk of the other, so that no walk deleted later lets the question come back.
+     */
+    @Transaction
+    open suspend fun apartRounds(first: Long, second: Long) {
+        val a = walksOf(first)
+        val b = walksOf(second)
+        insertApart(a.flatMap { x -> b.filter { it != x }.map { y -> apart(x, y) } })
     }
 
     /**

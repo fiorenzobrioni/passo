@@ -21,6 +21,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.callbackdev.passo.core.designsystem.components.RoundChartTags
 import com.callbackdev.passo.core.designsystem.components.RouteMapTags
 import com.callbackdev.passo.core.designsystem.theme.PassoTheme
+import com.callbackdev.passo.core.domain.rounds.KeptRound
 import com.callbackdev.passo.core.testing.assertAccessible
 import com.callbackdev.passo.core.testing.walkPage
 import com.google.common.truth.Truth.assertThat
@@ -45,6 +46,8 @@ class RoundsScreenTest {
     private var outing: Long? = null
     private var forgot = false
     private var back = false
+    private var same: KeptRound? = null
+    private var another: KeptRound? = null
 
     private fun showList(state: RoundsUiState? = RoundSamples.list(), dark: Boolean = false) {
         compose.setContent {
@@ -61,6 +64,8 @@ class RoundsScreenTest {
                     onOpenOuting = { outing = it },
                     onRename = {},
                     onForget = { forgot = true },
+                    onSame = { same = it },
+                    onAnother = { another = it },
                 )
             }
         }
@@ -145,6 +150,58 @@ class RoundsScreenTest {
         compose.onNodeWithTag(RoundsTags.NO_MAP).assertIsDisplayed()
         compose.onNodeWithTag(RouteMapTags.MAP).assertDoesNotExist()
         compose.onNodeWithTag(RoundsTags.PAGE).performScrollToNode(hasTestTag(RoundChartTags.TIMES))
+    }
+
+    @Test
+    fun `the round the walks since made asks whether it is the one with no line, and is answered`() {
+        val lost = RoundSamples.lost()
+        showPage(RoundSamples.page(same = lost))
+        compose.onNodeWithText("Is this “Along the canals”?").assertIsDisplayed()
+        compose.onNodeWithText("lost the routes of its walks", substring = true).assertIsDisplayed()
+        snapshot("round_same")
+        compose.onNodeWithTag(RoundsTags.SAME_NO).performClick()
+        assertThat(another?.id).isEqualTo(lost.id)
+        compose.onNodeWithTag(RoundsTags.SAME_YES).performClick()
+        assertThat(same?.id).isEqualTo(lost.id)
+    }
+
+    @Test
+    fun `the round with no line asks back whether the round its walks since made is it`() {
+        val since = RoundSamples.round()
+        showPage(RoundSamples.page(name = "Along the canals", map = false, same = since))
+        compose.onNodeWithText("Is this “Your round of 4.26 km”?").assertIsDisplayed()
+        compose.onNodeWithText("since its routes were deleted may have made", substring = true).assertIsDisplayed()
+        compose.onNodeWithTag(RoundsTags.NO_MAP).assertIsDisplayed()
+        snapshot("round_same_lost")
+    }
+
+    @Test
+    fun `with nothing to ask, no question`() {
+        showPage()
+        compose.onNodeWithTag(RoundsTags.SAME).assertDoesNotExist()
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT-w360dp-h640dp-xhdpi")
+    fun `the question in Italian on a small phone`() {
+        showPage(RoundSamples.page(same = RoundSamples.lost("Lungo i navigli")))
+        compose.onNodeWithText("È «Lungo i navigli»?").assertIsDisplayed()
+        compose.onNodeWithTag(RoundsTags.SAME_YES).assertTextContains("Lo stesso")
+        compose.onNodeWithTag(RoundsTags.SAME_NO).assertTextContains("Un altro giro")
+        snapshot("round_same_it")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h640dp-xhdpi", fontScale = 2f)
+    fun `the question at twice the text size`() {
+        showPage(RoundSamples.page(same = RoundSamples.lost()))
+        compose.walkPage(hasTestTag(RoundsTags.PAGE), "round_same_large_text")
+    }
+
+    @Test
+    fun `in the dark, the question`() {
+        showPage(RoundSamples.page(same = RoundSamples.lost()), dark = true)
+        snapshot("round_same_dark")
     }
 
     /*

@@ -86,10 +86,28 @@ internal object RoundSamples {
     }
 
     /** A round's page, with its map. */
-    fun page(name: String? = null, map: Boolean = true): RoundUiState = RoundUiState(
-        round = round(name = name),
+    fun page(name: String? = null, map: Boolean = true, same: KeptRound? = null): RoundUiState = RoundUiState(
+        // With no map, no walk of it keeps a route: the round with no line.
+        round = round(name = name).let { if (map) it else it.copy(route = null) },
         map = if (map) RouteShape.of(OutingSamples.points()) else null,
         units = UnitPreference.METRIC,
         today = LocalDate.of(2026, 11, 21),
+        same = same,
     )
+
+    /**
+     * «Along the canals» as it was before every route was deleted: walked since May, named, with no
+     * line now; the round its walks since made may be it.
+     */
+    fun lost(name: String? = "Along the canals"): KeptRound = round(
+        walks = walks().mapIndexed { index, it ->
+            it.copy(
+                id = 300L + index,
+                startedAtMillis = it.startedAtMillis - 20 * WEEK,
+                localEpochDay = it.localEpochDay - 140,
+            )
+        },
+        name = name,
+        route = null,
+    ).let { it.copy(round = it.round.copy(id = 9)) }
 }

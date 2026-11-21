@@ -223,18 +223,17 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
   - a round's page: the map pinched and dragged, the chart, rename (the dialog, its keyboard),
     «Forget this round»; «Delete all routes» saying the rounds stay, and that with no route left
     Passo cannot know them again;
+  - a named round's routes all deleted, then the round walked three times with GPS: both pages ask
+    «Is this …?»; «Another round» keeps two and is not asked again; «The same» makes one, with the
+    old name, every walk, the map and the card's line at the next walk (§15 «Phase 20: two rounds
+    made one»);
   - in both themes, at a large text size, on the open foldable, with TalkBack on the chart.
 
-- [ ] **Decision (owner): a round whose walks all lost their routes** (§15 «Phase 20 reviewed: the
-  line held by the round's latest walks», 21 Nov 2026). As built it stays as history, with its
-  walks, times and name, and with no line it is never found again: its next walks with GPS make a
-  new round beside it, and «Your rounds» can show two rows for one round. Its page and «Delete all
-  routes» now say so. Proposed: the two made one when the reader says so, never by a guess. Once
-  the new round is known (its third walk) and a round with no line of the same kind, walks or runs,
-  has a usual length within a tenth of its own, the new round's page asks once whether it is that
-  one. «The same» moves the new walks into the old round, which keeps its name and its whole
-  history; «Not this one» keeps a pair of their walks in `round_apart`, and is not asked again.
-  Not built until the owner says.
+- [x] **Decision (owner): a round whose walks all lost their routes** (§15 «Phase 20 reviewed: the
+  line held by the round's latest walks», 21 Nov 2026). As built it stayed as history, with its
+  walks, times and name, and with no line it was never found again: its next walks with GPS made a
+  new round beside it. Decided by the owner on 21 Nov 2026: made one when the reader says so, never
+  by a guess, and built the same day (§15 «Phase 20: two rounds made one»).
 
 - [ ] **The figures of the two measures, written** (archive 05, «The phone checks up to Phase 23
   done», 21 Nov 2026). The owner made both measures, Phase 15's and Phase 13's 30-minute interval outing;
@@ -1384,6 +1383,44 @@ entries are written below.
     the modules touched (`:core:domain`, `:core:data`, `:core:tracking`, `:core:designsystem`,
     `:feature:sessions`, `:feature:settings`, `:feature:guide`: 1,377 tests, none failed), green on
     this machine. No picture of the README shows what changed.
+
+- **21 Nov 2026.** **Phase 20: two rounds made one** (owner: "for point 2, do Merge as you
+  advise").
+  - **The case.** A round has no line of its own: its line is its walks' routes, and no place
+    outlives its outing. Once every walk of a round lost its route («Delete all routes», or each
+    deleted on its page), no new walk can be compared with it: the next walks with GPS make a new
+    round, from the third time, and «Your rounds» shows two rows for one round. The old one keeps
+    its name and its months of walks, and never grows again; the new one compares each walk with
+    the few since. Passo cannot know they are one: with no line, only their lengths are left, and
+    two rounds of one length from the same door are two rounds (§11 Phase 20's edge cases).
+  - **Asked, never guessed** (`RoundMerge`, pure). A round with no line and a round with one, both
+    shown (three walks or more), of the same kind (walks or runs), their usual lengths within a
+    tenth, and no pair of their walks said not the same: each one's page asks whether it is the
+    other, «Is this “Along the canals”?», under its sentence. Of several, the closest in length is
+    asked first, then the one walked more.
+    - «The same» (`RoundRepository.merge`, `RoundDao.merge`): the other round's walks come into the
+      one whose page is open, which stays open on the two made one; the name is the reader's for the
+      round with no line, the one they walked for months, else the other's. The other round, left
+      with no walk, is forgotten. Nothing new is kept: the round is now what §11 Phase 20 already
+      allows, «a member whose route is deleted stays a member for its times; the map from another
+      member», and its usual at each kilometre comes from every walk's legs.
+    - «Another round» (`RoundRepository.notOneRound`, `RoundDao.apartRounds`): every walk of one is
+      kept not the same as every walk of the other, in `round_apart`, the table «Not the same round»
+      already writes, and the pairs go in the backup with it: no walk deleted later lets the
+      question come back, and no search is changed by them (a search reads only the pairs of the
+      outing it searches).
+    - The round with no line's page, «Delete all routes» and the guide say that Passo asks; the
+      CHANGELOG too.
+  - Tests: `RoundMergeTest` (both pages ask, two with lines or two without never, lengths and kinds,
+    the answer kept, the closest first, the name), `RoundRepositoryTest` (made one with the old name
+    and the six walks, its line the walks since; «Another round» standing when a walk is deleted),
+    `RoundsScreenTest` (the question on either page and its two answers, in Italian on a small
+    phone, at twice the text size, in the dark).
+  - Checked: `spotlessCheck`, `:app:checkForbiddenPermissions`, `:app:lintDebug`, and the tests of
+    `:core:domain`, `:core:data`, `:core:tracking`, `:feature:sessions`, `:feature:settings` and
+    `:feature:guide` (1,365 tests, none failed), green on this machine; the question's pictures
+    looked at, in both themes, in Italian on a small phone and at twice the text size. No picture of
+    the README shows it.
 
 ### Open
 

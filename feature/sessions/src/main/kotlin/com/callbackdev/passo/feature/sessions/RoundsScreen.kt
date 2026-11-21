@@ -21,6 +21,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -303,6 +304,8 @@ fun RoundRoute(
         onRename = viewModel::rename,
         // The page goes back by itself once the round is gone (below): one back, never two.
         onForget = viewModel::forget,
+        onSame = viewModel::same,
+        onAnother = viewModel::another,
     )
 }
 
@@ -322,6 +325,8 @@ fun RoundScreen(
     onRename: (String) -> Unit,
     onForget: () -> Unit,
     modifier: Modifier = Modifier,
+    onSame: (KeptRound) -> Unit = {},
+    onAnother: (KeptRound) -> Unit = {},
 ) {
     val scroll = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val resources = LocalResources.current
@@ -372,6 +377,9 @@ fun RoundScreen(
                 onOpenOuting,
                 onForget = { forgetting = true },
                 Modifier.fillMaxSize().padding(padding),
+                same = state.same,
+                onSame = onSame,
+                onAnother = onAnother,
             )
             if (renaming) {
                 RenameDialog(
@@ -415,6 +423,9 @@ private fun RoundPage(
     onOpenOuting: (Long) -> Unit,
     onForget: () -> Unit,
     modifier: Modifier,
+    same: KeptRound? = null,
+    onSame: (KeptRound) -> Unit = {},
+    onAnother: (KeptRound) -> Unit = {},
 ) {
     val resources = LocalResources.current
     val trend = resources.roundTrendSentence(round.trend, today, format)
@@ -441,6 +452,10 @@ private fun RoundPage(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+        }
+        // The round it may be, asked once: Passo cannot know it, the reader can.
+        if (same != null) {
+            item(key = "same") { SameRoundQuestion(same, format, onSame, onAnother) }
         }
         item(key = "map") {
             Box(Modifier.padding(horizontal = ScreenMargin)) {
@@ -620,6 +635,54 @@ private fun RenameDialog(current: String, onSave: (String) -> Unit, onDismiss: (
     )
 }
 
+/**
+ * Whether this page's round and [other] are one (PLANNING.md §15, «Phase 20: two rounds made one»): one of them
+ * lost every walk's route, so Passo could not know the other's walks were it. Asked, never guessed:
+ * «The same» makes them one on this page, «Another round» keeps them two and is not asked again.
+ */
+@Composable
+private fun SameRoundQuestion(
+    other: KeptRound,
+    format: MeasureFormatter,
+    onSame: (KeptRound) -> Unit,
+    onAnother: (KeptRound) -> Unit,
+) {
+    val resources = LocalResources.current
+    val name = resources.roundName(other, format)
+    // This page's round has a line, the other none: its walks lost their routes. Or the other way.
+    val lost = other.route == null
+    RoundGroup {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.testTag(RoundsTags.SAME)) {
+            Text(
+                stringResource(R.string.round_same_title, name),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() },
+            )
+            Text(
+                stringResource(if (lost) R.string.round_same_text_lost else R.string.round_same_text_since, name)
+                    .unorphaned(),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            // As the app's other questions are answered: the answer that keeps things as they are first.
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                TextButton(
+                    onClick = { onAnother(other) },
+                    modifier = Modifier.heightIn(min = 48.dp).testTag(RoundsTags.SAME_NO),
+                ) { Text(stringResource(R.string.round_same_no)) }
+                FilledTonalButton(
+                    onClick = { onSame(other) },
+                    modifier = Modifier.heightIn(min = 48.dp).testTag(RoundsTags.SAME_YES),
+                ) { Text(stringResource(R.string.round_same_yes)) }
+            }
+        }
+    }
+}
+
 /** A part of the page on its own rounded ground, as wide as the page's groups. */
 @Composable
 private fun RoundGroup(content: @Composable () -> Unit) {
@@ -671,4 +734,7 @@ object RoundsTags {
     const val NAME_SAVE = "round_name_save"
     const val FORGET = "round_forget"
     const val FORGET_CONFIRM = "round_forget_confirm"
+    const val SAME = "round_same"
+    const val SAME_YES = "round_same_yes"
+    const val SAME_NO = "round_same_no"
 }
