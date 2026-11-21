@@ -128,6 +128,7 @@ fun TodayRoute(
     onOpenYear: (Int) -> Unit = {},
     onOpenOuting: (Long) -> Unit = {},
     bottomPadding: Dp = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding(),
+    onOpenWalk: (WayId) -> Unit = {},
     viewModel: TodayViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -185,6 +186,8 @@ fun TodayRoute(
                 onClose = { viewModel.closeSession(id) },
                 onGps = viewModel::gps,
                 onOpen = { onOpenOuting(id) },
+                // A city walk's card draws the walk's map: a touch on it opens the walk (Phase 23).
+                onOpenWalk = current.session?.session?.walk?.let { walk -> { onOpenWalk(walk) } },
             )
         },
     )

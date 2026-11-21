@@ -2,6 +2,9 @@
 
 - Status: accepted
 - Date: 2026-09-25
+- Amended: 21 Nov 2026 (owner; PLANNING.md §11 Phase 23, step 23.1): decision 8's «a tap opens
+  Today» made true, and each goal notification opens the page that holds what it says (decision
+  8, below)
 
 ## Context
 
@@ -67,6 +70,24 @@ that say so, and a screen that never promises what Android will drop.
    widget's tap does. Settings adds it with the system's own prompt
    (`StatusBarManager.requestAddTileService`), and says where it stands only once the system
    has answered: Passo cannot see the panel, and does not guess.
+
+   *Amended 21 Nov 2026 (owner; PLANNING.md §11 Phase 23, step 23.1):* confirmed, and made
+   true. The doors' review found that the tile, both widgets and the counting notification
+   opened the page the app was last left on, a Way or Settings, not Today: they sent the app's
+   launch intent alone, which brings its `singleTask` task back as it was, and only a launcher
+   shortcut asked for Today. Each now names the page it opens, with an extra on that intent
+   (`AppDoors`), read once per touch by the activity: Today, or, while it shows an outing
+   under way, that outing's page (Phase 21); a paused tile or card opens Today asking to resume,
+   where its button is. Today comes forward with what was over it cleared, so back from it, or
+   from a page opened over it, lands on Today and not on the page left behind. The goal
+   notifications follow the same rule: goal reached and the evening reminder open Today; the
+   weekly summary opens its week in History (decision 4: «the week History shows»), where its
+   numbers are. Two rules came with it. Each door has its own request code (`DoorRequest`):
+   Android keeps one `PendingIntent` per intent and code whatever its extras, and a stage's
+   notification and an outing's had shared one, so the later one's extras went to both. And an
+   intent Android hands back when the app is opened from Recents after it was left by back
+   (`FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY`) is not a touch: it would have opened its page, or
+   started its shortcut's outing, a second time.
 
 ## Consequences
 

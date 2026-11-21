@@ -162,7 +162,14 @@ internal class WayNotifications(private val context: Context) {
         val note = placeNoteRes(stage.key)?.let(res::getString)
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_steps)
-            .setContentIntent(context.openAppIntent(REQUEST_WAY) { putExtra(WayIntents.EXTRA_OPEN_WAYS, true) })
+            // Its way's page, where the new stamp is: the list would leave the reader to find the
+            // one way and the one place it names (PLANNING.md §11 Phase 23).
+            .setContentIntent(
+                context.openAppIntent(DoorRequest.WAY) {
+                    putExtra(AppDoors.EXTRA_OPEN_WAY, progress.way.id.name)
+                    putExtra(AppDoors.EXTRA_OPEN_JOURNEY, progress.journey.id)
+                },
+            )
             .setAutoCancel(true)
             // Not "only alert once": a new stage is news, even with the last one still in the shade.
             .setCategory(NotificationCompat.CATEGORY_EVENT)
@@ -185,12 +192,5 @@ internal class WayNotifications(private val context: Context) {
     companion object {
         const val CHANNEL_ID = "ways"
         const val ID_WAY = 6
-        private const val REQUEST_WAY = 16
     }
-}
-
-/** What a stage's notification asks of the app when touched. */
-object WayIntents {
-    /** On the app's launch intent: open the Ways page. */
-    const val EXTRA_OPEN_WAYS = "com.callbackdev.passo.extra.OPEN_WAYS"
 }

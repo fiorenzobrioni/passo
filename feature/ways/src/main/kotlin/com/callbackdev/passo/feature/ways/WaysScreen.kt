@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -70,16 +71,21 @@ import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.model.WayJourneyState
 import java.time.LocalDate
 
-/** The Ways page, with its state from [WaysViewModel]. */
+/**
+ * The Ways page, with its state from [WaysViewModel].
+ *
+ * @param atCities opened at the cities' header, from the Outings page's door to them.
+ */
 @Composable
 fun WaysRoute(
     onBack: () -> Unit,
     onOpenWay: (WayId, Long?) -> Unit,
     onOpenContinent: (Continent) -> Unit,
+    atCities: Boolean = false,
     viewModel: WaysViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    WaysScreen(state, onBack, onOpenWay, onOpenContinent)
+    WaysScreen(state, onBack, onOpenWay, onOpenContinent, atCities = atCities)
 }
 
 /**
@@ -87,6 +93,10 @@ fun WaysRoute(
  * with its map; the ways by continent, each by length with what it would take at the reader's
  * pace; the cities, by continent, each with its map and where its walks stand; and the ways
  * finished or left, the cities walked. Each opens its own page.
+ *
+ * @param atCities the page opens with the cities' header at its top (PLANNING.md §11 Phase 23):
+ *   the reader came by the door to the city walks, and the ways of five continents stand above
+ *   them. Its order is the same, and the ways a swipe up.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,6 +106,7 @@ fun WaysScreen(
     onOpenWay: (WayId, Long?) -> Unit,
     onOpenContinent: (Continent) -> Unit,
     modifier: Modifier = Modifier,
+    atCities: Boolean = false,
 ) {
     val scroll = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     Scaffold(
@@ -114,7 +125,9 @@ fun WaysScreen(
         },
     ) { padding ->
         // Until the days are read, a bare page: a list without them would say nothing is walked.
-        if (state != null) WaysList(state, onOpenWay, onOpenContinent, Modifier.fillMaxSize().padding(padding))
+        if (state != null) {
+            WaysList(state, onOpenWay, onOpenContinent, atCities, Modifier.fillMaxSize().padding(padding))
+        }
     }
 }
 
@@ -123,10 +136,16 @@ private fun WaysList(
     state: WaysUiState,
     onOpenWay: (WayId, Long?) -> Unit,
     onOpenContinent: (Continent) -> Unit,
+    atCities: Boolean,
     modifier: Modifier,
 ) {
     val format = rememberMeasureFormatter(state.units)
+    // Placed there from the first frame, not scrolled to: the page arrives where it was asked to,
+    // with nothing passing under the reader's eyes. Saved as any list's place is, so a rotation
+    // keeps where the reader then scrolled.
+    val list = rememberLazyListState(initialFirstVisibleItemIndex = if (atCities) citiesHeaderIndex(state) else 0)
     LazyColumn(
+        state = list,
         modifier = modifier.testTag(WaysTags.LIST),
         contentPadding = pageGutter(sideInsets = false).contentPadding(bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -164,8 +183,12 @@ private fun WaysList(
                 }
             }
         }
-        item(key = "cities-header") {
-            IntroducedHeader(stringResource(R.string.ways_group_cities), stringResource(R.string.ways_cities_intro))
+        item(key = CITIES_HEADER_KEY) {
+            IntroducedHeader(
+                stringResource(R.string.ways_group_cities),
+                stringResource(R.string.ways_cities_intro),
+                Modifier.testTag(WaysTags.CITIES_HEADER),
+            )
         }
         item(key = "cities") {
             // Ten cities was the ceiling of one flat list: past it, a row a continent, each
@@ -192,10 +215,23 @@ private fun WaysList(
     }
 }
 
+private const val CITIES_HEADER_KEY = "cities-header"
+
+/**
+ * Where the cities' header stands in [WaysList]: after the intro, the way under way if there is
+ * one, the ways' header and a group for each continent with ways. Kept beside the list it counts,
+ * and pinned by a test that opens the page at it.
+ */
+private fun citiesHeaderIndex(state: WaysUiState): Int {
+    val active = if (state.active != null) 1 else 0
+    val continents = Continent.entries.count { Ways.waysIn(it).isNotEmpty() }
+    return 1 + active + 1 + continents
+}
+
 /** A group's header with the line under it that says what the group holds. */
 @Composable
-private fun IntroducedHeader(title: String, intro: String) {
-    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+private fun IntroducedHeader(title: String, intro: String, modifier: Modifier = Modifier) {
+    Column(modifier, verticalArrangement = Arrangement.spacedBy(2.dp)) {
         Header(title)
         Text(
             text = intro,
@@ -541,6 +577,7 @@ object WaysTags {
     const val ACTIVE = "ways_active"
     const val YOURS = "ways_yours"
     const val CITIES = "ways_cities"
+    const val CITIES_HEADER = "ways_cities_header"
     const val CONTINENT_PAGE = "ways_continent_page"
     const val CONTINENT_MAP = "ways_continent_map"
     const val WALK_START = "walk_start"

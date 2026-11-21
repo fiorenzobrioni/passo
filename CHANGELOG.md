@@ -104,6 +104,19 @@ All notable changes to Passo are documented here. The format follows
 
 ### Better
 
+- **Every way in opens where it says.** The tile, both widgets and the counting notification open
+  Today, wherever you last left the app, and while they show an outing, that outing. The goal
+  reached and the evening reminder open Today too; the weekly summary opens its own week in
+  History, where its numbers are; a stage reached opens its way, on its new stamp. Back from any
+  of them lands on Today.
+
+- **From an outing to its city walk in one touch.** An outing on a city walk names the walk on
+  its page, with its small map and how far along it you came, and opens the walk: its places,
+  its stamps, where it goes on from. The walk's small map on the outing's card opens it too.
+  «Walk through a city» on the Outings page opens the Ways at the cities, not above five
+  continents of ways. An outing's row in the day's list wears the arrow every other way in
+  wears.
+
 - **Outings, easier to read and to start.** Each outing is a shorter card that reads on one
   line, with one button to start it and a touch on the card to change it; a new one is at the
   top of the page. An outing under way leads with its sentence, shows how far it is and where

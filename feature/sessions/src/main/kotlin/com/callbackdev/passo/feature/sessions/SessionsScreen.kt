@@ -105,8 +105,9 @@ import com.callbackdev.passo.core.tracking.SessionSignalsAccess
 fun SessionsRoute(
     onBack: () -> Unit,
     onEdit: (Long?) -> Unit,
-    onOpenWays: () -> Unit = {},
+    onOpenCities: () -> Unit = {},
     onOpenOuting: (Long) -> Unit = {},
+    onOpenWalk: (WayId) -> Unit = {},
     viewModel: SessionsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -148,12 +149,14 @@ fun SessionsRoute(
                 onKeepGoing = viewModel::keepGoing,
                 onGps = viewModel::gps,
                 onOpen = { state?.live?.session?.id?.let(onOpenOuting) },
+                // A city walk's card draws its walk's map, which opens the walk (Phase 23).
+                onOpenWalk = { state?.live?.session?.walk?.let(onOpenWalk) },
             ),
             resumeTracking = viewModel::resumeTracking,
             openSignalSettings = {
                 runCatching { context.startActivity(SessionSignalsAccess.settingsIntent(context, block)) }
             },
-            openWays = onOpenWays,
+            openCities = onOpenCities,
         ),
     )
 }
@@ -164,7 +167,7 @@ class SessionsActions(
     val card: SessionCardActions = SessionCardActions(),
     val resumeTracking: () -> Unit = {},
     val openSignalSettings: () -> Unit = {},
-    val openWays: () -> Unit = {},
+    val openCities: () -> Unit = {},
 )
 
 /**
@@ -388,7 +391,7 @@ private fun SessionsList(
                 modifier = Modifier.animateItem(placementSpec = placement),
             )
         }
-        item(key = "cities") { CitiesDoor(actions.openWays) }
+        item(key = "cities") { CitiesDoor(actions.openCities) }
         item(key = "footer") {
             Column(
                 verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -629,7 +632,8 @@ object SessionsTags {
 
 /**
  * The door to the city walks (Phase 11): an outing whose goal is a walk through a city, its
- * places told on the way. They live on the Ways page, with the ways.
+ * places told on the way. They live on the Ways page, with the ways, and the door opens it at
+ * them (Phase 23).
  */
 @Composable
 private fun CitiesDoor(onOpen: () -> Unit) {

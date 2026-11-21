@@ -27,8 +27,9 @@ import com.callbackdev.passo.core.tracking.SessionControl
 import com.callbackdev.passo.core.tracking.StepTracking
 import com.callbackdev.passo.core.tracking.TrackingControl
 import com.callbackdev.passo.core.tracking.TrackingReadiness
-import com.callbackdev.passo.core.tracking.WayIntents
+import com.callbackdev.passo.shell.AppDoor
 import com.callbackdev.passo.shell.PassoRoot
+import com.callbackdev.passo.shell.isFreshTouch
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -39,8 +40,8 @@ import javax.inject.Inject
  * pages to [PassoRoot], and on every return (re)starts tracking unless the reader paused it:
  * opening the app is the documented way back after a force stop (PLANNING.md §4.2). A paused
  * widget's tap lands here too, asking to resume ([TrackingControl.EXTRA_RESUME]), and a launcher
- * shortcut, asking to start an outing ([SessionControl.EXTRA_START_PLAN]), and a stage's
- * notification, asking for the Ways ([WayIntents.EXTRA_OPEN_WAYS]).
+ * shortcut, asking to start an outing ([SessionControl.EXTRA_START_PLAN]); and every touch from
+ * outside the app names the page it opens ([AppDoor]: Today, an outing, a week, a way).
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -56,22 +57,15 @@ class MainActivity : ComponentActivity() {
 
     private var readiness by mutableStateOf(TrackingReadiness.READY)
 
-    private var openWays by mutableStateOf(false)
-
-    private var openToday by mutableStateOf(false)
-
-    private var openOuting by mutableStateOf<Long?>(null)
+    /** The page a touch from outside asked for, until the pages have opened it. */
+    private var door by mutableStateOf<AppDoor?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         readiness = StepTracking.readiness(this)
-        if (savedInstanceState == null) {
-            resumeIfAsked(intent)
-            startOutingIfAsked(intent)
-            openWaysIfAsked(intent)
-            openOutingIfAsked(intent)
-        }
+        // Not again after a rotation, nor after the process was ended: that touch was answered.
+        if (savedInstanceState == null) answer(intent)
         setContent {
             val settings by settingsRepository.settings.collectAsStateWithLifecycle(initialValue = null)
             val dark = when (settings?.theme) {
@@ -98,12 +92,8 @@ class MainActivity : ComponentActivity() {
                     readiness = readiness,
                     onboardingCompleted = settings?.onboardingCompleted,
                     outings = outings,
-                    openWays = openWays,
-                    onWaysOpened = { openWays = false },
-                    openToday = openToday,
-                    onTodayOpened = { openToday = false },
-                    openOuting = openOuting,
-                    onOutingOpened = { openOuting = null },
+                    door = door,
+                    onDoorOpened = { door = null },
                 )
             }
         }
@@ -111,10 +101,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        resumeIfAsked(intent)
-        startOutingIfAsked(intent)
-        openWaysIfAsked(intent)
-        openOutingIfAsked(intent)
+        answer(intent)
     }
 
     override fun onResume() {
@@ -139,40 +126,37 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * A launcher shortcut's outing, once per touch. Only while counting: an outing is measured
-     * from the steps, and a paused count has none; Today then says why, with its button. Either
-     * way Today comes forward, wherever the app was left: the card, or the reason, is there.
-     * Through the same door as a start from a page ([OutingStarter]): a plan measured with GPS
-     * asks for its permission here too, the first time.
+     * What a touch from outside asks for, once per touch: a resume, an outing to start, a page.
+     * Not an intent Android hands back from Recents ([isFreshTouch]): that touch was answered when
+     * it was made.
      */
-    private fun startOutingIfAsked(intent: Intent?) {
-        val planId = intent?.getLongExtra(SessionControl.EXTRA_START_PLAN, 0L) ?: 0L
+    private fun answer(intent: Intent?) {
+        if (intent == null || !intent.isFreshTouch) return
+        resumeIfAsked(intent)
+        startOutingIfAsked(intent)
+        AppDoor.take(intent)?.let { door = it }
+    }
+
+    /**
+     * A launcher shortcut's outing. Only while counting: an outing is measured from the steps,
+     * and a paused count has none; Today then says why, with its button. Either way Today comes
+     * forward, wherever the app was left: the card, or the reason, is there. Through the same
+     * door as a start from a page ([OutingStarter]): a plan measured with GPS asks for its
+     * permission here too, the first time.
+     */
+    private fun startOutingIfAsked(intent: Intent) {
+        val planId = intent.getLongExtra(SessionControl.EXTRA_START_PLAN, 0L)
         if (planId == 0L) return
-        intent?.removeExtra(SessionControl.EXTRA_START_PLAN)
-        openToday = true
+        intent.removeExtra(SessionControl.EXTRA_START_PLAN)
+        door = AppDoor.Today
         lifecycleScope.launch {
             if (settingsRepository.settings.first().trackingEnabled) outings.start(planId)
         }
     }
 
-    /** The notification of an outing's end: that outing's own page, once per touch. */
-    private fun openOutingIfAsked(intent: Intent?) {
-        val sessionId = intent?.getLongExtra(SessionControl.EXTRA_OPEN_OUTING, 0L) ?: 0L
-        if (sessionId == 0L) return
-        intent?.removeExtra(SessionControl.EXTRA_OPEN_OUTING)
-        openOuting = sessionId
-    }
-
-    /** A stage's notification: the Ways page, once per touch. */
-    private fun openWaysIfAsked(intent: Intent?) {
-        if (intent?.getBooleanExtra(WayIntents.EXTRA_OPEN_WAYS, false) != true) return
-        intent.removeExtra(WayIntents.EXTRA_OPEN_WAYS)
-        openWays = true
-    }
-
-    /** The widget's "tap to resume" (PLANNING.md §7): once per tap, not again on a rotation. */
-    private fun resumeIfAsked(intent: Intent?) {
-        if (intent?.getBooleanExtra(TrackingControl.EXTRA_RESUME, false) != true) return
+    /** The widget's and the tile's "tap to resume" (PLANNING.md §7). */
+    private fun resumeIfAsked(intent: Intent) {
+        if (!intent.getBooleanExtra(TrackingControl.EXTRA_RESUME, false)) return
         intent.removeExtra(TrackingControl.EXTRA_RESUME)
         lifecycleScope.launch {
             if (!settingsRepository.settings.first().trackingEnabled) trackingControl.resume()

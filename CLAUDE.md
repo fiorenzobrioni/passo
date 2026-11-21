@@ -49,8 +49,10 @@ open outing** (planned 20 Nov 2026: an outing with no goal, in three steps, a se
 PLANNING.md §11 Phase 21 and §15 «The open outing planned»): **its three steps are built**
 (20 Nov 2026, on the branch of PR #76, and wait for a phone; §15 «Phase 21.1 built: the open
 outing», «Phase 21.2 built: the marks on the way» and «Phase 21.3 built: the shape on the card»).
-**23 is next**, the doors (the ways in that were missing, and a list of the outings), then 18,
-then 20, which builds on 21; Phase 22, the walk already begun, later. On 19 Nov 2026 the owner dropped Phases
+**Phase 23, the doors**: **step 23.1 is built** (21 Nov 2026, on its pull request's branch, and
+waits for a phone; §15 «Phase 23.1 built: the doors that lead where they say»): every touch from
+outside names the page it opens (`AppDoors`, `AppDoor`). **23.2 is next** (Your outings), then
+20, which builds on 21, before 18 (owner, 21 Nov 2026); Phase 22, the walk already begun, later. On 19 Nov 2026 the owner dropped Phases
 18 and 19 «On the spot»:
 Phase 18 is now a city walk measured with GPS (small), Phase 19 is dropped, and Phase 20 is the
 usual round alone: no route is followed, no GPX imported (PLANNING.md §15, «The places on the spot

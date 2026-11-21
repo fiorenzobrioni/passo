@@ -56,7 +56,8 @@ internal class TrackingNotifications(private val context: Context) {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_steps)
             .setContentTitle(context.getString(R.string.tracking_notification_title))
-            .setContentIntent(context.openAppIntent())
+            // The day it shows is Today's; during an outing, the outing's own page instead (below).
+            .setContentIntent(context.openAppIntent(DoorRequest.COUNTING) { openingToday() })
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setSilent(true)

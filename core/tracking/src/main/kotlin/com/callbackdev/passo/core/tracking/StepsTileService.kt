@@ -1,5 +1,6 @@
 package com.callbackdev.passo.core.tracking
 
+import android.app.PendingIntent
 import android.app.StatusBarManager
 import android.content.ComponentName
 import android.content.Context
@@ -31,8 +32,9 @@ import javax.inject.Inject
  * Today's steps in Quick Settings (PLANNING.md §8). It reads only between
  * [onStartListening] and [onStopListening], which is while the panel is open: a closed panel
  * costs nothing. While open it follows the live count, as Today does, so it moves under the
- * reader's thumb; during an outing its line is the outing's. A tap opens Today; a paused tile's tap opens it asking to resume, as the
- * widget's does ([TrackingControl.EXTRA_RESUME]).
+ * reader's thumb; during an outing its line is the outing's. A tap opens Today, or the outing it
+ * shows ([tileTapIntent]); a paused tile's tap opens Today asking to resume, as the widget's does
+ * ([TrackingControl.EXTRA_RESUME]).
  */
 @AndroidEntryPoint
 class StepsTileService : TileService() {
@@ -94,21 +96,7 @@ class StepsTileService : TileService() {
 
     override fun onClick() {
         super.onClick()
-        val resume = shown == CountingState.PAUSED
-        // While it shows an outing under way, its own page: what the tile says of it, and its
-        // buttons (Phase 21).
-        val outing = shownOuting.takeIf { !resume }
-        val open = {
-            val request = when {
-                resume -> REQUEST_RESUME
-                outing != null -> REQUEST_OUTING
-                else -> REQUEST_OPEN
-            }
-            openAppIntent(request) {
-                if (resume) putExtra(TrackingControl.EXTRA_RESUME, true)
-                if (outing != null) putExtra(SessionControl.EXTRA_OPEN_OUTING, outing)
-            }?.let { startActivityAndCollapse(it) }
-        }
+        val open = { tileTapIntent(shown, shownOuting)?.let { startActivityAndCollapse(it) } }
         if (isLocked) unlockAndRun { open() } else open()
     }
 
@@ -122,11 +110,25 @@ class StepsTileService : TileService() {
         tile.stateDescription = face.subtitle
         tile.updateTile()
     }
+}
 
-    private companion object {
-        const val REQUEST_OPEN = 10
-        const val REQUEST_RESUME = 11
-        const val REQUEST_OUTING = 12
+/**
+ * What a touch on the tile opens: Today, which holds the count and the goal it shows (docs/adr/
+ * 0008-goals-and-system-surfaces.md, decision 8), wherever the app was left; on a paused tile,
+ * Today asking to resume, where its button is; while it shows an outing under way ([outingId]),
+ * that outing's own page, with what the tile says of it and its buttons (Phase 21).
+ */
+internal fun Context.tileTapIntent(shown: CountingState?, outingId: Long?): PendingIntent? {
+    val resume = shown == CountingState.PAUSED
+    val outing = outingId.takeIf { !resume }
+    val request = when {
+        resume -> DoorRequest.TILE_RESUME
+        outing != null -> DoorRequest.TILE_OUTING
+        else -> DoorRequest.TILE_TODAY
+    }
+    return openAppIntent(request) {
+        if (resume) putExtra(TrackingControl.EXTRA_RESUME, true)
+        if (outing != null) putExtra(SessionControl.EXTRA_OPEN_OUTING, outing) else openingToday()
     }
 }
 

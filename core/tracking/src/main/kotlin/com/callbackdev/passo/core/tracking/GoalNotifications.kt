@@ -5,6 +5,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -28,7 +29,9 @@ internal data class GoalReachedContent(val goalSteps: Int, val reachedAtMinute: 
  * the reader asked for in Settings; the counting notification keeps its own quiet one.
  *
  * Each says one sentence first and the numbers after it, in the same words as
- * Today and History, with the estimates saying they are. Tapping one opens the app.
+ * Today and History, with the estimates saying they are. Tapping one opens the page that holds
+ * what it says (PLANNING.md §11 Phase 23): the day's two open Today, the weekly summary its week
+ * in History, where its rows' numbers are.
  */
 internal class GoalNotifications(private val context: Context) {
     fun ensureChannel() {
@@ -53,7 +56,7 @@ internal class GoalNotifications(private val context: Context) {
         } else {
             res.getString(R.string.goal_reached_at, at)
         }
-        return builder(REQUEST_GOAL_REACHED)
+        return builder(DoorRequest.GOAL_REACHED) { openingToday() }
             .setContentTitle(
                 res.getQuantityString(R.plurals.goal_reached_title, content.goalSteps, format.steps(content.goalSteps)),
             )
@@ -79,7 +82,7 @@ internal class GoalNotifications(private val context: Context) {
             format.steps(nudge.steps),
             format.percent(nudge.steps.toDouble() / nudge.goalSteps),
         )
-        return builder(REQUEST_EVENING_REMINDER)
+        return builder(DoorRequest.EVENING_REMINDER) { openingToday() }
             .setContentTitle(
                 res.getQuantityString(R.plurals.evening_reminder_title, nudge.remaining, format.steps(nudge.remaining)),
             )
@@ -150,7 +153,9 @@ internal class GoalNotifications(private val context: Context) {
                 ),
             )
         }
-        return builder(REQUEST_WEEKLY_SUMMARY)
+        return builder(DoorRequest.WEEKLY_SUMMARY) {
+            putExtra(AppDoors.EXTRA_OPEN_WEEK, summary.week.start.toEpochDay())
+        }
             .setContentTitle(title)
             .setContentText(totals)
             .setStyle(NotificationCompat.BigTextStyle().bigText(lines.joinToString("\n")))
@@ -174,22 +179,18 @@ internal class GoalNotifications(private val context: Context) {
 
     // Not "only alert once": each of these is news of its own, posted once, and under a fixed id
     // that flag silenced today's whenever yesterday's was still in the shade.
-    private fun builder(requestCode: Int): NotificationCompat.Builder = NotificationCompat.Builder(context, CHANNEL_ID)
-        .setSmallIcon(R.drawable.ic_stat_steps)
-        .setContentIntent(context.openAppIntent(requestCode))
-        .setAutoCancel(true)
-        .setCategory(NotificationCompat.CATEGORY_REMINDER)
+    private fun builder(door: DoorRequest, opening: Intent.() -> Unit): NotificationCompat.Builder =
+        NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_stat_steps)
+            .setContentIntent(context.openAppIntent(door, opening))
+            .setAutoCancel(true)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
 
     companion object {
         const val CHANNEL_ID = "goals"
         const val ID_GOAL_REACHED = 2
         const val ID_EVENING_REMINDER = 3
         const val ID_WEEKLY_SUMMARY = 4
-
-        // One launch intent each, so no tap ever carries another's.
-        private const val REQUEST_GOAL_REACHED = 2
-        private const val REQUEST_EVENING_REMINDER = 3
-        private const val REQUEST_WEEKLY_SUMMARY = 4
         private const val REQUEST_WALK_NOW = 15
 
         /** One day at the goal is a day, not a streak (as Insights says it). */

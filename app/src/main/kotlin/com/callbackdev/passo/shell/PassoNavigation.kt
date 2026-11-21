@@ -82,9 +82,13 @@ data object GpsIntroKey : NavKey
 @Serializable
 data class OutingKey(val sessionId: Long) : NavKey
 
-/** The Ways, from Insights and from a stage's notification (PLANNING.md §11 Phase 11). */
+/**
+ * The Ways, from Insights (PLANNING.md §11 Phase 11); with [cities], opened at its cities, from
+ * the Outings page's door to them (Phase 23): below the ways of five continents, they were a long
+ * scroll from the door that named them.
+ */
 @Serializable
-data object WaysKey : NavKey
+data class WaysKey(val cities: Boolean = false) : NavKey
 
 /** The cities of one continent, from the Ways page (docs/adr/0015-city-walks.md, decision 12). */
 @Serializable
@@ -171,11 +175,22 @@ class PassoNavigationState(
      * launcher's shortcut) shows there, with no page of the app to keep in view. Every other
      * tab's stack is kept, as a tap on the bar keeps it.
      */
-    fun showToday() {
-        val today = backStacks.getValue(ShellTab.TODAY)
-        lastMoveWasTabTap = selected != ShellTab.TODAY
-        while (today.size > 1) today.removeAt(today.lastIndex)
-        selected = ShellTab.TODAY
+    fun showToday() = show(ShellTab.TODAY)
+
+    /**
+     * [tab]'s own page, as a fresh way in from outside the app (a widget, a notification): what
+     * was over it, and over Today beneath it, is cleared, so back from it lands on Today itself.
+     * The other tab's stack is kept, as a tap on the bar keeps it.
+     */
+    fun show(tab: ShellTab) {
+        lastMoveWasTabTap = selected != tab
+        backStacks.getValue(ShellTab.TODAY).clearToRoot()
+        backStacks.getValue(tab).clearToRoot()
+        selected = tab
+    }
+
+    private fun NavBackStack<NavKey>.clearToRoot() {
+        while (size > 1) removeAt(lastIndex)
     }
 
     /**

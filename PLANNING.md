@@ -55,10 +55,13 @@ so they are uniform"):
   **Phase 21, the open outing** (planned on 20 Nov 2026, in three steps; §11): **built, its three
   steps** (20 Nov 2026, on the branch of PR #76; §15, «Phase 21.1 built: the open outing», «Phase
   21.2 built: the marks on the way» and «Phase 21.3 built: the shape on the card»), and waits for
-  a phone (the boxes in «Open»). **Next: 23**, the
-  doors (two steps), then 18, a city walk measured with GPS (re-planned on 19 Nov 2026), then 20
-  (reviewed on 19 Nov 2026: the usual round alone; it builds on 21): not started. Phase 19 dropped; Phase 22, the walk already
-  begun, later, when the owner asks.
+  a phone (the boxes in «Open»). **Phase 23, the doors**: **step 23.1 built** (21 Nov 2026, on
+  the branch of its pull request; §15, «Phase 23.1 built: the doors that lead where they say»),
+  and waits for a phone (the box in «Open»). **Next: 23.2**, Your outings, then **20** (reviewed
+  on 19 Nov 2026: the usual round alone; it builds on 21), before 18 at the owner's wish (21 Nov
+  2026: the whole of 23 before 20, «which I need more»), then 18, a city walk measured with GPS
+  (re-planned on 19 Nov 2026): not started. Phase 19 dropped; Phase 22, the walk already begun,
+  later, when the owner asks.
 
 ## Open
 
@@ -178,6 +181,23 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
   - «The shape of the walk» on an outing's page, and none on an outing from before;
   - in both themes, at a large text size, on the open foldable, with TalkBack on the strip and the
     route.
+
+- [ ] **On a device (owner): Phase 23.1's doors** (§11 Phase 23, step 23.1; §15, «Phase 23.1 built:
+  the doors that lead where they say», 21 Nov 2026). Step 23.1's own box «On a device (owner)»
+  says it all; in short:
+  - with the app left on Settings (or a Way), the tile, each widget and the counting
+    notification open Today, and back from Today leaves the app;
+  - a paused tile or card: Today, counting again;
+  - while an outing counts, the same three open its page, and back lands on Today;
+  - the weekly summary opens its week; goal reached and the evening reminder open Today;
+  - a stage's notification opens its way, on the new stamp, with an outing's notification in the
+    shade at the same time (each opens its own page);
+  - from an outing on a city walk, its page's row and its card's small map open the walk;
+  - «Walk through a city» lands on the cities;
+  - a launcher shortcut's outing, then back out of the app, then Passo from Recents: no second
+    outing starts, no page opens again;
+  - an outing's row in Today's and History's lists wears its arrow; TalkBack says «See the
+    outing» on it, and «See the walk» on the walk's row and map.
 
 Read again on 2 Nov 2026, at archive 01 and 02: the boxes above are the ones the phases done had
 left open, and the review's device check. Read again at 1.1.0's tag: the owner's checks of the
@@ -652,7 +672,8 @@ Two widgets since Phase 4 (owner's request), in Chiaro's dress so a Passo card a
 - **Channel `goals`** (default importance, opt-in): goal reached once per day, the evening reminder (with "Walk now": an outing for the rest of the day), the weekly summary.
   - Goal reached rides on the service's samples. The reminder is an inexact `setAndAllowWhileIdle` with a wakeup, the summary an inexact `RTC` alarm without one; both armed again at every start of the process, every change of what they depend on, every clock or zone change, and every firing. No exact alarm permission (Phase 6, §15).
   - Each alerts when posted (no "only alert once": under a fixed id it silenced today's while yesterday's was still shown). Goal reached and the reminder go by themselves at the end of their day (`setTimeoutAfter`); the reminder also when its "Walk now" is touched or the goal is reached. No reminder during an outing, and no reminder alarm armed while the goals' notifications cannot show (armed again when they can: the app's return, the system's block-state broadcasts) (2 Nov 2026, §15).
-- **Channel `ways`** (default importance, Phase 11): a stage reached on the way under way, and its end. Told by the days being written (`WayNotifier`), never by a timer; touching it opens the Ways page.
+- **Channel `ways`** (default importance, Phase 11): a stage reached on the way under way, and its end. Told by the days being written (`WayNotifier`), never by a timer; touching it opens that way's page, on its journey, where the new stamp is (Phase 23; until then, the Ways page).
+- **Every touch names the page it opens** (Phase 23, `AppDoors`; ADR 0008 decision 8, amended): the launch intent alone brings the `singleTask` task back on whichever page it was left. The counting notification, the tile, the widgets, goal reached and the evening reminder open Today; while they show an outing, its page, over Today; the weekly summary its week in History; a stage its way, over Today. Each door has its own request code (`DoorRequest`), and an intent handed back from Recents is not a touch.
 - If `POST_NOTIFICATIONS` is denied, the foreground service still runs; its notification only shows in the system's task manager. Explain this in onboarding; don't block on it.
 - **QS tile (`TileService`):** reads today's steps from `onStartListening()` to `onStopListening()`, following the live count meanwhile. It costs nothing when the panel is closed.
 
@@ -2157,7 +2178,7 @@ the still route.
 
 #### Step 23.1 — The doors that lead where they say
 
-- [ ] **The tile, the widgets and the counting notification open Today.** ADR 0008 decision 8
+- [x] **The tile, the widgets and the counting notification open Today.** ADR 0008 decision 8
   says so, and `widgetTapIntent`'s comment says «lands on Today». They actually open the page
   the app was last left on (a Way, Settings): the launcher's intent brings the `singleTask`
   task back as it was, and only a shortcut's start brings Today forward (`openToday`).
@@ -2165,14 +2186,14 @@ the still route.
     others are, and `nav.showToday()`.
   - **Paused:** the resume extra keeps its meaning, and Today is where its button is.
   - **During an outing:** Phase 21.1's rule applies instead (the outing's page).
-- [ ] **The goal's notifications open what they speak of** (`GoalNotifications`).
+- [x] **The goal's notifications open what they speak of** (`GoalNotifications`).
   - The day's goal reached, and the evening reminder: Today.
   - The weekly summary («Last week: 12% more…»): History on that week (`HistoryTarget`, the
     week scale). Its rows say the same numbers.
-- [ ] **A stage reached opens its way** (`WayNotifier`): that way's page (`WayKey`), where the
+- [x] **A stage reached opens its way** (`WayNotifier`): that way's page (`WayKey`), where the
   new stamp is, instead of the Ways list. This revisits §8's «touching it opens the Ways page».
   The notification names one way and one place, and the list made the reader look for it.
-- [ ] **An outing on a city walk leads to the walk.**
+- [x] **An outing on a city walk leads to the walk.**
   - Its page (`OutingScreen`) has one row naming the walk, which opens the walk's page: its
     places, its stamps, «Continue from…». An example: «On the walk From the Duomo to the
     Navigli».
@@ -2180,18 +2201,18 @@ the still route.
   - The card's «See the outing» (21.1) still opens the outing.
 
   Today a half-walked city is four touches deep: Ways, Cities, a continent, the walk.
-- [ ] **The cities door lands on the cities.** The Outings page's «Walk through a city» opens
+- [x] **The cities door lands on the cities.** The Outings page's «Walk through a city» opens
   the Ways page at its «Cities» header, which today sits below five continents of ways. It
   uses a target, as History's (`HistoryTarget`); the Ways page's own order is unchanged.
-- [ ] **An outing's row looks like a door.** In Today's and History's lists, an outing's row
+- [x] **An outing's row looks like a door.** In Today's and History's lists, an outing's row
   opens its page but wears no chevron, while every other door on those pages wears one. It
   gains the chevron. A walk found in the steps opens nothing (decided), so it wears none.
-- [ ] **Tests.**
+- [x] **Tests.**
   - The intents each surface builds, with their extras.
   - `MainActivity`'s doors: Today, a week, a way, the cities, each once per touch.
   - The outing page's walk row.
   - The lists' rows: `assertAccessible()` on each, with the role and the label.
-- [ ] **The record.** Strings in English and Italian, the CHANGELOG, and ADR 0008 decision 8
+- [x] **The record.** Strings in English and Italian, the CHANGELOG, and ADR 0008 decision 8
   confirmed with what the fix found.
 - [ ] **On a device (owner).**
   - **Today:** with the app left on Settings, the tile, each widget and the counting
@@ -3097,6 +3118,88 @@ This log starts with Phase 16 built (18 Nov 2026); its entries are written below
       foldable), `OutingScreenTest` (the section, after the map, none for an outing from before, a
       run's title, Italian).
     - The screenshots looked at, in both themes.
+
+- **21 Nov 2026.** **Phase 23.1 built: the doors that lead where they say** (owner: "implement
+  Phase 23.1; premium work. I would like the whole of Phase 23 before 20, which I need more:
+  check the order is fine, otherwise stop and tell me why"; then a review of the code, push and
+  the pull request). §11 Phase 23's step 23.1 boxes are ticked but the phone's, which opens in
+  «Open». ADR 0008 (decision 8) and ADR 0005 (decision 8) are amended.
+  - **The order, checked.** The whole of 23, then 20, holds; 18 comes after 20, at the owner's
+    wish. Nothing in 20 needs 18 (a city walk measured with GPS), nor 18 anything in 20. 23.2
+    before 20 helps it: «Your outings» is the first list of outings with their still route read
+    lazily from `routes.db`, which 20's «Your rounds» then reuses, and 20's door stands beside
+    23.2's on the Outings page. One caution, not a block: 20 matches measured routes, and Phase
+    15's proof on a phone (the box in «Open») is still to be done; the rounds are only as good as
+    the routes, so that proof is best walked before 20's own device check.
+  - **Built.**
+    - `AppDoors` (`:core:tracking`): the extras a touch from outside puts on the launch intent,
+      `EXTRA_OPEN_TODAY`, `EXTRA_OPEN_WEEK`, `EXTRA_OPEN_WAY` with `EXTRA_OPEN_JOURNEY`, beside
+      21.1's `EXTRA_OPEN_OUTING`; `openingToday()`; `DoorRequest`, one request code per door.
+    - The counting notification, the tile (`tileTapIntent`, pure of the service) and both widgets
+      (`widgetTapIntent`) ask for Today, or for the outing they show; paused, for Today and the
+      resume together.
+    - Goal reached and the evening reminder: Today. The weekly summary: its week
+      (`EXTRA_OPEN_WEEK`, the week's first day). A stage reached: its way and its journey.
+    - `AppDoor` (`:app`): the page an intent asks for, read once (its extras taken off), the most
+      particular first; `PassoNavigationState.open(door)` and `show(tab)`; one effect in
+      `PassoRoot` in place of three flags (`openWays`, `openToday`, `openOuting`).
+    - `WaysKey(cities)`: the Ways page placed at its cities from its first frame
+      (`citiesHeaderIndex`), from the Outings page's «Walk through a city» (`openCities`).
+    - The outing's page: «On the walk», the walk's small map with where the outing left it, its
+      route and how far along it came («2.10 km of 9.32 km», or «The whole walk»), a door to the
+      walk as it stands (`WayKey(walk, null)`). The card's small map of a city walk is a door to
+      the walk too (`SessionCardActions.onOpenWalk`), on Today and the Outings page; «See the
+      outing» is unchanged.
+    - `OutingList`: an outing's row that opens its page wears the chevron.
+  - **Made exact on the way**, each in the code with its reason:
+    - **A door opens over Today.** The plan said «Today» for the day's surfaces and «the
+      outing's page» during an outing. 21.1 pushed the outing's page on whichever page the app
+      was left: back from it then landed on a Way from yesterday. Every door now clears Today's
+      stack first, so back from the outing's page, or from a way's, lands on Today, where the
+      card that follows them is. The week opens History's own page, with Today beneath it.
+    - **One request code per door.** A stage's notification (16) and an outing's (16) shared one:
+      Android keeps one `PendingIntent` per intent and code whatever its extras, and
+      `FLAG_UPDATE_CURRENT` gave the later one's extras to both, so an outing's notification in the
+      shade opened the Ways once a stage was told. `DoorRequest` is an enum: no two can share one.
+      A test posts the two together and fails if they do.
+    - **An intent from Recents is not a touch.** Opened again from Recents after the reader left
+      by back, Android hands the activity its task's first intent, extras and all
+      (`FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY`): a shortcut's outing would have started a second
+      time, a notification's page opened again. It is read as no touch (`isFreshTouch`), the
+      resume and the shortcut's start included.
+    - **The stage opens its journey**, not the way alone: once the last stage finishes the way,
+      the way's page without a journey shows it ready to start again, and the stamps the
+      notification speaks of would be gone from it.
+    - **The walk's row says how far the outing came**, not the walk as it stands now: that is the
+      walk's page's to say, and the outing's page is about the outing. Its label is «On the walk»
+      («Sulla passeggiata»), the route under it, as the walk's row on the Ways page is drawn.
+    - **The cities are placed, not scrolled to**: the page arrives where it was asked, with nothing
+      passing under the reader's eyes; where what is below the cities is shorter than the screen,
+      the list ends at its foot and the edge of the ways above shows, a sign they are there.
+    - **The day's list keeps one column for the lengths.** With the chevron at an outing's end, a
+      walk's «17 minutes» stood further right than the outing's «18 minutes»: where the list has a
+      door, a walk's row keeps the chevron's room free.
+    - **Passo's words before the location's request stay.** A door clears what was over Today,
+      and the screen that comes before Android's request (`GpsIntroKey`) waits there with an
+      outing waiting on its answer: cleared by the counting notification touched from the shade,
+      it would have left the outing unstarted. A door keeps it over the page it opens.
+    - **A paused card's touch is its resume, as the tile's**: the widget's tap asked for the
+      outing's page too when a card showed one, which a paused count cannot have; it now asks for
+      Today and the resume alone, as the tile always did.
+    - **The old `WayIntents.EXTRA_OPEN_WAYS` is gone**: a stage notification left in the shade by
+      the build before opens the app where it was, nothing worse.
+  - **The README.** No picture shows what changed (the day's lists and a city walk's card are in
+    none of them), so none is regenerated; 23.1 adds none, its doors are touches, not views.
+    CHANGELOG, ADR 0008 and ADR 0005, §8 above, CLAUDE.md.
+  - **Checked**: `spotlessCheck`, `:app:checkForbiddenPermissions`, `test` and `:app:lintDebug`,
+    as reported with the pull request.
+    - New tests: `AppDoorsTest` (each surface's intent and its extras; two doors in the shade at
+      once), `AppDoorTest` (the extras read once, an unknown way, Recents, each door's pages and
+      back, Passo's words before the location's request kept), `WidgetGalleryTest` (Today by name, paused), `OutingScreenTest` (the walk's row, the
+      whole walk, none, Italian on a small phone, twice the text size), `WaysScreenTest` (at the
+      cities, with and without a way under way), `TodayScreenTest` (the walk's map a door, an
+      outing's row), `HistoryScreenTest` (the row's role and label).
+    - The screenshots looked at.
 
 ### Open
 

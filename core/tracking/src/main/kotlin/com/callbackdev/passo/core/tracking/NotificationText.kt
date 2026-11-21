@@ -32,13 +32,14 @@ internal fun Context.walkDuration(minutes: Int): String = if (minutes < MINUTES_
 
 /**
  * The app's launch intent, with [extras] on it: this module does not know the app's activity,
- * and should not. [requestCode] keeps intents with different extras apart.
+ * and should not. Each door has its own [request] code, so intents with different extras stay
+ * apart ([DoorRequest]).
  */
-internal fun Context.openAppIntent(requestCode: Int = 0, extras: Intent.() -> Unit = {}): PendingIntent? =
+internal fun Context.openAppIntent(request: DoorRequest, extras: Intent.() -> Unit = {}): PendingIntent? =
     packageManager.getLaunchIntentForPackage(packageName)?.let {
         PendingIntent.getActivity(
             this,
-            requestCode,
+            request.code,
             it.apply(extras),
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )

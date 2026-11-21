@@ -5,6 +5,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
@@ -32,6 +37,7 @@ import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.domain.routes.GpsLine
 import com.callbackdev.passo.core.domain.routes.GpsLineAction
 import com.callbackdev.passo.core.domain.routes.LiveMeasure
+import com.callbackdev.passo.core.domain.sessions.Outing
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.today.DayMinute
 import com.callbackdev.passo.core.domain.today.TodayOverview
@@ -360,6 +366,73 @@ class TodayScreenTest {
         compose.onNodeWithText("The next place, 230\u00A0m ahead", substring = true).assertExists()
         compose.onNodeWithTag(SessionCardTags.MAP).assertExists()
         snapshot("today_walk")
+    }
+
+    @Test
+    fun `an outing's row in the day's list is a door, said as one`() {
+        val done = outing.copy(
+            id = 9,
+            state = SessionState.FINISHED,
+            end = SessionEnd.STOPPED,
+            startedAtMillis = 1_000L * 60 * (9 * 60),
+            endedAtMillis = 1_000L * 60 * (9 * 60 + 25),
+        )
+        val opened = mutableListOf<Long>()
+        compose.setContent {
+            PassoTheme {
+                TodayScreen(
+                    state = state().copy(outings = listOf(Outing.Planned(done, 9 * 60, 9 * 60 + 25))),
+                    askInSettings = false,
+                    onOpenSettings = {},
+                    onAllow = {},
+                    onResume = {},
+                    onCelebrated = {},
+                    onOpenOuting = { opened += it },
+                )
+            }
+        }
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(TodayTags.WALKS))
+        val row = compose.onNode(hasContentDescription("Brisk walk from", substring = true))
+        row.assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
+        assertThat(row.fetchSemanticsNode().config[SemanticsActions.OnClick].label).isEqualTo("See the outing")
+        compose.assertAccessible()
+        row.performClick()
+        assertThat(opened).containsExactly(9L)
+        snapshot("today_outing_row")
+    }
+
+    @Test
+    fun `a city walk's small map is the door to the walk`() {
+        val walk = checkNotNull(
+            SessionPlans.startWalk(
+                Ways.of(WayId.MILAN_DUOMO_NAVIGLI),
+                fromMeters = 3_216,
+                voice = SessionVoice.HEADPHONES,
+                nowMillis = 0,
+                localEpochDay = date.toEpochDay(),
+            ),
+        ).copy(id = 5, totals = outing.totals.copy(distanceMeters = 200.0))
+        val live = LiveSessionState(walk, cadence = 104, canKeepGoing = false, alertsWhileScreenOff = true)
+        var walks = 0
+        var outings = 0
+        show(
+            state().copy(session = live),
+            sessionActions = SessionCardActions(onOpen = { outings++ }, onOpenWalk = { walks++ }),
+        )
+
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasTestTag(SessionCardTags.MAP))
+        val map = compose.onNodeWithTag(SessionCardTags.MAP)
+        map.assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
+        assertThat(map.fetchSemanticsNode().config[SemanticsActions.OnClick].label).isEqualTo("See the walk")
+        // Still the walk's progress to TalkBack, as before it was a door.
+        map.assertContentDescriptionContains("Next: Sempione Park", substring = true)
+        map.performClick()
+        assertThat(walks).isEqualTo(1)
+        // «See the outing» still opens the outing.
+        compose.onNodeWithTag(TodayTags.LIST).performScrollToNode(hasText("See the outing"))
+        compose.onNodeWithText("See the outing").performClick()
+        assertThat(outings).isEqualTo(1)
+        compose.assertAccessible()
     }
 
     @Test
