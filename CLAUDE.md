@@ -39,27 +39,22 @@ Source of truth:
 
 Work one phase at a time, starting from the phase's section in PLANNING.md §11. Phases 15 to 20
 (location, `docs/adr/0016-location.md`) each name what to read first and hold «The bar» their
-work is measured against: read the ADR and the phase's section before planning. **Phases 15
-and 16 are built** (18 Nov 2026), on branches in cascade, and wait for a phone: what was built
-and decided is in their boxes and in archive 04 (`docs/planning/README.md`, from «Location, for
-an outing that asks for it» on); their proofs on a phone (the boxes in «Open») come before any
-release. **Phase 17 is built** (19 Nov 2026), on the branch of PR #74 at the owner's choice, and
-waits for a phone too (PLANNING.md §15, «Phase 17 built: the step that learns»). **Phase 21, the
-open outing** (planned 20 Nov 2026: an outing with no goal, in three steps, a session each;
-PLANNING.md §11 Phase 21 and §15 «The open outing planned»): **its three steps are built**
-(20 Nov 2026, on the branch of PR #76, and wait for a phone; §15 «Phase 21.1 built: the open
-outing», «Phase 21.2 built: the marks on the way» and «Phase 21.3 built: the shape on the card»).
-**Phase 23, the doors**: **step 23.1 is built** (21 Nov 2026, on its pull request's branch, and
-waits for a phone; §15 «Phase 23.1 built: the doors that lead where they say»): every touch from
-outside names the page it opens (`AppDoors`, `AppDoor`). **Step 23.2 is built** too (21 Nov 2026,
-on the same pull request, and waits for a phone; §15 «Phase 23.2 built: Your outings»): the list
-of the outings over, by month, each route drawn small and read only for the rows on screen
-(`YourOutings`, `RouteThumbnails`, `OutingsListScreen`). **20 is next**, which builds on 21, before
-18 (owner, 21 Nov 2026); Phase 22, the walk already begun, later. On 19 Nov 2026 the owner dropped Phases
-18 and 19 «On the spot»:
-Phase 18 is now a city walk measured with GPS (small), Phase 19 is dropped, and Phase 20 is the
-usual round alone: no route is followed, no GPX imported (PLANNING.md §15, «The places on the spot
-dropped, the city walk measured» and «Phase 20 reviewed: the usual round alone»).
+work is measured against: read the ADR and the phase's section before planning. **Phases 15, 16,
+17, 21 and 23 are done** (built 18 to 21 Nov 2026, merged into `main`, checked on a phone by the
+owner on 21 Nov 2026), not released: their sections and the log that built them are in archive
+05 (`docs/planning/05-phases-15-17-21-23.md`, found through `docs/planning/README.md`); ADR 0016's
+decisions and Phases 15 and 16 as first built are in archive 04, from «Location, for an outing
+that asks for it» on. 15 is the measured outing, 16 the outing's page, 17 the step that learns,
+21 the open outing (an outing with no goal, in three steps), 23 the doors: every touch from
+outside names the page it opens (`AppDoors`, `AppDoor`), and «Your outings» lists the outings
+over by month, each route drawn small and read only for the rows on screen (`YourOutings`,
+`RouteThumbnails`, `OutingsListScreen`). Before any release, the figures of Phase 15's measure
+(and of Phase 13's 30-minute interval outing) are still to be written (the box in PLANNING.md
+«Open»). **20 is next**, which builds on 21, before 18 (owner, 21 Nov 2026); Phase 22, the walk
+already begun, later. On 19 Nov 2026 the owner dropped Phases 18 and 19 «On the spot»: Phase 18
+is now a city walk measured with GPS (small), Phase 19 is dropped, and Phase 20 is the usual
+round alone: no route is followed, no GPX imported (archive 05, «The places on the spot dropped,
+the city walk measured» and «Phase 20 reviewed: the usual round alone»).
 
 ## Build and commands
 
