@@ -219,3 +219,48 @@ reference by name and read from the right place. The current log is not here: it
   - L794: 18 Nov 2026. Phase 15, what the reader sees, and the documents
   - L867: 18 Nov 2026. Phase 16, the outing's page: the route, the splits, the climb
   - L953: 18 Nov 2026. Phase 16 read again: the last points' pressure, and the shared image's test
+
+## [05-phases-15-17-21-23.md](05-phases-15-17-21-23.md): PLANNING, archive 05: Phases 15, 16, 17, 21 and 23, and the decisions log, §15, 18 to 21 Nov 2026
+
+- L18: 11. Delivery phases: Phases 15, 16, 17, 21 and 23
+  - L21: Phase 15 — The measured outing («Uscita misurata»)
+  - L349: Phase 16 — The outing's page: the route, the splits, the climb
+  - L451: Phase 17 — The step that learns («Il passo che impara»)
+  - L585: Phase 21 — The open outing («L'uscita aperta»)
+    - L621: The name.
+    - L624: The signals.
+    - L626: The card under way.
+    - L628: «See the outing» while it counts
+    - L629: The forgotten start
+    - L631: Left out:
+    - L638: The number.
+    - L643: No end by goal.
+    - L648: The cap is twelve hours, not four
+    - L657: Why not no cap at all.
+    - L661: A ride is not an end; the logic stays as it is.
+    - L692: Step 21.1 — The open outing
+    - L929: Step 21.2 — The marks on the way
+    - L1017: Step 21.3 — The shape on the card
+  - L1112: Phase 23 — The doors («Le porte»)
+    - L1137: Step 23.1 — The doors that lead where they say
+    - L1188: Step 23.2 — Your outings («Le tue uscite»)
+- L1240: 15. Decisions log: 18 to 21 Nov 2026
+  - L1242: 18 Nov 2026. Four answers after Phase 16, and the plan archived
+  - L1267: 18 Nov 2026. The switch turned on again asks again
+  - L1298: 19 Nov 2026. The review of Phases 15 and 16, and its fixes
+  - L1367: 19 Nov 2026. The fixes reviewed for what the reader sees
+  - L1412: 19 Nov 2026. Phase 17's proposal: put away, and found again
+  - L1429: 19 Nov 2026. Phase 17 reviewed against the code before it starts
+  - L1466: 19 Nov 2026. Phase 17 reviewed for what the reader sees
+  - L1486: 19 Nov 2026. The places on the spot dropped, the city walk measured
+  - L1520: 19 Nov 2026. Phase 20 reviewed: the usual round alone
+  - L1547: 19 Nov 2026. Phase 17 built: the step that learns
+  - L1613: 20 Nov 2026. Every route on plain ground
+  - L1646: 20 Nov 2026. The open outing planned
+  - L1706: 20 Nov 2026. The open outing's plan reviewed, and the doors
+  - L1763: 20 Nov 2026. Phase 21.1 built: the open outing
+  - L1837: 20 Nov 2026. Phase 21.2 built: the marks on the way
+  - L1912: 20 Nov 2026. Phase 21.3 built: the shape on the card
+  - L1995: 21 Nov 2026. Phase 23.1 built: the doors that lead where they say
+  - L2077: 21 Nov 2026. Phase 23.2 built: Your outings
+  - L2159: 21 Nov 2026. The phone checks up to Phase 23 done
