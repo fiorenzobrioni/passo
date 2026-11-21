@@ -67,6 +67,7 @@ import com.callbackdev.passo.feature.onboarding.NoSensorScreen
 import com.callbackdev.passo.feature.onboarding.OnboardingRoute
 import com.callbackdev.passo.feature.sessions.GpsIntroScreen
 import com.callbackdev.passo.feature.sessions.OutingRoute
+import com.callbackdev.passo.feature.sessions.OutingsListRoute
 import com.callbackdev.passo.feature.sessions.PlanEditorRoute
 import com.callbackdev.passo.feature.sessions.SessionsRoute
 import com.callbackdev.passo.feature.settings.SettingsRoute
@@ -86,42 +87,24 @@ import kotlinx.coroutines.launch
  *
  * @param onboardingCompleted null until the settings are read: a bare surface for that frame,
  *   because flashing the wrong screen at the reader is worse than one blank frame.
- * @param openWays a stage's notification was touched: the Ways page opens, once ([onWaysOpened]).
- * @param openToday a launcher's shortcut started an outing: Today comes forward, with its card,
- *   once ([onTodayOpened]).
  * @param outings the door every start of an outing goes through: when one waits for the reader's
  *   word on the location permission, the pages show Passo's own screen and the system's request.
- * @param openOuting the notification of an outing's end was touched: that outing's page opens,
- *   once ([onOutingOpened]).
+ * @param door the page a touch from outside the app asked for (the tile, a widget, a
+ *   notification, a launcher's shortcut): it opens once, then [onDoorOpened].
  */
 @Composable
 fun PassoRoot(
     readiness: TrackingReadiness,
     onboardingCompleted: Boolean?,
     outings: OutingStarter,
-    openWays: Boolean = false,
-    onWaysOpened: () -> Unit = {},
-    openToday: Boolean = false,
-    onTodayOpened: () -> Unit = {},
-    openOuting: Long? = null,
-    onOutingOpened: () -> Unit = {},
+    door: AppDoor? = null,
+    onDoorOpened: () -> Unit = {},
 ) {
     when {
         readiness == TrackingReadiness.NO_SENSOR -> NoSensorScreen()
-
         onboardingCompleted == null -> Surface(Modifier.fillMaxSize()) { }
-
         !onboardingCompleted -> OnboardingRoute()
-
-        else -> MainPages(
-            outings,
-            openWays,
-            onWaysOpened,
-            openToday,
-            onTodayOpened,
-            openOuting,
-            onOutingOpened,
-        )
+        else -> MainPages(outings, door, onDoorOpened)
     }
 }
 
@@ -137,15 +120,7 @@ fun PassoRoot(
  * the bar itself, so they are laid out to the pixel where the old `Scaffold` put them.
  */
 @Composable
-private fun MainPages(
-    outings: OutingStarter,
-    openWays: Boolean,
-    onWaysOpened: () -> Unit,
-    openToday: Boolean,
-    onTodayOpened: () -> Unit,
-    openOuting: Long?,
-    onOutingOpened: () -> Unit,
-) {
+private fun MainPages(outings: OutingStarter, door: AppDoor?, onDoorOpened: () -> Unit) {
     val nav = rememberPassoNavigationState()
     // An outing measured with GPS, waiting for the reader's word on the location permission
     // (docs/adr/0016-location.md, decision 2): asked here, where the activity is, for every door
@@ -166,22 +141,12 @@ private fun MainPages(
         scope.launch { outings.answered(preciseGranted = precise) }
         if (unasked && activity != null) runCatching { activity.startActivity(Gps.appSettingsIntent(activity)) }
     }
-    LaunchedEffect(openWays) {
-        if (openWays) {
-            nav.navigate(WaysKey)
-            onWaysOpened()
-        }
-    }
-    LaunchedEffect(openToday) {
-        if (openToday) {
-            nav.showToday()
-            onTodayOpened()
-        }
-    }
-    LaunchedEffect(openOuting) {
-        if (openOuting != null) {
-            nav.navigate(OutingKey(openOuting))
-            onOutingOpened()
+    // A record in Insights, or the weekly summary, opens its day, week or month in History, once.
+    var historyTarget by remember { mutableStateOf<HistoryTarget?>(null) }
+    LaunchedEffect(door) {
+        door?.let { asked ->
+            nav.open(asked)?.let { historyTarget = it }
+            onDoorOpened()
         }
     }
     // After Today has come forward for a launcher's shortcut, which clears what was over it:
@@ -199,8 +164,6 @@ private fun MainPages(
     }
     val reduced = reducedMotion()
     val density = LocalDensity.current
-    // A record in Insights opens its day, week or month in History, once.
-    var historyTarget by remember { mutableStateOf<HistoryTarget?>(null) }
     // The bar's measured height, system inset included; until the first measure, Material's 80dp.
     val inset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     var barHeight by remember { mutableStateOf(BAR_HEIGHT + inset) }
@@ -216,6 +179,7 @@ private fun MainPages(
                 onOpenYear = { open(YearKey(it)) },
                 onOpenOuting = { open(OutingKey(it)) },
                 bottomPadding = barHeight,
+                onOpenWalk = { open(WayKey(it, null)) },
             )
         }
         entry<HistoryKey> {
@@ -235,7 +199,7 @@ private fun MainPages(
                     historyTarget = HistoryTarget(scale, date)
                     nav.switchTab(ShellTab.HISTORY)
                 },
-                onOpenWays = { open(WaysKey) },
+                onOpenWays = { open(WaysKey()) },
                 bottomPadding = barHeight,
                 onOpenYear = { open(YearKey(it)) },
             )
@@ -246,6 +210,7 @@ private fun MainPages(
                 onCalibrate = { open(CalibrationKey(it)) },
                 onOpenSessions = { open(SessionsKey) },
                 onOpenGuide = { open(GuideKey) },
+                onOpenRoutes = { open(OutingsKey(withRoutes = true)) },
             )
         }
         entry<GuideKey> { GuideRoute(onBack = nav::goBack) }
@@ -254,7 +219,16 @@ private fun MainPages(
             SessionsRoute(
                 onBack = nav::goBack,
                 onEdit = { open(PlanEditorKey(it)) },
-                onOpenWays = { open(WaysKey) },
+                onOpenCities = { open(WaysKey(cities = true)) },
+                onOpenOuting = { open(OutingKey(it)) },
+                onOpenWalk = { open(WayKey(it, null)) },
+                onOpenOutings = { open(OutingsKey()) },
+            )
+        }
+        entry<OutingsKey> { key ->
+            OutingsListRoute(
+                withRoutes = key.withRoutes,
+                onBack = nav::goBack,
                 onOpenOuting = { open(OutingKey(it)) },
             )
         }
@@ -263,6 +237,8 @@ private fun MainPages(
                 sessionId = key.sessionId,
                 onBack = nav::goBack,
                 onOpenStepCard = { open(CalibrationKey(CalibratedStep.WALKING, card = true)) },
+                // The walk as it stands: its places, its stamps, «Continue from…».
+                onOpenWalk = { open(WayKey(it, null)) },
             )
         }
         entry<PlanEditorKey> { key -> PlanEditorRoute(planId = key.planId, onDone = nav::goBack) }
@@ -283,8 +259,9 @@ private fun MainPages(
                 onBack = leave,
             )
         }
-        entry<WaysKey> {
+        entry<WaysKey> { key ->
             WaysRoute(
+                atCities = key.cities,
                 onBack = nav::goBack,
                 onOpenWay = { way, journey -> open(WayKey(way, journey)) },
                 onOpenContinent = { open(ContinentKey(it)) },

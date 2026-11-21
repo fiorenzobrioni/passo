@@ -451,11 +451,12 @@ internal class SessionNotifications(private val context: Context) {
     }
 
     /**
-     * A touch on the notification of an outing's end opens that outing's own page (Phase 16):
-     * what it came to, in full. Its own request code, so its extra is never another intent's.
+     * A touch on the notification of an outing opens that outing's own page (Phase 16): what it
+     * came to, in full, or, while it counts, the outing as it goes (Phase 21). Its own request
+     * code, so its extra is never another door's ([DoorRequest]).
      */
     private fun outingIntent(session: Session) =
-        context.openAppIntent(REQUEST_OUTING) { putExtra(SessionControl.EXTRA_OPEN_OUTING, session.id) }
+        context.openAppIntent(DoorRequest.OUTING) { putExtra(SessionControl.EXTRA_OPEN_OUTING, session.id) }
 
     /** The notification of an outing's end that can be taken back: its goal, a long stillness, or its cap. */
     fun ended(session: Session, units: UnitPreference, canReopen: Boolean): android.app.Notification =
@@ -519,7 +520,6 @@ internal class SessionNotifications(private val context: Context) {
         private const val REQUEST_STOP = 12
         private const val REQUEST_KEEP_GOING = 13
         private const val REQUEST_RESUME_GPS = 15
-        private const val REQUEST_OUTING = 16
 
         /** Under this an open outing's chip says its time in motion, not a distance that reads as nothing. */
         private const val OPEN_CHIP_DISTANCE_FROM_METERS = 100.0

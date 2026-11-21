@@ -5,6 +5,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -44,12 +46,15 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.progressBarRangeInfo
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -127,6 +132,8 @@ import java.time.ZoneId
  * @property onOpen «See the outing»: its own page (Phase 16), on a finished card and, since
  *   Phase 21, on one under way or paused, whose page follows it. Null where the card is already
  *   on a page of its own, or there is none to open.
+ * @property onOpenWalk a touch on a city walk's small map: the walk's own page, its places and
+ *   its stamps (Phase 23). Null where the walk's page is the one the card is on.
  */
 class SessionCardActions(
     val onPause: () -> Unit = {},
@@ -136,6 +143,7 @@ class SessionCardActions(
     val onClose: () -> Unit = {},
     val onGps: (GpsLineAction) -> Unit = {},
     val onOpen: (() -> Unit)? = null,
+    val onOpenWalk: (() -> Unit)? = null,
 )
 
 /**
@@ -150,7 +158,8 @@ class SessionCardActions(
  *   going" for a while after a goal ([canKeepGoing]), "Resume" after an end by a long stillness.
  *
  * On a city walk (Phase 11) the bar is the walk's small map, the reader's point on it: drawn
- * only while the card is on screen, like every chart here. An open outing (Phase 21) has no goal
+ * only while the card is on screen, like every chart here, and a door to the walk's page (Phase
+ * 23). An open outing (Phase 21) has no goal
  * and no bar: in its place the shape of the walk (step 21.3), its route so far with GPS and its
  * minutes without; under it, since when it has been under way and its time in motion, then its
  * share of the day's goal. A goal outing taken on past its goal shows its shape too, where the bar
@@ -298,7 +307,7 @@ fun SessionCard(
                 session.pastGoal && shape?.drawn(session) == true ->
                     OutingShapeView(session, shape, format, actions.onOpen)
 
-                else -> GoalTrack(session, sentence, format, showMap, now, accent)
+                else -> GoalTrack(session, sentence, format, showMap, now, accent, actions.onOpenWalk)
             }
             if (finished && session.intervals != null) IntervalBars(session, accent)
             SessionStats(session, cadence, pace, format, measure.openMeters)
@@ -432,7 +441,8 @@ fun SessionLiveButtons(session: Session, actions: SessionCardActions, modifier: 
 /**
  * A goal outing's way to its goal: a city walk's small map, an interval outing's blocks, or the
  * bar with the reader's milestones, with where it stands and where it ends at its two ends. One
- * node for TalkBack, the progress and the sentence.
+ * node for TalkBack, the progress and the sentence; the walk's map, with [onOpenWalk], is also
+ * the door to the walk's page.
  */
 @Composable
 private fun GoalTrack(
@@ -442,17 +452,28 @@ private fun GoalTrack(
     showMap: Boolean,
     now: Long,
     accent: Color,
+    onOpenWalk: (() -> Unit)?,
 ) {
     val res = LocalResources.current
     val progressText = res.sessionProgress(session, format)
+    val walk = session.walk?.let(Ways::of)
+    val along = WalkPlaces.along(session)
+    val walkDoor = onOpenWalk?.takeIf { walk != null && along != null && showMap }
+    val openWalk = stringResource(R.string.session_card_open_walk)
     val described = Modifier.clearAndSetSemantics {
         contentDescription = res.getString(R.string.session_card_progress_description, progressText, sentence)
         progressBarRangeInfo = ProgressBarRangeInfo(session.progress().toFloat().coerceIn(0f, 1f), 0f..1f)
+        if (walkDoor != null) {
+            role = Role.Button
+            onClick(label = openWalk) {
+                walkDoor()
+                true
+            }
+        }
     }
-    val walk = session.walk?.let(Ways::of)
-    val along = WalkPlaces.along(session)
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         if (walk != null && along != null && showMap) {
+            val shape = MaterialTheme.shapes.large
             WayMapView(
                 way = walk,
                 walkedMeters = along,
@@ -461,7 +482,12 @@ private fun GoalTrack(
                 detailed = false,
                 // Wider than the walk's own frame: a card on Today, not a page.
                 ratio = CARD_MAP_RATIO,
-                modifier = Modifier.fillMaxWidth().testTag(SessionCardTags.MAP).then(described),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(SessionCardTags.MAP)
+                    .then(described)
+                    // The ripple in the map's own corners.
+                    .then(if (walkDoor != null) Modifier.clip(shape).clickable(onClick = walkDoor) else Modifier),
             )
         } else if (session.intervals != null) {
             IntervalTrack(session = session, color = accent, nowMillis = now, modifier = described)

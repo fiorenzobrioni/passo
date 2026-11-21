@@ -4,7 +4,11 @@ import android.graphics.Bitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
@@ -32,15 +36,19 @@ import com.callbackdev.passo.core.domain.routes.LiveMeasure
 import com.callbackdev.passo.core.domain.sessions.OutingMinutes
 import com.callbackdev.passo.core.domain.sessions.OutingShape
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
+import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.AltitudeSource
 import com.callbackdev.passo.core.model.IntervalSplit
+import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionPause
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionTotals
+import com.callbackdev.passo.core.model.SessionVoice
 import com.callbackdev.passo.core.model.UnitPreference
+import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.testing.assertAccessible
 import com.callbackdev.passo.core.testing.walkPage
 import com.google.common.truth.Truth.assertThat
@@ -655,6 +663,78 @@ class OutingScreenTest {
         compose.onNodeWithText("La forma della camminata").assertIsDisplayed()
         compose.onNodeWithText("Una barra", substring = true).assertIsDisplayed()
         snapshot("outing_shape_it")
+    }
+
+    /** An outing on Milan's walk, begun 800 m along it and walked 1.3 km further. */
+    private fun onWalk(walked: Double = 1_300.0, fromMeters: Int = 800): Session {
+        val walk = checkNotNull(
+            SessionPlans.startWalk(
+                Ways.of(WayId.MILAN_DUOMO_NAVIGLI),
+                fromMeters,
+                SessionVoice.OFF,
+                OutingSamples.startedAt,
+                OutingSamples.measured.localEpochDay,
+            ),
+        )
+        return walk.copy(
+            id = 21,
+            state = SessionState.FINISHED,
+            end = SessionEnd.STOPPED,
+            endedAtMillis = OutingSamples.startedAt + 20 * 60_000,
+            lastStepAtMillis = OutingSamples.startedAt + 20 * 60_000,
+            totals = OutingSamples.onSteps.totals.copy(distanceMeters = walked),
+        )
+    }
+
+    @Test
+    fun `an outing on a city walk names the walk, one touch from the walk's page`() {
+        var opened = 0
+        show(OutingSamples.state(session = onWalk(), route = null), actions = OutingActions(openWalk = { opened++ }))
+
+        val row = compose.onNodeWithTag(OutingTags.WALK).assertIsDisplayed()
+        // One node: what the walk is, and how far along it this outing came.
+        row.assertContentDescriptionContains(
+            "On the walk: From the Duomo to the Navigli, by the Castello. 2.10\u00A0km of 9.32\u00A0km.",
+            substring = true,
+        )
+        row.assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
+        assertThat(row.fetchSemanticsNode().config[SemanticsActions.OnClick].label).isEqualTo("See the walk")
+        row.performClick()
+        assertThat(opened).isEqualTo(1)
+        snapshot("outing_walk")
+    }
+
+    @Test
+    fun `an outing that walked a city to its end says the whole walk`() {
+        val length = Ways.of(WayId.MILAN_DUOMO_NAVIGLI).lengthMeters.toDouble()
+        show(OutingSamples.state(session = onWalk(walked = length), route = null))
+
+        compose.onNodeWithTag(OutingTags.WALK).assertContentDescriptionContains("The whole walk, ", substring = true)
+    }
+
+    @Test
+    fun `an outing on no walk has no row for one`() {
+        show(OutingSamples.state())
+
+        compose.onNodeWithTag(OutingTags.WALK).assertDoesNotExist()
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT-w360dp-h740dp-xxhdpi")
+    fun `the walk's row in Italian on a small phone`() {
+        show(OutingSamples.state(session = onWalk(), route = null))
+
+        val row = compose.onNodeWithTag(OutingTags.WALK).assertIsDisplayed()
+        row.assertContentDescriptionContains("Sulla passeggiata: Dal Duomo ai Navigli", substring = true)
+        assertThat(row.fetchSemanticsNode().config[SemanticsActions.OnClick].label).isEqualTo("Vedi la passeggiata")
+        snapshot("outing_walk_it")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h740dp-xxhdpi", fontScale = 2f)
+    fun `the walk's row at twice the text size`() {
+        show(OutingSamples.state(session = onWalk(), route = null))
+        compose.walkPage(hasTestTag(OutingTags.PAGE), "outing_walk_large_text")
     }
 
     private fun snapshot(name: String) {

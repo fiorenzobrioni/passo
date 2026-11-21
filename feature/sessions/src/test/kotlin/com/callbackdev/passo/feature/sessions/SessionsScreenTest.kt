@@ -80,6 +80,7 @@ class SessionsScreenTest {
         status: SessionsStatus = SessionsStatus.READY,
         restOfDay: Int = 2_400,
         list: List<SessionPlan> = plans,
+        kept: KeptOutingsDoor? = null,
     ) = SessionsUiState(
         plans = list,
         live = live,
@@ -88,6 +89,7 @@ class SessionsScreenTest {
         restOfDaySteps = restOfDay,
         status = status,
         alertsWhileScreenOff = true,
+        kept = kept,
     )
 
     private fun show(
@@ -282,6 +284,71 @@ class SessionsScreenTest {
         compose.onNodeWithText("4 fast intervals of 5 at pace", substring = true).assertIsDisplayed()
         compose.onNodeWithTag(SessionCardTags.INTERVAL_BARS).assertIsDisplayed()
         snapshot("sessions_intervals_done_dark")
+    }
+
+    @Test
+    fun `the outings walked are a door under the plans, from the first one over`() {
+        var opened = 0
+        val today = java.time.LocalDate.of(2026, 11, 21)
+        val latest = walking.copy(
+            localEpochDay = today.minusDays(1).toEpochDay(),
+            state = SessionState.FINISHED,
+            endedAtMillis = 20 * 60_000L,
+        )
+        show(
+            state(kept = KeptOutingsDoor(count = 48, latest = latest, route = null, today = today)),
+            actions = SessionsActions(openOutings = { opened++ }),
+        )
+
+        compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag(SessionsTags.KEPT))
+        compose.onNodeWithText("Your outings").assertIsDisplayed()
+        compose.onNodeWithText("48 outings · the latest yesterday").assertIsDisplayed()
+        // Beside the cities' door, on one ground.
+        compose.onNodeWithTag(SessionsTags.CITIES).assertExists()
+        compose.onNodeWithTag(SessionsTags.KEPT).performClick()
+        assertThat(opened).isEqualTo(1)
+        snapshot("sessions_kept")
+    }
+
+    @Test
+    fun `the door says when the latest was, and none is shown before the first`() {
+        val today = java.time.LocalDate.of(2026, 11, 21)
+        fun latestOn(day: java.time.LocalDate) =
+            walking.copy(localEpochDay = day.toEpochDay(), state = SessionState.FINISHED)
+        var current by mutableStateOf(state())
+        compose.setContent {
+            PassoTheme {
+                SessionsScreen(current, GoalNotificationsBlock.NONE, onBack = {
+                }, onEdit = {}, actions = SessionsActions())
+            }
+        }
+        compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag(SessionsTags.CITIES))
+        compose.onNodeWithTag(SessionsTags.KEPT).assertDoesNotExist()
+
+        current = state(kept = KeptOutingsDoor(1, latestOn(today), null, today))
+        compose.onNodeWithText("One outing, today").assertExists()
+        current = state(kept = KeptOutingsDoor(3, latestOn(today.minusDays(3)), null, today))
+        compose.onNodeWithText("3 outings · the latest on Wednesday").assertExists()
+        current = state(kept = KeptOutingsDoor(3, latestOn(java.time.LocalDate.of(2026, 11, 8)), null, today))
+        compose.onNodeWithText("3 outings · the latest on Nov 8").assertExists()
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT-w360dp-h740dp-xxhdpi")
+    fun `in Italian the door elides the article where the day asks it`() {
+        val today = java.time.LocalDate.of(2026, 11, 21)
+        val latest = walking.copy(
+            localEpochDay = java.time.LocalDate.of(2026, 11, 8).toEpochDay(),
+            state = SessionState.FINISHED,
+        )
+        show(state(kept = KeptOutingsDoor(12, latest, null, today)))
+
+        // The plans are «ready to start»: «Your outings» are the ones walked.
+        compose.onNodeWithText("Pronte da avviare").assertIsDisplayed()
+        compose.onNodeWithTag(SessionsTags.LIST).performScrollToNode(hasTestTag(SessionsTags.KEPT))
+        compose.onNodeWithText("Le tue uscite").assertIsDisplayed()
+        compose.onNodeWithText("12 uscite · l’ultima l’8 nov").assertIsDisplayed()
+        snapshot("sessions_kept_it")
     }
 
     @Test

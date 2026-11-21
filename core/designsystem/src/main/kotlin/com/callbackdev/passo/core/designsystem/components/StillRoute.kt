@@ -11,6 +11,7 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -37,10 +38,15 @@ import com.callbackdev.passo.core.domain.routes.RouteTrace
  * twelve-hour walk draws with no more points than its line has pixels to cross, so it costs no
  * more a frame than a short one.
  *
+ * A small one, a list's (Phase 23.2), draws its line thinner, so the route stays a line and not a
+ * ribbon: below [FULL_SIZE] across, every stroke and point narrows with the box, down to
+ * [MIN_SCALE] of a card's.
+ *
  * @param ratio the box's width over its height; the route's own shape, held to one that sits on
  *   a page, when null.
  * @param onClick what a touch opens (on a card, the outing's page), said to TalkBack as
  *   [clickLabel]; null for a picture alone.
+ * @param clip the box's corners: a card's group shape, or a list's smaller one.
  */
 @Composable
 fun StillRouteView(
@@ -50,6 +56,7 @@ fun StillRouteView(
     ratio: Float? = null,
     onClick: (() -> Unit)? = null,
     clickLabel: String? = null,
+    clip: Shape = GroupShape,
 ) {
     val scheme = MaterialTheme.colorScheme
     val land = scheme.surfaceContainerHigh
@@ -58,7 +65,7 @@ fun StillRouteView(
     Spacer(
         modifier
             .aspectRatio(ratio ?: routeMapRatio(shape))
-            .clip(GroupShape)
+            .clip(clip)
             .testTag(StillRouteTags.ROUTE)
             // One node: the route's sentence, and the door it is on a card.
             .clearAndSetSemantics {
@@ -88,28 +95,30 @@ fun StillRouteView(
                 }
                 val start = Offset(trace.start.first, trace.start.second)
                 val end = Offset(trace.end.first, trace.end.second)
+                val scale = (size.minDimension / FULL_SIZE.toPx()).coerceIn(MIN_SCALE, 1f)
+                fun px(dp: Float) = dp.dp.toPx() * scale
                 fun stroke(width: Float, dashed: Boolean = false) = Stroke(
                     width = width,
                     cap = StrokeCap.Round,
                     join = StrokeJoin.Round,
                     pathEffect = if (dashed) {
-                        PathEffect.dashPathEffect(floatArrayOf(DASH.dp.toPx(), DASH_GAP.dp.toPx()))
+                        PathEffect.dashPathEffect(floatArrayOf(px(DASH), px(DASH_GAP)))
                     } else {
                         null
                     },
                 )
-                val casing = stroke(CASING.dp.toPx())
-                val measured = stroke(LINE.dp.toPx())
-                val laid = stroke(LAID_LINE.dp.toPx(), dashed = true)
+                val casing = stroke(px(CASING))
+                val measured = stroke(px(LINE))
+                val laid = stroke(px(LAID_LINE), dashed = true)
                 onDrawBehind {
                     drawRect(land)
                     paths.forEach { (path, _) -> drawPath(path, halo, style = casing) }
                     paths.forEach { (path, isLaid) -> drawPath(path, line, style = if (isLaid) laid else measured) }
                     // Where it began, a ring; where it ends, or stands, a full point.
-                    val radius = END.dp.toPx()
+                    val radius = px(END)
                     drawCircle(halo, radius, start)
-                    drawCircle(line, radius, start, style = Stroke(RING.dp.toPx()))
-                    drawCircle(halo, radius + EDGE.dp.toPx(), end)
+                    drawCircle(line, radius, start, style = Stroke(px(RING)))
+                    drawCircle(halo, radius + px(EDGE), end)
                     drawCircle(line, radius, end)
                 }
             },
@@ -125,6 +134,12 @@ private const val END = 4.5f
 private const val RING = 2f
 private const val EDGE = 2f
 private val INSET = 20.dp
+
+/** A box at least this across draws a card's strokes; a smaller one narrows them with it. */
+private val FULL_SIZE = 120.dp
+
+/** How thin a list's small route goes: a line still, with its ring and its point. */
+private const val MIN_SCALE = 0.55f
 
 /** A point within a pixel of the last one kept adds nothing a screen can show. */
 private const val THIN_STEP = 1f

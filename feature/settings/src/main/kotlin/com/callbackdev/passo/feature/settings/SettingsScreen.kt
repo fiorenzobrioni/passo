@@ -129,6 +129,7 @@ fun SettingsRoute(
     onCalibrate: (CalibratedStep) -> Unit,
     onOpenSessions: () -> Unit,
     onOpenGuide: () -> Unit,
+    onOpenRoutes: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel(),
     dataViewModel: DataViewModel = hiltViewModel(),
 ) {
@@ -161,6 +162,7 @@ fun SettingsRoute(
             cancelImport = dataViewModel::cancelImport,
             dismissOutcome = dataViewModel::dismissOutcome,
             deleteRoutes = dataViewModel::deleteRoutes,
+            openRoutes = onOpenRoutes,
             backupFileName = dataViewModel::backupFileName,
             tableFileName = dataViewModel::tableFileName,
         ),
@@ -523,7 +525,7 @@ private fun SettingsList(
         }
 
         item { GroupHeader(stringResource(R.string.settings_group_data)) }
-        item { DataGroup(data, format, files, dataActions.dismissOutcome) }
+        item { DataGroup(data, format, files, dataActions.dismissOutcome, dataActions.openRoutes) }
 
         item { GroupHeader(stringResource(R.string.settings_privacy)) }
         item { PrivacyCard() }

@@ -83,7 +83,24 @@ class DataSectionTest {
         show(DataUiState(contents = contents))
 
         compose.onNodeWithTag(DataTags.WITH_ROUTES).assertDoesNotExist()
+        compose.onNodeWithTag(DataTags.ROUTES).assertDoesNotExist()
         compose.onNodeWithTag(DataTags.DELETE_ROUTES).assertDoesNotExist()
+    }
+
+    @Test
+    fun `your routes say how many and what they weigh, and open the outings that hold them`() {
+        var opened = 0
+        show(
+            DataUiState(contents = contents.copy(routes = 21, deletableRoutes = 21, deletableBytes = 3_400_000)),
+            DataActions(openRoutes = { opened++ }),
+        )
+
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(DataTags.ROUTES))
+        compose.onNodeWithText("Your routes").assertIsDisplayed()
+        compose.onNodeWithText("21 routes, 3.4 MB on this phone.", substring = true).assertIsDisplayed()
+        compose.onNodeWithTag(DataTags.ROUTES).assertHasClickAction().performClick()
+        assertThat(opened).isEqualTo(1)
+        snapshot("data_routes_list")
     }
 
     @Test
@@ -135,6 +152,8 @@ class DataSectionTest {
         show(DataUiState(contents = contents.copy(routes = 1, deletableRoutes = 0)))
 
         compose.onNodeWithTag(DataTags.DELETE_ROUTES).assertDoesNotExist()
+        // Nor one to list it: «Your outings» lists the outings over.
+        compose.onNodeWithTag(DataTags.ROUTES).assertDoesNotExist()
         // The backup can still carry it.
         compose.onNodeWithTag(DataTags.WITH_ROUTES).assertExists()
     }

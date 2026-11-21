@@ -64,7 +64,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -77,6 +80,7 @@ import com.callbackdev.passo.core.designsystem.components.DayShareLine
 import com.callbackdev.passo.core.designsystem.components.IntervalBars
 import com.callbackdev.passo.core.designsystem.components.MetricTile
 import com.callbackdev.passo.core.designsystem.components.MinuteStrip
+import com.callbackdev.passo.core.designsystem.components.PlaceText
 import com.callbackdev.passo.core.designsystem.components.RouteBead
 import com.callbackdev.passo.core.designsystem.components.RouteMapView
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
@@ -87,6 +91,7 @@ import com.callbackdev.passo.core.designsystem.components.SplitRow
 import com.callbackdev.passo.core.designsystem.components.StatStrip
 import com.callbackdev.passo.core.designsystem.components.StripStat
 import com.callbackdev.passo.core.designsystem.components.TilePair
+import com.callbackdev.passo.core.designsystem.components.WayMapView
 import com.callbackdev.passo.core.designsystem.components.duration
 import com.callbackdev.passo.core.designsystem.components.minuteStripBars
 import com.callbackdev.passo.core.designsystem.format.annotated
@@ -102,7 +107,10 @@ import com.callbackdev.passo.core.designsystem.format.sessionHeadline
 import com.callbackdev.passo.core.designsystem.format.sessionName
 import com.callbackdev.passo.core.designsystem.format.sessionZone
 import com.callbackdev.passo.core.designsystem.format.text
+import com.callbackdev.passo.core.designsystem.format.unbrokenText
 import com.callbackdev.passo.core.designsystem.format.unitOf
+import com.callbackdev.passo.core.designsystem.format.unorphaned
+import com.callbackdev.passo.core.designsystem.format.wayProgressText
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.share.ShareImage
 import com.callbackdev.passo.core.designsystem.share.SharedFiles
@@ -112,6 +120,7 @@ import com.callbackdev.passo.core.designsystem.theme.PassoTheme
 import com.callbackdev.passo.core.designsystem.theme.ScreenMargin
 import com.callbackdev.passo.core.designsystem.theme.padding
 import com.callbackdev.passo.core.designsystem.theme.pageGutter
+import com.callbackdev.passo.core.designsystem.ways.wayRouteRes
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
 import com.callbackdev.passo.core.domain.routes.Compass
 import com.callbackdev.passo.core.domain.routes.DistanceKind
@@ -125,11 +134,15 @@ import com.callbackdev.passo.core.domain.sessions.OutingMinutes
 import com.callbackdev.passo.core.domain.sessions.OutingShape
 import com.callbackdev.passo.core.domain.sessions.cadenceFloor
 import com.callbackdev.passo.core.domain.sessions.pausedMillis
+import com.callbackdev.passo.core.domain.ways.WalkPlaces
+import com.callbackdev.passo.core.domain.ways.Way
+import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.AltitudeSource
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.UnitSystem
+import com.callbackdev.passo.core.model.WayId
 import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
@@ -150,6 +163,7 @@ class OutingActions(
     val deleteRoute: () -> Unit = {},
     val openStepCard: () -> Unit = {},
     val live: SessionCardActions = SessionCardActions(),
+    val openWalk: () -> Unit = {},
 )
 
 /** An outing's page with its state, and the sharing and saving of its route. */
@@ -158,6 +172,7 @@ fun OutingRoute(
     sessionId: Long,
     onBack: () -> Unit,
     onOpenStepCard: () -> Unit = {},
+    onOpenWalk: (WayId) -> Unit = {},
     viewModel: OutingViewModel = hiltViewModel(),
 ) {
     LaunchedEffect(sessionId) { viewModel.open(sessionId) }
@@ -217,6 +232,7 @@ fun OutingRoute(
                 onKeepGoing = viewModel::keepGoing,
                 onGps = viewModel::gps,
             ),
+            openWalk = { current?.session?.walk?.let(onOpenWalk) },
         ),
     )
 }
@@ -332,6 +348,11 @@ private fun OutingPage(state: OutingUiState, format: MeasureFormatter, actions: 
                     SessionNotices(session, state.measure?.line, now, actions.live)
                 }
             }
+        }
+        // The walk it moved on, one touch away: its places, its stamps, where it goes on from.
+        // After what the outing under way asks of the reader, which cannot wait.
+        session.walk?.let { walk ->
+            item(key = "walk") { WalkRow(session, Ways.of(walk), format, actions.openWalk) }
         }
         if (route != null) {
             item(key = "map") {
@@ -767,6 +788,78 @@ private fun ShareCard(state: OutingUiState, route: DrawnRoute, format: MeasureFo
     }
 }
 
+/**
+ * The city walk an outing moved on (PLANNING.md §11 Phase 23): its small map with where the outing
+ * left it, its route, and how far along it the outing came, as the walk's row on the Ways page
+ * says it. A door to the walk's own page, where its places, its stamps and «Continue from…» are:
+ * from the outing, a half-walked city was four touches deep.
+ */
+@Composable
+private fun WalkRow(session: Session, walk: Way, format: MeasureFormatter, onOpen: () -> Unit) {
+    val along = WalkPlaces.along(session) ?: 0.0
+    val route = stringResource(wayRouteRes(walk.id))
+    val title = stringResource(R.string.outing_walk_title)
+    val standing = if (along >= walk.lengthMeters) {
+        stringResource(R.string.outing_walk_whole, format.distance(walk.lengthMeters.toDouble()).unbrokenText())
+    } else {
+        wayProgressText(walk, along, format)
+    }
+    val open = stringResource(com.callbackdev.passo.core.designsystem.R.string.session_card_open_walk)
+    val spoken = stringResource(R.string.outing_walk_spoken, title, route, standing)
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = GroupShape,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = ScreenMargin),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag(OutingTags.WALK)
+                .clickable(onClick = onOpen)
+                // One node: what the walk is and where the outing left it, and the door it is.
+                .clearAndSetSemantics {
+                    contentDescription = spoken
+                    role = Role.Button
+                    onClick(label = open) {
+                        onOpen()
+                        true
+                    }
+                }
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+        ) {
+            WayMapView(
+                way = walk,
+                walkedMeters = along,
+                reached = walk.stops.count { it.distanceMeters <= along },
+                contentDescription = "",
+                detailed = false,
+                ratio = 1f,
+                modifier = Modifier.size(WALK_THUMBNAIL),
+            )
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                // The route's last word is not left alone on a line («…per il / Castello»).
+                PlaceText(route.unorphaned(), style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    standing,
+                    style = MaterialTheme.typography.bodySmall.copy(fontFeatureSettings = "tnum"),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Icon(PassoIcons.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+/** As the walks' rows on the Ways page draw their map. */
+private val WALK_THUMBNAIL = 64.dp
+
 /** A part of the page on its own rounded ground, as wide as the page's groups. */
 @Composable
 private fun Group(content: @Composable () -> Unit) {
@@ -909,4 +1002,5 @@ object OutingTags {
     const val DELETE_CONFIRM = "outing_delete_confirm"
     const val STEP = "outing_step"
     const val STEP_READY = "outing_step_ready"
+    const val WALK = "outing_walk"
 }

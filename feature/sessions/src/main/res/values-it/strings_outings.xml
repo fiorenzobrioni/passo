@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="outings_title">Le tue uscite</string>
+    <string name="outings_back">Indietro</string>
+
+    <plurals name="outings_summary">
+        <item quantity="one">%1$s uscita da %2$s.</item>
+        <item quantity="many">%1$s uscite da %2$s.</item>
+        <item quantity="other">%1$s uscite da %2$s.</item>
+    </plurals>
+    <plurals name="outings_summary_some">
+        <item quantity="one">%1$s uscita da %2$s; %3$s.</item>
+        <item quantity="many">%1$s uscite da %2$s; %3$s.</item>
+        <item quantity="other">%1$s uscite da %2$s; %3$s.</item>
+    </plurals>
+    <plurals name="outings_with_route">
+        <item quantity="one">%1$s con il percorso</item>
+        <item quantity="many">%1$s con il percorso</item>
+        <item quantity="other">%1$s con il percorso</item>
+    </plurals>
+    <plurals name="outings_summary_all">
+        <item quantity="one">%1$s uscita da %2$s, con il percorso.</item>
+        <item quantity="many">%1$s uscite da %2$s, tutte con il percorso.</item>
+        <item quantity="other">%1$s uscite da %2$s, tutte con il percorso.</item>
+    </plurals>
+    <string name="outings_summary_one">Un’uscita, per ora.</string>
+    <string name="outings_summary_one_route">Un’uscita per ora, con il percorso.</string>
+
+    <string name="outings_filter_all">Tutte</string>
+    <string name="outings_filter_routes">Con il percorso</string>
+    <string name="outings_routes_note">Aprine una per condividerne il percorso o eliminarlo. L’uscita tiene i suoi numeri.</string>
+
+    <plurals name="outings_month">
+        <item quantity="one">%1$s uscita · %2$s in movimento</item>
+        <item quantity="many">%1$s uscite · %2$s in movimento</item>
+        <item quantity="other">%1$s uscite · %2$s in movimento</item>
+    </plurals>
+
+    <string name="outings_row_moving">%1$s in movimento</string>
+    <string name="outings_row_spoken_when">%1$s alle %2$s</string>
+    <string name="outings_row_spoken_estimated">%1$s, stimati</string>
+    <string name="outings_row_spoken_route">Con il percorso.</string>
+
+    <string name="outings_empty">Ancora nessuna uscita. Avviane una dalle Uscite: la ritrovi qui, dalla più recente.</string>
+    <string name="outings_empty_routes">Nessuna delle tue uscite ha un percorso. Un’uscita lo tiene quando «Misura con il GPS» è attivo.</string>
+</resources>

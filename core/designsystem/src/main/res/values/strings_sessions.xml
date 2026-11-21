@@ -91,6 +91,8 @@
     <string name="session_card_close">Close</string>
     <!-- On a finished outing, and what a touch on an outing's row does: its own page. -->
     <string name="session_card_open">See the outing</string>
+    <!-- A city walk's small map on an outing's card, and its row on the outing's page: the walk's own page. -->
+    <string name="session_card_open_walk">See the walk</string>
     <string name="session_card_under_way">Under way</string>
     <!-- What TalkBack says when an outing's card appears or changes: its name, then its state. -->
     <string name="session_card_pane">%1$s, %2$s</string>

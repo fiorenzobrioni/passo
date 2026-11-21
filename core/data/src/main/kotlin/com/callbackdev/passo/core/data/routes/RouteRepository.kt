@@ -5,6 +5,7 @@ import com.callbackdev.passo.core.domain.routes.RouteCodec
 import com.callbackdev.passo.core.model.AltitudeSource
 import com.callbackdev.passo.core.model.Route
 import com.callbackdev.passo.core.model.RouteBox
+import com.callbackdev.passo.core.model.RouteKey
 import com.callbackdev.passo.core.model.RoutePoint
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -100,6 +101,17 @@ constructor(private val dao: RouteDao, private val file: RouteFile = RouteFile {
 
     /** How many routes are kept, as it changes. */
     val count: Flow<Int> = whenPresent(0) { dao.observeRouteCount() }
+
+    /**
+     * Each route kept, by its outing's id and start, with how many points it holds, as they change:
+     * what «Your outings» knows of the routes before a row on screen reads one (PLANNING.md §11
+     * Phase 23, step 23.2). Nothing, and no database opened, until a route has been written.
+     */
+    val keys: Flow<List<RouteKey>> = whenPresent(emptyList()) {
+        dao.observeRouteKeys().map { rows ->
+            rows.map { RouteKey(it.sessionId, it.sessionStartedAtMillis, it.pointCount) }
+        }
+    }
 
     /** The bytes the routes' points take: what Your data says they weigh. */
     suspend fun bytes(except: Long? = null): Long = when {

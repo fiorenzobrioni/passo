@@ -2,6 +2,9 @@
 
 - Status: accepted
 - Date: 2026-09-25
+- Amended: 21 Nov 2026 (owner; PLANNING.md §11 Phase 23, step 23.1): a card's tap names the page
+  it opens, Today or the outing it shows (decision 8, below; `docs/adr/0008-goals-and-system-surfaces.md`,
+  decision 8)
 
 ## Context
 
@@ -65,6 +68,12 @@ part in the style of Chiaro's «Colpo d'occhio».
    Tapping a paused card opens the app asking it to resume (`TrackingControl.EXTRA_RESUME`): the
    foreground service is started from the activity, where Android allows it, and the reader sees
    it happen. An `ActionCallback` would have tried to start it from a broadcast.
+
+   *Amended 21 Nov 2026 (owner; PLANNING.md §11 Phase 23, step 23.1):* a card's tap brought the
+   app back on the page it was last left on, not on Today as §7 says: the launch intent alone
+   restores the task as it was. It now asks for Today by name (`AppDoors.EXTRA_OPEN_TODAY`, in
+   `widgetTapIntent`), a paused card for Today and the resume together, and a card that shows an
+   outing under way for that outing's page (Phase 21).
 9. **The same numbers as Today**: the model is `TodayOverview` over the stored minutes plus the
    service's buffer (`LiveSteps`), so the widget and the screen never tell two stories. The usual
    day is computed once per day, not at every repaint.

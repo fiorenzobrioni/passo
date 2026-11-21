@@ -57,6 +57,16 @@ All notable changes to Passo are documented here. The format follows
   your steps covered a stretch with no satellite. Under it, each kilometre (or mile) with its
   pace and its cadence, the fastest marked, and how much you climbed, as a figure and as a shape.
 
+- **Your outings, all in one place.** At the foot of Outings, «Your outings» says how many you
+  have walked and since when («48 outings since March; 21 with their route»), then lists them
+  month by month, the newest first: each with its day and time, how it went, its distance and its
+  time in motion, and, where it was measured with GPS, its route drawn small beside it. Touch one
+  to open its page. «With their route» shows only the outings that still hold one, and «Your
+  routes» in Settings opens the list on them: the way to see where each went and delete one on
+  its own, rather than all at once. A list of years scrolls as smoothly as a list of weeks, and a
+  route is read only when its row comes on screen. On the Outings page, the outings you keep to
+  start are now «Ready to start», and Settings' row to them is «Outings to start».
+
 - **Your route is yours to take or to delete.** Once the outing is over, share it as an image
   (the line, with no street in it) or as a GPX file for a map app, save the GPX where you like,
   or delete the route and keep the outing's numbers. In Settings, your backup holds the routes
@@ -103,6 +113,19 @@ All notable changes to Passo are documented here. The format follows
   does. The figure an hour will be written beside the switch once it is measured on a phone.
 
 ### Better
+
+- **Every way in opens where it says.** The tile, both widgets and the counting notification open
+  Today, wherever you last left the app, and while they show an outing, that outing. The goal
+  reached and the evening reminder open Today too; the weekly summary opens its own week in
+  History, where its numbers are; a stage reached opens its way, on its new stamp. Back from any
+  of them lands on Today.
+
+- **From an outing to its city walk in one touch.** An outing on a city walk names the walk on
+  its page, with its small map and how far along it you came, and opens the walk: its places,
+  its stamps, where it goes on from. The walk's small map on the outing's card opens it too.
+  «Walk through a city» on the Outings page opens the Ways at the cities, not above five
+  continents of ways. An outing's row in the day's list wears the arrow every other way in
+  wears.
 
 - **Outings, easier to read and to start.** Each outing is a shorter card that reads on one
   line, with one button to start it and a touch on the card to change it; a new one is at the

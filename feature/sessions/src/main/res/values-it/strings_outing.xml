@@ -92,4 +92,7 @@
     </plurals>
     <string name="outing_shape_gaps">I vuoti sono le tue pause.</string>
     <string name="outing_shape_goal_line">La linea segna il tuo obiettivo.</string>
+    <string name="outing_walk_title">Sulla passeggiata</string>
+    <string name="outing_walk_whole">Tutta la passeggiata, %1$s</string>
+    <string name="outing_walk_spoken">%1$s: %2$s. %3$s.</string>
 </resources>

@@ -45,8 +45,10 @@ import com.callbackdev.passo.core.designsystem.theme.widgetCardContainer
 import com.callbackdev.passo.core.designsystem.theme.widgetDress
 import com.callbackdev.passo.core.domain.widget.CountingState
 import com.callbackdev.passo.core.model.UserSettings
+import com.callbackdev.passo.core.tracking.AppDoors
 import com.callbackdev.passo.core.tracking.SessionControl
 import com.callbackdev.passo.core.tracking.TrackingControl
+import com.callbackdev.passo.core.tracking.openingToday
 import java.util.Locale
 import kotlin.math.floor
 
@@ -158,17 +160,22 @@ fun wallpaperWantsDarkInk(context: Context): Boolean {
 }
 
 /**
- * What a tap does: open the app, which lands on Today; on a paused card, open it asking to
- * resume, as the card says ([TrackingControl.EXTRA_RESUME]); on a card that shows an outing under
- * way ([outingId]), that outing's own page, which holds what the card shows of it and its buttons
+ * What a tap does: open Today, which holds the day the card shows, wherever the app was left
+ * ([AppDoors.EXTRA_OPEN_TODAY]); on a paused card, Today asking to resume, as the card says
+ * ([TrackingControl.EXTRA_RESUME]), where its button is; on a card that shows an outing under way
+ * ([outingId]), that outing's own page, which holds what the card shows of it and its buttons
  * (Phase 21). The launcher's own intent, so the tap brings back the app's task rather than
- * starting a second one.
+ * starting a second one; the extra is what brings the page forward (PLANNING.md §11 Phase 23).
  */
-fun widgetTapIntent(context: Context, state: CountingState, outingId: Long? = null): Intent? =
-    context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
-        if (state == CountingState.PAUSED) putExtra(TrackingControl.EXTRA_RESUME, true)
-        if (outingId != null) putExtra(SessionControl.EXTRA_OPEN_OUTING, outingId)
+fun widgetTapIntent(context: Context, state: CountingState, outingId: Long? = null): Intent? {
+    val resume = state == CountingState.PAUSED
+    // As the tile: a paused count's touch is its resume, on Today, whatever else the card shows.
+    val outing = outingId.takeIf { !resume }
+    return context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+        if (resume) putExtra(TrackingControl.EXTRA_RESUME, true)
+        if (outing != null) putExtra(SessionControl.EXTRA_OPEN_OUTING, outing) else openingToday()
     }
+}
 
 /**
  * The card every widget lives in: the launcher's corner, the ground at the reader's opacity, the

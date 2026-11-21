@@ -415,6 +415,30 @@ class SessionRepositoryTest {
     }
 
     @Test
+    fun `the outings over are read newest first, without their legs, the one under way left out`() = runTest {
+        val plan = SessionPlans.NEW.copy(gps = true)
+        fun start(at: Long) = checkNotNull(SessionPlans.start(plan, at, 20_720, 0, 8_000, withGps = true))
+        val older = repository.insert(start(1_000))
+        repository.save(
+            older.copy(
+                state = SessionState.FINISHED,
+                endedAtMillis = 900_000,
+                legs = listOf(OutingLeg(0, 100.0, 71_000, 130.5, endedAtMillis = 72_000)),
+            ),
+        )
+        val newer = repository.insert(start(3_600_000))
+        repository.save(newer.copy(state = SessionState.FINISHED, endedAtMillis = 4_500_000))
+        repository.insert(start(7_200_000))
+
+        val finished = repository.finished.first()
+        assertThat(finished.map { it.id }).containsExactly(newer.id, older.id).inOrder()
+        // The list draws no kilometre: its page reads them, whole.
+        assertThat(finished.last().legs).isEmpty()
+        assertThat(checkNotNull(repository.session(older.id)).legs).hasSize(1)
+        assertThat(repository.finishedCount.first()).isEqualTo(2)
+    }
+
+    @Test
     fun `an outing without GPS has no climb and no legs`() = runTest {
         val started = repository.insert(checkNotNull(SessionPlans.start(SessionPlans.NEW, 1_000, 20_720, 0, 8_000)))
 

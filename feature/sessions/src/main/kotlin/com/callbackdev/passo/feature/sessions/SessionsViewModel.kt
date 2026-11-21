@@ -4,17 +4,22 @@ import android.content.Context
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.callbackdev.passo.core.data.routes.RouteRepository
+import com.callbackdev.passo.core.data.routes.RouteThumbnails
 import com.callbackdev.passo.core.data.sessions.LiveSession
 import com.callbackdev.passo.core.data.sessions.LiveSessionState
 import com.callbackdev.passo.core.data.sessions.OutingShapes
 import com.callbackdev.passo.core.data.sessions.SessionRepository
 import com.callbackdev.passo.core.data.settings.SettingsRepository
+import com.callbackdev.passo.core.data.time.TodaySource
 import com.callbackdev.passo.core.data.tracking.LiveSteps
 import com.callbackdev.passo.core.data.tracking.TrackingRepository
 import com.callbackdev.passo.core.domain.metrics.StepLengths
 import com.callbackdev.passo.core.domain.routes.GpsLineAction
+import com.callbackdev.passo.core.domain.routes.RouteShape
 import com.callbackdev.passo.core.domain.sessions.OutingShape
 import com.callbackdev.passo.core.domain.sessions.pastGoal
+import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionPlan
 import com.callbackdev.passo.core.model.UnitPreference
 import com.callbackdev.passo.core.tracking.OutingStarter
@@ -25,13 +30,18 @@ import com.callbackdev.passo.core.tracking.TrackingControl
 import com.callbackdev.passo.core.tracking.TrackingReadiness
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -51,12 +61,22 @@ enum class SessionsStatus {
 }
 
 /**
+ * The door to «Your outings» (PLANNING.md §11 Phase 23, step 23.2): how many are kept, and the
+ * latest, whose route is the door's picture where it has one.
+ *
+ * @property today the reader's date, which the latest's day is said against: «yesterday».
+ */
+@Immutable
+data class KeptOutingsDoor(val count: Int, val latest: Session, val route: RouteShape?, val today: LocalDate)
+
+/**
  * The Outings page.
  *
  * @property live the outing under way, paused, or just ended by its goal.
  * @property shape what its card draws of its shape (Phase 21.3); null where the card draws none.
  * @property restOfDaySteps what "the rest of the day" means right now.
  * @property alertsWhileScreenOff the phone's step counter can wake it for a signal.
+ * @property kept the door to the outings walked; null until the first one is over.
  */
 @Immutable
 data class SessionsUiState(
@@ -68,6 +88,7 @@ data class SessionsUiState(
     val status: SessionsStatus,
     val alertsWhileScreenOff: Boolean,
     val shape: OutingShape? = null,
+    val kept: KeptOutingsDoor? = null,
 )
 
 /**
@@ -87,6 +108,9 @@ constructor(
     tracking: TrackingRepository,
     liveSteps: LiveSteps,
     liveSession: LiveSession,
+    routes: RouteRepository,
+    thumbnails: RouteThumbnails,
+    todaySource: TodaySource,
 ) : ViewModel() {
     private val readiness = MutableStateFlow(StepTracking.readiness(context))
 
@@ -110,13 +134,42 @@ constructor(
         live.map { it?.session?.takeIf { session -> session.open || session.pastGoal } },
     )
 
+    /**
+     * The door to «Your outings»: how many are over, and the latest with its route's picture, read
+     * from `routes.db` only for an outing that measured with GPS, and only while the page is seen.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val kept: Flow<KeptOutingsDoor?> = combine(sessions.finishedCount, sessions.observeLatestFinished(), ::Pair)
+        .distinctUntilChanged()
+        .flatMapLatest { (count, latest) ->
+            if (count == 0 || latest == null) {
+                flowOf(null)
+            } else {
+                val route = if (!latest.gps) {
+                    flowOf(null)
+                } else {
+                    routes.keys
+                        .map { keys ->
+                            keys.firstOrNull {
+                                it.sessionId == latest.id &&
+                                    it.sessionStartedAtMillis == latest.startedAtMillis &&
+                                    it.pointCount >= 2
+                            }
+                        }
+                        .distinctUntilChanged()
+                        .mapLatest { key -> key?.let { thumbnails.of(it) } }
+                }
+                route.map { KeptOutingsDoor(count, latest, it, LocalDate.ofEpochDay(todaySource.epochDay())) }
+            }
+        }
+
     val state: StateFlow<SessionsUiState?> = combine(
         sessions.plans,
-        combine(live, shape, ::Pair),
+        combine(live, shape, kept, ::Triple),
         combine(settingsRepository.settings, settingsRepository.profile, ::Pair),
         todaySteps,
         readiness,
-    ) { plans, (live, shape), (settings, profile), steps, ready ->
+    ) { plans, (live, shape, kept), (settings, profile), steps, ready ->
         SessionsUiState(
             plans = plans,
             live = live,
@@ -130,6 +183,7 @@ constructor(
             },
             alertsWhileScreenOff = StepTracking.hasWakeUpStepCounter(context),
             shape = shape?.takeIf { it.sessionId == live?.session?.id },
+            kept = kept,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), null)
 

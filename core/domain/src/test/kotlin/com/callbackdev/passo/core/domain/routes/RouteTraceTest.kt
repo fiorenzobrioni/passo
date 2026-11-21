@@ -103,4 +103,57 @@ class RouteTraceTest {
         // No more points than the line has pixels to cross, far fewer than its fixes.
         assertThat(trace.pointCount).isLessThan(seconds / 4)
     }
+
+    @Test
+    fun `a route kept for a list's small picture holds no more than it can show`() {
+        // A fix a second for twelve hours, wandering around a park and back: 43,200 points.
+        val seconds = 12 * 60 * 60
+        val points = (0 until seconds).map {
+            val turn = it / 900.0
+            point(
+                it.toLong(),
+                45.47 + 0.004 * sin(turn) + it * 0.0000001,
+                9.18 + 0.006 * cos(turn * 0.7),
+                if (it == 0) RoutePointKind.START else RoutePointKind.MEASURED,
+            )
+        }
+        val shape = checkNotNull(RouteShape.of(points))
+        val small = shape.thinnedTo(THUMBNAIL_PIXELS)
+        assertThat(small.points.size).isLessThan(seconds / 10)
+        assertThat(small.start).isEqualTo(shape.start)
+        assertThat(small.end).isEqualTo(shape.end)
+        // Drawn in the picture it was thinned for, it starts and ends where the whole one does.
+        val whole = RouteTrace.of(shape, THUMBNAIL_PIXELS.toFloat(), THUMBNAIL_PIXELS.toFloat(), inset = 0f)
+        val thin = RouteTrace.of(small, THUMBNAIL_PIXELS.toFloat(), THUMBNAIL_PIXELS.toFloat(), inset = 0f)
+        assertThat(thin.start.first).isWithin(2f).of(whole.start.first)
+        assertThat(thin.end.second).isWithin(2f).of(whole.end.second)
+    }
+
+    @Test
+    fun `a route thinned keeps its breaks and its dashes where they were`() {
+        val first = walk(600)
+        val laid = (1..300).map { point(700L + it, 45.4642 + (600 + it) * 0.0000135, 9.1900, RoutePointKind.LAID) }
+        val after = walk(600, from = 1_200).map { it.copy(latitudeE6 = it.latitudeE6 + 3_000) }
+        val shape = checkNotNull(RouteShape.of(first + laid + after))
+        val small = shape.thinnedTo(THUMBNAIL_PIXELS)
+
+        assertThat(small.points.size).isLessThan(shape.points.size / 3)
+        assertThat(small.lines.map { it.laid }).isEqualTo(shape.lines.map { it.laid })
+        assertThat(small.points.count { it.kind == RoutePointKind.START })
+            .isEqualTo(shape.points.count { it.kind == RoutePointKind.START })
+        // The first laid point and the measured one before it: the dash starts where it did.
+        val firstLaid = shape.points.indexOfFirst { it.kind == RoutePointKind.LAID }
+        assertThat(small.points).containsAtLeast(shape.points[firstLaid - 1], shape.points[firstLaid]).inOrder()
+    }
+
+    @Test
+    fun `a route already small is kept whole`() {
+        val shape = checkNotNull(RouteShape.of(walk(100)))
+        assertThat(shape.thinnedTo(THUMBNAIL_PIXELS)).isSameInstanceAs(shape)
+    }
+
+    private companion object {
+        /** A list's small route, 56dp at three pixels a dp. */
+        const val THUMBNAIL_PIXELS = 168
+    }
 }

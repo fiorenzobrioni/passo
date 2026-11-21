@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -75,11 +76,14 @@ fun OutingList(
     modifier: Modifier = Modifier,
     onOpen: ((Long) -> Unit)? = null,
 ) {
+    // Where a row is a door, with its chevron at its end, every row keeps that end free: the
+    // lengths of the day's walks then stand in one column, the outing's with the rest.
+    val doors = onOpen != null && outings.any { it is Outing.Planned }
     Column(modifier) {
         outings.forEachIndexed { index, outing ->
             if (index > 0) GroupDivider()
             when (outing) {
-                is Outing.Detected -> WalkRow(outing.walk, format)
+                is Outing.Detected -> WalkRow(outing.walk, format, keepEndFree = doors)
                 is Outing.Planned -> SessionRow(outing, format, onOpen)
             }
         }
@@ -205,11 +209,26 @@ private fun SessionRow(outing: Outing.Planned, format: MeasureFormatter, onOpen:
             )
             Figures(counted, estimated, measured)
         }
+        // A row that opens a page wears the chevron every other door on these pages wears
+        // (PLANNING.md §11 Phase 23); a walk found in the steps opens nothing, and wears none.
+        if (onOpen != null) {
+            Icon(
+                PassoIcons.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.align(Alignment.CenterVertically).size(ChevronSize),
+            )
+        }
     }
 }
 
+/**
+ * A walk found in the steps: its row says all there is, and opens nothing.
+ *
+ * @param keepEndFree leave the room an outing's chevron takes, beside an outing's row that has one.
+ */
 @Composable
-private fun WalkRow(walk: Walk, format: MeasureFormatter) {
+private fun WalkRow(walk: Walk, format: MeasureFormatter, keepEndFree: Boolean = false) {
     val kind = walkTypeLabel(walk.type)
     val from = clockTime(walk.startMinute)
     val to = clockTime(walk.endMinute)
@@ -269,8 +288,12 @@ private fun WalkRow(walk: Walk, format: MeasureFormatter) {
             )
             Figures(counted, estimated)
         }
+        if (keepEndFree) Spacer(Modifier.size(ChevronSize))
     }
 }
+
+/** Material's icon size: an outing's chevron, and the room a walk's row keeps beside it. */
+private val ChevronSize = 24.dp
 
 /**
  * A row's figures on two lines that never change places: what was counted (the steps, the

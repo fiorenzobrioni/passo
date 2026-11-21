@@ -2,7 +2,11 @@ package com.callbackdev.passo.feature.history
 
 import android.graphics.Bitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHasNoClickAction
@@ -207,9 +211,15 @@ class HistoryScreenTest {
         page().performScrollToNode(hasTestTag(HistoryTags.WALKS))
 
         compose.onAllNodes(hasContentDescription("Walk from", substring = true)).onFirst().assertHasNoClickAction()
-        compose.onNode(hasContentDescription("Brisk walk from", substring = true)).assertHasClickAction().performClick()
+        val row = compose.onNode(hasContentDescription("Brisk walk from", substring = true))
+        // A door, said as one (it wears the chevron every door on the page wears: the screenshot).
+        row.assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
+        assertThat(row.fetchSemanticsNode().config[SemanticsActions.OnClick].label).isEqualTo("See the outing")
+        compose.assertAccessible()
+        row.assertHasClickAction().performClick()
 
         assertThat(opened).containsExactly(1L)
+        snapshot("history_day_outing_door")
     }
 
     @Test

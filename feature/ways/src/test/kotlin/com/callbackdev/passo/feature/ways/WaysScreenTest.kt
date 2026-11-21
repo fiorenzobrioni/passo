@@ -7,6 +7,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.getBoundsInRoot
@@ -104,6 +105,43 @@ class WaysScreenTest {
         compose.waitForIdle()
         compose.assertAccessible()
         compose.writeScreenshot(name)
+    }
+
+    private fun showAtCities(state: WaysUiState) {
+        compose.setContent {
+            PassoTheme {
+                WaysScreen(state, onBack = {}, onOpenWay = { _, _ -> }, onOpenContinent = {}, atCities = true)
+            }
+        }
+        compose.waitForIdle()
+    }
+
+    /**
+     * The cities' header stands at the top of the list: at its very top where the page below it
+     * fills the screen, a little lower where it does not, since a list ends at the screen's foot.
+     * Either way the ways above it are out of sight.
+     */
+    private fun assertCitiesAtTop() {
+        val list = compose.onNodeWithTag(WaysTags.LIST).getBoundsInRoot()
+        val header = compose.onNodeWithTag(WaysTags.CITIES_HEADER).assertIsDisplayed().getBoundsInRoot()
+        assertThat(header.top - list.top).isLessThan((list.bottom - list.top) / 5)
+        compose.onNodeWithText("Walk a long way or a city", substring = true).assertIsNotDisplayed()
+    }
+
+    @Test
+    fun `opened by the door to the city walks, the page starts at the cities`() {
+        showAtCities(WaysSamples.state())
+        assertCitiesAtTop()
+        compose.onNodeWithTag(WaysTags.CITIES).assertIsDisplayed()
+        snapshot("ways_at_cities")
+    }
+
+    @Test
+    fun `at the cities with no way under way too, the ways a swipe up`() {
+        showAtCities(WaysSamples.state(active = null))
+        assertCitiesAtTop()
+        compose.onNodeWithTag(WaysTags.LIST).performScrollToNode(hasTestTag(WaysTags.catalogue(Continent.EUROPE)))
+        compose.onNodeWithTag(WaysTags.catalogue(Continent.EUROPE)).assertIsDisplayed()
     }
 
     @Test

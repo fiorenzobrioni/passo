@@ -18,7 +18,9 @@ import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionTotals
+import com.callbackdev.passo.core.tracking.AppDoors
 import com.callbackdev.passo.core.tracking.SessionControl
+import com.callbackdev.passo.core.tracking.TrackingControl
 import com.callbackdev.passo.widget.glance.GlanceWidgetContent
 import com.callbackdev.passo.widget.words.WordsWidgetContent
 import com.google.common.truth.Truth.assertThat
@@ -269,7 +271,15 @@ class WidgetGalleryTest {
         )
         val tap = checkNotNull(widgetTapIntent(context, outing.state, outing.session?.id))
         assertThat(tap.getLongExtra(SessionControl.EXTRA_OPEN_OUTING, 0L)).isEqualTo(31L)
+        assertThat(tap.hasExtra(AppDoors.EXTRA_OPEN_TODAY)).isFalse()
+        // Today by name: the launcher's intent alone brings the app back on the page it was left on.
         val day = checkNotNull(widgetTapIntent(context, WidgetSamples.model().state))
         assertThat(day.hasExtra(SessionControl.EXTRA_OPEN_OUTING)).isFalse()
+        assertThat(day.getBooleanExtra(AppDoors.EXTRA_OPEN_TODAY, false)).isTrue()
+        assertThat(day.hasExtra(TrackingControl.EXTRA_RESUME)).isFalse()
+        // Paused: Today, where its button is, asking to resume.
+        val paused = checkNotNull(widgetTapIntent(context, CountingState.PAUSED))
+        assertThat(paused.getBooleanExtra(AppDoors.EXTRA_OPEN_TODAY, false)).isTrue()
+        assertThat(paused.getBooleanExtra(TrackingControl.EXTRA_RESUME, false)).isTrue()
     }
 }

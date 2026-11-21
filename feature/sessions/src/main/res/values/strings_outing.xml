@@ -113,4 +113,10 @@
     </plurals>
     <string name="outing_shape_gaps">The gaps are your pauses.</string>
     <string name="outing_shape_goal_line">The line marks your goal.</string>
+    <!-- An outing on a city walk: the row naming the walk, a door to its page. Its route under it,
+         then how far along the walk the outing came («2.10 km of 9.32 km»), or the whole of it. -->
+    <string name="outing_walk_title">On the walk</string>
+    <string name="outing_walk_whole">The whole walk, %1$s</string>
+    <!-- The row said by TalkBack: «On the walk: From the Duomo to the Navigli, by the Castello. 2.10 km of 9.32 km.» -->
+    <string name="outing_walk_spoken">%1$s: %2$s. %3$s.</string>
 </resources>
