@@ -57,6 +57,16 @@ All notable changes to Passo are documented here. The format follows
   your steps covered a stretch with no satellite. Under it, each kilometre (or mile) with its
   pace and its cadence, the fastest marked, and how much you climbed, as a figure and as a shape.
 
+- **Your outings, all in one place.** At the foot of Outings, «Your outings» says how many you
+  have walked and since when («48 outings since March; 21 with their route»), then lists them
+  month by month, the newest first: each with its day and time, how it went, its distance and its
+  time in motion, and, where it was measured with GPS, its route drawn small beside it. Touch one
+  to open its page. «With their route» shows only the outings that still hold one, and «Your
+  routes» in Settings opens the list on them: the way to see where each went and delete one on
+  its own, rather than all at once. A list of years scrolls as smoothly as a list of weeks, and a
+  route is read only when its row comes on screen. On the Outings page, the outings you keep to
+  start are now «Ready to start», and Settings' row to them is «Outings to start».
+
 - **Your route is yours to take or to delete.** Once the outing is over, share it as an image
   (the line, with no street in it) or as a GPX file for a map app, save the GPX where you like,
   or delete the route and keep the outing's numbers. In Settings, your backup holds the routes

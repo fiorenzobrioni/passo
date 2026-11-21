@@ -88,6 +88,16 @@ constructor(
 
     fun observeLatestFinished(): Flow<Session?> = dao.observeLatestFinished().map { it?.toModel() }
 
+    /**
+     * The outings over, newest first, as they change (PLANNING.md §11 Phase 23, step 23.2): each
+     * without its intervals' splits, its legs or its pauses, which «Your outings» does not draw;
+     * its own page reads it whole.
+     */
+    val finished: Flow<List<Session>> = dao.observeFinished().map { rows -> rows.mapNotNull { it.toModel() } }
+
+    /** How many outings are over, as it changes. */
+    val finishedCount: Flow<Int> = dao.observeFinishedCount()
+
     /** The outings over from [fromDay] to [toDay] included, oldest first: a year's (Your year on foot). */
     suspend fun finishedBetween(fromDay: Long, toDay: Long): List<Session> =
         dao.finishedBetween(fromDay, toDay).mapNotNull { it.toModel() }

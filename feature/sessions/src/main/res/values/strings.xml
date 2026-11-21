@@ -4,7 +4,8 @@
     <string name="sessions_title">Outings</string>
     <string name="sessions_back">Back</string>
     <string name="sessions_intro">A walk with a goal, or with none: start one and keep the phone in your pocket.</string>
-    <string name="sessions_yours">Your outings</string>
+    <!-- The heading over the outings kept ready to start; «Your outings» are the ones walked (Phase 23.2). -->
+    <string name="sessions_ready">Ready to start</string>
     <!-- The start button is its icon alone: what TalkBack says for it, «Start Brisk walk». -->
     <string name="sessions_start_named">Start %1$s</string>
     <!-- What a tap on an outing's card does, for TalkBack. -->
@@ -103,6 +104,23 @@
     <string name="editor_voice_no_engine">This phone has no text-to-speech engine: the signals are vibrations only.</string>
     <string name="editor_voice_change">Change voice</string>
     <!-- The door to the city walks, on the Ways page (Phase 11). -->
+    <!-- The door to the outings walked (PLANNING.md §11 Phase 23, step 23.2): «48 outings · the latest yesterday». -->
+    <string name="sessions_kept_title">Your outings</string>
+    <plurals name="sessions_kept_count">
+        <item quantity="one">%1$s outing</item>
+        <item quantity="other">%1$s outings</item>
+    </plurals>
+    <string name="sessions_kept_body">%1$s · the latest %2$s</string>
+    <!-- With one outing kept: «One outing, yesterday». -->
+    <string name="sessions_kept_body_one">One outing, %1$s</string>
+    <string name="sessions_kept_today">today</string>
+    <string name="sessions_kept_yesterday">yesterday</string>
+    <!-- «on Wednesday», in the week before yesterday. -->
+    <string name="sessions_kept_weekday">on %1$s</string>
+    <!-- «on Nov 18», further back. -->
+    <string name="sessions_kept_date">on %1$s</string>
+    <!-- The same for a day Italian says with an elided article («l’8 nov»): 1, 8 and 11. English says them alike. -->
+    <string name="sessions_kept_date_elided">on %1$s</string>
     <string name="sessions_cities_title">Walk through a city</string>
     <string name="sessions_cities_body">Cities from Milan to Cusco, walked from wherever you are: each place told as your steps reach it.</string>
 

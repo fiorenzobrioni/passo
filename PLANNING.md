@@ -57,10 +57,11 @@ so they are uniform"):
   21.2 built: the marks on the way» and «Phase 21.3 built: the shape on the card»), and waits for
   a phone (the boxes in «Open»). **Phase 23, the doors**: **step 23.1 built** (21 Nov 2026, on
   the branch of its pull request; §15, «Phase 23.1 built: the doors that lead where they say»),
-  and waits for a phone (the box in «Open»). **Next: 23.2**, Your outings, then **20** (reviewed
-  on 19 Nov 2026: the usual round alone; it builds on 21), before 18 at the owner's wish (21 Nov
-  2026: the whole of 23 before 20, «which I need more»), then 18, a city walk measured with GPS
-  (re-planned on 19 Nov 2026): not started. Phase 19 dropped; Phase 22, the walk already begun,
+  and waits for a phone (the box in «Open»); **step 23.2 built** (21 Nov 2026, on the same pull
+  request; §15, «Phase 23.2 built: Your outings»), and waits for a phone too. With it Phase 23 is
+  built. **Next: 20** (reviewed on 19 Nov 2026: the usual round alone; it builds on 21), before 18
+  at the owner's wish (21 Nov 2026: the whole of 23 before 20, «which I need more»), then 18, a
+  city walk measured with GPS (re-planned on 19 Nov 2026): not started. Phase 19 dropped; Phase 22, the walk already begun,
   later, when the owner asks.
 
 ## Open
@@ -198,6 +199,18 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
     outing starts, no page opens again;
   - an outing's row in Today's and History's lists wears its arrow; TalkBack says «See the
     outing» on it, and «See the walk» on the walk's row and map.
+
+- [ ] **On a device (owner): Phase 23.2's Your outings** (§11 Phase 23, step 23.2; §15, «Phase 23.2
+  built: Your outings», 21 Nov 2026). Step 23.2's own box «On a device (owner)» says it all; in
+  short:
+  - the door under the plans, with its count and its latest, the latest's route as its picture;
+  - the list after a few weeks of outings, scrolled fast: the routes drawn as their rows come, the
+    months' headers, the page's sentence;
+  - the filter both ways; from Your data's «Your routes» to the list on its filter, one route
+    deleted from its outing's page, back: the row wears its mark, the count is one fewer;
+  - «Ready to start» over the plans, «Outings to start» in Settings;
+  - in both themes, at a large text size, on the open foldable, with TalkBack (a row read whole,
+    the months as headings).
 
 Read again on 2 Nov 2026, at archive 01 and 02: the boxes above are the ones the phases done had
 left open, and the review's device check. Read again at 1.1.0's tag: the owner's checks of the
@@ -2234,10 +2247,10 @@ weeks ago means paging History day by day, and with the outings measured with GP
 one list a walking app is expected to have. «Delete all routes» counts routes the reader cannot
 see one by one.
 
-- [ ] **The door** (`SessionsScreen`). On the Outings page, under the plans, beside the cities'
+- [x] **The door** (`SessionsScreen`). On the Outings page, under the plans, beside the cities'
   door (and Phase 20's rounds): «Your outings» / «Le tue uscite», with their count. It is shown
   from the first outing kept, not before.
-- [ ] **The page** (`:feature:sessions`, `OutingsListScreen`, one key in `:app`).
+- [x] **The page** (`:feature:sessions`, `OutingsListScreen`, one key in `:app`).
   - **One sentence first:** «48 outings since March; 21 with their route».
   - **Then by month, newest first.** Each row is the one the day's lists draw (`OutingList`):
     its mark, name, day and time, distance and time in motion, «measured» where it is.
@@ -2246,16 +2259,16 @@ see one by one.
   - **A row opens the outing's page.**
   - **No paging library.** A few thousand outings are one query of numbers; only the routes are
     read lazily.
-- [ ] **A filter:** «All | With their route» («Tutte | Con il percorso»). Your data's routes
+- [x] **A filter:** «All | With their route» («Tutte | Con il percorso»). Your data's routes
   row («21 routes, 3.4 MB», `DataSection`) opens this page with that filter. That is the way to
   see which outings hold a route, and to delete one from its page, rather than all at once.
-- [ ] **Tests.**
+- [x] **Tests.**
   - The list's grouping and its sentence (`:core:domain`, pure).
   - The page's UI tests: empty, one month, many, the filter; Italian on a small phone, twice
     the text size, an open foldable.
   - The routes read only for the rows shown.
   - Your data's row opening the filter.
-- [ ] **The record.**
+- [x] **The record.**
   - Strings in English and Italian, with plurals.
   - The CHANGELOG.
   - The guide's «Outings».
@@ -3200,6 +3213,88 @@ This log starts with Phase 16 built (18 Nov 2026); its entries are written below
       cities, with and without a way under way), `TodayScreenTest` (the walk's map a door, an
       outing's row), `HistoryScreenTest` (the row's role and label).
     - The screenshots looked at.
+
+- **21 Nov 2026.** **Phase 23.2 built: Your outings** (owner: "implement Phase 23.2; premium work;
+  at the end a review of the code written; then push on PR 77, which already holds 23.1"). §11
+  Phase 23's step 23.2 boxes are ticked but the phone's, which opens in «Open». With it Phase 23 is
+  built; 20 is next.
+  - **Built.**
+    - `YourOutings` (`:core:domain`, pure): the outings over by month, newest first, each with its
+      route's key where it has one that draws (same id, same start, two points at least); the same
+      months with only those (`withRoute`); the sentence's numbers (`OutingsSummary`: how many,
+      how many with a route, since which month, and whether that month needs its year);
+      `RelativeDay` for the door's «yesterday». Some 3,650 outings grouped in about 9 ms on this
+      machine's JVM (`YourOutingsTest`, which logs it).
+    - `RouteShape.thinnedTo` (`:core:domain`): a route kept with only the points a picture so many
+      pixels across can show, its stretches, breaks and dashes where they were.
+    - `SessionDao.observeFinished` and `SessionRepository.finished`: the outings over, their own
+      rows alone, without intervals, legs or pauses; `finishedCount` for the door.
+      `RouteDao.observeRouteKeys` and `RouteRepository.keys`: each route's outing and size, no
+      point of it, and nothing opened before the routes' file exists (`RouteFile`).
+    - `RouteThumbnails` (`:core:data`): a route read when its row asks, thinned to 224 pixels, kept
+      by its key (its point count in it) in a cache of 64, the least recently drawn going first.
+    - `OutingsListScreen` and `OutingsListViewModel` (`:feature:sessions`), `OutingsKey` in `:app`:
+      the sentence, the filter, the months' headers with their count and time in motion, a row
+      per outing (its route on plain ground in a 56dp tile, or its mark; its day and time; its
+      name; how it went; its distance, «measured» with the satellites' mark where it is, and its
+      time in motion), each a door to its page. Every row is a lazy item of its own, its month's
+      ground drawn piece by piece, so only the rows on screen are composed, and only they read a
+      route (`RoutePictures`).
+    - The door on the Outings page (`KeptOutingsDoor`): «Your outings», «48 outings · the latest
+      yesterday», under the plans and beside the cities' door on one ground, with the latest
+      outing's route as its picture where it has one; shown from the first outing over.
+    - Your data: «Your routes» («21 routes, 3.4 MB on this phone…»), which opens the list on its
+      filter (`OutingsKey(withRoutes)`); «Delete all routes» stays, under it.
+    - `StillRouteView` takes its corners (`clip`) and, below 120dp across, narrows its strokes with
+      its box, down to 0.55 of a card's: a list's small route stays a line, not a ribbon. A card's
+      route, wider than that, is drawn as before.
+  - **Made exact on the way**, each in the code with its reason:
+    - **Two «Your outings» were one too many.** The Outings page's heading over the plans said
+      «Your outings», and Settings' row to that page too. With the list named so by the plan, the
+      heading is now «Ready to start» («Pronte da avviare», the guide's own words for a plan) and
+      Settings' row «Outings to start» («Uscite da avviare»). The README's `outings.png` and
+      `intervals-done.png` (the heading) and `settings-appearance.png` (the row) are drawn again.
+    - **The routes row is a row of its own.** The plan had Your data's routes row («21 routes, 3.4
+      MB») open the list; that row was «Delete all routes», whose touch asks to delete them all. Its
+      count and weight move to a new row, «Your routes», a door with its chevron, and «Delete all
+      routes» says what it deletes and what stays. Both count the routes of the outings over, the
+      ones the list shows (the route still being written is not listed, nor deletable).
+    - **An outing under way is not in the list.** Its card, on the same page, shows it; it joins the
+      list when it is over. Its batches rewrite its row, so the list's read is made distinct: the
+      list is grouped again only when what it shows changed.
+    - **A route of one point is not a route here.** It draws no line, and its outing's page offers
+      nothing to delete for it: its row wears the mark, and the filter leaves it out.
+    - **The filter is the page's own**, saved with it, not the model's: the model lives as long as
+      the activity, and a page under Today (from the Outings page) and one under Settings (from Your
+      routes) can both be on their stacks, each with its filter.
+    - **One outing is said as one**: «One outing so far.», not «1 outing since November»; the
+      month is the header under it. In Italian a door's day takes its article, «l’ultima il 18 nov»,
+      elided on the 1st, the 8th and the 11th («l’8 nov»); a weekday none («l’ultima mercoledì»).
+    - **A row's figures never leave a dot at a line's end.** The distance and the time in motion
+      share a line with a dot between where they fit, and stand one under the other where they do
+      not (a large text size, Italian); a figure is never broken inside itself, its words may be.
+    - **One form for a time in motion**, «47 min», «2 h», «6 h 40 min», in the rows and the months'
+      headers; TalkBack hears it in words.
+    - **The months say their year only before this one**: «November», «March 2025».
+  - **The README.** A new picture, `outings-list.png` (48 outings since April, 21 with their route,
+    November's on top, five routes drawn small), beside `outing-route.png` and `outing-open.png`,
+    with its caption; the outing's page's feature line says the list. The three pictures above
+    are drawn again. CHANGELOG, the guide's «Outings» («Your outings», a new paragraph; «An
+    outing's own page» and «Your route» updated), CLAUDE.md.
+  - **Checked**: `spotlessCheck`, `:app:checkForbiddenPermissions`, `test` and `:app:lintDebug`,
+    as reported with the pull request.
+    - New tests: `YourOutingsTest` (by month, newest first; under way left out; a route by its id
+      and its start; a route of one point; the filter; the sentence's year and its routes; a
+      month's time; a few thousand in a moment; the relative day), `RouteTraceTest` (a route
+      thinned keeps its ends, its breaks and its dashes; a small one is itself),
+      `RouteThumbnailsTest` (the keys, no file and nothing opened, a picture read once and drawn
+      again, a route that grew, another outing's), `SessionRepositoryTest` (the outings over,
+      newest first, without their legs), `OutingsListScreenTest` (empty, one month, many months,
+      the filter both ways, no route and no filter, opened on routes with none left, one outing,
+      the routes read only for the rows on screen, Italian on a small phone, twice the text size,
+      the open foldable), `SessionsScreenTest` (the door, its days, none before the first, Italian
+      with its article), `DataSectionTest` (Your routes opens the list; no row with no route over).
+    - The screenshots looked at, in both themes.
 
 ### Open
 

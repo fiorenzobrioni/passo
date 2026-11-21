@@ -66,6 +66,14 @@ data class RouteBox(val southE6: Int, val westE6: Int, val northE6: Int, val eas
     }
 }
 
+/**
+ * A kept route without its points: which outing it belongs to, by its id and its start, and how
+ * many points it holds. What a list of outings reads to know which of them have a route, and
+ * whether a small picture of it drawn before is still the whole line (PLANNING.md §11 Phase 23,
+ * step 23.2).
+ */
+data class RouteKey(val sessionId: Long, val sessionStartedAtMillis: Long, val pointCount: Int)
+
 /** Where the altitudes of a route came from, and so how far its climb can be trusted. */
 enum class AltitudeSource {
     /** The pressure sensor for the short term, the satellites for the long: metres are metres. */

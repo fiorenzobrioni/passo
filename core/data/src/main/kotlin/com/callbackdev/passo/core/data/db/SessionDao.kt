@@ -99,6 +99,18 @@ abstract class SessionDao {
     @Query("SELECT COUNT(*) FROM session")
     abstract fun observeSessionCount(): Flow<Int>
 
+    /**
+     * The outings over, newest first, as they change: «Your outings» (PLANNING.md §11 Phase 23,
+     * step 23.2). Their own rows alone, without the intervals, the legs or the pauses, which the
+     * list does not draw: a few thousand outings are then one read of numbers.
+     */
+    @Query("SELECT * FROM session WHERE state = 'FINISHED' ORDER BY startedAtMillis DESC, id DESC")
+    abstract fun observeFinished(): Flow<List<SessionEntity>>
+
+    /** How many outings are over, as it changes: what the door to «Your outings» counts. */
+    @Query("SELECT COUNT(*) FROM session WHERE state = 'FINISHED'")
+    abstract fun observeFinishedCount(): Flow<Int>
+
     /** The outings walked on city walks, oldest first: what moves a walk (Phase 11). */
     @Transaction
     @Query("SELECT * FROM session WHERE walk IS NOT NULL ORDER BY startedAtMillis")

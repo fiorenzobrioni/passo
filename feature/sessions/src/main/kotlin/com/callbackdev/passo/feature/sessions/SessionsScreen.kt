@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.FiniteAnimationSpec
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,6 +43,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -64,6 +66,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.callbackdev.passo.core.designsystem.components.GroupDivider
 import com.callbackdev.passo.core.designsystem.components.IntervalBlocks
 import com.callbackdev.passo.core.designsystem.components.SessionCard
 import com.callbackdev.passo.core.designsystem.components.SessionCardActions
@@ -72,13 +75,16 @@ import com.callbackdev.passo.core.designsystem.components.SessionMarkSize
 import com.callbackdev.passo.core.designsystem.components.SettingsGroup
 import com.callbackdev.passo.core.designsystem.components.StatusCard
 import com.callbackdev.passo.core.designsystem.components.StatusTone
+import com.callbackdev.passo.core.designsystem.components.StillRouteView
 import com.callbackdev.passo.core.designsystem.components.WayMapView
 import com.callbackdev.passo.core.designsystem.components.reveal
 import com.callbackdev.passo.core.designsystem.components.sessionIcon
+import com.callbackdev.passo.core.designsystem.format.datePattern
 import com.callbackdev.passo.core.designsystem.format.format
 import com.callbackdev.passo.core.designsystem.format.planDescription
 import com.callbackdev.passo.core.designsystem.format.rememberMeasureFormatter
 import com.callbackdev.passo.core.designsystem.format.sessionName
+import com.callbackdev.passo.core.designsystem.format.shortDate
 import com.callbackdev.passo.core.designsystem.format.unorphaned
 import com.callbackdev.passo.core.designsystem.icons.PassoIcons
 import com.callbackdev.passo.core.designsystem.theme.GroupShape
@@ -88,6 +94,7 @@ import com.callbackdev.passo.core.designsystem.theme.padding
 import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.designsystem.theme.reducedMotion
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
+import com.callbackdev.passo.core.domain.sessions.RelativeDay
 import com.callbackdev.passo.core.domain.sessions.SessionConstants
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
 import com.callbackdev.passo.core.domain.ways.Ways
@@ -99,6 +106,7 @@ import com.callbackdev.passo.core.model.UnitSystem
 import com.callbackdev.passo.core.model.WayId
 import com.callbackdev.passo.core.tracking.GoalNotificationsBlock
 import com.callbackdev.passo.core.tracking.SessionSignalsAccess
+import java.time.LocalDate
 
 /** The Outings page with its state, and the notification permission it may ask for. */
 @Composable
@@ -108,6 +116,7 @@ fun SessionsRoute(
     onOpenCities: () -> Unit = {},
     onOpenOuting: (Long) -> Unit = {},
     onOpenWalk: (WayId) -> Unit = {},
+    onOpenOutings: () -> Unit = {},
     viewModel: SessionsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -157,6 +166,7 @@ fun SessionsRoute(
                 runCatching { context.startActivity(SessionSignalsAccess.settingsIntent(context, block)) }
             },
             openCities = onOpenCities,
+            openOutings = onOpenOutings,
         ),
     )
 }
@@ -168,6 +178,7 @@ class SessionsActions(
     val resumeTracking: () -> Unit = {},
     val openSignalSettings: () -> Unit = {},
     val openCities: () -> Unit = {},
+    val openOutings: () -> Unit = {},
 )
 
 /**
@@ -325,7 +336,7 @@ private fun SessionsList(
         }
         item(key = "header") {
             Text(
-                text = stringResource(R.string.sessions_yours),
+                text = stringResource(R.string.sessions_ready),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
@@ -391,7 +402,9 @@ private fun SessionsList(
                 modifier = Modifier.animateItem(placementSpec = placement),
             )
         }
-        item(key = "cities") { CitiesDoor(actions.openCities) }
+        item(key = "doors") {
+            Doors(state.kept, format, actions, Modifier.animateItem(placementSpec = placement))
+        }
         item(key = "footer") {
             Column(
                 verticalArrangement = Arrangement.spacedBy(6.dp),
@@ -628,6 +641,94 @@ object SessionsTags {
     const val NEW_FIRST = "sessions_new_first"
     const val BLOCKED = "sessions_blocked"
     const val CITIES = "sessions_cities"
+    const val KEPT = "sessions_kept"
+}
+
+/**
+ * The page's doors, under the plans, on one ground: the outings walked (Phase 23.2), from the first
+ * one over, and the city walks.
+ */
+@Composable
+private fun Doors(
+    kept: KeptOutingsDoor?,
+    format: MeasureFormatter,
+    actions: SessionsActions,
+    modifier: Modifier = Modifier,
+) {
+    SettingsGroup(modifier = modifier.padding(top = 4.dp)) {
+        if (kept != null) {
+            KeptDoor(kept, format, actions.openOutings)
+            GroupDivider()
+        }
+        CitiesDoor(actions.openCities)
+    }
+}
+
+/**
+ * The door to «Your outings» (PLANNING.md §11 Phase 23, step 23.2): how many, and when the latest
+ * was, with the latest's route as its picture where it has one, its mark where it has not.
+ */
+@Composable
+private fun KeptDoor(kept: KeptOutingsDoor, format: MeasureFormatter, onOpen: () -> Unit) {
+    val res = LocalResources.current
+    val day = LocalDate.ofEpochDay(kept.latest.localEpochDay)
+    val whenSaid = when (RelativeDay.of(day, kept.today)) {
+        RelativeDay.TODAY -> stringResource(R.string.sessions_kept_today)
+
+        RelativeDay.YESTERDAY -> stringResource(R.string.sessions_kept_yesterday)
+
+        RelativeDay.THIS_WEEK -> stringResource(
+            R.string.sessions_kept_weekday,
+            datePattern(day, "EEEE", capitalized = false),
+        )
+
+        // Italian says the 1st, the 8th and the 11th with the article elided: «l’8 nov».
+        RelativeDay.DATE -> stringResource(
+            if (day.dayOfMonth in ELIDED_DAYS) R.string.sessions_kept_date_elided else R.string.sessions_kept_date,
+            shortDate(day),
+        )
+    }
+    val body = if (kept.count == 1) {
+        stringResource(R.string.sessions_kept_body_one, whenSaid)
+    } else {
+        stringResource(
+            R.string.sessions_kept_body,
+            res.getQuantityString(R.plurals.sessions_kept_count, kept.count, format.steps(kept.count)),
+            whenSaid,
+        )
+    }
+    DoorRow(
+        title = stringResource(R.string.sessions_kept_title),
+        body = body,
+        onOpen = onOpen,
+        modifier = Modifier.testTag(SessionsTags.KEPT),
+    ) {
+        val route = kept.route
+        if (route != null) {
+            StillRouteView(
+                shape = route,
+                contentDescription = "",
+                ratio = 1f,
+                clip = MaterialTheme.shapes.large,
+                modifier = Modifier.size(DOOR_MAP_SIZE),
+            )
+        } else {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(DOOR_MAP_SIZE)
+                    .clip(MaterialTheme.shapes.large)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+            ) {
+                Icon(
+                    sessionIcon(kept.latest.intensity, kept.latest.goalKind),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp),
+                )
+            }
+        }
+    }
 }
 
 /**
@@ -637,37 +738,54 @@ object SessionsTags {
  */
 @Composable
 private fun CitiesDoor(onOpen: () -> Unit) {
-    SettingsGroup(modifier = Modifier.padding(top = 4.dp).testTag(SessionsTags.CITIES)) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onOpen, role = Role.Button)
-                .padding(horizontal = ScreenMargin, vertical = 14.dp),
-        ) {
-            // A city's walk as its door: the first of the two the line under it names.
-            WayMapView(
-                way = remember { Ways.of(DOOR_WALK) },
-                walkedMeters = null,
-                reached = 0,
-                contentDescription = "",
-                detailed = false,
-                ratio = 1f,
-                modifier = Modifier.size(DOOR_MAP_SIZE),
-            )
-            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(stringResource(R.string.sessions_cities_title), style = MaterialTheme.typography.bodyLarge)
-                Text(
-                    stringResource(R.string.sessions_cities_body),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            Icon(PassoIcons.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+    DoorRow(
+        title = stringResource(R.string.sessions_cities_title),
+        body = stringResource(R.string.sessions_cities_body),
+        onOpen = onOpen,
+        modifier = Modifier.testTag(SessionsTags.CITIES),
+    ) {
+        // A city's walk as its door: the first of the two the line under it names.
+        WayMapView(
+            way = remember { Ways.of(DOOR_WALK) },
+            walkedMeters = null,
+            reached = 0,
+            contentDescription = "",
+            detailed = false,
+            ratio = 1f,
+            modifier = Modifier.size(DOOR_MAP_SIZE),
+        )
+    }
+}
+
+/** One of the page's doors: its picture, what it opens and what is there, and the chevron. */
+@Composable
+private fun DoorRow(
+    title: String,
+    body: String,
+    onOpen: () -> Unit,
+    modifier: Modifier = Modifier,
+    picture: @Composable () -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onOpen, role = Role.Button)
+            .padding(horizontal = ScreenMargin, vertical = 14.dp),
+    ) {
+        // One picture's room for every door: their words start on one line.
+        Box(Modifier.clearAndSetSemantics {}) { picture() }
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(title, style = MaterialTheme.typography.bodyLarge)
+            Text(body, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
+        Icon(PassoIcons.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
 private val DOOR_WALK = WayId.MILAN_DUOMO_NAVIGLI
 private val DOOR_MAP_SIZE = 56.dp
+
+/** The days of the month Italian says with the article elided: «l’1», «l’8», «l’11». */
+private val ELIDED_DAYS = setOf(1, 8, 11)

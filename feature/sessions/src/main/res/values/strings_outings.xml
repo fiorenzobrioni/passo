@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- «Your outings»: the outings walked, by month, newest first (PLANNING.md §11 Phase 23, step 23.2). -->
+<resources>
+    <string name="outings_title">Your outings</string>
+    <string name="outings_back">Back</string>
+
+    <!-- The page's sentence: «48 outings since March.», the month alone in this year, with its year before. -->
+    <plurals name="outings_summary">
+        <item quantity="one">%1$s outing since %2$s.</item>
+        <item quantity="other">%1$s outings since %2$s.</item>
+    </plurals>
+    <!-- «48 outings since March; 21 with their route.» -->
+    <plurals name="outings_summary_some">
+        <item quantity="one">%1$s outing since %2$s; %3$s.</item>
+        <item quantity="other">%1$s outings since %2$s; %3$s.</item>
+    </plurals>
+    <plurals name="outings_with_route">
+        <item quantity="one">%1$s with its route</item>
+        <item quantity="other">%1$s with their route</item>
+    </plurals>
+    <!-- «12 outings since May, all with their route.» -->
+    <plurals name="outings_summary_all">
+        <item quantity="one">%1$s outing since %2$s, with its route.</item>
+        <item quantity="other">%1$s outings since %2$s, all with their route.</item>
+    </plurals>
+    <!-- The first outing kept: its month is under the sentence. -->
+    <string name="outings_summary_one">One outing so far.</string>
+    <string name="outings_summary_one_route">One outing so far, with its route.</string>
+
+    <!-- The filter: every outing, or those that still hold a route. -->
+    <string name="outings_filter_all">All</string>
+    <string name="outings_filter_routes">With their route</string>
+    <!-- Under the filter on the outings with a route: why the reader came, and what a deletion keeps. -->
+    <string name="outings_routes_note">Open one to share its route or delete it. The outing keeps its numbers.</string>
+
+    <!-- A month's header, and what it holds: «12 outings · 6 h 40 min in motion». -->
+    <plurals name="outings_month">
+        <item quantity="one">%1$s outing · %2$s in motion</item>
+        <item quantity="other">%1$s outings · %2$s in motion</item>
+    </plurals>
+
+    <!-- A row: the day, then the time it started. -->
+    <!-- Its figures: «4.26 km measured · 47 min in motion». -->
+    <string name="outings_row_moving">%1$s in motion</string>
+    <!-- Spoken: «Wednesday, November 18 at 5:40 PM». -->
+    <string name="outings_row_spoken_when">%1$s at %2$s</string>
+    <!-- Spoken: «4.10 km, estimated». -->
+    <string name="outings_row_spoken_estimated">%1$s, estimated</string>
+    <string name="outings_row_spoken_route">With its route.</string>
+
+    <string name="outings_empty">No outing yet. Start one from Outings: it is kept here, the newest first.</string>
+    <string name="outings_empty_routes">None of your outings holds a route. An outing keeps one when “Measure with GPS” is on.</string>
+</resources>

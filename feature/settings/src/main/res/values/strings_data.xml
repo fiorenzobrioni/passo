@@ -100,8 +100,10 @@
         <item quantity="other">%1$s routes</item>
     </plurals>
     <string name="data_delete_routes">Delete all routes</string>
-    <!-- «3 routes, 28 kB on this phone. …». -->
-    <string name="data_delete_routes_note">%1$s, %2$s on this phone. Never in Android’s cloud backup.</string>
+    <!-- «3 routes, 28 kB on this phone. …»: the row opens «Your outings» on the ones with a route (Phase 23.2). -->
+    <string name="data_routes_list">Your routes</string>
+    <string name="data_routes_list_note">%1$s, %2$s on this phone. Never in Android’s cloud backup. See which outings hold one.</string>
+    <string name="data_delete_routes_note">Every line and the places it went through. The outings keep their numbers.</string>
     <string name="data_delete_routes_title">Delete all routes?</string>
     <string name="data_delete_routes_text">Every line, and the places it went through, is deleted from this phone. Your outings and their numbers stay: the distance, the pace, the kilometres, the climb.</string>
     <!-- The same, while an outing with GPS is under way, or can still be taken back. -->

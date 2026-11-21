@@ -67,6 +67,7 @@ import com.callbackdev.passo.feature.onboarding.NoSensorScreen
 import com.callbackdev.passo.feature.onboarding.OnboardingRoute
 import com.callbackdev.passo.feature.sessions.GpsIntroScreen
 import com.callbackdev.passo.feature.sessions.OutingRoute
+import com.callbackdev.passo.feature.sessions.OutingsListRoute
 import com.callbackdev.passo.feature.sessions.PlanEditorRoute
 import com.callbackdev.passo.feature.sessions.SessionsRoute
 import com.callbackdev.passo.feature.settings.SettingsRoute
@@ -209,6 +210,7 @@ private fun MainPages(outings: OutingStarter, door: AppDoor?, onDoorOpened: () -
                 onCalibrate = { open(CalibrationKey(it)) },
                 onOpenSessions = { open(SessionsKey) },
                 onOpenGuide = { open(GuideKey) },
+                onOpenRoutes = { open(OutingsKey(withRoutes = true)) },
             )
         }
         entry<GuideKey> { GuideRoute(onBack = nav::goBack) }
@@ -220,6 +222,14 @@ private fun MainPages(outings: OutingStarter, door: AppDoor?, onDoorOpened: () -
                 onOpenCities = { open(WaysKey(cities = true)) },
                 onOpenOuting = { open(OutingKey(it)) },
                 onOpenWalk = { open(WayKey(it, null)) },
+                onOpenOutings = { open(OutingsKey()) },
+            )
+        }
+        entry<OutingsKey> { key ->
+            OutingsListRoute(
+                withRoutes = key.withRoutes,
+                onBack = nav::goBack,
+                onOpenOuting = { open(OutingKey(it)) },
             )
         }
         entry<OutingKey> { key ->

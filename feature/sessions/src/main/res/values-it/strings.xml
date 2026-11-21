@@ -4,7 +4,7 @@
     <string name="sessions_title">Uscite</string>
     <string name="sessions_back">Indietro</string>
     <string name="sessions_intro">Una camminata con un obiettivo, o senza: avviala e tieni il telefono in tasca.</string>
-    <string name="sessions_yours">Le tue uscite</string>
+    <string name="sessions_ready">Pronte da avviare</string>
     <string name="sessions_start_named">Inizia %1$s</string>
     <string name="sessions_edit">Modifica</string>
     <string name="sessions_new">Nuova uscita</string>
@@ -95,6 +95,19 @@
     <string name="editor_voice_no_engine">Questo telefono non ha un motore di sintesi vocale: i segnali sono solo vibrazioni.</string>
     <string name="editor_voice_change">Cambia voce</string>
     <!-- The door to the city walks, on the Ways page (Phase 11). -->
+    <string name="sessions_kept_title">Le tue uscite</string>
+    <plurals name="sessions_kept_count">
+        <item quantity="one">%1$s uscita</item>
+        <item quantity="many">%1$s uscite</item>
+        <item quantity="other">%1$s uscite</item>
+    </plurals>
+    <string name="sessions_kept_body">%1$s · l’ultima %2$s</string>
+    <string name="sessions_kept_body_one">Un’uscita, %1$s</string>
+    <string name="sessions_kept_today">oggi</string>
+    <string name="sessions_kept_yesterday">ieri</string>
+    <string name="sessions_kept_weekday">%1$s</string>
+    <string name="sessions_kept_date">il %1$s</string>
+    <string name="sessions_kept_date_elided">l’%1$s</string>
     <string name="sessions_cities_title">Passeggia in una città</string>
     <string name="sessions_cities_body">Città da Milano a Cusco, percorse da dove sei: ogni luogo ti viene detto quando i tuoi passi lo raggiungono.</string>
 

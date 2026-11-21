@@ -83,6 +83,14 @@ data object GpsIntroKey : NavKey
 data class OutingKey(val sessionId: Long) : NavKey
 
 /**
+ * «Your outings» (PLANNING.md §11 Phase 23, step 23.2): the outings walked, by month, from the
+ * Outings page's door; with [withRoutes], open on the ones that hold a route, from Your data's
+ * routes row.
+ */
+@Serializable
+data class OutingsKey(val withRoutes: Boolean = false) : NavKey
+
+/**
  * The Ways, from Insights (PLANNING.md §11 Phase 11); with [cities], opened at its cities, from
  * the Outings page's door to them (Phase 23): below the ways of five continents, they were a long
  * scroll from the door that named them.

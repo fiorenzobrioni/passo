@@ -65,6 +65,7 @@ class DataActions(
     val cancelImport: () -> Unit = {},
     val dismissOutcome: () -> Unit = {},
     val deleteRoutes: () -> Unit = {},
+    val openRoutes: () -> Unit = {},
     val backupFileName: () -> String = { "passo-backup.json" },
     val tableFileName: (CsvTable) -> String = { "passo-${it.name.lowercase()}.csv" },
 )
@@ -124,13 +125,20 @@ internal fun rememberDataFiles(actions: DataActions): DataFiles {
  * nothing anywhere. What an export or import came to is a card over the rows, which stays until
  * it is put away; an import is shown, with what it will do, before anything is written.
  *
- * A phone that keeps routes (the outings measured with GPS, Phase 16) has two rows more, and a
- * phone that keeps none has neither: «With the routes», off each time, which puts where the
- * reader walked in the backup's file; and «Delete all routes», which says how many there are
- * and what they weigh, and asks before it does.
+ * A phone that keeps routes (the outings measured with GPS, Phase 16) has three rows more, and a
+ * phone that keeps none has none of them: «With the routes», off each time, which puts where the
+ * reader walked in the backup's file; «Your routes», which says how many there are and what they
+ * weigh, and opens «Your outings» on the ones that hold them (Phase 23.2), to see each and delete
+ * one from its page; and «Delete all routes», which asks before it does.
  */
 @Composable
-internal fun DataGroup(state: DataUiState, format: MeasureFormatter, files: DataFiles, onDismissOutcome: () -> Unit) {
+internal fun DataGroup(
+    state: DataUiState,
+    format: MeasureFormatter,
+    files: DataFiles,
+    onDismissOutcome: () -> Unit,
+    onOpenRoutes: () -> Unit = {},
+) {
     val idle = state.task == null
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         state.outcome?.let { OutcomeCard(it, format, onDismissOutcome) }
@@ -185,10 +193,12 @@ internal fun DataGroup(state: DataUiState, format: MeasureFormatter, files: Data
             )
             if (state.contents.deletableRoutes > 0) {
                 GroupDivider()
+                // The routes of the outings that are over: the ones «Your outings» lists, and the
+                // ones «Delete all routes» deletes.
                 ValueRow(
-                    label = stringResource(R.string.data_delete_routes),
+                    label = stringResource(R.string.data_routes_list),
                     value = stringResource(
-                        R.string.data_delete_routes_note,
+                        R.string.data_routes_list_note,
                         pluralStringResource(
                             R.plurals.data_routes,
                             state.contents.deletableRoutes,
@@ -196,6 +206,15 @@ internal fun DataGroup(state: DataUiState, format: MeasureFormatter, files: Data
                         ),
                         Formatter.formatShortFileSize(LocalContext.current, state.contents.deletableBytes),
                     ),
+                    icon = PassoIcons.Way,
+                    trailing = true,
+                    onClick = onOpenRoutes,
+                    modifier = Modifier.testTag(DataTags.ROUTES),
+                )
+                GroupDivider()
+                ValueRow(
+                    label = stringResource(R.string.data_delete_routes),
+                    value = stringResource(R.string.data_delete_routes_note),
                     icon = PassoIcons.Trash,
                     enabled = idle,
                     onClick = { files.deleteRoutesDialog.value = true },
@@ -579,6 +598,7 @@ object DataTags {
     const val PREFERENCES = "data_preferences"
     const val CONFIRM_IMPORT = "data_confirm_import"
     const val WITH_ROUTES = "data_with_routes"
+    const val ROUTES = "data_routes"
     const val DELETE_ROUTES = "data_delete_routes"
     const val DELETE_ROUTES_CONFIRM = "data_delete_routes_confirm"
 }

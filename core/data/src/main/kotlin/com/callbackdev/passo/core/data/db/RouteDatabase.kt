@@ -46,6 +46,9 @@ data class RouteEntity(
 @Entity(tableName = "route_chunk", primaryKeys = ["sessionId", "position"])
 class RouteChunkEntity(val sessionId: Long, val position: Int, val bytes: ByteArray)
 
+/** A route's outing and its size, without its points: [RouteDao.observeRouteKeys]'s rows. */
+data class RouteKeyRow(val sessionId: Long, val sessionStartedAtMillis: Long, val pointCount: Int)
+
 @Dao
 abstract class RouteDao {
     @Query("SELECT * FROM route WHERE sessionId = :sessionId")
@@ -120,6 +123,14 @@ abstract class RouteDao {
     /** The outings that have a route, as they change: an outing's page asks for its own. */
     @Query("SELECT sessionId FROM route")
     abstract fun observeRouteIds(): Flow<List<Long>>
+
+    /**
+     * Each route's outing, by its id and its start, and how many points it holds, as they change:
+     * what «Your outings» reads to know which outings have a route, without a point of it
+     * (PLANNING.md §11 Phase 23, step 23.2).
+     */
+    @Query("SELECT sessionId, sessionStartedAtMillis, pointCount FROM route")
+    abstract fun observeRouteKeys(): Flow<List<RouteKeyRow>>
 
     @Query("DELETE FROM route")
     protected abstract suspend fun deleteAllRoutes()

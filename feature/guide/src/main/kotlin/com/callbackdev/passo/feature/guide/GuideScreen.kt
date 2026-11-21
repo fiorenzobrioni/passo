@@ -152,6 +152,7 @@ private fun GuideContent(state: GuideUiState, modifier: Modifier) {
         Feature(R.string.guide_outings_end_title, R.string.guide_outings_end_body)
         Feature(R.string.guide_outings_gps_title, R.string.guide_outings_gps_body)
         Feature(R.string.guide_outings_page_title, R.string.guide_outings_page_body)
+        Feature(R.string.guide_outings_list_title, R.string.guide_outings_list_body)
         Feature(R.string.guide_outings_route_title, R.string.guide_outings_route_body)
         Feature(R.string.guide_outings_gps_kept_title, R.string.guide_outings_gps_kept_body)
         Feature(R.string.guide_intervals_title, R.string.guide_intervals_body)
