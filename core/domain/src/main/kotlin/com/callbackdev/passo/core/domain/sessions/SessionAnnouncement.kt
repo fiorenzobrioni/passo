@@ -9,6 +9,7 @@ import com.callbackdev.passo.core.domain.ways.WalkPlaces
 import com.callbackdev.passo.core.domain.ways.WayStop
 import com.callbackdev.passo.core.domain.ways.Ways
 import com.callbackdev.passo.core.model.IntervalSets
+import com.callbackdev.passo.core.model.RoundStanding
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMarks
@@ -106,6 +107,10 @@ sealed interface SessionAnnouncement {
      * (nine tenths or more from fixes), with the pace of that kilometre ([paceSecondsPerKm], from
      * its legs); where it is not, said as the estimate it is, «about», and with no pace, which over
      * an estimate would be the cadence in disguise (docs/adr/0009-sessions.md, decision 1).
+     *
+     * On a usual round (Phase 20), [round]: the comparison takes the place of the time and the pace,
+     * so the words stay short («2 kilometres, 30 seconds ahead of your usual»); the kilometre after
+     * the round was left says so once, in the pace's place.
      */
     data class DistanceMark(
         val count: Int,
@@ -113,6 +118,7 @@ sealed interface SessionAnnouncement {
         val movingMinutes: Int,
         val measured: Boolean,
         val paceSecondsPerKm: Double? = null,
+        val round: RoundSaid? = null,
     ) : SessionAnnouncement
 
     /**
@@ -179,6 +185,12 @@ sealed interface SessionAnnouncement {
         fun mark(session: Session, count: Int): SessionAnnouncement? = when (session.marks) {
             SessionMarks.DISTANCE -> {
                 val pace = OutingMarks.paceOf(session, count)
+                val line = session.roundLine?.takeIf { it.marks == count }
+                val round = when (line?.standing) {
+                    RoundStanding.ON -> line.gapMillis?.let(RoundSaid::Gap)
+                    RoundStanding.GONE -> RoundSaid.Left
+                    RoundStanding.LEFT, null -> null
+                }
                 DistanceMark(
                     count = count,
                     miles = session.markMiles,
@@ -187,6 +199,7 @@ sealed interface SessionAnnouncement {
                         .coerceAtLeast(1),
                     measured = session.distanceKind() == DistanceKind.MEASURED,
                     paceSecondsPerKm = pace,
+                    round = round,
                 )
             }
 
@@ -293,6 +306,15 @@ sealed interface SessionAnnouncement {
         /** Nine tenths: a traffic light or two below the pace still reads as "almost all". */
         private const val MOSTLY_AT_PACE = 0.9
     }
+}
+
+/** What a kilometre's words say of a usual round (Phase 20). */
+sealed interface RoundSaid {
+    /** [millis] ahead of the usual (below zero), behind it (above), or at it (zero). */
+    data class Gap(val millis: Long) : RoundSaid
+
+    /** The round was left since the last kilometre. */
+    data object Left : RoundSaid
 }
 
 /** How an outing kept its pace, as its goal's sentence says it. */

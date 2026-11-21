@@ -337,6 +337,31 @@ class BackupCodecTest {
     }
 
     @Test
+    fun `a backup carries the usual rounds - their names, their walks and the pairs said not the same`() {
+        val rounds = full.copy(
+            rounds = listOf(BackupRound("Park", listOf(1_790_000_000_000, 1_790_090_000_000, 1_790_180_000_000))),
+            roundsApart = listOf(1_790_180_000_000L to 1_790_270_000_000L),
+        )
+        val text = BackupCodec.encode(rounds)
+        assertThat(BackupCodec.decode(text)).isEqualTo(BackupRead.Ok(rounds))
+        // Names and outings' starts: no place.
+        assertThat(text).doesNotContain("latitude")
+    }
+
+    @Test
+    fun `a file from before the rounds has none, and a round of one walk or a pair of one outing is dropped`() {
+        val text = BackupCodec.encode(full).replace(
+            "\"rounds\":[]",
+            "\"rounds\":[{\"name\":\" \",\"walks\":[5,5]},{\"walks\":[1,2]}]",
+        ).replace("\"roundsApart\":[]", "\"roundsApart\":[{\"first\":3,\"second\":3},{\"first\":1,\"second\":4}]")
+        val read = (BackupCodec.decode(text) as BackupRead.Ok).backup
+        assertThat(read.rounds).containsExactly(BackupRound(null, listOf(1L, 2L)))
+        assertThat(read.roundsApart).containsExactly(1L to 4L)
+        val before = BackupCodec.encode(full).replace(",\"rounds\":[]", "").replace(",\"roundsApart\":[]", "")
+        assertThat((BackupCodec.decode(before) as BackupRead.Ok).backup.rounds).isEmpty()
+    }
+
+    @Test
     fun `the file says what it is, and a day reads without the app`() {
         val text = BackupCodec.encode(full)
 

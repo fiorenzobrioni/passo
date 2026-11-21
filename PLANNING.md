@@ -46,10 +46,11 @@ so they are uniform"):
   doors, with Your outings. All five in archive 05, with the log that built them. Left: the
   figures of Phase 15's measure, written where they are said (the box in «Open»), before any
   release.
-- **Next: 20** (reviewed on 19 Nov 2026: the usual round alone; it builds on 21), before 18
-  at the owner's wish (21 Nov 2026: the whole of 23 before 20, «which I need more»), then 18, a
-  city walk measured with GPS (re-planned on 19 Nov 2026): not started. Phase 19 dropped; Phase 22, the walk already begun,
-  later, when the owner asks.
+- **Built on 21 Nov 2026: Phase 20**, the usual round (§11 Phase 20, §15 «Phase 20 built: the
+  usual round»), not checked on a phone yet (the box in «Open») and not released.
+- **Next: 18**, a city walk measured with GPS (re-planned on 19 Nov 2026), after 20 at the owner's
+  wish (21 Nov 2026): not started. Phase 19 dropped; Phase 22, the walk already begun, later, when
+  the owner asks.
 
 ## Open
 
@@ -204,6 +205,22 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
   - «Ready to start» over the plans, «Outings to start» in Settings;
   - in both themes, at a large text size, on the open foldable, with TalkBack (a row read whole,
     the months as headings).
+
+- [ ] **On a device (owner): Phase 20's usual round** (§11 Phase 20, and §15 «Phase 20 built: the
+  usual round», 21 Nov 2026). Phase 20's own box «On a device (owner)» says it all; in short:
+  - after the update, the outings with GPS walked before searched once: «Your rounds» under the
+    plans where a walk was taken three times from the door;
+  - a usual walk taken three times, then the fourth as an open outing with GPS: «… ahead of your
+    usual» on the card from the first kilometre, again at each, and the kilometre's words saying it
+    in the headphones; with marks every ten minutes, the card alone, silent;
+  - leaving the round on purpose for a few hundred metres: «You left your usual round» once, then
+    the walk's own sentence, and the next kilometre's words saying it;
+  - the same walk the other way round, not called the same; a shortcut, compared honestly;
+  - the outing's page: the sentence, this time and the usual, the round's door, «Not the same
+    round» and its question;
+  - a round's page: the map pinched and dragged, the chart, rename (the dialog, its keyboard),
+    «Forget this round»; «Delete all routes» saying the rounds stay;
+  - in both themes, at a large text size, on the open foldable, with TalkBack on the chart.
 
 - [ ] **The figures of the two measures, written** (archive 05, «The phone checks up to Phase 23
   done», 21 Nov 2026). The owner made both measures, Phase 15's and Phase 13's 30-minute interval outing;
@@ -800,8 +817,8 @@ cloud backup never carries; the day's distance stays the steps'.
 | 20 | Your usual round («Il tuo giro solito») | A walk the reader repeats, known without being told and compared with their usual; Your rounds | 16, 21 |
 
 **Done**, and checked on a phone (21 Nov 2026): 15, 16 and 17, with 21 and 23 beside them, in
-archive 05. Left: 20, then 18, the owner's order since 21 Nov 2026 (State, above), which changes
-the one written below.
+archive 05. **Built** (21 Nov 2026): 20, its phone check open. Left: 18, the owner's order since
+21 Nov 2026 (State, above), which changes the one written below.
 
 **Phase 21, the open outing, comes first** (owner, 20 Nov 2026; archive 05, «The open outing
 planned»). It is not a location phase: an outing with no goal, with GPS or without. It is planned
@@ -961,7 +978,7 @@ kilometre's mark (`SessionTracker`, `SessionAnnouncement`), the still route (21.
 `SessionsScreen.kt` (`CitiesDoor`, the door this phase's mirrors), `OutingScreen.kt`,
 `SessionCard.kt`; `BackupCodec.kt`, `DataSection` (Your data).
 
-- [ ] **The match** (`:core:domain/routes`, `RouteMatch`, pure). Two outings with GPS are the
+- [x] **The match** (`:core:domain/routes`, `RouteMatch`, pure). Two outings with GPS are the
   same round when they start within 100 m of each other, their lengths are within a tenth, four
   fifths of each lies within 40 m of the other, **and in the same direction**: the points of
   one fall in the same order along the other (review, 19 Nov 2026: a loop walked the other way
@@ -970,7 +987,7 @@ kilometre's mark (`SessionTracker`, `SessionAnnouncement`), the still route (21.
   (nine tenths from fixes) is matched. A loop started at another point of it is another round:
   rounds begin at the reader's door, not anywhere on the loop. Searched when an outing with GPS
   ends, the routes' boxes first, so a year of outings costs a few reads.
-- [ ] **The rounds** (`passo.db`, by auto-migration). `round` (its id, the name the reader gave
+- [x] **The rounds** (`passo.db`, by auto-migration). `round` (its id, the name the reader gave
   it, if any) and `round_member` (round, outing), and the pairs the reader said are not the
   same: numbers and names, never a place, so they are in `passo.db` and in Android's backup like
   the outings. A round holds no line of its own: its map and its start are read from its
@@ -980,16 +997,16 @@ kilometre's mark (`SessionTracker`, `SessionAnnouncement`), the still route (21.
   routes keeps its history and is found again by no new outing until one is walked with GPS.
   The JSON backup carries the rounds with the outings (added fields; their names and the pairs
   not the same); «Delete all routes» leaves them, and its dialog says the history stays.
-- [ ] **The comparison, honest.** A round's usual is the median of its members' times in
+- [x] **The comparison, honest.** A round's usual is the median of its members' times in
   motion before this one, each brought to the round's usual length (time × usual length ÷ its
   length): a shortcut of 300 m does not read as a faster walk (review, 19 Nov 2026). By the
   kilometre, the usual time at each kilometre is the median of the members' times there, from
   their legs (`Splits`), so the comparison holds for a member whose route was deleted.
-- [ ] **The outing's page.** From the third walk of a round, the page says it, sentence first
+- [x] **The outing's page.** From the third walk of a round, the page says it, sentence first
   («Your usual round, the sixth time: 2 minutes faster than usual»), against the usual above,
   with «Not the same round» (the pair is kept, the outing leaves the round) and the round's
   name, touched to open its page.
-- [ ] **The card, while it counts.** This is for an open outing with GPS (Phase 21). It must have
+- [x] **The card, while it counts.** This is for an open outing with GPS (Phase 21). It must have
   begun within 100 m of where a round with two walks or more begins, and still be on it after
   500 m (four fifths of its points so far within 40 m of the round's line, in order). Then it
   says how far ahead or behind the usual it is, in the day's own words («30 seconds ahead of
@@ -1020,7 +1037,7 @@ kilometre's mark (`SessionTracker`, `SessionAnnouncement`), the still route (21.
 
   The service reads the rounds and their members' routes once, at the outing's start, from
   `routes.db` (never making it: `RouteFile`).
-- [ ] **Your rounds** («I tuoi giri», `:feature:sessions`). A door on the Outings page, as the
+- [x] **Your rounds** («I tuoi giri», `:feature:sessions`). A door on the Outings page, as the
   cities' is, shown once there is a round. Each round: its name (or «Your round of 3.2 km»
   until it has one), its small map from its latest member's route (Phase 21.3's still route, on
   plain ground as every route since archive 05, «Every route on plain ground»: no gestures in a list),
@@ -1032,7 +1049,7 @@ kilometre's mark (`SessionTracker`, `SessionAnnouncement`), the still route (21.
   outings stay, as they are; the round and its pairs go, asked first). Never a record board, no
   fastest mark, no medal, never a segment, never anyone else's walk: one reader and their own
   rounds (ADR 0016 decision 16).
-- [ ] **Tests.** `RouteMatchTest` (the cases below, routes written by hand), the comparison's
+- [x] **Tests.** `RouteMatchTest` (the cases below, routes written by hand), the comparison's
   (lengths brought to the usual, the median, a member without route), the repository's (the
   migration, a member's outing deleted, «Delete all routes» leaving the rounds), the backup's
   round trip, the card's line (on the round, left, a round of two walks; said with the
@@ -1040,13 +1057,14 @@ kilometre's mark (`SessionTracker`, `SessionAnnouncement`), the still route (21.
   silent; a goal outing on a round, no line), the outing page's and
   Your rounds' UI tests, in Italian on a small phone and at twice the text size; the chart in
   both themes.
-- [ ] Strings in English and Italian, with plurals; CHANGELOG; the guide (a part in
+- [x] Strings in English and Italian, with plurals; CHANGELOG; the guide (a part in
   «Outings»); README: the feature line, and a screenshot of a round's page if it earns its
   place.
 - [ ] On a device (owner): a usual walk taken three times, then the fourth as an open outing
   with GPS, with the card's line and its words at each kilometre; the same walk the other way
   round, not called the same; a shortcut,
-  compared honestly; Your rounds in both themes and at a large text size.
+  compared honestly; Your rounds in both themes and at a large text size. (Open, «On a device
+  (owner): Phase 20's usual round»)
 
 **Acceptance:** the third time a round is walked Passo knows it without being told, and is right
 about which walks are the same one, direction included; «faster» and «slower» are true of the
@@ -1195,6 +1213,120 @@ entries are written below.
   Phase 15's before any release. Where «State», a box or a phase left here named an entry of
   that log or a phase moved, it now names archive 05. The index is run again; CLAUDE.md says
   where the phases are.
+
+- **21 Nov 2026.** **Phase 20 built: the usual round** (owner: "implement Phase 20; premium work;
+  at the end a review of the code written; then push and open the pull request"). §11 Phase 20's
+  boxes are ticked but the phone's, which opens in «Open». Nothing departs from ADR 0016: decision 16
+  already says a round compares a walk with the reader's own and never guides one, and decision 6
+  is kept by every number of a round being an outing's own.
+  - **Built.**
+    - `RouteMatch` (`:core:domain/routes`): two walks are one round when they start within 100 m,
+      their lengths are within a tenth, and four fifths of each lies within 40 m of the other in the
+      same order (`Verdict`: `SAME`, `STARTS_APART`, `LENGTHS_APART`, `APART`, `OTHER_WAY`). Each
+      route walked evenly, a sample every 10 m (2,000 at most), on a plane laid at its start, the
+      other's segments in a grid (`RouteLines.kt`: `EvenSamples`, `LineIndex`, `InOrder`): some 2 ms
+      a comparison, 365 of a 3.2 km round in about 0.7 s on this machine (`RouteMatchTest` logs it).
+    - `RoundFinder`, `RoundTimes`, `RoundWatch`, `YourRounds` (`:core:domain/rounds`), with their
+      constants and reasons in `RoundConstants`: which outings may be a round's walk, the choice
+      among candidates, the usual (the median length, the median time brought to it), the
+      comparison of a walk with the walks before it, the usual at each kilometre from the legs, the
+      live watch, the list and the trend of a round's times.
+    - The tracker: an open outing with GPS lays the points the meter settles along the reader's
+      rounds; found after 500 m, it is compared with the usual at each kilometre it crosses (or
+      mile, the marks' frozen unit), left after 200 m off the line; `Session.roundLine` holds it
+      (`RoundLine`, `RoundStanding`), so the card, the notification and the page say it alike
+      (`SessionHeadline.OnRound`, `OffRound`) and a restart tells nothing twice;
+      `SessionSignal.RoundLineChanged` brings the notification up to date, with no pulse; the
+      kilometre's words carry it (`SessionAnnouncement.DistanceMark.round`, `RoundSaid`).
+    - `passo.db` v12 by auto-migration: `round`, `round_member`, `round_apart`, and the line's four
+      columns on `session`; an outing deleted leaves its round, which is forgotten under two walks.
+      `RoundRepository` (`:core:data`): the search at an outing's end, once among the outings
+      before (`rounds_searched`), and among the outings an import brought with their routes; the
+      guides an open outing reads at its start; «Not the same round», «Forget this round», rename;
+      `kept`, the rounds as the pages show them. `RouteRepository.boxes`: the routes' boxes, read
+      before any point.
+    - The JSON backup's `rounds` (a name and the walks' starts) and `roundsApart`; an import joins a
+      round to the phone's own where they share a walk, keeping the phone's name.
+    - The service: the guides read once at an open outing with GPS's start, and again with the
+      route so far after a restart; the round searched after the end's last points are written.
+    - The outing's page: its round, sentence first («Your usual round, the 8th time: 6 minutes
+      faster than usual»), this time and the usual side by side, the line that says why a shortcut
+      is not faster, the round as a door, «Not the same round» asked first. «Your rounds»
+      (`RoundsScreen`, `RoundsKey`) and a round's page (`RoundKey`): its sentence, its usual, its
+      map with the gestures, `RoundTimesChart` (Canvas: a dot a walk, the usual a dashed line, one
+      sentence for TalkBack), its walks as doors, rename in the bar, «Forget this round» at the
+      foot. The door on the Outings page, between «Your outings» and the cities. `PassoIcons.Round`.
+    - «Delete all routes» says the rounds stay, with their walks and their times, where there are
+      some (`DataContents.rounds`).
+  - **Made exact on the way**, each in the code with its reason:
+    - **A run and a walk round the same park are two rounds.** The plan said nothing of it; «faster
+      than usual» against a usual of walks would be the running, not the reader's pace.
+    - **A round is kept from its second walk and shown from its third.** The card of the third walk
+      already compares it with the first two, as the plan asks («a round with two walks or more»);
+      «Your rounds» and the outing's page show it from the third, when Passo «knows it». Once shown,
+      every walk's page has its section, the first two saying which time they were and no more, so
+      «Not the same round» can take any walk out.
+    - **Searched at every end, and again at an end taken back.** An outing that ends and is taken
+      back with «Keep going» leaves the round first found and is searched again with its whole route.
+      Each outing is searched among those before it only, so the history's search, oldest first,
+      finds the rounds as they would have been found walk by walk.
+    - **A year of outings costs a few reads.** Numbers first (eligible, lengths, runs or walks), then
+      the routes' boxes (grown by 100 m, half their union in common), then the routes of what is
+      left: a round through its three latest walks, an outing in no round up to sixty, newest
+      first. A reader who walks a round daily for a year compares a new walk with three routes.
+    - **The line is told only where it is true.** At a kilometre the outing has walked measured
+      (nine tenths from fixes) and that two walks of the round reached whole; otherwise the last
+      comparison is held and the kilometre's words are its own. Within a fiftieth of the usual, and
+      a quarter of a minute, it is «Right on your usual».
+    - **Two rounds from the same door are told apart as the walk goes**: on the one walked more while
+      they share their streets, on the other once the walk leaves the first for the other's.
+    - **The words.** Under a minute a difference is said in seconds, to the nearest five; from a
+      minute, in minutes. On a round the kilometre's words drop its time and its pace («2
+      kilometres, 30 seconds ahead of your usual.»); the one after the round was left says it in
+      the pace's place, once. The walk's ordinal follows the language's ordinal rules (ICU), each
+      form a resource: «the 8th time», «l’8ª volta», the article elided where Italian elides it.
+      A round named by its length does not say its length twice in its row.
+    - **«Forget this round» says it may come back**: its outings stay, and a walk of it to come may
+      find it again, as any outing is found. Its pairs said not the same go with it.
+    - **A round's map has no beads**: its kilometres are each walk's own, on that walk's page.
+    - **The rename dialog is not drawn by a test**: a text field in a dialog's window never lets
+      Robolectric's clock go idle, focused or not. The name's rules are the repository's, tested
+      there; the dialog is the device check's.
+  - **The README.** Three new pictures in a row of their own: `today-round.png` (the open walk
+    round the park, «35 seconds ahead of your usual.»), `outing-round.png` (the brisk hour through
+    Milan, the 8th time on its round) and `round.png` (that round's page), with their captions; a
+    feature line, «Your usual rounds». No other picture shows what changed. CHANGELOG, VISION, the
+    guide's «Your usual rounds» in both languages, ADR 0016's status, CLAUDE.md.
+  - **The review of the code written** (the owner's request, at the end): five findings, each fixed
+    with its test where one can say it.
+    - The one search of the outings before rounds were kept would have searched again an outing a
+      backup brought in its round, and so undone the round and its name: an outing in a round keeps
+      it, and the search only adds (`RoundRepositoryTest`, «the history's search keeps a round a
+      backup brought»).
+    - «Forget this round» went back by itself and again when the page saw the round gone, which
+      during the page's exit could have gone back twice: it goes back once, when the round is gone.
+    - A round walked daily for years read its walks in one query of unbounded parameters: read a
+      slice of five hundred at a time.
+    - «Delete all routes» counted a pair kept unseen as a round: it counts the rounds the reader
+      can see.
+    - The service's one search swallowed a cancellation: passed on.
+    - Seen in the pictures: at twice the text size a round's walk broke its day in mid-word; the day
+      is short now, as «Your outings» writes it, the time under it where the two do not fit, and the
+      bar's title one line.
+  - **Checked**: `spotlessCheck`, `:app:checkForbiddenPermissions`, `test` (1,696 tests, none
+    failed) and `:app:lintDebug`, all green on this machine after the review's fixes.
+    - New tests: `RouteMatchTest` (every row of the match's edge cases, and a year of comparisons
+      timed), `RoundTimesTest`, `RoundWatchTest`, `RoundFinderTest`, `YourRoundsTest`,
+      `SessionTrackerRoundTest` (the card's line: found, at each kilometre, left, marks every ten
+      minutes and none, a goal outing, the other way round, no fix, a kilometre the round did not
+      reach, a restart), `SpokenTextTest`, `BackupCodecTest`, `RoundRepositoryTest` (the pair and
+      the third walk, the other way round, under nine tenths, a run, a route deleted, every route
+      deleted, an outing deleted, «Not the same round», «Forget this round», a name, the history's
+      search once, no routes' file, the guides), `SessionRepositoryTest` (the migration to 12, the
+      line read back), `BackupRepositoryTest` (a round's round trip, and twice), `OutingScreenTest`,
+      `RoundsScreenTest`, `SessionsScreenTest`, `DataSectionTest`, each at twice the text size, in
+      Italian on a small phone and on the foldable where it draws a page.
+    - The screenshots looked at, in both themes.
 
 ### Open
 

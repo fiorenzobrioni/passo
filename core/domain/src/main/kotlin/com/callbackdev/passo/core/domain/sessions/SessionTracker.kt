@@ -3,6 +3,9 @@ package com.callbackdev.passo.core.domain.sessions
 import com.callbackdev.passo.core.domain.metrics.MetricsCalculator
 import com.callbackdev.passo.core.domain.metrics.MetricsConstants
 import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.rounds.RoundTimes
+import com.callbackdev.passo.core.domain.rounds.RoundWatch
+import com.callbackdev.passo.core.domain.routes.DistanceKind
 import com.callbackdev.passo.core.domain.routes.Fix
 import com.callbackdev.passo.core.domain.routes.LegPiece
 import com.callbackdev.passo.core.domain.routes.Legs
@@ -10,6 +13,7 @@ import com.callbackdev.passo.core.domain.routes.RouteConstants.PACE_NOW_MILLIS
 import com.callbackdev.passo.core.domain.routes.RouteFilter
 import com.callbackdev.passo.core.domain.routes.RouteMeter
 import com.callbackdev.passo.core.domain.routes.RouteSettlement
+import com.callbackdev.passo.core.domain.routes.distanceKind
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.CADENCE_WINDOW_MILLIS
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.CAP_EXTENSION_MILLIS
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.CAP_WARNING_MILLIS
@@ -21,6 +25,8 @@ import com.callbackdev.passo.core.domain.sessions.SessionConstants.MIN_KEPT_STEP
 import com.callbackdev.passo.core.domain.sessions.SessionConstants.PAUSE_END_MILLIS
 import com.callbackdev.passo.core.domain.ways.WayStop
 import com.callbackdev.passo.core.domain.ways.Ways
+import com.callbackdev.passo.core.model.RoundLine
+import com.callbackdev.passo.core.model.RoundStanding
 import com.callbackdev.passo.core.model.RoutePoint
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
@@ -51,6 +57,13 @@ sealed interface SessionSignal {
      * pulses in a row would read as one mark, or as a quarter of a goal it does not have.
      */
     data class Mark(val count: Int) : SessionSignal
+
+    /**
+     * An open outing's line on a usual round changed (Phase 20): found, compared at a kilometre, or
+     * left. Told silently: the card and the notification say it, the kilometre's own words say it
+     * where the outing speaks ([Mark]), and nothing vibrates or wakes for it.
+     */
+    data class RoundLineChanged(val line: RoundLine) : SessionSignal
 
     /**
      * An interval outing changed interval (Phase 13): [position] is the one that begins. When one
@@ -122,21 +135,31 @@ data class RouteHarvest(val points: List<RoutePoint>, val samples: List<StepLeng
  *   and the distance is added when it is settled ([settle]), so its goal, its milestones and a
  *   walk's places are told on metres the fixes cannot take back. Steps, time in motion and the
  *   intervals are the steps' as ever, and told with them.
+ * - **An open outing with GPS on a usual round** (Phase 20) has its line: the points the meter
+ *   settles are laid along the reader's rounds ([RoundWatch]); once on one, from the first
+ *   kilometre (or mile, the marks' unit) it says how far ahead of the usual or behind, again at
+ *   each, and once that the round was left. It rides on the batch that settles the kilometre, as
+ *   the kilometre's mark does: no signal of its own, no wake ([SessionSignal.RoundLineChanged]).
  *
  * Not thread-safe: the service drives it from one thread.
  *
  * @param meter the meter of an outing with GPS; ignored for any other outing.
+ * @param rounds the reader's rounds, for an open outing with GPS; ignored for any other, whose
+ *   sentence is its goal's (a goal outing on a round is told so on its page, afterwards).
  */
 class SessionTracker(
     initial: Session,
     private val lengths: StepLengths,
     private val weightKg: Double,
     meter: RouteMeter? = null,
+    rounds: RoundWatch? = null,
 ) {
     var session: Session = initial
         private set
 
     private val route: RouteMeter? = meter.takeIf { initial.gps }
+
+    private val watch: RoundWatch? = rounds.takeIf { initial.gps && initial.open && route != null }
 
     private val window = ArrayDeque<Mark>()
     private var windowFrom: Long = initial.lastEventAtMillis
@@ -450,6 +473,7 @@ class SessionTracker(
         val since = overtime
         // What was kept aside is the outing's again: the route taken back has no hole.
         measuredMeters += overtimeMeasuredMeters
+        watch?.add(asidePoints)
         keptPoints += asidePoints
         keptSamples += asideSamples
         clearOvertime()
@@ -551,6 +575,12 @@ class SessionTracker(
             next = next.copy(toldMilestones = next.toldMilestones + crossed)
             signals += SessionSignal.Milestone(crossed.maxBy { it.percent })
         }
+        // Before the kilometre's mark: its words say the round's line as it stands at that kilometre.
+        val followed = followRound(next)
+        if (followed.roundLine != next.roundLine) {
+            next = followed
+            followed.roundLine?.let { signals += SessionSignal.RoundLineChanged(it) }
+        }
         val marks = OutingMarks.crossed(next)
         if (marks > next.toldMarks) {
             next = next.copy(toldMarks = marks)
@@ -594,6 +624,54 @@ class SessionTracker(
         if (!walking) return null
         toldInterval = coming
         return SessionSignal.IntervalChange(schedule.at(schedule.startOf(coming)), atMillis + until, early = true)
+    }
+
+    /**
+     * Where [next], an open outing with GPS, stands on the reader's rounds (Phase 20): found on one
+     * from its first half kilometre, compared with its usual at each kilometre it crosses, and left
+     * once it has been off its line for a few hundred metres; the kilometre after that says so, and
+     * the line stops. Any other outing, and one paused or over, is left as it is.
+     */
+    private fun followRound(next: Session): Session {
+        val watch = watch ?: return next
+        if (next.state != SessionState.ACTIVE) return next
+        val line = next.roundLine
+        val crossed = OutingMarks.distanceCrossed(next)
+        val walked = next.totals.distanceMeters
+        val followed = when (line?.standing) {
+            null -> watch.on(null, walked)?.let { compared(next, RoundLine(it), crossed) }
+
+            RoundStanding.ON -> when (val on = watch.on(line.roundId, walked)) {
+                // Left: said on the card from now, and by the next kilometre's words. Counted from
+                // the kilometres already behind, so that next one is the next to come.
+                null -> line.copy(standing = RoundStanding.LEFT, marks = crossed)
+
+                // Two rounds from the same door, and the walk took the other's streets.
+                line.roundId -> if (crossed > line.marks) compared(next, line, crossed) else line
+
+                else -> compared(next, RoundLine(on), crossed)
+            }
+
+            RoundStanding.LEFT ->
+                if (crossed > line.marks) line.copy(standing = RoundStanding.GONE, marks = crossed) else line
+
+            RoundStanding.GONE -> line
+        }
+        return if (followed == line) next else next.copy(roundLine = followed)
+    }
+
+    /**
+     * [line] compared at the [crossed]th kilometre of [session]: its time in motion to it, less the
+     * round's usual there. Only for a kilometre measured (nine tenths from fixes: a comparison of
+     * times over an estimate is the cadence in disguise) that the round's walks reached; otherwise
+     * [line] as it was, its last comparison held.
+     */
+    private fun compared(session: Session, line: RoundLine, crossed: Int): RoundLine {
+        val watch = watch ?: return line
+        if (crossed <= 0 || session.distanceKind() != DistanceKind.MEASURED) return line
+        val usual = watch.usualAt(line.roundId, crossed) ?: return line
+        val mine = OutingMarks.movingMillisTo(session, crossed)
+        return line.copy(marks = crossed, gapMillis = RoundTimes.even(mine - usual, usual))
     }
 
     /**
@@ -666,6 +744,7 @@ class SessionTracker(
         return when {
             session.state == SessionState.ACTIVE -> {
                 measuredMeters += settled.measuredMeters
+                watch?.add(settled.points)
                 keptPoints += settled.points
                 keptSamples += settled.samples
                 val laid = session.copy(legs = settled.pieces.fold(session.legs, Legs::lay))

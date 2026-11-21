@@ -270,4 +270,11 @@
     <!-- A route drawn still, on a card: «Your route so far: 2.30 km», over «Your route: 3.20 km». -->
     <string name="session_route_so_far">Your route so far: %1$s</string>
     <string name="session_route_whole">Your route: %1$s</string>
+
+    <!-- An open outing with GPS on one of the reader's usual rounds (Phase 20): from its first kilometre, its time there against the round's usual, in the day's own words. «30 seconds ahead of your usual.» -->
+    <string name="session_headline_round_ahead">%1$s ahead of your usual.</string>
+    <string name="session_headline_round_behind">%1$s behind your usual.</string>
+    <string name="session_headline_round_even">Right on your usual.</string>
+    <!-- Off the round for a few hundred metres: said once, until the next kilometre. -->
+    <string name="session_headline_round_left">You left your usual round.</string>
 </resources>

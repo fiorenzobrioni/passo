@@ -3,6 +3,8 @@ package com.callbackdev.passo.core.data.db
 import com.callbackdev.passo.core.model.IntervalSets
 import com.callbackdev.passo.core.model.IntervalSplit
 import com.callbackdev.passo.core.model.OutingLeg
+import com.callbackdev.passo.core.model.RoundLine
+import com.callbackdev.passo.core.model.RoundStanding
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
@@ -133,7 +135,15 @@ internal fun SessionEntity.toModel(
         marks = marks.toEnumOrNull<SessionMarks>() ?: SessionMarks.NONE,
         markMiles = markMiles,
         toldMarks = toldMarks,
+        roundLine = roundLine(),
     )
+}
+
+/** An open outing's line on a usual round (Phase 20); none where a newer build wrote a standing unknown here. */
+private fun SessionEntity.roundLine(): RoundLine? {
+    val round = roundLineId ?: return null
+    val standing = roundLineStanding.toEnumOrNull<RoundStanding>() ?: return null
+    return RoundLine(round, standing, roundLineMarks, roundLineGapMillis)
 }
 
 internal fun Session.toEntity() = SessionEntity(
@@ -178,6 +188,10 @@ internal fun Session.toEntity() = SessionEntity(
     marks = marks.name,
     markMiles = markMiles,
     toldMarks = toldMarks,
+    roundLineId = roundLine?.roundId,
+    roundLineStanding = roundLine?.standing?.name,
+    roundLineMarks = roundLine?.marks ?: 0,
+    roundLineGapMillis = roundLine?.gapMillis,
 )
 
 /** An outing's legs as rows; none for an outing without GPS, or one not yet written. */

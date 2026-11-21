@@ -90,6 +90,14 @@ data class OutingKey(val sessionId: Long) : NavKey
 @Serializable
 data class OutingsKey(val withRoutes: Boolean = false) : NavKey
 
+/** «Your rounds» (PLANNING.md §11 Phase 20): the reader's usual rounds, from the Outings page's door. */
+@Serializable
+data object RoundsKey : NavKey
+
+/** One usual round's page (Phase 20): from Your rounds, and from the page of an outing that is its walk. */
+@Serializable
+data class RoundKey(val roundId: Long) : NavKey
+
 /**
  * The Ways, from Insights (PLANNING.md §11 Phase 11); with [cities], opened at its cities, from
  * the Outings page's door to them (Phase 23): below the ways of five continents, they were a long

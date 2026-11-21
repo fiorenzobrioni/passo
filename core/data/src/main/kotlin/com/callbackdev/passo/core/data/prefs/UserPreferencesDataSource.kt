@@ -149,6 +149,19 @@ constructor(private val dataStore: DataStore<Preferences>) {
     }
 
     /**
+     * Whether the outings with GPS walked before the usual rounds (Phase 20) were searched for them,
+     * once, oldest first: from then on each is searched as it ends. Not in the JSON backup: a phone
+     * that imports outings searches the ones that came by itself.
+     */
+    suspend fun roundsSearched(): Boolean = dataStore.data
+        .catch { if (it is IOException) emit(emptyPreferences()) else throw it }
+        .first()[Keys.ROUNDS_SEARCHED] ?: false
+
+    suspend fun markRoundsSearched() {
+        dataStore.edit { it[Keys.ROUNDS_SEARCHED] = true }
+    }
+
+    /**
      * What the reader last answered when Passo asked for the location permission
      * (docs/adr/0016-location.md, decision 2): a refusal is never asked again by itself, and a
      * grant the system took back («Only this time») is asked again without Passo's own screen,
@@ -372,6 +385,7 @@ constructor(private val dataStore: DataStore<Preferences>) {
         val SESSION_PLANS_SEEDED = booleanPreferencesKey("session_plans_seeded")
         val INTERVAL_PRESET_SEEDED = booleanPreferencesKey("interval_preset_seeded")
         val OPEN_PRESET_SEEDED = booleanPreferencesKey("open_preset_seeded")
+        val ROUNDS_SEARCHED = booleanPreferencesKey("rounds_searched")
         val SESSION_SUMMARY_SEEN = longPreferencesKey("session_summary_seen")
         val YEAR_CARD_CLOSED = intPreferencesKey("year_card_closed")
         val GPS_ANSWER = stringPreferencesKey("gps_answer")

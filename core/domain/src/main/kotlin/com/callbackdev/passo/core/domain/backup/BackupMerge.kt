@@ -237,6 +237,32 @@ object BackupMerge {
             }
 
     /**
+     * The file's usual rounds (PLANNING.md §11 Phase 20), each with its walks as this phone's
+     * outings: an outing is found by the instant it started, as a route is. A walk the phone does not
+     * have is left out, and a round left with fewer than two is none. The pairs said not the same come
+     * the same way. Where a round's walk is a walk of a round here already, the repository joins the
+     * two: an import adds, and never undoes the phone's own grouping.
+     *
+     * @param outings this phone's outings after the file's were added: each one's start with its id.
+     */
+    fun rounds(
+        outings: Map<Long, Long>,
+        incoming: List<BackupRound>,
+        apart: List<Pair<Long, Long>>,
+    ): Pair<List<Pair<String?, List<Long>>>, List<Pair<Long, Long>>> {
+        val rounds = incoming.mapNotNull { round ->
+            val walks = round.walks.mapNotNull { outings[it] }.distinct()
+            if (walks.size < 2) null else round.name to walks
+        }
+        val pairs = apart.mapNotNull { (first, second) ->
+            val a = outings[first] ?: return@mapNotNull null
+            val b = outings[second] ?: return@mapNotNull null
+            if (a == b) null else a to b
+        }
+        return rounds to pairs
+    }
+
+    /**
      * The file's settings in place of this phone's, except what only this phone decides: whether
      * it is counting now, whether its first run is done, and whether its first-day note was read.
      */

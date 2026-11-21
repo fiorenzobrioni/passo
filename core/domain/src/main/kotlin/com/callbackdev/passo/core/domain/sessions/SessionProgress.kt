@@ -2,6 +2,7 @@ package com.callbackdev.passo.core.domain.sessions
 
 import com.callbackdev.passo.core.domain.routes.DistanceKind
 import com.callbackdev.passo.core.domain.routes.distanceKind
+import com.callbackdev.passo.core.model.RoundStanding
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
@@ -156,6 +157,16 @@ sealed interface SessionHeadline {
     data class OpenGoing(val movingMillis: Long, val measuredMeters: Double?) : SessionHeadline
 
     /**
+     * An open outing with GPS on one of the reader's usual rounds (Phase 20), from its first
+     * kilometre: its time in motion there against the round's usual, [gapMillis] (below zero ahead,
+     * above behind, zero at the usual), as Today says a day against a usual one.
+     */
+    data class OnRound(val gapMillis: Long) : SessionHeadline
+
+    /** The same outing, off its usual round: said once, until the next kilometre. */
+    data object OffRound : SessionHeadline
+
+    /**
      * An open outing over: what it came to, [movingMillis] in motion and [distanceMeters], a
      * measure where [measured], an estimate otherwise; and how it ended.
      */
@@ -199,7 +210,17 @@ sealed interface SessionHeadline {
 
                 moving < OPEN_STARTING_MILLIS -> OpenStarting
 
-                else -> OpenGoing(moving, session.totals.distanceMeters.takeIf { measured })
+                else -> onRound(session) ?: OpenGoing(moving, session.totals.distanceMeters.takeIf { measured })
+            }
+        }
+
+        /** An open outing's sentence on a usual round, while it counts; null off one, and before its first kilometre. */
+        private fun onRound(session: Session): SessionHeadline? {
+            val line = session.roundLine ?: return null
+            return when (line.standing) {
+                RoundStanding.ON -> line.gapMillis?.let(::OnRound)
+                RoundStanding.LEFT -> OffRound
+                RoundStanding.GONE -> null
             }
         }
 

@@ -44,6 +44,11 @@ import androidx.sqlite.db.SupportSQLiteDatabase
  *   `session`), so its minutes are drawn with their gaps; false for every outing before it, whose
  *   minutes in a pause would be drawn as walked, but for those that could only come from a Passo
  *   that kept them: an open outing, and one with a pause written ([KeptPauses]).
+ * - v12: the usual rounds (Phase 20): `round` (an id and the reader's name for it), `round_member`
+ *   (which outings are its walks) and `round_apart` (the pairs the reader said are not the same),
+ *   three new tables of numbers and names; and an open outing's line on a round while it counts
+ *   (`roundLineId`, `roundLineStanding`, `roundLineMarks`, `roundLineGapMillis` on `session`), none
+ *   for every outing before it. No place: a round's line is its walks' routes, in `routes.db`.
  */
 @Database(
     entities = [
@@ -58,8 +63,11 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         StepLengthSampleEntity::class,
         SessionLegEntity::class,
         SessionPauseEntity::class,
+        RoundEntity::class,
+        RoundMemberEntity::class,
+        RoundApartEntity::class,
     ],
-    version = 11,
+    version = 12,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -72,6 +80,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
         AutoMigration(from = 8, to = 9),
         AutoMigration(from = 9, to = 10),
         AutoMigration(from = 10, to = 11, spec = PassoDatabase.KeptPauses::class),
+        AutoMigration(from = 11, to = 12),
     ],
 )
 abstract class PassoDatabase : RoomDatabase() {
@@ -80,6 +89,8 @@ abstract class PassoDatabase : RoomDatabase() {
     abstract fun sessionDao(): SessionDao
 
     abstract fun wayDao(): WayDao
+
+    abstract fun roundDao(): RoundDao
 
     /**
      * An outing from before v11 has its pauses known only where nothing else could have walked

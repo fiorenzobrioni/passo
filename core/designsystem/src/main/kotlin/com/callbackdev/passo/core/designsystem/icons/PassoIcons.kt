@@ -545,6 +545,25 @@ object PassoIcons {
     }
 
     /**
+     * A usual round (Phase 20): out of the door (the dot), round, and back to it the same way round,
+     * the arrow saying which: a round is its direction as much as its streets.
+     */
+    val Round: ImageVector by lazy {
+        icon("round") {
+            circle(5.5f, 19f, 1.8f)
+            moveTo(7.3f, 19f)
+            lineTo(15f, 19f)
+            curveTo(20.5f, 19f, 20.5f, 5.5f, 15f, 5.5f)
+            lineTo(9f, 5.5f)
+            curveTo(6.2f, 5.5f, 5.5f, 7.5f, 5.5f, 10f)
+            lineTo(5.5f, 14.8f)
+            moveTo(3.3f, 12.6f)
+            lineTo(5.5f, 14.8f)
+            lineTo(7.7f, 12.6f)
+        }
+    }
+
+    /**
      * The interval walk (Phase 13): from a dot, slow and fast in turns, the line low and high, as
      * the editor draws its blocks. Set apart from [Outing], which every other walk wears.
      */

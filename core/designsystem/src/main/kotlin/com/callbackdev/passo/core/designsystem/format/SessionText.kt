@@ -324,6 +324,23 @@ fun Resources.sessionHeadline(
             }
         }
 
+        // On a usual round (Phase 20), from its first kilometre: «30 seconds ahead of your usual.»
+        is SessionHeadline.OnRound -> when {
+            headline.gapMillis < 0 -> getString(
+                R.string.session_headline_round_ahead,
+                roundGapWords(-headline.gapMillis),
+            )
+
+            headline.gapMillis > 0 -> getString(
+                R.string.session_headline_round_behind,
+                roundGapWords(headline.gapMillis),
+            )
+
+            else -> getString(R.string.session_headline_round_even)
+        }
+
+        SessionHeadline.OffRound -> getString(R.string.session_headline_round_left)
+
         is SessionHeadline.OpenEnded -> {
             val summary = openSummary(session, format)
             when (headline.end) {
@@ -349,7 +366,28 @@ private fun Resources.beyondWords(amount: SessionAmount, format: MeasureFormatte
 private val SessionHeadline.going: Boolean
     get() = this is SessionHeadline.Starting || this is SessionHeadline.Going ||
         this is SessionHeadline.PastHalf || this is SessionHeadline.AlmostThere ||
-        this is SessionHeadline.OpenStarting || this is SessionHeadline.OpenGoing
+        this is SessionHeadline.OpenStarting || this is SessionHeadline.OpenGoing ||
+        this is SessionHeadline.OnRound || this is SessionHeadline.OffRound
+
+/**
+ * A difference against a usual round in words (Phase 20): under a minute in seconds, to the nearest
+ * five («30 seconds»), from a minute in minutes, to the nearest («2 minutes»). A second's precision
+ * would be the receiver's, not the reader's.
+ */
+fun Resources.roundGapWords(millis: Long): String {
+    val seconds = (millis.coerceAtLeast(0) + MILLIS_PER_SECOND / 2) / MILLIS_PER_SECOND
+    return if (seconds < SECONDS_PER_MINUTE - GAP_SECONDS_GRAIN / 2) {
+        val rounded = (((seconds + GAP_SECONDS_GRAIN / 2) / GAP_SECONDS_GRAIN) * GAP_SECONDS_GRAIN)
+            .coerceAtLeast(GAP_SECONDS_GRAIN)
+            .toInt()
+        getQuantityString(R.plurals.pace_seconds, rounded, rounded)
+    } else {
+        durationWords(((seconds + SECONDS_PER_MINUTE / 2) / SECONDS_PER_MINUTE).toInt())
+    }
+}
+
+/** A difference under a minute is said to the nearest five seconds. */
+private const val GAP_SECONDS_GRAIN = 5L
 
 /**
  * The place ahead on a city walk while its outing goes, where [sessionHeadline] says «Next: …»;

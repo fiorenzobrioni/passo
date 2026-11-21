@@ -229,4 +229,10 @@
     <string name="session_share_whole_day">Da sola, tutto l’obiettivo del giorno</string>
     <string name="session_route_so_far">Il tuo percorso fin qui: %1$s</string>
     <string name="session_route_whole">Il tuo percorso: %1$s</string>
+
+    <!-- Un’uscita aperta con il GPS su uno dei giri soliti (Fase 20): dal primo chilometro, il suo tempo lì rispetto al solito del giro, con le parole del giorno. -->
+    <string name="session_headline_round_ahead">%1$s avanti rispetto al solito.</string>
+    <string name="session_headline_round_behind">%1$s indietro rispetto al solito.</string>
+    <string name="session_headline_round_even">In linea con il tuo solito.</string>
+    <string name="session_headline_round_left">Hai lasciato il tuo giro solito.</string>
 </resources>

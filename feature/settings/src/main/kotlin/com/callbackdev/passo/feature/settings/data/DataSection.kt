@@ -250,11 +250,18 @@ internal fun DataDialogs(state: DataUiState, format: MeasureFormatter, files: Da
             text = {
                 // «Every line» would not be true of the one still being written: said, where it is.
                 val keeps = state.contents.routes > state.contents.deletableRoutes
-                Text(
-                    stringResource(
-                        if (keeps) R.string.data_delete_routes_text_keeping else R.string.data_delete_routes_text,
-                    ),
+                val text = stringResource(
+                    if (keeps) R.string.data_delete_routes_text_keeping else R.string.data_delete_routes_text,
                 )
+                // The usual rounds stay with their history (Phase 20): said where there are some.
+                val rounds = if (state.contents.rounds >
+                    0
+                ) {
+                    " " + stringResource(R.string.data_delete_routes_rounds)
+                } else {
+                    ""
+                }
+                Text(text + rounds, modifier = Modifier.testTag(DataTags.DELETE_ROUTES_TEXT))
             },
             confirmButton = {
                 TextButton(
@@ -601,4 +608,5 @@ object DataTags {
     const val ROUTES = "data_routes"
     const val DELETE_ROUTES = "data_delete_routes"
     const val DELETE_ROUTES_CONFIRM = "data_delete_routes_confirm"
+    const val DELETE_ROUTES_TEXT = "data_delete_routes_text"
 }

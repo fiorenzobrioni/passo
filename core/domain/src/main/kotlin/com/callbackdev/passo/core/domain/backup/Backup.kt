@@ -11,6 +11,12 @@ import com.callbackdev.passo.core.model.StepLengthSample
 import com.callbackdev.passo.core.model.UserSettings
 import com.callbackdev.passo.core.model.WayJourney
 
+/**
+ * A usual round as a backup carries it (PLANNING.md §11 Phase 20): the reader's name for it, if any,
+ * and its walks by their outings' starts, the one thing of an outing the same on every phone.
+ */
+data class BackupRound(val name: String?, val walks: List<Long>)
+
 /** One recorded day as a backup carries it: its summary as it stood, and every minute of it. */
 data class BackupDay(val summary: DailySummary, val minutes: List<MinuteSteps>)
 
@@ -32,6 +38,8 @@ data class BackupDay(val summary: DailySummary, val minutes: List<MinuteSteps>)
  * @property routes where the outings measured with GPS went, by the outing's start: only when
  *   the reader asked for them («With the routes», off by default; docs/adr/0016-location.md,
  *   decision 9). Empty in every other backup: the one thing of this file that is a place.
+ * @property rounds the usual rounds (Phase 20): names and outings' starts, never a place; and
+ *   [roundsApart], the pairs of outings the reader said are not the same round, by their starts.
  * @property stepFallback the file's step length was set in a way this build cannot read (a mode
  *   from a newer Passo, a learnt step damaged): its profile has the height's estimate instead,
  *   and the import says so.
@@ -49,6 +57,8 @@ data class Backup(
     val journeys: List<WayJourney> = emptyList(),
     val stepLengthSamples: Map<Long, List<StepLengthSample>> = emptyMap(),
     val routes: Map<Long, Route> = emptyMap(),
+    val rounds: List<BackupRound> = emptyList(),
+    val roundsApart: List<Pair<Long, Long>> = emptyList(),
     val stepFallback: Boolean = false,
 ) {
     /** The first and last day with steps, null for a backup without any. */

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The usual rounds (PLANNING.md §11 Phase 20): a walk the reader repeats, found among their own outings with GPS. Never a record: no fastest, no medal. -->
+<resources>
+    <!-- A round with no name of the reader's: «Your round of 3.20 km»; one of runs, «Your running round of 5.00 km». -->
+    <string name="round_name">Your round of %1$s</string>
+    <string name="round_name_run">Your running round of %1$s</string>
+
+    <!-- Which time a walk of a round was, by the language's ordinal rules: «the 1st time», «the 2nd time», «the 3rd time», «the 6th time». -->
+    <string name="round_time_one">the %1$dst time</string>
+    <string name="round_time_two">the %1$dnd time</string>
+    <string name="round_time_few">the %1$drd time</string>
+    <string name="round_time_many">the %1$dth time</string>
+    <string name="round_time_other">the %1$dth time</string>
+
+    <plurals name="rounds_count">
+        <item quantity="one">%1$s round</item>
+        <item quantity="other">%1$s rounds</item>
+    </plurals>
+    <plurals name="rounds_walks">
+        <item quantity="one">%1$s walk</item>
+        <item quantity="other">%1$s walks</item>
+    </plurals>
+
+    <!-- The door on the Outings page, under Your outings: «2 rounds · 14 walks». -->
+    <string name="sessions_rounds_title">Your rounds</string>
+    <string name="sessions_rounds_body">%1$s · %2$s</string>
+
+    <!-- Your rounds: the page. -->
+    <string name="rounds_title">Your rounds</string>
+    <string name="rounds_back">Back</string>
+    <plurals name="rounds_summary">
+        <item quantity="one">%1$s walk you take again and again, found among your outings with GPS.</item>
+        <item quantity="other">%1$s walks you take again and again, found among your outings with GPS.</item>
+    </plurals>
+    <!-- A row: «3.20 km · 9 walks», then «Usually 38 min in motion». -->
+    <string name="rounds_row_detail">%1$s · %2$s</string>
+    <string name="rounds_row_usual">Usually %1$s in motion</string>
+    <string name="rounds_row_spoken">%1$s. %2$s. Usually %3$s in motion.</string>
+    <string name="rounds_note">A round is found once you walk the same streets three times with GPS, from the same door and the same way round. Its times are in motion, each brought to the round\'s usual length: a shortcut is not a faster walk, nor a detour a slower one.</string>
+    <string name="rounds_empty">No usual round now. Walk one three times with GPS, and Passo finds it.</string>
+    <string name="rounds_open">See the round</string>
+
+    <!-- A round's page. -->
+    <string name="round_back">Back</string>
+    <string name="round_rename">Rename</string>
+    <!-- The page's sentence, and its chart's to TalkBack: «6 walks since March; the last 3 faster than usual.» -->
+    <plurals name="round_trend_faster">
+        <item quantity="one">%1$s since %2$s; the last one faster than usual.</item>
+        <item quantity="other">%1$s since %2$s; the last %3$d faster than usual.</item>
+    </plurals>
+    <plurals name="round_trend_slower">
+        <item quantity="one">%1$s since %2$s; the last one slower than usual.</item>
+        <item quantity="other">%1$s since %2$s; the last %3$d slower than usual.</item>
+    </plurals>
+    <plurals name="round_trend_even">
+        <item quantity="one">%1$s since %2$s; the last one in its usual time.</item>
+        <item quantity="other">%1$s since %2$s; the last %3$d in their usual time.</item>
+    </plurals>
+    <!-- «Usually 38 minutes in motion, for 3.20 km.» -->
+    <string name="round_usual">Usually %1$s in motion, for %2$s.</string>
+    <string name="round_map_spoken">Your round: %1$s, from your door and back.</string>
+    <string name="round_map_spoken_line">Your round: %1$s, from %2$s to %3$s.</string>
+    <string name="round_no_map">The routes of this round\'s walks were deleted: its walks and their times stay, and a walk of it with GPS draws its map again.</string>
+    <string name="round_times">Its times</string>
+    <!-- Under the chart: what a dot is and what the line is. -->
+    <string name="round_times_note">A dot for each walk, its time in motion brought to %1$s; lower is faster. The dashed line is your usual, %2$s.</string>
+    <string name="round_walks">Its walks</string>
+    <!-- A walk's row: its day, its time brought to the usual length, then «3.25 km walked». -->
+    <string name="round_walk_meters">%1$s walked</string>
+    <string name="round_walk_spoken">%1$s: %2$s at the usual length, %3$s walked.</string>
+    <string name="round_forget">Forget this round</string>
+    <string name="round_forget_title">Forget this round?</string>
+    <string name="round_forget_text">Its walks stay as they are, in Your outings. Walk it again with GPS, and Passo may find it again.</string>
+    <string name="round_forget_confirm">Forget</string>
+    <string name="round_rename_title">Name this round</string>
+    <string name="round_rename_label">Its name</string>
+    <string name="round_rename_note">Left empty, it is named by its length.</string>
+    <string name="round_rename_save">Save</string>
+    <string name="round_cancel">Cancel</string>
+
+    <!-- An outing's page, over: the round it is a walk of. «Your usual round, the 6th time: 2 minutes faster than usual.» -->
+    <string name="outing_round_title">Your usual round</string>
+    <string name="outing_round_sentence">Your usual round, %1$s: %2$s.</string>
+    <string name="outing_round_sentence_alone">Your usual round, %1$s.</string>
+    <string name="outing_round_faster">%1$s faster than usual</string>
+    <string name="outing_round_slower">%1$s slower than usual</string>
+    <string name="outing_round_even">in its usual time</string>
+    <string name="outing_round_this">This time</string>
+    <string name="outing_round_this_meaning">In motion, brought to %1$s</string>
+    <string name="outing_round_usual">Usual</string>
+    <plurals name="outing_round_usual_meaning">
+        <item quantity="one">The middle of the walk before</item>
+        <item quantity="other">The middle of the %1$d walks before</item>
+    </plurals>
+    <string name="outing_round_tile_spoken">%1$s: %2$s. %3$s.</string>
+    <string name="outing_round_note">Times in motion, each brought to the round\'s usual %1$s: a shortcut is not a faster walk.</string>
+    <string name="outing_round_walks">%1$s · %2$s</string>
+    <string name="outing_round_not_same">Not the same round</string>
+    <string name="outing_round_not_same_title">Not the same round?</string>
+    <string name="outing_round_not_same_text">This outing leaves %1$s, and Passo never matches it with its walks again.</string>
+    <string name="outing_round_not_same_confirm">Not the same</string>
+</resources>

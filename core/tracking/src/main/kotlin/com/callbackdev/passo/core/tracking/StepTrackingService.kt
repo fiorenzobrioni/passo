@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat
 import com.callbackdev.passo.core.data.db.RouteDatabase
 import com.callbackdev.passo.core.data.prefs.UserPreferences
 import com.callbackdev.passo.core.data.prefs.UserPreferencesDataSource
+import com.callbackdev.passo.core.data.rounds.RoundRepository
 import com.callbackdev.passo.core.data.routes.RouteRepository
 import com.callbackdev.passo.core.data.sessions.LiveSession
 import com.callbackdev.passo.core.data.sessions.LiveSessionState
@@ -35,6 +36,8 @@ import com.callbackdev.passo.core.designsystem.format.measureFormatter
 import com.callbackdev.passo.core.domain.goals.GoalReached
 import com.callbackdev.passo.core.domain.metrics.MetricsCalculator
 import com.callbackdev.passo.core.domain.metrics.StepLengths
+import com.callbackdev.passo.core.domain.rounds.RoundGuide
+import com.callbackdev.passo.core.domain.rounds.RoundWatch
 import com.callbackdev.passo.core.domain.routes.GpsAnswer
 import com.callbackdev.passo.core.domain.routes.GpsDuty
 import com.callbackdev.passo.core.domain.routes.GpsLines
@@ -46,6 +49,7 @@ import com.callbackdev.passo.core.domain.routes.RouteHeights
 import com.callbackdev.passo.core.domain.routes.RouteMeter
 import com.callbackdev.passo.core.domain.routes.pace
 import com.callbackdev.passo.core.domain.sessions.IntervalSchedule
+import com.callbackdev.passo.core.domain.sessions.OutingMarks
 import com.callbackdev.passo.core.domain.sessions.RouteHarvest
 import com.callbackdev.passo.core.domain.sessions.SessionAnnouncement
 import com.callbackdev.passo.core.domain.sessions.SessionConstants
@@ -66,9 +70,11 @@ import com.callbackdev.passo.core.model.DiagnosticsEvent
 import com.callbackdev.passo.core.model.DiagnosticsType
 import com.callbackdev.passo.core.model.MinuteSteps
 import com.callbackdev.passo.core.model.Profile
+import com.callbackdev.passo.core.model.RoutePoint
 import com.callbackdev.passo.core.model.Session
 import com.callbackdev.passo.core.model.SessionEnd
 import com.callbackdev.passo.core.model.SessionGoalKind
+import com.callbackdev.passo.core.model.SessionIntensity
 import com.callbackdev.passo.core.model.SessionMilestone
 import com.callbackdev.passo.core.model.SessionState
 import com.callbackdev.passo.core.model.SessionVoice
@@ -151,6 +157,11 @@ import javax.inject.Inject
  * Phase 16): each point the route keeps is given its height from the pressure and the
  * satellites together (`RouteHeights`), and what the outing climbed is counted on them. It asks
  * for no permission, never wakes the processor by itself, and is removed with the receiver.
+ *
+ * The reader's usual rounds (Phase 20) are read here at two moments and no other: at the start of
+ * an open outing with GPS, once, so its card can say how it stands on one ([RoundWatch], fed the
+ * points it keeps anyway); and at the end of an outing with GPS, once its route is written whole,
+ * to find the round it was ([RoundRepository.find]). Nothing of it runs on a timer, or wakes.
  */
 @AndroidEntryPoint
 class StepTrackingService : Service() {
@@ -173,6 +184,8 @@ class StepTrackingService : Service() {
     @Inject lateinit var ways: WayRepository
 
     @Inject lateinit var routes: RouteRepository
+
+    @Inject lateinit var rounds: RoundRepository
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val persistMutex = Mutex()
@@ -447,7 +460,10 @@ class StepTrackingService : Service() {
             // An outing the system interrupted (the process died): it goes on from where it was
             // written, and the steps meanwhile reach it with the next sample.
             sessions.liveSession()?.let {
-                tracker = newTracker(it)
+                // An open outing with GPS on a round takes its line back from the route kept so far.
+                val guides = roundGuides(it)
+                tracker =
+                    newTracker(it, guides = guides, walked = if (guides.isEmpty()) emptyList() else walkedSoFar(it))
                 if (it.voice != SessionVoice.OFF) speech.prepare()
                 // An outing with GPS comes back without its receiver, which a process the system
                 // restarted cannot have. Opened by the reader, it takes it back below; started
@@ -461,6 +477,17 @@ class StepTrackingService : Service() {
                     sessions.deleteOrphanRoutes()
                 } catch (e: Exception) {
                     Log.w(TAG, "Clearing the routes with no outing failed", e)
+                }
+                // The outings with GPS walked before the usual rounds were kept, searched for them
+                // once (Phase 20); never again after. Beside the start, never in its way.
+                launch {
+                    try {
+                        rounds.searchOnce()
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: Exception) {
+                        Log.w(TAG, "Searching the outings for their rounds failed", e)
+                    }
                 }
             }
             registerReceivers()
@@ -1392,6 +1419,11 @@ class StepTrackingService : Service() {
                 // speaks, and the notification brought up to date, as at a milestone.
                 is SessionSignal.Mark -> tellMark(signal)
 
+                // Its line on a usual round (Phase 20): no pulse and no words of its own (the
+                // kilometre's carry it), only the notification brought up to date, so whoever looks
+                // next reads it. It rides on the batch that settled the kilometre: no wake.
+                is SessionSignal.RoundLineChanged -> notifyNow()
+
                 // Told once the batch is in: a later change in the same batch replaces it.
                 is SessionSignal.IntervalChange -> pendingChange = signal
 
@@ -1477,6 +1509,18 @@ class StepTrackingService : Service() {
                     pressureHeldForEnd = false
                     // Unless the receiver is on again meanwhile (an end taken back at once).
                     if (!locationSource.active) pressureSource.stop()
+                }
+            }
+            // Its route written whole: the round it was, among the reader's own (Phase 20), beside
+            // the writes rather than holding them up. Again at a second end, should it be taken
+            // back: it leaves the round first found.
+            if (finished.kept && session.gps) {
+                try {
+                    rounds.find(session.id)
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.e(TAG, "Finding an outing's round failed", e)
                 }
             }
         }
@@ -1725,7 +1769,7 @@ class StepTrackingService : Service() {
             ?: return
         val saved = persistMutex.withLock { sessions.insert(session) }
         if (plan.id != 0L) sessions.markPlanUsed(plan.id, now)
-        tracker = newTracker(saved, current.profile)
+        tracker = newTracker(saved, current.profile, roundGuides(saved))
         onSteps = readiness?.let { startedOnSteps(saved, it) }
         if (saved.voice != SessionVoice.OFF && sessionNotifications.signalsAllowed()) {
             speak(SessionAnnouncement.started(saved), saved)
@@ -1799,7 +1843,12 @@ class StepTrackingService : Service() {
         speech.say(spoken(announcement, session, units), session.voice)
     }
 
-    private suspend fun newTracker(session: Session, profile: Profile? = null): SessionTracker {
+    private suspend fun newTracker(
+        session: Session,
+        profile: Profile? = null,
+        guides: List<RoundGuide> = emptyList(),
+        walked: List<RoutePoint> = emptyList(),
+    ): SessionTracker {
         val measuredWith = profile ?: preferencesSource.current().profile
         // A meter for an outing with GPS (any other ignores it). A mock fix is taken only by a
         // debuggable build, where a route can be replayed on a desk; never by a release, the one
@@ -1810,7 +1859,45 @@ class StepTrackingService : Service() {
             StepLengths.of(measuredWith),
             MetricsCalculator.weightKg(measuredWith),
             RouteMeter(allowMock = debuggable),
+            RoundWatch(guides).also { if (walked.isNotEmpty()) it.add(walked) }.takeIf { guides.isNotEmpty() },
         )
+    }
+
+    /**
+     * Whether [session] is told against the reader's usual rounds while it counts (Phase 20): an
+     * open outing measured with GPS. A goal outing keeps its goal's sentence; its round is told on
+     * its page, afterwards.
+     */
+    private fun followsRounds(session: Session): Boolean = session.open && session.gps && session.live
+
+    /** The route [session] has kept so far, for its line on a round after a restart; none should it not read. */
+    private suspend fun walkedSoFar(session: Session): List<RoutePoint> = try {
+        routes.route(session.id, session.startedAtMillis)?.points.orEmpty()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Log.w(TAG, "Reading the route so far failed", e)
+        emptyList()
+    }
+
+    /**
+     * The rounds [session] may walk, read once at its start, or at a restart of the process: runs
+     * for a run, walks for a walk, by the kilometre or the mile its marks were frozen in. None for any
+     * other outing, and none should the read fail: the outing counts as any.
+     */
+    private suspend fun roundGuides(session: Session): List<RoundGuide> {
+        if (!followsRounds(session)) return emptyList()
+        return try {
+            rounds.guides(
+                running = session.intensity == SessionIntensity.RUN,
+                unitMeters = OutingMarks.meters(session.markMiles),
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Log.w(TAG, "Reading the usual rounds failed", e)
+            emptyList()
+        }
     }
 
     private fun today(): Long = LocalDate.now(ZoneId.systemDefault()).toEpochDay()

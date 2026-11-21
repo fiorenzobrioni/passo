@@ -31,13 +31,18 @@ object OutingMarks {
      * estimate without.
      */
     fun crossed(session: Session): Int = when (session.marks) {
-        SessionMarks.DISTANCE ->
-            floor((session.totals.distanceMeters + EPSILON_METERS) / meters(session.markMiles)).toInt()
-
+        SessionMarks.DISTANCE -> distanceCrossed(session)
         SessionMarks.TIME -> (session.totals.movingMillis / TIME_MARK_MILLIS).toInt()
-
         SessionMarks.NONE -> 0
     }.coerceAtLeast(0)
+
+    /**
+     * How many kilometres, or miles in the unit frozen at its start, [session] has walked, whatever
+     * its marks: what a usual round's line is told at (Phase 20), silently where the marks are ten
+     * minutes, or none.
+     */
+    fun distanceCrossed(session: Session): Int =
+        floor((session.totals.distanceMeters + EPSILON_METERS) / meters(session.markMiles)).toInt().coerceAtLeast(0)
 
     /**
      * The time in motion [session] took to reach its [count]th distance mark: from its legs where

@@ -20,6 +20,9 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** A route's box, and the start of the outing it belongs to. */
+data class KeptBox(val sessionStartedAtMillis: Long, val box: RouteBox)
+
 /** Whether the routes' own file is on the phone: it is made by the first route written, and by nothing else. */
 fun interface RouteFile {
     fun exists(): Boolean
@@ -110,6 +113,18 @@ constructor(private val dao: RouteDao, private val file: RouteFile = RouteFile {
     val keys: Flow<List<RouteKey>> = whenPresent(emptyList()) {
         dao.observeRouteKeys().map { rows ->
             rows.map { RouteKey(it.sessionId, it.sessionStartedAtMillis, it.pointCount) }
+        }
+    }
+
+    /**
+     * Each route's box, by its outing's id, with the outing's start it belongs to: what the usual
+     * rounds (Phase 20) read before any point, so only the routes that may be the same are opened.
+     * Nothing, and no database opened, until a route has been written.
+     */
+    suspend fun boxes(): Map<Long, KeptBox> {
+        if (!file.exists()) return emptyMap()
+        return dao.routes().associate {
+            it.sessionId to KeptBox(it.sessionStartedAtMillis, RouteBox(it.southE6, it.westE6, it.northE6, it.eastE6))
         }
     }
 

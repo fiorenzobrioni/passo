@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.callbackdev.passo.core.data.rounds.RoundRepository
 import com.callbackdev.passo.core.data.routes.RouteRepository
 import com.callbackdev.passo.core.data.routes.RouteThumbnails
 import com.callbackdev.passo.core.data.sessions.LiveSession
@@ -70,6 +71,13 @@ enum class SessionsStatus {
 data class KeptOutingsDoor(val count: Int, val latest: Session, val route: RouteShape?, val today: LocalDate)
 
 /**
+ * The door to «Your rounds» (PLANNING.md §11 Phase 20): how many rounds, how many walks of them, and
+ * the latest walked's small map as its picture.
+ */
+@Immutable
+data class RoundsDoor(val rounds: Int, val walks: Int, val route: RouteShape?)
+
+/**
  * The Outings page.
  *
  * @property live the outing under way, paused, or just ended by its goal.
@@ -77,6 +85,7 @@ data class KeptOutingsDoor(val count: Int, val latest: Session, val route: Route
  * @property restOfDaySteps what "the rest of the day" means right now.
  * @property alertsWhileScreenOff the phone's step counter can wake it for a signal.
  * @property kept the door to the outings walked; null until the first one is over.
+ * @property rounds the door to the usual rounds; null until there is one.
  */
 @Immutable
 data class SessionsUiState(
@@ -89,6 +98,7 @@ data class SessionsUiState(
     val alertsWhileScreenOff: Boolean,
     val shape: OutingShape? = null,
     val kept: KeptOutingsDoor? = null,
+    val rounds: RoundsDoor? = null,
 )
 
 /**
@@ -111,6 +121,7 @@ constructor(
     routes: RouteRepository,
     thumbnails: RouteThumbnails,
     todaySource: TodaySource,
+    rounds: RoundRepository,
 ) : ViewModel() {
     private val readiness = MutableStateFlow(StepTracking.readiness(context))
 
@@ -163,13 +174,34 @@ constructor(
             }
         }
 
+    /**
+     * The door to «Your rounds»: shown once there is one, with the latest walked's small map, read only
+     * while the page is seen.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val roundsDoor: Flow<RoundsDoor?> = rounds.kept
+        .map { kept -> kept.takeIf { it.isNotEmpty() } }
+        .distinctUntilChanged()
+        .mapLatest { kept ->
+            kept?.let {
+                RoundsDoor(
+                    it.size,
+                    it.sumOf { round ->
+                        round.walks.size
+                    },
+                    it.first().route?.let { key -> thumbnails.of(key) },
+                )
+            }
+        }
+
     val state: StateFlow<SessionsUiState?> = combine(
         sessions.plans,
-        combine(live, shape, kept, ::Triple),
+        combine(live, shape, combine(kept, roundsDoor, ::Pair), ::Triple),
         combine(settingsRepository.settings, settingsRepository.profile, ::Pair),
         todaySteps,
         readiness,
-    ) { plans, (live, shape, kept), (settings, profile), steps, ready ->
+    ) { plans, (live, shape, doors), (settings, profile), steps, ready ->
+        val (kept, roundsDoor) = doors
         SessionsUiState(
             plans = plans,
             live = live,
@@ -184,6 +216,7 @@ constructor(
             alertsWhileScreenOff = StepTracking.hasWakeUpStepCounter(context),
             shape = shape?.takeIf { it.sessionId == live?.session?.id },
             kept = kept,
+            rounds = roundsDoor,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), null)
 

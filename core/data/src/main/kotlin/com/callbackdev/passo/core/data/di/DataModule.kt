@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.callbackdev.passo.core.data.db.PassoDatabase
+import com.callbackdev.passo.core.data.db.RoundDao
 import com.callbackdev.passo.core.data.db.RouteDao
 import com.callbackdev.passo.core.data.db.RouteDatabase
 import com.callbackdev.passo.core.data.db.SessionDao
@@ -40,6 +41,9 @@ object DataModule {
 
     @Provides
     fun wayDao(database: PassoDatabase): WayDao = database.wayDao()
+
+    @Provides
+    fun roundDao(database: PassoDatabase): RoundDao = database.roundDao()
 
     /**
      * The routes' own database (docs/adr/0016-location.md, decision 8): a second file, so that

@@ -293,6 +293,8 @@ data class SessionTotals(
  *   frozen, so a change of units on the way does not change the mark under the reader's feet.
  * @property toldMarks the marks already told, so none is told twice, not even by a process that
  *   restarted.
+ * @property roundLine an open outing with GPS on one of the reader's usual rounds (Phase 20): where
+ *   it stands on it, as last told; null for every other outing, and until it is found on one.
  */
 data class Session(
     val id: Long = 0,
@@ -333,6 +335,7 @@ data class Session(
     val marks: SessionMarks = SessionMarks.NONE,
     val markMiles: Boolean = false,
     val toldMarks: Int = 0,
+    val roundLine: RoundLine? = null,
 ) {
     val reached: Boolean get() = reachedAtMillis != null
     val live: Boolean get() = state != SessionState.FINISHED

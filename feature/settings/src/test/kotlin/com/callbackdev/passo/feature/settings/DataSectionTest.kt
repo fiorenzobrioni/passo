@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -134,6 +135,25 @@ class DataSectionTest {
         snapshot("data_routes_delete")
         compose.onNodeWithTag(DataTags.DELETE_ROUTES_CONFIRM).performClick()
         assertThat(deleted).isEqualTo(1)
+    }
+
+    @Test
+    fun `deleting all routes says the usual rounds stay, with their history, where there are some`() {
+        show(
+            DataUiState(contents = contents.copy(routes = 3, deletableRoutes = 3, deletableBytes = 28_400, rounds = 2)),
+        )
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(DataTags.DELETE_ROUTES))
+        compose.onNodeWithTag(DataTags.DELETE_ROUTES).performClick()
+        compose.onNodeWithTag(DataTags.DELETE_ROUTES_TEXT)
+            .assertTextContains("Your usual rounds stay too, with their walks and their times.", substring = true)
+    }
+
+    @Test
+    fun `with no round, the dialog says nothing of rounds`() {
+        show(DataUiState(contents = contents.copy(routes = 3, deletableRoutes = 3, deletableBytes = 28_400)))
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(DataTags.DELETE_ROUTES))
+        compose.onNodeWithTag(DataTags.DELETE_ROUTES).performClick()
+        compose.onNodeWithText("usual rounds", substring = true).assertDoesNotExist()
     }
 
     @Test

@@ -105,6 +105,11 @@ sealed interface BackupRead {
  *   had, so it can be drawn minute by minute with their gaps. Absent, they are known only where
  *   nothing else could have written the outing (an open one, or one with a pause), as in the
  *   database; a build without it reads the outing without its shape.
+ * - `rounds` (added with the usual rounds, Phase 20) lists the reader's rounds, each its `name`
+ *   (absent until they gave it one) and its `walks`, its outings by their `startedAtMillis`;
+ *   `roundsApart` the pairs of outings (`first`, `second`, by their starts) the reader said are
+ *   not the same round. Names and numbers: a round's line is its walks' routes. A file without them
+ *   has none, and a build without them reads the outings as ever.
  * - `route` (Phase 16) on an outing with GPS, **only in a file exported «With the routes»**:
  *   where it went. `points` is Base64 of the app's own compact form, `altitudes` where their
  *   heights came from (`BAROMETER` or `SATELLITES`). The one field of this file that is a place.
@@ -278,6 +283,8 @@ private fun Backup.toFile() = BackupFile(
         )
     },
     diagnostics = diagnostics.map { DiagnosticDto(it.wallMillis, it.type.name, it.detail) },
+    rounds = rounds.map { RoundDto(it.name, it.walks.sorted()) },
+    roundsApart = roundsApart.map { (first, second) -> RoundApartDto(first, second) },
     ways = journeys.sortedBy { it.startedAtMillis }.map { journey ->
         WayDto(
             way = journey.way.name,
@@ -373,6 +380,10 @@ private fun BackupFile.toBackup(): Backup {
             row.type.toEnumOrNull<DiagnosticsType>()?.let { DiagnosticsEvent(row.atMillis, it, row.detail) }
         },
         journeys = ways.mapNotNull { it.toJourney() },
+        // A round of fewer than two walks is no round; a pair of one outing with itself is none.
+        rounds = rounds.map { BackupRound(it.name?.takeIf(String::isNotBlank), it.walks.distinct()) }
+            .filter { it.walks.size >= 2 },
+        roundsApart = roundsApart.filter { it.first != it.second }.map { it.first to it.second },
     )
 }
 

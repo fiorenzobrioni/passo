@@ -69,6 +69,8 @@ import com.callbackdev.passo.feature.sessions.GpsIntroScreen
 import com.callbackdev.passo.feature.sessions.OutingRoute
 import com.callbackdev.passo.feature.sessions.OutingsListRoute
 import com.callbackdev.passo.feature.sessions.PlanEditorRoute
+import com.callbackdev.passo.feature.sessions.RoundRoute
+import com.callbackdev.passo.feature.sessions.RoundsRoute
 import com.callbackdev.passo.feature.sessions.SessionsRoute
 import com.callbackdev.passo.feature.settings.SettingsRoute
 import com.callbackdev.passo.feature.settings.calibration.CalibrationRoute
@@ -223,7 +225,14 @@ private fun MainPages(outings: OutingStarter, door: AppDoor?, onDoorOpened: () -
                 onOpenOuting = { open(OutingKey(it)) },
                 onOpenWalk = { open(WayKey(it, null)) },
                 onOpenOutings = { open(OutingsKey()) },
+                onOpenRounds = { open(RoundsKey) },
             )
+        }
+        entry<RoundsKey> {
+            RoundsRoute(onBack = nav::goBack, onOpenRound = { open(RoundKey(it)) })
+        }
+        entry<RoundKey> { key ->
+            RoundRoute(roundId = key.roundId, onBack = nav::goBack, onOpenOuting = { open(OutingKey(it)) })
         }
         entry<OutingsKey> { key ->
             OutingsListRoute(
@@ -239,6 +248,7 @@ private fun MainPages(outings: OutingStarter, door: AppDoor?, onDoorOpened: () -
                 onOpenStepCard = { open(CalibrationKey(CalibratedStep.WALKING, card = true)) },
                 // The walk as it stands: its places, its stamps, «Continue from…».
                 onOpenWalk = { open(WayKey(it, null)) },
+                onOpenRound = { open(RoundKey(it)) },
             )
         }
         entry<PlanEditorKey> { key -> PlanEditorRoute(planId = key.planId, onDone = nav::goBack) }
