@@ -68,7 +68,7 @@ object YourRounds {
         return rounds
             .mapNotNull { round ->
                 val walks = round.walks.mapNotNull { byId[it] }.sortedBy { it.startedAtMillis }
-                if (walks.size < RoundConstants.KNOWN_WALKS) return@mapNotNull null
+                if (walks.size < RoundConstants.WALKS) return@mapNotNull null
                 val usual = RoundTimes.usual(walks) ?: return@mapNotNull null
                 val route = walks.asReversed().firstNotNullOfOrNull { walk ->
                     drawable[walk.id]?.takeIf { it.sessionStartedAtMillis == walk.startedAtMillis }

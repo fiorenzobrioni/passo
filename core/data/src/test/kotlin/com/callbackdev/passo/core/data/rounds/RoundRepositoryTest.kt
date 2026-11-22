@@ -117,68 +117,89 @@ class RoundRepositoryTest {
 
     private suspend fun kept(): List<Round> = rounds.rounds.first()
 
+    /** Three walks round the park, [from] days on, each searched as it ends: a round; their ids. */
+    private suspend fun aRound(from: Long = 0): List<Long> = (from until from + 3).map { day ->
+        walked(LOOP, day = day).also { rounds.find(it) }
+    }
+
     @Test
-    fun `the second walk of a round makes the pair, the third joins it`() = runTest {
+    fun `a round is born at its third walk, the walk the same as two others, and the fourth joins it`() = runTest {
         val first = walked(LOOP, day = 0)
         rounds.find(first)
-        assertThat(kept()).isEmpty()
         val second = walked(LOOP, day = 1)
         rounds.find(second)
-        assertThat(kept().single().walks).containsExactly(first, second)
+        // Two walks are not yet a round: nothing kept that the reader could not see.
+        assertThat(kept()).isEmpty()
+        assertThat(database.roundDao().rounds()).isEmpty()
         val third = walked(LOOP, day = 2, minutes = 38.0)
         rounds.find(third)
         assertThat(kept().single().walks).containsExactly(first, second, third)
+        val fourth = walked(LOOP, day = 3)
+        rounds.find(fourth)
+        assertThat(kept().single().walks).containsExactly(first, second, third, fourth)
     }
 
     @Test
     fun `the same streets walked the other way are not the same round`() = runTest {
         rounds.find(walked(LOOP, day = 0))
-        rounds.find(walked(LOOP.asReversed(), day = 1))
+        rounds.find(walked(LOOP, day = 1))
+        rounds.find(walked(LOOP.asReversed(), day = 2))
         assertThat(kept()).isEmpty()
     }
 
     @Test
     fun `an outing measured under nine tenths is not matched`() = runTest {
         rounds.find(walked(LOOP, day = 0))
-        rounds.find(walked(LOOP, day = 1, measuredShare = 0.8))
+        rounds.find(walked(LOOP, day = 1))
+        rounds.find(walked(LOOP, day = 2, measuredShare = 0.8))
         assertThat(kept()).isEmpty()
     }
 
     @Test
     fun `a run round the park is not the walk round it`() = runTest {
         rounds.find(walked(LOOP, day = 0))
-        rounds.find(walked(LOOP, day = 1, minutes = 20.0, intensity = SessionIntensity.RUN))
+        rounds.find(walked(LOOP, day = 1))
+        rounds.find(walked(LOOP, day = 2, minutes = 20.0, intensity = SessionIntensity.RUN))
         assertThat(kept()).isEmpty()
     }
 
     @Test
+    fun `a walk the same as walks of two rounds makes them one`() = runTest {
+        val dao = database.roundDao()
+        // Two rounds of the same streets, kept apart until now (an import, a round forgotten).
+        val first = checkNotNull(dao.start((0L..2L).map { walked(LOOP, day = it) }))
+        dao.rename(first, "The park")
+        val second = checkNotNull(dao.start((3L..6L).map { walked(LOOP, day = it) }))
+        val next = walked(LOOP, day = 7)
+        rounds.find(next)
+        val one = kept().single()
+        // The one with more walks keeps its id; the name is the one the reader gave.
+        assertThat(one.id).isEqualTo(second)
+        assertThat(one.name).isEqualTo("The park")
+        assertThat(one.walks).hasSize(8)
+    }
+
+    @Test
     fun `a member's route deleted, it stays a member for its times`() = runTest {
-        val first = walked(LOOP, day = 0)
-        val second = walked(LOOP, day = 1)
-        rounds.find(second)
+        val (first, second, third) = aRound()
         routes.forget(first, START)
-        assertThat(kept().single().walks).containsExactly(first, second)
-        // A new walk still finds the round, through the walk that kept its route.
-        val third = walked(LOOP, day = 2)
-        rounds.find(third)
         assertThat(kept().single().walks).containsExactly(first, second, third)
+        // A new walk still finds the round, through the walks that kept their route.
+        val fourth = walked(LOOP, day = 3)
+        rounds.find(fourth)
+        assertThat(kept().single().walks).containsExactly(first, second, third, fourth)
     }
 
     @Test
     fun `every member's route deleted, the history stays and no new walk is matched until one with GPS is kept`() =
         runTest {
-            val first = walked(LOOP, day = 0)
-            val second = walked(LOOP, day = 1)
-            rounds.find(second)
+            val old = aRound().toSet()
             routes.deleteAll()
-            assertThat(kept().single().walks).containsExactly(first, second)
-            val third = walked(LOOP, day = 2)
-            rounds.find(third)
-            assertThat(kept().single().walks).containsExactly(first, second)
-            // The walk after it has a route to be matched with: a round of their own.
-            val fourth = walked(LOOP, day = 3)
-            rounds.find(fourth)
-            assertThat(kept().map { it.walks }).containsExactly(setOf(first, second), setOf(third, fourth))
+            assertThat(kept().single().walks).isEqualTo(old)
+            // The next walks have nothing with a route to be matched with but each other: a round of
+            // their own at the third.
+            val next = (3L..5L).map { day -> walked(LOOP, day = day).also { rounds.find(it) } }
+            assertThat(kept().map { it.walks }).containsExactly(old, next.toSet())
         }
 
     @Test
@@ -236,13 +257,13 @@ class RoundRepositoryTest {
     fun `after an import, a round of older walks with their routes is joined to the phone's by its line`() = runTest {
         val dao = database.roundDao()
         // The phone's round, named: three walks round the park.
-        val phone = dao.start((10L..12L).map { walked(LOOP, day = it) })
+        val phone = checkNotNull(dao.start((10L..12L).map { walked(LOOP, day = it) }))
         dao.rename(phone, "The park")
         // Another round of the phone's, as long, from the same door: not this one.
-        val other = dao.start((13L..15L).map { walked(OTHER_LOOP, day = it) })
+        val other = checkNotNull(dao.start((13L..15L).map { walked(OTHER_LOOP, day = it) }))
         // The file's: three older walks round the park, a round of their own.
         val brought = (0L..2L).map { walked(LOOP, day = it) }
-        val file = dao.start(brought)
+        val file = checkNotNull(dao.start(brought))
         rounds.joinAlike(brought)
         val after = kept()
         assertThat(after.map { it.id }).containsExactly(phone, other)
@@ -256,8 +277,8 @@ class RoundRepositoryTest {
     @Test
     fun `rounds the import did not touch, or the reader said are not one, are left as they are`() = runTest {
         val dao = database.roundDao()
-        val first = dao.start((0L..2L).map { walked(LOOP, day = it) })
-        val second = dao.start((3L..5L).map { walked(LOOP, day = it) })
+        val first = checkNotNull(dao.start((0L..2L).map { walked(LOOP, day = it) }))
+        val second = checkNotNull(dao.start((3L..5L).map { walked(LOOP, day = it) }))
         // Nothing of either came with the file.
         rounds.joinAlike(listOf(walked(OTHER_LOOP, day = 9)))
         assertThat(kept().map { it.id }).containsExactly(first, second)
@@ -291,57 +312,50 @@ class RoundRepositoryTest {
     }
 
     @Test
-    fun `a member's outing deleted leaves the round, and under two members the round is forgotten`() = runTest {
-        val first = walked(LOOP, day = 0)
-        val second = walked(LOOP, day = 1)
-        val third = walked(LOOP, day = 2)
-        rounds.find(second)
-        rounds.find(third)
-        sessions.delete(third)
-        assertThat(kept().single().walks).containsExactly(first, second)
-        sessions.delete(second)
+    fun `a member's outing deleted leaves the round, and under three walks the round is forgotten`() = runTest {
+        val walks = aRound()
+        val fourth = walked(LOOP, day = 3)
+        rounds.find(fourth)
+        sessions.delete(fourth)
+        assertThat(kept().single().walks).containsExactlyElementsIn(walks)
+        sessions.delete(walks[2])
         assertThat(kept()).isEmpty()
         assertThat(database.roundDao().rounds()).isEmpty()
     }
 
     @Test
     fun `not the same round keeps the pair, and the two are never matched again`() = runTest {
-        val first = walked(LOOP, day = 0)
-        val second = walked(LOOP, day = 1)
-        val third = walked(LOOP, day = 2)
-        rounds.find(second)
-        rounds.find(third)
-        rounds.notTheSame(third)
-        assertThat(kept().single().walks).containsExactly(first, second)
-        // Searched again (an end taken back, an import): still apart.
-        rounds.find(third)
-        assertThat(kept().single().walks).containsExactly(first, second)
-        // A walk after it is matched as ever.
+        val (first, second, third) = aRound()
         val fourth = walked(LOOP, day = 3)
         rounds.find(fourth)
-        assertThat(kept().single().walks).containsExactly(first, second, fourth)
+        rounds.notTheSame(fourth)
+        assertThat(kept().single().walks).containsExactly(first, second, third)
+        // Searched again (an end taken back, an import): still apart.
+        rounds.find(fourth)
+        assertThat(kept().single().walks).containsExactly(first, second, third)
+        // A walk after it is matched as ever.
+        val fifth = walked(LOOP, day = 4)
+        rounds.find(fifth)
+        assertThat(kept().single().walks).containsExactly(first, second, third, fifth)
     }
 
     @Test
     fun `forgetting a round lets its outings be, and a walk of it to come finds it again`() = runTest {
-        val first = walked(LOOP, day = 0)
-        val second = walked(LOOP, day = 1)
-        rounds.find(second)
+        val (first, second, third) = aRound()
         rounds.rename(kept().single().id, "The park")
         rounds.forget(kept().single().id)
         assertThat(kept()).isEmpty()
         assertThat(sessions.session(first)).isNotNull()
-        val third = walked(LOOP, day = 2)
-        rounds.find(third)
+        val fourth = walked(LOOP, day = 3)
+        rounds.find(fourth)
         // Found again as any round is: with every walk in no round it is the same as, its name gone.
-        assertThat(kept().single().walks).containsExactly(first, second, third)
+        assertThat(kept().single().walks).containsExactly(first, second, third, fourth)
         assertThat(kept().single().name).isNull()
     }
 
     @Test
     fun `a name is the reader's, and a blank one names the round from its length again`() = runTest {
-        walked(LOOP, day = 0)
-        rounds.find(walked(LOOP, day = 1))
+        aRound()
         val id = kept().single().id
         rounds.rename(id, "  The park  ")
         assertThat(kept().single().name).isEqualTo("The park")
@@ -366,14 +380,15 @@ class RoundRepositoryTest {
         val first = walked(LOOP, day = 0)
         val second = walked(LOOP, day = 1)
         val third = walked(LOOP, day = 2)
+        val fourth = walked(LOOP, day = 3)
         val dao = database.roundDao()
-        val brought = dao.pair(first, second)
+        val brought = checkNotNull(dao.start(listOf(first, second, third)))
         dao.rename(brought, "The park")
         rounds.searchOnce()
         val round = kept().single()
         assertThat(round.id).isEqualTo(brought)
         assertThat(round.name).isEqualTo("The park")
-        assertThat(round.walks).containsExactly(first, second, third)
+        assertThat(round.walks).containsExactly(first, second, third, fourth)
     }
 
     @Test
@@ -388,12 +403,12 @@ class RoundRepositoryTest {
     @Test
     fun `an open outing's start reads each round's line and its usual at each kilometre`() = runTest {
         walked(LOOP, day = 0, minutes = 32.0)
-        val second = walked(LOOP, day = 1, minutes = 48.0)
-        rounds.find(second)
+        rounds.find(walked(LOOP, day = 1, minutes = 48.0))
+        rounds.find(walked(LOOP, day = 2, minutes = 40.0))
         val guide = rounds.guides(running = false, unitMeters = 1_000.0).single()
-        assertThat(guide.walks).isEqualTo(2)
-        assertThat(guide.lines).hasSize(2)
-        // Ten and fifteen minutes a kilometre: the middle is twelve and a half.
+        assertThat(guide.walks).isEqualTo(3)
+        assertThat(guide.lines).hasSize(3)
+        // Ten, fifteen and twelve and a half minutes a kilometre: the middle is twelve and a half.
         assertThat(guide.usualAtMarks.first()).isEqualTo(750_000L)
         assertThat(rounds.guides(running = true, unitMeters = 1_000.0)).isEmpty()
     }
@@ -423,18 +438,29 @@ class RoundRepositoryTest {
 
     @Test
     fun `an outing taken back with Keep going is not its own round's walk at a restart`() = runTest {
-        walked(LOOP, day = 0)
-        val second = walked(LOOP, day = 1)
-        rounds.find(second)
-        val third = walked(LOOP, day = 2)
-        rounds.find(third)
+        aRound()
+        val fourth = walked(LOOP, day = 3)
+        rounds.find(fourth)
         // Ended, found, then taken back: under way again, still its round's walk until it ends.
-        val going = checkNotNull(sessions.session(third))
+        val going = checkNotNull(sessions.session(fourth))
         sessions.save(going.copy(state = SessionState.ACTIVE, endedAtMillis = null))
-        assertThat(kept().single().walks).contains(third)
+        assertThat(kept().single().walks).contains(fourth)
         val guide = rounds.guides(running = false, unitMeters = 1_000.0).single()
-        assertThat(guide.walks).isEqualTo(2)
-        assertThat(guide.lines).hasSize(2)
+        assertThat(guide.walks).isEqualTo(3)
+        assertThat(guide.lines).hasSize(3)
+    }
+
+    @Test
+    fun `an end taken back and ended again keeps its round while it is still the same, name and all`() = runTest {
+        val walks = aRound()
+        val id = kept().single().id
+        rounds.rename(id, "The park")
+        // The third walk ends again, a little longer: still the round, which is not undone.
+        rounds.find(walks[2])
+        val round = kept().single()
+        assertThat(round.id).isEqualTo(id)
+        assertThat(round.name).isEqualTo("The park")
+        assertThat(round.walks).containsExactlyElementsIn(walks)
     }
 
     private companion object {

@@ -59,7 +59,7 @@ constructor(
     val rounds: Flow<List<Round>> = combine(dao.observeRounds(), dao.observeMembers()) { rows, members ->
         val walks = members.groupBy({ it.roundId }) { it.sessionId }
         rows.mapNotNull { row ->
-            walks[row.id]?.takeIf { it.size >= RoundConstants.MIN_WALKS }?.let { Round(row.id, row.name, it.toSet()) }
+            walks[row.id]?.takeIf { it.size >= RoundConstants.WALKS }?.let { Round(row.id, row.name, it.toSet()) }
         }
     }
 
@@ -88,11 +88,12 @@ constructor(
 
     /**
      * Finds the round of the outing [sessionId], which has just ended and whose route is written
-     * whole: among the outings with GPS before it, a round one of whose walks it is the same as, or
-     * a new pair with an outing in none. Searched again if it ends again (an end taken back): it
-     * leaves the round it was found in first.
+     * whole: among the outings with GPS before it, every round and every walk in none it is the same
+     * as, made one with it ([RoundFinder.choose]). Searched again if it ends again (an end taken
+     * back): it stays in the round it was found in while it is still the same as it, and leaves it
+     * otherwise.
      */
-    suspend fun find(sessionId: Long) = lock.withLock { findLocked(sessionId, history = null, again = true) }
+    suspend fun find(sessionId: Long) = lock.withLock { findLocked(sessionId, history = null) }
 
     /**
      * Searches, once, the outings with GPS walked before the rounds were kept, oldest first, each
@@ -115,8 +116,8 @@ constructor(
     }
 
     /**
-     * The rounds an open outing with GPS may walk, read once at its start: each round of two walks
-     * over or more that still has a route, its lines its latest walks' (up to
+     * The rounds an open outing with GPS may walk, read once at its start: each round of
+     * [RoundConstants.WALKS] walks over or more that still has a route, its lines its latest walks' (up to
      * [RoundConstants.WALKS_ASKED]), and its usual time at each kilometre in [unitMeters] (or mile),
      * from its walks' legs. Runs only for a run, walks for a walk.
      *
@@ -127,13 +128,13 @@ constructor(
     suspend fun guides(running: Boolean, unitMeters: Double): List<RoundGuide> = withContext(Dispatchers.Default) {
         val members = dao.members().groupBy({ it.roundId }) { it.sessionId }
         members.mapNotNull { (roundId, ids) ->
-            if (ids.size < RoundConstants.MIN_WALKS) return@mapNotNull null
+            if (ids.size < RoundConstants.WALKS) return@mapNotNull null
             // A round walked daily for years is read a slice at a time: a query's parameters are bounded.
             val walks = ids.chunked(IDS_A_READ).flatMap { sessions.sessions(it) }
                 .mapNotNull { it.toModel() }
                 .filter { it.state == SessionState.FINISHED }
                 .sortedBy { it.startedAtMillis }
-            if (walks.size < RoundConstants.MIN_WALKS || walks.all { it.running } != running) return@mapNotNull null
+            if (walks.size < RoundConstants.WALKS || walks.all { it.running } != running) return@mapNotNull null
             val lines = latestLines(walks).map { it.points }
             if (lines.isEmpty()) return@mapNotNull null
             val usual = RoundTimes.usual(walks) ?: return@mapNotNull null
@@ -161,7 +162,7 @@ constructor(
             val rounds = dao.members()
                 .groupBy({ it.roundId }) { it.sessionId }
                 .mapValues { (_, ids) -> ids.mapNotNull { outings[it] }.sortedBy { it.startedAtMillis } }
-                .filterValues { it.size >= RoundConstants.MIN_WALKS }
+                .filterValues { it.size >= RoundConstants.WALKS }
             val ids = rounds.keys.sorted()
             var joined: Pair<Long, Long>? = null
             search@ for (a in ids) {
@@ -215,22 +216,27 @@ constructor(
         val all = sessions.finishedWithGps().mapNotNull { it.toModel() }
         // In a round already when its turn comes: it was brought with it, and stays as it is. An
         // outing earlier in the search may have been taken into one since; it was searched before.
-        for (id in ids) if (dao.roundOf(id) == null) findLocked(id, all, again = false)
+        for (id in ids) if (dao.roundOf(id) == null) findLocked(id, all)
     }
 
     /**
      * [history] the outings with GPS over, oldest first, read once for a search of many; read here
-     * for the search of one. [again]: the outing ended once more (an end taken back), and leaves the
-     * round it was found in first, to be searched with its whole route.
+     * for the search of one. An outing in a round already (an end taken back, ended again) is
+     * searched with its whole route: it stays in that round while it is still the same as it, and
+     * leaves it otherwise, so that a round of three is not undone, and its name lost, by a walk of it
+     * that only went on a little.
      */
-    private suspend fun findLocked(sessionId: Long, history: List<Session>?, again: Boolean) {
+    private suspend fun findLocked(sessionId: Long, history: List<Session>?) {
         val outings = history ?: sessions.finishedWithGps().mapNotNull { it.toModel() }
         val outing = outings.firstOrNull { it.id == sessionId } ?: return
-        if (again) dao.leave(sessionId)
-        if (!RoundFinder.eligible(outing)) return
+        val current = dao.roundOf(sessionId)
+        suspend fun leave() {
+            if (current != null) dao.leave(sessionId)
+        }
+        if (!RoundFinder.eligible(outing)) return leave()
         val boxes = routes.boxes()
-        val box = boxes[sessionId]?.takeIf { it.sessionStartedAtMillis == outing.startedAtMillis } ?: return
-        val route = routes.route(sessionId, outing.startedAtMillis) ?: return
+        val box = boxes[sessionId]?.takeIf { it.sessionStartedAtMillis == outing.startedAtMillis } ?: return leave()
+        val route = routes.route(sessionId, outing.startedAtMillis) ?: return leave()
         val pairs = dao.apart()
         val apart = pairs.mapNotNull {
             when (sessionId) {
@@ -239,7 +245,8 @@ constructor(
                 else -> null
             }
         }.toSet()
-        val roundOf = dao.members().associate { it.sessionId to it.roundId }
+        val memberRows = dao.members()
+        val roundOf = memberRows.associate { it.sessionId to it.roundId }
         // A round with a walk the reader said is not the same as this one is not this one's.
         val closed = roundOf.filterKeys { it in apart }.values.toSet()
         // Cheapest first: the numbers, then the boxes; the routes of what is left, newest first.
@@ -269,12 +276,16 @@ constructor(
                 WalkedRoute(route.points, outing.totals.distanceMeters),
                 candidates,
                 apart = pairs.mapTo(HashSet()) { it.firstId to it.secondId },
+                members = memberRows.groupBy({ it.roundId }) { it.sessionId }.mapValues { it.value.toSet() },
             )
         }
         when (choice) {
-            is RoundChoice.Join -> dao.join(choice.roundId, sessionId)
-            is RoundChoice.New -> dao.start(choice.sessionIds + sessionId)
-            RoundChoice.None -> Unit
+            is RoundChoice.Into -> {
+                if (current != null && current !in choice.rounds) dao.leave(sessionId)
+                dao.unite(choice.rounds, choice.walks + sessionId)
+            }
+
+            RoundChoice.None -> leave()
         }
     }
 

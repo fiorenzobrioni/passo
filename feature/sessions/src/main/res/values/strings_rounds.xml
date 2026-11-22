@@ -73,6 +73,11 @@
     <string name="round_times">Its times</string>
     <!-- Under the chart: what a dot is and what the line is. The line is the usual now, of all the walks: each walk's own page compares it with the walks before it, and says so. -->
     <string name="round_times_note">A dot for each walk, its time in motion brought to %1$s; lower is faster. The dashed line is your usual now, %2$s: the middle of all its walks.</string>
+    <!-- The same, for a round walked more often than its usual counts: the usual is its latest walks'. -->
+    <plurals name="round_times_note_recent">
+        <item quantity="one">A dot for each walk, its time in motion brought to %1$s; lower is faster. The dashed line is your usual now, %2$s: the middle of its last walk.</item>
+        <item quantity="other">A dot for each walk, its time in motion brought to %1$s; lower is faster. The dashed line is your usual now, %2$s: the middle of its last %3$d walks.</item>
+    </plurals>
     <string name="round_walks">Its walks</string>
     <!-- A walk's row: its day, its time brought to the usual length, then «3.25 km walked». -->
     <string name="round_walk_meters">%1$s walked</string>

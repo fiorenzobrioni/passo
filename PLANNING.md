@@ -1461,6 +1461,61 @@ entries are written below.
     `:core:domain`, `:core:data`, `:core:tracking`, `:feature:sessions`, `:feature:settings` and
     `:feature:guide` (1,372 tests, none failed), green on this machine; `round.png` looked at.
 
+- **22 Nov 2026.** **Phase 20: one rule, one threshold, a recent usual** (owner, after asking whether
+  Phase 20 would be designed the same again: "do 1, 2 and 4"; point 3, the round with no line
+  designed from the start, was explained and is the subject of its own answer).
+  - **One rule: a round is the walks linked by being the same** (`RoundFinder.choose`,
+    `RoundChoice.Into`, `RoundDao.unite`). It replaces the rules added one by one before: join the
+    closest round, pair with an outing in none, then take every walk in none (§15 «Phase 20: the last
+    open choices»).
+    - An outing that ends takes with it every round and every walk in no round it is the same as,
+      each by the whole rule. Rounds come first, then walks in none, each kind closest first: a walk
+      the reader took out of a round must not keep the next walk of it out. Nothing said not the
+      same is put in one round.
+    - It closes a gap still open: a walk the same as walks of two rounds now makes them one. The
+      round with the most walks keeps its id, the oldest of equals. Its name is its own, else the
+      first of the others'.
+    - The file's rounds of an import follow the same rule (`RoundDao.importRounds`). A file's round
+      holding walks of two rounds here makes them one, unless the reader said they are not.
+      `joinAlike` stays: the file's older walks are each searched among the ones before them, and
+      the phone's walks come after.
+    - An end taken back and ended again keeps its round while it is still the same as it. It no
+      longer leaves first, so a round of three is not undone, nor its name lost, by a walk of it
+      that only went on a little.
+  - **One threshold: a round is three walks, for everything** (`RoundConstants.WALKS`, replacing
+    `MIN_WALKS` and `KNOWN_WALKS`).
+    - What changed: a round is born when a walk is the same as two others, and no pair is kept
+      unseen. It is kept, shown, followed by the card, asked about by «Two rounds made one» and
+      counted by «Delete all routes» from three walks.
+    - A round is forgotten under three walks: an outing deleted, «Not the same round», an end taken
+      back that is no longer the same.
+    - A usual needs three walks: the outing's page compares from the fourth walk, and the card from
+      the fourth, a round of three walks over. The usual at a kilometre needs three walks that
+      reached it.
+    - The reason: two walks were a usual of two, the card spoke of a round the reader could not
+      see, and the hidden pairs needed exceptions of their own.
+    - The cost, accepted: the card's line comes one walk later, and a named round of three that
+      loses a walk is forgotten with its name.
+    - The backup reads and writes rounds of three walks or more.
+  - **A recent usual: the latest ten walks** (`RoundConstants.USUAL_WALKS`, `RoundTimes`). The usual
+    of every place that says one is the latest ten walks', at most: the round's, an outing's against
+    the walks before it, and each kilometre's. «Faster than usual» says how the reader walks the
+    round these weeks, not years ago. The round's chart says «the middle of its last 10 walks» for a
+    round walked more than ten times; the guide, the README and the CHANGELOG say it.
+  - Tests:
+    - `RoundFinderTest`: every round and walk taken, three walks, the round first, nothing said not
+      the same.
+    - `RoundTimesTest`: three walks before a usual, the latest ten.
+    - `RoundRepositoryTest`, each with three-walk rounds now: born at the third and joined by the
+      fourth; two rounds made one by a walk; a member deleted under three; an end ended again
+      keeping its round and name.
+    - `BackupCodecTest`, `OutingScreenTest` (the third walk, no usual yet) and `RoundsScreenTest`
+      (the last ten).
+    - No README picture changed (drawn again and compared).
+  - Checked: `spotlessCheck`, `:app:checkForbiddenPermissions`, `:app:lintDebug`, and the tests of
+    `:core:domain`, `:core:data`, `:core:tracking`, `:feature:sessions`, `:feature:settings` and
+    `:feature:guide` (1,378 tests, none failed), green on this machine.
+
 ### Open
 
 - [x] **On a device (owner): the shortcuts after an update** (archive 04, 15 Nov 2026, «The shortcuts

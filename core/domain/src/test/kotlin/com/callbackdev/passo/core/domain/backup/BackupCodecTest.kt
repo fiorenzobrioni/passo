@@ -349,13 +349,13 @@ class BackupCodecTest {
     }
 
     @Test
-    fun `a file from before the rounds has none, and a round of one walk or a pair of one outing is dropped`() {
+    fun `a file from before the rounds has none, and a round under three walks or a pair of one outing is dropped`() {
         val text = BackupCodec.encode(full).replace(
             "\"rounds\":[]",
-            "\"rounds\":[{\"name\":\" \",\"walks\":[5,5]},{\"walks\":[1,2]}]",
+            "\"rounds\":[{\"name\":\" \",\"walks\":[5,5,6]},{\"walks\":[7,8]},{\"walks\":[1,2,3]}]",
         ).replace("\"roundsApart\":[]", "\"roundsApart\":[{\"first\":3,\"second\":3},{\"first\":1,\"second\":4}]")
         val read = (BackupCodec.decode(text) as BackupRead.Ok).backup
-        assertThat(read.rounds).containsExactly(BackupRound(null, listOf(1L, 2L)))
+        assertThat(read.rounds).containsExactly(BackupRound(null, listOf(1L, 2L, 3L)))
         assertThat(read.roundsApart).containsExactly(1L to 4L)
         val before = BackupCodec.encode(full).replace(",\"rounds\":[]", "").replace(",\"roundsApart\":[]", "")
         assertThat((BackupCodec.decode(before) as BackupRead.Ok).backup.rounds).isEmpty()

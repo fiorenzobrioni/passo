@@ -5,7 +5,8 @@ import org.junit.Test
 
 /**
  * A round's times, honestly compared (PLANNING.md §11 Phase 20, «The comparison, honest»): by time
- * in motion, each brought to the round's usual length, the usual the middle of the walks before.
+ * in motion, each brought to the round's usual length, the usual the middle of the walks before, the
+ * latest ten at most and three at least (§15, «Phase 20: one rule, one threshold, a recent usual»).
  */
 class RoundTimesTest {
     private fun outing(id: Long, meters: Double, minutes: Double, day: Long = id, pausedMinutes: Double = 0.0) =
@@ -23,9 +24,9 @@ class RoundTimesTest {
 
     @Test
     fun `a shortcut that leaves out a tenth, brought to the usual length, is not faster for it`() {
-        val walks = listOf(outing(1, 3_520.0, 44.0), outing(2, 3_520.0, 44.0))
+        val walks = listOf(outing(1, 3_520.0, 44.0), outing(2, 3_520.0, 44.0), outing(3, 3_520.0, 44.0))
         // The same pace on 3.2 km instead of 3.52: four minutes less, and no faster a walk.
-        val shortcut = outing(3, 3_200.0, 40.0)
+        val shortcut = outing(4, 3_200.0, 40.0)
         val compared = RoundTimes.comparison(shortcut, walks + shortcut)
         assertThat(compared.thisMillis).isEqualTo(44 * 60_000L)
         assertThat(compared.gapMillis).isEqualTo(0L)
@@ -33,32 +34,35 @@ class RoundTimesTest {
 
     @Test
     fun `a round with a detour of 300 m one day is compared at the usual length, not called slower for it`() {
-        val walks = listOf(outing(1, 3_200.0, 40.0), outing(2, 3_200.0, 40.0))
-        val detour = outing(3, 3_500.0, 43.75)
+        val walks = listOf(outing(1, 3_200.0, 40.0), outing(2, 3_200.0, 40.0), outing(3, 3_200.0, 40.0))
+        val detour = outing(4, 3_500.0, 43.75)
         val compared = RoundTimes.comparison(detour, walks + detour)
         assertThat(compared.gapMillis).isEqualTo(0L)
     }
 
     @Test
     fun `a round walked with a long pause is compared by time in motion, as every outing`() {
-        val walks = listOf(outing(1, 3_200.0, 40.0), outing(2, 3_200.0, 40.0))
-        val paused = outing(3, 3_200.0, 37.0, pausedMinutes = 25.0)
+        val walks = listOf(outing(1, 3_200.0, 40.0), outing(2, 3_200.0, 40.0), outing(3, 3_200.0, 40.0))
+        val paused = outing(4, 3_200.0, 37.0, pausedMinutes = 25.0)
         val compared = RoundTimes.comparison(paused, walks + paused)
         assertThat(compared.gapMillis).isEqualTo(-3 * 60_000L)
     }
 
     @Test
-    fun `the first two walks of a round have no usual, the third has the first two's`() {
+    fun `the first three walks of a round have no usual, the fourth has the first three's`() {
         val first = outing(1, 3_200.0, 40.0)
         val second = outing(2, 3_200.0, 42.0)
         val third = outing(3, 3_200.0, 38.0)
-        val walks = listOf(first, second, third)
+        val fourth = outing(4, 3_200.0, 36.0)
+        val walks = listOf(first, second, third, fourth)
         assertThat(RoundTimes.comparison(first, walks)).isEqualTo(RoundComparison(1, null, null, null))
         assertThat(RoundTimes.comparison(second, walks).usual).isNull()
-        val compared = RoundTimes.comparison(third, walks)
-        assertThat(compared.nth).isEqualTo(3)
-        assertThat(compared.usual?.movingMillis).isEqualTo(41 * 60_000L)
-        assertThat(compared.gapMillis).isEqualTo(-3 * 60_000L)
+        // Two walks are not a usual: the third says which time it was, and no more.
+        assertThat(RoundTimes.comparison(third, walks).usual).isNull()
+        val compared = RoundTimes.comparison(fourth, walks)
+        assertThat(compared.nth).isEqualTo(4)
+        assertThat(compared.usual?.movingMillis).isEqualTo(40 * 60_000L)
+        assertThat(compared.gapMillis).isEqualTo(-4 * 60_000L)
     }
 
     @Test
@@ -68,9 +72,10 @@ class RoundTimesTest {
                 outing(1, 3_200.0, 40.0),
                 outing(2, 3_200.0, 40.0),
                 outing(3, 3_200.0, 40.0),
-                outing(4, 3_200.0, 30.0),
+                outing(4, 3_200.0, 40.0),
+                outing(5, 3_200.0, 30.0),
             )
-        assertThat(RoundTimes.comparison(walks[2], walks).gapMillis).isEqualTo(0L)
+        assertThat(RoundTimes.comparison(walks[3], walks).gapMillis).isEqualTo(0L)
     }
 
     @Test
@@ -94,16 +99,33 @@ class RoundTimesTest {
     }
 
     @Test
-    fun `a kilometre fewer than two walks reached has no usual`() {
-        val walks = listOf(outing(1, 3_200.0, 32.0), outing(2, 2_900.0, 29.0))
+    fun `a kilometre fewer than three walks reached has no usual`() {
+        val walks = listOf(outing(1, 3_200.0, 32.0), outing(2, 2_900.0, 29.0), outing(3, 3_200.0, 32.0))
         assertThat(RoundTimes.usualAtMarks(walks, 1_000.0, 3)[2]).isNull()
     }
 
     @Test
     fun `a member whose route was deleted still gives its times, from its legs`() {
         // Its legs are numbers in the outing, not in the route: nothing here reads a point.
-        val walks = listOf(outing(1, 2_000.0, 20.0), outing(2, 2_000.0, 24.0))
+        val walks = listOf(outing(1, 2_000.0, 20.0), outing(2, 2_000.0, 24.0), outing(3, 2_000.0, 22.0))
         assertThat(RoundTimes.usualAtMarks(walks, 1_000.0, 2)).containsExactly(11 * 60_000L, 22 * 60_000L).inOrder()
+    }
+
+    @Test
+    fun `the usual is the latest ten walks', how the round is walked these weeks`() {
+        // Five slow walks a year ago, then ten quicker ones: the usual is the ten's.
+        val old = (1L..5L).map { outing(it, 3_200.0, 60.0, day = it) }
+        val recent = (6L..15L).map { outing(it, 3_200.0, 40.0, day = 300 + it) }
+        val usual = checkNotNull(RoundTimes.usual(old + recent))
+        assertThat(usual.movingMillis).isEqualTo(40 * 60_000L)
+        assertThat(usual.walks).isEqualTo(10)
+        // The sixteenth, at 40 minutes, is at its usual, not twenty minutes faster than a year ago.
+        val next = outing(16, 3_200.0, 40.0, day = 330)
+        assertThat(RoundTimes.comparison(next, old + recent + next).gapMillis).isEqualTo(0L)
+        // At each kilometre too: the latest ten's.
+        assertThat(RoundTimes.usualAtMarks(old + recent, 1_000.0, 1).single()).isEqualTo(12 * 60_000L + 30_000L)
+        // Under three walks, no usual.
+        assertThat(RoundTimes.usual(recent.take(2))).isNull()
     }
 
     @Test

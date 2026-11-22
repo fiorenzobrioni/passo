@@ -66,6 +66,11 @@
     <string name="round_same_no">Un altro giro</string>
     <string name="round_times">I suoi tempi</string>
     <string name="round_times_note">Un punto per ogni uscita, il suo tempo in movimento riportato a %1$s; più in basso è più veloce. La linea tratteggiata è il tuo solito di adesso, %2$s: la mediana di tutte le sue uscite.</string>
+    <plurals name="round_times_note_recent">
+        <item quantity="one">Un punto per ogni uscita, il suo tempo in movimento riportato a %1$s; più in basso è più veloce. La linea tratteggiata è il tuo solito di adesso, %2$s: la mediana della sua ultima uscita.</item>
+        <item quantity="many">Un punto per ogni uscita, il suo tempo in movimento riportato a %1$s; più in basso è più veloce. La linea tratteggiata è il tuo solito di adesso, %2$s: la mediana delle sue ultime %3$d uscite.</item>
+        <item quantity="other">Un punto per ogni uscita, il suo tempo in movimento riportato a %1$s; più in basso è più veloce. La linea tratteggiata è il tuo solito di adesso, %2$s: la mediana delle sue ultime %3$d uscite.</item>
+    </plurals>
     <string name="round_walks">Le sue uscite</string>
     <string name="round_walk_meters">%1$s percorsi</string>
     <string name="round_walk_spoken">%1$s: %2$s alla lunghezza solita, %3$s percorsi.</string>

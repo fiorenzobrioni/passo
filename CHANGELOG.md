@@ -19,10 +19,10 @@ All notable changes to Passo are documented here. The format follows
   each, how far ahead of your usual or behind it you are («35 seconds ahead of your usual»), and
   where it speaks, the kilometre's words say it in place of the pace; leave the round and it says
   so once, then goes on as any walk. No new vibration and nothing more awake: it rides on the
-  kilometre. Afterwards the outing's page says which time it was and how it went against the walks
-  before («Your usual round, the 8th time: 6 minutes faster than usual»), each time in motion
-  brought to the round's usual length, so a shortcut is not a faster walk and a detour not a
-  slower one; «Not the same round» takes an outing out where Passo was wrong, for good. «Your
+  kilometre. Afterwards the outing's page says which time it was and how it went against your usual,
+  the walks of it before, the last ten at most («Your usual round, the 8th time: 6 minutes faster
+  than usual»), each time in motion brought to the round's usual length, so a shortcut is not a
+  faster walk and a detour not a slower one; «Not the same round» takes an outing out where Passo was wrong, for good. «Your
   rounds», a new door on the Outings page, keeps each round with its map, its times over the weeks
   against your usual, and every walk of it; rename it, or forget it, and its outings stay as they
   are. Your outings with GPS from before are searched once for their rounds. A round is numbers

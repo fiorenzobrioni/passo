@@ -59,16 +59,20 @@ object RoundConstants {
     const val MIN_METERS: Double = 500.0
 
     /**
-     * A round is kept from its second walk, the first two that match: Passo remembers the pair, and
-     * the card of an open outing with GPS can compare the third with them while it counts.
+     * A round is this many walks of it, for everything (§15, «Phase 20: one rule, one threshold, a
+     * recent usual»): it is born when a walk is the same as two others, kept, shown and followed by
+     * the card from then on, and forgotten once it has fewer; and a usual is made of this many walks
+     * at least. The third time a round is walked Passo knows it without being told (the phase's
+     * acceptance); two walks are not yet a usual, and no round is kept that the reader cannot see.
      */
-    const val MIN_WALKS: Int = 2
+    const val WALKS: Int = 3
 
     /**
-     * It is shown from its third walk: Your rounds, and the outing's page. The third time a round is
-     * walked Passo knows it without being told (the phase's acceptance); a pair is not yet a usual.
+     * A round's usual is its latest walks', this many at most: «faster than usual» says how the
+     * reader walks it these weeks, not how they walked it years ago. Ten is a season of a weekly round
+     * and a fortnight of a daily one, enough for a median that one odd day does not move.
      */
-    const val KNOWN_WALKS: Int = 3
+    const val USUAL_WALKS: Int = 10
 
     /**
      * A round is asked through its latest walks that keep a route, this many: when an outing ends,

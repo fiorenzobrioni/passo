@@ -6,6 +6,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import androidx.room.Upsert
+import com.callbackdev.passo.core.domain.rounds.RoundConstants
 import com.callbackdev.passo.core.model.Session
 import kotlinx.coroutines.flow.Flow
 
@@ -184,10 +185,10 @@ abstract class SessionDao {
     @Query("DELETE FROM round_apart WHERE firstId = :id OR secondId = :id")
     protected abstract suspend fun deleteRoundApart(id: Long)
 
-    /** The walks of a round left with fewer than two: a round is a pair at least. */
+    /** The walks of a round left with fewer than three: a round is three walks at least. */
     @Query(
         "DELETE FROM round_member WHERE roundId IN " +
-            "(SELECT roundId FROM round_member GROUP BY roundId HAVING COUNT(*) < 2)",
+            "(SELECT roundId FROM round_member GROUP BY roundId HAVING COUNT(*) < ${RoundConstants.WALKS})",
     )
     protected abstract suspend fun deleteLoneRoundMembers()
 
@@ -244,7 +245,7 @@ abstract class SessionDao {
     /**
      * An outing with what belongs to it alone: its intervals, its legs, its pauses, what it said of
      * the step, and its place in a round (Phase 20): it leaves its round, which is forgotten once
-     * fewer than two walks are left, and any pair said not the same with it goes.
+     * fewer than three walks are left, and any pair said not the same with it goes.
      */
     @Transaction
     open suspend fun deleteSession(id: Long) {

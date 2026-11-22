@@ -109,10 +109,8 @@ constructor(
         sessionDao.observeSessionCount(),
         routes.routeIds,
         growing,
-        // The rounds the reader can see, from their third walk: a pair kept unseen is not «your round».
-        rounds.rounds.map { found ->
-            found.count { it.walks.size >= RoundConstants.KNOWN_WALKS }
-        }.distinctUntilChanged(),
+        // The rounds the reader can see: every round kept, three walks at least.
+        rounds.rounds.map { it.size }.distinctUntilChanged(),
     ) { days, outings, kept, underWay, roundCount ->
         // The route still being written is not the reader's to delete yet: «Delete all routes»
         // counts and weighs the others, and is not offered for that one alone.
@@ -175,7 +173,9 @@ constructor(
         // The usual rounds, by their walks' starts: names and numbers, so in every backup.
         val members = roundDao.members().groupBy({ it.roundId }) { it.sessionId }
         val keptRounds = roundDao.rounds().mapNotNull { round ->
-            members[round.id]?.mapNotNull { starts[it] }?.takeIf { it.size >= 2 }?.let { BackupRound(round.name, it) }
+            members[round.id]?.mapNotNull { starts[it] }?.takeIf { it.size >= RoundConstants.WALKS }?.let {
+                BackupRound(round.name, it)
+            }
         }
         val apart = roundDao.apart().mapNotNull { pair ->
             val first = starts[pair.firstId] ?: return@mapNotNull null

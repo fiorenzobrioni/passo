@@ -1,6 +1,7 @@
 package com.callbackdev.passo.core.domain.backup
 
 import com.callbackdev.passo.core.domain.metrics.sanitized
+import com.callbackdev.passo.core.domain.rounds.RoundConstants
 import com.callbackdev.passo.core.domain.routes.Legs
 import com.callbackdev.passo.core.domain.routes.RouteCodec
 import com.callbackdev.passo.core.domain.sessions.SessionPlans
@@ -380,9 +381,9 @@ private fun BackupFile.toBackup(): Backup {
             row.type.toEnumOrNull<DiagnosticsType>()?.let { DiagnosticsEvent(row.atMillis, it, row.detail) }
         },
         journeys = ways.mapNotNull { it.toJourney() },
-        // A round of fewer than two walks is no round; a pair of one outing with itself is none.
+        // A round of fewer than three walks is no round; a pair of one outing with itself is none.
         rounds = rounds.map { BackupRound(it.name?.takeIf(String::isNotBlank), it.walks.distinct()) }
-            .filter { it.walks.size >= 2 },
+            .filter { it.walks.size >= RoundConstants.WALKS },
         roundsApart = roundsApart.filter { it.first != it.second }.map { it.first to it.second },
     )
 }

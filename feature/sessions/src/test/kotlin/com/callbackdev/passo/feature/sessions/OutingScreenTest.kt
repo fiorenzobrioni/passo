@@ -756,13 +756,11 @@ class OutingScreenTest {
     }
 
     @Test
-    fun `the first two walks of a round say which time they were, and no usual`() {
-        // The second walk of a round known since its third: its page says which time it was.
-        val second = RoundSamples.outingState(count = 2)
-        val known = second.round?.copy(round = RoundSamples.round(RoundSamples.walks(3)))
-        show(second.copy(round = known))
+    fun `the first three walks of a round say which time they were, and no usual`() {
+        // The third walk, the one that made the round: two walks before it are not yet a usual.
+        show(RoundSamples.outingState(count = 3))
         page().performScrollToNode(hasTestTag(OutingTags.ROUND))
-        compose.onNodeWithTag(OutingTags.ROUND_SENTENCE).assertTextEquals("Your usual round, the 2nd time.")
+        compose.onNodeWithTag(OutingTags.ROUND_SENTENCE).assertTextEquals("Your usual round, the 3rd time.")
         compose.onNodeWithText("This time").assertDoesNotExist()
     }
 

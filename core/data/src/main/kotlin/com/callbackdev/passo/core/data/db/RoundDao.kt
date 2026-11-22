@@ -6,13 +6,16 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
+import com.callbackdev.passo.core.domain.rounds.RoundConstants
+import com.callbackdev.passo.core.domain.rounds.RoundMerge
 import kotlinx.coroutines.flow.Flow
 
 /**
  * The usual rounds (PLANNING.md §11 Phase 20): which outings are a round's walks, the names the
  * reader gave them, and the pairs they said are not the same. Numbers and names: a round's line is
- * its walks' routes, in `routes.db`. Every change that can leave a round with fewer than two walks
- * forgets it in the same transaction: a round is a pair at least.
+ * its walks' routes, in `routes.db`. Every change that can leave a round with fewer than
+ * [RoundConstants.WALKS] walks forgets it in the same transaction: a round is three walks at least
+ * (§15, «Phase 20: one rule, one threshold, a recent usual»).
  */
 @Dao
 abstract class RoundDao {
@@ -69,35 +72,40 @@ abstract class RoundDao {
 
     @Query(
         "DELETE FROM round_member WHERE roundId IN " +
-            "(SELECT roundId FROM round_member GROUP BY roundId HAVING COUNT(*) < 2)",
+            "(SELECT roundId FROM round_member GROUP BY roundId HAVING COUNT(*) < ${RoundConstants.WALKS})",
     )
     protected abstract suspend fun deleteLoneMembers()
 
     @Query("DELETE FROM round WHERE id NOT IN (SELECT DISTINCT roundId FROM round_member)")
     protected abstract suspend fun deleteEmptyRounds()
 
-    /** A new round of the outings [first] and [second], unnamed; its id. */
-    open suspend fun pair(first: Long, second: Long): Long = start(listOf(first, second))
-
-    /** A new round of the outings [walks], two or more, unnamed; its id. */
+    /**
+     * One round of the rounds [rounds] and the outings [walks] (§15, «Phase 20: one rule, one
+     * threshold, a recent usual»): the round that keeps its id is the one with the most walks, the
+     * oldest of equals; its name is its own, or the first of the others' in [rounds]' order, or
+     * [name]. With no round, a new one of [walks], [RoundConstants.WALKS] of them at least. Its id;
+     * null when there is no round.
+     */
     @Transaction
-    open suspend fun start(walks: List<Long>): Long {
-        val id = insertRound(RoundEntity())
-        upsertMembers(walks.distinct().map { RoundMemberEntity(it, id) })
-        // Should one have been another round's walk, that round may be one walk now; and a round of
-        // fewer than two is none.
+    open suspend fun unite(rounds: List<Long>, walks: List<Long>, name: String? = null): Long? {
+        val held = rounds.distinct().map { it to walksOf(it) }.filter { it.second.isNotEmpty() }
+        val kept = held
+            .maxWithOrNull(compareBy<Pair<Long, List<Long>>> { it.second.size }.thenByDescending { it.first })
+            ?.first
+        val all = (held.flatMap { it.second } + walks).distinct()
+        if (kept == null && all.size < RoundConstants.WALKS) return null
+        val into = kept ?: insertRound(RoundEntity())
+        val names = (listOfNotNull(kept) + held.map { it.first }).firstNotNullOfOrNull { nameOf(it) }
+        upsertMembers(all.map { RoundMemberEntity(it, into) })
+        rename(into, names ?: name)
         prune()
-        return id
+        return into.takeIf { walksOf(it).isNotEmpty() }
     }
 
-    /** The outing [sessionId] becomes a walk of the round [roundId]. */
-    @Transaction
-    open suspend fun join(roundId: Long, sessionId: Long) {
-        upsertMembers(listOf(RoundMemberEntity(sessionId, roundId)))
-        prune()
-    }
+    /** A new round of the outings [walks], [RoundConstants.WALKS] of them at least, unnamed; its id. */
+    open suspend fun start(walks: List<Long>): Long? = unite(emptyList(), walks)
 
-    /** The outing [sessionId] is a walk of no round any more; a round left with one walk is forgotten. */
+    /** The outing [sessionId] is a walk of no round any more; a round left under three walks is forgotten. */
     @Transaction
     open suspend fun leave(sessionId: Long) {
         deleteMember(sessionId)
@@ -156,23 +164,38 @@ abstract class RoundDao {
     }
 
     /**
-     * The rounds an import brings, each with its walks by their ids on this phone: a round one of
-     * whose walks is a walk of a round here already joins that one, keeping this phone's name where it
-     * has one; any other is a new round. Then the pairs said not the same.
+     * The rounds an import brings, each with its walks by their ids on this phone, after the pairs
+     * said not the same. By the one rule (§15, «Phase 20: one rule, one threshold, a recent usual»),
+     * a round of the file is one with every round here that holds one of its walks, and with its walks
+     * in none: they become one round, this phone's name kept where it has one, the file's otherwise.
+     * Nothing said not the same is put in one round: a round or the file's other walks with such a
+     * pair to what is taken already stay apart, the phone's round with the most walks taken first.
      */
     @Transaction
     open suspend fun importRounds(rounds: List<Pair<String?, List<Long>>>, pairs: List<Pair<Long, Long>>) {
+        insertApart(pairs.filter { it.first != it.second }.map { apart(it.first, it.second) })
+        val said = apart().mapTo(HashSet()) { it.firstId to it.secondId }
         for ((name, walks) in rounds) {
             val distinct = walks.distinct()
-            if (distinct.size < 2) continue
-            val here = distinct.firstNotNullOfOrNull { roundOf(it) }
-            val id = here ?: insertRound(RoundEntity(name = name))
-            if (here != null && name != null && nameOf(here) == null) rename(here, name)
-            // A walk of another round here stays in it: the phone's own grouping is not undone.
-            val free = distinct.filter { roundOf(it) == null || roundOf(it) == id }
-            upsertMembers(free.map { RoundMemberEntity(it, id) })
+            if (distinct.size < RoundConstants.WALKS) continue
+            val here = distinct.mapNotNull { roundOf(it) }.distinct()
+                .map { it to walksOf(it) }
+                .sortedWith(compareByDescending<Pair<Long, List<Long>>> { it.second.size }.thenBy { it.first })
+            val free = distinct.filter { roundOf(it) == null }
+            val taken = HashSet<Long>()
+            val joined = ArrayList<Long>()
+            for ((id, members) in here) {
+                if (RoundMerge.saidApart(taken, members, said)) continue
+                taken += members
+                joined += id
+            }
+            if (RoundMerge.saidApart(taken, free, said)) {
+                if (joined.isNotEmpty()) unite(joined, emptyList(), name)
+                unite(emptyList(), free, name)
+            } else {
+                unite(joined, free, name)
+            }
         }
-        insertApart(pairs.filter { it.first != it.second }.map { apart(it.first, it.second) })
         prune()
     }
 

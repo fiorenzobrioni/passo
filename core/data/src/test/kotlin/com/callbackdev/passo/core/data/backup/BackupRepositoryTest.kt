@@ -326,8 +326,7 @@ class BackupRepositoryTest {
             )
         }
         val rounds = old.database.roundDao()
-        val round = rounds.pair(ids[0], ids[1])
-        rounds.join(round, ids[2])
+        val round = checkNotNull(rounds.start(listOf(ids[0], ids[1], ids[2])))
         rounds.rename(round, "Park")
         rounds.insertApart(listOf(com.callbackdev.passo.core.data.db.RoundApartEntity(ids[2], ids[3])))
         return ids

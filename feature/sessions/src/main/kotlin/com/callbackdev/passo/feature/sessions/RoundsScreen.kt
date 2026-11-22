@@ -331,7 +331,7 @@ fun RoundScreen(
     val scroll = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
     val resources = LocalResources.current
     val round = state?.round
-    // No longer one of the reader's rounds (forgotten from another page, or left with two walks):
+    // No longer one of the reader's rounds (forgotten from another page, or left under three walks):
     // nothing true to show, so back.
     LaunchedEffect(state != null && round == null) { if (state != null && round == null) onBack() }
     var renaming by rememberSaveable { mutableStateOf(false) }
@@ -499,8 +499,20 @@ private fun RoundPage(
                         lastDay = dayLabel(last, today),
                         description = trend,
                     )
+                    // The usual now is the latest walks': said so where it is not every walk's.
+                    val recent = round.walks.size > round.usual.walks
                     Text(
-                        stringResource(R.string.round_times_note, length, usual),
+                        if (recent) {
+                            resources.getQuantityString(
+                                R.plurals.round_times_note_recent,
+                                round.usual.walks,
+                                length,
+                                usual,
+                                round.usual.walks,
+                            )
+                        } else {
+                            stringResource(R.string.round_times_note, length, usual)
+                        },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

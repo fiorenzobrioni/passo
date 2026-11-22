@@ -140,6 +140,21 @@ class RoundsScreenTest {
     }
 
     @Test
+    fun `a round walked more than ten times says its usual is its last ten walks`() {
+        val outing = OutingSamples.measured
+        val walks = (12 downTo 1).map { weeks ->
+            outing.copy(
+                id = 500L + weeks,
+                startedAtMillis = outing.startedAtMillis - weeks * 7 * 86_400_000L,
+                localEpochDay = outing.localEpochDay - weeks * 7,
+            )
+        } + outing
+        showPage(RoundSamples.page().copy(round = RoundSamples.round(walks)))
+        compose.onNodeWithTag(RoundsTags.PAGE).performScrollToNode(hasTestTag(RoundChartTags.TIMES))
+        compose.onNodeWithText("the middle of its last 10 walks", substring = true).assertExists()
+    }
+
+    @Test
     fun `each walk with its day and its time at the usual length, a door to its page, the newest first`() {
         showPage()
         compose.onNodeWithTag(RoundsTags.PAGE).performScrollToNode(hasTestTag("${RoundsTags.WALK}-12"))

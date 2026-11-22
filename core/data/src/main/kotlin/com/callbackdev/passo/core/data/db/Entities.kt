@@ -217,7 +217,7 @@ data class RoundEntity(@PrimaryKey(autoGenerate = true) val id: Long = 0, val na
 
 /**
  * An outing that is a walk of a round: one round at most, so the outing is the key. Deleted with
- * its outing, and the round with it once fewer than two walks are left.
+ * its outing, and the round with it once fewer than three walks are left.
  */
 @Entity(tableName = "round_member", indices = [Index("roundId")])
 data class RoundMemberEntity(@PrimaryKey val sessionId: Long, val roundId: Long)

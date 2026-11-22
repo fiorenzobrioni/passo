@@ -21,15 +21,14 @@ class RoundCandidate(val session: Session, val roundId: Long?, val points: List<
 
 /** Where a new outing goes among the reader's rounds. */
 sealed interface RoundChoice {
-    /** Into the round [roundId]: it is the same as one of its walks. */
-    data class Join(val roundId: Long) : RoundChoice
-
     /**
-     * A new round with the outings [sessionIds], the walks in no round it is the same as, closest
-     * first: every one of them, so that the third walk of a round makes it known even when the first
-     * two were too far apart to be matched with each other (§15, «Phase 20: the last open choices»).
+     * One round of the outing, the rounds [rounds] and the walks in no round [walks], each the same
+     * as the outing, closest first (§15, «Phase 20: one rule, one threshold, a recent usual»): a
+     * round is the walks linked by being the same, so a walk the same as walks of two rounds makes
+     * them one, and one the same as two walks in no round makes a round of the three. [rounds] may be
+     * empty, then [walks] are two at least; a single round and no walk is a walk joining it.
      */
-    data class New(val sessionIds: List<Long>) : RoundChoice
+    data class Into(val rounds: List<Long>, val walks: List<Long>) : RoundChoice
 
     /** Into none. */
     data object None : RoundChoice
@@ -79,21 +78,25 @@ object RoundFinder {
     }
 
     /**
-     * The round [outing] is, among [candidates]: a round one of whose walks it is the same as (the
-     * closest, should it match walks of two), before a new round with the outings in none it is the
-     * same as. A round is the reader's usual once it is one: a new walk joins it rather than starting
-     * another.
+     * The round [outing] is, among [candidates] (§15, «Phase 20: one rule, one threshold, a recent
+     * usual»): one rule, a round is the walks linked by being the same. The outing takes with it every
+     * round one of whose walks it is the same as and every walk in no round it is the same as, each by
+     * the whole rule with the outing, closest first: two walks of one round may lie too far apart to be
+     * matched with each other (one with a detour, one with a shortcut) and still be each the same as a
+     * third, and a walk the same as walks of two rounds makes them one.
      *
-     * A new round takes every walk in no round the outing is the same as, closest first, each by the
-     * whole rule with the outing: two walks of one round may lie too far apart to be matched with each
-     * other (one with a detour, one with a shortcut) and still be each the same as a third. No two the
-     * reader said are not the same ([apart], each pair the smaller id first) are put in one round:
-     * of such two, the closer to the outing.
+     * A round is [RoundConstants.WALKS] walks: with no round among them, the outing makes one only
+     * with two walks in no round or more. Nothing the reader said is not the same ([apart], each pair
+     * the smaller id first) is put in one round: a round or a walk with such a pair to what is taken
+     * already is left. Rounds are taken first, the closest first, then the walks in none: a round is
+     * the reader's usual, and a walk they took out of it must not keep the next walk of it out too.
+     * [members] holds the walks of the candidates' rounds.
      */
     fun choose(
         outing: WalkedRoute,
         candidates: List<RoundCandidate>,
         apart: Set<Pair<Long, Long>> = emptySet(),
+        members: Map<Long, Set<Long>> = emptyMap(),
     ): RoundChoice {
         val same = candidates.mapNotNull { candidate ->
             val result = RouteMatch.compare(
@@ -102,15 +105,27 @@ object RoundFinder {
             )
             if (result.same) candidate to result.inOrder else null
         }
-        same.filter { it.first.roundId != null }.maxByOrNull { it.second }?.let { (candidate, _) ->
-            return RoundChoice.Join(checkNotNull(candidate.roundId))
-        }
+        val rounds = ArrayList<Long>()
         val walks = ArrayList<Long>()
-        for ((candidate, _) in same.sortedByDescending { it.second }) {
-            val id = candidate.session.id
-            if (walks.none { minOf(it, id) to maxOf(it, id) in apart }) walks += id
+        val taken = HashSet<Long>()
+        val ordered = same.sortedWith(
+            compareByDescending<Pair<RoundCandidate, Double>> {
+                it.first.roundId != null
+            }.thenByDescending { it.second },
+        )
+        for ((candidate, _) in ordered) {
+            val round = candidate.roundId
+            if (round != null && round in rounds) continue
+            val group = round?.let { members[it] } ?: setOf(candidate.session.id)
+            if (RoundMerge.saidApart(taken, group, apart)) continue
+            taken += group
+            if (round != null) rounds += round else walks += candidate.session.id
         }
-        return if (walks.isEmpty()) RoundChoice.None else RoundChoice.New(walks)
+        return when {
+            rounds.isNotEmpty() -> RoundChoice.Into(rounds, walks)
+            walks.size >= RoundConstants.WALKS - 1 -> RoundChoice.Into(emptyList(), walks)
+            else -> RoundChoice.None
+        }
     }
 
     private class Grown(box: RouteBox, lat: Double, lon: Double) {
