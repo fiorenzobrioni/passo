@@ -37,24 +37,14 @@ Source of truth:
     `PLANNING.md` «How it is made» says, then run `python3 tools/planning_index.py` (`--check`
     tells if the index is behind).
 
-Work one phase at a time, starting from the phase's section in PLANNING.md §11. Phases 15 to 20
-(location, `docs/adr/0016-location.md`) each name what to read first and hold «The bar» their
-work is measured against: read the ADR and the phase's section before planning. **Phases 15, 16,
-17, 21 and 23 are done** (built 18 to 21 Nov 2026, merged into `main`, checked on a phone by the
-owner on 21 Nov 2026), not released: their sections and the log that built them are in archive
-05 (`docs/planning/05-phases-15-17-21-23.md`, found through `docs/planning/README.md`); ADR 0016's
-decisions and Phases 15 and 16 as first built are in archive 04, from «Location, for an outing
-that asks for it» on. 15 is the measured outing, 16 the outing's page, 17 the step that learns,
-21 the open outing (an outing with no goal, in three steps), 23 the doors: every touch from
-outside names the page it opens (`AppDoors`, `AppDoor`), and «Your outings» lists the outings
-over by month, each route drawn small and read only for the rows on screen (`YourOutings`,
-`RouteThumbnails`, `OutingsListScreen`). Before any release, the figures of Phase 15's measure
-(and of Phase 13's 30-minute interval outing) are still to be written (the box in PLANNING.md
-«Open»). **20 is next**, which builds on 21, before 18 (owner, 21 Nov 2026); Phase 22, the walk
-already begun, later. On 19 Nov 2026 the owner dropped Phases 18 and 19 «On the spot»: Phase 18
-is now a city walk measured with GPS (small), Phase 19 is dropped, and Phase 20 is the usual
-round alone: no route is followed, no GPX imported (archive 05, «The places on the spot dropped,
-the city walk measured» and «Phase 20 reviewed: the usual round alone»).
+Work one phase at a time, starting from the phase's section in PLANNING.md §11; where the work
+stands is PLANNING.md «State». The location phases (`docs/adr/0016-location.md`) each name what
+to read first and hold «The bar» their work is measured against: read the ADR and the phase's
+section before planning. **Phases 15, 16, 17, 21 and 23 are done**, on `main`, not released
+(archive 05; ADR 0016's decisions and the first build of 15 and 16 in archive 04); before any
+release, the box of the figures still to be written in PLANNING.md «Open». **Phases 19 and 20 are dropped**
+(owner, 19 and 22 Nov 2026). **18**, a city walk measured with GPS, is next only if the owner
+decides to build it; 22, the walk already begun, later.
 
 ## Build and commands
 
@@ -92,15 +82,15 @@ that does not match it.
 
 | Module | Kind | Holds |
 |---|---|---|
-| `:core:model` | pure Kotlin/JVM | data classes shared by everything (a route's points, an outing's legs and its pauses, and a learnt step among them) |
-| `:core:domain` | pure Kotlin/JVM | `StepAccountant`, metric calculators, `WalkDetector`, `TypicalDayCalculator`, `PeriodOverview`, `Insights` (streaks, records, averages), `SessionTracker` and `SessionPlans` (outings), `OutingMarks` (an open outing's marks on the way), `OutingMinutes` and `OutingShape` (an outing minute by minute, its route so far and its share of the day: the shape on its card), `YourOutings` (the outings over by month, «Your outings»), `IntervalSchedule` (the interval walk), `YearInReview` (Your year on foot), the backup file and its merge (`BackupCodec`, `BackupMerge`, `CsvExport`), `StepCalibration`, the step that learns (`StepLengthLearner`, `LearnedSteps`, `LearnedStepText`), the Ways and the city walks (`Ways`, `WayProgress`, `WalkDays`, `WalkPlaces`, `WayForecast`, `WayAnnouncement`, `WayProjection`, `Continents`, the generated `WayData` and `ContinentData`), the measured outing (`routes/`: `RouteMeter`, the fusion of steps and fixes, `RouteFilter`, `RouteCodec`, `GpsDuty`, `GpsStart`, `Pace`; `GpsLines`, the card's line for each state of the receiver; `Altitude`, `Climb` and `RouteHeights`, the climb; `Legs` and `Splits`, the kilometres; `GpxCodec`; `RouteShape` and `ScaleBar`, what a route's map draws, on plain ground; `RouteTrace`, a route thinned to the pixels of a still picture, and `thinnedTo`, the few points a list's small route keeps) |
-| `:core:data` | Android library | Room (steps, tracker state, outings, ways), DataStore (settings, profile), repositories exposing `Flow`, `BackupRepository` (export, import), `WayRepository`, `StepLearningRepository` (what the outings with GPS taught of the step, and the reader's answers), `OutingShapes` (an outing's shape for its card and its page, read only while seen), `RouteThumbnails` (a list's small routes, read when their row comes on screen, kept thinned); a second Room database, `routes.db` (`RouteDatabase`, `RouteRepository`), where the outings measured with GPS went, and which no read ever makes (`RouteFile`) |
-| `:core:tracking` | Android library | `StepTrackingService` (FGS type `health`), sensor source, receivers, ongoing notification, `StepCounterProbe` (the calibration's direct read), `WayNotifier` (a stage reached), `LocationSource` (the satellite receiver, for an outing that asks for it), `PressureSource` (the barometer, on only with that receiver, for the climb), `OutingStarter` (the one door every start of a plan goes through) |
-| `:core:designsystem` | Android library | M3 theme, typography, shared components, the Canvas charts (`DayTrendChart`, `BarChart`), `CalendarHeatmap`, `WalkList` and `OutingList`, `SessionCard`, the ways' and the continents' maps and stamps (`WayMapView`, `ContinentMapView`, `WayStamp`) and place names, a route's map, the one that moves (`RouteMapView`, `MapViewport`), `SplitList` and `ClimbProfile`, `MinuteStrip` (an outing minute by minute) and `StillRouteView` (a route drawn still, for a card or a list), `StepCurveChart` (a learnt step against the step in use), the one file provider for what is shared (`SharedFiles`, `ShareImage`), date formatting |
-| `:core:testing` | Android library, test-only | `assertAccessible()` (labels, 48dp touch targets) and `walkPage()`, shared by the UI tests as `testImplementation` |
-| `:feature:*` | Android library | `today`, `history`, `insights`, `settings` (with your data and the step calibration), `onboarding`, `sessions` (the Outings page and editor, an outing's own page, `OutingScreen`, and «Your outings», `OutingsListScreen`), `ways` (the Ways, each continent's cities, each way's page and each city walk's), `guide` (the guide, in Chiaro's shape), `year` (Your year on foot: the year's pages, shared as an image) |
-| `:widget` | Android library | the two Glance widgets («At a glance», «In words»), their settings screen, the update coordinator |
-| `:app` | application | `Application`, `MainActivity`, navigation (the bottom bar: Today, History, Insights), DI entry points; wires everything |
+| `:core:model` | pure Kotlin/JVM | the data classes shared by everything |
+| `:core:domain` | pure Kotlin/JVM | all the logic, with unit tests: the step accounting (`StepAccountant`), the metrics, walks, insights, the outings (`SessionTracker`), the interval walk, the year, the backup's file and merge, the step calibration and the step that learns, the Ways and the city walks (the generated `WayData`), and the measured outing in `routes/` (`RouteMeter`, the fusion of steps and fixes; `GpsDuty`, the receiver's duty) |
+| `:core:data` | Android library | Room and DataStore behind repositories that expose `Flow`; a second Room database, `routes.db` (`RouteDatabase`), for the routes of the outings with GPS, which no read ever creates (`RouteFile`) |
+| `:core:tracking` | Android library | `StepTrackingService` (FGS type `health`), the sensor, the receivers, the notifications, `LocationSource` and `PressureSource` (on only for an outing with GPS), `OutingStarter` (the one door every start of an outing goes through) |
+| `:core:designsystem` | Android library | the theme, the shared components, the Canvas charts and maps, the one file provider for what is shared (`SharedFiles`), date formatting |
+| `:core:testing` | Android library, test-only | `assertAccessible()` and `walkPage()`, for the UI tests |
+| `:feature:*` | Android library | `today`, `history`, `insights`, `settings`, `onboarding`, `sessions` (the outings), `ways`, `guide`, `year` |
+| `:widget` | Android library | the two Glance widgets, their settings screen, the update coordinator |
+| `:app` | application | `MainActivity`, navigation, DI; wires everything |
 
 Rules: `:core:model` and `:core:domain` stay pure Kotlin/JVM; if a class there needs a `Context`
 or a `Resources`, it is in the wrong module. Feature modules depend on `core:*`, never on each

@@ -3,7 +3,7 @@
 - Status: accepted (owner, 18 Nov 2026). Phase 15 built the same day, not released; tried on a
   phone by the owner (21 Nov 2026), decision 4's proof answered as built: the second type is
   added to the running service, no fallback. Phases 16 and 17 built and tried on a phone too;
-  18 and 20 not built, 19 dropped (PLANNING.md §15, 19 and 21 Nov 2026)
+  18 not built, 19 and 20 dropped (PLANNING.md §15, 19, 21 and 22 Nov 2026)
 - Date: 2026-11-18
 - Supersedes: PLANNING.md §15 «Route maps with GPS stay out» (1 Oct 2026; archived in
   `docs/planning/02-decisions-to-1-nov-2026.md`, line 120)
@@ -385,6 +385,8 @@ to be proven on a device in Phase 15):
     reader's own, is left out too: with no ground to draw outside its forty cities a map app
     does it better, and the reader's own streets need no guide. The usual round (Phase 20)
     compares a walk with the reader's own; it never guides one.
+    *Amended 22 Nov 2026 (owner; PLANNING.md §15, «Phase 20 dropped»):* the usual round is left
+    out too, once built: it cost the app far more than it gave a step counter.
 
 ## Why this is acceptable now
 
