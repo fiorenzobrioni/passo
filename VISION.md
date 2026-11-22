@@ -176,11 +176,11 @@ Asked for by the owner after the v1.0.0 release (1 Oct 2026); the phases are in 
 ### After 1.1: location, for an outing that asks for it
 
 Asked for and approved by the owner on 18 Nov 2026, after weighing it a second time
-(`docs/adr/0016-location.md`; the phases are in PLANNING §11, 15 to 20). **Phase 15 is built**
-(18 Nov 2026; not released: it goes out with Phase 16 or not at all, and its proof on a phone
-comes first), and with it the principles, the non-goals and the success criteria above were
-amended, each where it changed. Phase 16 is built too, waiting for the same proof; Phases 17,
-18 and 20 are planned, and Phase 19 was dropped with the first Phase 18 (owner, 19 Nov 2026).
+(`docs/adr/0016-location.md`; the phases are in PLANNING §11, 15 to 20). **Phases 15, 16 and
+17 are built** and checked on a phone (21 Nov 2026), not released: 15 goes out with 16 or not at
+all. With 15 the principles, the non-goals and the success criteria above were amended, each
+where it changed. Phase 18 is planned, to be weighed by the owner before it starts; Phases 19
+and 20 were dropped (owner, 19 and 22 Nov 2026).
 
 Location enters as a measuring tape, never as a tracker: it is read only inside an outing the
 reader started with «Measure with GPS» on. A reader who never turns it on is asked for nothing,
@@ -203,11 +203,7 @@ Android's cloud backup.
   its kilometres truer. «On the spot», a city walk or a way walked where it is, was weighed and
   dropped (owner, 19 Nov 2026): real value for few readers, a high cost for all
   (`docs/adr/0016-location.md`, decision 13, amended).
-- **The open outing** («L'uscita aperta», Phase 21, planned on 20 Nov 2026 and to be built before 18 and 20): an outing with no goal, with GPS or without, whose page follows it while it counts, its route growing, and can stop it. Not a location phase, but the outings with GPS asked for it, and the usual round is walked as one.
-- **Your usual round** («Il tuo giro solito», Phase 20): a walk the reader repeats, known
-  without being told among their own outings with GPS, and compared with their usual, honestly
-  (the same direction, the time brought to the usual length): a sentence on the outing's page,
-  a line at each kilometre while it counts, and the rounds listed with their walks.
+- **The open outing** («L'uscita aperta», Phase 21, built on 20 Nov 2026): an outing with no goal, with GPS or without, whose page follows it while it counts, its route growing, and can stop it. Not a location phase, but the outings with GPS asked for it.
 
 Still out: a catalogue of sports, cycling, training plans, segments, rankings, friends, live
 sharing, an outing that starts by itself, following a route or a GPX from elsewhere (weighed

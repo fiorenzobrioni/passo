@@ -37,24 +37,14 @@ Source of truth:
     `PLANNING.md` «How it is made» says, then run `python3 tools/planning_index.py` (`--check`
     tells if the index is behind).
 
-Work one phase at a time, starting from the phase's section in PLANNING.md §11. Phases 15 to 20
-(location, `docs/adr/0016-location.md`) each name what to read first and hold «The bar» their
-work is measured against: read the ADR and the phase's section before planning. **Phases 15, 16,
-17, 21 and 23 are done** (built 18 to 21 Nov 2026, merged into `main`, checked on a phone by the
-owner on 21 Nov 2026), not released: their sections and the log that built them are in archive
-05 (`docs/planning/05-phases-15-17-21-23.md`, found through `docs/planning/README.md`); ADR 0016's
-decisions and Phases 15 and 16 as first built are in archive 04, from «Location, for an outing
-that asks for it» on. 15 is the measured outing, 16 the outing's page, 17 the step that learns,
-21 the open outing (an outing with no goal, in three steps), 23 the doors: every touch from
-outside names the page it opens (`AppDoors`, `AppDoor`), and «Your outings» lists the outings
-over by month, each route drawn small and read only for the rows on screen (`YourOutings`,
-`RouteThumbnails`, `OutingsListScreen`). Before any release, the figures of Phase 15's measure
-(and of Phase 13's 30-minute interval outing) are still to be written (the box in PLANNING.md
-«Open»). **20 is next**, which builds on 21, before 18 (owner, 21 Nov 2026); Phase 22, the walk
-already begun, later. On 19 Nov 2026 the owner dropped Phases 18 and 19 «On the spot»: Phase 18
-is now a city walk measured with GPS (small), Phase 19 is dropped, and Phase 20 is the usual
-round alone: no route is followed, no GPX imported (archive 05, «The places on the spot dropped,
-the city walk measured» and «Phase 20 reviewed: the usual round alone»).
+Work one phase at a time, starting from the phase's section in PLANNING.md §11; where the work
+stands is PLANNING.md «State». The location phases (`docs/adr/0016-location.md`) each name what
+to read first and hold «The bar» their work is measured against: read the ADR and the phase's
+section before planning. **Phases 15, 16, 17, 21 and 23 are done**, on `main`, not released
+(archive 05; ADR 0016's decisions and the first build of 15 and 16 in archive 04); before any
+release, the box of the figures still to be written in PLANNING.md «Open». **Phases 19 and 20 are dropped**
+(owner, 19 and 22 Nov 2026). **18**, a city walk measured with GPS, is next only if the owner
+decides to build it; 22, the walk already begun, later.
 
 ## Build and commands
 
