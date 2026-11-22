@@ -110,6 +110,42 @@ class RoundMergeTest {
     }
 
     @Test
+    fun `the first walk after every route was lost is asked whether it was the round, once`() {
+        // «Along the canals» lost its routes; a walk of it with GPS, weeks after its last.
+        val walk = Ground.outing(100, 4_250.0, 50.0, day = 200)
+        assertThat(RoundMerge.lostFor(walk, listOf(canals, since), emptySet())?.id).isEqualTo(1L)
+        // «It wasn't»: a pair with any of its walks, and the page asks no more.
+        assertThat(RoundMerge.lostFor(walk, listOf(canals), setOf(5L to 100L))).isNull()
+    }
+
+    @Test
+    fun `only a walk that can give the round its line back is asked`() {
+        val rounds = listOf(canals, since)
+        // Another kind, another length, measured under nine tenths, or walked before the round's last.
+        val run = Ground.outing(100, 4_250.0, 25.0, day = 200, intensity = SessionIntensity.RUN)
+        assertThat(RoundMerge.lostFor(run, rounds, emptySet())).isNull()
+        assertThat(RoundMerge.lostFor(Ground.outing(100, 5_000.0, 60.0, day = 200), rounds, emptySet())).isNull()
+        val estimated = Ground.outing(100, 4_250.0, 50.0, day = 200, measuredShare = 0.8)
+        assertThat(RoundMerge.lostFor(estimated, rounds, emptySet())).isNull()
+        assertThat(RoundMerge.lostFor(Ground.outing(100, 4_250.0, 50.0, day = 10), rounds, emptySet())).isNull()
+        // A walk of a round already: the rounds' own question is for that.
+        assertThat(RoundMerge.lostFor(since.latest, rounds, emptySet())).isNull()
+        // No round with no line, nothing to ask.
+        assertThat(RoundMerge.lostFor(Ground.outing(100, 4_250.0, 50.0, day = 200), listOf(since), emptySet()))
+            .isNull()
+    }
+
+    @Test
+    fun `of two rounds with no line, the walk is asked about the closest in length`() {
+        val near = round(3, firstId = 40, count = 3, meters = 4_248.0, lined = false)
+        val walk = Ground.outing(100, 4_250.0, 50.0, day = 200)
+        assertThat(RoundMerge.lostFor(walk, listOf(canals, near), emptySet())?.id).isEqualTo(3L)
+        // As close, the one walked more.
+        val asClose = round(3, firstId = 40, count = 3, meters = 4_240.0, lined = false)
+        assertThat(RoundMerge.lostFor(walk, listOf(canals, asClose), emptySet())?.id).isEqualTo(1L)
+    }
+
+    @Test
     fun `made one, they keep the name of the round with no line, else the other's`() {
         assertThat(RoundMerge.name(since, canals)).isEqualTo("Along the canals")
         assertThat(RoundMerge.name(canals, since)).isEqualTo("Along the canals")

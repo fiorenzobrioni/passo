@@ -103,6 +103,7 @@
     <string name="data_preview_import">Importa</string>
     <string name="data_with_routes">Con i percorsi</string>
     <string name="data_with_routes_note">La copia allora dice anche dove hai camminato, nelle uscite misurate con il GPS. Spento, contiene solo numeri.</string>
+    <string name="data_with_routes_rounds">Senza, i tuoi giri soliti tornano senza la loro linea: la prossima uscita con il GPS di ognuno ti chiede se era quel giro.</string>
     <plurals name="data_routes">
         <item quantity="one">%1$s percorso</item>
         <item quantity="many">%1$s percorsi</item>
@@ -115,7 +116,7 @@
     <string name="data_delete_routes_title">Eliminare tutti i percorsi?</string>
     <string name="data_delete_routes_text">Ogni linea, con i luoghi che attraversa, viene eliminata da questo telefono. Le uscite e i loro numeri restano: la distanza, l’andatura, i chilometri, la salita.</string>
     <string name="data_delete_routes_text_keeping">Ogni linea delle uscite finite, con i luoghi che attraversa, viene eliminata da questo telefono. L’uscita ancora in corso tiene il suo percorso. Le uscite e i loro numeri restano: la distanza, l’andatura, i chilometri, la salita.</string>
-    <string name="data_delete_routes_rounds">Restano anche i tuoi giri soliti, con le loro uscite e i loro tempi, ma senza più un percorso Passo non può riconoscerli: ripercorrendoli con il GPS, li trova come giri nuovi, e ti chiede se sono quelli che avevi.</string>
+    <string name="data_delete_routes_rounds">Restano anche i tuoi giri soliti, con le loro uscite e i loro tempi, ma senza più un percorso Passo non può riconoscerli: quando ne percorri uno con il GPS, la pagina di quell’uscita ti chiede se era quel giro.</string>
     <string name="data_delete_routes_confirm">Elimina</string>
     <string name="data_delete_routes_cancel">Annulla</string>
 </resources>

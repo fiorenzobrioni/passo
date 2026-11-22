@@ -58,7 +58,7 @@
     <string name="round_usual">Di solito %1$s in movimento, per %2$s.</string>
     <string name="round_map_spoken">Il tuo giro: %1$s, dalla tua porta e ritorno.</string>
     <string name="round_map_spoken_line">Il tuo giro: %1$s, da %2$s a %3$s.</string>
-    <string name="round_no_map">I percorsi delle uscite di questo giro sono stati eliminati: le uscite e i loro tempi restano, ma senza più una linea Passo non può riconoscerlo. Se lo percorri con il GPS, dalla terza volta Passo lo trova come un giro nuovo, e ti chiede se è questo.</string>
+    <string name="round_no_map">I percorsi delle uscite di questo giro sono stati eliminati: le uscite e i loro tempi restano, ma senza più una linea Passo non può riconoscerlo. Se lo percorri con il GPS, la pagina di quell’uscita ti chiede se era questo giro: allora Passo lo riconosce di nuovo.</string>
     <string name="round_same_title">È «%1$s»?</string>
     <string name="round_same_text_lost">«%1$s» ha perso i percorsi delle sue uscite, così Passo non poteva sapere se questo giro è lo stesso. Se lo è, i due diventano uno, con tutte le loro uscite e i loro tempi.</string>
     <string name="round_same_text_since">Le tue uscite di questo giro da quando i suoi percorsi sono stati eliminati possono aver fatto «%1$s». Se è così, i due diventano uno, con tutte le loro uscite e i loro tempi.</string>
@@ -105,4 +105,9 @@
     <string name="outing_round_not_same_title">Non è lo stesso giro?</string>
     <string name="outing_round_not_same_text">Questa uscita lascia %1$s, e Passo non la abbina mai più alle sue uscite.</string>
     <string name="outing_round_not_same_confirm">Non è lo stesso</string>
+
+    <string name="outing_lost_title">Era «%1$s»?</string>
+    <string name="outing_lost_text">«%1$s» ha perso i percorsi delle sue uscite, così Passo non poteva sapere se questa uscita era quel giro. Se lo era, l’uscita entra nel giro, e con il suo percorso Passo lo riconosce di nuovo dalla prossima volta che lo percorri, con tutti i suoi tempi.</string>
+    <string name="outing_lost_yes">Sì, era quello</string>
+    <string name="outing_lost_no">No</string>
 </resources>

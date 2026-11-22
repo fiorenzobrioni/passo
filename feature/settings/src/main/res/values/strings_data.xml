@@ -95,6 +95,8 @@
     <!-- The routes of the outings measured with GPS (Phase 16): only on a phone that keeps some. -->
     <string name="data_with_routes">With the routes</string>
     <string name="data_with_routes_note">The backup then also says where you walked, in the outings measured with GPS. Off, it holds numbers only.</string>
+    <!-- Where the reader has usual rounds and the switch is off: a round has no line but its walks' routes, so it comes back without one. -->
+    <string name="data_with_routes_rounds">Without them, your usual rounds come back with no line: the next walk of each with GPS asks whether it was that round.</string>
     <plurals name="data_routes">
         <item quantity="one">%1$s route</item>
         <item quantity="other">%1$s routes</item>
@@ -108,8 +110,8 @@
     <string name="data_delete_routes_text">Every line, and the places it went through, is deleted from this phone. Your outings and their numbers stay: the distance, the pace, the kilometres, the climb.</string>
     <!-- The same, while an outing with GPS is under way, or can still be taken back. -->
     <string name="data_delete_routes_text_keeping">Every line of the outings that are over, and the places it went through, is deleted from this phone. The outing still under way keeps its route. Your outings and their numbers stay: the distance, the pace, the kilometres, the climb.</string>
-    <!-- Where the reader has usual rounds (Phase 20): they stay, with their history, but a round with no route left has no line to be known by: its next walks make a new round, and the two pages ask whether they are one. -->
-    <string name="data_delete_routes_rounds">Your usual rounds stay too, with their walks and their times, but with no route left Passo cannot know them again: walked with GPS, each is found as a new round, and Passo asks whether it is the one you had.</string>
+    <!-- Where the reader has usual rounds (Phase 20): they stay, with their history, but a round with no route left has no line to be known by: the page of its next walk with GPS asks whether it was that round. -->
+    <string name="data_delete_routes_rounds">Your usual rounds stay too, with their walks and their times, but with no route left Passo cannot know them again: walk one of them with GPS, and that walk\'s page asks whether it was that round.</string>
     <string name="data_delete_routes_confirm">Delete</string>
     <string name="data_delete_routes_cancel">Cancel</string>
 </resources>

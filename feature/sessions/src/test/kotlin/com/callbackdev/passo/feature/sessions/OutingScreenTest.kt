@@ -12,6 +12,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasContentDescription
@@ -762,6 +763,48 @@ class OutingScreenTest {
         page().performScrollToNode(hasTestTag(OutingTags.ROUND))
         compose.onNodeWithTag(OutingTags.ROUND_SENTENCE).assertTextEquals("Your usual round, the 3rd time.")
         compose.onNodeWithText("This time").assertDoesNotExist()
+    }
+
+    @Test
+    fun `a walk in no round is asked whether it was the round that lost its routes, and is answered`() {
+        var was: Long? = null
+        var wasNot: Long? = null
+        val lost = RoundSamples.lost()
+        show(
+            OutingSamples.state().copy(over = true, lost = lost),
+            actions = OutingActions(wasLostRound = { was = it.id }, wasNotLostRound = { wasNot = it.id }),
+        )
+        page().performScrollToNode(hasTestTag(OutingTags.LOST))
+        compose.onNodeWithText("Was this “Along the canals”?").assertIsDisplayed()
+        compose.onNodeWithText("knows the round again from your next walk of it", substring = true).assertExists()
+        snapshot("outing_lost")
+        compose.onNodeWithTag(OutingTags.LOST_NO).performClick()
+        assertThat(wasNot).isEqualTo(lost.id)
+        compose.onNodeWithTag(OutingTags.LOST_YES).performClick()
+        assertThat(was).isEqualTo(lost.id)
+    }
+
+    @Test
+    fun `while an outing can still be taken back, or when it is a round's walk, nothing is asked`() {
+        show(OutingSamples.state().copy(over = false, lost = RoundSamples.lost()))
+        compose.onNodeWithTag(OutingTags.LOST).assertDoesNotExist()
+    }
+
+    @Test
+    @Config(qualifiers = "it-rIT-w360dp-h640dp-xhdpi")
+    fun `the question in Italian on a small phone`() {
+        show(OutingSamples.state().copy(over = true, lost = RoundSamples.lost("Lungo i navigli")))
+        page().performScrollToNode(hasTestTag(OutingTags.LOST))
+        compose.onNodeWithText("Era «Lungo i navigli»?").assertIsDisplayed()
+        compose.onNodeWithTag(OutingTags.LOST_YES).assertTextContains("Sì, era quello")
+        snapshot("outing_lost_it")
+    }
+
+    @Test
+    @Config(qualifiers = "en-rUS-w360dp-h640dp-xhdpi", fontScale = 2f)
+    fun `the question at twice the text size`() {
+        show(OutingSamples.state().copy(over = true, lost = RoundSamples.lost()))
+        compose.walkPage(hasTestTag(OutingTags.PAGE), "outing_lost_large_text")
     }
 
     @Test

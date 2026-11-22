@@ -156,11 +156,16 @@ internal fun DataGroup(
             )
             if (state.contents.routes > 0) {
                 GroupDivider()
+                // Without the routes, the usual rounds come back with no line: said where there are
+                // some, while the switch is off (§15, «Phase 20: a round with no line asked at its
+                // first walk»).
+                val withRounds = state.contents.rounds > 0 && !files.withRoutes.value
+                val note = stringResource(R.string.data_with_routes_note)
                 SwitchRow(
                     label = stringResource(R.string.data_with_routes),
                     checked = files.withRoutes.value,
                     onChange = { files.withRoutes.value = it },
-                    note = stringResource(R.string.data_with_routes_note),
+                    note = if (withRounds) note + " " + stringResource(R.string.data_with_routes_rounds) else note,
                     icon = PassoIcons.Gps,
                     modifier = Modifier.testTag(DataTags.WITH_ROUTES),
                 )

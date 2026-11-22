@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.add
@@ -122,6 +123,7 @@ import com.callbackdev.passo.core.designsystem.theme.padding
 import com.callbackdev.passo.core.designsystem.theme.pageGutter
 import com.callbackdev.passo.core.designsystem.ways.wayRouteRes
 import com.callbackdev.passo.core.domain.format.MeasureFormatter
+import com.callbackdev.passo.core.domain.rounds.KeptRound
 import com.callbackdev.passo.core.domain.routes.Compass
 import com.callbackdev.passo.core.domain.routes.DistanceKind
 import com.callbackdev.passo.core.domain.routes.RouteShape
@@ -166,6 +168,8 @@ class OutingActions(
     val openWalk: () -> Unit = {},
     val openRound: (Long) -> Unit = {},
     val notTheSameRound: () -> Unit = {},
+    val wasLostRound: (KeptRound) -> Unit = {},
+    val wasNotLostRound: (KeptRound) -> Unit = {},
 )
 
 /** An outing's page with its state, and the sharing and saving of its route. */
@@ -238,6 +242,8 @@ fun OutingRoute(
             openWalk = { current?.session?.walk?.let(onOpenWalk) },
             openRound = onOpenRound,
             notTheSameRound = viewModel::notTheSameRound,
+            wasLostRound = viewModel::wasLostRound,
+            wasNotLostRound = viewModel::wasNotLostRound,
         ),
     )
 }
@@ -365,6 +371,12 @@ private fun OutingPage(state: OutingUiState, format: MeasureFormatter, actions: 
         val round = state.round
         if (round != null && state.over) {
             item(key = "round") { RoundSection(round, format, actions, onNotTheSame = { notSame = true }) }
+        }
+        // A round whose walks lost their routes this walk may be: asked here, at once, so that the
+        // round is known again from the next walk of it, not from a third.
+        val lost = state.lost
+        if (round == null && lost != null && state.over) {
+            item(key = "lost") { LostRoundQuestion(lost, format, actions) }
         }
         if (route != null) {
             item(key = "map") {
@@ -946,6 +958,46 @@ private fun RoundSection(
     }
 }
 
+/**
+ * Whether this outing was a walk of [round], whose walks all lost their routes (§15, «Phase 20: a
+ * round with no line asked at its first walk»). Passo cannot know it, the reader can: «It was» gives
+ * the round this walk and its route, «It wasn't» is kept and not asked again.
+ */
+@Composable
+private fun LostRoundQuestion(round: KeptRound, format: MeasureFormatter, actions: OutingActions) {
+    val resources = LocalResources.current
+    val name = resources.roundName(round, format)
+    Group {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.testTag(OutingTags.LOST)) {
+            Text(
+                stringResource(R.string.outing_lost_title, name),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() },
+            )
+            Text(
+                stringResource(R.string.outing_lost_text, name).unorphaned(),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            // As the app's other questions are answered: the answer that keeps things as they are first.
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                TextButton(
+                    onClick = { actions.wasNotLostRound(round) },
+                    modifier = Modifier.heightIn(min = 48.dp).testTag(OutingTags.LOST_NO),
+                ) { Text(stringResource(R.string.outing_lost_no)) }
+                FilledTonalButton(
+                    onClick = { actions.wasLostRound(round) },
+                    modifier = Modifier.heightIn(min = 48.dp).testTag(OutingTags.LOST_YES),
+                ) { Text(stringResource(R.string.outing_lost_yes)) }
+            }
+        }
+    }
+}
+
 private fun minutesOf(millis: Long): Int =
     ((millis + MILLIS_PER_MINUTE / 2) / MILLIS_PER_MINUTE).toInt().coerceAtLeast(1)
 
@@ -1169,4 +1221,7 @@ object OutingTags {
     const val ROUND_OPEN = "outing_round_open"
     const val NOT_SAME = "outing_round_not_same"
     const val NOT_SAME_CONFIRM = "outing_round_not_same_confirm"
+    const val LOST = "outing_lost"
+    const val LOST_YES = "outing_lost_yes"
+    const val LOST_NO = "outing_lost_no"
 }

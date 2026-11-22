@@ -44,6 +44,34 @@ object RoundMerge {
     }
 
     /**
+     * The round with no line [outing] may be a walk of, asked on its page at once (§15, «Phase 20: a
+     * round with no line asked at its first walk»), or null. A round whose walks all lost their
+     * routes is not found again by a walk of it, and its next walks would make a new round from the
+     * third; asked at the first, it takes the walk and its route, and is known again from the next.
+     *
+     * Asked only of a walk that can give the round its line back: [outing] over, measured, long
+     * enough ([RoundFinder.eligible]), with a route the caller says it has, and in no round
+     * ([rounds], the rounds shown). Of the rounds with no line, those of its kind (walks or runs),
+     * their usual length within a tenth of its, and all their walks before it, with no pair said not
+     * the same between it and them ([apart]); the closest in length first, then the one walked more.
+     */
+    fun lostFor(outing: Session, rounds: List<KeptRound>, apart: Set<Pair<Long, Long>>): KeptRound? {
+        if (!RoundFinder.eligible(outing)) return null
+        if (rounds.any { round -> round.walks.any { it.id == outing.id } }) return null
+        val running = outing.intensity == SessionIntensity.RUN
+        return rounds
+            .asSequence()
+            .filter { it.route == null && it.running == running }
+            .filter { RouteMatch.lengthsAlike(it.usual.meters, outing.totals.distanceMeters) }
+            .filter { it.latest.startedAtMillis < outing.startedAtMillis }
+            .filter { !saidApart(listOf(outing.id), it.walks.map { walk -> walk.id }, apart) }
+            .minWithOrNull(
+                compareBy<KeptRound> { abs(it.usual.meters - outing.totals.distanceMeters) }
+                    .thenByDescending { it.walks.size },
+            )
+    }
+
+    /**
      * The name the two keep once they are one: the reader's for the round with no line, the one they
      * walked for months; else the other's; else none, and the round is named by its length.
      */

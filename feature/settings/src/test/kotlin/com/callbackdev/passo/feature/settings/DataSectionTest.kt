@@ -118,6 +118,19 @@ class DataSectionTest {
     }
 
     @Test
+    fun `with rounds and the routes off, the backup says the rounds come back with no line`() {
+        show(
+            DataUiState(contents = contents.copy(routes = 3, deletableRoutes = 3, deletableBytes = 28_400, rounds = 2)),
+        )
+        compose.onNodeWithTag(SettingsTags.LIST).performScrollToNode(hasTestTag(DataTags.WITH_ROUTES))
+        compose.onNodeWithText("your usual rounds come back with no line", substring = true).assertIsDisplayed()
+        snapshot("data_routes_rounds")
+        // With the routes, they come back whole: nothing to say.
+        compose.onNodeWithTag(DataTags.WITH_ROUTES).performClick()
+        compose.onNodeWithText("your usual rounds come back with no line", substring = true).assertDoesNotExist()
+    }
+
+    @Test
     fun `deleting all routes says how many and what they weigh, and asks first`() {
         var deleted = 0
         show(
@@ -147,7 +160,7 @@ class DataSectionTest {
         compose.onNodeWithTag(DataTags.DELETE_ROUTES_TEXT)
             .assertTextContains("Your usual rounds stay too, with their walks and their times", substring = true)
         compose.onNodeWithTag(DataTags.DELETE_ROUTES_TEXT)
-            .assertTextContains("each is found as a new round", substring = true)
+            .assertTextContains("that walk's page asks whether it was that round", substring = true)
     }
 
     @Test

@@ -13,6 +13,7 @@ import com.callbackdev.passo.core.data.sessions.SessionRepository
 import com.callbackdev.passo.core.data.settings.SettingsRepository
 import com.callbackdev.passo.core.domain.rounds.KeptRound
 import com.callbackdev.passo.core.domain.rounds.RoundComparison
+import com.callbackdev.passo.core.domain.rounds.RoundMerge
 import com.callbackdev.passo.core.domain.rounds.RoundTimes
 import com.callbackdev.passo.core.domain.rounds.YourRounds
 import com.callbackdev.passo.core.domain.routes.GpsLineAction
@@ -81,6 +82,8 @@ data class OutingRound(val round: KeptRound, val comparison: RoundComparison)
  * @property shape its minutes and its day's goal, for «The shape of the walk» (Phase 21.3); its
  *   minutes are null for an outing from before its pauses were kept, and the section is not shown.
  * @property round the usual round it is a walk of (Phase 20); null for every other outing.
+ * @property lost a round whose walks all lost their routes this outing may be a walk of, asked on
+ *   its page (§15, «Phase 20: a round with no line asked at its first walk»); null for none.
  */
 @Immutable
 data class OutingUiState(
@@ -93,6 +96,7 @@ data class OutingUiState(
     val measure: LiveMeasure? = null,
     val shape: OutingShape? = null,
     val round: OutingRound? = null,
+    val lost: KeptRound? = null,
 )
 
 /**
@@ -140,22 +144,26 @@ constructor(
                     learning.stepOf(id),
                     learning.learning.map { it.proposed && it.readyOutingId == id }.distinctUntilChanged(),
                 ) { atPace, ready -> atPace to ready }
-                // Its usual round (Phase 20), once known: read only while the page is seen.
-                val round = rounds.kept.map { kept ->
-                    YourRounds.of(id, kept)?.let { found ->
-                        found.walks.firstOrNull {
-                            it.id == id
-                        }?.let { OutingRound(found, RoundTimes.comparison(it, found.walks)) }
-                    }
-                }.distinctUntilChanged()
-                combine(stored, route, combine(units, shape, round, ::Triple), running, step) {
+                // Its usual round (Phase 20), once known, and the pairs said not the same: read only
+                // while the page is seen.
+                val known = combine(rounds.kept, rounds.apart, ::Pair)
+                combine(stored, route, combine(units, shape, known, ::Triple), running, step) {
                         saved,
                         drawn,
-                        (unit, outingShape, outingRound),
+                        (unit, outingShape, rounding),
                         liveState,
                         (atPace, ready),
                     ->
+                    val (kept, apart) = rounding
+                    val outingRound = YourRounds.of(id, kept)?.let { found ->
+                        found.walks.firstOrNull { it.id == id }?.let {
+                            OutingRound(found, RoundTimes.comparison(it, found.walks))
+                        }
+                    }
                     (liveState?.session ?: saved)?.let {
+                        // A round with no line it may give its line back to: only with its route.
+                        val lost = it.takeIf { outingRound == null && drawn != null }
+                            ?.let { outing -> RoundMerge.lostFor(outing, kept, apart) }
                         OutingUiState(
                             it,
                             drawn,
@@ -167,6 +175,7 @@ constructor(
                             measure = liveState?.measure,
                             shape = outingShape?.takeIf { shape -> shape.sessionId == it.id },
                             round = outingRound,
+                            lost = lost,
                         )
                     }
                 }
@@ -209,6 +218,21 @@ constructor(
     fun notTheSameRound() {
         val session = state.value?.takeIf { it.over && it.round != null }?.session ?: return
         viewModelScope.launch { rounds.notTheSame(session.id) }
+    }
+
+    /**
+     * «It was»: the open outing is a walk of [round], which had lost every route; it gives it its line
+     * back. Only once it is over for good, as its page asks it.
+     */
+    fun wasLostRound(round: KeptRound) {
+        val session = state.value?.takeIf { it.over && it.lost?.id == round.id }?.session ?: return
+        viewModelScope.launch { rounds.joinLost(round.id, session.id) }
+    }
+
+    /** «It wasn't»: the open outing is not a walk of [round], and its page asks no more. */
+    fun wasNotLostRound(round: KeptRound) {
+        val session = state.value?.takeIf { it.over && it.lost?.id == round.id }?.session ?: return
+        viewModelScope.launch { rounds.notThisRound(session.id, round.id) }
     }
 
     /** The open outing's route as a GPX document named [name]; null when it has none. */

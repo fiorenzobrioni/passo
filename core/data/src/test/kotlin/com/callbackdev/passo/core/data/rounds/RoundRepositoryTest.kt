@@ -254,6 +254,43 @@ class RoundRepositoryTest {
     }
 
     @Test
+    fun `the first walk after every route was lost, said to be the round, gives it its line back`() = runTest {
+        val walks = aRound()
+        val canals = kept().single().id
+        rounds.rename(canals, "Along the canals")
+        routes.deleteAll()
+        // A walk of it with GPS: nothing with a route to be matched with, so in no round.
+        val next = walked(LOOP, day = 3)
+        rounds.find(next)
+        val outing = checkNotNull(sessions.session(next))
+        assertThat(RoundMerge.lostFor(outing, rounds.kept.first(), rounds.apart.first())?.id).isEqualTo(canals)
+        // «It was»: it joins the round, which has a line again.
+        rounds.joinLost(canals, next)
+        val round = kept().single()
+        assertThat(round.id).isEqualTo(canals)
+        assertThat(round.name).isEqualTo("Along the canals")
+        assertThat(round.walks).containsExactlyElementsIn(walks + next)
+        assertThat(rounds.guides(running = false, unitMeters = 1_000.0).single().lines).hasSize(1)
+        // And the walk after it is known as the round's, by that line.
+        val after = walked(LOOP, day = 4)
+        rounds.find(after)
+        assertThat(kept().single().walks).contains(after)
+    }
+
+    @Test
+    fun `it wasn't, and the walk's page does not ask again`() = runTest {
+        aRound()
+        val canals = kept().single().id
+        routes.deleteAll()
+        val next = walked(LOOP, day = 3)
+        rounds.find(next)
+        rounds.notThisRound(next, canals)
+        val outing = checkNotNull(sessions.session(next))
+        assertThat(RoundMerge.lostFor(outing, rounds.kept.first(), rounds.apart.first())).isNull()
+        assertThat(kept().single().walks).doesNotContain(next)
+    }
+
+    @Test
     fun `after an import, a round of older walks with their routes is joined to the phone's by its line`() = runTest {
         val dao = database.roundDao()
         // The phone's round, named: three walks round the park.

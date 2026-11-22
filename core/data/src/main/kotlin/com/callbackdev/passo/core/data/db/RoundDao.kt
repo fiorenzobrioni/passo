@@ -153,6 +153,16 @@ abstract class RoundDao {
     }
 
     /**
+     * «It wasn't»: the outing [sessionId] is not a walk of the round [roundId], kept not the same as
+     * each of its walks, so its page never asks again (§15, «Phase 20: a round with no line asked at
+     * its first walk»).
+     */
+    @Transaction
+    open suspend fun apartFrom(sessionId: Long, roundId: Long) {
+        insertApart(walksOf(roundId).filter { it != sessionId }.map { apart(sessionId, it) })
+    }
+
+    /**
      * «Another round»: the two rounds the reader said are not one. Each walk of one is kept not the
      * same as each walk of the other, so that no walk deleted later lets the question come back.
      */

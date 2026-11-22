@@ -61,7 +61,7 @@
     <string name="round_map_spoken">Your round: %1$s, from your door and back.</string>
     <string name="round_map_spoken_line">Your round: %1$s, from %2$s to %3$s.</string>
     <!-- Every walk's route deleted: no line is left to know the round by, and no place outlives its outing, so its next walks make a new round. -->
-    <string name="round_no_map">The routes of this round\'s walks were deleted: its walks and their times stay, but with no line left Passo cannot know it again. Walk it with GPS, and from the third time Passo finds it as a new round, and asks whether it is this one.</string>
+    <string name="round_no_map">The routes of this round\'s walks were deleted: its walks and their times stay, but with no line left Passo cannot know it again. Walk it with GPS, and that walk\'s page asks whether it was this round: then Passo knows it again.</string>
     <!-- Two rounds that may be one (PLANNING.md §15, «Phase 20: two rounds made one»): one lost every walk's route, the other was made by the walks since. Asked on either's page, once; «The same» makes them one, «Another round» keeps them two. -->
     <string name="round_same_title">Is this “%1$s”?</string>
     <!-- On the page of the round the new walks made: the other is the one with no line. -->
@@ -113,4 +113,10 @@
     <string name="outing_round_not_same_title">Not the same round?</string>
     <string name="outing_round_not_same_text">This outing leaves %1$s, and Passo never matches it with its walks again.</string>
     <string name="outing_round_not_same_confirm">Not the same</string>
+
+    <!-- An outing's page, over, in no round: a round whose walks all lost their routes it may be a walk of (PLANNING.md §15, «Phase 20: a round with no line asked at its first walk»). «It was» gives the round this walk and its route; «It wasn't» is kept, and not asked again. -->
+    <string name="outing_lost_title">Was this “%1$s”?</string>
+    <string name="outing_lost_text">“%1$s” lost the routes of its walks, so Passo could not tell whether this walk was it. If it was, the walk joins it, and with this walk\'s route Passo knows the round again from your next walk of it, with all its times.</string>
+    <string name="outing_lost_yes">It was</string>
+    <string name="outing_lost_no">It wasn\'t</string>
 </resources>

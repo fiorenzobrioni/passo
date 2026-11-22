@@ -205,6 +205,18 @@ constructor(
         dao.merge(into, from, name?.trim()?.takeIf { it.isNotEmpty() })
     }
 
+    /**
+     * «It was»: the outing [sessionId] is a walk of the round [roundId], which had lost every route
+     * (§15, «Phase 20: a round with no line asked at its first walk»). It joins the round with its
+     * route, and the round is known again by the next walk of it, and followed by its card.
+     */
+    suspend fun joinLost(roundId: Long, sessionId: Long) = lock.withLock {
+        dao.unite(listOf(roundId), listOf(sessionId))
+    }
+
+    /** «It wasn't»: the outing is not a walk of the round, and its page does not ask again. */
+    suspend fun notThisRound(sessionId: Long, roundId: Long) = lock.withLock { dao.apartFrom(sessionId, roundId) }
+
     /** «Another round»: the two rounds are not one, and are never asked about again. */
     suspend fun notOneRound(first: Long, second: Long) = lock.withLock { dao.apartRounds(first, second) }
 

@@ -223,10 +223,12 @@ and closes here, naming the one that closes it. Phase 12's own boxes stay in its
   - a round's page: the map pinched and dragged, the chart, rename (the dialog, its keyboard),
     «Forget this round»; «Delete all routes» saying the rounds stay, and that with no route left
     Passo cannot know them again;
-  - a named round's routes all deleted, then the round walked three times with GPS: both pages ask
-    «Is this …?»; «Another round» keeps two and is not asked again; «The same» makes one, with the
-    old name, every walk, the map and the card's line at the next walk (§15 «Phase 20: two rounds
-    made one»);
+  - a named round's routes all deleted, then the round walked once with GPS: that walk's page asks
+    «Was this …?»; «It was» gives the round its line back, and the next walk of it is on the card;
+    «It wasn't» is not asked again (§15 «Phase 20: a round with no line asked at its first walk»);
+    the export's «With the routes» off saying the rounds come back with no line; and, should a new
+    round be made meanwhile, both rounds' pages asking «Is this …?» (§15 «Phase 20: two rounds made
+    one»);
   - a round walked once with a detour and once with a shortcut, then as usual: known at the third
     walk; and a file «With the routes» from a phone that walked the round before, imported: one round,
     with this phone's name (§15 «Phase 20: the last open choices»);
@@ -1515,6 +1517,48 @@ entries are written below.
   - Checked: `spotlessCheck`, `:app:checkForbiddenPermissions`, `:app:lintDebug`, and the tests of
     `:core:domain`, `:core:data`, `:core:tracking`, `:feature:sessions`, `:feature:settings` and
     `:feature:guide` (1,378 tests, none failed), green on this machine.
+
+- **22 Nov 2026.** **Phase 20: a round with no line asked at its first walk** (owner: "ok, go ahead
+  this way", after asking whether changing the privacy choice would make the round with no line
+  simpler).
+  - **The privacy choice stays as it is.** The owner asked whether changing it would make the round
+    with no line simpler, and was answered no.
+    - It would solve only a part. The cloud copy would have to carry places, a round's line
+      included, and so the reader's door; the export would have to carry places when not asked;
+      and «Delete all routes» cannot keep a round's line without breaking its own word.
+    - «Two rounds made one» would still be needed, and it is built.
+    - Putting `routes.db` in Android's cloud copy also risks its quota of 25 MB per app: past it,
+      Android stops backing up the whole app, the steps' history with it.
+    - What the owner chose instead is to make the case lighter.
+  - **The first walk is asked** (`RoundMerge.lostFor`, `RoundRepository.joinLost` and
+    `notThisRound`, `RoundDao.apartFrom`). An outing's page asks «Was this “Along the canals”?» when
+    the outing:
+    - is over, measured, long enough, with its route, and in no round;
+    - and there is a round of its kind whose walks all lost their routes, of a usual length within
+      a tenth of the outing's, with all its walks before it and no pair said not the same with it;
+    - of several such rounds, the closest in length is asked about first, then the one walked more.
+    - «It was» puts the outing in the round, which has its line back. From the next walk of it, it
+      is found, followed on the card and compared with all its history.
+    - «It wasn't» keeps the outing not the same as each of the round's walks, and the page asks no
+      more.
+    - After a change of phone through the cloud copy, a round is known again at its first walk, with
+      one answer, not at its third with a new round and a question on its page. That question,
+      «Two rounds made one», stays for a reader who does not answer the first one.
+    - The round with no line's page, «Delete all routes», the guide and the CHANGELOG say it.
+  - **The export says it** (`DataSection`): with usual rounds kept and «With the routes» off, the
+    switch's note adds that the rounds come back with no line and that the next walk of each asks.
+  - Tests:
+    - `RoundMergeTest`: the walk asked, kinds, lengths, measured, before the round, a walk of a round
+      already, the answer kept, the closest.
+    - `RoundRepositoryTest`: «It was» giving the round its line back, the next walk found by it;
+      «It wasn't».
+    - `OutingScreenTest`: the question and its answers, not while the outing can be taken back, in
+      Italian on a small phone, at twice the text size.
+    - `DataSectionTest`: the export's line, gone with the routes on.
+  - Checked: `spotlessCheck`, `:app:checkForbiddenPermissions`, `:app:lintDebug`, and the tests of
+    `:core:domain`, `:core:data`, `:core:tracking`, `:feature:sessions`, `:feature:settings` and
+    `:feature:guide` (1,388 tests, none failed), green on this machine; the question's and the
+    export's pictures looked at. No README picture shows them.
 
 ### Open
 
